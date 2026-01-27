@@ -1,119 +1,119 @@
 WMO_region:
-  API: "wmo_region"
-  attributes: "ebas_station_wmo_region"
+  API: [wmo_region]
+  attributes: [ebas_station_wmo_region]
 
 altitude:
-  API: "alt"
-  attributes: "ebas_station_altitude"
+  API: [alt]
+  attributes: [ebas_station_altitude]
 
 country:
-  API: "country_code"
-  attributes: "ebas_station_code"
+  API: [country_code]
+  attributes: [ebas_station_code]
 
 associated_networks:
-  API: ""
-  attributes: "naming_authority"
+  API: [program_affiliation]
+  attributes: [project]
 
 contact_email_address:
-  API: "email"
-  attributes: "creator_email"
+  API: [email]
+  attributes: [creator_email]
 
 contact_institution:
-  API: "organisation_name"
-  attributes: "creator_institution"
+  API: [organisation_name]
+  attributes: [creator_institution]
 
 contact_name:
-  API: ""
-  attributes: "creator_name"
+  API: []
+  attributes: [creator_name]
 
 data_level:
-  API: ""
-  attributes: "ebas_data_level"
+  API: []
+  attributes: [ebas_data_level]
 
 data_licence:
-  API: ""
-  attributes: "license"
+  API: [md_constraints, data_license]
+  attributes: [license]
 
 land_use:
-  API: ""
-  attributes: "ebas_station_land_use"
+  API: []
+  attributes: [ebas_station_land_use]
 
 latitude:
-  API: "lat"
-  attributes: "ebas_station_latitude"
+  API: [lat]
+  attributes: [ebas_station_latitude]
 
 longitude:
-  API: "lon"
-  attributes: "ebas_station_longitude"
+  API: [lon]
+  attributes: [ebas_station_longitude]
 
 measurement_methodology:
-  API: ""
-  attributes: "ebas_method_ref"
+  API: []
+  attributes: [ebas_method_ref]
 
 measuring_instrument_inlet_information:
-  API: ""
-  attributes: "ebas_inlet_description"
+  API: []
+  attributes: [ebas_inlet_description]
 
 measuring_instrument_name:
-  API: "instrument_model"
-  attributes: "ebas_instrument_name"
+  API: [instrument_model]
+  attributes: [ebas_instrument_name]
 
 measuring_instrument_sampling_type:
-  API: "instrument_type"
-  attributes: "ebas_instrument_type"
+  API: [instrument_type]
+  attributes: [ebas_instrument_type]
 
 network:
-  API: ""
-  attributes: "naming_authority"
+  API: []
+  attributes: [naming_authority]
 
 principal_investigator_email_address:
-  API: "email"
-  attributes: "creator_email"
+  API: [email]
+  attributes: [creator_email]
 
 principal_investigator_institution:
-  API: "organisation_name"
-  attributes: "creator_institution"
+  API: [organisation_name]
+  attributes: [creator_institution]
 
 principal_investigator_name:
-  API: ""
-  attributes: "creator_name"
+  API: []
+  attributes: [creator_name]
 
 sampling_height:
-  API: ""
-  attributes: "ebas_measurement_height"
+  API: []
+  attributes: [ebas_measurement_height]
 
 station_name:
-  API: "name"
-  attributes: "ebas_station_name"
+  API: [name]
+  attributes: [ebas_station_name]
 
 station_reference:
-  API: ""
-  attributes: "ebas_station_code"
+  API: []
+  attributes: [ebas_station_code]
 
 station_timezone:
-  API: ""
-  attributes: "timezone"
+  API: []
+  attributes: [timezone]
 
 doi:
-  API: ""
-  attributes: "doi"
+  API: [md_identification, identifier, pid]
+  attributes: [doi]
 
 license:
-  API: ""
-  attributes: "license"
+  API: [md_constraints, data_license]
+  attributes: [license]
 
 citation:
-  API: ""
-  attributes: "citation"
+  API: [md_constraints, citation]
+  attributes: [citation]
 
 actris_national_facility:
-  API: "actris_national_facility"
-  attributes: ""
+  API: [actris_national_facility]
+  attributes: []
 
 matrix:
-  API: "matrix"
-  attributes: ""
+  API: [matrix]
+  attributes: [matrix]
 
 framework:
-  API: "program_affiliation"
-  attributes: ""
+  API: [program_affiliation]
+  attributes: [project]

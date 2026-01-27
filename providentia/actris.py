@@ -889,60 +889,75 @@ class Actris:
             specific_metadata = metadata[0]['md_actris_specific']
             contact_metadata = metadata[0]['md_metadata']['contact'][0]
             contact_identification = metadata[0]['md_identification']['contact'][0]
+        # else:
+        #     local_warnings += f"Metadata cannot be read from DOI {doi} in API, reading from attributes.."
 
         # save metadata
         metadata_np = {}
         for ghost_key, actris_key in metadata_dict.items():
-
+            
             metadata_np[ghost_key] = np.frombuffer(shared_memory_vars['metadata'][ghost_key], dtype='S75').reshape(metadata_shape)
 
-            actris_api_key = actris_key['API']
-            actris_attr_key = actris_key['attributes']
-
-            # search in API first
-            val = None
-            if len(metadata) > 0:
-                if actris_api_key in facility_metadata.keys() and len(actris_api_key) > 0:
-                    val = facility_metadata[actris_api_key]
-                elif actris_api_key in specific_metadata.keys() and len(actris_api_key) > 0:
-                    val = specific_metadata[actris_api_key]
-                elif ghost_key in ['contact_email_address', 'contact_institution', 'contact_name']:
-                    if ghost_key == 'contact_name':
-                        val = f"{contact_metadata['first_name']} {contact_metadata['last_name']}" 
-                    elif len(actris_api_key) > 0:
-                        val = contact_metadata[actris_api_key]
-                elif ghost_key in ['principal_investigator_email_address', 
-                                   'principal_investigator_institution',
-                                   'principal_investigator_name']:
-                    if ghost_key == 'principal_investigator_name':
-                        val = f"{contact_identification['first_name']} {contact_identification['last_name']}"
-                    elif len(actris_api_key) > 0:
-                        val = contact_identification[actris_api_key]
+            actris_api_keys = actris_key['API']
+            actris_attr_keys = actris_key['attributes']
             
+            # search in API first
+            vals = []
+            if len(metadata) != 0:
+                for actris_api_key in actris_api_keys:
+                    val = None
+                    if actris_api_key in facility_metadata.keys() and len(actris_api_key) > 0:
+                        val = facility_metadata[actris_api_key]
+                    elif actris_api_key in specific_metadata.keys() and len(actris_api_key) > 0:
+                        val = specific_metadata[actris_api_key]
+                    elif ghost_key in ['contact_email_address', 'contact_institution', 'contact_name']:
+                        if ghost_key == 'contact_name':
+                            val = f"{contact_metadata['first_name']} {contact_metadata['last_name']}" 
+                        elif len(actris_api_key) > 0:
+                            val = contact_metadata[actris_api_key]
+                    elif ghost_key in ['principal_investigator_email_address', 
+                                    'principal_investigator_institution',
+                                    'principal_investigator_name']:
+                        if ghost_key == 'principal_investigator_name':
+                            val = f"{contact_identification['first_name']} {contact_identification['last_name']}"
+                        elif len(actris_api_key) > 0:
+                            val = contact_identification[actris_api_key]
+                    if val is not None:
+                        vals.append(val)
+
             # search in attributes if it does not exist in API
-            if val is None and len(actris_attr_key) > 0:
-                if actris_attr_key in da_var_attrs.keys():
-                    val = da_var_attrs[actris_attr_key]
-                elif actris_attr_key in ds.attrs.keys():
-                    val = ds.attrs[actris_attr_key]
-              
+            if len(vals) == 0:
+                for actris_attr_key in actris_attr_keys:
+                    val = None
+                    if len(actris_attr_key) > 0:
+                        if actris_attr_key in da_var_attrs.keys():
+                            val = da_var_attrs[actris_attr_key]
+                        elif actris_attr_key in ds.attrs.keys():
+                            val = ds.attrs[actris_attr_key]
+                    if val is not None:
+                        vals.append(val)
+
             # if not found, make nan
-            if val is None:
-                val = str(np.nan)
+            if len(vals) == 0:
+                metadata_val = str(np.nan)
+            # if found and only one value
+            elif len(vals) == 1:
+                vals = vals[0]
+                # if it is a string made out of commas, make nan
+                if isinstance(vals, str) and self.str_to_nan(vals):
+                    vals = str(np.nan)
+                # keep everything as string
+                elif not isinstance(vals, str):
+                    vals = str(vals)
+                metadata_val = vals
             # convert lists into strings
-            elif isinstance(val, list):
-                val = ", ".join(val).lstrip(", ")
-            # if it is a string made out of commas, make nan
-            elif isinstance(val, str) and self.str_to_nan(val):
-                val = str(np.nan)
-            # keep everything as string
-            elif not isinstance(val, str):
-                val = str(val)
-
+            elif len(vals) > 1:
+                metadata_val = ", ".join(vals).lstrip(", ")
+            
             # remove all leading character ,
-            val = val.lstrip(", ")
+            metadata_val = metadata_val.lstrip(", ")
 
-            metadata_np[ghost_key][i] = val.encode('utf-8')
+            metadata_np[ghost_key][i] = metadata_val.encode('utf-8')
 
         return url, station, local_errors, local_warnings
 
