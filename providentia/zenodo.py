@@ -5,6 +5,7 @@ import shutil
 import sys
 import time
 
+import json
 import requests
 import tarfile
 from tqdm import tqdm
@@ -89,8 +90,9 @@ class Zenodo:
                 continue
             
             # for other errors, print response content and raise exception
-            print(f"Error {resp.status_code}: {resp.text}")
-            resp.raise_for_status() 
+            error = f"Error {resp.status_code}: {resp.text}"
+            self.download_instance.logger.info(error)
+            sys.exit(1)
 
     def download_zip(self, network, artifact_network):
         """
@@ -138,24 +140,214 @@ class Zenodo:
 
         return zip_path
 
-    def extract_zip(self, network, zip_path):
+    def extract_zip(self, file_paths, zip_path, initial_check):
         """
-        Extract the contents of a ZIP archive into a temporary directory.
+        Extract certain tar.xz of a ZIP archive into a temporary directory.
+
+        Parameters
+        ----------
+        file_paths : list of str
+            List of file paths used to determine which archives must be extracted.
+        zip_path : str
+            Absolute path to the ZIP file.
+        initial_check : bool
+            Flag indicating whether missing archives should deactivate the download
+            process during the initial validation step.
+
+        Returns
+        -------
+        valid_files_info : dict
+            Dictionary where each key is the final directory, and
+            each value is a dictionary containing metadata for each successfully
+            extracted nc file. The metadata includes network, resolution, species,
+            filenames in the format of `species/species_YYYYMMM.nc` and tar_member
+            with relative path of the `.tar.xz` archive inside the ZIP file.
+        """
+
+        files_info = {}
+
+        # fill the dictionary with the metadata
+        for path in file_paths:
+            dir = join('/', *path.split('/')[:-1])
+
+            if dir not in files_info:
+                files_info[dir] = {
+                    "network": path.split('/')[-4],
+                    "resolution": path.split('/')[-3],
+                    "species": path.split('/')[-2],
+                    "tar_member": f"{path.split('/')[-4]}/{path.split('/')[-3]}/{path.split('/')[-2]}.tar.xz",
+                    "filenames": [join(*path.split('/')[-2:])],
+                }
+            else:
+                files_info[dir]["filenames"].append(join(*path.split('/')[-2:]))
+
+        valid_files_info = {}
+
+        # open zip file
+        with ZipFile(zip_path) as zipf:
+            zip_members = set(zipf.namelist())
+
+            # iterate through the different nc files and validate each one of them
+            for dir, file_info_dict in files_info.items():
+                for filename in file_info_dict["filenames"]:
+                    
+                    tar_member = file_info_dict["tar_member"]
+
+                    if tar_member in zip_members:
+                        # extract valid tar member 
+                        zipf.extract(tar_member, self.temp_dir)
+                        
+                        # include the tar files that were on the ZIP file on the final directory
+                        if dir not in valid_files_info:
+                            valid_files_info[dir] = {
+                                "network": file_info_dict["network"],
+                                "resolution": file_info_dict["resolution"],
+                                "species": file_info_dict["species"],
+                                "tar_path": join(self.temp_dir, tar_member),
+                                "filenames": [filename],
+                            }
+                        else:
+                            valid_files_info[dir]["filenames"].append(filename)
+                    else:
+                        # throw a warning if nc file is not found in the zip file
+                        msg = f"Missing archive in ZIP: {tar_member}"
+                        show_message(self.download_instance, msg, deactivate=initial_check)
+
+        return valid_files_info
+
+    def extract_tar(self, files_info):
+        """
+        Extract selected files from previously extracted `.tar.xz` archives.
+
+        Parameters
+        ----------
+        files_info : dict
+            Dictionary where each key is the final directory, and
+            each value is a dictionary containing metadata for each successfully
+            extracted nc file. The metadata includes network, resolution, species,
+            filenames in the format of `species/species_YYYYMMM.nc` and tar_path
+            with the absolute path of the `.tar.xz` archive inside the ZIP file.
+        """
+
+        # iterate through each file
+        for dir, file_info_dict in files_info.items():
+            self.download_instance.logger.info(f"\n  - {dir}")
+
+            for filename in tqdm(file_info_dict["filenames"], desc=f"    Extracting from {os.path.basename(file_info_dict['tar_path'])}"):
+                # open tar file
+                with tarfile.open(file_info_dict["tar_path"]) as tar:
+                    try:
+                        member = tar.getmember(filename)
+                    except KeyError:
+                        # throw a warning if nc file is not found in the tar file
+                        msg = f"Missing file in TAR: {filename}"
+                        show_message(self.download_instance, msg)
+                        continue
+
+                    # create directory where the tar file will be extracted
+                    os.makedirs(dir, exist_ok=True)
+                    
+                    # extract valid nc file
+                    with tar.extractfile(member) as src:
+                        with open(join(os.path.dirname(dir), filename), "wb") as dst:
+                            shutil.copyfileobj(src, dst)
+
+    def filter_dates(self, dates):
+        """
+        Filter a list of dates based on the start and end date of the download instance.
+
+        Parameters
+        ----------
+        dates : list of str
+            List of dates in 'YYYYMMDD' string format to be filtered.
+
+        Returns
+        -------
+        valid_dates : list of str
+            List of dates that are within the range specified by 
+            `self.download_instance.start_date` and `self.download_instance.end_date`.
+        """
+
+        valid_dates = []
+        for date in dates:
+            if self.download_instance.end_date >= date >= self.download_instance.start_date:
+                valid_dates.append(date)
+
+        return valid_dates
+        
+    def check_filetrees(self, network):
+        """
+        Check the filetree for valid resolutions, species and dates for a given network.
 
         Parameters
         ----------
         network : str
-            Name of the network to download.
-        zip_path : str
-            Absolute path to the zip file.
-        """
-        
-        # open the ZIP file
-        with ZipFile(zip_path, "r") as zipf:            
-            zipf.extractall(self.temp_dir)
+            The network identifier used to select the subset of the filetree 
+            JSON corresponding to that network.
 
-    def extract_tar(self):
-        pass
+        Returns
+        -------
+        valid_filetree : dict of dict
+            Nested dictionary where keys are valid resolutions and values are 
+            dictionaries mapping species names to lists of valid dates. 
+            The structure is `{network: resolution: {species: [date]}}}`
+        """
+
+        # load filetree JSON for the current GHOST version
+        filetree_path = join(PROVIDENTIA_ROOT, 'settings', 'internal', 'zenodo', f'zenodo_ghost_filetree_{self.download_instance.ghost_version}.json')
+        with open(filetree_path) as f:
+            zenodo_filetrees = json.load(f)
+
+        valid_filetree = {network : {}}
+
+        # determine which resolution to process
+        valid_resolutions = self.download_instance.resolution if self.download_instance.resolution != '' else zenodo_filetrees[network].keys()
+        for resolution in valid_resolutions:
+            if resolution in zenodo_filetrees[network]:
+                # determine which species to process
+                valid_species = self.download_instance.species if self.download_instance.species != '' else zenodo_filetrees[network][resolution].keys()
+                for species in valid_species:
+                    if species in zenodo_filetrees[network][resolution]:
+                        # obtain dates in the date range
+                        dates = zenodo_filetrees[network][resolution][species]
+                        valid_dates = self.filter_dates(dates)
+                        # add resolution, species and dates to the output if needed
+                        if valid_dates:
+                            if resolution not in valid_filetree[network]:
+                                valid_filetree[network][resolution] = {}
+
+                            valid_filetree[network][resolution][species] = valid_dates
+
+        return valid_filetree
+
+    def filetree_to_paths(self, filetree):
+        """
+        Convert the filetree dictionary into a list of file paths.
+
+        Parameters
+        ----------
+        filetree : dict
+            Nested dictionary where keys are valid resolutions and values are 
+            dictionaries mapping species names to lists of valid dates. 
+            The structure is `{network: resolution: {species: [date]}}}`
+
+        Returns
+        -------
+        paths : list of str
+            List of absolute file paths.
+        """
+
+        paths = []
+
+        for network, resolutions in filetree.items():
+            for resolution, species_dict in resolutions.items():
+                for species, dates in species_dict.items():
+                    for date in dates:
+                        filename = f"{species}_{date}.nc"
+                        path = join(self.download_instance.ghost_root, network, resolution, species, filename)
+                        paths.append(path)
+
+        return paths
 
     def download_ghost_network_zenodo(self, network, initial_check, files_to_download=None):
         """
@@ -178,7 +370,7 @@ class Zenodo:
         """
 
         if not initial_check:
-            # print current_network
+            # print current network
             self.download_instance.logger.info('\n'+'-'*40)
             self.download_instance.logger.info(f"\nDownloading GHOST {network} network data from Zenodo...")
         
@@ -187,132 +379,32 @@ class Zenodo:
             msg = f"Network '{network}' is not available for GHOST version {self.download_instance.ghost_version} on Zenodo."
             show_message(self.download_instance, msg, deactivate=initial_check)
             return
+ 
+        if initial_check:
+            # obtain the filetree that match with the configuration file
+            valid_filetree = self.check_filetrees(network)
 
-        # get the GHOST artifact value for the corresponding network
-        artifact_network = self.artifact_mapping[network]    
+            # convert the filetree to absolute paths
+            initial_check_nc_files = self.filetree_to_paths(valid_filetree)
 
-        # create temporal dir to store the zip file and its tar components
-        self.temp_dir = os.path.join(self.download_instance.ghost_root, ".temp")
-        os.makedirs(self.temp_dir, exist_ok=True)
-
-        # download zip on the temporal directory
-        zip_path = self.download_zip(network, artifact_network)
-
-        # extract zip on the temporal directory
-        self.extract_zip(network, zip_path)
-
-        # extract tar on the temporal directory
-        self.extract_tar()
-
-        # get resolution and/or species combinations
-        # network
-        if not self.download_instance.resolution and not self.download_instance.species:
-            res_spec_combinations = [""]
-        # network + resolution 
-        elif not self.download_instance.species:
-            res_spec_combinations = [f"/{resolution}/" for resolution in self.download_instance.resolution]
-        # network + species 
-        elif not self.download_instance.resolution:
-            res_spec_combinations = [f"/{species}.tar.xz"  for species in self.download_instance.species]   
-        # network + resolution + species 
+            return initial_check_nc_files
+        
         else:
-            res_spec_combinations = [f"/{resolution}/{species}.tar.xz" for species in self.download_instance.species for resolution in self.download_instance.resolution]
+            # get the GHOST artifact value for the corresponding network
+            artifact_network = self.artifact_mapping[network]    
 
-        # get all the species tar files which fulfill the combination condition
-        res_spec_dir_tail = []
-        with RemoteZip(zip_file_url) as zip:
-            for combi in res_spec_combinations:
-                res_spec_dir_tail += list(filter(lambda x: combi in x, zip.namelist()))
-            res_spec_dir_tail = list(filter(lambda x: x[-7:] == '.tar.xz', res_spec_dir_tail))
+            # create temporal dir to store the zip file and its tar components
+            self.temp_dir = os.path.join(self.download_instance.ghost_root, ".temp")
+            os.makedirs(self.temp_dir, exist_ok=True)
 
-            # warning if network + species + resolution combination is gets no matching results
-            if not res_spec_dir_tail:
-                print_spec = f'{",".join(self.download_instance.species)} species' if self.download_instance.species else ""
-                print_res = f'at {",".join(self.download_instance.resolution)} resolution(s)' if self.download_instance.resolution else ""
-                msg = f"There is no data available in Zenodo for {network} network for {print_spec} {print_res}"
-                show_message(self.download_instance, msg, deactivate=initial_check)
+            # download zip on the temporal directory
+            zip_path = self.download_zip(network, artifact_network)
 
-            # check if there's any possible combination with user's network, resolution and species
-            else:
-                # initialise list with all the nc files to be downloaded
-                initial_check_nc_files = []
+            # extract zip on the temporal directory
+            valid_files_info = self.extract_zip(files_to_download, zip_path, initial_check)
 
-                # print the species, resolution and network combinations that are going to be downloaded
-                if not initial_check:
-                    self.download_instance.logger.info(f"\n{network} observations to download:")
-                
-                for remote_dir_tail in res_spec_dir_tail:
-                    resolution, species = remote_dir_tail.split("/")[1:]
-                    species = species[:-7]
-                    local_dir = join(self.download_instance.ghost_root, network, self.download_instance.ghost_version, resolution, species)
-
-                    #  print the species, resolution and network combinations that are going to be downloaded
-                    if not initial_check:
-                        self.download_instance.logger.info(f"\n  - {local_dir}")
-
-                    # create temporal dir to store the middle tar file with its directories
-                    self.temp_dir = join(self.download_instance.ghost_root,'.temp')
-                    if not os.path.exists(self.temp_dir):
-                        os.mkdir(self.temp_dir)
-
-                    zip.extract(remote_dir_tail,self.temp_dir)
-                    
-                    # get path and the name of the directory of the tar file
-                    tar_path = join(self.download_instance.ghost_root, network, str(self.download_instance.ghost_version), *remote_dir_tail.split("/")[1:])
-                    temp_path = join(self.temp_dir,remote_dir_tail)
-
-                    # extract nc file from tar file
-                    with tarfile.open(temp_path) as tar_file:
-                        # get the nc files that are between the start and end date
-                        tar_names = tar_file.getnames()
-                        valid_nc_file_names = self.download_instance.get_valid_nc_files_in_date_range(tar_names)
-                        
-                        # warning if network + species + resolution + date range combination gets no matching results                        
-                        if not valid_nc_file_names:
-                            print_spec = f'{",".join(self.download_instance.species)} species' if self.download_instance.species else ""
-                            print_res = f'at {",".join(self.download_instance.resolution)} resolutions' if self.download_instance.resolution else ""
-                            msg = f"There is no data available in Zenodo from {self.download_instance.start_date} to {self.download_instance.end_date} for {network} network for {print_spec} species at {print_res} resolution"
-                            show_message(self.download_instance, msg, deactivate=initial_check)
-                            continue
-                        # download the valid resolution species date combinations
-                        else:                 
-                            # create directories if they don't exist
-                            tar_dir = os.path.dirname(tar_path) 
-                            if not os.path.exists(tar_dir):
-                                os.makedirs(tar_dir)
-                            
-                            if not initial_check:
-                                # get the ones that are not already downloaded
-                                valid_nc_file_names = list(filter(lambda x:join(local_dir,x.split('/')[-1]) in files_to_download, valid_nc_file_names))
-                                if not valid_nc_file_names:
-                                    msg = "Files were already downloaded."
-                                    show_message(self.download_instance, msg, deactivate=initial_check)     
-                                    continue  
-                                
-                            valid_nc_files = list(filter(lambda x:x.name in valid_nc_file_names, tar_file.getmembers()))
-                            
-                            # sort nc_files
-                            valid_nc_files.sort(key = lambda x:x.name)   
-
-                            if not initial_check and not self.download_instance.logfile:
-                                # print the tqdm bar if output goes to screen   
-                                valid_nc_files_iter = tqdm(valid_nc_files,bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Downloading files ({len(valid_nc_files)})")
-                            else:
-                                # do not print the bar if it is the initial check
-                                valid_nc_files_iter = valid_nc_files
-
-                            for nc_file in valid_nc_files_iter:
-                                local_path = join(tar_dir,nc_file.name)
-                                if initial_check:
-                                    initial_check_nc_files.append(local_path)
-                                else:
-                                    # get last downloaded file in case there was a keyboard interrupt
-                                    self.download_instance.latest_nc_file_path = local_path
-
-                                    # extract the file
-                                    tar_file.extract(member = nc_file, path = tar_dir)
-                
-                # remove the temp directory
-                shutil.rmtree(os.path.dirname(os.path.dirname(temp_path)))
-                
-                return initial_check_nc_files
+            # extract tar on the temporal directory
+            self.extract_tar(valid_files_info)                    
+ 
+            # remove the temporal directory
+            shutil.rmtree(os.path.dirname(os.path.dirname(self.temp_dir)))
