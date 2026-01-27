@@ -233,7 +233,7 @@ class Zenodo:
         for dir, file_info_dict in files_info.items():
             self.download_instance.logger.info(f"\n  - {dir}")
 
-            for filename in tqdm(file_info_dict["filenames"], desc=f"    Extracting from {os.path.basename(file_info_dict['tar_path'])}"):
+            for filename in tqdm(file_info_dict["filenames"], bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}', desc=f"    Extracting files ({len(file_info_dict['filenames'])})"):
                 # open tar file
                 with tarfile.open(file_info_dict["tar_path"]) as tar:
                     try:
