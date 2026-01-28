@@ -77,6 +77,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#generate-outputs">Generate Outputs</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#obtain-zenodo-filetrees">Obtain Zenodo Filetrees</a></li>
 </ul>
 </li>
 </ul>
@@ -118,6 +119,7 @@
 <li><p><a class="reference internal" href="#generate-the-docs">Generate the docs</a></p></li>
 <li><p><a class="reference internal" href="#create-conda-environments">Create conda environments</a></p></li>
 <li><p><a class="reference internal" href="#memory-profiling-code">Memory Profiling Code</a></p></li>
+<li><p><a class="reference internal" href="#obtain-zenodo-filetrees">Obtain Zenodo Filetrees</a></p></li>
 </ul>
 <section id="migrate-repository-from-gitlab-to-github">
 <h2>Migrate repository from Gitlab to Github<a class="headerlink" href="#migrate-repository-from-gitlab-to-github" title="Link to this heading"></a></h2>
@@ -525,6 +527,118 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
 </pre></div>
 </div>
 </section>
+</section>
+<section id="obtain-zenodo-filetrees">
+<h2>Obtain Zenodo Filetrees<a class="headerlink" href="#obtain-zenodo-filetrees" title="Link to this heading"></a></h2>
+<p>Here the code used to obtain the Zenodo filetrees for the release of the next GHOST versions in Zenodo.</p>
+<p>In order to create individual filetrees, run a modified version of the Providentia Zenodo download.</p>
+<p>First of all, the <code class="docutils literal notranslate"><span class="pre">download_ghost_network_zenodo</span></code> function only has to be runned once with <code class="docutils literal notranslate"><span class="pre">initial_check</span> <span class="pre">=</span> <span class="pre">False</span></code>. To do so comment these lines on <code class="docutils literal notranslate"><span class="pre">configuration.py</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># download GHOST network</span>
+<span class="c1">#initial_check_nc_files = download_fun(network, initial_check=True)</span>
+<span class="c1">#files_to_download = self.select_files_to_download(initial_check_nc_files)</span>
+<span class="c1">#if not initial_check_nc_files or files_to_download:</span>
+    <span class="n">download_fun</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">initial_check</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">files_to_download</span><span class="o">=</span><span class="n">files_to_download</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This makes <code class="docutils literal notranslate"><span class="pre">download_ghost_network_zenodo</span></code> run the next code:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># get the GHOST artifact value for the corresponding network</span>
+<span class="n">artifact_network</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">artifact_mapping</span><span class="p">[</span><span class="n">network</span><span class="p">]</span>    
+
+<span class="c1"># create temporal dir to store the zip file and its tar components</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">temp_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">download_instance</span><span class="o">.</span><span class="n">ghost_root</span><span class="p">,</span> <span class="s2">&quot;.temp&quot;</span><span class="p">)</span>
+<span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">temp_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># download zip on the temporal directory</span>
+<span class="n">zip_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">download_zip</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">artifact_network</span><span class="p">)</span>
+
+<span class="c1"># extract zip on the temporal directory</span>
+<span class="n">valid_files_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_zip</span><span class="p">(</span><span class="n">files_to_download</span><span class="p">,</span> <span class="n">zip_path</span><span class="p">,</span> <span class="n">initial_check</span><span class="p">)</span>
+
+<span class="c1"># extract tar on the temporal directory</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">extract_tar</span><span class="p">(</span><span class="n">valid_files_info</span><span class="p">)</span>          
+</pre></div>
+</div>
+<p>Before that modify the <code class="docutils literal notranslate"><span class="pre">extract_zip</span></code> and <code class="docutils literal notranslate"><span class="pre">extract_tar</span></code> functions from the <code class="docutils literal notranslate"><span class="pre">zenodo.py</span></code> module.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">extract_zip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">zip_path</span><span class="p">):</span>        
+  <span class="c1"># open the ZIP file</span>
+  <span class="k">with</span> <span class="n">ZipFile</span><span class="p">(</span><span class="n">zip_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">zipf</span><span class="p">:</span>            
+      <span class="n">zipf</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">temp_dir</span><span class="p">)</span>
+
+      <span class="c1"># list all files inside the ZIP</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">file_paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">temp_dir</span><span class="p">,</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">zipf</span><span class="o">.</span><span class="n">namelist</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)]</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_tar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">):</span>
+  <span class="kn">import</span><span class="w"> </span><span class="nn">tarfile</span>
+  <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+
+  <span class="n">json_dict</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="k">for</span> <span class="n">tar_path</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_paths</span><span class="p">,</span><span class="n">desc</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;    Checking </span><span class="si">{</span><span class="n">network</span><span class="si">}</span><span class="s2"> tars&quot;</span><span class="p">,):</span>
+      <span class="k">with</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">tar_path</span><span class="p">,</span> <span class="s2">&quot;r:*&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tar</span><span class="p">:</span>
+          <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">species_tar</span> <span class="o">=</span> <span class="n">tar_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+          <span class="n">species</span> <span class="o">=</span> <span class="n">species_tar</span><span class="p">[:</span><span class="o">-</span><span class="mi">7</span><span class="p">]</span>
+
+          <span class="k">if</span> <span class="n">network</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">json_dict</span><span class="p">:</span>
+              <span class="n">json_dict</span><span class="p">[</span><span class="n">network</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+          
+          <span class="k">if</span> <span class="n">resolution</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">json_dict</span><span class="p">[</span><span class="n">network</span><span class="p">]:</span>
+              <span class="n">json_dict</span><span class="p">[</span><span class="n">network</span><span class="p">][</span><span class="n">resolution</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+          <span class="k">if</span> <span class="n">species</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">json_dict</span><span class="p">[</span><span class="n">network</span><span class="p">][</span><span class="n">resolution</span><span class="p">]:</span>
+              <span class="n">json_dict</span><span class="p">[</span><span class="n">network</span><span class="p">][</span><span class="n">resolution</span><span class="p">][</span><span class="n">species</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+          <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">tar</span><span class="o">.</span><span class="n">getmembers</span><span class="p">():</span>
+              <span class="n">file_name</span> <span class="o">=</span> <span class="n">member</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+              <span class="k">if</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.nc&#39;</span><span class="p">):</span>
+                  <span class="n">json_dict</span><span class="p">[</span><span class="n">network</span><span class="p">][</span><span class="n">resolution</span><span class="p">][</span><span class="n">species</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+
+          <span class="n">json_dict</span><span class="p">[</span><span class="n">network</span><span class="p">][</span><span class="n">resolution</span><span class="p">][</span><span class="n">species</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">json_dict</span><span class="p">[</span><span class="n">network</span><span class="p">][</span><span class="n">resolution</span><span class="p">][</span><span class="n">species</span><span class="p">]))</span>
+      
+  <span class="n">final_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;/home/pserrano/providentia/settings/internal/zenodo/zenodo_networks/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">download_instance</span><span class="o">.</span><span class="n">ghost_version</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">network</span><span class="si">}</span><span class="s2">.json&quot;</span>
+  <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">final_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+      <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">json_dict</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+  <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">final_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+      <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>After all the networks have generated individual filetrees, join all of them by running this script:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
+<span class="n">ghost_version</span> <span class="o">=</span> <span class="s1">&#39;1.5.1&#39;</span>
+
+<span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;/home/pserrano/providentia/settings/internal/zenodo/zenodo_networks/</span><span class="si">{</span><span class="n">ghost_version</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="n">ld</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+<span class="n">yaml_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;/home/pserrano/providentia/settings/internal/zenodo/zenodo_</span><span class="si">{</span><span class="n">ghost_version</span><span class="si">}</span><span class="s2">.yaml&quot;</span>
+<span class="n">yaml_obj</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">yaml_path</span><span class="p">))</span>
+
+<span class="n">valid_networks</span> <span class="o">=</span> <span class="n">yaml_obj</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+<span class="n">actual_networks</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="p">[:</span><span class="o">-</span><span class="mi">5</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ld</span><span class="p">]</span>
+
+<span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">valid_networks</span><span class="p">)</span><span class="o">-</span><span class="nb">set</span><span class="p">(</span><span class="n">actual_networks</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">set</span><span class="p">(</span><span class="n">actual_networks</span><span class="p">)</span><span class="o">-</span><span class="nb">set</span><span class="p">(</span><span class="n">valid_networks</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">valid_networks</span><span class="p">)</span><span class="o">-</span><span class="nb">set</span><span class="p">(</span><span class="n">actual_networks</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">actual_networks</span><span class="p">)</span><span class="o">-</span><span class="nb">set</span><span class="p">(</span><span class="n">valid_networks</span><span class="p">))</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="k">for</span> <span class="n">json_file</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">ld</span><span class="p">):</span>
+    <span class="n">full_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">json_file</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">full_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+
+<span class="n">final_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path</span><span class="p">)),</span> <span class="sa">f</span><span class="s1">&#39;zenodo_ghost_filetree_</span><span class="si">{</span><span class="n">ghost_version</span><span class="si">}</span><span class="s1">.json&#39;</span><span class="p">)</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">final_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span><span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Too see more useful scripts regarding the filetrees <a class="reference external" href="https://github.com/BSC-ES/providentia/issues/812">this</a> issue.</p>
 </section>
 </section>
 

@@ -109,9 +109,13 @@ These are the available networks for version **1.5.1**:
 
 To view the available data for each network, visit the Zenodo page for one of the versions, you can find the links in [this](#available-ghost-versions) section.
 
-Open the **Files** dropdown and click **Preview** on the network you’re interested in.
+When scrolling down, you will find the list of available networks, where the name and the total size for each network are shown.
 
 ![Zenodo Preview](uploads/Zenodo_preview.png "Zenodo Preview")
+
+Larger networks contain more NetCDF files and therefore take longer to download. Some ZIP files may take several hours to complete, depending on their size.
+
+In order to see the ZIP file contents on the network you’re interested in, open the **Files** dropdown and click **Preview**.
   
 Once this is done, open the dropdown named after the network. The **first-level directories** correspond to the *resolution*, and the **second-level directories** correspond to the *species*.
 
@@ -129,4 +133,18 @@ end_date = 20220101
 species = absae440-870aero
 network = AERONET_v3_lev1.5
 resolution = daily
+dl_ghost_source = zenodo
+```
+
+Also, another example using a lighter network with faster download times:
+
+```ini
+[zenodo-EBAS-NILU] 
+ghost_version = 1.5
+network = EBAS-NILU
+start_date = 202001
+end_date = 202101
+species = sconcno3, sconco3, sconcna
+resolution = daily
+dl_ghost_source = zenodo
 ```

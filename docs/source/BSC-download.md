@@ -32,6 +32,7 @@ The network is essential to generate a report, as it provides access to the real
 - For GHOST network downloads, answer `y` to the prompt:  
   _"Do you want to download observational data from the BSC remote machine? (Otherwise, GHOST observational data will be retrieved from Zenodo)"_  
   or set `dl_ghost_source = bsc` in your configuration.
+- **If the configuration file contains only network data and no models, network data will be downloaded automatically.**
 
 ## Download of interpolated models
 
@@ -42,7 +43,7 @@ An interpolated model consists of model output that have already been spatially 
 - Models are retrieved from the `mod_root` path specified in the `storage5` or `mn5` key of `settings/data_paths.yaml`.
 
 **How to enable:**  
-- You must include at least one network **and** one model in your configuration.  
+- You must include at least one network and one model in your configuration.  
 - Set `dl_mode` to `both` or `mod` (or answer `both`/`mod` to the prompt).  
 - Answer `y` to the prompt:  
   _"Model data was detected in the configuration file. Do you want to download the interpolated version? (Otherwise, the non-interpolated model data will be downloaded)"_  
@@ -65,6 +66,7 @@ Non-interpolated model data refers to model outputs that are ready to be interpo
 - Answer `n` to the prompt:  
   _"Model data was detected in the configuration file. Do you want to download the interpolated version? (Otherwise, the non-interpolated model data will be downloaded)"_  
   or set `dl_interpolated = False` in your configuration.
+- **If the configuration file contains only model data and no networks, non-interpolated model data will be downloaded automatically.**
 
 ### HPC non-interpolated downloads
 In some cases, model data exists in `esarchive`, but not all HPC machines have direct access to it. When interpolation needs to be performed on a machine without `esarchive` access, the model data must first be copied from `esarchive` to `gpfs`.

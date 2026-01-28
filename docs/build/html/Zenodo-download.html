@@ -216,8 +216,10 @@
 <section id="explore-network-contents">
 <h2>Explore network contents<a class="headerlink" href="#explore-network-contents" title="Link to this heading"></a></h2>
 <p>To view the available data for each network, visit the Zenodo page for one of the versions, you can find the links in <a class="reference internal" href="#available-ghost-versions">this</a> section.</p>
-<p>Open the <strong>Files</strong> dropdown and click <strong>Preview</strong> on the network you’re interested in.</p>
+<p>When scrolling down, you will find the list of available networks, where the name and the total size for each network are shown.</p>
 <p><img alt="Zenodo Preview" src="_images/Zenodo_preview.png" /></p>
+<p>Larger networks contain more NetCDF files and therefore take longer to download. Some ZIP files may take several hours to complete, depending on their size.</p>
+<p>In order to see the ZIP file contents on the network you’re interested in, open the <strong>Files</strong> dropdown and click <strong>Preview</strong>.</p>
 <p>Once this is done, open the dropdown named after the network. The <strong>first-level directories</strong> correspond to the <em>resolution</em>, and the <strong>second-level directories</strong> correspond to the <em>species</em>.</p>
 <p><img alt="Zenodo File Structure" src="_images/Zenodo_File_Structure.png" /></p>
 </section>
@@ -231,6 +233,18 @@
 <span class="na">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">absae440-870aero</span>
 <span class="na">network</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">AERONET_v3_lev1.5</span>
 <span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">daily</span>
+<span class="na">dl_ghost_source</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">zenodo</span>
+</pre></div>
+</div>
+<p>Also, another example using a lighter network with faster download times:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[zenodo-EBAS-NILU]</span><span class="w"> </span>
+<span class="na">ghost_version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">1.5</span>
+<span class="na">network</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">EBAS-NILU</span>
+<span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">202001</span>
+<span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">202101</span>
+<span class="na">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">sconcno3, sconco3, sconcna</span>
+<span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">daily</span>
+<span class="na">dl_ghost_source</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">zenodo</span>
 </pre></div>
 </div>
 </section>

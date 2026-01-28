@@ -11,6 +11,7 @@ This page can be used by developers to better understand certain parts of the co
 - [Generate the docs](#generate-the-docs)
 - [Create conda environments](#create-conda-environments)
 - [Memory Profiling Code](#memory-profiling-code)
+- [Obtain Zenodo Filetrees](#obtain-zenodo-filetrees)
 
 ## Migrate repository from Gitlab to Github
 
@@ -471,3 +472,125 @@ To get the detailed stats, use:
 ```bash
 memray stats output_file 
 ```
+
+## Obtain Zenodo Filetrees
+
+Here the code used to obtain the Zenodo filetrees for the release of the next GHOST versions in Zenodo. 
+
+In order to create individual filetrees, run a modified version of the Providentia Zenodo download. 
+
+First of all, the `download_ghost_network_zenodo` function only has to be runned once with `initial_check = False`. To do so comment these lines on `configuration.py`:
+
+```python
+# download GHOST network
+#initial_check_nc_files = download_fun(network, initial_check=True)
+#files_to_download = self.select_files_to_download(initial_check_nc_files)
+#if not initial_check_nc_files or files_to_download:
+    download_fun(network, initial_check=False, files_to_download=files_to_download)
+```
+
+This makes `download_ghost_network_zenodo` run the next code:
+
+```python
+# get the GHOST artifact value for the corresponding network
+artifact_network = self.artifact_mapping[network]    
+
+# create temporal dir to store the zip file and its tar components
+self.temp_dir = os.path.join(self.download_instance.ghost_root, ".temp")
+os.makedirs(self.temp_dir, exist_ok=True)
+
+# download zip on the temporal directory
+zip_path = self.download_zip(network, artifact_network)
+
+# extract zip on the temporal directory
+valid_files_info = self.extract_zip(files_to_download, zip_path, initial_check)
+
+# extract tar on the temporal directory
+self.extract_tar(valid_files_info)          
+```
+
+Before that modify the `extract_zip` and `extract_tar` functions from the `zenodo.py` module.
+
+```python
+def extract_zip(self, network, zip_path):        
+  # open the ZIP file
+  with ZipFile(zip_path, "r") as zipf:            
+      zipf.extractall(self.temp_dir)
+
+      # list all files inside the ZIP
+      self.file_paths = [join(self.temp_dir,f) for f in zipf.namelist() if not f.endswith("/")]
+
+def extract_tar(self, network):
+  import tarfile
+  import json
+
+  json_dict = {}
+  for tar_path in tqdm(self.file_paths,desc=f"    Checking {network} tars",):
+      with tarfile.open(tar_path, "r:*") as tar:
+          _, _, _, _, _, _, _, _, network, resolution, species_tar = tar_path.split('/')
+          species = species_tar[:-7]
+
+          if network not in json_dict:
+              json_dict[network] = {}
+          
+          if resolution not in json_dict[network]:
+              json_dict[network][resolution] = {}
+
+          if species not in json_dict[network][resolution]:
+              json_dict[network][resolution][species] = []
+
+          for member in tar.getmembers():
+              file_name = member.name.split('/')[-1]
+              if file_name.endswith('.nc'):
+                  json_dict[network][resolution][species].append(file_name)
+
+          json_dict[network][resolution][species] = list(sorted(json_dict[network][resolution][species]))
+      
+  final_path = f"/home/pserrano/providentia/settings/internal/zenodo/zenodo_networks/{self.download_instance.ghost_version}/{network}.json"
+  with open(final_path, "w", encoding="utf-8") as f:
+      json.dump(json_dict, f, indent=2)
+
+  with open(final_path, "r", encoding="utf-8") as f:
+      data = json.load(f)
+```
+
+After all the networks have generated individual filetrees, join all of them by running this script:
+
+```python
+import os
+import json
+import yaml
+import sys
+
+ghost_version = '1.5.1'
+
+path = f"/home/pserrano/providentia/settings/internal/zenodo/zenodo_networks/{ghost_version}"
+ld = os.listdir(path)
+
+yaml_path = f"/home/pserrano/providentia/settings/internal/zenodo/zenodo_{ghost_version}.yaml"
+yaml_obj = yaml.safe_load(open(yaml_path))
+
+valid_networks = yaml_obj.keys()
+actual_networks = [i[:-5] for i in ld]
+
+if set(valid_networks)-set(actual_networks) or set(actual_networks)-set(valid_networks):
+    print(set(valid_networks)-set(actual_networks))
+    print()
+    print(set(actual_networks)-set(valid_networks))
+    sys.exit()
+
+data = {}
+
+for json_file in sorted(ld):
+    full_path = os.path.join(path, json_file)
+    with open(full_path) as f:
+        d = json.load(f)
+    n = list(d.keys())[0]
+    data[n] = d[n]
+
+final_path = os.path.join(os.path.dirname(os.path.dirname(path)), f'zenodo_ghost_filetree_{ghost_version}.json')
+with open(final_path, 'w') as f:
+    json.dump(data, f,indent=4)
+```
+
+Too see more useful scripts regarding the filetrees [this](https://github.com/BSC-ES/providentia/issues/812) issue.

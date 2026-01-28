@@ -141,6 +141,7 @@
 <li><p>For GHOST network downloads, answer <code class="docutils literal notranslate"><span class="pre">y</span></code> to the prompt:<br />
 <em>“Do you want to download observational data from the BSC remote machine? (Otherwise, GHOST observational data will be retrieved from Zenodo)”</em><br />
 or set <code class="docutils literal notranslate"><span class="pre">dl_ghost_source</span> <span class="pre">=</span> <span class="pre">bsc</span></code> in your configuration.</p></li>
+<li><p><strong>If the configuration file contains only network data and no models, network data will be downloaded automatically.</strong></p></li>
 </ul>
 </section>
 <section id="download-of-interpolated-models">
@@ -153,7 +154,7 @@ or set <code class="docutils literal notranslate"><span class="pre">dl_ghost_sou
 </ul>
 <p><strong>How to enable:</strong></p>
 <ul class="simple">
-<li><p>You must include at least one network <strong>and</strong> one model in your configuration.</p></li>
+<li><p>You must include at least one network and one model in your configuration.</p></li>
 <li><p>Set <code class="docutils literal notranslate"><span class="pre">dl_mode</span></code> to <code class="docutils literal notranslate"><span class="pre">both</span></code> or <code class="docutils literal notranslate"><span class="pre">mod</span></code> (or answer <code class="docutils literal notranslate"><span class="pre">both</span></code>/<code class="docutils literal notranslate"><span class="pre">mod</span></code> to the prompt).</p></li>
 <li><p>Answer <code class="docutils literal notranslate"><span class="pre">y</span></code> to the prompt:<br />
 <em>“Model data was detected in the configuration file. Do you want to download the interpolated version? (Otherwise, the non-interpolated model data will be downloaded)”</em><br />
@@ -178,6 +179,7 @@ or set <code class="docutils literal notranslate"><span class="pre">dl_interpola
 <li><p>Answer <code class="docutils literal notranslate"><span class="pre">n</span></code> to the prompt:<br />
 <em>“Model data was detected in the configuration file. Do you want to download the interpolated version? (Otherwise, the non-interpolated model data will be downloaded)”</em><br />
 or set <code class="docutils literal notranslate"><span class="pre">dl_interpolated</span> <span class="pre">=</span> <span class="pre">False</span></code> in your configuration.</p></li>
+<li><p><strong>If the configuration file contains only model data and no networks, non-interpolated model data will be downloaded automatically.</strong></p></li>
 </ul>
 </section>
 <section id="hpc-non-interpolated-downloads">
