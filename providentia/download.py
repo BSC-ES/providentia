@@ -1123,7 +1123,7 @@ class Download(object):
                 # first try with the original species
                 try:
                     # if it is an ensemble member
-                    if ensemble.isdigit() or ensemble in ['allmembers', 'av_an']:
+                    if ensemble.isdigit() or ensemble == 'allmembers':
                         res_spec = join(remote_dir,resolution,species)
                     # if it is an ensemble statistic
                     else:
@@ -1138,7 +1138,7 @@ class Download(object):
                         for mapping_speci in mapping_species[speci_to_process]:
                             try:
                                 # if it is an ensemble member
-                                if ensemble.isdigit() or ensemble in ['allmembers', 'av_an']:
+                                if ensemble.isdigit() or ensemble == 'allmembers':
                                     res_spec = join(remote_dir,resolution, mapping_speci)
                                 # if it is an ensemble statistic
                                 else:
@@ -1176,7 +1176,7 @@ class Download(object):
 
                 if nc_files:
                     # if it is an ensemble member
-                    if ensemble.isdigit() or ensemble in ['allmembers', 'av_an']:
+                    if ensemble.isdigit() or ensemble == 'allmembers':
                         # get the domain, resolution and species from the path
                         domain, resolution, species = remote_dir.split('/')[-3:]
 
@@ -1201,10 +1201,6 @@ class Download(object):
                             # filter by ensemble in case that ensemble is not allmembers
                             if ensemble != 'allmembers':
                                 nc_files = list(filter(lambda x:x.split("_")[0] == species+'-'+ensemble,nc_files))
-                        
-                        # example: od550du_2018011700_av_an.nc
-                        elif format == (0, 3):
-                            nc_files = list(filter(lambda x:x.split("_")[0] == species, nc_files))
 
                         # unknown format
                         else:
@@ -1222,7 +1218,7 @@ class Download(object):
                         nc_files = list(filter(lambda x:x.split("_")[0] == species and "_".join(x[:-3].split("_")[2:]) == ensemble, nc_files))
                 
                 # add ensemble-stats directory if it is an ensemble member
-                if ensemble.isdigit() or ensemble in ['allmembers', 'av_an']:
+                if ensemble.isdigit() or ensemble == 'allmembers':
                     local_dir = join(self.mod_to_interp_root,mod_id,domain,resolution,species)
                 else:
                     local_dir = join(self.mod_to_interp_root,mod_id,domain,resolution,"ensemble-stats",species+"_"+ensemble)
@@ -1385,7 +1381,7 @@ class Download(object):
                 species = speci_to_process
 
                 # if it is an ensemble member
-                if ensemble.isdigit() or ensemble in ['allmembers', 'av_an']:
+                if ensemble.isdigit() or ensemble == 'allmembers':
                     res_spec = join(esarchive_dir,resolution,species)
                 # if it is an ensemble statistic
                 else:
@@ -1397,7 +1393,7 @@ class Download(object):
                     if speci_to_process in mapping_species:
                         for species in mapping_species[speci_to_process]:
                             # if it is an ensemble member
-                            if ensemble.isdigit() or ensemble in ['allmembers', 'av_an']:
+                            if ensemble.isdigit() or ensemble == 'allmembers':
                                 res_spec = join(esarchive_dir,resolution,species)
                             # if it is an ensemble statistic
                             else:
@@ -1433,7 +1429,7 @@ class Download(object):
 
                 if nc_files:
                     # if it is an ensemble member
-                    if ensemble.isdigit() or ensemble in ['allmembers', 'av_an']:
+                    if ensemble.isdigit() or ensemble == 'allmembers':
                         # get the domain, resolution and species from the path
                         domain, resolution, species = esarchive_dir.split('/')[-3:]
 
@@ -1495,7 +1491,7 @@ class Download(object):
                 # copy the valid resolution specie date combinations
                 else:
                     # if it is an ensemble member
-                    if ensemble.isdigit() or ensemble in ['allmembers', 'av_an']:
+                    if ensemble.isdigit() or ensemble == 'allmembers':
                         gpfs_dir = join(self.mod_to_interp_root,mod_id,domain,resolution,species)
                     else:
                         gpfs_dir = join(self.mod_to_interp_root,mod_id,domain,resolution,"ensemble-stats",species+"_"+ensemble)
