@@ -522,7 +522,7 @@ class Download(object):
             try:
                 sftp_species = self.species if self.species else set(self.sftp.listdir(join(self.nonghost_remote_obs_path,network,resolution))).intersection(self.available_species)
             except FileNotFoundError:
-                msg = f"There is no data available in {self.remote_machine} for {network} network at {resolution} resolution"
+                msg = f"There is no data available in {self.remote_machine} for {network} network at {resolution} resolution."
                 show_message(self, msg, deactivate=initial_check)
                 continue
             for species in sftp_species: 
@@ -550,7 +550,7 @@ class Download(object):
                 try:
                     nc_files = self.sftp.listdir(remote_dir)
                 except FileNotFoundError:
-                    msg = f"There is no data available in {self.remote_machine} for {network} network for {species} species at {resolution} resolution"
+                    msg = f"There is no data available in {self.remote_machine} for {network} network for {species} species at {resolution} resolution."
                     show_message(self, msg, deactivate=initial_check)
                     continue
                 
@@ -694,7 +694,7 @@ class Download(object):
             try:
                 sftp_species = self.species if self.species else set(self.sftp.listdir(join(remote_dir,resolution))).intersection(self.available_species)
             except FileNotFoundError:
-                msg = f"There is no data available in {self.remote_machine} for {network} network at {resolution} resolution"
+                msg = f"There is no data available in {self.remote_machine} for {network} network at {resolution} resolution."
                 show_message(self, msg, deactivate=initial_check)
                 continue
             for species in sftp_species: 
@@ -723,7 +723,7 @@ class Download(object):
                 try:
                     nc_files = self.sftp.listdir(remote_dir)
                 except FileNotFoundError:
-                    msg = f"There is no data available in {self.remote_machine} for {network} network for {species} species at {resolution} resolution"
+                    msg = f"There is no data available in {self.remote_machine} for {network} network for {species} species at {resolution} resolution."
                     show_message(self, msg, deactivate=initial_check)
                     continue
                 
@@ -899,14 +899,14 @@ class Download(object):
             try:
                 sftp_species = self.species if self.species else set(self.sftp.listdir(join(remote_dir,resolution))).intersection(self.available_species)
             except FileNotFoundError:
-                msg = f"There is no data available in {self.remote_machine} for {model_new} model at {resolution} resolution"
+                msg = f"There is no data available in {self.remote_machine} for {model_new} model at {resolution} resolution."
                 show_message(self, msg, deactivate=initial_check)
                 continue
             for species in sftp_species: 
                 try:
                     sftp_network = self.network if self.network else self.sftp.listdir(join(remote_dir,resolution,species))
                 except FileNotFoundError:
-                    msg = f"There is no data available in {self.remote_machine} for {model_new} model for {species} species at {resolution} resolution"
+                    msg = f"There is no data available in {self.remote_machine} for {model_new} model for {species} species at {resolution} resolution."
                     show_message(self, msg, deactivate=initial_check)
                     continue
                 for network in sftp_network:
@@ -943,7 +943,7 @@ class Download(object):
                 try:
                     nc_files = self.sftp.listdir(remote_dir)
                 except FileNotFoundError:
-                    msg = f"There is no data available in {self.remote_machine} for {model_new} model for {species} species {network} network at {resolution} resolution"
+                    msg = f"There is no data available in {self.remote_machine} for {model_new} model for {species} species {network} network at {resolution} resolution."
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
@@ -952,7 +952,7 @@ class Download(object):
 
                 # warning if model + species + resolution + network + date range combination gets no matching results       
                 if not valid_nc_files:                 
-                    msg = f"There is no data available in {self.remote_machine} from {self.start_date} to {self.end_date} for {model_new} model {species} species {network} network at {resolution} resolution"
+                    msg = f"There is no data available in {self.remote_machine} from {self.start_date} to {self.end_date} for {model_new} model {species} species {network} network at {resolution} resolution."
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
@@ -1111,7 +1111,7 @@ class Download(object):
                 available_species = self.available_species+[spec[0] for spec in mapping_species.values()]
                 sftp_species = self.species if self.species else set(self.sftp.listdir(join(remote_dir,resolution))).intersection(available_species)
             except FileNotFoundError:
-                msg = f"There is no data available in {self.remote_machine} for the {mod_id} model with the {domain} domain at {resolution} resolution"
+                msg = f"There is no data available in {self.remote_machine} for the {mod_id} model with the {domain} domain at {resolution} resolution."
                 show_message(self, msg, deactivate=initial_check)
                 continue
 
@@ -1152,7 +1152,7 @@ class Download(object):
                 
                 # if no species were found, then show the message
                 if species_exists is False:
-                    msg = f"There is no data available in {self.remote_machine} for the {mod_id} model with the {domain} domain for {species} species at {resolution} resolution"
+                    msg = f"There is no data available in {self.remote_machine} for the {mod_id} model with the {domain} domain for {species} species at {resolution} resolution."
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
@@ -1238,7 +1238,7 @@ class Download(object):
 
                 # warning if model + species + resolution + network + date range combination gets no matching results       
                 if not valid_nc_files:                 
-                    msg = f"There is no data available in {self.remote_machine} from {self.start_date} to {self.end_date} for {model} model {species} species at {resolution} resolution"
+                    msg = f"There is no data available in {self.remote_machine} from {self.start_date} to {self.end_date} for {model} model {species} species at {resolution} resolution."
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
@@ -1370,7 +1370,7 @@ class Download(object):
                 available_species = self.available_species+[spec[0] for spec in mapping_species.values()]
                 sftp_species = self.species if self.species else set(os.listdir(join(esarchive_dir,resolution))).intersection(available_species)
             except FileNotFoundError:
-                msg = f"There is no data available in esarchive for the {mod_id} model with the {domain} domain at {resolution} resolution"
+                msg = f"There is no data available in esarchive for the {mod_id} model with the {domain} domain at {resolution} resolution."
                 show_message(self, msg, deactivate=initial_check)
                 continue
 
@@ -1403,7 +1403,7 @@ class Download(object):
                 
                 # if no species were found, then show the message
                 if species_exists is False:
-                    msg = f"There is no data available in esarchive for the {mod_id} model with the {domain} domain for {species} species at {resolution} resolution"
+                    msg = f"There is no data available in esarchive for the {mod_id} model with the {domain} domain for {species} species at {resolution} resolution."
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
@@ -1484,7 +1484,7 @@ class Download(object):
 
                 # warning if model + species + resolution + network + date range combination gets no matching results       
                 if not valid_nc_files:                 
-                    msg = f"There is no data available in esarchive from {self.start_date} to {self.end_date} for {model} model {species} species at {resolution} resolution"
+                    msg = f"There is no data available in esarchive from {self.start_date} to {self.end_date} for {model} model {species} species at {resolution} resolution."
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
