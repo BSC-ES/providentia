@@ -751,7 +751,7 @@ class ProvConfiguration:
         config_forecast = copy.deepcopy(self.read_instance.forecast)
 
         # ignore the models if user wants to download observations
-        if self.read_instance.dl_mode == 'obs':
+        if self.read_instance.dl_mode == 'obs' and self.read_instance.mode == 'download':
             return
 
         if self.read_instance.experiments and self.read_instance.mode == 'download':
