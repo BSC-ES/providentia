@@ -354,7 +354,7 @@ class SubmitInterpolation(object):
                                     print(f"Observation files for {network_to_interpolate_against} cannot be found for {temporal_resolution_to_output} resolution in {os.path.dirname(obs_path)}.")
                                     continue
                                 else:
-                                    print(f"{len(obs_files)} observation files for {network_to_interpolate_against} and {temporal_resolution_to_output} resolution were found in {os.path.dirname(obs_path)}.")
+                                    print(f"{len(obs_files)} observation file(s) for {network_to_interpolate_against} and {temporal_resolution_to_output} resolution were found in {os.path.dirname(obs_path)}.")
 
                                 # determine if ensemble is member or emsemble stat
                                 ensemble_member = ensemble.isdigit()
@@ -381,7 +381,7 @@ class SubmitInterpolation(object):
                                     print(f"Model files cannot be found for {temporal_resolution_to_output} resolution in {os.path.dirname(mod_path)}.")
                                     continue
                                 else:
-                                    print(f"{len(mod_files_all)} model files for {temporal_resolution_to_output} resolution were found in {os.path.dirname(mod_path)}.")
+                                    print(f"{len(mod_files_all)} model file(s) for {temporal_resolution_to_output} resolution were found in {os.path.dirname(mod_path)}.")
 
                                 # ensemble stat?
                                 if ensemble_stat:

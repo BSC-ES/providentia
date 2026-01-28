@@ -168,7 +168,7 @@ class Zenodo:
 
         # fill the dictionary with the metadata
         for path in file_paths:
-            dir = join('/', *path.split('/')[:-1])
+            dir = join('/', *path.split('/')[:-3], self.download_instance.ghost_version, *path.split('/')[-3:-1])
 
             if dir not in files_info:
                 files_info[dir] = {
@@ -407,4 +407,4 @@ class Zenodo:
             self.extract_tar(valid_files_info)                    
  
             # remove the temporal directory
-            shutil.rmtree(os.path.dirname(os.path.dirname(self.temp_dir)))
+            shutil.rmtree(self.temp_dir)
