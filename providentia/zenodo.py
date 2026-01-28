@@ -5,6 +5,7 @@ import shutil
 import sys
 import time
 
+from datetime import datetime
 import json
 import requests
 import tarfile
@@ -268,9 +269,15 @@ class Zenodo:
             `self.download_instance.start_date` and `self.download_instance.end_date`.
         """
 
+        # transform YYYYMMDD into datetime format
+        start = datetime.strptime(self.download_instance.start_date, "%Y%m%d")
+        end = datetime.strptime(self.download_instance.end_date, "%Y%m%d")
+
         valid_dates = []
         for date in dates:
-            if self.download_instance.end_date >= date >= self.download_instance.start_date:
+            # transform YYYMM into datetime and append '01'
+            d = datetime.strptime(date + "01", "%Y%m%d")
+            if start <= d < end:
                 valid_dates.append(date)
 
         return valid_dates
