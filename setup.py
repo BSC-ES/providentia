@@ -47,7 +47,7 @@ with open("README.md", "r") as f:
 setup(
     name="providentia",
     license="GNU GPL v3",
-    version="3.0.0",
+    version="3.0.1",
     author="Dene Bowdalo, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa, Amalia Vradi",
     author_email="dene.bowdalo@bsc.es, alba.vilanova@bsc.es, paula.serrano@bsc.es, francesco.benincasa@bsc.es, amalia.vradi@bsc.es",
     packages=find_packages(),

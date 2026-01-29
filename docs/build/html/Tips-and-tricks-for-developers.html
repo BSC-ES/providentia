@@ -1,22 +1,24 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tips and tricks for developers &mdash; Providentia 3.0.0 documentation</title>
+  <title>Tips and tricks for developers &mdash; Providentia 3.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
   
-      <script src="_static/jquery.js?v=5d32c60e"></script>
-      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=acc74ff5"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=08bfcbec"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -68,8 +70,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#generate-the-docs">Generate the docs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#create-conda-environments">Create conda environments</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#create-local-environment">Create local environment</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#create-providentia-env-v3-0-0-nord4-in-nord4">Create providentia-env_v3.0.0-nord4 in Nord4</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#create-providentia-env-v3-0-0-in-mn5">Create providentia-env_v3.0.0 in MN5</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#create-providentia-env-v3-0-1-nord4-in-nord4">Create providentia-env_v3.0.1-nord4 in Nord4</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#create-providentia-env-v3-0-1-in-mn5">Create providentia-env_v3.0.1 in MN5</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#memory-profiling-code">Memory Profiling Code</a><ul>
@@ -430,7 +432,7 @@ make<span class="w"> </span>html
 <section id="generate-the-docs">
 <h2>Generate the docs<a class="headerlink" href="#generate-the-docs" title="Link to this heading"></a></h2>
 <p>Edit the files under <code class="docutils literal notranslate"><span class="pre">docs/source</span></code>, then navigate to docs and simply run:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>activate<span class="w"> </span>providentia-env_v3.0.0
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>activate<span class="w"> </span>providentia-env_v3.0.1
 <span class="nb">cd</span><span class="w"> </span>docs
 make<span class="w"> </span>clean
 make<span class="w"> </span>html
@@ -456,27 +458,27 @@ make<span class="w"> </span>html
 </pre></div>
 </div>
 <p>Check what the latest versions of <a class="reference external" href="https://github.com/conda/conda/releases">conda</a> and <a class="reference external" href="https://github.com/conda/conda-build/releases">conda-build</a> are.</p>
-<p>What the first command does is creating an environment called <code class="docutils literal notranslate"><span class="pre">providentia-env_v3.0.0</span></code> with the Python version 3.11.5, and installing <code class="docutils literal notranslate"><span class="pre">cartopy</span></code>, <code class="docutils literal notranslate"><span class="pre">jupyterlab</span></code>, <code class="docutils literal notranslate"><span class="pre">ghostscript</span></code> and <code class="docutils literal notranslate"><span class="pre">dask</span></code> with conda, and the Python packages from <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> using pip. The equivalent would be:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>providentia-env_v3.0.0<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.11.5<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>--override-channels
-conda<span class="w"> </span>activate<span class="w"> </span>providentia-env_v3.0.0
+<p>What the first command does is creating an environment called <code class="docutils literal notranslate"><span class="pre">providentia-env_v3.0.1</span></code> with the Python version 3.11.5, and installing <code class="docutils literal notranslate"><span class="pre">cartopy</span></code>, <code class="docutils literal notranslate"><span class="pre">jupyterlab</span></code>, <code class="docutils literal notranslate"><span class="pre">ghostscript</span></code> and <code class="docutils literal notranslate"><span class="pre">dask</span></code> with conda, and the Python packages from <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> using pip. The equivalent would be:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>providentia-env_v3.0.1<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.11.5<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>--override-channels
+conda<span class="w"> </span>activate<span class="w"> </span>providentia-env_v3.0.1
 conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>cartopy<span class="w"> </span>jupyterlab<span class="w"> </span>ghostscript<span class="w"> </span>dask<span class="w"> </span>--override-channels
 pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
 </pre></div>
 </div>
 </section>
-<section id="create-providentia-env-v3-0-0-nord4-in-nord4">
-<h3>Create providentia-env_v3.0.0-nord4 in Nord4<a class="headerlink" href="#create-providentia-env-v3-0-0-nord4-in-nord4" title="Link to this heading"></a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>-p<span class="w"> </span>/gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.0-nord4<span class="w"> </span>-y<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.11.5<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>--override-channels
-conda<span class="w"> </span>activate<span class="w"> </span>/gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.0-nord4
+<section id="create-providentia-env-v3-0-1-nord4-in-nord4">
+<h3>Create providentia-env_v3.0.1-nord4 in Nord4<a class="headerlink" href="#create-providentia-env-v3-0-1-nord4-in-nord4" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>-p<span class="w"> </span>/gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.1-nord4<span class="w"> </span>-y<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.11.5<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>--override-channels
+conda<span class="w"> </span>activate<span class="w"> </span>/gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.1-nord4
 conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>cartopy<span class="w"> </span>jupyterlab<span class="w"> </span>ghostscript<span class="w"> </span>dask<span class="w"> </span>--override-channels
 pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
 </pre></div>
 </div>
 </section>
-<section id="create-providentia-env-v3-0-0-in-mn5">
-<h3>Create providentia-env_v3.0.0 in MN5<a class="headerlink" href="#create-providentia-env-v3-0-0-in-mn5" title="Link to this heading"></a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>-p<span class="w"> </span>/gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.0<span class="w"> </span>-y<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.11.5<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>--override-channels
-conda<span class="w"> </span>activate<span class="w"> </span>/gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.0
+<section id="create-providentia-env-v3-0-1-in-mn5">
+<h3>Create providentia-env_v3.0.1 in MN5<a class="headerlink" href="#create-providentia-env-v3-0-1-in-mn5" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>-p<span class="w"> </span>/gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.1<span class="w"> </span>-y<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.11.5<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>--override-channels
+conda<span class="w"> </span>activate<span class="w"> </span>/gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.1
 conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>cartopy<span class="w"> </span>jupyterlab<span class="w"> </span>ghostscript<span class="w"> </span>dask<span class="w"> </span>--override-channels
 pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
 </pre></div>

@@ -9,7 +9,7 @@
 project = 'Providentia'
 copyright = '2019-2026, Dene Bowdalo, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa, Amalia Vradi'
 author = 'Dene Bowdalo, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa, Amalia Vradi'
-release = '3.0.0'
+release = '3.0.1'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

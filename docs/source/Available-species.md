@@ -21,6 +21,7 @@ Depending on the version specified in `ghost_version` in the [configuration file
 
 As explained above, the available species depend on the selected GHOST version. For each version, the supported species are listed below on this page. A link to the corresponding `GHOST_standards.py` file used by Providentia is also provided for additional context on the GHOST standards used.
 
+(ghost-1-2)=
 ### GHOST 1.2
 
 #### Standards file
@@ -198,6 +199,7 @@ As explained above, the available species depend on the selected GHOST version. 
 - td2
 - vdist
 
+(ghost-1-3)=
 ### GHOST 1.3
 
 #### Standards file 
@@ -423,6 +425,7 @@ As explained above, the available species depend on the selected GHOST version. 
 - wetv
 - wetzn
 
+(ghost-1-3-1)=
 ### GHOST 1.3.1
 
 #### Standards file 
@@ -652,6 +655,7 @@ As explained above, the available species depend on the selected GHOST version. 
 - wetv
 - wetzn
 
+(ghost-1-3-2)=
 ### GHOST 1.3.2
 
 #### Standards file 
@@ -895,7 +899,7 @@ As explained above, the available species depend on the selected GHOST version. 
 - wetv
 - wetzn
 
-
+(ghost-1-3-3)=
 ### GHOST 1.3.3
 
 #### Standards file 
@@ -1139,6 +1143,7 @@ As explained above, the available species depend on the selected GHOST version. 
 - wetv
 - wetzn
 
+(ghost-1-4)=
 ### GHOST 1.4
 
 #### Standards file 
@@ -1602,6 +1607,7 @@ As explained above, the available species depend on the selected GHOST version. 
 - wetv
 - wetzn
 
+(ghost-1-5)=
 ### GHOST 1.5
 
 #### Standards file 
@@ -2185,6 +2191,7 @@ As explained above, the available species depend on the selected GHOST version. 
 - wetv
 - wetzn
 
+(ghost-1-5-1)=
 ### GHOST 1.5.1
 
 #### Standards file 

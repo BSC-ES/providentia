@@ -23,9 +23,9 @@ jobs:
       run: conda env update --file environment.yaml
     - name: Test with pytest
       run: |
-        conda run -n providentia-env_v3.0.0 coverage run -m pytest tests
-        conda run -n providentia-env_v3.0.0 coverage report -i -m
-        conda run -n providentia-env_v3.0.0 coverage xml -o coverage.xml
+        conda run -n providentia-env_v3.0.1 coverage run -m pytest tests
+        conda run -n providentia-env_v3.0.1 coverage report -i -m
+        conda run -n providentia-env_v3.0.1 coverage xml -o coverage.xml
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
