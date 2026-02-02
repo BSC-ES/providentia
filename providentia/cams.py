@@ -170,7 +170,7 @@ class Cams(object):
 
     # TODO check that message in stream does not get repeated in the loop
     # TODO check if it is plaussible to keep this code as a separate function since there is a continue
-    def create_request(self, cams_species, cams_dict, current_cams_date, next_cams_date, level, stream, url, mod_id, initial_check=False):
+    def create_request(self, cams_species, cams_dict, current_cams_date, next_cams_date, level, stream, url, mod_id, initial_check):
         """
         Build the request required by the Copernicus Atmosphere Data Store API.
 
@@ -192,17 +192,20 @@ class Cams(object):
             CAMS dataset URL.
         mod_id : str or None
             Model identifier for multi-model datasets.
-        initial_check : bool, optional
+        initial_check : bool
             If True, suppress warnings related to unavailable streams.
 
         Returns
         -------
         dict : request
             Request dictionary.
+        is_valid : bool
+            Indicator of a valid request.
         """
 
-        # create the request
+        # initialise request and boolean
         request = {"variable" : cams_species}
+        is_valid = True
 
         # add leadtime hour to the request if the dataset has it
         if 'leadtime_hour' in cams_dict:
@@ -223,9 +226,10 @@ class Cams(object):
         if cams_dict['stream'] is True:
             # check whether the stream is available for the year
             if stream not in cams_stream[request["year"]]:
-                msg = f"The current stream '{stream}' is not available for the current date: {request['month']}-{request['year']}. Continuing...."          
+                msg = f"The current stream '{stream}' is not available for the current date: {request['month']}-{request['year']}. Continuing..."          
                 show_message(self.download_instance, msg, deactivate=initial_check)
-                # continue
+                is_valid = False
+                return request, is_valid
                 
             request["type"] = stream
 
@@ -259,7 +263,7 @@ class Cams(object):
         if 'data_format' in cams_dict:
             request['data_format'] = cams_dict['data_format']
 
-        return request
+        return request, is_valid
 
     def create_cdsapirc(self, cdsapirc_path):  
         """
@@ -711,7 +715,7 @@ class Cams(object):
         # warn the user that download is going to be for N days before
         if cams_dict['lookahead_days'] > 0:
             msg = f"Model data will be downloaded {cams_dict['lookahead_days']} day(s) in advance relative to the configured date."
-            show_message(self.download_instance, msg)
+            show_message(self.download_instance, msg, deactivate=initial_check)
         
         # initialise list with all the nc files to be downloaded
         initial_check_nc_files = []
@@ -778,7 +782,12 @@ class Cams(object):
                     next_cams_date = cams_end_date if next_cams_date > cams_end_date else next_cams_date
 
                     # create dictionary to do the request
-                    request = self.create_request(cams_species, cams_dict, current_cams_date, next_cams_date, level, stream, url, mod_id)
+                    request, is_valid = self.create_request(cams_species, cams_dict, current_cams_date, next_cams_date, level, stream, url, mod_id, initial_check)
+
+                    # jump to the next date
+                    if not is_valid:
+                        current_cams_date = next_cams_date + timedelta(days=1)
+                        continue
 
                     # create temporal dir to store the middle zip file with its directories
                     os.makedirs(temp_dir, exist_ok=True)
@@ -850,6 +859,7 @@ class Cams(object):
                                 self.download_instance.logger.info(f"\nUnexpected error ({err.response.status_code}):")
                                 self.download_instance.logger.info(f"Details: {err}")
                             # next download
+                            current_cams_date = next_cams_date + timedelta(days=1)
                             continue
 
                     # extract file 
@@ -899,6 +909,7 @@ class Cams(object):
                     current_cams_date = next_cams_date + timedelta(days=1)    
 
                 # remove the temp directory tail
-                shutil.rmtree(temp_root_dir)
+                if os.path.exists(temp_root_dir):
+                    shutil.rmtree(temp_root_dir)
                     
         return initial_check_nc_files
