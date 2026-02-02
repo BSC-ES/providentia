@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -6,19 +8,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FAQ &mdash; Providentia 3.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=08bfcbec"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=08bfcbec"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -65,6 +63,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#unknown-miniconda3-23-9-0-0-on-nord4">Unknown Miniconda3/23.9.0-0 on Nord4</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#could-not-load-the-qt-platform-plugin-xcb-on-hpc">Could not load the Qt platform plugin “xcb” on HPC</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#segmentation-fault-on-nord4">Segmentation fault on Nord4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#why-is-data-that-i-have-already-downloaded-being-redownloaded-after-upgrading-to-3-0-0">Why is data that I have already downloaded being redownloaded after upgrading to 3.0.0?</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Training-material.html">Training material</a></li>
@@ -171,6 +170,13 @@ It is also possible your cache file is out-of-date; it may help to try:
 <section id="segmentation-fault-on-nord4">
 <h2>Segmentation fault on Nord4<a class="headerlink" href="#segmentation-fault-on-nord4" title="Link to this heading"></a></h2>
 <p>This error appears when slurm is not able to submit the job properly. This is not a problem of Providentia, but of the machine. Try again, change machines or work locally.</p>
+</section>
+<section id="why-is-data-that-i-have-already-downloaded-being-redownloaded-after-upgrading-to-3-0-0">
+<h2>Why is data that I have already downloaded being redownloaded after upgrading to 3.0.0?<a class="headerlink" href="#why-is-data-that-i-have-already-downloaded-being-redownloaded-after-upgrading-to-3-0-0" title="Link to this heading"></a></h2>
+<p>With the release of Providentia v3.0.0, the use of the <strong>experiment</strong> nomenclature is deprecated, instead, it will be called <strong>model</strong>.  As a consequence, local directories names have changed from from <code class="docutils literal notranslate"><span class="pre">exp</span></code> to <code class="docutils literal notranslate"><span class="pre">mod</span></code> and from <code class="docutils literal notranslate"><span class="pre">exp_to_interp</span></code> to <code class="docutils literal notranslate"><span class="pre">mod_to_interp</span></code>.</p>
+<p>If you are currently working with the latest version of Providentia locally, you may be downloading data you already had, because <code class="docutils literal notranslate"><span class="pre">exp</span></code> and <code class="docutils literal notranslate"><span class="pre">exp_to_interp</span></code> are no longer used and data is now downloaded into <code class="docutils literal notranslate"><span class="pre">mod</span></code> and <code class="docutils literal notranslate"><span class="pre">mod_to_interp</span></code>.</p>
+<p>To automatically handle this, we added the option, <code class="docutils literal notranslate"><span class="pre">--dir_merge</span></code>, which detects whether a rename or a merge of directories needs to be done.</p>
+<p>So, if you are working with the new version of Providentia, we highly recommend running this command <code class="docutils literal notranslate"><span class="pre">./bin/providentia</span> <span class="pre">--dir_merge</span></code></p>
 </section>
 </section>
 

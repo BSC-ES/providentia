@@ -81,3 +81,13 @@ These are the module names for Rocky Linux.
 ## Segmentation fault on Nord4
 
 This error appears when slurm is not able to submit the job properly. This is not a problem of Providentia, but of the machine. Try again, change machines or work locally.
+
+## Why is data that I have already downloaded being redownloaded after upgrading to 3.0.0?
+
+With the release of Providentia v3.0.0, the use of the **experiment** nomenclature is deprecated, instead, it will be called **model**.  As a consequence, local directories names have changed from from `exp` to `mod` and from `exp_to_interp` to `mod_to_interp`.
+
+If you are currently working with the latest version of Providentia locally, you may be downloading data you already had, because `exp` and `exp_to_interp` are no longer used and data is now downloaded into `mod` and `mod_to_interp`.
+
+To automatically handle this, we added the option, `--dir_merge`, which detects whether a rename or a merge of directories needs to be done.
+
+So, if you are working with the new version of Providentia, we highly recommend running this command `./bin/providentia --dir_merge`
