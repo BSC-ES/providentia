@@ -754,8 +754,11 @@ class Cams(object):
                 # get directory structure
                 dir_tail = join(config_modid, domain, resolution, species)
 
-                # get temporal and final dir
-                temp_dir = join(self.download_instance.mod_to_interp_root,'.temp', dir_tail)
+                # temporal directory for the zip file
+                temp_root_dir = join(self.download_instance.mod_to_interp_root,'.temp')
+                temp_dir = join(temp_root_dir, dir_tail)
+
+                # final directory for the nc files
                 final_dir = join(self.download_instance.mod_to_interp_root, dir_tail)
 
                 # create dir
@@ -895,7 +898,7 @@ class Cams(object):
                     # add one day to the date
                     current_cams_date = next_cams_date + timedelta(days=1)    
 
-                    # remove the temp directory tail
-                    shutil.rmtree(temp_dir)
+                # remove the temp directory tail
+                shutil.rmtree(temp_root_dir)
                     
         return initial_check_nc_files

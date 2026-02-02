@@ -1698,11 +1698,12 @@ class Download(object):
                 if file.startswith("dtrsync_"):
                     os.remove(join(PROVIDENTIA_ROOT,file)) 
 
-        # delete temp dir if necessary
-        temp_dir = join(self.ghost_root,'.temp')
-        if os.path.exists(temp_dir):
-            self.logger.info(f"\nDeleting {temp_dir}")
-            shutil.rmtree(temp_dir)
+        # delete Zenodo and CAMS temp dirs if necessary
+        for root in ['mod_to_interp_root', 'ghost_root']:
+            temp_dir = join(getattr(self, root),'.temp')
+            if os.path.exists(temp_dir):
+                self.logger.info(f"\nDeleting {temp_dir}")
+                shutil.rmtree(temp_dir)
         
         self.logger.info("\nExiting...")
         sys.exit()
