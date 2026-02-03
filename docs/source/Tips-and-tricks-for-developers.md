@@ -411,6 +411,8 @@ pip install -r requirements.txt
 ### Create providentia-env_v3.0.1-nord4 in Nord4
 
 ```bash
+module unload intel
+module load GCC/10.2.0
 conda create -p /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.1-nord4 -y python=3.11.5 -c conda-forge --override-channels
 conda activate /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.1-nord4
 conda install -c conda-forge cartopy jupyterlab ghostscript dask --override-channels
