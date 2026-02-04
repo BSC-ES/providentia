@@ -74,10 +74,10 @@ class Download(object):
             read_conf = False
             if os.path.exists(self.config):
                 read_conf = True
-            else: 
-                if os.path.exists(join(self.config_dir, self.config)):
+            elif os.path.exists(join(self.config_dir, self.config)):
                     self.config = join(self.config_dir, self.config)
                     read_conf = True
+
             if read_conf:
                 load_conf(self, self.config)
                 self.from_conf = True
@@ -128,6 +128,8 @@ class Download(object):
         """Execute the Providentia download process for all configured sections."""
         
         for section_ind, section in enumerate(self.sections):
+            self.logger.info('Starting to download for {} section'.format(section))
+
             # update for new section parameters
             self.section = section
             self.section_opts = self.sub_opts[self.section]

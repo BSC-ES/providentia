@@ -59,7 +59,7 @@ class SubmitInterpolation(object):
         self.interpolation_log_dir = join(PROVIDENTIA_ROOT, 'logs/interpolation/interpolation_logs')
 
         # initialize commandline arguments, if given
-        provconf = ProvConfiguration(self, **self.commandline_arguments)
+        self.provconf = ProvConfiguration(self, **self.commandline_arguments)
 
         print()
 
@@ -82,64 +82,139 @@ class SubmitInterpolation(object):
             error = "Error: No configuration file found. The path to the config file must be added as an argument."
             sys.exit(error)
 
-        # get section args
-        if "section" in self.commandline_arguments:
-            section = self.commandline_arguments["section"]
-            if section in self.parent_section_names:
-                self.current_config = self.sub_opts[section]
-            else:
-                # try to get parent section
-                error = f"Error: Defined section '{section}' does not exist in configuration file. Available: {self.parent_section_names}"
-                if '·' in section:
-                    if section.split('·')[0] in self.parent_section_names:
-                        msg = f"Using parent section {section.split('·')[0]} for interpolation"
-                        self.current_config = self.sub_opts[section]
-                        print(msg)
+        # update variables from config file
+        if self.config != '':  
+            read_conf = False
+            if os.path.exists(self.config):
+                read_conf = True
+            elif os.path.exists(join(self.config_dir, self.config)):
+                    self.config = join(self.config_dir, self.config)
+                    read_conf = True
+
+            if read_conf:
+                load_conf(self, self.config)
+                self.from_conf = True
+                # get the section in case it was passed on the command line                
+                if 'section' in self.commandline_arguments:
+                    # config and section defined 
+                    if self.commandline_arguments['section'] in self.all_sections:
+                        self.sections = [self.commandline_arguments['section']]
                     else:
-                        sys.exit(error)       
+                        msg = 'Error: The section specified in the command line ({0}) does not exist.'.format(self.commandline_arguments['section'])
+                        msg += '\nTip: For subsections, add the name of the parent section followed by an interpunct (·) '
+                        msg += 'before the subsection name (e.g. SECTIONA·Spain). Available: {0}'.format(self.all_sections)
+                        self.logger.error(msg)
+                        sys.exit(1)
+                # if no section passed, then get all the parent sections
                 else:
-                    sys.exit(error)        
-        else:
-            # if no parent section names are found throw an error
-            if len(self.parent_section_names) == 0:
-                error = "Error: No sections were found in the configuration file, make sure to name them using square brackets."
-                sys.exit(error)
-            self.current_config = self.sub_opts[self.parent_section_names[0]]
-            print(f"Warning: Taking first defined section ({self.parent_section_names[0]}) to be read.")
-
-        # dictionary that stores utilized interpolation variables
-        self.interpolation_variables = {}
-
-        # update variables from defined config file (if not passed via command line)
-        if self.current_config:
-            for k, val in sorted(self.current_config.items()):
-                if k not in self.commandline_arguments:
-                    setattr(self, k, provconf.parse_parameter(k, val))
-
-        # now all variables have been parsed, check validity of those, throwing errors where necessary
-        provconf.check_validity()
-
-        # print variables used, if all species are used print "All Species"        
-        print("\nVariables used for the interpolation:\n")
-        for arg in interp_print_variables:
-            if arg != "models":
-                print(f"{arg}: {getattr(self, arg)}")
+                    # if no parent section names are found throw an error
+                    if len(self.parent_section_names) == 0:
+                        error = "Error: No sections were found in the configuration file, make sure to name them using square brackets."
+                        self.logger.error(error)
+                        sys.exit(1)
+                    self.sections = self.parent_section_names
             else:
-                print(f"{arg}:")
-                for mod, alias in getattr(self, "experiments").items():
-                    if self.alias_flag:
-                        print(f" - {mod} ({alias})")
-                    else:
-                        print(f" - {mod}")
-
-        # define the QOS (Quality of Service) used to manage jobs on the SLURM system
-        if self.machine == 'mn5':
-            self.qos = 'gp_bsces'
+                error = 'Error: The path to the configuration file specified in the command line does not exist.'
+                self.logger.error(error)
+                sys.exit(1)
         else:
-            self.qos = 'bsc_es'
+            error = "Error: No configuration file found. The path to the config file must be added as an argument."
+            self.logger.error(error)
+            sys.exit(1)
+        
+    def run(self):
+        """Execute the Providentia interpolation workflow for all configured sections."""
+        
+        for section_ind, section in enumerate(self.sections):
+            print('Starting to interpolate for {} section'.format(section))
 
-        # initialise current line number for printing output
-        self.current_line = -1
+            # update for new section parameters
+            self.section = section
+            self.section_opts = self.sub_opts[self.section]
+
+            # dictionary that stores used interpolation variables
+            self.interpolation_variables = {}
+
+            # update self with section variables (if not passed via command line)
+            for k, val in self.section_opts.items():
+                if k not in self.commandline_arguments:
+                    setattr(self, k, self.provconf.parse_parameter(k, val))
+
+            # now all variables have been parsed, check validity of those, throwing errors where necessary
+            self.provconf.check_validity()
+
+            # print variables used, if all species are used print "All Species"        
+            print("\nVariables used for the interpolation:\n")
+            for arg in interp_print_variables:
+                if arg != "models":
+                    print(f"{arg}: {getattr(self, arg)}")
+                else:
+                    print(f"{arg}:")
+                    for mod, alias in getattr(self, "experiments").items():
+                        if self.alias_flag:
+                            print(f" - {mod} ({alias})")
+                        else:
+                            print(f" - {mod}")
+
+            # define the QOS (Quality of Service) used to manage jobs on the SLURM system
+            if self.machine == 'mn5':
+                self.qos = 'gp_bsces'
+            else:
+                self.qos = 'bsc_es'
+
+            # initialise current line number for printing output
+            self.current_line = -1
+
+            # get all unique arguments to process interpolation tasks
+            self.gather_arguments()
+
+            # create greasy arguments file
+            self.create_greasy_arguments_file()
+
+            # check if Greasy is installed
+            is_greasy_installed = False
+            try:
+                result = subprocess.run(
+                    ['greasy', '-V'],
+                    stdout=subprocess.PIPE,
+                    text=True
+                )
+                if 'greasy' in result.stdout:
+                    is_greasy_installed = True
+            except:
+                pass
+
+            # submit interpolation jobs
+            if self.interp_multiprocessing:
+                print('\nUsing multiprocessing to manage the job submission.')
+                self.submit_job_multiprocessing()
+            else:
+                if is_greasy_installed:
+                    print('\nUsing Greasy to manage the job submission.')
+                    # create submission script according to machine
+                    if self.machine == "nord3":
+                        self.create_lsf_submission_script()
+                    else:
+                        self.create_slurm_submission_script()
+                    self.submit_job_greasy()
+                else:
+                    print('Using multiprocessing to manage the job submission.')
+                    self.submit_job_multiprocessing()
+
+            # remove section variables from memory
+            for k in self.section_opts:
+                try:
+                    vars(self).pop(k)
+                except:
+                    pass
+
+            # reset domain and ensemble for new section
+            self.domain = []
+            self.ensemble = []
+                    
+            # reinitialise default configuration variables
+            # modified by commandline arguments, if given
+            self.provconf = ProvConfiguration(self, **self.commandline_arguments)
 
     def gather_arguments(self):
         """Gather list of arguments for all unique tasks to process, as defined in the configuration file."""
@@ -1341,7 +1416,7 @@ class SubmitInterpolation(object):
 
 def main(**kwargs):
     """
-    Initialize the interpolation submission environment and launch the job workflow.
+    Initialize the interpolation submission environment and launch the interpolation workflow.
 
     Parameters
     ----------
@@ -1349,41 +1424,5 @@ def main(**kwargs):
         Optional command-line arguments that override default configuration values.
     """
 
-    # initialise SubmitInterpolation object
-    SI = SubmitInterpolation(**kwargs)
-
-    # get all unique arguments to process interpolation tasks
-    SI.gather_arguments()
-
-    # create greasy arguments file
-    SI.create_greasy_arguments_file()
-
-    # check if Greasy is installed
-    is_greasy_installed = False
-    try:
-        result = subprocess.run(
-            ['greasy', '-V'],
-            stdout=subprocess.PIPE,
-            text=True
-        )
-        if 'greasy' in result.stdout:
-            is_greasy_installed = True
-    except:
-        pass
-
-    # submit interpolation jobs
-    if SI.interp_multiprocessing:
-        print('\nUsing multiprocessing to manage the job submission.')
-        SI.submit_job_multiprocessing()
-    else:
-        if is_greasy_installed:
-            print('\nUsing Greasy to manage the job submission.')
-            # create submission script according to machine
-            if SI.machine == "nord3":
-                SI.create_lsf_submission_script()
-            else:
-                SI.create_slurm_submission_script()
-            SI.submit_job_greasy()
-        else:
-            print('Using multiprocessing to manage the job submission.')
-            SI.submit_job_multiprocessing()
+    interpolation = SubmitInterpolation(**kwargs)
+    interpolation.run()

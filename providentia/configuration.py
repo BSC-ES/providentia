@@ -1712,7 +1712,7 @@ class ProvConfiguration:
                                                                                               filter_species_fill_value]
 
         if (MACHINE == 'local') and (not self.read_instance.interp_multiprocessing) and (self.read_instance.mode == 'interpolation'):
-            msg = 'During interpolation multiprocessing must be turned on for local runs, activating.'
+            msg = 'During interpolation, multiprocessing must be turned on for local runs, activating.'
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.interp_multiprocessing = True
             if 1 <= self.read_instance.cpus_per_task <= self.read_instance.available_cpus:

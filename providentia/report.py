@@ -135,6 +135,9 @@ class Report:
             self.logger.error(error)
             sys.exit(1)
 
+    def run(self):
+        """Execute the Providentia report workflow for all configured sections."""
+
         # iterate through configuration sections
         for section_ind, (filename, section) in enumerate(zip(self.filenames, self.parent_section_names)):
             self.logger.info('Starting to create PDF for {} section'.format(section))
@@ -2308,4 +2311,5 @@ def main(**kwargs):
         Configuration arguments and command-line parameters passed to the Report initialiser.
     """
    
-    Report(**kwargs)
+    report = Report(**kwargs)
+    report.run()
