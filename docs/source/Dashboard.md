@@ -4,6 +4,21 @@ Providentia's dashboard was designed to allow for interactive quick-look visuali
 
 ![providentia](uploads/providentia.png)
 
+## Getting started
+
+To start the dashboard, run the following command in the command line. The configuration file is optional:
+
+```
+./bin/providentia --config='/path/to/file/example.conf'
+```
+
+The dashboard mode only fetches content from one section of the configuration file.
+If more than one section is defined, a pop-up will appear asking you to select the desired section:
+
+![providentia](uploads/section_pop_up.png)
+
+Alternatively, you can specify it directly using the `--section` parameter.
+
 ## Menu bar
 
 ![providentia](uploads/dashboard_menu.png)

@@ -52,6 +52,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Interpolation.html">Interpolation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dashboard.html">Dashboard</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Report</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#getting-started">Getting started</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#plot-types-and-options">Plot types and options</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#plot-selection">Plot selection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#summary-and-station-plots">Summary and station plots</a></li>
@@ -106,6 +107,17 @@
   <section class="tex2jax_ignore mathjax_ignore" id="report">
 <h1>Report<a class="headerlink" href="#report" title="Link to this heading"></a></h1>
 <p>Providentia’s report mode was designed to be able to generate complete PDF reports, allowing in-depth analysis of model output, with respect to observational data.</p>
+<section id="getting-started">
+<h2>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h2>
+<p>To start your report, simply add <code class="docutils literal notranslate"><span class="pre">--report</span></code> or <code class="docutils literal notranslate"><span class="pre">--reports</span></code> as a launch option along with the <strong>mandatory</strong> configuration file on the command line:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span> <span class="o">--</span><span class="n">report</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span> <span class="o">--</span><span class="n">reports</span>
+</pre></div>
+</div>
+<p>The report mode fetches all the content specified in your configuration file across all sections. To only run one specific section, add the <code class="docutils literal notranslate"><span class="pre">--section</span></code> parameter to the command.</p>
+</section>
 <section id="plot-types-and-options">
 <h2>Plot types and options<a class="headerlink" href="#plot-types-and-options" title="Link to this heading"></a></h2>
 <p>The report mode has access to a larger variety of plot types than the standard interactive version of Providentia. Each available plot type for the reports is listed in <a class="reference internal" href="Plot-types-and-options.html"><span class="doc std std-doc">Plot types and options</span></a>.</p>

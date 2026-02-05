@@ -116,7 +116,7 @@
 <p>Providentia’s download mode retrieves modelled and observational data from BSC systems and external sources (CAMS, Zenodo, ACTRIS) for local use.</p>
 <section id="getting-started">
 <h3>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h3>
-<p>To start downloading data, simply add <code class="docutils literal notranslate"><span class="pre">--download</span></code> or <code class="docutils literal notranslate"><span class="pre">--dl</span></code> to your command:</p>
+<p>To start downloading data, simply add <code class="docutils literal notranslate"><span class="pre">--download</span></code> or <code class="docutils literal notranslate"><span class="pre">--dl</span></code> as a launch option along with the <strong>mandatory</strong> configuration file on the command line:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span> <span class="o">--</span><span class="n">download</span>
 </pre></div>
 </div>
@@ -124,7 +124,7 @@
 </pre></div>
 </div>
 <p>This will get the data that needs to be downloaded from your configuration file and save it into the directories specified in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code> for <code class="docutils literal notranslate"><span class="pre">local</span></code>.</p>
-<p>The download mode fetches all the content specified in your configuration file across all sections.</p>
+<p>The download mode fetches all the content specified in your configuration file across all sections. To only run one specific section, add the <code class="docutils literal notranslate"><span class="pre">--section</span></code> parameter to the command.</p>
 </section>
 <section id="types-of-downloads">
 <h3>Types of downloads<a class="headerlink" href="#types-of-downloads" title="Link to this heading"></a></h3>

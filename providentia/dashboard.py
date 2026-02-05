@@ -128,6 +128,10 @@ class Dashboard(QtWidgets.QWidget):
                         msg = 'Select section to load'
                         dialog = InputDialog(self, title, msg, all_sections)
                         self.section, okpressed = dialog.selected_option, dialog.okpressed
+                        
+                        # exit if section is not selected
+                        if not okpressed:
+                            sys.exit(1)
 
                     if okpressed or (len(all_sections) == 1):
                         self.from_conf = True

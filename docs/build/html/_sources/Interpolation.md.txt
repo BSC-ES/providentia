@@ -6,19 +6,21 @@ Interpolation consists of spatially interpolating gridded model outputs to obser
 
 The Interpolation mode allows to interpolate models against **GHOST** and **non-GHOST** observations.
 
-## Starting an Interpolation
+## Getting started
 
-To start an interpolation, you need to add either `--interp`, `--interpolate`, or `--interpolation` as a launch option along with the **mandatory** configuration file on the command line. This will initiate the interpolation process.
+To start an interpolation, you need to add either `--interp`, `--interpolate` or `--interpolation` as a launch option along with the **mandatory** configuration file on the command line:
 
 ```
-./bin/providentia --interp --config='/path/to/file/example.conf'
+./bin/providentia --config='/path/to/file/example.conf' --interp 
 ```   
 ```
-./bin/providentia --interpolate  --config='/path/to/file/example.conf'
+./bin/providentia --config='/path/to/file/example.conf' --interpolate 
 ```         
 ```
-./bin/providentia --interpolation --config='/path/to/file/example.conf'
+./bin/providentia--config='/path/to/file/example.conf' --interpolation 
 ```     
+
+The interpolation mode fetches all the content specified in your configuration file across all sections. To only run one specific section, add the `--section` parameter to the command.
 
 In terms of performance, we recommend running Providentia Interpolation in MareNostrum5.
 

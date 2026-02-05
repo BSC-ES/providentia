@@ -4,7 +4,7 @@ Providentia's download mode retrieves modelled and observational data from BSC s
 
 ## Getting started
 
-To start downloading data, simply add `--download` or `--dl` to your command:
+To start downloading data, simply add `--download` or `--dl` as a launch option along with the **mandatory** configuration file on the command line:
 
 ```
 ./bin/providentia --config='/path/to/file/example.conf' --download
@@ -16,7 +16,7 @@ To start downloading data, simply add `--download` or `--dl` to your command:
 
 This will get the data that needs to be downloaded from your configuration file and save it into the directories specified in `settings/data_paths.yaml` for `local`.
 
-The download mode fetches all the content specified in your configuration file across all sections.
+The download mode fetches all the content specified in your configuration file across all sections. To only run one specific section, add the `--section` parameter to the command.
 
 ## Types of downloads
 
