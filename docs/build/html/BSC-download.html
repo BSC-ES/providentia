@@ -118,22 +118,17 @@
 <p>Providentia can download GHOST and non-GHOST networks from the BSC HPC environment using available login nodes. By default, it connects to <code class="docutils literal notranslate"><span class="pre">storage5</span></code> (or <code class="docutils literal notranslate"><span class="pre">mn5</span></code> if <code class="docutils literal notranslate"><span class="pre">storage5</span></code> is unavailable).</p>
 <p>The login nodes used are defined in <code class="docutils literal notranslate"><span class="pre">settings/dl_hpc.yaml</span></code>:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">transfer1.bsc.es</span></code> (primary)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">transfer2.bsc.es</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">transfer3.bsc.es</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">transfer4.bsc.es</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">glogin4.bsc.es</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">transfer1.bsc.es</span></code> (storage5)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">transfer2.bsc.es</span></code> (storage5)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">transfer3.bsc.es</span></code> (storage5)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">transfer4.bsc.es</span></code> (storage5)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">glogin4.bsc.es</span></code> (mn5)</p></li>
 </ul>
-<p>Downloads will attempt the nodes in the order listed. If the primary node is unavailable, the system automatically tries the next one in the list.</p>
+<p>The download mode will attempt to access the nodes in the order listed. If the node is unavailable, the system will automatically try the next node in the list, and so on.</p>
 </section>
 <section id="download-of-networks-from-hpc-machines">
 <h2>Download of networks from HPC machines<a class="headerlink" href="#download-of-networks-from-hpc-machines" title="Link to this heading"></a></h2>
 <p>The network is essential to generate a report, as it provides access to the real observational data. At BSC, a large number of observational datasets are already stored on <code class="docutils literal notranslate"><span class="pre">gpfs</span></code>.</p>
-<p><strong>Download source paths:</strong></p>
-<ul class="simple">
-<li><p>Networks are saved under the <code class="docutils literal notranslate"><span class="pre">ghost_root</span></code> and <code class="docutils literal notranslate"><span class="pre">nonghost_root</span></code> paths specified in the <code class="docutils literal notranslate"><span class="pre">local</span></code> key of <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p></li>
-<li><p>Networks are retrieved from the <code class="docutils literal notranslate"><span class="pre">ghost_root</span></code> and <code class="docutils literal notranslate"><span class="pre">nonghost_root</span></code> paths specified in the <code class="docutils literal notranslate"><span class="pre">storage5</span></code> or <code class="docutils literal notranslate"><span class="pre">mn5</span></code> key of <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p></li>
-</ul>
 <p><strong>How to enable:</strong></p>
 <ul class="simple">
 <li><p>You must include at least one network in your configuration.</p></li>
@@ -143,15 +138,22 @@
 or set <code class="docutils literal notranslate"><span class="pre">dl_ghost_source</span> <span class="pre">=</span> <span class="pre">bsc</span></code> in your configuration.</p></li>
 <li><p><strong>If the configuration file contains only network data and no models, network data will be downloaded automatically.</strong></p></li>
 </ul>
+<p><strong>Download source paths:</strong></p>
+<ul class="simple">
+<li><p>Networks are <strong>saved</strong> under the <code class="docutils literal notranslate"><span class="pre">ghost_root</span></code> and <code class="docutils literal notranslate"><span class="pre">nonghost_root</span></code> paths specified in the <code class="docutils literal notranslate"><span class="pre">local</span></code> key of <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p></li>
+<li><p>Networks are <strong>retrieved</strong> from the <code class="docutils literal notranslate"><span class="pre">ghost_root</span></code> and <code class="docutils literal notranslate"><span class="pre">nonghost_root</span></code> paths specified in the <code class="docutils literal notranslate"><span class="pre">storage5</span></code> or <code class="docutils literal notranslate"><span class="pre">mn5</span></code> key of <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p></li>
+</ul>
+<p>If your network data to be <strong>retrieved</strong> is stored in a different directory, you can update the corresponding path in the <code class="docutils literal notranslate"><span class="pre">storage5</span></code> or <code class="docutils literal notranslate"><span class="pre">mn5</span></code> key to point to the correct location.</p>
+<p><strong>Data format requirements:</strong></p>
+<p>To be detected by Providentia, network data must follow these folder structures:</p>
+<ul class="simple">
+<li><p>GHOST networks: <code class="docutils literal notranslate"><span class="pre">{network}/{ghost_version}/{resolution}/{species}/{species_YYYYMM.nc}</span></code></p></li>
+<li><p>Non-GHOST networks: <code class="docutils literal notranslate"><span class="pre">{network}/{resolution}/{species}/{species_YYYYMM.nc}</span></code></p></li>
+</ul>
 </section>
 <section id="download-of-interpolated-models">
 <h2>Download of interpolated models<a class="headerlink" href="#download-of-interpolated-models" title="Link to this heading"></a></h2>
 <p>An interpolated model consists of model output that have already been spatially interpolated to the observations. These models are ready to be used in modes such as report and dashboard. Most interpolated model data is stored on <code class="docutils literal notranslate"><span class="pre">gpfs</span></code>.</p>
-<p><strong>Download source paths:</strong></p>
-<ul class="simple">
-<li><p>Models are saved under the <code class="docutils literal notranslate"><span class="pre">mod_root</span></code> path specified in the <code class="docutils literal notranslate"><span class="pre">local</span></code> key of <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p></li>
-<li><p>Models are retrieved from the <code class="docutils literal notranslate"><span class="pre">mod_root</span></code> path specified in the <code class="docutils literal notranslate"><span class="pre">storage5</span></code> or <code class="docutils literal notranslate"><span class="pre">mn5</span></code> key of <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p></li>
-</ul>
 <p><strong>How to enable:</strong></p>
 <ul class="simple">
 <li><p>You must include at least one network and one model in your configuration.</p></li>
@@ -160,18 +162,21 @@ or set <code class="docutils literal notranslate"><span class="pre">dl_ghost_sou
 <em>“Model data was detected in the configuration file. Do you want to download the interpolated version? (Otherwise, the non-interpolated model data will be downloaded)”</em><br />
 or set <code class="docutils literal notranslate"><span class="pre">dl_interpolated</span> <span class="pre">=</span> <span class="pre">True</span></code> in your configuration.</p></li>
 </ul>
+<p><strong>Download source paths:</strong></p>
+<ul class="simple">
+<li><p>Models are <strong>saved</strong> under the <code class="docutils literal notranslate"><span class="pre">mod_root</span></code> path specified in the <code class="docutils literal notranslate"><span class="pre">local</span></code> key of <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p></li>
+<li><p>Models are <strong>retrieved</strong> from the <code class="docutils literal notranslate"><span class="pre">mod_root</span></code> path specified in the <code class="docutils literal notranslate"><span class="pre">storage5</span></code> or <code class="docutils literal notranslate"><span class="pre">mn5</span></code> key of <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p></li>
+</ul>
+<p>your model data to be <strong>retrieved</strong> in a different directory, you can update the corresponding path in the <code class="docutils literal notranslate"><span class="pre">storage5</span></code> or <code class="docutils literal notranslate"><span class="pre">mn5</span></code> key to point to the correct location.</p>
+<p><strong>Data format requirements:</strong></p>
+<p>To be detected by Providentia, interpolated model data must follow this folder structure:</p>
+<p><code class="docutils literal notranslate"><span class="pre">{ghost_version}/{model_id}-{domain}-{ensemble}/{resolution}/{species}/{network}/{species_YYYYMM.nc}</span></code></p>
 </section>
 <section id="download-of-non-interpolated-models">
 <h2>Download of non-interpolated models<a class="headerlink" href="#download-of-non-interpolated-models" title="Link to this heading"></a></h2>
 <section id="local-non-interpolated-downloads">
 <h3>Local non-interpolated downloads<a class="headerlink" href="#local-non-interpolated-downloads" title="Link to this heading"></a></h3>
 <p>Non-interpolated model data refers to model outputs that are ready to be interpolated against a network using interpolation mode. Most non-interpolated datasets are stored in <code class="docutils literal notranslate"><span class="pre">esarchive</span></code>, although some may already exist in <code class="docutils literal notranslate"><span class="pre">gpfs</span></code>.</p>
-<p><strong>Download source paths:</strong></p>
-<ul class="simple">
-<li><p>Models are saved under the <code class="docutils literal notranslate"><span class="pre">mod_to_interp_root</span></code> path specified in the <code class="docutils literal notranslate"><span class="pre">local</span></code> key in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p></li>
-<li><p>Models are retrieved from the paths specified in <code class="docutils literal notranslate"><span class="pre">settings/interp_models.yaml</span></code>. To learn how to define models, please see the <a class="reference internal" href="Interpolation.html#define-models"><span class="std std-ref">Defining models in interp_models.yaml</span></a> section in Interpolation.</p></li>
-<li><p>If the model is not in the path, the system looks in the <code class="docutils literal notranslate"><span class="pre">mod_to_interp_root</span></code> paths under the <code class="docutils literal notranslate"><span class="pre">storage5</span></code> or <code class="docutils literal notranslate"><span class="pre">mn5</span></code> key in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p></li>
-</ul>
 <p><strong>How to enable:</strong></p>
 <ul class="simple">
 <li><p>You must include at least one model in your configuration.</p></li>
@@ -181,18 +186,32 @@ or set <code class="docutils literal notranslate"><span class="pre">dl_interpola
 or set <code class="docutils literal notranslate"><span class="pre">dl_interpolated</span> <span class="pre">=</span> <span class="pre">False</span></code> in your configuration.</p></li>
 <li><p><strong>If the configuration file contains only model data and no networks, non-interpolated model data will be downloaded automatically.</strong></p></li>
 </ul>
+<p><strong>Download source paths:</strong></p>
+<ul class="simple">
+<li><p>Models are <strong>saved</strong> under the <code class="docutils literal notranslate"><span class="pre">mod_to_interp_root</span></code> path specified in the <code class="docutils literal notranslate"><span class="pre">local</span></code> key in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p></li>
+<li><p>Firstly, models are <strong>retrieved</strong> from the paths specified in <code class="docutils literal notranslate"><span class="pre">settings/interp_models.yaml</span></code>.</p></li>
+<li><p>If the model is not in the path, the system <strong>retrieves</strong> from the <code class="docutils literal notranslate"><span class="pre">mod_to_interp_root</span></code> path under the <code class="docutils literal notranslate"><span class="pre">storage5</span></code> or <code class="docutils literal notranslate"><span class="pre">mn5</span></code> key in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p></li>
+</ul>
+<p>If your data is stored in a different directory you can update paths directly in <code class="docutils literal notranslate"><span class="pre">settings/interp_models.yaml</span></code>. To learn how to define models, please see the <a class="reference internal" href="Interpolation.html#define-models"><span class="std std-ref">Defining models in interp_models.yaml</span></a> section in Interpolation.</p>
+<p>You can also update the corresponding <code class="docutils literal notranslate"><span class="pre">storage5</span></code> or <code class="docutils literal notranslate"><span class="pre">mn5</span></code> path in <code class="docutils literal notranslate"><span class="pre">mod_to_interp_root</span></code> to point to the correct location.</p>
+<p><strong>Data format requirements:</strong></p>
+<p>To be detected by Providentia, interpolated model data must follow this folder structure:</p>
+<ul class="simple">
+<li><p>Standard non-interpolated models: <code class="docutils literal notranslate"><span class="pre">{model_id}/{domain}/{resolution}/{species}/{species_YYYYMM[DD].nc}</span></code></p></li>
+<li><p>Ensemble-stats species non-interpolated models: <code class="docutils literal notranslate"><span class="pre">{model_id}/{domain}/{resolution}/ensemble-stats/{species}_{ensemble_stat}_an/{species_YYYYMM[DD]_{ensemble_stat}_an.nc}</span></code></p></li>
+</ul>
 </section>
 <section id="hpc-non-interpolated-downloads">
 <h3>HPC non-interpolated downloads<a class="headerlink" href="#hpc-non-interpolated-downloads" title="Link to this heading"></a></h3>
 <p>In some cases, model data exists in <code class="docutils literal notranslate"><span class="pre">esarchive</span></code>, but not all HPC machines have direct access to it. When interpolation needs to be performed on a machine without <code class="docutils literal notranslate"><span class="pre">esarchive</span></code> access, the model data must first be copied from <code class="docutils literal notranslate"><span class="pre">esarchive</span></code> to <code class="docutils literal notranslate"><span class="pre">gpfs</span></code>.</p>
+<p><strong>How to enable:</strong></p>
+<ul class="simple">
+<li><p>The download <strong>must be performed from the <code class="docutils literal notranslate"><span class="pre">storage5</span></code> machine</strong>.</p></li>
+</ul>
 <p><strong>Download source paths:</strong></p>
 <ul class="simple">
 <li><p>Models are copied from <code class="docutils literal notranslate"><span class="pre">esarchive</span></code> to the <code class="docutils literal notranslate"><span class="pre">gpfs</span></code> <code class="docutils literal notranslate"><span class="pre">mod_to_interp_root</span></code> folder defined under the <code class="docutils literal notranslate"><span class="pre">storage5</span></code> key in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p></li>
 <li><p>Only copies from paths specified in <code class="docutils literal notranslate"><span class="pre">settings/interp_models.yaml</span></code>. To learn how to define models, please see the <a class="reference internal" href="Interpolation.html#define-models"><span class="std std-ref">Defining models in interp_models.yaml</span></a> section in Interpolation.</p></li>
-</ul>
-<p><strong>How to enable:</strong></p>
-<ul class="simple">
-<li><p>The download <strong>must be performed from the <code class="docutils literal notranslate"><span class="pre">storage5</span></code> machine</strong>.</p></li>
 </ul>
 </section>
 </section>
