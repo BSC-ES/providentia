@@ -97,7 +97,8 @@ class ProvConfiguration:
                 if (self.read_instance.mode != 'library') & (kwarg in ['section', 'subsection']):
                     continue
                 # set argument
-                setattr(self.read_instance, kwarg, kwargs[kwarg])
+                val = kwargs.get(kwarg, val)
+                setattr(self.read_instance, kwarg, self.parse_parameter(kwarg, val))
 
         # direct output to file/screen
         if hasattr(self.read_instance, 'logger') is False:
@@ -1106,7 +1107,7 @@ class ProvConfiguration:
                 if os.path.exists(mod_to_interp_path):
                     model_exists = True
                 
-                msg += f"Cannot find the model ID {modid} with the {domain} domain in '{mod_to_interp_path}'."
+                msg += f"Cannot find the model ID {modid} in '{os.path.dirname(mod_to_interp_path)}'."
         
         # local download and interpolation
         else:
@@ -1121,7 +1122,7 @@ class ProvConfiguration:
                 if os.path.exists(mod_to_interp_path):
                     model_exists = True
 
-                msg += f"Cannot find the model ID {modid} with the {domain} domain in '{mod_to_interp_path}'."
+                msg += f"Cannot find the model ID {modid} in '{os.path.dirname(mod_to_interp_path)}'."
             
             # local download
             else:
@@ -1712,7 +1713,7 @@ class ProvConfiguration:
                                                                                               filter_species_fill_value]
 
         if (MACHINE == 'local') and (not self.read_instance.interp_multiprocessing) and (self.read_instance.mode == 'interpolation'):
-            msg = 'During interpolation, multiprocessing must be turned on for local runs, activating.'
+            msg = 'During interpolation, multiprocessing must be turned on for local runs, activating...'
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.interp_multiprocessing = True
             if 1 <= self.read_instance.cpus_per_task <= self.read_instance.available_cpus:

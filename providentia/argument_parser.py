@@ -96,8 +96,14 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--cores-explicit",
                                      dest="cores_explicit",
                                      help="define if cores has been passed through command line")       
-            self.parser.add_argument("--network", "--observation", "--framework",
+            self.parser.add_argument("--network",
                                      dest="network",
+                                     help="define observations to load (e.g. 'EBAS', 'EEA_AQ_eReporting')")
+            self.parser.add_argument("--observation",
+                                     dest="observation",
+                                     help="define observations to load (e.g. 'EBAS', 'EEA_AQ_eReporting')")
+            self.parser.add_argument("--framework",
+                                     dest="framework",
                                      help="define observations to load (e.g. 'EBAS', 'EEA_AQ_eReporting')")
             self.parser.add_argument("--species",
                                      dest="species",
@@ -117,8 +123,17 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--observations_data_label",
                                      dest="observations_data_label",
                                      help="alias for observations data label")
-            self.parser.add_argument("--experiments", "--experiment", "--model", "--models",
+            self.parser.add_argument("--experiments",
                                      dest="experiments",
+                                     help="models to read")
+            self.parser.add_argument("--experiment",
+                                     dest="experiment",
+                                     help="models to read")
+            self.parser.add_argument("--model",
+                                     dest="model",
+                                     help="models to read")
+            self.parser.add_argument("--models",
+                                     dest="models",
                                      help="models to read")
             self.parser.add_argument("--domain",
                                      dest="domain",
