@@ -64,6 +64,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#hdf-error-on-hpc">HDF error on HPC</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#unknown-miniconda3-23-9-0-0-on-nord4">Unknown Miniconda3/23.9.0-0 on Nord4</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#could-not-load-the-qt-platform-plugin-xcb-on-hpc">Could not load the Qt platform plugin “xcb” on HPC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#could-not-load-the-qt-platform-plugin-xcb-on-local-machine">Could not load the Qt platform plugin “xcb” on local machine</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#segmentation-fault-on-nord4">Segmentation fault on Nord4</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#why-is-data-that-i-have-already-downloaded-being-redownloaded-after-upgrading-to-3-0-0">Why is data that I have already downloaded being redownloaded after upgrading to 3.0.0?</a></li>
 </ul>
@@ -168,6 +169,23 @@ It is also possible your cache file is out-of-date; it may help to try:
 </pre></div>
 </div>
 <p>These are the module names for Rocky Linux.</p>
+</section>
+<section id="could-not-load-the-qt-platform-plugin-xcb-on-local-machine">
+<h2>Could not load the Qt platform plugin “xcb” on local machine<a class="headerlink" href="#could-not-load-the-qt-platform-plugin-xcb-on-local-machine" title="Link to this heading"></a></h2>
+<p>In some machines (for example, users using WSL to access Linux from Windows), we need to install qt5 and libxcb libraries:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">update</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="o">--</span><span class="n">reinstall</span> <span class="n">libxcb</span><span class="o">-</span><span class="n">xinerama0</span> <span class="n">libxkbcommon</span><span class="o">-</span><span class="n">x11</span><span class="o">-</span><span class="mi">0</span> <span class="n">libx11</span><span class="o">-</span><span class="n">xcb1</span> <span class="n">libxrender1</span> <span class="n">libxi6</span> <span class="n">libxcb1</span> <span class="n">libxext6</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">qtbase5</span><span class="o">-</span><span class="n">dev</span> <span class="n">qtbase5</span><span class="o">-</span><span class="n">dev</span><span class="o">-</span><span class="n">tools</span> <span class="n">qt5</span><span class="o">-</span><span class="n">qmake</span> <span class="n">libqt5gui5</span> <span class="n">libqt5widgets5</span> <span class="n">libqt5core5a</span>
+</pre></div>
+</div>
+<p>Then add to .bashrc:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">QT_QPA_PLATFORM_PLUGIN_PATH</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">x86_64</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">gnu</span><span class="o">/</span><span class="n">qt5</span><span class="o">/</span><span class="n">plugins</span><span class="o">/</span><span class="n">platforms</span>
+</pre></div>
+</div>
+<p>And load:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="o">.</span><span class="n">bashrc</span>
+</pre></div>
+</div>
 </section>
 <section id="segmentation-fault-on-nord4">
 <h2>Segmentation fault on Nord4<a class="headerlink" href="#segmentation-fault-on-nord4" title="Link to this heading"></a></h2>

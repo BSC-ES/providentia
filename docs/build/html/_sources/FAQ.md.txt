@@ -78,6 +78,27 @@ sudo dnf libxcb xcb-util xcb-util-image xcb-util-keysyms xcb-util-renderutil xcb
 
 These are the module names for Rocky Linux.
 
+
+## Could not load the Qt platform plugin "xcb" on local machine
+
+In some machines (for example, users using WSL to access Linux from Windows), we need to install qt5 and libxcb libraries:
+
+```
+sudo apt update
+sudo apt install --reinstall libxcb-xinerama0 libxkbcommon-x11-0 libx11-xcb1 libxrender1 libxi6 libxcb1 libxext6
+sudo apt install qtbase5-dev qtbase5-dev-tools qt5-qmake libqt5gui5 libqt5widgets5 libqt5core5a
+```
+
+Then add to .bashrc:
+```
+export QT_QPA_PLATFORM_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/qt5/plugins/platforms
+```
+
+And load:
+```
+source .bashrc
+```
+
 ## Segmentation fault on Nord4
 
 This error appears when slurm is not able to submit the job properly. This is not a problem of Providentia, but of the machine. Try again, change machines or work locally.
