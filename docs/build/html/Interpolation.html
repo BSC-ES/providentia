@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -6,19 +8,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Interpolation &mdash; Providentia 3.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=08bfcbec"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=08bfcbec"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -50,7 +48,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Getting-started.html">Getting started</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="Modes.html">Modes</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Interpolation</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#starting-an-interpolation">Starting an Interpolation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#getting-started">Getting started</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#execution-details">Execution details</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#local-users">Local users</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#bsc-hpc-users">BSC HPC users</a></li>
@@ -119,18 +117,19 @@
 <p>This mode allows users to spatially interpolate model output against available observational stations, allowing it to be subsequently evaluated in <strong>Providentia</strong>.</p>
 <p>Interpolation consists of spatially interpolating gridded model outputs to observational station locations using a nearest-neighbour approach.</p>
 <p>The Interpolation mode allows to interpolate models against <strong>GHOST</strong> and <strong>non-GHOST</strong> observations.</p>
-<section id="starting-an-interpolation">
-<h2>Starting an Interpolation<a class="headerlink" href="#starting-an-interpolation" title="Link to this heading"></a></h2>
-<p>To start an interpolation, you need to add either <code class="docutils literal notranslate"><span class="pre">--interp</span></code>, <code class="docutils literal notranslate"><span class="pre">--interpolate</span></code>, or <code class="docutils literal notranslate"><span class="pre">--interpolation</span></code> as a launch option along with the <strong>mandatory</strong> configuration file on the command line. This will initiate the interpolation process.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">interp</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span>
+<section id="getting-started">
+<h2>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h2>
+<p>To start an interpolation, you need to add either <code class="docutils literal notranslate"><span class="pre">--interp</span></code>, <code class="docutils literal notranslate"><span class="pre">--interpolate</span></code> or <code class="docutils literal notranslate"><span class="pre">--interpolation</span></code> as a launch option along with the <strong>mandatory</strong> configuration file on the command line:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span> <span class="o">--</span><span class="n">interp</span> 
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">interpolate</span>  <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span> <span class="o">--</span><span class="n">interpolate</span> 
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">interpolation</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span><span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span> <span class="o">--</span><span class="n">interpolation</span> 
 </pre></div>
 </div>
+<p>The interpolation mode fetches all the content specified in your configuration file across all sections. To only run one specific section, add the <code class="docutils literal notranslate"><span class="pre">--section</span></code> parameter to the command.</p>
 <p>In terms of performance, we recommend running Providentia Interpolation in MareNostrum5.</p>
 </section>
 <section id="execution-details">
@@ -329,15 +328,15 @@ Be aware that this can be demanding on the computer, so ensure your machine has 
 <p>Every time an interpolation is done, logs are saved in the <code class="docutils literal notranslate"><span class="pre">logs/interpolation</span></code> folder.</p>
 <p>To check the status/output of an interpolation job, the following log files are created on submission in different directories:</p>
 <ul>
-<li><h3 class="rubric" id="management-logs">Management logs</h3>
+<li><p class="rubric" id="management-logs">Management logs</p>
 <p>These logs provide an overview of the interpolation process. Most errors will appear here.</p>
 <p>Located in the <code class="docutils literal notranslate"><span class="pre">logs/interpolation/management_logs</span></code> folder, look for an <code class="docutils literal notranslate"><span class="pre">$SLURMJOBID.out</span></code> file.</p>
 </li>
-<li><h3 class="rubric" id="submission-logs">Submission logs</h3>
+<li><p class="rubric" id="submission-logs">Submission logs</p>
 <p>These logs contain information about the Slurm and Greasy submissions to the HPC machines.</p>
 <p>Found in the <code class="docutils literal notranslate"><span class="pre">logs/interpolation/submission_logs</span></code> folder, search for an <code class="docutils literal notranslate"><span class="pre">$SLURMJOBID.out</span></code> file.</p>
 </li>
-<li><h3 class="rubric" id="interpolation-logs">Interpolation logs</h3>
+<li><p class="rubric" id="interpolation-logs">Interpolation logs</p>
 <p>These logs give information about individual interpolations and how long it took to do them.</p>
 <p>Found in the <code class="docutils literal notranslate"><span class="pre">logs/interpolation/interpolation_logs</span></code> folder, for each individual interpolation, new directories are created with the structure <code class="docutils literal notranslate"><span class="pre">{model}/{species}/{network}/{resolution}</span></code>. Inside these directories, logs for each month are stored as <code class="docutils literal notranslate"><span class="pre">{YYYYMM}_{exit_code}.out</span></code>. If successful, the exit code will be 0.</p>
 </li>

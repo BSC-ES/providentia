@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -6,19 +8,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Command line configuration &mdash; Providentia 3.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=08bfcbec"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=08bfcbec"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -126,12 +124,28 @@
 <td><p>Open a <a class="reference internal" href="Notebooks.html"><span class="doc std std-doc">Jupyter notebook</span></a> to use Providentia as a <a class="reference internal" href="Library.html"><span class="doc std std-doc">library</span></a>.</p></td>
 <td><p>—</p></td>
 </tr>
-<tr class="row-even"><td><p>clean</p></td>
+<tr class="row-even"><td><p>debug</p></td>
+<td><p>Start <a class="reference internal" href="Topics-on-HPC.html#running-the-tool-on-debug"><span class="std std-ref">debug mode</span></a>.</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-odd"><td><p>clean</p></td>
 <td><p>Removes log files.</p></td>
 <td><p>—</p></td>
 </tr>
-<tr class="row-odd"><td><p>debug</p></td>
-<td><p>Start <a class="reference internal" href="Topics-on-HPC.html#running-the-tool-on-debug"><span class="std std-ref">debug mode</span></a>.</p></td>
+<tr class="row-even"><td><p>conf, config</p></td>
+<td><p>Configuration file path or configuration file name if the file is stored in <code class="docutils literal notranslate"><span class="pre">providentia/configurations</span></code>.</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-odd"><td><p>config_dir</p></td>
+<td><p>Path to all configuration files.</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-even"><td><p>section</p></td>
+<td><p>Section within configuration file.</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-odd"><td><p>logfile</p></td>
+<td><p>Redirects output to a file. More info in the <a class="reference internal" href="Redirecting-output-to-a-file.html"><span class="doc std std-doc">Redirecting output to a file</span></a>  page.</p></td>
 <td><p>—</p></td>
 </tr>
 <tr class="row-even"><td><p>cores</p></td>
@@ -160,22 +174,6 @@
 </tr>
 <tr class="row-even"><td><p>version, V</p></td>
 <td><p>Print version of Providentia.</p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-odd"><td><p>logfile</p></td>
-<td><p>Redirects output to a file. More info in the <a class="reference internal" href="Redirecting-output-to-a-file.html"><span class="doc std std-doc">Redirecting output to a file page</span></a>.</p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-even"><td><p>conf, config</p></td>
-<td><p>Configuration file path.</p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-odd"><td><p>config_dir</p></td>
-<td><p>Path to all configuration files.</p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-even"><td><p>section</p></td>
-<td><p>Section within configuration file.</p></td>
 <td><p>—</p></td>
 </tr>
 <tr class="row-odd"><td><p>cartopy_data_dir</p></td>

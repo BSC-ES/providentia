@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -6,19 +8,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard &mdash; Providentia 3.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=08bfcbec"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=08bfcbec"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -51,6 +49,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="Modes.html">Modes</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Interpolation.html">Interpolation</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Dashboard</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#getting-started">Getting started</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#menu-bar">Menu bar</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#data-selection">Data Selection</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#filters">Filters</a></li>
@@ -119,6 +118,17 @@
 <h1>Dashboard<a class="headerlink" href="#dashboard" title="Link to this heading"></a></h1>
 <p>Providentia’s dashboard was designed to allow for interactive quick-look visualisations of observations and colocated model output.</p>
 <p><img alt="providentia" src="_images/providentia.png" /></p>
+<section id="getting-started">
+<h2>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h2>
+<p>To start the dashboard, run the following command in the command line. The configuration file is optional:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span>
+</pre></div>
+</div>
+<p>The dashboard mode only fetches content from one section of the configuration file.
+If more than one section is defined, a pop-up will appear asking you to select the desired section:</p>
+<p><img alt="providentia" src="_images/section_pop_up.png" /></p>
+<p>Alternatively, you can specify it directly using the <code class="docutils literal notranslate"><span class="pre">--section</span></code> parameter.</p>
+</section>
 <section id="menu-bar">
 <h2>Menu bar<a class="headerlink" href="#menu-bar" title="Link to this heading"></a></h2>
 <p><img alt="providentia" src="_images/dashboard_menu.png" /></p>
