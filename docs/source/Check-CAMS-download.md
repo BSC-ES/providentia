@@ -6,7 +6,7 @@ To check the status of a CAMS data download, you need to access the Copernicus A
 
 Go to the following URL:
 
-https://ads.atmosphere.copernicus.eu/
+[https://ads.atmosphere.copernicus.eu/](https://ads.atmosphere.copernicus.eu/)
 
 ## 2. Log In
 

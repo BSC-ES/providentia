@@ -6,7 +6,7 @@ Providentia's download mode supports downloading model output data provided by *
 
 An ECMWF account is required to download the files. For a tutorial on how to create and set up your account, see the [Account setup in Atmosphere Data Store](#ADS) page.
 
-Data requests may take some time to complete. After starting a request from Providentia, you can monitor its progress by following the steps described in the [Check CAMS download](#check-cams-download) page.
+Data requests may take some time to complete. After starting a request from Providentia, you can monitor its progress by following the steps described in the [Check CAMS download](Check-CAMS-download) page.
 
 ## Available CAMS datasets
 
