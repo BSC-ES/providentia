@@ -142,9 +142,6 @@ class Cams(object):
         # convert the selected dates to datetetime
         cams_start_date = datetime.strptime(self.download_instance.start_date, "%Y%m%d")
         cams_end_date = datetime.strptime(self.download_instance.end_date, "%Y%m%d") - timedelta(days=1)
-
-        # download N days ahead for forecast
-        cams_start_date = cams_start_date - timedelta(days=cams_dict['lookahead_days'])
         
         # normalize all to UTC
         min_start_date = min_start_date.astimezone(timezone.utc) if min_start_date.tzinfo else min_start_date.replace(tzinfo=timezone.utc)
@@ -168,8 +165,6 @@ class Cams(object):
 
         return cams_start_date, cams_end_date
 
-    # TODO check that message in stream does not get repeated in the loop
-    # TODO check if it is plaussible to keep this code as a separate function since there is a continue
     def create_request(self, cams_species, cams_dict, current_cams_date, next_cams_date, level, stream, url, mod_id, initial_check):
         """
         Build the request required by the Copernicus Atmosphere Data Store API.
@@ -706,11 +701,14 @@ class Cams(object):
             return
     
         # make the necessary checks to the dates
-        cams_start_date, cams_end_date = self.control_dates(url, cams_dict, initial_check)
+        original_cams_start_date, cams_end_date = self.control_dates(url, cams_dict, initial_check)
 
         # stop download if the dates are not correct
-        if cams_start_date is None and cams_end_date is None:
+        if original_cams_start_date is None and cams_end_date is None:
             return
+        
+        # download N days ahead for forecast
+        cams_start_date = original_cams_start_date - timedelta(days=cams_dict['lookahead_days'])
         
         # warn the user that download is going to be for N days before
         if cams_dict['lookahead_days'] > 0:
@@ -773,12 +771,13 @@ class Cams(object):
                     self.download_instance.logger.info('')
                     client = cdsapi.Client(retry_max=1, quiet=True)
 
-                # iterate through the dates
+                # initialize iterators controlers
                 current_cams_date = cams_start_date
+                next_cams_date = original_cams_start_date.replace(day=1) + relativedelta(months=1) - timedelta(days=1)
+
                 while current_cams_date <= cams_end_date:
 
                     # add one month
-                    next_cams_date = current_cams_date.replace(day=1) + relativedelta(months=1) - timedelta(days=1)
                     next_cams_date = cams_end_date if next_cams_date > cams_end_date else next_cams_date
 
                     # create dictionary to do the request
@@ -905,8 +904,13 @@ class Cams(object):
                         # change the last downloaded file
                         self.download_instance.latest_nc_file_path = "/path/to/file"
 
+                    self.download_instance.logger.info('')
+
                     # add one day to the date
                     current_cams_date = next_cams_date + timedelta(days=1)    
+
+                    # prepate next cams date for the next iteration
+                    next_cams_date = current_cams_date.replace(day=1) + relativedelta(months=1) - timedelta(days=1)
 
                 # remove the temp directory tail
                 if os.path.exists(temp_root_dir):
