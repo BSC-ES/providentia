@@ -16,6 +16,10 @@ To start your report, simply add `--report` or `--reports` as a launch option al
 
 The report mode fetches all the content specified in your configuration file across all sections. To only run one specific section, add the `--section` parameter to the command.
 
+## Report configuration fields
+
+All parameters that can be used in the report configuration files can be found in the [Shared Parameters](shared-parameters), [Analysis and Visualization Parameters](visualization-parameters) or [Report Parameters](report-parameters) sections of the Configuration Fields page.
+
 ## Plot types and options
 
 The report mode has access to a larger variety of plot types than the standard interactive version of Providentia. Each available plot type for the reports is listed in [Plot types and options](Plot-types-and-options).
@@ -37,7 +41,7 @@ report_type = new_plots
 
 ## Summary and station plots
 
-Users can specify if they want to see the plots as a summary for all the stations, or per station. This is set through the parameters `report_summary` and `report_stations`.
+Users can specify if they want to see the plots as a summary for all the stations or per station. This is set through the parameters `report_summary` and `report_stations`.
 
 When a report has multiple subsections, summary plots will show data per subsection and data label, and station plots will show only data per label.
 

@@ -1,10 +1,10 @@
 # Filtering
 
-In Providentia there are substantial number of options when it comes to filtering data. Here we go through each of these one by one, and explain how they can be applied through the dashboard, or via configuration file.
+In Providentia there are substantial number of options when it comes to filtering data. Here we go through each of these one by one, and explain how they can be applied through the dashboard or via configuration file.
 
 ## Dashboard filtering
 
-ALL of the filters explained in the following sections can be selected on the dashboard menu bar, either in the **Data Selection** section, or in the **Filters** section. 
+ALL of the filters explained in the following sections can be selected on the dashboard menu bar, either in the **Data Selection** section or in the **Filters** section. 
 
 A general important rule to remember is when things are modified in the **Data Selection** section, then data must be re-read using the **READ** button for the filters to be applied.
 
@@ -33,7 +33,7 @@ By default on the dashboard metadata menu, the variables will display the full a
 
 ### Text metadata
 
-Text metadata is filtered by either setting to **keep** or **remove** specific fields for a variable, for example keeping Spanish and French stations, or removing just UK stations: 
+Text metadata is filtered by either setting to **keep** or **remove** specific fields for a variable, for example keeping Spanish and French stations or removing just UK stations: 
 
 ```
 country = keep: Spain, France
@@ -44,7 +44,7 @@ On the dashboard metadata menu all available fields for a variable will be displ
 
 ## QA flags
 
-Observations of atmospheric species are taken by scientists in the real-world where issues with instruments, meteorology, or even human error can mean observations are subject to significant biases, which left alone could impose significant biases for evaluations with model data. Fortunately when this occurs observations are typically flagged so they can be screened out.
+Observations of atmospheric species are taken by scientists in the real-world where issues with instruments, meteorology or even human error can mean observations are subject to significant biases, which left alone could impose significant biases for evaluations with model data. Fortunately when this occurs observations are typically flagged so they can be screened out.
 
 There are two sets of QA flags available in Providentia for filtering observations when using GHOST or ACTRIS data.
 
@@ -137,7 +137,7 @@ On the dashboard the filters can be set under the **% REP** button on the menu b
 (periods)= 
 ## Periods
 
-It is often desired to select or remove certain periods over a time range, for example just keep daytime data, or remove summertime data. Providentia gives an easy way to filter in such a way using the `period` variable when using GHOST data. 
+It is often desired to select or remove certain periods over a time range, for example just keep daytime data or remove summertime data. Providentia gives an easy way to filter in such a way using the `period` variable when using GHOST data. 
 
 The available period fields that that can be selected are: `Daytime`, `Nighttime`, `Weekday`, `Weekend`, `Spring`, `Summer`, `Autumn`, `Winter`. The availability of some of these fields is contingent on the active temporal resolution of data, for example **Daytime** values cannot be selected when monthly data is loaded.
 

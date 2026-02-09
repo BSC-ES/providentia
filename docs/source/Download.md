@@ -46,36 +46,23 @@ Providentia supports four types of downloads. For detailed instructions, please 
    - How to get this type of download: specify the model as `cams_analysis`, `cams_forecast` or `cams_reanalysis` in your configuration, and set `dl_interpolated` to `False`.
    - To see more information, check the [CAMS download page](CAMS-download).
 
-### Download configuration fields
+## Download configuration fields
 
-Only the following configuration fields are used during download. All required fields must be provided.
+All parameters that can be used in the download configuration files can be found in the [Shared Parameters](shared-parameters) or [Download Parameters](download-parameters) sections of the Configuration Fields page.
 
-| Variable        | Description                              | Required | Default |
-|-----------------|------------------------------------------|----------|---------|
-| `ghost_version`         | GHOST version used when a GHOST network is selected | No | 1.5 |
-| `network`, `observation`, `framework` | Observation network to use               | Yes      | —       |
-| `model`, `models`, `experiments`, `experiment` |  Model ID(s) to be interpolated           | No       | —       |
-| `domain` | Domain of the model, can be indicated in the model field (e.g. `regional`, `global`) | No | — |
-| `ensemble` | Ensemble of the model, can be indicated in the model field (e.g. `000`, `001`) | No | — |
-| `species`         | Species to load (e.g. `sconco3`, `pm10`)| Yes      | —       |
-| `resolution`      | Observation data resolution (e.g. `hourly`, `daily`) | Yes | —       |
-| `model_resolution` | Model resolution if different from observations | No | Same as `resolution` |
-| `start_date`      | Start date of download (`YYYYMM`)   | Yes      | —       |
-| `end_date`        | End date of download (`YYYYMM`)     | Yes      | —       |
-| `filter_species`  | Optional filter to select specific species | No     | —       |
+### Automation of the download
 
+When running downloads, the questions presented during a download can be skipped by setting the appropriate variables. This allows downloads to be fully automated without any user input.
 
-## Automation of the download
+Each of these variables corresponds directly to one of the questions asked during a manual download. 
 
-In order to add the download to your scripts or if you just want to make it without the user input, here are all the variables you need to have
-
-| Variable  | Description    | Original Question | Expected Values |
-|--------------------|----------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
-| `dl_overwrite`     | Indicates whether previously downloaded files should be overwritten. | _There are some files that were already downloaded in a previous download, do you want to overwrite them ([y]/n)?_ | `True` (overwrite existing files) or `False` (keep existing files)   |
-| `dl_ghost_source`  | Determines where GHOST observations are downloaded from. | _Do you want to download observational data from the BSC remote machine? (Otherwise, GHOST observational data will be retrieved from Zenodo) ([y]/n)_ | `bsc` (download from BSC remote machine) or `zenodo` (retrieve from Zenodo)  |
-| `dl_interpolated`  | Specifies whether the interpolated versions of the model output should be downloaded. | _Model data was detected in the configuration file. Do you want to download the interpolated version? (Otherwise, the non-interpolated model data will be downloaded) ([y]/n)_ | `True` (download interpolated) or `False` (download non-interpolated)                                |
-| `dl_mode` | Selects what to download when both observations and model output are present in the configuration file. | _Which type of data do you want to download? Observational, modelled or both? ([both]/obs/mod)_      | `obs` (download observations), `mod` (download models) or `both` (download both) |
-| `network_type` | Determines whether to use all GHOST or all non-GHOST networks when the observation field uses the `*` wildcard.  | _Do you want to download all the GHOST networks? (Otherwise all the non-GHOST networks will be downloaded) ([y]/n)_   | `ghost` (use all GHOST networks) or `non-ghost` (use all non-GHOST networks)                |
+| Variable | Original Question | Expected Values |
+|-------------------- | -------------------- | -------------------- |
+| `dl_overwrite`     | _There are some files that were already downloaded in a previous download, do you want to overwrite them ([y]/n)?_ | `True` (overwrite existing files) or `False` (keep existing files)   |
+| `dl_ghost_source`  | _Do you want to download observational data from the BSC remote machine? (Otherwise, GHOST observational data will be retrieved from Zenodo) ([y]/n)_ | `bsc` (download from BSC remote machine) or `zenodo` (retrieve from Zenodo)  |
+| `dl_interpolated`  | _Model data was detected in the configuration file. Do you want to download the interpolated version? (Otherwise, the non-interpolated model data will be downloaded) ([y]/n)_ | `True` (download interpolated) or `False` (download non-interpolated)                                |
+| `dl_mode` | _Which type of data do you want to download? Observational, modelled or both? ([both]/obs/mod)_ | `obs` (download observations), `mod` (download models) or `both` (download both) |
+| `network_type` | _Do you want to download all the GHOST networks? (Otherwise all the non-GHOST networks will be downloaded) ([y]/n)_   | `ghost` (use all GHOST networks) or `non-ghost` (use all non-GHOST networks)                |
 
 ## Using wildcards
 

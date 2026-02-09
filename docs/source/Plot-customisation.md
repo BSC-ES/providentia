@@ -56,7 +56,7 @@ If you want to automatically remove stations that have certain statistical value
          "NMB": ["<-100.0", ">100.0"],
          "NRMSE": [">100.0"]}
 ```
-The statistics can be general, across all components, or they can be specific per component, for example:
+The statistics can be general, across all components or they can be specific per component, for example:
 
  ```
 "CAMS": {"r": {"sconco3": ["<0.3"], 
@@ -81,7 +81,7 @@ remove_extreme_stations=CAMS
 
 ## Calculating exceedances
 
-In Providentia the `exceedances` statistic is available in the list of available statistics. How it is currently implemented is simplistic, but users can simply state a threshold/limit value per component or network-component pair, and each instance where values exceed this limit will be counted. Therefore the `exceedances` statistic simply gives the number of instances above the threshold. The threshold values can be set in the file `settings/exceedances.yaml` per component, or network-component pair, as so: 
+In Providentia the `exceedances` statistic is available in the list of available statistics. How it is currently implemented is simplistic, but users can simply state a threshold/limit value per component or network-component pair, and each instance where values exceed this limit will be counted. Therefore the `exceedances` statistic simply gives the number of instances above the threshold. The threshold values can be set in the file `settings/exceedances.yaml` per component or network-component pair, as so: 
 
 ```
 sconco3: {

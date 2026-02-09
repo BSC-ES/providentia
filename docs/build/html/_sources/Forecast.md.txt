@@ -8,7 +8,7 @@ For the forecast case, there are a few important details that you need to know i
 
 If the model data is stored as a forecast, that is, multiple forecast days are provided for each calendar day, then to ensure that all forecast days are interpolated, the `forecast` variable in the configuration file must be set to a valid value (defined in the next section).
 
-If the `forecast` variable is set to a valid value, no matter what it is, then the interpolation will be done for all forecast days. If the `forecast` variable is not set, or set to a value that is not valid, then the interpolation will happen for only the first forecast day (i.e. treating the data as a non-forecast type).
+If the `forecast` variable is set to a valid value, no matter what it is, then the interpolation will be done for all forecast days. If the `forecast` variable is not set or set to a value that is not valid, then the interpolation will happen for only the first forecast day (i.e. treating the data as a non-forecast type).
 
 ## Forecast options
 

@@ -49,10 +49,10 @@
 <li class="toctree-l1 current"><a class="reference internal" href="Modes.html">Modes</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Interpolation</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#getting-started">Getting started</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#interpolation-configuration-fields">Interpolation configuration fields</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#execution-details">Execution details</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#local-users">Local users</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#bsc-hpc-users">BSC HPC users</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#interpolation-configuration-fields">Interpolation configuration fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#interpolation-considerations">Interpolation considerations</a></li>
 </ul>
 </li>
@@ -132,6 +132,10 @@
 <p>The interpolation mode fetches all the content specified in your configuration file across all sections. To only run one specific section, add the <code class="docutils literal notranslate"><span class="pre">--section</span></code> parameter to the command.</p>
 <p>In terms of performance, we recommend running Providentia Interpolation in MareNostrum5.</p>
 </section>
+<section id="interpolation-configuration-fields">
+<h2>Interpolation configuration fields<a class="headerlink" href="#interpolation-configuration-fields" title="Link to this heading"></a></h2>
+<p>All parameters that can be used in the interpolation configuration files can be found in the <a class="reference internal" href="Configuration-fields.html#shared-parameters"><span class="std std-ref">Shared Parameters</span></a> or <a class="reference internal" href="Configuration-fields.html#interpolation-parameters"><span class="std std-ref">Interpolation Parameters</span></a> sections of the Configuration Fields page.</p>
+</section>
 <section id="execution-details">
 <h2>Execution details<a class="headerlink" href="#execution-details" title="Link to this heading"></a></h2>
 <section id="local-users">
@@ -143,141 +147,6 @@ Be aware that this can be demanding on the computer, so ensure your machine has 
 <h3>BSC HPC users<a class="headerlink" href="#bsc-hpc-users" title="Link to this heading"></a></h3>
 <p>Upon submission, a first job named <code class="docutils literal notranslate"><span class="pre">PRV</span></code> will start the submission process which will make a job called <code class="docutils literal notranslate"><span class="pre">PRVI</span></code> appear in the SLURM queue, shortly afterwards a job array named <code class="docutils literal notranslate"><span class="pre">PRVI_$SLURMJOBID</span></code> (containing the jobs for all the defined variable combinations) will be submitted.</p>
 <p>When all jobs have been completed (or there is a failure) the <code class="docutils literal notranslate"><span class="pre">PRVI</span></code> job will exit the queue.</p>
-</section>
-<section id="interpolation-configuration-fields">
-<h3>Interpolation configuration fields<a class="headerlink" href="#interpolation-configuration-fields" title="Link to this heading"></a></h3>
-<p>During the interpolation step, only a specific set of configuration fields is used. All required fields must be provided, otherwise, the process will fail at startup.</p>
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Variable</p></th>
-<th class="head"><p>Description</p></th>
-<th class="head"><p>Required</p></th>
-<th class="head"><p>Default</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ghost_version</span></code></p></td>
-<td><p>GHOST version used when a GHOST network is selected</p></td>
-<td><p>No</p></td>
-<td><p>1.5</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">start_date</span></code></p></td>
-<td><p>Start date of interpolation (<code class="docutils literal notranslate"><span class="pre">YYYYMM</span></code>)</p></td>
-<td><p>Yes</p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">end_date</span></code></p></td>
-<td><p>End date of interpolation (<code class="docutils literal notranslate"><span class="pre">YYYYMM</span></code>)</p></td>
-<td><p>Yes</p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">model</span></code>, <code class="docutils literal notranslate"><span class="pre">models</span></code>, <code class="docutils literal notranslate"><span class="pre">experiments</span></code>, <code class="docutils literal notranslate"><span class="pre">experiment</span></code></p></td>
-<td><p>Model ID(s) to be interpolated</p></td>
-<td><p>Yes</p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">domain</span></code></p></td>
-<td><p>Domain of the model, can be indicated in the model field (e.g. <code class="docutils literal notranslate"><span class="pre">regional</span></code>, <code class="docutils literal notranslate"><span class="pre">global</span></code>)</p></td>
-<td><p>No</p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ensemble</span></code></p></td>
-<td><p>Ensemble of the model, can be indicated in the model field (e.g. <code class="docutils literal notranslate"><span class="pre">000</span></code>, <code class="docutils literal notranslate"><span class="pre">001</span></code>)</p></td>
-<td><p>No</p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">species</span></code></p></td>
-<td><p>Species to load (e.g. <code class="docutils literal notranslate"><span class="pre">sconco3</span></code>, <code class="docutils literal notranslate"><span class="pre">pm10</span></code>)</p></td>
-<td><p>Yes</p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">network</span></code>, <code class="docutils literal notranslate"><span class="pre">observation</span></code>, <code class="docutils literal notranslate"><span class="pre">framework</span></code></p></td>
-<td><p>Observation network to use (e.g. <code class="docutils literal notranslate"><span class="pre">EBAS</span></code>, <code class="docutils literal notranslate"><span class="pre">EEA_AQ_eReporting</span></code>)</p></td>
-<td><p>Yes</p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">network_type</span></code></p></td>
-<td><p>Network type when wildcards are used (<code class="docutils literal notranslate"><span class="pre">GHOST</span></code>, non-GHOST or both)</p></td>
-<td><p>No</p></td>
-<td><p>Both</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">resolution</span></code></p></td>
-<td><p>Observation data resolution (e.g. <code class="docutils literal notranslate"><span class="pre">hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">daily</span></code>)</p></td>
-<td><p>Yes</p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">model_resolution</span></code></p></td>
-<td><p>Model resolution if different from observations</p></td>
-<td><p>No</p></td>
-<td><p>Same as <code class="docutils literal notranslate"><span class="pre">resolution</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">forecast</span></code></p></td>
-<td><p>Controls how forecast data is handled. This variable must be set to a valid value when performing interpolation for forecast data to be interpolated (<code class="docutils literal notranslate"><span class="pre">day</span></code>,<code class="docutils literal notranslate"><span class="pre">daily</span></code>,<code class="docutils literal notranslate"><span class="pre">combined</span></code>,<code class="docutils literal notranslate"><span class="pre">dayN</span></code>,<code class="docutils literal notranslate"><span class="pre">dailyN</span></code>,<code class="docutils literal notranslate"><span class="pre">combinedN</span></code>)</p></td>
-<td><p>No</p></td>
-<td><p>All</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">interp_spinup_timesteps</span></code></p></td>
-<td><p>Number of initial timesteps skipped for model spin-up</p></td>
-<td><p>No</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">interp_model_downsampling</span></code></p></td>
-<td><p>Statistic for the downsampling of the model resolution to the observational resolution (<code class="docutils literal notranslate"><span class="pre">mean</span></code>, <code class="docutils literal notranslate"><span class="pre">median</span></code>)</p></td>
-<td><p>No</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">mean</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">interp_model_upsampling</span></code></p></td>
-<td><p>Method for the upsampling of the model resolution to the observational resolution (<code class="docutils literal notranslate"><span class="pre">fill</span></code>, <code class="docutils literal notranslate"><span class="pre">gaps</span></code>)</p></td>
-<td><p>No</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fill</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">interp_n_neighbours</span></code></p></td>
-<td><p>Number of nearest neighbours used for interpolation</p></td>
-<td><p>No</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">4</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">interp_reverse_vertical_orientation</span></code></p></td>
-<td><p>Reverse vertical order of model levels</p></td>
-<td><p>No</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">false</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">interp_chunk_size</span></code></p></td>
-<td><p>Minimum number of jobs per interpolation chunk</p></td>
-<td><p>No</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">16</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">interp_job_array_limit</span></code></p></td>
-<td><p>Maximum number of chunks in the job array</p></td>
-<td><p>No</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">100</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">interp_multiprocessing</span></code></p></td>
-<td><p>Use multiprocessing instead of Greasy on HPC systems</p></td>
-<td><p>No</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">false</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">mod_root</span></code></p></td>
-<td><p>Root directory for interpolated model data, overwrites <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
-<td><p>No</p></td>
-<td><p>From <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ghost_root</span></code></p></td>
-<td><p>Root directory for GHOST observations, overwrites <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
-<td><p>No</p></td>
-<td><p>From <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">nonghost_root</span></code></p></td>
-<td><p>Root directory for non-GHOST observations, overwrites <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
-<td><p>No</p></td>
-<td><p>From <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">mod_to_interp_root</span></code></p></td>
-<td><p>Root directory for non-interpolated model data, overwrites <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
-<td><p>No</p></td>
-<td><p>From <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
-</tr>
-</tbody>
-</table>
 </section>
 <section id="interpolation-considerations">
 <h3>Interpolation considerations<a class="headerlink" href="#interpolation-considerations" title="Link to this heading"></a></h3>

@@ -1,6 +1,6 @@
 # QA filtering
 
-Observations of atmospheric species are taken by scientists in the real-world where issues with instruments, meteorology, or even human error can mean observations are subject to significant biases, which left alone could impose significant biases for evaluations with model data. Fortunately when this occurs observations are typically flagged so they can be screened out.
+Observations of atmospheric species are taken by scientists in the real-world where issues with instruments, meteorology or even human error can mean observations are subject to significant biases, which left alone could impose significant biases for evaluations with model data. Fortunately when this occurs observations are typically flagged so they can be screened out.
 
 There are two sets of QA flags available in Providentia for filtering observations when using GHOST or ACTRIS data.
 
@@ -17,7 +17,7 @@ A selection of **qa** fields are set in Providentia by default, but no **flags**
 
 When using the dashboard by clicking on the **FLAGS** or **QA** buttons on the menu bar, pop-up menus will appear giving the option to interactively select fields.
 
-The variables can also be set in the configuration files, using either the names of the flags you want to apply, or their numerical codes (defined below). 
+The variables can also be set in the configuration files, using either the names of the flags you want to apply or their numerical codes (defined below). 
 
 The variables can be set explicitely (using codes or names), for example:
 ```

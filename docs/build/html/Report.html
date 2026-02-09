@@ -51,6 +51,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Dashboard.html">Dashboard</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Report</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#getting-started">Getting started</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#report-configuration-fields">Report configuration fields</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#plot-types-and-options">Plot types and options</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#plot-selection">Plot selection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#summary-and-station-plots">Summary and station plots</a></li>
@@ -116,6 +117,10 @@
 </div>
 <p>The report mode fetches all the content specified in your configuration file across all sections. To only run one specific section, add the <code class="docutils literal notranslate"><span class="pre">--section</span></code> parameter to the command.</p>
 </section>
+<section id="report-configuration-fields">
+<h2>Report configuration fields<a class="headerlink" href="#report-configuration-fields" title="Link to this heading"></a></h2>
+<p>All parameters that can be used in the report configuration files can be found in the <a class="reference internal" href="Configuration-fields.html#shared-parameters"><span class="std std-ref">Shared Parameters</span></a>, <a class="reference internal" href="Configuration-fields.html#visualization-parameters"><span class="std std-ref">Analysis and Visualization Parameters</span></a> or <a class="reference internal" href="Configuration-fields.html#report-parameters"><span class="std std-ref">Report Parameters</span></a> sections of the Configuration Fields page.</p>
+</section>
 <section id="plot-types-and-options">
 <h2>Plot types and options<a class="headerlink" href="#plot-types-and-options" title="Link to this heading"></a></h2>
 <p>The report mode has access to a larger variety of plot types than the standard interactive version of Providentia. Each available plot type for the reports is listed in <a class="reference internal" href="Plot-types-and-options.html"><span class="doc std std-doc">Plot types and options</span></a>.</p>
@@ -134,7 +139,7 @@
 </section>
 <section id="summary-and-station-plots">
 <h2>Summary and station plots<a class="headerlink" href="#summary-and-station-plots" title="Link to this heading"></a></h2>
-<p>Users can specify if they want to see the plots as a summary for all the stations, or per station. This is set through the parameters <code class="docutils literal notranslate"><span class="pre">report_summary</span></code> and <code class="docutils literal notranslate"><span class="pre">report_stations</span></code>.</p>
+<p>Users can specify if they want to see the plots as a summary for all the stations or per station. This is set through the parameters <code class="docutils literal notranslate"><span class="pre">report_summary</span></code> and <code class="docutils literal notranslate"><span class="pre">report_stations</span></code>.</p>
 <p>When a report has multiple subsections, summary plots will show data per subsection and data label, and station plots will show only data per label.</p>
 <p>There is also the possibility to create some plots per station, and some only as a summary by using dictionaries in <code class="docutils literal notranslate"><span class="pre">settings/report_plots.yaml</span></code>. For instance, in the following example we would be creating timeseries station plots and scatter summary plots.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;new_plots&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;station&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;timeseries&quot;</span><span class="p">,</span> <span class="s2">&quot;timeseries_annotate&quot;</span><span class="p">],</span> 

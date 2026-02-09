@@ -53,7 +53,8 @@
 <li class="toctree-l2"><a class="reference internal" href="Download-mode.html">Download</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Library</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#importing-providentia">Importing Providentia</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#getting-started">Getting started</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#library-configuration-fields">Library configuration fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#features">Features</a></li>
 </ul>
 </li>
@@ -107,9 +108,9 @@
 <h1>Library<a class="headerlink" href="#library" title="Link to this heading"></a></h1>
 <section class="tex2jax_ignore mathjax_ignore" id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
-<p>The library was designed for users to exploit the powerful backend of Providentia, allowing the use of the Providentia functionalities directly in your own scripts, or within <a class="reference internal" href="Notebooks.html"><span class="doc std std-doc">Jupyter notebooks</span></a>.</p>
-<section id="importing-providentia">
-<h3>Importing Providentia<a class="headerlink" href="#importing-providentia" title="Link to this heading"></a></h3>
+<p>The library was designed for users to exploit the powerful backend of Providentia, allowing the use of the Providentia functionalities directly in your own scripts or within <a class="reference internal" href="Notebooks.html"><span class="doc std std-doc">Jupyter notebooks</span></a>.</p>
+<section id="getting-started">
+<h3>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h3>
 <p>If the script you are running is not inside the Providentia home directory, in order to import from Providentia, then it is necessary to add these lines to your code at the start:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
@@ -127,6 +128,10 @@
 </div>
 <p>After the import you will have full access to the backend of Providentia and all of its functions as described in the following sections.</p>
 <p>NOTE: In the future we will allow for Providentia to be imported as a module on the BSC machines, making this step redundant.</p>
+</section>
+<section id="library-configuration-fields">
+<h3>Library configuration fields<a class="headerlink" href="#library-configuration-fields" title="Link to this heading"></a></h3>
+<p>All parameters that can be used in the library configuration files can be found in the <a class="reference internal" href="Configuration-fields.html#shared-parameters"><span class="std std-ref">Shared Parameters</span></a> or <a class="reference internal" href="Configuration-fields.html#visualization-parameters"><span class="std std-ref">Analysis and Visualization Parameters</span></a> sections of the Configuration Fields page.</p>
 </section>
 <section id="features">
 <h3>Features<a class="headerlink" href="#features" title="Link to this heading"></a></h3>
@@ -232,7 +237,7 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">filter_station</span><span class="p">(</span><span class="n">station</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">station</span></code> corresponds to the <code class="docutils literal notranslate"><span class="pre">station_reference</span></code> of one station of interest, or can be a list of multiple stations given their <code class="docutils literal notranslate"><span class="pre">station_reference</span></code> values. This will then subsequently mean the data in memory is filtered for the relevant station or stations.</p>
+<p>where <code class="docutils literal notranslate"><span class="pre">station</span></code> corresponds to the <code class="docutils literal notranslate"><span class="pre">station_reference</span></code> of one station of interest or can be a list of multiple stations given their <code class="docutils literal notranslate"><span class="pre">station_reference</span></code> values. This will then subsequently mean the data in memory is filtered for the relevant station or stations.</p>
 </section>
 <section id="library-print-active-configuration-file">
 <h4>Library: Print active configuration file<a class="headerlink" href="#library-print-active-configuration-file" title="Link to this heading"></a></h4>
@@ -251,7 +256,7 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">stat_calc</span> <span class="o">=</span> <span class="n">provi</span><span class="o">.</span><span class="n">statistic</span><span class="p">(</span><span class="n">stat</span><span class="p">,</span> <span class="n">labela</span><span class="o">=</span><span class="s1">&#39;OBS&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">stat</span></code> is the statistic wished to be calculated, and <code class="docutils literal notranslate"><span class="pre">labela</span></code> is the name of the observations/model data (this can be an alias set in the configuration file or the original dataset name). The statistic returned will be one summary value, which can be formulated in differing ways, e.g. taking a median time series across all stations and then calculating the statistic, or calculating the statistic across all stations and then taking the median. This formulation can be set by changing the statistical mode in the configuration file, for which more information can be found <a class="reference internal" href="Statistics.html"><span class="doc std std-doc">here</span></a>.</p>
+<p>where <code class="docutils literal notranslate"><span class="pre">stat</span></code> is the statistic wished to be calculated, and <code class="docutils literal notranslate"><span class="pre">labela</span></code> is the name of the observations/model data (this can be an alias set in the configuration file or the original dataset name). The statistic returned will be one summary value, which can be formulated in differing ways, e.g. taking a median time series across all stations and then calculating the statistic or calculating the statistic across all stations and then taking the median. This formulation can be set by changing the statistical mode in the configuration file, for which more information can be found <a class="reference internal" href="Statistics.html"><span class="doc std std-doc">here</span></a>.</p>
 <p>If wanting to calculate a bias statistic, then an additional dataset is needed to be compared against, which can be set via the following argument:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">labelb</span><span class="o">=</span><span class="s1">&#39;EMEP&#39;</span>
 </pre></div>
@@ -361,7 +366,7 @@
 </section>
 <section id="saving-returning-plot-object-in-memory">
 <h6>Saving / returning plot object in memory<a class="headerlink" href="#saving-returning-plot-object-in-memory" title="Link to this heading"></a></h6>
-<p>Rather than viewing the plot on the screen, it can be returned in memory for more editing, or saved to a file.</p>
+<p>Rather than viewing the plot on the screen, it can be returned in memory for more editing or saved to a file.</p>
 <p>To return the plot in memory, this can be done as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plot_obj</span> <span class="o">=</span> <span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_type</span><span class="p">,</span> <span class="n">return_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>

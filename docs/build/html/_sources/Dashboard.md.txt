@@ -19,6 +19,10 @@ If more than one section is defined, a pop-up will appear asking you to select t
 
 Alternatively, you can specify it directly using the `--section` parameter.
 
+## Dashboard configuration fields
+
+All parameters that can be used in the dashboard configuration files can be found in the [Shared Parameters](shared-parameters), [Analysis and Visualization Parameters](visualization-parameters) or [Dashboard Parameters](dashboard-parameters) sections of the Configuration Fields page.
+
 ## Menu bar
 
 ![providentia](uploads/dashboard_menu.png)
@@ -58,7 +62,7 @@ If the user makes changes to any of the fields in this section, it is needed to 
 
 The filters section provides a variety of options to filter data or stations. A detailed review of all the filter options available in Providentia can be found here: [Filtering](Filtering).
 
-After having selected or modified any filters in this section, simply click the **FILTER** button to apply the filters, or the **RESET** button to undo any filters back to the defaults. 
+After having selected or modified any filters in this section, simply click the **FILTER** button to apply the filters or the **RESET** button to undo any filters back to the defaults. 
 
 #### Bounds
 
@@ -76,7 +80,7 @@ See here for more information about representativity filters: [Representativity 
 
 ![period](uploads/period.png)
 
-The **PERIOD** button opens a pop-up menu that allows for the selection or removal of specific data periods, for example keep daytime data, or remove summertime data.
+The **PERIOD** button opens a pop-up menu that allows for the selection or removal of specific data periods, for example keep daytime data or remove summertime data.
 
 See here for more detailed information: [Period filtering](periods)
 
@@ -134,7 +138,7 @@ Directly under the menu bar, there is a toolbar that gives several useful option
 
 In order from left to right, these are:
 
-- **Export**: Exports the active state of the dashboard. This can be done to save the loaded data (both observations and model data) directly as a NetCDF or Numpy file, or to save the current state as a configuration file. For more information about exported data see [Saved file formats](Saved-file-formats).
+- **Export**: Exports the active state of the dashboard. This can be done to save the loaded data (both observations and model data) directly as a NetCDF or Numpy file or to save the current state as a configuration file. For more information about exported data see [Saved file formats](Saved-file-formats).
 - **Load**: This can be used to load a configuration file from a previous evaluation session. For instance, those saved using the export button. If there is more than one section or subsection, users will be asked to choose which one they want to load.
 - **World view**: Sets the map to the entire world view.
 - **Original state**: Returns all plots to their initial states.
@@ -153,7 +157,7 @@ In order from left to right, these are:
 
 Once data has been loaded on the dashboard, by left clicking on a station the map, multiple plots will appear showing data for that station.
 
-Multiple stations can also be selected at once. This can by doing by using the **site selection** menu options, or by using the toolbar **lasso**, or a third way is to right click on a station while another is selected. By right clicking on an already selected station, it will be unselected.
+Multiple stations can also be selected at once. This can by doing by using the **site selection** menu options or by using the toolbar **lasso** or a third way is to right click on a station while another is selected. By right clicking on an already selected station, it will be unselected.
 
 When multiple stations are selected, data on the plots will reflect an aggregation across all selected stations (controlled via the information set in the **Statistics** section on the menu bar).
 
@@ -175,7 +179,7 @@ The first icon is a save button which allows individual plots to be saved as a f
 
 ![providentia](uploads/dashboard_plotmod.png)
 
-The second is a burger menu icon, which after clicking reveals a plot settings menu, where multiple options to interactively customise the plot are revealed (e.g. point size, or smoothing for the timeseries).
+The second is a burger menu icon, which after clicking reveals a plot settings menu, where multiple options to interactively customise the plot are revealed (e.g. point size or smoothing for the timeseries).
 
 ![providentia](uploads/dashboard_plotoptions.png)
 
@@ -191,4 +195,4 @@ See here for more information about all available [plot options](Plot-types-and-
 
 ![providentia](uploads/dashboard_legend.png)
 
-The legend in the upper right of the dashboard displays which data is currently loaded on the dashboard (observations and model names). The legend is interactive, so by clicking on any data type, the respective data for that type will be hidden, or shown, on all plots.
+The legend in the upper right of the dashboard displays which data is currently loaded on the dashboard (observations and model names). The legend is interactive, so by clicking on any data type, the respective data for that type will be hidden or shown, on all plots.

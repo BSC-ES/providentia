@@ -50,12 +50,12 @@
 <li class="toctree-l1 current"><a class="reference internal" href="Configuration.html">Configuration</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Configuration-files.html">Configuration files</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Configuration fields</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#common-parameters">Common parameters</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#analysis-and-visualisation-modes-dashboard-report-library">Analysis and visualisation modes (Dashboard, Report, Library)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dashboard">Dashboard</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#report">Report</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#interpolation">Interpolation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#download">Download</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared-parameters">Shared parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#parameters-for-analysis-and-visualization-modes-dashboard-report-library">Parameters for analysis and visualization modes (Dashboard, Report, Library)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dashboard-parameters">Dashboard parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#report-parameters">Report parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#interpolation-parameters">Interpolation parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#download-parameters">Download parameters</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Command-line-configuration.html">Command line configuration</a></li>
@@ -104,165 +104,227 @@
 <h1>Configuration fields<a class="headerlink" href="#configuration-fields" title="Link to this heading"></a></h1>
 <p>Configuration fields determine how Providentia behaves during a run using a configuration file. Below is a full list of all available parameters organised by mode.</p>
 <p>These fields can also be set via command line arguments, for more details, see the <a class="reference internal" href="Command-line-configuration.html"><span class="doc std std-doc">Command line configuration page</span></a>.</p>
-<section id="common-parameters">
-<h2>Common parameters<a class="headerlink" href="#common-parameters" title="Link to this heading"></a></h2>
+<section id="shared-parameters">
+<span id="id1"></span><h2>Shared parameters<a class="headerlink" href="#shared-parameters" title="Link to this heading"></a></h2>
 <p>Some of these fields are required depending on the mode. If a parameter required by a given mode is missing, Providentia will fail.</p>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Parameter</p></th>
 <th class="head"><p>Required in</p></th>
 <th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>network</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">network</span></code>, <code class="docutils literal notranslate"><span class="pre">observation</span></code>, <code class="docutils literal notranslate"><span class="pre">framework</span></code></p></td>
 <td><p>Dashboard, Report, Interpolation</p></td>
-<td><p>Network you want to load observations from. Can be multiple (e.g. <code class="docutils literal notranslate"><span class="pre">CAPMoN,</span> <span class="pre">EBAS</span></code>). Adding a wild card (*) is going to expand to certain variables (vconcaerobin* → vconcaerobin1, vconcaerobin2, etc.).</p></td>
+<td><p>Network(s) to load observations from. Multiple values are allowed (e.g. <code class="docutils literal notranslate"><span class="pre">CAPMoN,</span> <span class="pre">EBAS</span></code>). Wildcards (<code class="docutils literal notranslate"><span class="pre">*</span></code>) expand to multiple variables (e.g. <code class="docutils literal notranslate"><span class="pre">vconcaerobin*</span></code> → <code class="docutils literal notranslate"><span class="pre">vconcaerobin1</span></code>, <code class="docutils literal notranslate"><span class="pre">vconcaerobin2</span></code>, etc.). For GHOST networks, the selection is dictated by GHOST. For non-GHOST networks, available options are defined under the <code class="docutils literal notranslate"><span class="pre">nonghost_available_networks</span></code> key in <code class="docutils literal notranslate"><span class="pre">available_inputs.yaml</span></code> and can be modified by the user.</p></td>
+<td><p>—</p></td>
 </tr>
-<tr class="row-odd"><td><p>species</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">model</span></code>, <code class="docutils literal notranslate"><span class="pre">models</span></code>, <code class="docutils literal notranslate"><span class="pre">experiments</span></code>, <code class="docutils literal notranslate"><span class="pre">experiment</span></code></p></td>
+<td><p>Dashboard, Report, Interpolation</p></td>
+<td><p>Model(s). Model IDs can optionally include domain and/or ensemble information in the following formats: <code class="docutils literal notranslate"><span class="pre">modelID</span></code>, <code class="docutils literal notranslate"><span class="pre">modelID-ensemble</span></code>, <code class="docutils literal notranslate"><span class="pre">modelID-domain</span></code> or <code class="docutils literal notranslate"><span class="pre">modelID-domain-ensemble</span></code>. Also, <code class="docutils literal notranslate"><span class="pre">model</span></code>, <code class="docutils literal notranslate"><span class="pre">domain</span></code> and/or <code class="docutils literal notranslate"><span class="pre">ensemble</span></code> can be specified separately. Model IDs can also be mapped to alternative names (aliases) by appending them in parentheses after the ID (e.g. <code class="docutils literal notranslate"><span class="pre">mod1-dom-ens,</span> <span class="pre">mod2-dom-ens</span> <span class="pre">(altmod1,</span> <span class="pre">altmod2)</span></code>).</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">species</span></code></p></td>
 <td><p>All modes</p></td>
 <td><p>Species to load. Can be multiple (e.g. <code class="docutils literal notranslate"><span class="pre">sconco3,</span> <span class="pre">sconcno2</span></code>). Dictated by GHOST. See the <a class="reference internal" href="Available-species.html"><span class="doc std std-doc">Available Species</span></a> page for options.</p></td>
+<td><p>—</p></td>
 </tr>
-<tr class="row-even"><td><p>resolution</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">resolution</span></code></p></td>
 <td><p>All modes</p></td>
-<td><p>Temporal resolution of the observations you want to load (e.g. <code class="docutils literal notranslate"><span class="pre">3hourly</span></code>).</p></td>
+<td><p>Temporal resolution of the observations to load (e.g. <code class="docutils literal notranslate"><span class="pre">hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">daily</span></code>). For GHOST networks, the resolution is dictated by GHOST. For non-GHOST networks, available options are defined under the <code class="docutils literal notranslate"><span class="pre">nonghost_available_resolutions</span></code> key in <code class="docutils literal notranslate"><span class="pre">available_inputs.yaml</span></code> and can be modified by the user.</p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p>start_date</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">start_date</span></code></p></td>
 <td><p>All modes</p></td>
-<td><p>Comparison start date in YYYYMMDD format (e.g. <code class="docutils literal notranslate"><span class="pre">20170101</span></code>).</p></td>
+<td><p>Comparison start date in <code class="docutils literal notranslate"><span class="pre">YYYYMMDD</span></code> format or <code class="docutils literal notranslate"><span class="pre">YYYYMM</span></code> when interpolation is enabled (e.g. <code class="docutils literal notranslate"><span class="pre">20170101</span></code>).</p></td>
+<td><p>—</p></td>
 </tr>
-<tr class="row-even"><td><p>end_date</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">end_date</span></code></p></td>
 <td><p>All modes</p></td>
-<td><p>Comparison end date in YYYYMMDD format (e.g. <code class="docutils literal notranslate"><span class="pre">20180601</span></code>).</p></td>
+<td><p>Comparison end date in <code class="docutils literal notranslate"><span class="pre">YYYYMMDD</span></code> format or <code class="docutils literal notranslate"><span class="pre">YYYYMM</span></code> when interpolation is enabled (e.g. <code class="docutils literal notranslate"><span class="pre">20180601</span></code>).</p></td>
+<td><p>—</p></td>
 </tr>
-<tr class="row-odd"><td><p>model</p></td>
-<td><p>Dashboard, Report, Interpolation</p></td>
-<td><p>ID of model. The model IDs can be mapped to different names by adding a list of alternative names after the model IDs (e.g. <code class="docutils literal notranslate"><span class="pre">mod1,</span> <span class="pre">mod2</span> <span class="pre">(altmod1,</span> <span class="pre">altmod2)</span></code>). After interpolation model IDs will consist of 3 separate strings [ID-domain-ensemble]. The domain and ensemble</p></td>
-</tr>
-<tr class="row-even"><td><p>model_resolution</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ghost_version</span></code></p></td>
 <td><p>Optional</p></td>
-<td><p>Model resolution if different from observations</p></td>
+<td><p>GHOST version used when a GHOST network is selected.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1.5</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p>domain</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">domain</span></code></p></td>
 <td><p>Optional</p></td>
-<td><p>Domain of the model. Can be multiple.</p></td>
+<td><p>Domain of the model (e.g. <code class="docutils literal notranslate"><span class="pre">regional</span></code>, <code class="docutils literal notranslate"><span class="pre">global</span></code>). When multiple model IDs and multiple ensembles/domains are provided, all possible combinations of model, domain and ensemble will be used. Options are defined under the <code class="docutils literal notranslate"><span class="pre">available_domains</span></code> key in <code class="docutils literal notranslate"><span class="pre">available_inputs.yaml</span></code> and can be modified by the user.</p></td>
+<td><p>All available</p></td>
 </tr>
-<tr class="row-even"><td><p>ensemble</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ensemble</span></code></p></td>
 <td><p>Optional</p></td>
-<td><p>Ensemble member number or ensemble statistic of the model. defaults to all members available. Can be multiple.</p></td>
+<td><p>Ensemble of the model (e.g. <code class="docutils literal notranslate"><span class="pre">000</span></code>, <code class="docutils literal notranslate"><span class="pre">001</span></code>). When multiple model IDs and multiple ensembles/domains are provided, all possible combinations of model, domain and ensemble will be used.</p></td>
+<td><p>All available, except in interpolation mode where the default is <code class="docutils literal notranslate"><span class="pre">000</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p>forecast</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">model_resolution</span></code></p></td>
 <td><p>Optional</p></td>
-<td><p>Controls how forecast data is handled. Can be multiple (e.g. <code class="docutils literal notranslate"><span class="pre">day</span></code>, <code class="docutils literal notranslate"><span class="pre">daily</span></code>, <code class="docutils literal notranslate"><span class="pre">combined</span></code>). If wanting to limit to specific forecast days, then add the forecast day to the option, (e.g. <code class="docutils literal notranslate"><span class="pre">day1</span></code>, <code class="docutils literal notranslate"><span class="pre">daily2</span></code>, <code class="docutils literal notranslate"><span class="pre">combined3</span></code>). Different options cannot be mixed however (i.e. <code class="docutils literal notranslate"><span class="pre">day</span></code> options cannot be set with <code class="docutils literal notranslate"><span class="pre">daily</span></code> or <code class="docutils literal notranslate"><span class="pre">combined</span></code> options). This variable must be set to a valid value when performing interpolation for forecast data to be interpolated.</p></td>
+<td><p>Model resolution if different from observations.</p></td>
+<td><p>Same as <code class="docutils literal notranslate"><span class="pre">resolution</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p>filter_species</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">forecast</span></code></p></td>
 <td><p>Optional</p></td>
-<td><p>Filter read species by other species data within a data range. The first value set is the lower bound to filter by, and the second value the upper bound. Place a sign before each bound value to inform if the filter should be inclusive or exclusive of the bound, e.g. <code class="docutils literal notranslate"><span class="pre">&lt;</span></code> or <code class="docutils literal notranslate"><span class="pre">&lt;=</span></code>. If not wishing to set either the lower or upper bounds, a <code class="docutils literal notranslate"><span class="pre">:</span></code> can be used. Optionally, a fill value can also be given as a third value to impose what the filtered data is set to, by default this is <code class="docutils literal notranslate"><span class="pre">NaN</span></code>. Multiple filters can be  set together separated by a comma (e.g. <code class="docutils literal notranslate"><span class="pre">network1:species1</span> <span class="pre">(&gt;lowerlim,</span> <span class="pre">&lt;=upperlim,</span> <span class="pre">fillvalue),</span> <span class="pre">network2:species2</span> <span class="pre">(:,</span> <span class="pre">&lt;upperlim)</span></code>).</p></td>
+<td><p>Controls how forecast data is handled: <code class="docutils literal notranslate"><span class="pre">day</span></code>, <code class="docutils literal notranslate"><span class="pre">daily</span></code>, <code class="docutils literal notranslate"><span class="pre">combined</span></code>, <code class="docutils literal notranslate"><span class="pre">dayN</span></code>, <code class="docutils literal notranslate"><span class="pre">dailyN</span></code>, <code class="docutils literal notranslate"><span class="pre">combinedN</span></code>. Multiple values of the same type can be provided (e.g. <code class="docutils literal notranslate"><span class="pre">day</span></code>, <code class="docutils literal notranslate"><span class="pre">day2</span></code>, <code class="docutils literal notranslate"><span class="pre">day3</span></code>), but different types cannot be mixed (i.e. <code class="docutils literal notranslate"><span class="pre">day</span></code> options cannot be combined with <code class="docutils literal notranslate"><span class="pre">daily</span></code> or <code class="docutils literal notranslate"><span class="pre">combined</span></code>). To limit to specific forecast days, append the day number to the option (e.g. <code class="docutils literal notranslate"><span class="pre">day1</span></code>, <code class="docutils literal notranslate"><span class="pre">daily2</span></code>, <code class="docutils literal notranslate"><span class="pre">combined3</span></code>). This variable must be set to a valid value when performing interpolation for forecast data.</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">filter_species</span></code></p></td>
+<td><p>Optional</p></td>
+<td><p>Filter read species by other species data within a data range. The first value set is the lower bound to filter by, and the second value the upper bound. Place a sign before each bound value to inform if the filter should be inclusive or exclusive of the bound, (e.g. <code class="docutils literal notranslate"><span class="pre">&lt;</span></code> or <code class="docutils literal notranslate"><span class="pre">&lt;=</span></code>). If not wishing to set either the lower or upper bounds, a <code class="docutils literal notranslate"><span class="pre">:</span></code> can be used. Optionally, a fill value can also be given as a third value to impose what the filtered data is set to, by default this is <code class="docutils literal notranslate"><span class="pre">NaN</span></code>. Multiple filters can be  set together separated by a comma (e.g. <code class="docutils literal notranslate"><span class="pre">network1:species1</span> <span class="pre">(&gt;lowerlim,</span> <span class="pre">&lt;=upperlim,</span> <span class="pre">fillvalue),</span> <span class="pre">network2:species2</span> <span class="pre">(:,</span> <span class="pre">&lt;upperlim)</span></code>).</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ghost_root</span></code></p></td>
+<td><p>Optional</p></td>
+<td><p>Root directory for GHOST observations, overwrites <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
+<td><p>From <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nonghost_root</span></code></p></td>
+<td><p>Optional</p></td>
+<td><p>Root directory for non-GHOST observations, overwrites <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
+<td><p>From <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">mod_root</span></code></p></td>
+<td><p>Optional</p></td>
+<td><p>Root directory for interpolated model data, overwrites <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
+<td><p>From <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">mod_to_interp_root</span></code></p></td>
+<td><p>Optional</p></td>
+<td><p>Root directory for non-interpolated model data, overwrites <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
+<td><p>From <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="analysis-and-visualisation-modes-dashboard-report-library">
-<h2>Analysis and visualisation modes (Dashboard, Report, Library)<a class="headerlink" href="#analysis-and-visualisation-modes-dashboard-report-library" title="Link to this heading"></a></h2>
-<p>Apart from the common parameters, these are the fields used by all analysis and visualisation modes (<a class="reference internal" href="Dashboard.html"><span class="doc std std-doc">Dashboard</span></a>, <a class="reference internal" href="Report.html"><span class="doc std std-doc">Report</span></a>, <a class="reference internal" href="Library.html"><span class="doc std std-doc">Library</span></a>). All parameters in this section are optional.</p>
+<section id="parameters-for-analysis-and-visualization-modes-dashboard-report-library">
+<span id="visualization-parameters"></span><h2>Parameters for analysis and visualization modes (Dashboard, Report, Library)<a class="headerlink" href="#parameters-for-analysis-and-visualization-modes-dashboard-report-library" title="Link to this heading"></a></h2>
+<p>Apart from the common parameters, these are the fields used by all analysis and visualisation modes (<a class="reference internal" href="Dashboard.html"><span class="doc std std-doc">Dashboard</span></a>, <a class="reference internal" href="Report.html"><span class="doc std std-doc">Report</span></a>, <a class="reference internal" href="Library.html"><span class="doc std std-doc">Library</span></a>). All parameters in this section are <strong>optional</strong>.</p>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Parameter</p></th>
 <th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>statistic_mode</p></td>
-<td><p>Statistic mode: Temporal|Spatial (default), Spatial|Temporal or Flattened.</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">statistic_mode</span></code></p></td>
+<td><p>Statistic mode: <code class="docutils literal notranslate"><span class="pre">Temporal|Spatial</span></code>, <code class="docutils literal notranslate"><span class="pre">Spatial|Temporal</span></code>, <code class="docutils literal notranslate"><span class="pre">Flattened</span></code>.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Temporal|Spatial</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p>statistic_aggregation</p></td>
-<td><p>Aggregation statistic, e.g. Median.</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">statistic_aggregation</span></code></p></td>
+<td><p>Aggregation statistic: <code class="docutils literal notranslate"><span class="pre">Median</span></code>, <code class="docutils literal notranslate"><span class="pre">Mean</span></code>, <code class="docutils literal notranslate"><span class="pre">p1</span></code>, <code class="docutils literal notranslate"><span class="pre">p5</span></code>, <code class="docutils literal notranslate"><span class="pre">p10</span></code>, <code class="docutils literal notranslate"><span class="pre">p25</span></code>, <code class="docutils literal notranslate"><span class="pre">p75</span></code>, <code class="docutils literal notranslate"><span class="pre">p90</span></code>, <code class="docutils literal notranslate"><span class="pre">p95</span></code>, <code class="docutils literal notranslate"><span class="pre">p99</span></code>.</p></td>
+<td><p>Depends on <code class="docutils literal notranslate"><span class="pre">statistic_mode</span></code>: <code class="docutils literal notranslate"><span class="pre">Median</span></code> if <code class="docutils literal notranslate"><span class="pre">Temporal|Spatial</span></code> or <code class="docutils literal notranslate"><span class="pre">Spatial|Temporal</span></code>; no aggregation if <code class="docutils literal notranslate"><span class="pre">Flattened</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p>timeseries_statistic_aggregation</p></td>
-<td><p>Timeseries aggregation statistic, e.g. Median.</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">timeseries_statistic_aggregation</span></code></p></td>
+<td><p>Timeseries aggregation statistic: <code class="docutils literal notranslate"><span class="pre">Median</span></code>, <code class="docutils literal notranslate"><span class="pre">Mean</span></code>, <code class="docutils literal notranslate"><span class="pre">p1</span></code>, <code class="docutils literal notranslate"><span class="pre">p5</span></code>, <code class="docutils literal notranslate"><span class="pre">p10</span></code>, <code class="docutils literal notranslate"><span class="pre">p25</span></code>, <code class="docutils literal notranslate"><span class="pre">p75</span></code>, <code class="docutils literal notranslate"><span class="pre">p90</span></code>, <code class="docutils literal notranslate"><span class="pre">p95</span></code>, <code class="docutils literal notranslate"><span class="pre">p99</span></code>.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Median</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p>periodic_statistic_mode</p></td>
-<td><p>Periodic statistic mode: Independent (default), Cycle.</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">periodic_statistic_mode</span></code></p></td>
+<td><p>Periodic statistic mode: <code class="docutils literal notranslate"><span class="pre">Independent</span></code>, <code class="docutils literal notranslate"><span class="pre">Cycle</span></code>.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Independent</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p>periodic_statistic_aggregation</p></td>
-<td><p>Periodic aggregation statistic, e.g. Mean (default).</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">periodic_statistic_aggregation</span></code></p></td>
+<td><p>Periodic aggregation statistic: <code class="docutils literal notranslate"><span class="pre">Median</span></code>, <code class="docutils literal notranslate"><span class="pre">Mean</span></code>, <code class="docutils literal notranslate"><span class="pre">p1</span></code>, <code class="docutils literal notranslate"><span class="pre">p5</span></code>, <code class="docutils literal notranslate"><span class="pre">p10</span></code>, <code class="docutils literal notranslate"><span class="pre">p25</span></code>, <code class="docutils literal notranslate"><span class="pre">p75</span></code>, <code class="docutils literal notranslate"><span class="pre">p90</span></code>, <code class="docutils literal notranslate"><span class="pre">p95</span></code>, <code class="docutils literal notranslate"><span class="pre">p99</span></code>.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Median</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p>temporal_colocation</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">temporal_colocation</span></code></p></td>
 <td><p>Boolean variable to set if you want to temporally colocate the observation and model data.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p>spatial_colocation</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">spatial_colocation</span></code></p></td>
 <td><p>Boolean variable to set if you want to spatially colocate the observation and model data across multiple species.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p>plot_characteristics_filename</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">plot_characteristics_filename</span></code></p></td>
 <td><p>The path to the file containing the plot characteristics.</p></td>
+<td><p>—</p></td>
 </tr>
-<tr class="row-even"><td><p>observations_data_label</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">observations_data_label</span></code></p></td>
 <td><p>Alias for observational data</p></td>
+<td><p>—</p></td>
 </tr>
-<tr class="row-odd"><td><p>lower_bound</p></td>
-<td><p>Filter out data lower than this set limit. If multiple species are being read then this can either be one value, setting the same limit across species, or multiple values per species (e.g. <code class="docutils literal notranslate"><span class="pre">3,</span> <span class="pre">4,</span> <span class="pre">5</span></code>).</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">lower_bound</span></code></p></td>
+<td><p>Filter out data lower than this set limit. If multiple species are being read then this can either be one value, setting the same limit across species or multiple values per species (e.g. <code class="docutils literal notranslate"><span class="pre">3,</span> <span class="pre">4,</span> <span class="pre">5</span></code>).</p></td>
+<td><p>—</p></td>
 </tr>
-<tr class="row-even"><td><p>upper_bound</p></td>
-<td><p>Filter out data above this set limit. If multiple species are being read then this can either be one value, setting the same limit across species, or multiple values per species (e.g. <code class="docutils literal notranslate"><span class="pre">3,</span> <span class="pre">4,</span> <span class="pre">5</span></code>).</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">upper_bound</span></code></p></td>
+<td><p>Filter out data above this set limit. If multiple species are being read then this can either be one value, setting the same limit across species or multiple values per species (e.g. <code class="docutils literal notranslate"><span class="pre">3,</span> <span class="pre">4,</span> <span class="pre">5</span></code>).</p></td>
+<td><p>—</p></td>
 </tr>
-<tr class="row-odd"><td><p>map_extent</p></td>
-<td><p>Set the map plot extents with the syntax: minimum longitude, maximum longitude, minimum latitude, maximum latitude.</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">map_extent</span></code></p></td>
+<td><p>Set the map plot extents with the syntax: minimum longitude, maximum longitude, minimum latitude, maximum latitude (e.g. <code class="docutils literal notranslate"><span class="pre">-30,</span> <span class="pre">50,</span> <span class="pre">20,</span> <span class="pre">90</span></code>).</p></td>
+<td><p>—</p></td>
 </tr>
-<tr class="row-even"><td><p>remove_extreme_stations</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">remove_extreme_stations</span></code></p></td>
 <td><p>Type of extreme stations removal, from the options given in <code class="docutils literal notranslate"><span class="pre">remove_extreme_stations.yaml</span></code>.</p></td>
+<td><p>—</p></td>
 </tr>
-<tr class="row-odd"><td><p>resampling_resolution</p></td>
-<td><p>Resolution you want to resample your data to. Options: <code class="docutils literal notranslate"><span class="pre">hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">3hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">6hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">daily</span></code>, <code class="docutils literal notranslate"><span class="pre">monthly</span></code>, <code class="docutils literal notranslate"><span class="pre">annual</span></code>.</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">resampling_resolution</span></code></p></td>
+<td><p>Resolution you want to resample your data to: <code class="docutils literal notranslate"><span class="pre">hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">3hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">6hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">daily</span></code>, <code class="docutils literal notranslate"><span class="pre">monthly</span></code>, <code class="docutils literal notranslate"><span class="pre">annual</span></code>.</p></td>
+<td><p>—</p></td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="dashboard">
-<h2>Dashboard<a class="headerlink" href="#dashboard" title="Link to this heading"></a></h2>
-<p>This parameter is used only in the <a class="reference internal" href="Dashboard.html"><span class="doc std std-doc">Dashboard mode</span></a>. It is optional.</p>
+<section id="dashboard-parameters">
+<span id="id2"></span><h2>Dashboard parameters<a class="headerlink" href="#dashboard-parameters" title="Link to this heading"></a></h2>
+<p>This parameter is used only in the <a class="reference internal" href="Dashboard.html"><span class="doc std std-doc">Dashboard mode</span></a>. It is <strong>optional</strong>.</p>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Parameter</p></th>
 <th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>active_dashboard_plots</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">active_dashboard_plots</span></code></p></td>
 <td><p>Plots that will be active in the dashboard once it is launched (e.g. <code class="docutils literal notranslate"><span class="pre">timeseries,</span> <span class="pre">periodic-violin,</span> <span class="pre">scatter,</span> <span class="pre">distribution</span></code>).</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">timeseries,</span> <span class="pre">statsummary,</span> <span class="pre">distribution,</span> <span class="pre">periodic</span></code></p></td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="report">
-<h2>Report<a class="headerlink" href="#report" title="Link to this heading"></a></h2>
-<p>These parameters are used only in the <a class="reference internal" href="Report.html"><span class="doc std std-doc">Report mode</span></a>. All of them are optional.</p>
+<section id="report-parameters">
+<span id="id3"></span><h2>Report parameters<a class="headerlink" href="#report-parameters" title="Link to this heading"></a></h2>
+<p>These parameters are used only in the <a class="reference internal" href="Report.html"><span class="doc std std-doc">Report mode</span></a>. All of them are <strong>optional</strong>.</p>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Parameter</p></th>
 <th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>report_type</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">report_type</span></code></p></td>
 <td><p>Type of report to generate that defines which plots the report will contain, from the options given in <code class="docutils literal notranslate"><span class="pre">report_plots.yaml</span></code>.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">standard</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p>report_summary</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">report_summary</span></code></p></td>
 <td><p>Boolean variable to set if you wish to make specific plots for each station in subsection.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p>report_stations</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">report_stations</span></code></p></td>
 <td><p>Boolean variable to set if you wish to make summary plots across station subsection.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p>report_title</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">report_title</span></code></p></td>
 <td><p>The header in the first page of the report (as in the PDF).</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Providentia</span> <span class="pre">Report</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p>report_filename</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">report_filename</span></code></p></td>
 <td><p>The filename of the report or the path to create the report (as in the PDF).</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">PROVIDENTIA_Report</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p>harmonise_stations</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">harmonise_stations</span></code></p></td>
 <td><p>Boolean variable to set if you wish to harmonise axes limits across stations for stations report.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p>harmonise_summary</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">harmonise_summary</span></code></p></td>
 <td><p>Boolean variable to set if you wish to harmonise axes limits across subsections for summary report.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
 </tr>
 </tbody>
 </table>
@@ -277,61 +339,90 @@
 </pre></div>
 </div>
 </section>
-<section id="interpolation">
-<h2>Interpolation<a class="headerlink" href="#interpolation" title="Link to this heading"></a></h2>
-<p>These parameters are used only in the <a class="reference internal" href="Interpolation.html"><span class="doc std std-doc">Interpolation mode</span></a>. All of them are optional.</p>
+<section id="interpolation-parameters">
+<span id="id4"></span><h2>Interpolation parameters<a class="headerlink" href="#interpolation-parameters" title="Link to this heading"></a></h2>
+<p>These parameters are used only in the <a class="reference internal" href="Interpolation.html"><span class="doc std std-doc">Interpolation mode</span></a>. All of them are <strong>optional</strong>.</p>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Parameter</p></th>
 <th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>interp_n_neighbours</p></td>
-<td><p>The number of nearest neighbours to use in the interpolation of model output to observational stations. If not set, this defaults to <code class="docutils literal notranslate"><span class="pre">4</span></code>.</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">interp_n_neighbours</span></code></p></td>
+<td><p>Number of nearest neighbours used for interpolation</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">4</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p>interp_spinup_timesteps</p></td>
-<td><p>Number of initial timesteps skipped for model spin-up. If not set, this defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">interp_reverse_vertical_orientation</span></code></p></td>
+<td><p>Reverse vertical order of model levels</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p>interp_model_downsampling</p></td>
-<td><p>Sets the statistic for the downsampling of the model resolution to the observational resolution. Options: <code class="docutils literal notranslate"><span class="pre">mean</span></code>, <code class="docutils literal notranslate"><span class="pre">median</span></code>.</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">interp_chunk_size</span></code></p></td>
+<td><p>Minimum number of jobs per interpolation chunk</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">16</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p>interp_model_upsampling</p></td>
-<td><p>Sets the method for the upsampling of the model resolution to the observational resolution. <code class="docutils literal notranslate"><span class="pre">fill</span></code> linearly fills between measurements, and <code class="docutils literal notranslate"><span class="pre">gaps</span></code> sets NaN values for times that the model does not have.</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">interp_job_array_limit</span></code></p></td>
+<td><p>Maximum number of chunks in the job array</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">100</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p>interp_multiprocessing</p></td>
-<td><p>Boolean variable to set if you wish to use multiprocessing instead of greasy to interpolate on HPC machines.</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">interp_multiprocessing</span></code></p></td>
+<td><p>Use multiprocessing instead of Greasy on HPC systems</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p>network_type</p></td>
-<td><p>Determines whether to use all GHOST or all non-GHOST networks when the observation field uses the <code class="docutils literal notranslate"><span class="pre">*</span></code> wildcard.</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">interp_spinup_timesteps</span></code></p></td>
+<td><p>Number of initial timesteps skipped for model spin-up</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">interp_model_downsampling</span></code></p></td>
+<td><p>Statistic for the downsampling of the model resolution to the observational resolution: <code class="docutils literal notranslate"><span class="pre">mean</span></code>, <code class="docutils literal notranslate"><span class="pre">median</span></code>.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mean</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">interp_model_upsampling</span></code></p></td>
+<td><p>Method for the upsampling of the model resolution to the observational resolution: <code class="docutils literal notranslate"><span class="pre">fill</span></code>, <code class="docutils literal notranslate"><span class="pre">gaps</span></code>. <code class="docutils literal notranslate"><span class="pre">fill</span></code> linearly fills between measurements, and <code class="docutils literal notranslate"><span class="pre">gaps</span></code> sets NaN values for times that the model does not have.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fill</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">network_type</span></code></p></td>
+<td><p>Determines whether to use all GHOST or all non-GHOST networks when the <code class="docutils literal notranslate"><span class="pre">observation</span></code> field uses the <code class="docutils literal notranslate"><span class="pre">*</span></code> wildcard.</p></td>
+<td><p>—</p></td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="download">
-<h2>Download<a class="headerlink" href="#download" title="Link to this heading"></a></h2>
-<p>These parameters are used only in the <a class="reference internal" href="Download.html"><span class="doc std std-doc">Download mode</span></a>. All of them are optional.</p>
+<section id="download-parameters">
+<span id="id5"></span><h2>Download parameters<a class="headerlink" href="#download-parameters" title="Link to this heading"></a></h2>
+<p>These parameters are used only in the <a class="reference internal" href="Download.html"><span class="doc std std-doc">Download mode</span></a>. All of them are <strong>optional</strong>.</p>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Parameter</p></th>
 <th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>dl_overwrite</p></td>
-<td><p>Indicates whether previously downloaded files should be overwritten.</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dl_overwrite</span></code></p></td>
+<td><p>Indicates whether previously downloaded files should be overwritten: <code class="docutils literal notranslate"><span class="pre">True</span></code>, <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></td>
+<td><p>—</p></td>
 </tr>
-<tr class="row-odd"><td><p>dl_ghost_source</p></td>
-<td><p>Determines where GHOST observations are downloaded from.</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dl_ghost_source</span></code></p></td>
+<td><p>Determines where GHOST observations are downloaded from: <code class="docutils literal notranslate"><span class="pre">bsc</span></code>, <code class="docutils literal notranslate"><span class="pre">zenodo</span></code>.</p></td>
+<td><p>—</p></td>
 </tr>
-<tr class="row-even"><td><p>dl_interpolated</p></td>
-<td><p>Specifies whether the interpolated versions of the model output should be downloaded.</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dl_interpolated</span></code></p></td>
+<td><p>Specifies whether the interpolated versions of the model output should be downloaded: <code class="docutils literal notranslate"><span class="pre">True</span></code>, <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></td>
+<td><p>—</p></td>
 </tr>
-<tr class="row-odd"><td><p>dl_mode</p></td>
-<td><p>Selects what to download when both observations and model output are present in the configuration file.</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dl_mode</span></code></p></td>
+<td><p>Selects what to download when both observations and model output are present in the configuration file: <code class="docutils literal notranslate"><span class="pre">obs</span></code>, <code class="docutils literal notranslate"><span class="pre">mod</span></code>, <code class="docutils literal notranslate"><span class="pre">both</span></code>.</p></td>
+<td><p>—</p></td>
 </tr>
-<tr class="row-even"><td><p>network_type</p></td>
-<td><p>Determines whether to use all GHOST or all non-GHOST networks when the observation field uses the <code class="docutils literal notranslate"><span class="pre">*</span></code> wildcard.</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">network_type</span></code></p></td>
+<td><p>Determines whether to use all GHOST or all non-GHOST networks when the observation field uses the <code class="docutils literal notranslate"><span class="pre">*</span></code> wildcard: <code class="docutils literal notranslate"><span class="pre">ghost</span></code>, <code class="docutils literal notranslate"><span class="pre">non-ghost</span></code>.</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dl_timeout</span></code></p></td>
+<td><p>Sets the timeout (in seconds) for downloads from HPC systems, covering interpolated and non-interpolated model data as well as GHOST and non-GHOST observations.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">180</span></code></p></td>
 </tr>
 </tbody>
 </table>

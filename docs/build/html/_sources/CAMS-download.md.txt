@@ -46,7 +46,7 @@ _"Model data was detected in the configuration file. Do you want to download the
 
 Using this dataset you can either download:
 
-* **Regional Analysis data**, or
+* **Regional Analysis data** or
 * **Regional Forecast data**
 
 This dataset contains multi-level data.

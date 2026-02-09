@@ -1,8 +1,8 @@
 # Overview
 
-The library was designed for users to exploit the powerful backend of Providentia, allowing the use of the Providentia functionalities directly in your own scripts, or within [Jupyter notebooks](Notebooks).
+The library was designed for users to exploit the powerful backend of Providentia, allowing the use of the Providentia functionalities directly in your own scripts or within [Jupyter notebooks](Notebooks).
 
-## Importing Providentia
+## Getting started
 
 If the script you are running is not inside the Providentia home directory, in order to import from Providentia, then it is necessary to add these lines to your code at the start:      
 
@@ -30,6 +30,10 @@ import providentia as prv
 After the import you will have full access to the backend of Providentia and all of its functions as described in the following sections.
 
 NOTE: In the future we will allow for Providentia to be imported as a module on the BSC machines, making this step redundant. 
+
+## Library configuration fields
+
+All parameters that can be used in the library configuration files can be found in the [Shared Parameters](shared-parameters) or [Analysis and Visualization Parameters](visualization-parameters) sections of the Configuration Fields page.
 
 ## Features
 
@@ -180,7 +184,7 @@ If wanting to filter data for a specific station or stations, the following conv
 provi.filter_station(station)
 ```
 
-where `station` corresponds to the `station_reference` of one station of interest, or can be a list of multiple stations given their `station_reference` values. This will then subsequently mean the data in memory is filtered for the relevant station or stations.
+where `station` corresponds to the `station_reference` of one station of interest or can be a list of multiple stations given their `station_reference` values. This will then subsequently mean the data in memory is filtered for the relevant station or stations.
 
 ### Library: Print active configuration file
 
@@ -202,7 +206,7 @@ In order to calculate statistics for a dataset, this can done via the following 
 stat_calc = provi.statistic(stat, labela='OBS')
 ```
 
-where `stat` is the statistic wished to be calculated, and `labela` is the name of the observations/model data (this can be an alias set in the configuration file or the original dataset name). The statistic returned will be one summary value, which can be formulated in differing ways, e.g. taking a median time series across all stations and then calculating the statistic, or calculating the statistic across all stations and then taking the median. This formulation can be set by changing the statistical mode in the configuration file, for which more information can be found [here](Statistics).
+where `stat` is the statistic wished to be calculated, and `labela` is the name of the observations/model data (this can be an alias set in the configuration file or the original dataset name). The statistic returned will be one summary value, which can be formulated in differing ways, e.g. taking a median time series across all stations and then calculating the statistic or calculating the statistic across all stations and then taking the median. This formulation can be set by changing the statistical mode in the configuration file, for which more information can be found [here](Statistics).
 
 If wanting to calculate a bias statistic, then an additional dataset is needed to be compared against, which can be set via the following argument:
 
@@ -346,7 +350,7 @@ The available plot options per plot type are given in the sections below.
 
 ##### Saving / returning plot object in memory
 
-Rather than viewing the plot on the screen, it can be returned in memory for more editing, or saved to a file.
+Rather than viewing the plot on the screen, it can be returned in memory for more editing or saved to a file.
 
 To return the plot in memory, this can be done as follows:
 

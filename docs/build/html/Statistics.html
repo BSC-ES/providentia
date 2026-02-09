@@ -486,7 +486,7 @@ n &amp;= \text{number of paired values}
 <section id="mfb-mean-fractional-bias">
 <h3>MFB (Mean Fractional Bias)<a class="headerlink" href="#mfb-mean-fractional-bias" title="Link to this heading"></a></h3>
 <p>Computes the average fractional difference between model and observations, expressed as a percentage. Equally weights positive and negative biases and does not treat observations as the absolute “true” value.</p>
-<p>Otherwise known as fractional bias (FB), or modified normalised mean bias (MNMB).</p>
+<p>Otherwise known as fractional bias (FB) or modified normalised mean bias (MNMB).</p>
 <div class="math notranslate nohighlight">
 \[
 \text{MFB} = \frac{1}{n} \sum_{i=1}^{n} \frac{m_i - o_i}{\frac{m_i + o_i}{2}} \cdot 100
@@ -506,7 +506,7 @@ n &amp;= \text{number of paired values}
 <section id="me-mean-error-nme-normalised-mean-error">
 <h3>ME (Mean Error), NME (Normalised Mean Error)<a class="headerlink" href="#me-mean-error-nme-normalised-mean-error" title="Link to this heading"></a></h3>
 <p>Computes the average absolute difference between model and observations. Always positive, highlighting biases that may cancel out in MB. Has a normalised option expressed as a percentage (NME).</p>
-<p>ME is otherwise known as mean gross error (MGE), mean absolute error (MAE), or mean absolute gross error (MAGE). NME is otherwise known as normalised mean gross error (NMGE), or normalised mean absolute error (NMAE).</p>
+<p>ME is otherwise known as mean gross error (MGE), mean absolute error (MAE) or mean absolute gross error (MAGE). NME is otherwise known as normalised mean gross error (NMGE) or normalised mean absolute error (NMAE).</p>
 <div class="math notranslate nohighlight">
 \[
 \text{ME} = \frac{1}{n} \sum_{i=1}^{n} |m_i - o_i|
@@ -553,7 +553,7 @@ n &amp;= \text{number of paired values}
 <section id="mfe-mean-fractional-error">
 <h3>MFE (Mean Fractional Error)<a class="headerlink" href="#mfe-mean-fractional-error" title="Link to this heading"></a></h3>
 <p>Computes the mean absolute fractional difference between model and observations, expressed as a percentage. Always positive.</p>
-<p>Otherwise known as fractional error (FE), fractional gross error (FGE), or mean absolute fractional bias (MAFB).</p>
+<p>Otherwise known as fractional error (FE), fractional gross error (FGE) or mean absolute fractional bias (MAFB).</p>
 <div class="math notranslate nohighlight">
 \[
 \text{MFE} = \frac{1}{n} \sum_{i=1}^{n} \frac{|m_i - o_i|}{\frac{m_i + o_i}{2}} \cdot 100

@@ -7,7 +7,7 @@ A Jupyter notebook can be launched with the following command:
 ```
 ./bin/providentia --notebook
 ```         
-If you are on a local machine, this will directly open Jupyter in your web browser, or if you are on a HPC it will start a job on the machine with SLURM. 
+If you are on a local machine, this will directly open Jupyter in your web browser or if you are on a HPC it will start a job on the machine with SLURM. 
 
 For the HPC case, a file named `notebook.out` will be created. Information in the file will then allow for a connection to a Jupyter notebook to be set up. Firstly, an SSH tunnel from the local machine needs to be set up, by pasting a given command into a Linux/MacOS terminal or equivalent (i.e. PuTTY on Windows), e.g.:
 

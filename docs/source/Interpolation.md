@@ -24,6 +24,10 @@ The interpolation mode fetches all the content specified in your configuration f
 
 In terms of performance, we recommend running Providentia Interpolation in MareNostrum5.
 
+## Interpolation configuration fields
+
+All parameters that can be used in the interpolation configuration files can be found in the [Shared Parameters](shared-parameters) or [Interpolation Parameters](interpolation-parameters) sections of the Configuration Fields page.
+
 ## Execution details
 
 ### Local users
@@ -38,36 +42,6 @@ Upon submission, a first job named `PRV` will start the submission process which
 
 When all jobs have been completed (or there is a failure) the `PRVI` job will exit the queue.
 
-### Interpolation configuration fields
-
-During the interpolation step, only a specific set of configuration fields is used. All required fields must be provided, otherwise, the process will fail at startup.
-
-| Variable | Description | Required | Default |
-|--------|------------|----------|---------|
-| `ghost_version` | GHOST version used when a GHOST network is selected | No | 1.5 |
-| `start_date` | Start date of interpolation (`YYYYMM`) | Yes | — |
-| `end_date` | End date of interpolation (`YYYYMM`) | Yes | — |
-| `model`, `models`, `experiments`, `experiment` | Model ID(s) to be interpolated | Yes | — |
-| `domain` | Domain of the model, can be indicated in the model field (e.g. `regional`, `global`) | No | — |
-| `ensemble` | Ensemble of the model, can be indicated in the model field (e.g. `000`, `001`) | No | — |
-| `species` | Species to load (e.g. `sconco3`, `pm10`) | Yes | — |
-| `network`, `observation`, `framework` | Observation network to use (e.g. `EBAS`, `EEA_AQ_eReporting`) | Yes | — |
-| `network_type` | Network type when wildcards are used (`GHOST`, non-GHOST or both) | No | Both |
-| `resolution` | Observation data resolution (e.g. `hourly`, `daily`) | Yes | — |
-| `model_resolution` | Model resolution if different from observations | No | Same as `resolution` |
-| `forecast` | Controls how forecast data is handled. This variable must be set to a valid value when performing interpolation for forecast data to be interpolated (`day`,`daily`,`combined`,`dayN`,`dailyN`,`combinedN`) | No | All |
-| `interp_spinup_timesteps` | Number of initial timesteps skipped for model spin-up | No | `0` |
-| `interp_model_downsampling` | Statistic for the downsampling of the model resolution to the observational resolution (`mean`, `median`) | No | `mean` |
-| `interp_model_upsampling` | Method for the upsampling of the model resolution to the observational resolution (`fill`, `gaps`) | No | `fill` |
-| `interp_n_neighbours` | Number of nearest neighbours used for interpolation | No | `4` |
-| `interp_reverse_vertical_orientation` | Reverse vertical order of model levels | No | `false` |
-| `interp_chunk_size` | Minimum number of jobs per interpolation chunk | No | `16` |
-| `interp_job_array_limit` | Maximum number of chunks in the job array | No | `100` |
-| `interp_multiprocessing` | Use multiprocessing instead of Greasy on HPC systems | No | `false` |
-| `mod_root` | Root directory for interpolated model data, overwrites `data_paths.yaml` | No | From `data_paths.yaml` |
-| `ghost_root` | Root directory for GHOST observations, overwrites `data_paths.yaml` | No | From `data_paths.yaml` |
-| `nonghost_root` | Root directory for non-GHOST observations, overwrites `data_paths.yaml` | No | From `data_paths.yaml` |
-| `mod_to_interp_root` | Root directory for non-interpolated model data, overwrites `data_paths.yaml` | No | From `data_paths.yaml` |
 
 ### Interpolation considerations
 

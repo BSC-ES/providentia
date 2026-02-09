@@ -106,10 +106,10 @@
              
   <section class="tex2jax_ignore mathjax_ignore" id="filtering">
 <h1>Filtering<a class="headerlink" href="#filtering" title="Link to this heading"></a></h1>
-<p>In Providentia there are substantial number of options when it comes to filtering data. Here we go through each of these one by one, and explain how they can be applied through the dashboard, or via configuration file.</p>
+<p>In Providentia there are substantial number of options when it comes to filtering data. Here we go through each of these one by one, and explain how they can be applied through the dashboard or via configuration file.</p>
 <section id="dashboard-filtering">
 <h2>Dashboard filtering<a class="headerlink" href="#dashboard-filtering" title="Link to this heading"></a></h2>
-<p>ALL of the filters explained in the following sections can be selected on the dashboard menu bar, either in the <strong>Data Selection</strong> section, or in the <strong>Filters</strong> section.</p>
+<p>ALL of the filters explained in the following sections can be selected on the dashboard menu bar, either in the <strong>Data Selection</strong> section or in the <strong>Filters</strong> section.</p>
 <p>A general important rule to remember is when things are modified in the <strong>Data Selection</strong> section, then data must be re-read using the <strong>READ</strong> button for the filters to be applied.</p>
 <p>When things are modified in the <strong>Filters</strong> section, then the <strong>FILTER</strong> button must be clicked to apply the filters. These filters can then be removed (back to defaults) by clicking the <strong>RESET</strong> button.</p>
 </section>
@@ -129,7 +129,7 @@
 </section>
 <section id="text-metadata">
 <h3>Text metadata<a class="headerlink" href="#text-metadata" title="Link to this heading"></a></h3>
-<p>Text metadata is filtered by either setting to <strong>keep</strong> or <strong>remove</strong> specific fields for a variable, for example keeping Spanish and French stations, or removing just UK stations:</p>
+<p>Text metadata is filtered by either setting to <strong>keep</strong> or <strong>remove</strong> specific fields for a variable, for example keeping Spanish and French stations or removing just UK stations:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">country</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">Spain</span><span class="p">,</span> <span class="n">France</span>
 <span class="n">country</span> <span class="o">=</span> <span class="n">remove</span><span class="p">:</span> <span class="n">United</span> <span class="n">Kingdom</span>
 </pre></div>
@@ -139,7 +139,7 @@
 </section>
 <section id="qa-flags">
 <h2>QA flags<a class="headerlink" href="#qa-flags" title="Link to this heading"></a></h2>
-<p>Observations of atmospheric species are taken by scientists in the real-world where issues with instruments, meteorology, or even human error can mean observations are subject to significant biases, which left alone could impose significant biases for evaluations with model data. Fortunately when this occurs observations are typically flagged so they can be screened out.</p>
+<p>Observations of atmospheric species are taken by scientists in the real-world where issues with instruments, meteorology or even human error can mean observations are subject to significant biases, which left alone could impose significant biases for evaluations with model data. Fortunately when this occurs observations are typically flagged so they can be screened out.</p>
 <p>There are two sets of QA flags available in Providentia for filtering observations when using GHOST or ACTRIS data.</p>
 <ul class="simple">
 <li><p><strong>flags</strong> - flags that relate to standardised data flags taken from the data provider.</p></li>
@@ -213,7 +213,7 @@
 </section>
 <section id="periods">
 <span id="id2"></span><h2>Periods<a class="headerlink" href="#periods" title="Link to this heading"></a></h2>
-<p>It is often desired to select or remove certain periods over a time range, for example just keep daytime data, or remove summertime data. Providentia gives an easy way to filter in such a way using the <code class="docutils literal notranslate"><span class="pre">period</span></code> variable when using GHOST data.</p>
+<p>It is often desired to select or remove certain periods over a time range, for example just keep daytime data or remove summertime data. Providentia gives an easy way to filter in such a way using the <code class="docutils literal notranslate"><span class="pre">period</span></code> variable when using GHOST data.</p>
 <p>The available period fields that that can be selected are: <code class="docutils literal notranslate"><span class="pre">Daytime</span></code>, <code class="docutils literal notranslate"><span class="pre">Nighttime</span></code>, <code class="docutils literal notranslate"><span class="pre">Weekday</span></code>, <code class="docutils literal notranslate"><span class="pre">Weekend</span></code>, <code class="docutils literal notranslate"><span class="pre">Spring</span></code>, <code class="docutils literal notranslate"><span class="pre">Summer</span></code>, <code class="docutils literal notranslate"><span class="pre">Autumn</span></code>, <code class="docutils literal notranslate"><span class="pre">Winter</span></code>. The availability of some of these fields is contingent on the active temporal resolution of data, for example <strong>Daytime</strong> values cannot be selected when monthly data is loaded.</p>
 <p>When wanting to apply these via configuration file the syntax is the same as the text metadata filtering with a small caveat, that you can both keep and remove fields at the same time by using a <strong>double pipe “||”</strong> between the keep and remove definitions to distinguish between them, for example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">period</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">Winter</span>

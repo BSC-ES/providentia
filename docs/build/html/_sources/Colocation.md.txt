@@ -42,7 +42,7 @@ Spatial colocation can be set in the configuration file by setting a boolean as 
 spatial_colocation = False
 ```
 
-On the dashboard, only one species is allowed to be loaded at once, so in theory it should not be possible to use spatial colocation. However there is a workaround using **filter_species** if loading the dashboard from a configuration file, or set under the **MULTI** button on the menu bar if not. If we filter the one loaded species with one or multiple filter species as follows, not filtering by any data range, then the resultant stations will be same as when loading multiple species with spatial colocation active: 
+On the dashboard, only one species is allowed to be loaded at once, so in theory it should not be possible to use spatial colocation. However there is a workaround using **filter_species** if loading the dashboard from a configuration file or set under the **MULTI** button on the menu bar if not. If we filter the one loaded species with one or multiple filter species as follows, not filtering by any data range, then the resultant stations will be same as when loading multiple species with spatial colocation active: 
 
 ```
 network = EBAS
