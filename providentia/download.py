@@ -60,9 +60,6 @@ class Download(object):
         # get origin update (ACTRIS)
         self.origin_update_choice = env.get("ORIGIN_UPDATE")
 
-        # set timeout limit
-        self.timeoutLimit = 3 * 60
-
         # initialise default configuration variables
         # modified by commandline arguments, if given
         self.provconf = ProvConfiguration(self, **self.commandline_arguments)
@@ -1660,7 +1657,7 @@ class Download(object):
             Total size of the file being downloaded.
         """
          
-        if (time.time() - self.ncfile_dl_start_time) > self.timeoutLimit:
+        if (time.time() - self.ncfile_dl_start_time) > self.dl_timeout:
             error = 'Download timeout, try later.'
             self.logger.error(error)
             sys.exit(1)

@@ -729,6 +729,10 @@ class ProvConfiguration:
         elif key == 'cpus_per_task':
             if value is not None:
                 return math.ceil(float(value))
+            
+        elif key == 'dl_timeout':
+            if value is not None:
+                return float(value)
         
         # if no special parsing treatment for variable, simply return value
         return value

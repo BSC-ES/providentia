@@ -65,3 +65,4 @@ download:
   end_date:
   ensemble:
     - "000"
+  dl_timeout: 180
