@@ -114,11 +114,13 @@ def test_make_fairmode_statsummary(inst, statistic_mode, network_type):
     plot(inst, statistic_mode, network_type, 'boxplot')
 
 
-@pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
+# Contingency table cannot be created for od550aero
+@pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities[0:3])
 def test_make_contingencytable(inst, statistic_mode, network_type):
     plot(inst, statistic_mode, network_type, 'contingencytable')
 
 
-@pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
+# Gerrity table cannot be created for od550aero
+@pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities[0:3])
 def test_make_gerritytable(inst, statistic_mode, network_type):
     plot(inst, statistic_mode, network_type, 'contingencytable', ['gerrity'])

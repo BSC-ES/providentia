@@ -832,12 +832,19 @@ class Canvas(FigureCanvas):
                         self.read_instance.handle_layout_update('None', sender=plot_type_position)
                         return
                 
-                # if we have more than one model, skip contingency table
-                if plot_type == 'contingencytable' and len(self.read_instance.data_labels) == 3:
-                    msg = f'It is not possible to make {plot_type} plots with more than 1 model.'
-                    show_message(self.read_instance, msg)
-                    self.read_instance.handle_layout_update('None', sender=plot_type_position)
-                    return
+                if plot_type == 'contingencytable':
+                    # if we have more than one model, skip contingency table
+                    if len(self.read_instance.data_labels) == 3:
+                        msg = f'It is not possible to make {plot_type} plots with more than 1 model.'
+                        show_message(self.read_instance, msg)
+                        self.read_instance.handle_layout_update('None', sender=plot_type_position)
+                        return
+                    # if do not have correct species, cannot make contingency table
+                    if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5', 'sconcso2']:
+                        msg = f'Contingency table cannot be created for {speci}.'
+                        show_message(self.read_instance, msg)
+                        self.read_instance.handle_layout_update('None', sender=plot_type_position)
+                        return
             
                 # if do not have correct resolution or species, cannot make fairmode plots
                 if plot_type in ['fairmode-target', 'fairmode-statsummary']:

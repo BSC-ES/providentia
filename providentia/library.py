@@ -617,6 +617,13 @@ class Providentia:
             if not any(valid_station_idxs):
                 self.logger.info(f'No data after filtering by coverage for {speci}.')
                 return
+            
+        if base_plot_type == 'contingencytable':
+            # warning for contingency table if species aren't PM2.5, PM10, NO2, O3, or SO2
+            if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5', 'sconcso2']:
+                msg = f'Contingency table cannot be created for {speci}.'
+                show_message(self, msg)
+                return
 
         # get data labels for plot
         if len(data_labels) == 0:

@@ -1268,6 +1268,14 @@ class Report:
                 if not any(valid_station_idxs):
                     self.logger.info(f'No data to generate FAIRMODE plot after filtering by coverage for {speci}.')
                     continue
+            
+            if base_plot_type == 'contingencytable':
+                # warning for contingency tables if species aren't PM2.5, PM10, NO2, O3 or SO2
+                speci = networkspeci.split('|')[1]
+                if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5', 'sconcso2']:
+                    msg = f'Contingency table cannot be created for {speci}.'
+                    show_message(self, msg)
+                    continue
 
             # make plot
             plot_indices = self.make_plot('summary', plot_type, plot_options, networkspeci)
@@ -1440,9 +1448,9 @@ class Report:
                                                                     plot_type, 
                                                                     self.current_station_name))   
 
+                speci = networkspeci.split('|')[1]
                 if base_plot_type in ['fairmode-target', 'fairmode-statsummary']:
                     # warning for fairmode plots if species aren't PM2.5, PM10, NO2 or O3
-                    speci = networkspeci.split('|')[1]
                     if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
                         msg = f'Fairmode plot cannot be created for {speci} in {self.current_station_name}.'
                         show_message(self, msg)
@@ -1459,7 +1467,14 @@ class Report:
                     if not any(valid_station_idxs):
                         self.logger.info(f'No data to generate FAIRMODE plot after filtering by coverage for {speci} in {self.current_station_name}.')
                         continue
-
+                
+                if base_plot_type == 'contingencytable':
+                    # warning for contingency tables if species aren't PM2.5, PM10, NO2, O3 or SO2
+                    if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5', 'sconcso2']:
+                        msg = f'Contingency table cannot be created for {speci} in {self.current_station_name}.'
+                        show_message(self, msg)
+                        continue
+                    
                 # make plot                
                 plot_indices = self.make_plot('station', plot_type, plot_options, networkspeci)
 
