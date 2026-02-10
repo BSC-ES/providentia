@@ -90,12 +90,12 @@ class Canvas(FigureCanvas):
         # define all possible plots
         self.all_plots = ['legend', 'map', 'timeseries', 'periodic-violin', 'periodic', 
                           'metadata', 'distribution', 'scatter', 'statsummary', 'boxplot',
-                          'taylor', 'fairmode-target', 'fairmode-statsummary']
+                          'taylor', 'fairmode-target', 'fairmode-statsummary', 'contingencytable']
 
         # define all possible plots in layout options
         self.layout_options = ['None', 'boxplot', 'distribution', 'metadata', 'periodic', 
                                'periodic-violin', 'scatter', 'statsummary', 'timeseries', 'taylor', 
-                               'fairmode-target', 'fairmode-statsummary']
+                               'fairmode-target', 'fairmode-statsummary', 'contingencytable']
         
         # stop running if plot type in active_dashboard_plots does not exist
         for plot_type in self.read_instance.active_dashboard_plots:
@@ -792,6 +792,7 @@ class Canvas(FigureCanvas):
         
         # redraw plot
         self.figure.canvas.draw()
+
         # flush events so can see map selection immediately 
         self.figure.canvas.flush_events()
 
@@ -820,7 +821,7 @@ class Canvas(FigureCanvas):
                     return
                 
                 # if temporal colocation is turned off or there are no models, skip some plots
-                if plot_type in ['scatter', 'taylor', 'fairmode-target', 'fairmode-statsummary']:
+                if plot_type in ['scatter', 'taylor', 'fairmode-target', 'fairmode-statsummary', 'contingencytable']:
                     if ((not self.read_instance.temporal_colocation) 
                         or ((self.read_instance.temporal_colocation) and (len(self.read_instance.data_labels) == 1))):
                         if (not self.read_instance.temporal_colocation):
@@ -831,6 +832,13 @@ class Canvas(FigureCanvas):
                         self.read_instance.handle_layout_update('None', sender=plot_type_position)
                         return
                 
+                # if we have more than one model, skip contingency table
+                if plot_type == 'contingencytable' and len(self.read_instance.data_labels) == 3:
+                    msg = f'It is not possible to make {plot_type} plots with more than 1 model.'
+                    show_message(self.read_instance, msg)
+                    self.read_instance.handle_layout_update('None', sender=plot_type_position)
+                    return
+            
                 # if do not have correct resolution or species, cannot make fairmode plots
                 if plot_type in ['fairmode-target', 'fairmode-statsummary']:
                     speci = self.read_instance.networkspeci.split('|')[1]
@@ -924,7 +932,7 @@ class Canvas(FigureCanvas):
                     # get r or r2 as correlation statistic
                     corr_stat = self.plot_characteristics[plot_type]['corr_stat']
                     relevant_zstats = [corr_stat, "StdDev"]
-                
+
                 # setup xlabel / ylabel for other plot_types
                 else:    
                     # set new xlabel
@@ -978,7 +986,7 @@ class Canvas(FigureCanvas):
                                                 self.plot_characteristics[plot_type], plot_options, relim=True, autoscale=True)
 
                 # set axes labels
-                if plot_type != 'taylor':
+                if plot_type not in ['taylor', 'contingencytable']:
                     # set xlabel
                     set_axis_label(ax, 'x', xlabel, self.plot_characteristics[plot_type])
                     # set ylabel
@@ -1884,7 +1892,7 @@ class Canvas(FigureCanvas):
                 for objects in [ax_to_remove.lines, ax_to_remove.artists]:
                     self.remove_axis_objects(objects)
 
-            elif plot_type == 'statsummary':
+            elif plot_type in ['statsummary', 'contingencytable']:
                 self.remove_axis_objects(ax_to_remove.tables)
             
             elif plot_type in ['taylor', 'scatter']:
@@ -1933,11 +1941,19 @@ class Canvas(FigureCanvas):
                 plot_type = plot_type.replace('-','_')
             cb_options = getattr(self, plot_type + '_options')
 
+            if plot_type == 'contingencytable':
+                # if more than one station is selected, select gerrity as it is already showing
+                n_stations = self.selected_station_data[self.read_instance.networkspeci]['per_station'].shape[1]
+
             # uncheck all options
             for option in all_plot_options:
                 index = all_plot_options.index(option)
+                if plot_type == 'contingencytable' and n_stations > 1:
+                    state = QtCore.Qt.Checked
+                else:
+                    state = QtCore.Qt.Unchecked
                 self.read_instance.block_MPL_canvas_updates = True
-                cb_options.model().item(index).setCheckState(QtCore.Qt.Unchecked)
+                cb_options.model().item(index).setCheckState(state)
                 self.read_instance.block_MPL_canvas_updates = False
             
             # check selected options
@@ -2678,6 +2694,16 @@ class Canvas(FigureCanvas):
                                                'markersize_sl': [self.taylor_markersize_sl]
                                                }
 
+        # CONTINGENCY TABLE SETTINGS MENU #
+        # create contingency table settings menu
+        self.contingencytable_menu = SettingsMenu(plot_type='contingencytable', canvas_instance=self)
+        self.contingencytable_options = self.contingencytable_menu.checkable_comboboxes['options']
+        self.contingencytable_elements = self.contingencytable_menu.get_elements()
+
+        # get contingency table interactive dictionary
+        self.interactive_elements['contingencytable'] = {'hidden': True
+                                               }
+        
         # create array with buttons and elements to edit when the canvas is resized or the plots are changed
         self.menu_buttons = []
         self.save_buttons = []
@@ -2836,6 +2862,7 @@ class Canvas(FigureCanvas):
         self.update_smooth_min_points(plot_type, smooth_min_points)
 
         return None
+    
     def update_plot_option(self):
         """ 
         Function to handle the update of the plot options
@@ -3095,6 +3122,17 @@ class Canvas(FigureCanvas):
                                               self.plot_characteristics[plot_type],  
                                               self.current_plot_options[plot_type])
 
+                    # option 'gerrity'
+                    elif option == 'gerrity':
+                        # clear all previously plotted artists for plot type
+                        self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
+                        
+                        # make plot again considering plot option
+                        func = getattr(self.plotting, 'make_contingencytable')
+                        func(self.plot_axes[plot_type], self.read_instance.networkspeci, 
+                             self.read_instance.data_labels, self.plot_characteristics[plot_type], 
+                             self.current_plot_options[plot_type])
+                            
                     # option 'threshold'
                     elif option == 'threshold':
                         if not undo:
@@ -3414,7 +3452,8 @@ class Canvas(FigureCanvas):
         """
         
         # set markersize
-        if plot_type in ['timeseries', 'periodic', 'scatter', 'periodic-violin', 'taylor', 'fairmode-target', 'fairmode-statsummary']:
+        if plot_type in ['timeseries', 'periodic', 'scatter', 'periodic-violin', 'taylor', 'fairmode-target', 
+                         'fairmode-statsummary']:
             
             if isinstance(ax, dict):
                 for sub_ax in ax.values():

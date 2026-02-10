@@ -225,11 +225,16 @@ class Report:
             self.summary_plots_to_make = []
             self.station_plots_to_make = []
             if isinstance(self.report_plots[self.report_type], list):
-                self.summary_plots_to_make = self.report_plots[self.report_type]
                 for plot_type in self.report_plots[self.report_type]:
                     # there can be no station specific plots for map plot type
                     if plot_type[:4] != 'map-':
                         self.station_plots_to_make.append(plot_type)
+                    # there can be no summary specific contingency tables (if gerrity, then allow)
+                    if (plot_type[:16] != 'contingencytable'):
+                        self.summary_plots_to_make.append(plot_type)
+                    else:
+                        if ('gerrity' in plot_type.split('_')[1:]):
+                            self.summary_plots_to_make.append(plot_type)
             elif isinstance(self.report_plots[self.report_type], dict):
                 # get summary plots
                 if 'summary' in self.report_plots[self.report_type].keys():
@@ -237,7 +242,13 @@ class Report:
                         msg = 'report_summary is False, summary plots will not be created.'
                         show_message(self, msg)
                     else:
-                        self.summary_plots_to_make = self.report_plots[self.report_type]['summary']
+                        # there can be no summary specific contingency tables (if gerrity, then allow)
+                        for plot_type in self.report_plots[self.report_type]['summary']:
+                            if (plot_type[:16] != 'contingencytable'):
+                                self.summary_plots_to_make.append(plot_type)
+                            else:
+                                if ('gerrity' in plot_type.split('_')[1:]):
+                                    self.summary_plots_to_make.append(plot_type)
                 # get station plots
                 if 'station' in self.report_plots[self.report_type].keys():
                     if not self.report_stations:
@@ -1677,6 +1688,11 @@ class Report:
         # do not make statsummary plot if stat is MDA8, and are making periodic statistic
         if (base_plot_type == 'statsummary') and (base_zstat == 'MDA8') and (z_statistic_period is not None):
             msg = f"Cannot make {plot_type} because MDA8 statistic is not available for periodic statistics. Not making plot."
+            show_message(self, msg)
+            return plot_indices
+
+        if (base_plot_type == 'contingencytable') and not self.temporal_colocation:
+            msg = f"Cannot make {plot_type} because temporal colocation is False. Not making plot."
             show_message(self, msg)
             return plot_indices
 

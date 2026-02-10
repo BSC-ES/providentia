@@ -1,0 +1,15 @@
+pm2p5:
+  limits: [0, 10, 20, 25, 50, 75, 800]
+  units: ug m-3
+pm10: 
+  limits: [0, 20, 40, 50, 100, 150, 1200]
+  units: ug m-3
+sconcno2:
+  limits: [0, 40, 90, 120, 230, 340, 1000]
+  units: ug m-3
+sconco3:
+  limits: [0, 50, 100, 130, 240, 380, 800]
+  units: ug m-3
+sconcso2:
+  limits: [0, 100, 200, 350, 500, 750, 1250]
+  units: ug m-3

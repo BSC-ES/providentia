@@ -112,3 +112,13 @@ def test_make_fairmode_statsummary(inst, statistic_mode, network_type):
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
 def test_make_fairmode_statsummary(inst, statistic_mode, network_type):
     plot(inst, statistic_mode, network_type, 'boxplot')
+
+
+@pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
+def test_make_contingencytable(inst, statistic_mode, network_type):
+    plot(inst, statistic_mode, network_type, 'contingencytable')
+
+
+@pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
+def test_make_gerritytable(inst, statistic_mode, network_type):
+    plot(inst, statistic_mode, network_type, 'contingencytable', ['gerrity'])

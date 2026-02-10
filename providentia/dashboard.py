@@ -991,9 +991,9 @@ class Dashboard(QtWidgets.QWidget):
     
         # remove plot types that need active temporal colocation and model
         if Version(matplotlib.__version__) < Version("3.8"):
-            available_plots = ['scatter', 'fairmode-target', 'fairmode-statsummary']
+            available_plots = ['scatter', 'fairmode-target', 'fairmode-statsummary', 'contingencytable']
         else:
-            available_plots = ['scatter', 'taylor', 'fairmode-target', 'fairmode-statsummary']        
+            available_plots = ['scatter', 'taylor', 'fairmode-target', 'fairmode-statsummary', 'contingencytable']      
         for plot_type in available_plots:
             if ((not self.temporal_colocation) 
                 or ((self.temporal_colocation) and (len(self.experiments) == 0))): 
