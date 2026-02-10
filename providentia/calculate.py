@@ -9,6 +9,9 @@ and https://github.com/davidcarslaw/openair/blob/HEAD/R/modStats.R
 
 import copy
 import numpy as np
+import pandas as pd
+import xarray as xr
+import xskillscore as xs
 
 def nansumwrapper(data, **kwargs):
     """Sum array elements over a given axis treating Not a Numbers as zero, returning NaN if all elements are NaN.
@@ -1027,4 +1030,47 @@ class ModBias(object):
                 return np.nan, np.nan, np.nan
             elif plot == 'summary':
                 return np.nan, np.nan, np.nan, np.nan, np.nan, np.nan
-        
+    
+    @staticmethod
+    def calculate_contingency_table(obs, mod, limits, index_levels, time_index, edges):
+        """ 
+        Calculate contingency table
+
+        Parameters
+        ----------
+        obs : numpy.array
+            Observations data array
+        mod : numpy.array
+            Model data array
+        limits : list
+            AQI category limits
+        index_levels : list
+            AQI categories
+        time_index : np.array
+            Datetimes
+        edges : list
+            Contingency table edges
+        """
+
+        cut_obs_data = pd.cut(obs, limits, labels=index_levels)
+        cut_model_data = pd.cut(mod, limits, labels=index_levels)
+
+        obs_data = xr.DataArray(cut_obs_data, dims=["time"], coords={"time": time_index})
+        model_data = xr.DataArray(cut_model_data, dims=["time"], coords={"time": time_index})
+
+        edges = np.array(edges)
+
+        return xs.Contingency(obs_data, model_data, edges, edges, dim=['time'])
+
+    @staticmethod
+    def calculate_gerrity_score(contingency_table):
+        """ 
+        Calculate gerrity score from contingency table
+
+        Parameters
+        ----------
+        contingency_table : xs.Contingency
+            Contingency table
+        """
+
+        return contingency_table.gerrity_score().values.item()

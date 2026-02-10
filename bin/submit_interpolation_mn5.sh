@@ -14,9 +14,9 @@ conda config --set env_prompt '($(basename {default_env})) '
 if ! { conda config --show-sources | grep '/gpfs/projects/bsc32/repository/apps/conda_envs/'; } >/dev/null 2>&1; then
     conda config --append envs_dirs /gpfs/projects/bsc32/repository/apps/conda_envs/
 fi
-if { conda env list | grep 'providentia-env_v3.0.1'; } >/dev/null 2>&1; then 
-    echo "Activating conda environment in /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.1..."
-    conda activate providentia-env_v3.0.1
+if { conda env list | grep 'providentia-env_v3.0.2'; } >/dev/null 2>&1; then 
+    echo "Activating conda environment in /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.2..."
+    conda activate providentia-env_v3.0.2
 else 
     echo "Environment not found in /gpfs/projects/bsc32/repository/apps/conda_envs/"
 fi
