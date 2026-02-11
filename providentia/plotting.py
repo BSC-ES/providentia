@@ -2918,6 +2918,7 @@ class Plotting:
         index_levels = plot_characteristics["index_levels"]
         levels = plot_characteristics["levels"]
         edges = plot_characteristics["edges"] 
+        gerrity_row_limit = plot_characteristics["gerrity_row_limit"]
 
         # get valid data labels for networkspeci
         valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
@@ -2974,15 +2975,17 @@ class Plotting:
                         'Gerrity Score': gerrity_score
                     })
 
-                    if self.read_instance.mode not in ['report', 'library'] and station_ind > 9 and n_stations != 10:
-                        results.append({
-                            'Station reference': '...',
-                            'Station name': '...',
-                            'Latitude': '...',
-                            'Longitude': '...',
-                            'Gerrity Score': '...'
-                        })
-                        break
+                    # Hide last rows if there is a limit
+                    if gerrity_row_limit is not None:
+                        if station_ind > gerrity_row_limit-1 and n_stations != gerrity_row_limit:
+                            results.append({
+                                'Station reference': '...',
+                                'Station name': '...',
+                                'Latitude': '...',
+                                'Longitude': '...',
+                                'Gerrity Score': '...'
+                            })
+                            break
 
                 # Show contingency table (only available per station)
                 else:

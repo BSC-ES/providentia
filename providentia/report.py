@@ -1706,11 +1706,21 @@ class Report:
             show_message(self, msg)
             return plot_indices
 
-        if (base_plot_type == 'contingencytable') and not self.temporal_colocation:
-            msg = f"Cannot make {plot_type} because temporal colocation is False. Not making plot."
-            show_message(self, msg)
-            return plot_indices
-
+        if base_plot_type == 'contingencytable':
+            if ((not self.temporal_colocation) 
+                or ((self.temporal_colocation) and (len(data_labels) == 1 or len(data_labels) > 2))):
+                # do not make contingencytable if temporal colocation if off
+                if not self.temporal_colocation:
+                    msg = f'Cannot make {plot_type} plots without activating the temporal colocation.'
+                # do not make contingencytable if no model is loaded
+                elif len(data_labels) == 1:
+                    msg = f'Cannot make {plot_type} plots without loading models.'
+                # do not make contingencytable if more than one model is loaded
+                elif len(data_labels) > 2:
+                    msg = f'Cannot make {plot_type} plots with more than 1 model.'
+                show_message(self, msg)
+                return plot_indices
+                
         # get data labels without observations
         data_labels_sans_obs = copy.deepcopy(data_labels)
         if self.observations_data_label in data_labels_sans_obs:
