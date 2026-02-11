@@ -624,7 +624,21 @@ class Providentia:
                 msg = f'Contingency table cannot be created for {speci}.'
                 show_message(self, msg)
                 return
-
+            
+            if ((not self.temporal_colocation) 
+                or ((self.temporal_colocation) and (len(self.data_labels) == 1 or len(self.data_labels) > 2))):
+                # do not make contingencytable if temporal colocation if off
+                if not self.temporal_colocation:
+                    msg = f'Cannot make {plot_type} plots without activating the temporal colocation.'
+                # do not make contingencytable if no model is loaded
+                elif len(self.data_labels) == 1:
+                    msg = f'Cannot make {plot_type} plots without loading models.'
+                # do not make contingencytable if more than one model is loaded
+                elif len(self.data_labels) > 2:
+                    msg = f'Cannot make {plot_type} plots with more than 1 model.'
+                show_message(self, msg)
+                return
+                
         # get data labels for plot
         if len(data_labels) == 0:
             data_labels = copy.deepcopy(self.data_labels)
