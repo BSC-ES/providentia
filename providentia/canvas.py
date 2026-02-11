@@ -832,6 +832,7 @@ class Canvas(FigureCanvas):
                         self.read_instance.handle_layout_update('None', sender=plot_type_position)
                         return
                 
+                speci = self.read_instance.networkspeci.split('|')[1]
                 if plot_type == 'contingencytable':
                     # if we have more than one model, skip contingency table
                     if len(self.read_instance.data_labels) == 3:
@@ -848,7 +849,6 @@ class Canvas(FigureCanvas):
             
                 # if do not have correct resolution or species, cannot make fairmode plots
                 if plot_type in ['fairmode-target', 'fairmode-statsummary']:
-                    speci = self.read_instance.networkspeci.split('|')[1]
                     if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
                         msg = f'Fairmode plot cannot be created for {speci}.'
                         show_message(self.read_instance, msg)
