@@ -335,51 +335,6 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
         fi
     fi
 
-# Nord3v2
-elif [ "${BSC_MACHINE}" == "nord3v2" ] || [ "${BSC_MACHINE}" = "amd" ]; then
-    echo "INFO: Running on ${BSC_MACHINE}..."
-    if $notebook; then
-        echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
-        echo "Starting notebook Jupyter session."
-        echo "Check 'notebook.out' for information on how to connect to session."
-        eval "${load_command}"
-        if [[ "${constraint}" == "lowmem" ]]; then
-            eval "${notebook_alloc_command} ${queue_option} bin/notebook.sh"
-        else
-            eval "${notebook_alloc_command} ${constraint_option} ${queue_option} bin/notebook.sh"
-        fi
-
-    elif $debug; then
-        echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
-        echo "Entering debug mode"
-        eval "${load_command}"
-        if [[ "${constraint}" == "lowmem" ]]; then
-            eval "${salloc_command} ${queue_option}"
-        else
-            eval "${salloc_command} ${constraint_option} ${queue_option}"
-        fi
-
-     elif $interpolation; then
-            echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
-            echo "Loading dependencies..."
-            eval "${load_command}"
-            jobid=$(eval "sbatch ${cores_option} ${account_option} ${queue_option} bin/submit_interpolation_${BSC_MACHINE}.sh $OTHEROPTS | awk '{print \$4}'")
-            echo "Check submission info in 'logs/interpolation/management_logs/$jobid.out'"
-
-    else
-        if $debugexec; then
-            eval "srun ${python_command}"
-        else
-            echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
-            eval "${load_command}"
-            if [[ "${constraint}" == "lowmem" ]]; then
-                eval "${salloc_command} ${queue_option} srun ${python_command}"
-            else
-                eval "${salloc_command} ${constraint_option} ${queue_option} srun ${python_command}"
-            fi
-        fi
-    fi
-
 # storage5
 elif [[ "${BSC_MACHINE}" == "stg" ]]; then
     echo "INFO: Running on the storage5..."

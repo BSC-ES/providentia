@@ -378,7 +378,7 @@ class NavigationToolbar(NavigationToolbar2QT):
 
             # connect lasso event
             if ((Version(matplotlib.__version__) < Version("3.2")) or
-               (self.read_instance.machine in ['nord3v2', 'mn5', 'nord4'])):
+               (self.read_instance.machine in ['mn5', 'nord4'])):
                 blit = False
             else:
                 blit = True

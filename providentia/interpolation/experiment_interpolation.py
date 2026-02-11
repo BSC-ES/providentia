@@ -1344,7 +1344,7 @@ class ModelInterpolation(object):
             set_file_permissions_ownership(netCDF_fname)
 
         # copy file to esarchive (if have access)
-        if MACHINE in ['nord3v2', 'nord4']:
+        if MACHINE == 'nord4':
             
             # set esarchive output dir
             esarchive_output_dir = '/esarchive/recon/prov_interp/{}'.format('/'.join(netCDF_fname.split('/exp_interp/')[1].split('/')[:-1]))

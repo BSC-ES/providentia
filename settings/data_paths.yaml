@@ -16,23 +16,11 @@ storage5:
   mod_to_interp_root: /gpfs/projects/bsc32/AC_cache/exp
   nonghost_root: /gpfs/archive/bsc32/esarchive/obs
 
-nord3v2:
-  ghost_root: /gpfs/projects/bsc32/AC_cache/obs/ghost
-  mod_root: /gpfs/projects/bsc32/AC_cache/recon/exp_interp
-  mod_to_interp_root: /gpfs/projects/bsc32/AC_cache/exp
-  nonghost_root: /esarchive/obs
-
 nord4:
   ghost_root: /gpfs/projects/bsc32/AC_cache/obs/ghost
   mod_root: /gpfs/projects/bsc32/AC_cache/recon/exp_interp
   mod_to_interp_root: /gpfs/projects/bsc32/AC_cache/exp
   nonghost_root: /esarchive/obs
-
-amd:
-  ghost_root: /gpfs/projects/bsc32/AC_cache/obs/ghost
-  mod_root: /gpfs/projects/bsc32/AC_cache/recon/exp_interp
-  mod_to_interp_root: ""
-  nonghost_root: /gpfs/projects/bsc32/AC_cache/obs/nonghost
 
 hub:
   ghost_root: /esarchive/obs/ghost
@@ -41,12 +29,6 @@ hub:
   nonghost_root: /esarchive/obs
 
 workstation:
-  ghost_root: /esarchive/obs/ghost
-  mod_root: /esarchive/recon/prov_interp
-  mod_to_interp_root: ""
-  nonghost_root: /esarchive/obs
-
-dust:
   ghost_root: /esarchive/obs/ghost
   mod_root: /esarchive/recon/prov_interp
   mod_to_interp_root: ""

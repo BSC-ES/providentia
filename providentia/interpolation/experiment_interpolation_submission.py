@@ -885,7 +885,7 @@ class SubmitInterpolation(object):
             n_jobs_in_queue = len(squeue_status.split('\n')[:-1])
             # if number of jobs in queue > 0, then sleep for 10
             # seconds and then check again how many jobs there are in queue
-            if (self.machine in ('nord3v2', 'amd', 'mn5', 'nord4')) and (n_jobs_in_queue > 0):
+            if (self.machine in ('mn5', 'nord4')) and (n_jobs_in_queue > 0):
                 time.sleep(10)
                 continue
             elif self.machine == 'nord3':

@@ -16,33 +16,6 @@ elif [ "${BSC_MACHINE}" = "nord4" ]; then
     module load NCO/5.1.0-foss-2020b
     module load singularity
 
-# Nord3v2
-elif [ "${BSC_MACHINE}" == "nord3v2" ] || [ "${BSC_MACHINE}" = "amd" ]; then 
-    module use /gpfs/projects/bsc32/software/suselinux/11/modules/all
-    module load Python/3.7.4-GCCcore-8.3.0 \
-        Ghostscript/9.50-GCCcore-8.3.0 \
-        xarray/0.19.0-foss-2019b-Python-3.7.4 \
-        seaborn/0.9.0-foss-2019b-Python-3.7.4 \
-        Cartopy/0.20.3-foss-2019b-Python-3.7.4 \
-        netcdf4-python/1.5.3-foss-2019b-Python-3.7.4 \
-        geopandas/0.7.0-foss-2019b-Python-3.7.4 \
-        PyQt5/5.13.1-GCCcore-8.3.0-Python-3.7.4 \
-        Qt5/5.14.1-GCCcore-8.3.0 \
-        OpenMPI/4.0.5-GCC-8.3.0-nord3-v2 \
-        pyproj/3.2.1-foss-2019b-Python-3.7.4 \
-        jupyterlab/3.0.9-foss-2019b-Python-3.7.4 \
-        pypdf/3.6.0-foss-2019b-Python-3.7.4 \
-        matplotlib/3.4.3-foss-2019b-Python-3.7.4 \
-        UDUNITS/2.2.26-GCCcore-8.3.0 \
-        HDF5/1.10.5-gompi-2019b \
-        netCDF/4.7.1-gompi-2019b \
-        GEOS/3.7.2-foss-2019b-Python-3.7.4 \
-        GSL/2.6-GCC-8.3.0 \
-        NCO/4.9.2-foss-2019b \
-        greasy/2.2.3 \
-        tqdm/4.41.1-foss-2019b-Python-3.7.4 \
-        python-dotenv/0.21.1-foss-2019b-Python-3.7.4
-
 # Hub
 elif [ "${ip}" == "84.88.185.48" ]; then
     module load Python/3.9.6-GCCcore-11.2.0 \

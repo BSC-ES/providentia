@@ -251,7 +251,7 @@ class Download(object):
 
             if self.experiments and self.dl_mode != 'obs':
                 # remote machine model download
-                if self.machine in ["storage5", "nord3v2", "nord4"]:
+                if self.machine in ["storage5", "nord4"]:
                     # get function to download model depending on the configuration file field
                     download_model_fun = self.copy_non_interpolated_model
                 # local model download
