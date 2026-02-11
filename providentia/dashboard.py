@@ -991,9 +991,9 @@ class Dashboard(QtWidgets.QWidget):
     
         # remove plot types that need active temporal colocation and model
         if Version(matplotlib.__version__) < Version("3.8"):
-            available_plots = ['scatter', 'fairmode-target', 'fairmode-statsummary']
+            available_plots = ['scatter', 'fairmode-target', 'fairmode-statsummary', 'contingencytable']
         else:
-            available_plots = ['scatter', 'taylor', 'fairmode-target', 'fairmode-statsummary']        
+            available_plots = ['scatter', 'taylor', 'fairmode-target', 'fairmode-statsummary', 'contingencytable']      
         for plot_type in available_plots:
             if ((not self.temporal_colocation) 
                 or ((self.temporal_colocation) and (len(self.experiments) == 0))): 
@@ -1003,9 +1003,9 @@ class Dashboard(QtWidgets.QWidget):
                 if plot_type not in canvas_instance.layout_options:
                     canvas_instance.layout_options.append(plot_type)       
 
-             # remove fairmode plot types if do not have correct species / resolution
+            # remove fairmode plot types if do not have correct species / resolution
             speci = self.networkspeci.split('|')[1]
-            for plot_type in ['fairmode-target', 'fairmode-statsummary']:
+            if plot_type in ['fairmode-target', 'fairmode-statsummary']:
                 if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
                     if plot_type in canvas_instance.layout_options:
                         canvas_instance.layout_options.remove(plot_type)
@@ -1014,6 +1014,15 @@ class Dashboard(QtWidgets.QWidget):
                     if plot_type in canvas_instance.layout_options:
                         canvas_instance.layout_options.remove(plot_type)
 
+            # remove contingency table if do not have correct species / resolution
+            elif plot_type == 'contingencytable':
+                if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5', 'sconcso2']:
+                    if plot_type in canvas_instance.layout_options:
+                        canvas_instance.layout_options.remove(plot_type)
+                if self.active_resolution != 'hourly':
+                    if plot_type in canvas_instance.layout_options:
+                        canvas_instance.layout_options.remove(plot_type)
+                
         # if there are no temporal resolutions (only yearly), skip periodic plots
         for plot_type in ['periodic', 'periodic-violin']: 
             if self.active_resolution == 'annual':            

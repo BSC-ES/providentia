@@ -47,7 +47,7 @@ def plot(inst, statistic_mode, network_type, plot_type, plot_options=[]):
     else:
         base_plot_type = plot_type.split('_')[0]
 
-    if base_plot_type in ['statsummary', 'heatmap', 'table']:
+    if base_plot_type in ['statsummary', 'heatmap', 'table', 'contingencytable']:
 
         # get table
         for child in fig.axes[0].get_children():
@@ -57,7 +57,7 @@ def plot(inst, statistic_mode, network_type, plot_type, plot_options=[]):
 
         # extract data from the table/heatmap
         data = []
-        if base_plot_type in ['statsummary', 'table']:
+        if base_plot_type in ['statsummary', 'table', 'contingencytable']:
             for (row, col), cell in table.get_celld().items():
                 data.append({
                     "row": row,
@@ -76,6 +76,8 @@ def plot(inst, statistic_mode, network_type, plot_type, plot_options=[]):
         # save data, uncomment if we want to update it
         if 'bias' in plot_options:
             path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{plot_type}_bias_values.csv'
+        elif 'gerrity' in plot_options:
+            path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{plot_type}_gerrity_values.csv'
         else:
             path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{plot_type}_values.csv'
         if GENERATE_OUTPUT:

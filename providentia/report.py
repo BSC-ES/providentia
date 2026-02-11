@@ -225,11 +225,16 @@ class Report:
             self.summary_plots_to_make = []
             self.station_plots_to_make = []
             if isinstance(self.report_plots[self.report_type], list):
-                self.summary_plots_to_make = self.report_plots[self.report_type]
                 for plot_type in self.report_plots[self.report_type]:
                     # there can be no station specific plots for map plot type
                     if plot_type[:4] != 'map-':
                         self.station_plots_to_make.append(plot_type)
+                    # there can be no summary specific contingency tables (if gerrity, then allow)
+                    if (plot_type[:16] != 'contingencytable'):
+                        self.summary_plots_to_make.append(plot_type)
+                    else:
+                        if ('gerrity' in plot_type.split('_')[1:]):
+                            self.summary_plots_to_make.append(plot_type)
             elif isinstance(self.report_plots[self.report_type], dict):
                 # get summary plots
                 if 'summary' in self.report_plots[self.report_type].keys():
@@ -237,7 +242,13 @@ class Report:
                         msg = 'report_summary is False, summary plots will not be created.'
                         show_message(self, msg)
                     else:
-                        self.summary_plots_to_make = self.report_plots[self.report_type]['summary']
+                        # there can be no summary specific contingency tables (if gerrity, then allow)
+                        for plot_type in self.report_plots[self.report_type]['summary']:
+                            if (plot_type[:16] != 'contingencytable'):
+                                self.summary_plots_to_make.append(plot_type)
+                            else:
+                                if ('gerrity' in plot_type.split('_')[1:]):
+                                    self.summary_plots_to_make.append(plot_type)
                 # get station plots
                 if 'station' in self.report_plots[self.report_type].keys():
                     if not self.report_stations:
@@ -1257,6 +1268,19 @@ class Report:
                 if not any(valid_station_idxs):
                     self.logger.info(f'No data to generate FAIRMODE plot after filtering by coverage for {speci}.')
                     continue
+            
+            if base_plot_type == 'contingencytable':
+                # warning for contingency tables if species aren't PM2.5, PM10, NO2, O3 or SO2
+                speci = networkspeci.split('|')[1]
+                if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5', 'sconcso2']:
+                    msg = f'Contingency table cannot be created for {speci}.'
+                    show_message(self, msg)
+                    continue
+                # warning for contingency tables if resolution is not hourly
+                if self.active_resolution != 'hourly':
+                    msg = 'Contingency table can only be created if the resolution is hourly.'
+                    show_message(self, msg)
+                    continue
 
             # make plot
             plot_indices = self.make_plot('summary', plot_type, plot_options, networkspeci)
@@ -1429,9 +1453,9 @@ class Report:
                                                                     plot_type, 
                                                                     self.current_station_name))   
 
+                speci = networkspeci.split('|')[1]
                 if base_plot_type in ['fairmode-target', 'fairmode-statsummary']:
                     # warning for fairmode plots if species aren't PM2.5, PM10, NO2 or O3
-                    speci = networkspeci.split('|')[1]
                     if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
                         msg = f'Fairmode plot cannot be created for {speci} in {self.current_station_name}.'
                         show_message(self, msg)
@@ -1447,6 +1471,18 @@ class Report:
                     data, valid_station_idxs = get_fairmode_data(self, self, networkspeci, self.data_labels)
                     if not any(valid_station_idxs):
                         self.logger.info(f'No data to generate FAIRMODE plot after filtering by coverage for {speci} in {self.current_station_name}.')
+                        continue
+                
+                if base_plot_type == 'contingencytable':
+                    # warning for contingency tables if species aren't PM2.5, PM10, NO2, O3 or SO2
+                    if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5', 'sconcso2']:
+                        msg = f'Contingency table cannot be created for {speci} in {self.current_station_name}.'
+                        show_message(self, msg)
+                        continue
+                    # warning for contingency tables if resolution is not hourly
+                    if self.active_resolution != 'hourly':
+                        msg = 'Contingency table can only be created if the resolution is hourly.'
+                        show_message(self, msg)
                         continue
 
                 # make plot                
@@ -1680,6 +1716,21 @@ class Report:
             show_message(self, msg)
             return plot_indices
 
+        if base_plot_type == 'contingencytable':
+            if ((not self.temporal_colocation) 
+                or ((self.temporal_colocation) and (len(data_labels) == 1 or len(data_labels) > 2))):
+                # do not make contingencytable if temporal colocation if off
+                if not self.temporal_colocation:
+                    msg = f'Cannot make {plot_type} plots without activating the temporal colocation.'
+                # do not make contingencytable if no model is loaded
+                elif len(data_labels) == 1:
+                    msg = f'Cannot make {plot_type} plots without loading models.'
+                # do not make contingencytable if more than one model is loaded
+                elif len(data_labels) > 2:
+                    msg = f'Cannot make {plot_type} plots with more than 1 model.'
+                show_message(self, msg)
+                return plot_indices
+                
         # get data labels without observations
         data_labels_sans_obs = copy.deepcopy(data_labels)
         if self.observations_data_label in data_labels_sans_obs:

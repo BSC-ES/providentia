@@ -352,7 +352,8 @@ class Providentia:
     def plot(self, plot, data_labels=None, labela='', labelb='', title=None, xlabel=None, ylabel=None, cb=True, 
              legend=True, set_obs_legend=True, map_extent=None, annotate=False, bias=False, domain=False, 
              hidedata=False, logx=False, logy=False, multispecies=False, regression=False, smooth=False, 
-             threshold=False, plot_options=None, save=False, return_plot=False, format=None, width=None, height=None):
+             threshold=False, gerrity=False, plot_options=None, save=False, return_plot=False, format=None, 
+             width=None, height=None):
         """ 
         Wrapper method to make a Providentia plot.
 
@@ -400,6 +401,8 @@ class Providentia:
             Indicates if timeseries has smooth line/s or the smoothing window, defaults to False.
         threshold : bool, optional
             Indicates if plot has threshold line/s, defaults to False.
+        gerrity : bool, optional
+            Indicates if plot shows Gerrity scores per station
         plot_options : list, optional
             List with plot options, defaults to None.
         save : bool or str, optional
@@ -480,6 +483,9 @@ class Providentia:
         if threshold:
             if 'threshold' not in plot_options:
                 plot_options.append('threshold')
+        if gerrity:
+            if 'gerrity' not in plot_options:
+                plot_options.append('gerrity')          
 
         # get base plot type (no plot options), and plot type (with plot options)
         base_plot_type = copy.deepcopy(plot)
@@ -490,7 +496,8 @@ class Providentia:
 
         # get zstat for required plots
         base_plot_type_split = base_plot_type.split('-')
-        if (len(base_plot_type_split) > 1) & (base_plot_type not in ['periodic-violin', 'fairmode-target','fairmode-statsummary']):
+        if (len(base_plot_type_split) > 1) & (base_plot_type not in ['periodic-violin', 'fairmode-target', 
+                                                                     'fairmode-statsummary']):
             base_plot_type = base_plot_type_split[0]
             zstat = base_plot_type_split[1]
         else:
@@ -610,7 +617,33 @@ class Providentia:
             if not any(valid_station_idxs):
                 self.logger.info(f'No data after filtering by coverage for {speci}.')
                 return
-
+            
+        if base_plot_type == 'contingencytable':
+            # warning for contingency table if species aren't PM2.5, PM10, NO2, O3, or SO2
+            if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5', 'sconcso2']:
+                msg = f'Contingency table cannot be created for {speci}.'
+                show_message(self, msg)
+                return
+            # warning for contingency table if resolution is not hourly
+            if self.active_resolution != 'hourly':
+                msg = 'Contingency table can only be created if the resolution is hourly.'
+                show_message(self, msg)
+                return
+            
+            if ((not self.temporal_colocation) 
+                or ((self.temporal_colocation) and (len(self.data_labels) == 1 or len(self.data_labels) > 2))):
+                # do not make contingencytable if temporal colocation if off
+                if not self.temporal_colocation:
+                    msg = f'Cannot make {plot_type} plots without activating the temporal colocation.'
+                # do not make contingencytable if no model is loaded
+                elif len(self.data_labels) == 1:
+                    msg = f'Cannot make {plot_type} plots without loading models.'
+                # do not make contingencytable if more than one model is loaded
+                elif len(self.data_labels) > 2:
+                    msg = f'Cannot make {plot_type} plots with more than 1 model.'
+                show_message(self, msg)
+                return
+                
         # get data labels for plot
         if len(data_labels) == 0:
             data_labels = copy.deepcopy(self.data_labels)

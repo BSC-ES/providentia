@@ -63,7 +63,8 @@
                   "table-Median", "table-Median_bias", "table-Mean_multispecies", 
                   "statsummary", "statsummary_bias", "statsummary_multispecies", "statsummary_multispecies_bias",
                   "taylor-r2", "taylor-r", "taylor-r2_annotate", "taylor-r_annotate",
-                  "fairmode-target", "fairmode-target_individual", "fairmode-target_annotate"],
+                  "fairmode-target", "fairmode-target_individual", "fairmode-target_annotate",
+                  "contingencytable", "contingencytable_gerrity"],
     
     "training": ["map-Median", "map-r", "timeseries_annotate", "periodic-Mean_threshold", "statsummary_multispecies", "taylor-r2", "scatter_annotate_individual"],
 
@@ -74,6 +75,6 @@
     "cams2_82_bis": ["metadata", "statsummary", "statsummary_multispecies_bias", "map-r", "map-MFB", "map-MFE", "timeseries_smooth", "timeseries_bias_smooth", "distribution", 
                      "scatter_annotate"],
 
-    "debug": ['statsummary','statsummary_multispecies','statsummary_multispecies_bias','boxplot_multispecies']
+    "debug": ['contingencytable', 'contingencytable_gerrity']
 
 }

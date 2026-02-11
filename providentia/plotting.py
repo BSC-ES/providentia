@@ -23,8 +23,10 @@ from PIL import Image
 import pyproj
 import seaborn as sns
 import yaml
+import xarray as xr
+import xskillscore as xs
 
-from providentia.auxiliar import CURRENT_PATH, join
+from providentia.auxiliar import CURRENT_PATH, join, get_conversion_factor, get_standard_parameters_by_speci
 from .calculate import ModBias
 from .statistics import (boxplot_inner_fences, calculate_statistic, group_periodic,
                          get_fairmode_data, get_z_statistic_info, get_z_statistic_type)
@@ -40,6 +42,7 @@ pyproj.set_use_global_context()
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 fairmode_settings = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
+contingency_settings = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/contingency.yaml')))
 
 
 class Plotting:
@@ -2823,8 +2826,7 @@ class Plotting:
                 
                 # add the dots to the track plot elements list
                 self.fairmode_statsummary_plot.append(stations_dots[0])
-
-            
+                
             # track plot elements if using dashboard 
             if self.read_instance.mode not in ['report', 'library']:
                 self.track_plot_elements(data_label, 'fairmode-statsummary', 'plot', 
@@ -2875,7 +2877,137 @@ class Plotting:
         if self.read_instance.mode not in ['report', 'library']:
             set_axis_title(self.read_instance, relevant_axis, fairmode_settings[speci]['title'], plot_characteristics)
 
+    def make_contingencytable(self, relevant_axis, networkspeci, data_labels, plot_characteristics, 
+                              plot_options):
+        """
+        Renders a contingency table or a gerrity score table per station
 
+        Parameters
+        ----------
+        relevant_axis : object
+            Axis to plot on.
+        networkspeci : str
+            Current networkspeci (e.g. EBAS|sconco3).
+        data_labels : list
+            Data arrays to plot.
+        plot_characteristics : dict
+            Plot characteristics.
+        plot_options : list
+            Options to configure plot.
+        """
+        
+        # get limits
+        speci = networkspeci.split('|')[1]
+        if speci in list(contingency_settings.keys()):
+            limits = contingency_settings[speci]['limits']
+            limits_units = contingency_settings[speci]['units']
+
+        # get input and output units
+        standard_parameter_speci = get_standard_parameters_by_speci(speci, self.read_instance.ghost_version)
+        initial_units = limits_units
+        final_units = self.read_instance.measurement_units[speci]
+
+        # convert units using conversion factor
+        conversion_factor = get_conversion_factor(initial_units, final_units, standard_parameter_speci) 
+        if isinstance(conversion_factor, str):
+            self.read_instance.logger.error(conversion_factor)
+            sys.exit(1)
+        limits = [limit*conversion_factor for limit in limits]
+        
+        # define categories
+        index_levels = plot_characteristics["index_levels"]
+        levels = plot_characteristics["levels"]
+        edges = plot_characteristics["edges"] 
+        gerrity_row_limit = plot_characteristics["gerrity_row_limit"]
+
+        # get valid data labels for networkspeci
+        valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
+
+        # cut data_labels for those in valid data labels
+        cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
+
+        # check if there is data
+        if 'per_station' not in self.canvas_instance.selected_station_data[networkspeci]:
+            msg = 'Contingency table cannot be calculated without data.'
+            show_message(self.read_instance, msg)
+            return
+                        
+        # get observations data (flattened)
+        observations_data = self.canvas_instance.selected_station_data[networkspeci]['per_station'][0,:,:]
+        n_stations = observations_data.shape[0]
+
+        # if gerrity score is in plot options or we are in dashboard and we select more than one station, then make gerrity plot
+        make_gerrity = True if 'gerrity' in plot_options or (self.read_instance.mode not in ['report', 'library'] and n_stations > 1) else False
+
+        # iterate through data labels
+        results = []
+        for data_label in cut_data_labels:
+
+            # continue for observations data label
+            if data_label == self.read_instance.observations_data_label:
+                continue
+
+            # get model data (flattened)# If gerrity score is in plot options or we are in dashboard and we select more than one station
+            model_data = self.canvas_instance.selected_station_data[networkspeci]['per_station'][valid_data_labels.index(data_label),:,:]
+            
+            for station_ind in np.arange(n_stations):
+
+                st_observations_data = observations_data[station_ind, :]
+                st_model_data = model_data[station_ind, :]
+                
+                # Calculate contingency table
+                contingency_table = ModBias.calculate_contingency_table(st_observations_data, st_model_data, 
+                                                                        limits, index_levels, 
+                                                                        self.read_instance.time_index, edges)
+                
+                # Calculate gerrity score per station
+                if make_gerrity:
+                    gerrity_score = round(ModBias.calculate_gerrity_score(contingency_table), 2)
+                    current_lon = round(self.canvas_instance.selected_station_metadata[networkspeci]['longitude'][station_ind][0], 2)
+                    current_lat = round(self.canvas_instance.selected_station_metadata[networkspeci]['latitude'][station_ind][0], 2)
+                    current_station_reference = self.canvas_instance.selected_station_metadata[networkspeci]['station_reference'][station_ind][0]
+                    current_station_name = self.canvas_instance.selected_station_metadata[networkspeci]['station_name'][station_ind][0]
+                    results.append({
+                        'Station reference': current_station_reference,
+                        'Station name': current_station_name,
+                        'Latitude': current_lat,
+                        'Longitude': current_lon,
+                        'Gerrity Score': gerrity_score
+                    })
+
+                    # Hide last rows if there is a limit
+                    if gerrity_row_limit is not None:
+                        if station_ind > gerrity_row_limit-1 and n_stations != gerrity_row_limit:
+                            results.append({
+                                'Station reference': '...',
+                                'Station name': '...',
+                                'Latitude': '...',
+                                'Longitude': '...',
+                                'Gerrity Score': '...'
+                            })
+                            break
+
+                # Show contingency table (only available per station)
+                else:
+                    results_df = pd.DataFrame(contingency_table.table.values, index=levels, columns=levels)
+                    results_df.index.name = "Observations"
+                    results_df.columns.name = "Model"
+
+            # make table
+            if make_gerrity:
+                results_df = pd.DataFrame(results)
+            table = relevant_axis.table(cellText=results_df.values, 
+                                        colLabels=results_df.columns,
+                                        rowLabels=None if make_gerrity else results_df.index,
+                                        **plot_characteristics['plot'])
+
+            # adjust column width the length of columns
+            table.auto_set_column_width(col=list(range(len(results_df.columns) + 1)))
+
+            # track plot elements if using dashboard 
+            if self.read_instance.mode not in ['report', 'library']:
+                self.track_plot_elements(data_label, 'contingencytable', 'plot', [table], bias=False)
+            
     def track_plot_elements(self, data_label, base_plot_type, element_type, plot_object, bias=False):
         """
         Registers plotted artists and collections to manage their visibility dynamically on the dashboard.
