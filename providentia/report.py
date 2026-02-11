@@ -1276,6 +1276,11 @@ class Report:
                     msg = f'Contingency table cannot be created for {speci}.'
                     show_message(self, msg)
                     continue
+                # warning for contingency tables if resolution is not hourly
+                if self.active_resolution != 'hourly':
+                    msg = 'Contingency table can only be created if the resolution is hourly.'
+                    show_message(self, msg)
+                    continue
 
             # make plot
             plot_indices = self.make_plot('summary', plot_type, plot_options, networkspeci)
@@ -1474,7 +1479,12 @@ class Report:
                         msg = f'Contingency table cannot be created for {speci} in {self.current_station_name}.'
                         show_message(self, msg)
                         continue
-                    
+                    # warning for contingency tables if resolution is not hourly
+                    if self.active_resolution != 'hourly':
+                        msg = 'Contingency table can only be created if the resolution is hourly.'
+                        show_message(self, msg)
+                        continue
+
                 # make plot                
                 plot_indices = self.make_plot('station', plot_type, plot_options, networkspeci)
 

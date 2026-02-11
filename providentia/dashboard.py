@@ -1014,9 +1014,12 @@ class Dashboard(QtWidgets.QWidget):
                     if plot_type in canvas_instance.layout_options:
                         canvas_instance.layout_options.remove(plot_type)
 
-            # remove contingency table if do not have correct species
+            # remove contingency table if do not have correct species / resolution
             elif plot_type == 'contingencytable':
                 if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5', 'sconcso2']:
+                    if plot_type in canvas_instance.layout_options:
+                        canvas_instance.layout_options.remove(plot_type)
+                if self.active_resolution != 'hourly':
                     if plot_type in canvas_instance.layout_options:
                         canvas_instance.layout_options.remove(plot_type)
                 

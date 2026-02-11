@@ -840,9 +840,14 @@ class Canvas(FigureCanvas):
                         show_message(self.read_instance, msg)
                         self.read_instance.handle_layout_update('None', sender=plot_type_position)
                         return
-                    # if do not have correct species, cannot make contingency table
+                    # if do not have correct species or resolution, cannot make contingency table
                     if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5', 'sconcso2']:
                         msg = f'Contingency table cannot be created for {speci}.'
+                        show_message(self.read_instance, msg)
+                        self.read_instance.handle_layout_update('None', sender=plot_type_position)
+                        return
+                    if self.read_instance.active_resolution != 'hourly':
+                        msg = 'Contingency table can only be created if the resolution is hourly.'
                         show_message(self.read_instance, msg)
                         self.read_instance.handle_layout_update('None', sender=plot_type_position)
                         return

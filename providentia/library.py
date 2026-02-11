@@ -624,6 +624,11 @@ class Providentia:
                 msg = f'Contingency table cannot be created for {speci}.'
                 show_message(self, msg)
                 return
+            # warning for contingency table if resolution is not hourly
+            if self.active_resolution != 'hourly':
+                msg = 'Contingency table can only be created if the resolution is hourly.'
+                show_message(self, msg)
+                return
             
             if ((not self.temporal_colocation) 
                 or ((self.temporal_colocation) and (len(self.data_labels) == 1 or len(self.data_labels) > 2))):
