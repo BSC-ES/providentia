@@ -28,10 +28,11 @@ def read_data(inst, path):
     assert (generated_output.size != 0)
 
 
-def plot(inst, statistic_mode, network_type, plot_type, plot_options=[]):
+def plot(inst, statistic_mode, network_type, plot_type, plot_options=[], load=True):
 
     # make plot
-    inst.load()
+    if load:
+        inst.load()
     fig = inst.plot(plot_type, plot_options=plot_options, return_plot=True)
 
     # check that a figure has been returned

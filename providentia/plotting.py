@@ -2936,8 +2936,11 @@ class Plotting:
         observations_data = self.canvas_instance.selected_station_data[networkspeci]['per_station'][0,:,:]
         n_stations = observations_data.shape[0]
 
-        # if gerrity score is in plot options or we are in dashboard and we select more than one station, then make gerrity plot
-        make_gerrity = True if 'gerrity' in plot_options or (self.read_instance.mode not in ['report', 'library'] and n_stations > 1) else False
+        # if gerrity score is in plot options or we select more than one station, then make gerrity plot
+        make_gerrity = True if 'gerrity' in plot_options or n_stations > 1 else False
+        if 'gerrity' not in plot_options and n_stations > 1:
+            msg = 'Contingency table will be replaced by Gerrity score table because there is data for more than one station.'
+            show_message(self.read_instance, msg)
 
         # iterate through data labels
         results = []
