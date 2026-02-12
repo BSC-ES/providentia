@@ -28,6 +28,19 @@ Some of these fields are required depending on the mode. If a parameter required
 | `mod_root` | Optional | Root directory for interpolated model data, overwrites `data_paths.yaml` | From `data_paths.yaml` |
 | `mod_to_interp_root` | Optional | Root directory for non-interpolated model data, overwrites `data_paths.yaml` | From `data_paths.yaml` |
 
+If the number of networks and species are **both** multiple but not equal, Providentia will throw the error `Error: The number of "network" and "species" fields is not the same.` and the user will be required to clearly specify which networks and species they want. For example, this would not be accepted:
+
+```
+network = EBAS, EEA_AQ_eReporting
+species = sconco3, sconcno2, sconcso2
+```
+
+But this would:
+```
+network = EBAS, EBAS, EBAS, EEA_AQ_eReporting, EEA_AQ_eReporting, EEA_AQ_eReporting
+species = sconco3, sconcno2, sconcso2, sconco3, sconcno2, sconcso2
+```
+
 (visualization-parameters)=
 ## Parameters for analysis and visualization modes (Dashboard, Report, Library)
 
@@ -73,19 +86,6 @@ These parameters are used only in the [Report mode](Report). All of them are **o
 | `report_filename` | The filename of the report or the path to create the report (as in the PDF). | `PROVIDENTIA_Report` |
 | `harmonise_stations` | Boolean variable to set if you wish to harmonise axes limits across stations for stations report. | `True` |
 | `harmonise_summary` | Boolean variable to set if you wish to harmonise axes limits across subsections for summary report. | `True` |
-
-If the number of networks and species are **both** multiple but not equal, Providentia will throw the error `Error: The number of "network" and "species" fields is not the same.` and the user will be required to clearly specify which networks and species they want. For example, this would not be accepted:
-
-```
-network = EBAS, EEA_AQ_eReporting
-species = sconco3, sconcno2, sconcso2
-```
-
-But this would:
-```
-network = EBAS, EBAS, EBAS, EEA_AQ_eReporting, EEA_AQ_eReporting, EEA_AQ_eReporting
-species = sconco3, sconcno2, sconcso2, sconco3, sconcno2, sconcso2
-```
 
 (interpolation-parameters)=
 ## Interpolation parameters

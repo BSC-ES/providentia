@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -8,15 +6,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Configuration fields &mdash; Providentia 3.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
   
-      <script src="_static/jquery.js?v=5d32c60e"></script>
-      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=08bfcbec"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=08bfcbec"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -198,6 +200,16 @@
 </tr>
 </tbody>
 </table>
+<p>If the number of networks and species are <strong>both</strong> multiple but not equal, Providentia will throw the error <code class="docutils literal notranslate"><span class="pre">Error:</span> <span class="pre">The</span> <span class="pre">number</span> <span class="pre">of</span> <span class="pre">&quot;network&quot;</span> <span class="pre">and</span> <span class="pre">&quot;species&quot;</span> <span class="pre">fields</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">the</span> <span class="pre">same.</span></code> and the user will be required to clearly specify which networks and species they want. For example, this would not be accepted:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span> <span class="o">=</span> <span class="n">EBAS</span><span class="p">,</span> <span class="n">EEA_AQ_eReporting</span>
+<span class="n">species</span> <span class="o">=</span> <span class="n">sconco3</span><span class="p">,</span> <span class="n">sconcno2</span><span class="p">,</span> <span class="n">sconcso2</span>
+</pre></div>
+</div>
+<p>But this would:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span> <span class="o">=</span> <span class="n">EBAS</span><span class="p">,</span> <span class="n">EBAS</span><span class="p">,</span> <span class="n">EBAS</span><span class="p">,</span> <span class="n">EEA_AQ_eReporting</span><span class="p">,</span> <span class="n">EEA_AQ_eReporting</span><span class="p">,</span> <span class="n">EEA_AQ_eReporting</span>
+<span class="n">species</span> <span class="o">=</span> <span class="n">sconco3</span><span class="p">,</span> <span class="n">sconcno2</span><span class="p">,</span> <span class="n">sconcso2</span><span class="p">,</span> <span class="n">sconco3</span><span class="p">,</span> <span class="n">sconcno2</span><span class="p">,</span> <span class="n">sconcso2</span>
+</pre></div>
+</div>
 </section>
 <section id="parameters-for-analysis-and-visualization-modes-dashboard-report-library">
 <span id="visualization-parameters"></span><h2>Parameters for analysis and visualization modes (Dashboard, Report, Library)<a class="headerlink" href="#parameters-for-analysis-and-visualization-modes-dashboard-report-library" title="Link to this heading"></a></h2>
@@ -328,16 +340,6 @@
 </tr>
 </tbody>
 </table>
-<p>If the number of networks and species are <strong>both</strong> multiple but not equal, Providentia will throw the error <code class="docutils literal notranslate"><span class="pre">Error:</span> <span class="pre">The</span> <span class="pre">number</span> <span class="pre">of</span> <span class="pre">&quot;network&quot;</span> <span class="pre">and</span> <span class="pre">&quot;species&quot;</span> <span class="pre">fields</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">the</span> <span class="pre">same.</span></code> and the user will be required to clearly specify which networks and species they want. For example, this would not be accepted:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span> <span class="o">=</span> <span class="n">EBAS</span><span class="p">,</span> <span class="n">EEA_AQ_eReporting</span>
-<span class="n">species</span> <span class="o">=</span> <span class="n">sconco3</span><span class="p">,</span> <span class="n">sconcno2</span><span class="p">,</span> <span class="n">sconcso2</span>
-</pre></div>
-</div>
-<p>But this would:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span> <span class="o">=</span> <span class="n">EBAS</span><span class="p">,</span> <span class="n">EBAS</span><span class="p">,</span> <span class="n">EBAS</span><span class="p">,</span> <span class="n">EEA_AQ_eReporting</span><span class="p">,</span> <span class="n">EEA_AQ_eReporting</span><span class="p">,</span> <span class="n">EEA_AQ_eReporting</span>
-<span class="n">species</span> <span class="o">=</span> <span class="n">sconco3</span><span class="p">,</span> <span class="n">sconcno2</span><span class="p">,</span> <span class="n">sconcso2</span><span class="p">,</span> <span class="n">sconco3</span><span class="p">,</span> <span class="n">sconcno2</span><span class="p">,</span> <span class="n">sconcso2</span>
-</pre></div>
-</div>
 </section>
 <section id="interpolation-parameters">
 <span id="id4"></span><h2>Interpolation parameters<a class="headerlink" href="#interpolation-parameters" title="Link to this heading"></a></h2>
