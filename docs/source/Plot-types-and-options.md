@@ -20,7 +20,7 @@ The standard plot types consist of:
 - Taylor Diagram (`taylor`)
 - FAIRMODE target plot (`fairmode-target`)
 - FAIRMODE statistics summary plot (`fairmode-statsummary`)
-- Contingency table (`contingencytable``)
+- Contingency table (`contingencytable`)
 
 Some of these plots are created for specific statistics, namely: `map`, `periodic`, `heatmap`, `taylor` and `table`. In the report and library modes, this statistic is defined by aggregating the `-[stat]` field to the plot type. `[stat]` should be replaced with any of the base statistic names (e.g. p5, Mean) or model bias names (e.g. r2, RMSE). For example to show the median values spatially, `map-p50` would be set as the plot name or `map-r2` to show the coefficient of determination. The available statistic names are documented in `settings/basic_stats.yaml` and `settings/model_bias_stats.yaml`. For the Taylor diagram, only `r`and `r2`can be used.
 
