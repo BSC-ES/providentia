@@ -621,7 +621,6 @@ class DataReader:
                         str_model += f" ({alias})"
                     self.read_instance.logger.info(str_model)
                     mods_printed.append(model)
-        self.read_instance.logger.info("")
 
     def read_basic_metadata(self):     
         """

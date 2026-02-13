@@ -1166,6 +1166,7 @@ def generate_file_trees(instance):
 
     # generate file trees for ghost
     if gft or (not os.path.exists(ghost_filetree_path)):
+        instance.logger.info('')
         if not os.path.exists(ghost_filetree_path):
             instance.logger.info(f'Generating file tree {ghost_filetree_path}...')
         else:
