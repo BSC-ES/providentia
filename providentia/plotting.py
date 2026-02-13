@@ -2936,8 +2936,11 @@ class Plotting:
         observations_data = self.canvas_instance.selected_station_data[networkspeci]['per_station'][0,:,:]
         n_stations = observations_data.shape[0]
 
-        # if gerrity score is in plot options or we are in dashboard and we select more than one station, then make gerrity plot
-        make_gerrity = True if 'gerrity' in plot_options or (self.read_instance.mode not in ['report', 'library'] and n_stations > 1) else False
+        # if gerrity score is in plot options or we select more than one station, then make gerrity plot
+        make_gerrity = True if 'gerrity' in plot_options or n_stations > 1 else False
+        if 'gerrity' not in plot_options and n_stations > 1:
+            msg = 'Contingency table will be replaced by Gerrity score table because there is data for more than one station.'
+            show_message(self.read_instance, msg)
 
         # iterate through data labels
         results = []
@@ -2954,19 +2957,29 @@ class Plotting:
 
                 st_observations_data = observations_data[station_ind, :]
                 st_model_data = model_data[station_ind, :]
-                
-                # Calculate contingency table
+
+                # calculate rolling average for PM10 and PM2.5
+                if speci in ['pm2p5', 'pm10']:
+                    st_observations_data = pd.Series(st_observations_data).rolling(window=24, min_periods=18).mean().to_numpy()
+                    st_model_data = pd.Series(st_model_data).rolling(window=24, min_periods=18).mean().to_numpy()
+
+                # calculate contingency table
                 contingency_table = ModBias.calculate_contingency_table(st_observations_data, st_model_data, 
                                                                         limits, index_levels, 
                                                                         self.read_instance.time_index, edges)
                 
-                # Calculate gerrity score per station
+                # calculate gerrity score per station
                 if make_gerrity:
                     gerrity_score = round(ModBias.calculate_gerrity_score(contingency_table), 2)
                     current_lon = round(self.canvas_instance.selected_station_metadata[networkspeci]['longitude'][station_ind][0], 2)
                     current_lat = round(self.canvas_instance.selected_station_metadata[networkspeci]['latitude'][station_ind][0], 2)
                     current_station_reference = self.canvas_instance.selected_station_metadata[networkspeci]['station_reference'][station_ind][0]
+                    
+                    # do not make table / append data if station reference is nan
+                    if pd.isna(current_station_reference):
+                        continue
                     current_station_name = self.canvas_instance.selected_station_metadata[networkspeci]['station_name'][station_ind][0]
+                    
                     results.append({
                         'Station reference': current_station_reference,
                         'Station name': current_station_name,
@@ -2975,7 +2988,7 @@ class Plotting:
                         'Gerrity Score': gerrity_score
                     })
 
-                    # Hide last rows if there is a limit
+                    # hide last rows if there is a limit
                     if gerrity_row_limit is not None:
                         if station_ind > gerrity_row_limit-1 and n_stations != gerrity_row_limit:
                             results.append({
@@ -2987,26 +3000,62 @@ class Plotting:
                             })
                             break
 
-                # Show contingency table (only available per station)
+                # show contingency table (only available per station)
                 else:
                     results_df = pd.DataFrame(contingency_table.table.values, index=levels, columns=levels)
-                    results_df.index.name = "Observations"
-                    results_df.columns.name = "Model"
 
             # make table
             if make_gerrity:
                 results_df = pd.DataFrame(results)
-            table = relevant_axis.table(cellText=results_df.values, 
-                                        colLabels=results_df.columns,
-                                        rowLabels=None if make_gerrity else results_df.index,
-                                        **plot_characteristics['plot'])
 
-            # adjust column width the length of columns
-            table.auto_set_column_width(col=list(range(len(results_df.columns) + 1)))
+            if not results_df.empty:
+                table = relevant_axis.table(cellText=results_df.values, 
+                                            colLabels=results_df.columns,
+                                            rowLabels=None if make_gerrity else results_df.index,
+                                            **plot_characteristics['plot'])
 
-            # track plot elements if using dashboard 
-            if self.read_instance.mode not in ['report', 'library']:
-                self.track_plot_elements(data_label, 'contingencytable', 'plot', [table], bias=False)
+                if not make_gerrity:
+                    # Show data label on a row above value columns
+                    for col in range(len(results_df.columns)):
+                        # Center horizontally
+                        if col == 3:
+                            text = data_label
+                        else:
+                            text = ""
+                        table.add_cell(
+                            row=-1,
+                            col=col,
+                            width=1,
+                            height=table[0, 0].get_height(),
+                            text=text,
+                            loc="center"
+                        )
+                    cells_to_merge = [(-1, col) for col in range(len(results_df.columns))]
+                    merge_cells(table, cells_to_merge, visibility=True)
+
+                    # Show observations label above index column
+                    table.add_cell(
+                        row=0,
+                        col=-1,
+                        width=table[0, 0].get_width(),
+                        height=table[0, 0].get_height(),
+                        text=self.read_instance.observations_data_label,
+                        loc="center"
+                    )
+
+                # adjust cell height
+                if 'cell_height' in plot_characteristics:
+                    table.scale(1, plot_characteristics['cell_height'])
+
+                # adjust fontsize
+                if 'fontsize' in plot_characteristics:
+                    table.auto_set_font_size(False)
+                    table.set_fontsize(plot_characteristics['fontsize'])
+                    table.auto_set_column_width(np.arange(-1, len(results_df.columns)+1))
+                    
+                # track plot elements if using dashboard 
+                if self.read_instance.mode not in ['report', 'library']:
+                    self.track_plot_elements(data_label, 'contingencytable', 'plot', [table], bias=False)
             
     def track_plot_elements(self, data_label, base_plot_type, element_type, plot_object, bias=False):
         """

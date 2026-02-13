@@ -20,6 +20,7 @@ The standard plot types consist of:
 - Taylor Diagram (`taylor`)
 - FAIRMODE target plot (`fairmode-target`)
 - FAIRMODE statistics summary plot (`fairmode-statsummary`)
+- Contingency table (`contingencytable`)
 
 Some of these plots are created for specific statistics, namely: `map`, `periodic`, `heatmap`, `taylor` and `table`. In the report and library modes, this statistic is defined by aggregating the `-[stat]` field to the plot type. `[stat]` should be replaced with any of the base statistic names (e.g. p5, Mean) or model bias names (e.g. r2, RMSE). For example to show the median values spatially, `map-p50` would be set as the plot name or `map-r2` to show the coefficient of determination. The available statistic names are documented in `settings/basic_stats.yaml` and `settings/model_bias_stats.yaml`. For the Taylor diagram, only `r`and `r2`can be used.
 
@@ -82,6 +83,10 @@ For the `metadata` plot the metadata displayed is set to a default list of metad
 ### FAIRMODE statistics summary (`fairmode-statsummary`)
 
 ![fairmode-statsummary](uploads/fairmode-statsummary.png)
+
+### Contingency table (`contingencytable`) - Only per station
+
+![contingencytable](uploads/contingencytable.png)
 
 ## Plot options
 
@@ -227,3 +232,14 @@ Plot types:
 - Dashboard: Not applicable
 - Report: `boxplot`
 - Library: `boxplot`
+
+### Transform contingency table into gerrity scores table (`_gerrity`)
+
+Adding `_gerrity` will create a new table showing the gerrity scores per station.
+
+![gerrity](uploads/gerrity.png)
+
+Plot types: 
+- Dashboard: `contingencytable`
+- Report: `contingencytable`
+- Library: `contingencytable`

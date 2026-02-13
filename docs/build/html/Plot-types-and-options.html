@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -8,15 +6,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Plot types and options &mdash; Providentia 3.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
   
-      <script src="_static/jquery.js?v=5d32c60e"></script>
-      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=08bfcbec"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=08bfcbec"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -68,6 +70,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#taylor-diagram-taylor">Taylor diagram (<code class="docutils literal notranslate"><span class="pre">taylor</span></code>)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#fairmode-target-fairmode-target">FAIRMODE target (<code class="docutils literal notranslate"><span class="pre">fairmode-target</span></code>)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#fairmode-statistics-summary-fairmode-statsummary">FAIRMODE statistics summary (<code class="docutils literal notranslate"><span class="pre">fairmode-statsummary</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#contingency-table-contingencytable-only-per-station">Contingency table (<code class="docutils literal notranslate"><span class="pre">contingencytable</span></code>) - Only per station</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#plot-options">Plot options</a><ul>
@@ -84,6 +87,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#show-the-model-grid-in-the-maps-domain">Show the model grid in the maps (<code class="docutils literal notranslate"><span class="pre">_domain</span></code>)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#add-threshold-line-threshold">Add threshold line (<code class="docutils literal notranslate"><span class="pre">_threshold</span></code>)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#normalise-boxplot-normalise">Normalise boxplot (<code class="docutils literal notranslate"><span class="pre">_normalise</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transform-contingency-table-into-gerrity-scores-table-gerrity">Transform contingency table into gerrity scores table (<code class="docutils literal notranslate"><span class="pre">_gerrity</span></code>)</a></li>
 </ul>
 </li>
 </ul>
@@ -147,6 +151,7 @@
 <li><p>Taylor Diagram (<code class="docutils literal notranslate"><span class="pre">taylor</span></code>)</p></li>
 <li><p>FAIRMODE target plot (<code class="docutils literal notranslate"><span class="pre">fairmode-target</span></code>)</p></li>
 <li><p>FAIRMODE statistics summary plot (<code class="docutils literal notranslate"><span class="pre">fairmode-statsummary</span></code>)</p></li>
+<li><p>Contingency table (<code class="docutils literal notranslate"><span class="pre">contingencytable</span></code>)</p></li>
 </ul>
 <p>Some of these plots are created for specific statistics, namely: <code class="docutils literal notranslate"><span class="pre">map</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">heatmap</span></code>, <code class="docutils literal notranslate"><span class="pre">taylor</span></code> and <code class="docutils literal notranslate"><span class="pre">table</span></code>. In the report and library modes, this statistic is defined by aggregating the <code class="docutils literal notranslate"><span class="pre">-[stat]</span></code> field to the plot type. <code class="docutils literal notranslate"><span class="pre">[stat]</span></code> should be replaced with any of the base statistic names (e.g. p5, Mean) or model bias names (e.g. r2, RMSE). For example to show the median values spatially, <code class="docutils literal notranslate"><span class="pre">map-p50</span></code> would be set as the plot name or <code class="docutils literal notranslate"><span class="pre">map-r2</span></code> to show the coefficient of determination. The available statistic names are documented in <code class="docutils literal notranslate"><span class="pre">settings/basic_stats.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">settings/model_bias_stats.yaml</span></code>. For the Taylor diagram, only <code class="docutils literal notranslate"><span class="pre">r</span></code>and <code class="docutils literal notranslate"><span class="pre">r2</span></code>can be used.</p>
 <p>The timeseries can also be used to show how statistics vary in time. In order to do this, we need to add <code class="docutils literal notranslate"><span class="pre">-[stat]</span></code> and the temporal resolution after the plot type name (e.g. <code class="docutils literal notranslate"><span class="pre">timeseries-Mean-daily</span></code>, <code class="docutils literal notranslate"><span class="pre">timeseries-r2-monthly</span></code>, <code class="docutils literal notranslate"><span class="pre">timeseries-r-annual</span></code>).</p>
@@ -206,6 +211,10 @@
 <section id="fairmode-statistics-summary-fairmode-statsummary">
 <h3>FAIRMODE statistics summary (<code class="docutils literal notranslate"><span class="pre">fairmode-statsummary</span></code>)<a class="headerlink" href="#fairmode-statistics-summary-fairmode-statsummary" title="Link to this heading"></a></h3>
 <p><img alt="fairmode-statsummary" src="_images/fairmode-statsummary.png" /></p>
+</section>
+<section id="contingency-table-contingencytable-only-per-station">
+<h3>Contingency table (<code class="docutils literal notranslate"><span class="pre">contingencytable</span></code>) - Only per station<a class="headerlink" href="#contingency-table-contingencytable-only-per-station" title="Link to this heading"></a></h3>
+<p><img alt="contingencytable" src="_images/contingencytable.png" /></p>
 </section>
 </section>
 <section id="plot-options">
@@ -351,6 +360,17 @@
 <li><p>Dashboard: Not applicable</p></li>
 <li><p>Report: <code class="docutils literal notranslate"><span class="pre">boxplot</span></code></p></li>
 <li><p>Library: <code class="docutils literal notranslate"><span class="pre">boxplot</span></code></p></li>
+</ul>
+</section>
+<section id="transform-contingency-table-into-gerrity-scores-table-gerrity">
+<h3>Transform contingency table into gerrity scores table (<code class="docutils literal notranslate"><span class="pre">_gerrity</span></code>)<a class="headerlink" href="#transform-contingency-table-into-gerrity-scores-table-gerrity" title="Link to this heading"></a></h3>
+<p>Adding <code class="docutils literal notranslate"><span class="pre">_gerrity</span></code> will create a new table showing the gerrity scores per station.</p>
+<p><img alt="gerrity" src="_images/gerrity.png" /></p>
+<p>Plot types:</p>
+<ul class="simple">
+<li><p>Dashboard: <code class="docutils literal notranslate"><span class="pre">contingencytable</span></code></p></li>
+<li><p>Report: <code class="docutils literal notranslate"><span class="pre">contingencytable</span></code></p></li>
+<li><p>Library: <code class="docutils literal notranslate"><span class="pre">contingencytable</span></code></p></li>
 </ul>
 </section>
 </section>

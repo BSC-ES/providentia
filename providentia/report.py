@@ -826,7 +826,13 @@ class Report:
                 # set figure attributes
                 # adjust subplots?
                 if 'subplots_adjust' in plot_characteristics_vars:
-                    fig.subplots_adjust(**plot_characteristics['subplots_adjust'])
+                    if base_plot_type == 'contingencytable':
+                        if 'gerrity' in plot_options:
+                            fig.subplots_adjust(**plot_characteristics['subplots_adjust']['gerrity'])
+                        else:
+                            fig.subplots_adjust(**plot_characteristics['subplots_adjust']['contingency'])
+                    else:
+                        fig.subplots_adjust(**plot_characteristics['subplots_adjust'])
 
                 # make legend?
                 if 'legend' in plot_characteristics_vars:
@@ -835,7 +841,7 @@ class Report:
                     else:
                         set_obs = True
                     plot_characteristics['legend'] = self.plotting.make_legend_handles(plot_characteristics['legend'], 
-                                                                                   set_obs=set_obs)
+                                                                                       set_obs=set_obs)
                     fig.legend(**plot_characteristics['legend']['plot'])
 
                 # add colourbar axis to plot dictionary (if not already there)?
