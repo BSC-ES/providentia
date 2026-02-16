@@ -388,7 +388,7 @@ class Zenodo:
             return
  
         if initial_check:
-            # obtain the filetree that match with the configuration file
+            # obtain the filetree that matches with the configuration file
             valid_filetree = self.check_filetrees(network)
 
             # convert the filetree to absolute paths

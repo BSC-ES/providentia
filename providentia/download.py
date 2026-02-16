@@ -30,6 +30,7 @@ data_paths = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/data_paths.yam
 interp_models = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_models.yaml')))
 mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
 dl_hpc = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'dl_hpc.yaml')))
+temporal_resolution_map = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'temporal_resolution_map.yaml')))
 
 class Download(object):
     """Main class responsible for handling Providentia data downloads."""
@@ -173,11 +174,11 @@ class Download(object):
                             # get user input to know which kind of network wants
                             while True:
                                 download_source = input("\nDo you want to download all the GHOST networks? (Otherwise all the non-GHOST networks will be downloaded) ([y]/n): ").lower()
-                                if download_source in ['','y','n']:
+                                if download_source in ['', 'y', 'n']:
                                     break
                             
                             # get the boolean value from the answer of the user
-                            self.reading_ghost = download_source in ['','y']
+                            self.reading_ghost = download_source in ['', 'y']
 
                     # if there are GHOST networks, ask the user whether they want to download it from zenodo or HPC machines
                     if self.reading_ghost:
@@ -185,7 +186,7 @@ class Download(object):
                             # ask whether the user wants to download from the zenodo or bsc machine
                             while True: 
                                 dl_ghost_source = input("\nDo you want to download observational data from the BSC remote machine? (Otherwise, GHOST observational data will be retrieved from Zenodo) ([y]/n): ").lower()
-                                if dl_ghost_source in ['','y','n']:
+                                if dl_ghost_source in ['', 'y', 'n']:
                                     break
 
                             self.dl_ghost_source = 'bsc' if dl_ghost_source in ['', 'y'] else 'zenodo'
@@ -445,7 +446,7 @@ class Download(object):
                     # ask if user wants to overwrite
                     while True:
                         dl_overwrite = input("\nThere are some files that were already downloaded in a previous download, do you want to overwrite them ([y]/n)? ").lower() 
-                        if dl_overwrite in ['y','n','']:
+                        if dl_overwrite in ['y', 'n', '']:
                             break
                     
                     # get the boolean value
@@ -1035,7 +1036,7 @@ class Download(object):
         msg = ""
         model_exists = False
 
-        # see if the model is any of the interp_models.yaml lists
+        # see if the model is in any of the interp_models.yaml lists
         for model_type, model_dict in interp_models.items():
             if mod_id in model_dict["models"]:
                 model_exists = True
@@ -1113,12 +1114,22 @@ class Download(object):
                 possible_species = set(self.sftp.listdir(join(remote_dir, resolution))).intersection(available_species)
                 sftp_species = self.species if self.species else possible_species
             except FileNotFoundError:
-                # tell the user you are looking for finer resolutions
-                msg = f"No data available at {resolution} resolution. Searching for finer resolution data."
-                show_message(self, msg, deactivate=initial_check)
+                # get the order of the possible resolutions
+                possible_resolutions_list = temporal_resolution_map[resolution]
+                
+                # get resolution input from user
+                while True:
+                    user_resolution = input(f"No data found at {resolution} resolution. "
+                    f"You can specify a temporal resolution ({', '.join(possible_resolutions_list)}). "
+                    "If left empty, the first available option will be selected automatically: ").lower()
 
-                # look for finer resolutions
-                for resolution in temporal_resolution_map[resolution]:
+                    if user_resolution in possible_resolutions_list or user_resolution == '':
+                        if user_resolution != '':
+                            possible_resolutions_list = [user_resolution]
+                        break
+
+                # look for other resolutions
+                for resolution in possible_resolutions_list:
                     try:
                         available_species = set(self.sftp.listdir(join(remote_dir, resolution))).intersection(available_species)
                         sftp_species = self.species if self.species else possible_species
@@ -1260,8 +1271,7 @@ class Download(object):
                     continue
 
                 # download the valid resolution specie date combinations
-                else:
-                    
+                else:    
                     # create directories if they don't exist
                     if not os.path.exists(local_dir):
                         os.makedirs(local_dir) 
