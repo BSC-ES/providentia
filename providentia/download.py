@@ -1102,17 +1102,35 @@ class Download(object):
 
         # get all the resolutions available in the remote directory
         sftp_resolutions = self.model_resolution if self.model_resolution else set(self.sftp.listdir(remote_dir)).intersection(self.nonghost_available_resolutions)
-
+        
+        # get available species in GHOST and the mapped ones
+        available_species = self.available_species + [spec[0] for spec in mapping_species.values()]
+        
         # iterate through the resolutions
         for resolution in sftp_resolutions:
+            sftp_species = None
             try:
-                # get available species ("normal" and mapped)
-                available_species = self.available_species+[spec[0] for spec in mapping_species.values()]
-                sftp_species = self.species if self.species else set(self.sftp.listdir(join(remote_dir,resolution))).intersection(available_species)
+                possible_species = set(self.sftp.listdir(join(remote_dir, resolution))).intersection(available_species)
+                sftp_species = self.species if self.species else possible_species
             except FileNotFoundError:
-                msg = f"There is no data available in {self.remote_machine} for the {mod_id} model with the {domain} domain at {resolution} resolution."
+                # tell the user you are looking for finer resolutions
+                msg = f"No data available at {resolution} resolution. Searching for finer resolution data."
                 show_message(self, msg, deactivate=initial_check)
-                continue
+
+                # look for finer resolutions
+                for resolution in temporal_resolution_map[resolution]:
+                    try:
+                        available_species = set(self.sftp.listdir(join(remote_dir, resolution))).intersection(available_species)
+                        sftp_species = self.species if self.species else possible_species
+                        self.logger.info(f"Data for the {resolution} resolution was found.")
+                        break
+                    except:
+                        pass
+                
+                if not sftp_species:
+                    msg = f"There is no data available in {self.remote_machine} for the {mod_id} model with the {domain} domain at {resolution} resolution."
+                    show_message(self, msg, deactivate=initial_check)
+                    continue
 
             # iterate through the species
             for speci_to_process in sftp_species: 
