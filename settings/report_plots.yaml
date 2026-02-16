@@ -64,7 +64,7 @@
                   "statsummary", "statsummary_bias", "statsummary_multispecies", "statsummary_multispecies_bias",
                   "taylor-r2", "taylor-r", "taylor-r2_annotate", "taylor-r_annotate",
                   "fairmode-target", "fairmode-target_individual", "fairmode-target_annotate",
-                  "contingencytable", "contingencytable_gerrity"],
+                  "fairmode-statsummary", "contingencytable", "contingencytable_gerrity"],
     
     "training": ["map-Median", "map-r", "timeseries_annotate", "periodic-Mean_threshold", "statsummary_multispecies", "taylor-r2", "scatter_annotate_individual"],
 
@@ -75,6 +75,12 @@
     "cams2_82_bis": ["metadata", "statsummary", "statsummary_multispecies_bias", "map-r", "map-MFB", "map-MFE", "timeseries_smooth", "timeseries_bias_smooth", "distribution", 
                      "scatter_annotate"],
 
-    "debug": ['contingencytable', 'contingencytable_gerrity']
+    "docs": {"summary": ["map-Mean", "timeseries", "periodic-Mean", "periodic-violin", "boxplot", "distribution",
+                         "scatter", "heatmap-RMSE", "table-RMSE", "statsummary", "taylor-r", 
+                         "fairmode-target", "fairmode-statsummary", "contingencytable", "metadata"],
+             "station": ["contingencytable"]
+    },
+
+    "debug": ["timeseries", "fairmode-target", "fairmode-statsummary"]
 
 }

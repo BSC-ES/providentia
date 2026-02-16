@@ -2842,6 +2842,7 @@ class Plotting:
 
             # write the threshold on the exceedances row title
             if row == "observed_exceedances":
+                exc_threshold = round(exc_threshold, plot_characteristics["round_decimal_places"]["title"])
                 row_title = row_title.format(exc_threshold)
 
             # add units to the first two rows
