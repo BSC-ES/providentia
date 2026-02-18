@@ -20,6 +20,7 @@ The standard plot types consist of:
 - Taylor Diagram (`taylor`)
 - FAIRMODE target plot (`fairmode-target`)
 - FAIRMODE statistics summary plot (`fairmode-statsummary`)
+- Contingency table (`contingencytable`)
 
 Some of these plots are created for specific statistics, namely: `map`, `periodic`, `heatmap`, `taylor` and `table`. In the report and library modes, this statistic is defined by aggregating the `-[stat]` field to the plot type. `[stat]` should be replaced with any of the base statistic names (e.g. p5, Mean) or model bias names (e.g. r2, RMSE). For example to show the median values spatially, `map-p50` would be set as the plot name or `map-r2` to show the coefficient of determination. The available statistic names are documented in `settings/basic_stats.yaml` and `settings/model_bias_stats.yaml`. For the Taylor diagram, only `r`and `r2`can be used.
 
@@ -29,59 +30,67 @@ For the `metadata` plot the metadata displayed is set to a default list of metad
 
 ### Map (`map`)
 
-![Map](uploads/Map.png)
+![Map colorbar](uploads/plot_types/map-cb.png)
+
+![Map](uploads/plot_types/map.png)
 
 ### Metadata (`metadata`)
 
-![Metadata](uploads/Metadata.png)
+![Metadata](uploads/plot_types/metadata.png)
 
 ### Timeseries (`timeseries`)
 
-![Timeseries](uploads/Timeseries.png)
+![Timeseries](uploads/plot_types/timeseries.png)
 
 ### Periodic (`periodic`)
 
-![Periodic](uploads/Periodic.png)
+![Periodic](uploads/plot_types/periodic.png)
 
 ### Periodic violin (`periodic-violin`)
 
-![Periodic-violin](uploads/Periodic-violin.png)
+![Periodic-violin](uploads/plot_types/periodic-violin.png)
 
 ### Boxplot (`boxplot`)
 
-![Boxplot](uploads/Boxplot.png)
+![Boxplot](uploads/plot_types/boxplot.png)
 
 ### Distribution (`distribution`)
 
-![Distribution](uploads/Distribution.png)
+![Distribution](uploads/plot_types/distribution.png)
 
 ### Scatter plot (`scatter`)
 
-![Scatter](uploads/Scatter.png)
+![Scatter](uploads/plot_types/scatter.png)
 
 ### Heatmap (`heatmap`)
 
-![Heatmap](uploads/Heatmap.png)
+![Heatmap colorbar](uploads/plot_types/heatmap-cb.png)
+
+![Heatmap](uploads/plot_types/heatmap.png)
 
 ### Table (`table`)
 
-![Table](uploads/Table.png)
+![Table](uploads/plot_types/table.png)
 
 ### Statistics summary (`statsummary`)
 
-![Statsummary](uploads/Statsummary.png)
+![Statsummary](uploads/plot_types/statsummary.png)
 
 ### Taylor diagram (`taylor`)
 
-![taylor](uploads/taylor.png)
+![taylor](uploads/plot_types/taylor.png)
 
 ### FAIRMODE target (`fairmode-target`)
 
-![fairmode-target](uploads/fairmode-target.png)
+![fairmode-target](uploads/plot_types/fairmode-target.png)
 
 ### FAIRMODE statistics summary (`fairmode-statsummary`)
 
-![fairmode-statsummary](uploads/fairmode-statsummary.png)
+![fairmode-statsummary](uploads/plot_types/fairmode-statsummary.png)
+
+### Contingency table (`contingencytable`) - Only per station
+
+![contingencytable](uploads/plot_types/contingencytable.png)
 
 ## Plot options
 
@@ -227,3 +236,14 @@ Plot types:
 - Dashboard: Not applicable
 - Report: `boxplot`
 - Library: `boxplot`
+
+### Transform contingency table into gerrity scores table (`_gerrity`)
+
+Adding `_gerrity` will create a new table showing the gerrity scores per station.
+
+![gerrity](uploads/gerrity.png)
+
+Plot types: 
+- Dashboard: `contingencytable`
+- Report: `contingencytable`
+- Library: `contingencytable`

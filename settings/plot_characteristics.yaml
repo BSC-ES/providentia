@@ -2777,25 +2777,36 @@
             "plot_options": ["gerrity"],
             "orientation": "portrait",
             "figure": { "ncols": 1, "nrows": 1 },
-            "gerrity_row_limit": 50,
+            "gerrity_row_limit": 30,
             "page_title":
               {
-                "t": "Table",
+                "t": "Contingency table",
                 "fontsize": 13,
                 "ha": "left",
                 "x": 0.05,
                 "y": 0.98,
               },
-            "axis_title": { "fontsize": 12 },
-            "subplots_adjust":
-              {
-                "left": 0.20,
-                "right": 0.98,
-                "top": 0.90,
-                "bottom": 0.06,
-                "hspace": 0.2,
-                "wspace": 0.01,
-              },
+            "axis_title": { "fontsize": 12, "pad": 20 },
+            "subplots_adjust": {
+              "contingency":
+                {
+                  "left": 0.2,
+                  "right": 0.98,
+                  "top": 0.80,
+                  "bottom": 0.06,
+                  "hspace": 0.2,
+                  "wspace": 0.01,
+                },
+              "gerrity":
+                {
+                  "left": 0.04,
+                  "right": 0.98,
+                  "top": 0.90,
+                  "bottom": 0.06,
+                  "hspace": 0.2,
+                  "wspace": 0.01,
+                },
+            },
             "legend":
               {
                 "plot":
@@ -2815,7 +2826,7 @@
             "plot":
               {
                 "loc": "upper left",
-                "rowLoc": "right",
+                "rowLoc": "center",
                 "colLoc": "center",
                 "cellLoc": "center",
               },

@@ -1,10 +1,27 @@
 # Getting started
 
-If you have access to the HPC machines at Barcelona Supercomputing Center (BSC), the first thing you need to decide is whether you want to use Providentia on a supercomputer (MN5 or Nord4) or on your local computer (Linux or Mac).
+If you have access to the HPC machines at Barcelona Supercomputing Center (BSC), the first thing you need to decide is whether you want to use Providentia on a supercomputer (MN5 or Nord4) or on your local computer.
 
 We recommend working on local machines to everyone, including the users at BSC, because the interactive features of the dashboard are faster and you do not need to wait in queue to get resources and use the software. The only disadvantage is that the data (models and observations) stored on HPC cannot be accessed directly and need to be downloaded onto your local machine using the [download](Download) mode in advance. If you do not want to download the data and instead you prefer to use an HPC machine for your analysis, we recommend reading the Wiki section [Connection setup](Connection-setup).
 
 If you do not have access to the machines, you won't be able to use the download mode to get model data (only observations from limited sources, i.e. Zenodo for GHOST and NILU Thredds for ACTRIS). If you want to use your own data, consider checking the tutorial [2. Formatting model data](https://github.com/BSC-ES/providentia/blob/master/tutorials/2.%20Formatting%20model%20data.ipynb) and reading the section [Create your own data network](Create-your-own-data-network) to process and create netCDF files that Providentia can read.
+
+## Prerequisites
+
+Providentia works best on Linux and macOS.
+
+The software has not been designed to work on Windows, if you are a Windows user one of the best options is to run it from a Windows Subsystem for Linux (WSL): [https://ubuntu.com/desktop/wsl](https://ubuntu.com/desktop/wsl). Alternatively, if you have a virtual machine software like Oracle VirtualBox, you can use that as well.
+
+### 1. Git
+Install Git by following the instructions here: [https://git-scm.com/install/linux](https://git-scm.com/install/linux)
+
+### 2. Conda
+Install Conda following the official guide: [https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html). We recommend Miniconda because it is lightweight. After downloading the .sh file, run the installer from your terminal:
+
+```bash
+cd Downloads
+bash Miniconda3-latest-Linux-x86_64.sh
+```
 
 ## Cloning the project
 
@@ -25,7 +42,7 @@ cd providentia
 ./bin/providentia
 ```
 
-The first time the software runs in a local machine it will create a conda environment called `providentia-env_v[version]` with all the modules needed. If conda is not installed, an error message will appear. If this is the case you should follow [the steps on this page](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) to install it.  If you encountered any other problem, feel free to [contact us](Home).
+The first time the software runs in a local machine it will create a conda environment called `providentia-env_v[version]` with all the modules needed. If you encountered any other problem, feel free to [contact us](Home).
 
 In HPC, the environment is not created by the user as it is stored in a shared folder. Every time we run Providentia on HPC, a wall time of 2 hours is requested, with 12 CPUs and 30Gb of total memory. This can be modified as desired using the bash options. You can check the available options with:
 

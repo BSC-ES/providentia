@@ -140,7 +140,7 @@ class Report:
 
         # iterate through configuration sections
         for section_ind, (filename, section) in enumerate(zip(self.filenames, self.parent_section_names)):
-            self.logger.info('Starting to create PDF for {} section'.format(section))
+            self.logger.info('\nStarting to create PDF for {} section'.format(section))
 
             # update for new section parameters
             self.section = section
@@ -300,6 +300,9 @@ class Report:
                     vars(self).pop(k)
                 except:
                     pass
+
+            if section_ind != len(self.parent_section_names) - 1:
+                self.logger.info('\n'+'='*70)
 
     def start_pdf(self, filename):
         """
@@ -823,7 +826,13 @@ class Report:
                 # set figure attributes
                 # adjust subplots?
                 if 'subplots_adjust' in plot_characteristics_vars:
-                    fig.subplots_adjust(**plot_characteristics['subplots_adjust'])
+                    if base_plot_type == 'contingencytable':
+                        if 'gerrity' in plot_options:
+                            fig.subplots_adjust(**plot_characteristics['subplots_adjust']['gerrity'])
+                        else:
+                            fig.subplots_adjust(**plot_characteristics['subplots_adjust']['contingency'])
+                    else:
+                        fig.subplots_adjust(**plot_characteristics['subplots_adjust'])
 
                 # make legend?
                 if 'legend' in plot_characteristics_vars:
@@ -832,7 +841,7 @@ class Report:
                     else:
                         set_obs = True
                     plot_characteristics['legend'] = self.plotting.make_legend_handles(plot_characteristics['legend'], 
-                                                                                   set_obs=set_obs)
+                                                                                       set_obs=set_obs)
                     fig.legend(**plot_characteristics['legend']['plot'])
 
                 # add colourbar axis to plot dictionary (if not already there)?
@@ -1158,9 +1167,9 @@ class Report:
         
         # if have 0 relevant stations, continue to next networkspeci
         if self.n_stations == 0:
-            self.logger.info('No valid stations for {}, {}. Not making summmary plots'.format(networkspeci, self.subsection))
+            self.logger.info('\nNo valid stations for {}, {}. Not making summmary plots'.format(networkspeci, self.subsection))
         else:
-            self.logger.info('Making {}, {} summary plots'.format(networkspeci, self.subsection)) 
+            self.logger.info('\nMaking {}, {} summary plots'.format(networkspeci, self.subsection)) 
 
         # create nested dictionary to store statistical information across all networkspecies
         if networkspeci not in self.stats_summary[self.subsection]:
@@ -1247,7 +1256,7 @@ class Report:
                     chunk_stat = copy.deepcopy(zstat)
                     chunk_resolution = plot_type.split('-')[2].split('_')[0]
 
-            self.logger.info('Making summary {0}'.format(plot_type))
+            self.logger.info('\nMaking summary {0}'.format(plot_type))
 
             if base_plot_type in ['fairmode-target', 'fairmode-statsummary']:
                 # warning for fairmode plots if species aren't PM2.5, PM10, NO2 or O3
@@ -1448,7 +1457,7 @@ class Report:
                         chunk_stat = copy.deepcopy(zstat)
                         chunk_resolution = plot_type.split('-')[2].split('_')[0]
 
-                self.logger.info('Making station {2} for {3} ({0}/{1})'.format(i+1, 
+                self.logger.info('\nMaking station {2} for {3} ({0}/{1})'.format(i+1, 
                                                                     len(self.relevant_station_inds),
                                                                     plot_type, 
                                                                     self.current_station_name))   

@@ -198,6 +198,16 @@
 </tr>
 </tbody>
 </table>
+<p>If the number of networks and species are <strong>both</strong> multiple but not equal, Providentia will throw the error <code class="docutils literal notranslate"><span class="pre">Error:</span> <span class="pre">The</span> <span class="pre">number</span> <span class="pre">of</span> <span class="pre">&quot;network&quot;</span> <span class="pre">and</span> <span class="pre">&quot;species&quot;</span> <span class="pre">fields</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">the</span> <span class="pre">same.</span></code> and the user will be required to clearly specify which networks and species they want. For example, this would not be accepted:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span> <span class="o">=</span> <span class="n">EBAS</span><span class="p">,</span> <span class="n">EEA_AQ_eReporting</span>
+<span class="n">species</span> <span class="o">=</span> <span class="n">sconco3</span><span class="p">,</span> <span class="n">sconcno2</span><span class="p">,</span> <span class="n">sconcso2</span>
+</pre></div>
+</div>
+<p>But this would:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span> <span class="o">=</span> <span class="n">EBAS</span><span class="p">,</span> <span class="n">EBAS</span><span class="p">,</span> <span class="n">EBAS</span><span class="p">,</span> <span class="n">EEA_AQ_eReporting</span><span class="p">,</span> <span class="n">EEA_AQ_eReporting</span><span class="p">,</span> <span class="n">EEA_AQ_eReporting</span>
+<span class="n">species</span> <span class="o">=</span> <span class="n">sconco3</span><span class="p">,</span> <span class="n">sconcno2</span><span class="p">,</span> <span class="n">sconcso2</span><span class="p">,</span> <span class="n">sconco3</span><span class="p">,</span> <span class="n">sconcno2</span><span class="p">,</span> <span class="n">sconcso2</span>
+</pre></div>
+</div>
 </section>
 <section id="parameters-for-analysis-and-visualization-modes-dashboard-report-library">
 <span id="visualization-parameters"></span><h2>Parameters for analysis and visualization modes (Dashboard, Report, Library)<a class="headerlink" href="#parameters-for-analysis-and-visualization-modes-dashboard-report-library" title="Link to this heading"></a></h2>
@@ -328,16 +338,6 @@
 </tr>
 </tbody>
 </table>
-<p>If the number of networks and species are <strong>both</strong> multiple but not equal, Providentia will throw the error <code class="docutils literal notranslate"><span class="pre">Error:</span> <span class="pre">The</span> <span class="pre">number</span> <span class="pre">of</span> <span class="pre">&quot;network&quot;</span> <span class="pre">and</span> <span class="pre">&quot;species&quot;</span> <span class="pre">fields</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">the</span> <span class="pre">same.</span></code> and the user will be required to clearly specify which networks and species they want. For example, this would not be accepted:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span> <span class="o">=</span> <span class="n">EBAS</span><span class="p">,</span> <span class="n">EEA_AQ_eReporting</span>
-<span class="n">species</span> <span class="o">=</span> <span class="n">sconco3</span><span class="p">,</span> <span class="n">sconcno2</span><span class="p">,</span> <span class="n">sconcso2</span>
-</pre></div>
-</div>
-<p>But this would:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span> <span class="o">=</span> <span class="n">EBAS</span><span class="p">,</span> <span class="n">EBAS</span><span class="p">,</span> <span class="n">EBAS</span><span class="p">,</span> <span class="n">EEA_AQ_eReporting</span><span class="p">,</span> <span class="n">EEA_AQ_eReporting</span><span class="p">,</span> <span class="n">EEA_AQ_eReporting</span>
-<span class="n">species</span> <span class="o">=</span> <span class="n">sconco3</span><span class="p">,</span> <span class="n">sconcno2</span><span class="p">,</span> <span class="n">sconcso2</span><span class="p">,</span> <span class="n">sconco3</span><span class="p">,</span> <span class="n">sconcno2</span><span class="p">,</span> <span class="n">sconcso2</span>
-</pre></div>
-</div>
 </section>
 <section id="interpolation-parameters">
 <span id="id4"></span><h2>Interpolation parameters<a class="headerlink" href="#interpolation-parameters" title="Link to this heading"></a></h2>

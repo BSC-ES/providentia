@@ -117,7 +117,9 @@ def test_make_fairmode_statsummary(inst, statistic_mode, network_type):
 # Contingency table cannot be created for od550aero
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities[0:3])
 def test_make_contingencytable(inst, statistic_mode, network_type):
-    plot(inst, statistic_mode, network_type, 'contingencytable')
+    inst.load()
+    inst.filter('station_reference', keep=['AT0034G_UVP'])
+    plot(inst, statistic_mode, network_type, 'contingencytable', load=False)
 
 
 # Gerrity table cannot be created for od550aero

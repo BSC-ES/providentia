@@ -125,7 +125,7 @@ class Download(object):
         """Execute the Providentia download process for all configured sections."""
         
         for section_ind, section in enumerate(self.sections):
-            self.logger.info('Starting to download for {} section'.format(section))
+            self.logger.info(f"\nStarting {section} section download...")
 
             # update for new section parameters
             self.section = section
@@ -289,6 +289,9 @@ class Download(object):
             # reinitialise default configuration variables
             # modified by commandline arguments, if given
             self.provconf = ProvConfiguration(self, **self.commandline_arguments)
+
+            if section_ind != len(self.sections) - 1:
+                self.logger.info('\n'+'='*70)
 
         # show message in case models or observations were ignored
         if self.overwritten_files_flag == True:

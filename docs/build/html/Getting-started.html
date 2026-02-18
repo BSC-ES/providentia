@@ -46,6 +46,11 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Home.html">Home</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#git">1. Git</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#conda">2. Conda</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#cloning-the-project">Cloning the project</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#running-the-tool-the-first-time">Running the tool the first time</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#accessing-the-data">Accessing the data</a><ul>
@@ -101,9 +106,26 @@
              
   <section class="tex2jax_ignore mathjax_ignore" id="getting-started">
 <h1>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h1>
-<p>If you have access to the HPC machines at Barcelona Supercomputing Center (BSC), the first thing you need to decide is whether you want to use Providentia on a supercomputer (MN5 or Nord4) or on your local computer (Linux or Mac).</p>
+<p>If you have access to the HPC machines at Barcelona Supercomputing Center (BSC), the first thing you need to decide is whether you want to use Providentia on a supercomputer (MN5 or Nord4) or on your local computer.</p>
 <p>We recommend working on local machines to everyone, including the users at BSC, because the interactive features of the dashboard are faster and you do not need to wait in queue to get resources and use the software. The only disadvantage is that the data (models and observations) stored on HPC cannot be accessed directly and need to be downloaded onto your local machine using the <a class="reference internal" href="Download.html"><span class="doc std std-doc">download</span></a> mode in advance. If you do not want to download the data and instead you prefer to use an HPC machine for your analysis, we recommend reading the Wiki section <a class="reference internal" href="Topics-on-HPC.html#connection-setup"><span class="std std-ref">Connection setup</span></a>.</p>
 <p>If you do not have access to the machines, you won’t be able to use the download mode to get model data (only observations from limited sources, i.e. Zenodo for GHOST and NILU Thredds for ACTRIS). If you want to use your own data, consider checking the tutorial <a class="reference external" href="https://github.com/BSC-ES/providentia/blob/master/tutorials/2.%20Formatting%20model%20data.ipynb">2. Formatting model data</a> and reading the section <a class="reference internal" href="Create-your-own-data-network.html"><span class="doc std std-doc">Create your own data network</span></a> to process and create netCDF files that Providentia can read.</p>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h2>
+<p>Providentia works best on Linux and macOS.</p>
+<p>The software has not been designed to work on Windows, if you are a Windows user one of the best options is to run it from a Windows Subsystem for Linux (WSL): <a class="reference external" href="https://ubuntu.com/desktop/wsl">https://ubuntu.com/desktop/wsl</a>. Alternatively, if you have a virtual machine software like Oracle VirtualBox, you can use that as well.</p>
+<section id="git">
+<h3>1. Git<a class="headerlink" href="#git" title="Link to this heading"></a></h3>
+<p>Install Git by following the instructions here: <a class="reference external" href="https://git-scm.com/install/linux">https://git-scm.com/install/linux</a></p>
+</section>
+<section id="conda">
+<h3>2. Conda<a class="headerlink" href="#conda" title="Link to this heading"></a></h3>
+<p>Install Conda following the official guide: <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html">https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html</a>. We recommend Miniconda because it is lightweight. After downloading the .sh file, run the installer from your terminal:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>Downloads
+bash<span class="w"> </span>Miniconda3-latest-Linux-x86_64.sh
+</pre></div>
+</div>
+</section>
+</section>
 <section id="cloning-the-project">
 <h2>Cloning the project<a class="headerlink" href="#cloning-the-project" title="Link to this heading"></a></h2>
 <p>Use the following command to get a copy of the repository in your machine:</p>
@@ -119,7 +141,7 @@
 <span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span>
 </pre></div>
 </div>
-<p>The first time the software runs in a local machine it will create a conda environment called <code class="docutils literal notranslate"><span class="pre">providentia-env_v[version]</span></code> with all the modules needed. If conda is not installed, an error message will appear. If this is the case you should follow <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html">the steps on this page</a> to install it.  If you encountered any other problem, feel free to <a class="reference internal" href="Home.html"><span class="doc std std-doc">contact us</span></a>.</p>
+<p>The first time the software runs in a local machine it will create a conda environment called <code class="docutils literal notranslate"><span class="pre">providentia-env_v[version]</span></code> with all the modules needed. If you encountered any other problem, feel free to <a class="reference internal" href="Home.html"><span class="doc std std-doc">contact us</span></a>.</p>
 <p>In HPC, the environment is not created by the user as it is stored in a shared folder. Every time we run Providentia on HPC, a wall time of 2 hours is requested, with 12 CPUs and 30Gb of total memory. This can be modified as desired using the bash options. You can check the available options with:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">usage</span>
 </pre></div>

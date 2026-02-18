@@ -472,7 +472,7 @@ def round_decimal_places(x, decimal_places):
     else:
         return 'nan'
 
-def merge_cells(table, cells):
+def merge_cells(table, cells, visibility=False):
     """
     Merge cells in a matplotlib Table.
     Reference: https://stackoverflow.com/a/53819765/12684122
@@ -483,6 +483,8 @@ def merge_cells(table, cells):
         The table object containing the cells.
     cells : list of tuple
         List of table coordinates to merge, e.g. [(0, 1), (0, 0), (0, 2)].
+    visibility : bool
+        Whether we want to show or hide the texts in the cells other than 0.
     """
 
     cells_array = [np.asarray(c) for c in cells]
@@ -511,8 +513,9 @@ def merge_cells(table, cells):
 
     # didn't had to check for ha because I only want ha='center'
     txts[0].set_transform(transforms.Affine2D().translate(*trans))
-    for txt in txts[1:]:
-        txt.set_visible(False)
+    if not visibility:
+        for txt in txts[1:]:
+            txt.set_visible(False)
 
 def get_taylor_diagram_ghelper_info(reference_stddev, plot_characteristics, extend=False):
     """

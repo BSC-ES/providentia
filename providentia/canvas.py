@@ -835,7 +835,7 @@ class Canvas(FigureCanvas):
                 speci = self.read_instance.networkspeci.split('|')[1]
                 if plot_type == 'contingencytable':
                     # if we have more than one model, skip contingency table
-                    if len(self.read_instance.data_labels) == 3:
+                    if len(self.read_instance.data_labels) > 2:
                         msg = f'It is not possible to make {plot_type} plots with more than 1 model.'
                         show_message(self.read_instance, msg)
                         self.read_instance.handle_layout_update('None', sender=plot_type_position)

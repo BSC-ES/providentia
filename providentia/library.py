@@ -1310,11 +1310,11 @@ class Providentia:
             else:
                 error = 'Error: The path to the configuration file passed as an argument does not exist.'
                 self.logger.info(error)
-                return False
+                sys.exit(1)
         else:
             error = "Error: The configuration file must be given as an argument: e.g. 'config=...'"
             self.logger.info(error)
-            return False
+            sys.exit(1)
 
         # parse section
         # if section name provided, try and use that
@@ -1325,7 +1325,7 @@ class Providentia:
         if len(self.sections) == 0:
             error = "Error: No sections were found in the configuration file, make sure to name them using square brackets."
             self.logger.info(error)
-            return False
+            sys.exit(1)
     
         self.have_section = False
         if hasattr(self, 'section'): 
@@ -1333,10 +1333,11 @@ class Providentia:
             if self.section in self.all_sections:
                 self.have_section = True
             else:
-                msg = 'Error: The section specified in the command line ({0}) does not exist.'.format(self.section)
-                msg += '\nTip: For subsections, add the name of the parent section followed by an interpunct (·) '
-                msg += 'before the subsection name (e.g. SECTIONA·Spain). Available: {0}'.format(self.all_sections)
-                show_message(self, msg)
+                error = 'Error: The section specified in the command line ({0}) does not exist.'.format(self.section)
+                error += '\nTip: For subsections, add the name of the parent section followed by an interpunct (·) '
+                error += 'before the subsection name (e.g. SECTIONA·Spain). Available: {0}'.format(self.all_sections)
+                self.logger.info(error)
+                sys.exit(1)
 
         if not self.have_section:
             self.section = self.sections[0]
@@ -1656,7 +1657,7 @@ class Providentia:
 
         if not hasattr(self, 'data_in_memory'):
             self.logger.info('Error: Data has not been loaded. Use the load() method')
-            return False
+            sys.exit(1)
         else:
             return True
         
@@ -1672,7 +1673,7 @@ class Providentia:
 
         if not self.valid_config:
             self.logger.info("Error: A valid configuration file has not been read. Please reinitialise your Providentia object with a valid file: prv.Providentia('filename.conf')")
-            return False
+            sys.exit(1)
         else:
             return True
 

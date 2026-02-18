@@ -451,7 +451,8 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot</span><span class="p">,</span> <span class="n">data_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">labela</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">labelb</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cb</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
              <span class="n">legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">set_obs_legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">map_extent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">annotate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
              <span class="n">hidedata</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">logx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">logy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">multispecies</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">regression</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
-             <span class="n">threshold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">plot_options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+             <span class="n">threshold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">gerrity</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">plot_options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+             <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">        Wrapper method to make a Providentia plot.</span>
 
@@ -499,6 +500,8 @@
 <span class="sd">            Indicates if timeseries has smooth line/s or the smoothing window, defaults to False.</span>
 <span class="sd">        threshold : bool, optional</span>
 <span class="sd">            Indicates if plot has threshold line/s, defaults to False.</span>
+<span class="sd">        gerrity : bool, optional</span>
+<span class="sd">            Indicates if plot shows Gerrity scores per station</span>
 <span class="sd">        plot_options : list, optional</span>
 <span class="sd">            List with plot options, defaults to None.</span>
 <span class="sd">        save : bool or str, optional</span>
@@ -579,6 +582,9 @@
         <span class="k">if</span> <span class="n">threshold</span><span class="p">:</span>
             <span class="k">if</span> <span class="s1">&#39;threshold&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">plot_options</span><span class="p">:</span>
                 <span class="n">plot_options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;threshold&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">gerrity</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;gerrity&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">plot_options</span><span class="p">:</span>
+                <span class="n">plot_options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;gerrity&#39;</span><span class="p">)</span>          
 
         <span class="c1"># get base plot type (no plot options), and plot type (with plot options)</span>
         <span class="n">base_plot_type</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">plot</span><span class="p">)</span>
@@ -589,7 +595,8 @@
 
         <span class="c1"># get zstat for required plots</span>
         <span class="n">base_plot_type_split</span> <span class="o">=</span> <span class="n">base_plot_type</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">base_plot_type_split</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">base_plot_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;periodic-violin&#39;</span><span class="p">,</span> <span class="s1">&#39;fairmode-target&#39;</span><span class="p">,</span><span class="s1">&#39;fairmode-statsummary&#39;</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">base_plot_type_split</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">base_plot_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;periodic-violin&#39;</span><span class="p">,</span> <span class="s1">&#39;fairmode-target&#39;</span><span class="p">,</span> 
+                                                                     <span class="s1">&#39;fairmode-statsummary&#39;</span><span class="p">]):</span>
             <span class="n">base_plot_type</span> <span class="o">=</span> <span class="n">base_plot_type_split</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">zstat</span> <span class="o">=</span> <span class="n">base_plot_type_split</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
@@ -709,7 +716,33 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">valid_station_idxs</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;No data after filtering by coverage for </span><span class="si">{</span><span class="n">speci</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
                 <span class="k">return</span>
-
+            
+        <span class="k">if</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;contingencytable&#39;</span><span class="p">:</span>
+            <span class="c1"># warning for contingency table if species aren&#39;t PM2.5, PM10, NO2, O3, or SO2</span>
+            <span class="k">if</span> <span class="n">speci</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;sconco3&#39;</span><span class="p">,</span> <span class="s1">&#39;sconcno2&#39;</span><span class="p">,</span> <span class="s1">&#39;pm10&#39;</span><span class="p">,</span> <span class="s1">&#39;pm2p5&#39;</span><span class="p">,</span> <span class="s1">&#39;sconcso2&#39;</span><span class="p">]:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Contingency table cannot be created for </span><span class="si">{</span><span class="n">speci</span><span class="si">}</span><span class="s1">.&#39;</span>
+                <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="c1"># warning for contingency table if resolution is not hourly</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_resolution</span> <span class="o">!=</span> <span class="s1">&#39;hourly&#39;</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Contingency table can only be created if the resolution is hourly.&#39;</span>
+                <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+                <span class="k">return</span>
+            
+            <span class="k">if</span> <span class="p">((</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">temporal_colocation</span><span class="p">)</span> 
+                <span class="ow">or</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">temporal_colocation</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_labels</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_labels</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">))):</span>
+                <span class="c1"># do not make contingencytable if temporal colocation if off</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">temporal_colocation</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Cannot make </span><span class="si">{</span><span class="n">plot_type</span><span class="si">}</span><span class="s1"> plots without activating the temporal colocation.&#39;</span>
+                <span class="c1"># do not make contingencytable if no model is loaded</span>
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_labels</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Cannot make </span><span class="si">{</span><span class="n">plot_type</span><span class="si">}</span><span class="s1"> plots without loading models.&#39;</span>
+                <span class="c1"># do not make contingencytable if more than one model is loaded</span>
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_labels</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Cannot make </span><span class="si">{</span><span class="n">plot_type</span><span class="si">}</span><span class="s1"> plots with more than 1 model.&#39;</span>
+                <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+                <span class="k">return</span>
+                
         <span class="c1"># get data labels for plot</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_labels</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">data_labels</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_labels</span><span class="p">)</span>
@@ -1386,11 +1419,11 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">error</span> <span class="o">=</span> <span class="s1">&#39;Error: The path to the configuration file passed as an argument does not exist.&#39;</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
-                <span class="k">return</span> <span class="kc">False</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">error</span> <span class="o">=</span> <span class="s2">&quot;Error: The configuration file must be given as an argument: e.g. &#39;config=...&#39;&quot;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
-            <span class="k">return</span> <span class="kc">False</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="c1"># parse section</span>
         <span class="c1"># if section name provided, try and use that</span>
@@ -1401,7 +1434,7 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sections</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">error</span> <span class="o">=</span> <span class="s2">&quot;Error: No sections were found in the configuration file, make sure to name them using square brackets.&quot;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
-            <span class="k">return</span> <span class="kc">False</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
     
         <span class="bp">self</span><span class="o">.</span><span class="n">have_section</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;section&#39;</span><span class="p">):</span> 
@@ -1409,10 +1442,11 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">section</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_sections</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">have_section</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Error: The section specified in the command line (</span><span class="si">{0}</span><span class="s1">) does not exist.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">section</span><span class="p">)</span>
-                <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Tip: For subsections, add the name of the parent section followed by an interpunct (·) &#39;</span>
-                <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;before the subsection name (e.g. SECTIONA·Spain). Available: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_sections</span><span class="p">)</span>
-                <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+                <span class="n">error</span> <span class="o">=</span> <span class="s1">&#39;Error: The section specified in the command line (</span><span class="si">{0}</span><span class="s1">) does not exist.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">section</span><span class="p">)</span>
+                <span class="n">error</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Tip: For subsections, add the name of the parent section followed by an interpunct (·) &#39;</span>
+                <span class="n">error</span> <span class="o">+=</span> <span class="s1">&#39;before the subsection name (e.g. SECTIONA·Spain). Available: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_sections</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">have_section</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">section</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sections</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -1749,7 +1783,7 @@
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;data_in_memory&#39;</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Error: Data has not been loaded. Use the load() method&#39;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="kc">False</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span></div>
 
@@ -1768,7 +1802,7 @@
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid_config</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Error: A valid configuration file has not been read. Please reinitialise your Providentia object with a valid file: prv.Providentia(&#39;filename.conf&#39;)&quot;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="kc">False</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span></div>
 
