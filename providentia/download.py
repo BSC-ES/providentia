@@ -997,6 +997,7 @@ class Download(object):
             
             return initial_check_nc_files
 
+    # TODO
     def download_non_interpolated_model(self, model, initial_check, files_to_download=None):
         """
         Download non-interpolated model data from a remote machine via SFTP.
@@ -1314,7 +1315,8 @@ class Download(object):
         else:
             msg = "There is no available model output to be downloaded."
             show_message(self, msg, deactivate=initial_check)
-            
+
+    # TODO         
     def copy_non_interpolated_model(self, model, initial_check, files_to_download=None):
         """
         Copy from esarchive to gpfs interpolated model data from a remote machine via SFTP.
