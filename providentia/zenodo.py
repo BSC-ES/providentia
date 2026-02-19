@@ -318,6 +318,7 @@ class Zenodo:
                         # obtain dates in the date range
                         dates = zenodo_filetrees[network][resolution][species]
                         valid_dates = self.filter_dates(dates)
+                        
                         # add resolution, species and dates to the output if needed
                         if valid_dates:
                             if resolution not in valid_filetree[network]:
@@ -327,7 +328,7 @@ class Zenodo:
                             f"network '{network}' in the requested date range."
                             show_message(self.download_instance, msg)
 
-                            valid_filetree[network][resolution][species] = valid_dates
+                        valid_filetree[network][resolution][species] = valid_dates
                     else:
                         msg = f"Species '{species}' not found for network '{network}', resolution '{resolution}'. Skipping."
                         show_message(self.download_instance, msg)
