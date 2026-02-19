@@ -10,7 +10,7 @@ If you do not have access to the machines, you won't be able to use the download
 
 Providentia works best on Linux and macOS.
 
-The software has not been designed to work on Windows, if you are a Windows user one of the best options is to run it from a Windows Subsystem for Linux (WSL): [https://ubuntu.com/desktop/wsl](https://ubuntu.com/desktop/wsl). Alternatively, if you have a virtual machine software like Oracle VirtualBox, you can use that as well.
+The software has not been designed to work on Windows, if you are a Windows user one of the best options is to run it from a Windows Subsystem for Linux ([WSL](WSL)). Alternatively, if you have a virtual machine software like Oracle VirtualBox, you can use that as well.
 
 ### 1. Git
 Install Git by following the instructions here: [https://git-scm.com/install/linux](https://git-scm.com/install/linux)

@@ -21,7 +21,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Training material" href="Training-material.html" />
-    <link rel="prev" title="Saved file formats" href="Saved-file-formats.html" /> 
+    <link rel="prev" title="Windows Subsystem for Linux" href="WSL.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -176,12 +176,9 @@ It is also possible your cache file is out-of-date; it may help to try:
 <span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">qtbase5</span><span class="o">-</span><span class="n">dev</span> <span class="n">qtbase5</span><span class="o">-</span><span class="n">dev</span><span class="o">-</span><span class="n">tools</span> <span class="n">qt5</span><span class="o">-</span><span class="n">qmake</span> <span class="n">libqt5gui5</span> <span class="n">libqt5widgets5</span> <span class="n">libqt5core5a</span>
 </pre></div>
 </div>
-<p>Then add to .bashrc:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">QT_QPA_PLATFORM_PLUGIN_PATH</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">x86_64</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">gnu</span><span class="o">/</span><span class="n">qt5</span><span class="o">/</span><span class="n">plugins</span><span class="o">/</span><span class="n">platforms</span>
-</pre></div>
-</div>
-<p>And load:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="o">.</span><span class="n">bashrc</span>
+<p>Edit your .bashrc file and add the line <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">QT_QPA_PLATFORM_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/qt5/plugins/platform</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">vi</span> <span class="o">~/.</span><span class="n">bashrc</span>
+<span class="n">source</span> <span class="o">~/.</span><span class="n">bashrc</span>
 </pre></div>
 </div>
 </section>
@@ -202,7 +199,7 @@ It is also possible your cache file is out-of-date; it may help to try:
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Saved-file-formats.html" class="btn btn-neutral float-left" title="Saved file formats" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="WSL.html" class="btn btn-neutral float-left" title="Windows Subsystem for Linux" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="Training-material.html" class="btn btn-neutral float-right" title="Training material" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

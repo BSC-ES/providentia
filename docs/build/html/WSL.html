@@ -1,0 +1,244 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Windows Subsystem for Linux &mdash; Providentia 3.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=08bfcbec"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="FAQ" href="FAQ.html" />
+    <link rel="prev" title="Saved file formats" href="Saved-file-formats.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Providentia
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Home.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Modes.html">Modes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Colocation.html">Colocation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Filtering.html">Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Forecast.html">Forecast</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Statistics.html">Statistics</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="Other-topics.html">Other topics</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ADS.html">Account setup in Atmosphere Data Store</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Check-CAMS-download.html">Check CAMS Download Status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Create-your-own-data-network.html">Create your own data network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Available-species.html">Available Species</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Multispecies-filtering.html">Multispecies filtering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="QA-filtering.html">QA filtering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Redirecting-output-to-a-file.html">Redirecting output to a file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Topics-on-HPC.html">Topics on HPC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Saved-file-formats.html">Saved file formats</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Windows Subsystem for Linux</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#steps-to-install-wsl">Steps to install WSL</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#open-the-windows-powershell">1. Open the Windows Powershell</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#run-wsl">2. Run <code class="docutils literal notranslate"><span class="pre">wsl</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#run-wsl-status">3. Run <code class="docutils literal notranslate"><span class="pre">wsl</span> <span class="pre">--status</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#install-your-linux-distribution">4. Install your Linux distribution:</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#install-providentia-on-wsl">Install Providentia on WSL</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Training-material.html">Training material</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the team</a></li>
+<li class="toctree-l1"><a class="reference internal" href="History.html">History of Providentia</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tips-and-tricks-for-developers.html">Tips and tricks for developers</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Providentia</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="Other-topics.html">Other topics</a></li>
+      <li class="breadcrumb-item active">Windows Subsystem for Linux</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/WSL.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="windows-subsystem-for-linux">
+<h1>Windows Subsystem for Linux<a class="headerlink" href="#windows-subsystem-for-linux" title="Link to this heading"></a></h1>
+<section id="steps-to-install-wsl">
+<h2>Steps to install WSL<a class="headerlink" href="#steps-to-install-wsl" title="Link to this heading"></a></h2>
+<section id="open-the-windows-powershell">
+<h3>1. Open the Windows Powershell<a class="headerlink" href="#open-the-windows-powershell" title="Link to this heading"></a></h3>
+<p>As administrator, click Yes if prompted.</p>
+</section>
+<section id="run-wsl">
+<h3>2. Run <code class="docutils literal notranslate"><span class="pre">wsl</span></code><a class="headerlink" href="#run-wsl" title="Link to this heading"></a></h3>
+<p>If command is not recognised open the control panel, navigate to Programs and Features and click on Turn Windows features on and off, search for the options Windows subsystem for linux and Hyper-V, check them, click OK and restart your laptop. Run Windows Powershell as administrator and try to run <code class="docutils literal notranslate"><span class="pre">wsl</span></code> again. If it still says that it is not recognised, check your Windows version using the command <code class="docutils literal notranslate"><span class="pre">winver</span></code> and make sure your Windows installation is new. Otherwise, go to Update Windows through the control panel and proceed to update the system.</p>
+</section>
+<section id="run-wsl-status">
+<h3>3. Run <code class="docutils literal notranslate"><span class="pre">wsl</span> <span class="pre">--status</span></code><a class="headerlink" href="#run-wsl-status" title="Link to this heading"></a></h3>
+<p>This should show:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Default</span> <span class="n">Version</span><span class="p">:</span> <span class="mi">2</span>
+</pre></div>
+</div>
+<p>If you have updated your Windows version in step 2, it might suggest that you upgrade wsl by doing <code class="docutils literal notranslate"><span class="pre">wsl</span> <span class="pre">--update</span></code>.</p>
+<p>If when running <code class="docutils literal notranslate"><span class="pre">wsl</span> <span class="pre">--status</span></code> this error is shown:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">This</span> <span class="n">application</span> <span class="n">requires</span> <span class="n">the</span> <span class="n">Windows</span> <span class="n">Subsystem</span> <span class="k">for</span> <span class="n">Linux</span> <span class="n">Optional</span> <span class="n">Component</span><span class="o">.</span>
+<span class="n">Install</span> <span class="n">it</span> <span class="n">by</span> <span class="n">running</span><span class="p">:</span> <span class="n">wsl</span><span class="o">.</span><span class="n">exe</span> <span class="o">--</span><span class="n">install</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">distribution</span>
+<span class="n">The</span> <span class="n">system</span> <span class="n">may</span> <span class="n">need</span> <span class="n">to</span> <span class="n">be</span> <span class="n">restarted</span> <span class="n">so</span> <span class="n">the</span> <span class="n">changes</span> <span class="n">can</span> <span class="n">take</span> <span class="n">effect</span><span class="o">.</span>
+<span class="n">Error</span> <span class="n">code</span><span class="p">:</span> <span class="n">Wsl</span><span class="o">/</span><span class="n">WSL_E_WSL_OPTIONAL_COMPONENT_REQUIRED</span>
+</pre></div>
+</div>
+<p>Try installing the distribution doing <code class="docutils literal notranslate"><span class="pre">wsl.exe</span> <span class="pre">--install</span> <span class="pre">Ubuntu-22.04</span></code>. If it fails again with same error, open the control panel, navigate to Programs and Features and click on Turn Windows features on and off and uncheck the options Windows subsystem for linux and Hyper-V, click OK and restart. Then, open Turn Windows features on and off again and check the options and restart your computer. Now, if you open the Powershell and type <code class="docutils literal notranslate"><span class="pre">wsl</span> <span class="pre">--status</span></code> you should finally get:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Default</span> <span class="n">Version</span><span class="p">:</span> <span class="mi">2</span>
+</pre></div>
+</div>
+</section>
+<section id="install-your-linux-distribution">
+<h3>4. Install your Linux distribution:<a class="headerlink" href="#install-your-linux-distribution" title="Link to this heading"></a></h3>
+<p>If the installation failed before, rerun:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wsl</span><span class="o">.</span><span class="n">exe</span> <span class="o">--</span><span class="n">install</span> <span class="n">Ubuntu</span><span class="o">-</span><span class="mf">22.04</span>
+</pre></div>
+</div>
+<p>This will ask you to create a username and password, remember them because you will need them to install the packages required by Providentia.</p>
+<p>If you get the error:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wsl</span><span class="p">:</span> <span class="n">Using</span> <span class="n">legacy</span> <span class="n">distribution</span> <span class="n">registration</span><span class="o">.</span> <span class="n">Consider</span> <span class="n">using</span> <span class="n">a</span> <span class="n">tar</span> <span class="n">based</span> <span class="n">distribution</span> <span class="n">instead</span><span class="o">.</span>
+<span class="n">Downloading</span><span class="p">:</span> <span class="n">Ubuntu</span> <span class="mf">22.04</span> <span class="n">LTS</span>
+<span class="n">Ubuntu</span> <span class="mf">22.04</span> <span class="n">LTS</span> <span class="n">has</span> <span class="n">been</span> <span class="n">downloaded</span><span class="o">.</span>
+<span class="n">Distribution</span> <span class="n">successfully</span> <span class="n">installed</span><span class="o">.</span> <span class="n">It</span> <span class="n">can</span> <span class="n">be</span> <span class="n">launched</span> <span class="n">via</span> <span class="s1">&#39;wsl.exe -d Ubuntu 22.04 LTS&#39;</span>
+<span class="n">Launching</span> <span class="n">Ubuntu</span> <span class="mf">22.04</span> <span class="n">LTS</span><span class="o">...</span>
+<span class="n">Installing</span><span class="p">,</span> <span class="n">this</span> <span class="n">may</span> <span class="n">take</span> <span class="n">a</span> <span class="n">few</span> <span class="n">minutes</span><span class="o">...</span>
+<span class="n">WslRegisterDistribution</span> <span class="n">failed</span> <span class="k">with</span> <span class="n">error</span><span class="p">:</span> <span class="mh">0x80370102</span>
+<span class="n">Please</span> <span class="n">enable</span> <span class="n">the</span> <span class="n">Virtual</span> <span class="n">Machine</span> <span class="n">Platform</span> <span class="n">Windows</span> <span class="n">feature</span> <span class="ow">and</span> <span class="n">ensure</span> <span class="n">virtualization</span> <span class="ow">is</span> <span class="n">enabled</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">BIOS</span><span class="o">.</span>
+<span class="n">For</span> <span class="n">information</span> <span class="n">please</span> <span class="n">visit</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">aka</span><span class="o">.</span><span class="n">ms</span><span class="o">/</span><span class="n">enablevirtualization</span>
+<span class="n">Press</span> <span class="nb">any</span> <span class="n">key</span> <span class="n">to</span> <span class="k">continue</span><span class="o">...</span>
+<span class="n">The</span> <span class="n">installation</span> <span class="n">process</span> <span class="k">for</span> <span class="n">distribution</span> <span class="s1">&#39;Ubuntu-22.04&#39;</span> <span class="n">failed</span> <span class="k">with</span> <span class="n">exit</span> <span class="n">code</span><span class="p">:</span> <span class="mf">1.</span>
+</pre></div>
+</div>
+<p>It means that your virtualisation is not activated.</p>
+<ol class="arabic simple" start="6">
+<li><p>Once it is installed, you can open the terminal running <code class="docutils literal notranslate"><span class="pre">wsl</span></code> from PowerShell or by opening the application named WSL. From inside you can see your Windows directories doing <code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">/mnt/</span></code>. From outside, in Windows, you can see the folders of the subsystem in a section called Linux in your file explorer.</p></li>
+</ol>
+</section>
+</section>
+<section id="install-providentia-on-wsl">
+<h2>Install Providentia on WSL<a class="headerlink" href="#install-providentia-on-wsl" title="Link to this heading"></a></h2>
+<p>We can now install Providentia:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/mnt/c/Users/YOURUSER/Desktop<span class="w"> </span><span class="o">(</span>your<span class="w"> </span>preferred<span class="w"> </span>location<span class="o">)</span>
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/BSC-ES/providentia.git
+</pre></div>
+</div>
+<p>We also need to install <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html">conda</a>. We recommend Miniconda because it is lightweight. After downloading the .sh file for Linux, run the installer from your terminal:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/mnt/c/Users/YOURUSER/Downloads
+bash<span class="w"> </span>Miniconda3-latest-Linux-x86_64.sh
+</pre></div>
+</div>
+<p>If conda is not detected after the installation finishes run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;export PATH=&quot;/home/YOURUSERINWSL/miniconda3/bin:$PATH&quot;&#39;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.bashrc
+<span class="nb">source</span><span class="w"> </span>~/.bashrc
+conda<span class="w"> </span>init
+</pre></div>
+</div>
+<p>Close your WSL and reopen it.</p>
+<p>Navigate to your Providentia directory and launch the dashboard:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/mnt/c/Users/YOURUSER/Desktop/providentia<span class="w"> </span><span class="o">(</span>your<span class="w"> </span>preferred<span class="w"> </span>location<span class="o">)</span>
+./bin/providentia
+</pre></div>
+</div>
+<p>If you get the error <code class="docutils literal notranslate"><span class="pre">Could</span> <span class="pre">not</span> <span class="pre">load</span> <span class="pre">the</span> <span class="pre">Qt</span> <span class="pre">platform</span> <span class="pre">plugin</span> <span class="pre">&quot;xcb&quot;</span> <span class="pre">on</span> <span class="pre">local</span> <span class="pre">machine</span></code>, run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">update</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="o">--</span><span class="n">reinstall</span> <span class="n">libxcb</span><span class="o">-</span><span class="n">xinerama0</span> <span class="n">libxkbcommon</span><span class="o">-</span><span class="n">x11</span><span class="o">-</span><span class="mi">0</span> <span class="n">libx11</span><span class="o">-</span><span class="n">xcb1</span> <span class="n">libxrender1</span> <span class="n">libxi6</span> <span class="n">libxcb1</span> <span class="n">libxext6</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">qtbase5</span><span class="o">-</span><span class="n">dev</span> <span class="n">qtbase5</span><span class="o">-</span><span class="n">dev</span><span class="o">-</span><span class="n">tools</span> <span class="n">qt5</span><span class="o">-</span><span class="n">qmake</span> <span class="n">libqt5gui5</span> <span class="n">libqt5widgets5</span> <span class="n">libqt5core5a</span>
+</pre></div>
+</div>
+<p>Edit your .bashrc file and add the line <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">QT_QPA_PLATFORM_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/qt5/plugins/platform</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>vi<span class="w"> </span>~/.bashrc
+<span class="nb">source</span><span class="w"> </span>~/.bashrc
+</pre></div>
+</div>
+<p>Now you should be able to open the dashboard:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span>
+</pre></div>
+</div>
+<p>It will be blank as you don’t have any data on the WSL. If you have data in your Windows machine, change the paths in <code class="docutils literal notranslate"><span class="pre">providentia/settings/data_paths.yaml</span></code> to point to your local directories under <code class="docutils literal notranslate"><span class="pre">/mnt</span></code>. Remember that you can use the <a class="reference internal" href="Download.html"><span class="doc std std-doc">download mode</span></a> of Providentia to get data from Zenodo, ACTRIS and CAMS, and also from the MN5 if you have access to the machine.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Saved-file-formats.html" class="btn btn-neutral float-left" title="Saved file formats" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="FAQ.html" class="btn btn-neutral float-right" title="FAQ" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2026, Dene Bowdalo, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa, Amalia Vradi.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

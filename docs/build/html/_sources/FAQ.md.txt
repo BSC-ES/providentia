@@ -89,14 +89,10 @@ sudo apt install --reinstall libxcb-xinerama0 libxkbcommon-x11-0 libx11-xcb1 lib
 sudo apt install qtbase5-dev qtbase5-dev-tools qt5-qmake libqt5gui5 libqt5widgets5 libqt5core5a
 ```
 
-Then add to .bashrc:
+Edit your .bashrc file and add the line `export QT_QPA_PLATFORM_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/qt5/plugins/platform`.
 ```
-export QT_QPA_PLATFORM_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/qt5/plugins/platforms
-```
-
-And load:
-```
-source .bashrc
+vi ~/.bashrc
+source ~/.bashrc
 ```
 
 ## Segmentation fault on Nord4
