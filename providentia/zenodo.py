@@ -322,9 +322,19 @@ class Zenodo:
                         if valid_dates:
                             if resolution not in valid_filetree[network]:
                                 valid_filetree[network][resolution] = {}
+                        else:
+                            msg =  f"No valid dates for species '{species}', resolution '{resolution}', "
+                            f"network '{network}' in the requested date range."
+                            show_message(self.download_instance, msg)
 
                             valid_filetree[network][resolution][species] = valid_dates
-
+                    else:
+                        msg = f"Species '{species}' not found for network '{network}', resolution '{resolution}'. Skipping."
+                        show_message(self.download_instance, msg)
+            else:
+                msg = f"Resolution '{resolution}' not available for network '{network}'. Skipping."
+                show_message(self.download_instance, msg)
+        
         return valid_filetree
 
     def filetree_to_paths(self, filetree):
@@ -375,12 +385,7 @@ class Zenodo:
         initial_check_nc_files : list of str
             A list of file paths intended for download.
         """
-
-        if not initial_check:
-            # print current network
-            self.download_instance.logger.info('\n'+'-'*40)
-            self.download_instance.logger.info(f"\nDownloading GHOST {network} network data from Zenodo...")
-        
+   
         # exit if network is not uploaded
         if network not in self.artifact_mapping.keys():
             msg = f"Network '{network}' is not available for GHOST version {self.download_instance.ghost_version} on Zenodo."
@@ -388,7 +393,11 @@ class Zenodo:
             return
  
         if initial_check:
-            # obtain the filetree that match with the configuration file
+            # print current network
+            self.download_instance.logger.info('\n'+'-'*40)
+            self.download_instance.logger.info(f"\nDownloading GHOST {network} network data from Zenodo...")
+   
+            # obtain the filetree that matches with the configuration file
             valid_filetree = self.check_filetrees(network)
 
             # convert the filetree to absolute paths
@@ -396,22 +405,22 @@ class Zenodo:
 
             return initial_check_nc_files
         
-        else:
-            # get the GHOST artifact value for the corresponding network
-            artifact_network = self.artifact_mapping[network]    
+        elif files_to_download:
+                # get the GHOST artifact value for the corresponding network
+                artifact_network = self.artifact_mapping[network]    
 
-            # create temporal dir to store the zip file and its tar components
-            self.temp_dir = os.path.join(self.download_instance.ghost_root, ".temp")
-            os.makedirs(self.temp_dir, exist_ok=True)
+                # create temporal dir to store the zip file and its tar components
+                self.temp_dir = os.path.join(self.download_instance.ghost_root, ".temp")
+                os.makedirs(self.temp_dir, exist_ok=True)
 
-            # download zip on the temporal directory
-            zip_path = self.download_zip(network, artifact_network)
+                # download zip on the temporal directory
+                zip_path = self.download_zip(network, artifact_network)
 
-            # extract zip on the temporal directory
-            valid_files_info = self.extract_zip(files_to_download, zip_path, initial_check)
+                # extract zip on the temporal directory
+                valid_files_info = self.extract_zip(files_to_download, zip_path, initial_check)
 
-            # extract tar on the temporal directory
-            self.extract_tar(valid_files_info)                    
- 
-            # remove the temporal directory
-            shutil.rmtree(self.temp_dir)
+                # extract tar on the temporal directory
+                self.extract_tar(valid_files_info)                    
+    
+                # remove the temporal directory
+                shutil.rmtree(self.temp_dir)
