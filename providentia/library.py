@@ -512,6 +512,14 @@ class Providentia:
             return
         speci = networkspeci.split('|')[-1]
 
+        if (multispecies) and (len(np.unique(list(self.measurement_units.values()))) > 1):
+            msg = f"Units in the multispecies plots will be converted to 'multispecies_units' ({self.multispecies_units}) for consistency. "
+            show_message(self, msg)
+            if self.multispecies_units in [None, ""]:
+                error = f"Please specify the units in your configuration file by adding 'multispecies_units'. "
+                error += f"Units for each species are: {self.measurement_units}."
+                sys.exit(error)
+
         # for timeseries chunking
         chunk_stat = None
         chunk_resolution = None
@@ -843,7 +851,7 @@ class Providentia:
 
             # make plot
             func(relevant_ax, networkspeci, relevant_data_labels, self.plot_characteristics[plot_type], plot_options,
-                statsummary=True, plotting_paradigm='summary', stats_df=stats_df)     
+                 stats_to_plot, statsummary=True, plotting_paradigm='summary', stats_df=stats_df)     
 
             # re-filter for original subsection
             kwargs['subsection'] = orig_ss
@@ -903,7 +911,7 @@ class Providentia:
 
             # make plot
             func(relevant_ax, networkspeci, relevant_data_labels, 
-                self.plot_characteristics[plot_type], plot_options, plotting_paradigm='summary', 
+                self.plot_characteristics[plot_type], plot_options, zstat, plotting_paradigm='summary', 
                 stats_df=stats_df)
 
             # re-filter for original subsection

@@ -14,4 +14,4 @@ Other topics
    Redirecting-output-to-a-file.md
    Topics-on-HPC.md
    Saved-file-formats.md
-   WSL.md
+   Running-on-Windows.rst

@@ -611,6 +611,14 @@
             <span class="k">return</span>
         <span class="n">speci</span> <span class="o">=</span> <span class="n">networkspeci</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
+        <span class="k">if</span> <span class="p">(</span><span class="n">multispecies</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">measurement_units</span><span class="o">.</span><span class="n">values</span><span class="p">())))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Units in the multispecies plots will be converted to &#39;multispecies_units&#39; (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">multispecies_units</span><span class="si">}</span><span class="s2">) for consistency. &quot;</span>
+            <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">multispecies_units</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">]:</span>
+                <span class="n">error</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Please specify the units in your configuration file by adding &#39;multispecies_units&#39;. &quot;</span>
+                <span class="n">error</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Units for each species are: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">measurement_units</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+
         <span class="c1"># for timeseries chunking</span>
         <span class="n">chunk_stat</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">chunk_resolution</span> <span class="o">=</span> <span class="kc">None</span>
@@ -942,7 +950,7 @@
 
             <span class="c1"># make plot</span>
             <span class="n">func</span><span class="p">(</span><span class="n">relevant_ax</span><span class="p">,</span> <span class="n">networkspeci</span><span class="p">,</span> <span class="n">relevant_data_labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span> <span class="n">plot_options</span><span class="p">,</span>
-                <span class="n">statsummary</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">plotting_paradigm</span><span class="o">=</span><span class="s1">&#39;summary&#39;</span><span class="p">,</span> <span class="n">stats_df</span><span class="o">=</span><span class="n">stats_df</span><span class="p">)</span>     
+                 <span class="n">stats_to_plot</span><span class="p">,</span> <span class="n">statsummary</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">plotting_paradigm</span><span class="o">=</span><span class="s1">&#39;summary&#39;</span><span class="p">,</span> <span class="n">stats_df</span><span class="o">=</span><span class="n">stats_df</span><span class="p">)</span>     
 
             <span class="c1"># re-filter for original subsection</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;subsection&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">orig_ss</span>
@@ -1002,7 +1010,7 @@
 
             <span class="c1"># make plot</span>
             <span class="n">func</span><span class="p">(</span><span class="n">relevant_ax</span><span class="p">,</span> <span class="n">networkspeci</span><span class="p">,</span> <span class="n">relevant_data_labels</span><span class="p">,</span> 
-                <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span> <span class="n">plot_options</span><span class="p">,</span> <span class="n">plotting_paradigm</span><span class="o">=</span><span class="s1">&#39;summary&#39;</span><span class="p">,</span> 
+                <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span> <span class="n">plot_options</span><span class="p">,</span> <span class="n">zstat</span><span class="p">,</span> <span class="n">plotting_paradigm</span><span class="o">=</span><span class="s1">&#39;summary&#39;</span><span class="p">,</span> 
                 <span class="n">stats_df</span><span class="o">=</span><span class="n">stats_df</span><span class="p">)</span>
 
             <span class="c1"># re-filter for original subsection</span>

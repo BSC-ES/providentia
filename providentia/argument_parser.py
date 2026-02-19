@@ -298,7 +298,10 @@ class ProvArgumentParser(object):
                                      dest="logfile",
                                      action='store_true',
                                      help="redirect the output to a log file")
- 
+            self.parser.add_argument("--multispecies_units",
+                                     dest="multispecies_units",
+                                     help="Units of data in multispecies plots")
+            
         except Exception as error:
             log.error('Unhandled exception on Providentia: %s' % error, exc_info=True)
 

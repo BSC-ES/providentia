@@ -20,7 +20,8 @@ import seaborn as sns
 import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join, get_conversion_factor, get_standard_parameters_by_speci
-from .statistics import calculate_statistic, get_z_statistic_sign
+from .statistics import calculate_statistic, get_z_statistic_sign, get_z_statistic_type
+from .warnings_prv import show_message
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 
@@ -837,3 +838,119 @@ def get_fairmode_RV_exceendance(read_instance, speci, RV, exc_threshold, units):
     exc_threshold *= conversion_factor
         
     return RV, exc_threshold
+
+def get_multispecies_conversion_factor(read_instance, speci):
+    """
+    Get conversion factor from original data units to multispecies units defined in configuration
+    given a species
+
+    Parameters
+    ----------
+    read_instance : object
+        Instance of class Dashboard or Report.
+    speci : str
+        Speci to plot.
+
+    Returns
+    -------
+    None, float
+        Conversion factor
+    """
+
+    # get input and output units
+    standard_parameter_speci = get_standard_parameters_by_speci(speci, read_instance.ghost_version)
+    initial_units = read_instance.measurement_units[speci]
+    final_units = read_instance.multispecies_units
+
+    # do not convert if units do not change
+    if initial_units == final_units:
+        return None
+
+    # convert units using conversion factor
+    conversion_factor = get_conversion_factor(initial_units, final_units, standard_parameter_speci) 
+    if isinstance(conversion_factor, str):
+        read_instance.logger.error(conversion_factor)
+        sys.exit(1)
+
+    # check if conversion factor is nan
+    if np.isnan(conversion_factor):
+        msg = f'Conversion factor is nan, units for {speci} could not be converted from {initial_units} to {final_units}, '
+        msg += 'multispecies plot will show data in different units.'
+        show_message(read_instance, msg)
+        return None
+    
+    return conversion_factor
+
+def convert_multispecies_df_units(read_instance, stats_df, zstats, base_plot_type):
+    """
+    Convert units in multispecies dataframe
+
+    Parameters
+    ----------
+    read_instance : object
+        Instance of class Dashboard or Report.
+    stats_df : pandas.Dataframe
+        Multispecies statistics dataframe
+
+    Returns
+    -------
+    pandas.Dataframe
+        Multispecies statistics dataframe with converted units
+    """
+    
+    for networkspeci in read_instance.networkspecies:
+
+        speci = networkspeci.split('|')[1]
+        conversion_factor = get_multispecies_conversion_factor(read_instance, speci)
+        if conversion_factor is not None:
+
+            mask = stats_df.index.get_level_values('networkspecies') == networkspeci
+            
+            if base_plot_type in ['statsummary']:
+
+                # get stats that are in measurement units
+                stat_cols = []
+                stat_names = []
+                for col in zstats:
+
+                    # get units
+                    base_zstat = col.split('_bias')[0].split('-')[0]
+                    z_statistic_type = get_z_statistic_type(base_zstat)
+                    if z_statistic_type == 'basic':
+                        units = read_instance.basic_stats[base_zstat]['units']
+                    else:
+                        units = read_instance.modbias_stats[base_zstat]['units']
+
+                    # get stat position in dataframe and collect stats that are in measurement units
+                    col_position = stats_df.columns.get_loc(col)
+                    if units == "[measurement_units]":
+                        stat_cols.append(col_position)
+                        stat_names.append(col)
+
+                # convert stats that are in measurement units
+                if len(stat_cols) > 0:
+                    msg = f'Converting units of {stat_names} for {networkspeci} to {read_instance.multispecies_units}.'
+                    show_message(read_instance, msg)
+                    stats_df.iloc[mask, stat_cols] *= conversion_factor
+
+            elif base_plot_type in ['heatmap', 'table']:
+
+                # get units
+                if isinstance(zstats, list):
+                    zstat = zstats[0]
+                else:
+                    zstat = zstats
+                base_zstat = zstat.split('_bias')[0].split('-')[0]
+                z_statistic_type = get_z_statistic_type(zstat)
+                if z_statistic_type == 'basic':
+                    units = read_instance.basic_stats[base_zstat]['units']
+                else:
+                    units = read_instance.modbias_stats[base_zstat]['units']
+
+                # check if stat is in measurement units and convert stat if it is
+                if units == "[measurement_units]":
+                    msg = f'Converting units of {zstat} for {networkspeci} to {read_instance.multispecies_units}.'
+                    show_message(read_instance, msg)
+                    stats_df.iloc[mask, :] *= conversion_factor
+
+    return stats_df

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Multispecies filtering &mdash; Providentia 3.0.1 documentation</title>
+  <title>Running on Windows &mdash; Providentia 3.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
@@ -20,8 +20,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="QA filtering" href="QA-filtering.html" />
-    <link rel="prev" title="Available Species" href="Available-species.html" /> 
+    <link rel="next" title="Git Bash" href="Git-Bash.html" />
+    <link rel="prev" title="Saved file formats" href="Saved-file-formats.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -58,12 +58,16 @@
 <li class="toctree-l2"><a class="reference internal" href="Check-CAMS-download.html">Check CAMS Download Status</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Create-your-own-data-network.html">Create your own data network</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Available-species.html">Available Species</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Multispecies filtering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Multispecies-filtering.html">Multispecies filtering</a></li>
 <li class="toctree-l2"><a class="reference internal" href="QA-filtering.html">QA filtering</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Redirecting-output-to-a-file.html">Redirecting output to a file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Topics-on-HPC.html">Topics on HPC</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Saved-file-formats.html">Saved file formats</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Running-on-Windows.html">Running on Windows</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Running on Windows</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Git-Bash.html">Git Bash</a></li>
+<li class="toctree-l3"><a class="reference internal" href="WSL.html">Windows Subsystem for Linux</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
@@ -89,9 +93,9 @@
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="Other-topics.html">Other topics</a></li>
-      <li class="breadcrumb-item active">Multispecies filtering</li>
+      <li class="breadcrumb-item active">Running on Windows</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/Multispecies-filtering.md.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/Running-on-Windows.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -99,29 +103,22 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section class="tex2jax_ignore mathjax_ignore" id="multispecies-filtering">
-<h1>Multispecies filtering<a class="headerlink" href="#multispecies-filtering" title="Link to this heading"></a></h1>
-<p>Multispecies filtering refers to the ability to filter loaded species data by the values of another species.</p>
-<p>For example, when performing investigations of dust in the atmosphere it is a common practice to filter the AOD by the Angstrom exponent, to isolate values associated with dust. For instance, we can set the AOD to be nan when the Angstrom exponent is above 0.6, removing all non-dust AOD.</p>
-<p>If we take a look at the timeseries for one station, we can see what this actually means:</p>
-<p><img alt="multispecies-filtering" src="_images/multispecies-filtering.jpg" /></p>
-<p>It can be observed that there are less data points for AOD after the filtering is applied, with the removal of the data points happening when the Angstrom exponent is above 0.6.</p>
-<p>Multispecies filtering can be set in the configuration files using the <code class="docutils literal notranslate"><span class="pre">filter_species</span></code> variable, where we define the network and species to filter by, the lower range to filter associated data by, the upper range to filter associated data by, and the value to set associated data to (default is nan). If you want to leave one of the filter ranges open-ended, then use a colon (:). Spatial colocation must be active in order to apply multispecies filtering (it is active by default).</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">All</span><span class="p">]</span>
-<span class="n">network</span> <span class="o">=</span> <span class="n">AERONET_v3_lev1</span><span class="mf">.5</span>
-<span class="n">species</span> <span class="o">=</span> <span class="n">od550aero</span>
-<span class="n">filter_species</span> <span class="o">=</span> <span class="n">AERONET_v3_lev1</span><span class="mf">.5</span><span class="p">:</span><span class="n">ae440</span><span class="o">-</span><span class="mi">870</span><span class="n">aero</span> <span class="p">(</span><span class="o">&gt;</span><span class="mf">0.6</span><span class="p">,</span> <span class="p">:,</span> <span class="n">nan</span><span class="p">)</span>
-<span class="n">spatial_colocation</span> <span class="o">=</span> <span class="kc">True</span>
-</pre></div>
-</div>
-<p>On the dashboard this can be replicated under the <strong>MULTI</strong> button on the menu bar. The apply (A) checkbox must be checked to apply the filter, and then data re-read by hitting the <strong>READ</strong> button on the main menu bar.</p>
-<p><img alt="multi" src="_images/multi.png" /></p>
-<p>It is also possible to filter data by more than one species at a time, for example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span> <span class="o">=</span> <span class="n">nasa</span><span class="o">-</span><span class="n">aeronet</span><span class="o">/</span><span class="n">directsun_v3</span><span class="o">-</span><span class="n">lev15</span>
-<span class="n">species</span> <span class="o">=</span> <span class="n">od550aero</span>
-<span class="n">filter_species</span> <span class="o">=</span> <span class="n">nasa</span><span class="o">-</span><span class="n">aeronet</span><span class="o">/</span><span class="n">directsun_v3</span><span class="o">-</span><span class="n">lev15</span><span class="p">:</span><span class="n">ae440</span><span class="o">-</span><span class="mi">870</span><span class="n">aero</span> <span class="p">(</span><span class="o">&gt;</span><span class="mf">0.75</span><span class="p">,</span> <span class="o">&lt;=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">nan</span><span class="p">),</span> <span class="n">nasa</span><span class="o">-</span><span class="n">aeronet</span><span class="o">/</span><span class="n">directsun_v3</span><span class="o">-</span><span class="n">lev15</span><span class="p">:</span><span class="n">ae440</span><span class="o">-</span><span class="mi">870</span><span class="n">aero</span> <span class="p">(</span><span class="o">&gt;</span><span class="mf">1.2</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">)</span>
-<span class="n">spatial_colocation</span> <span class="o">=</span> <span class="kc">True</span>
-</pre></div>
+  <section id="running-on-windows">
+<h1>Running on Windows<a class="headerlink" href="#running-on-windows" title="Link to this heading"></a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Git-Bash.html">Git Bash</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Git-Bash.html#steps-to-install-git-bash">Steps to install Git Bash</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Git-Bash.html#install-providentia-on-git-bash">Install Providentia on Git Bash</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="WSL.html">Windows Subsystem for Linux</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="WSL.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="WSL.html#steps-to-install-wsl">Steps to install WSL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="WSL.html#install-providentia-on-wsl">Install Providentia on WSL</a></li>
+</ul>
+</li>
+</ul>
 </div>
 </section>
 
@@ -129,8 +126,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Available-species.html" class="btn btn-neutral float-left" title="Available Species" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="QA-filtering.html" class="btn btn-neutral float-right" title="QA filtering" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Saved-file-formats.html" class="btn btn-neutral float-left" title="Saved file formats" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Git-Bash.html" class="btn btn-neutral float-right" title="Git Bash" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

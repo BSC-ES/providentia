@@ -8,9 +8,7 @@ If you do not have access to the machines, you won't be able to use the download
 
 ## Prerequisites
 
-Providentia works best on Linux and macOS.
-
-The software has not been designed to work on Windows, if you are a Windows user one of the best options is to run it from a Windows Subsystem for Linux ([WSL](WSL)). Alternatively, if you have a virtual machine software like Oracle VirtualBox, you can use that as well.
+Providentia works best on Linux and macOS. For these machines, these are the prerequisites:
 
 ### 1. Git
 Install Git by following the instructions here: [https://git-scm.com/install/linux](https://git-scm.com/install/linux)
@@ -22,6 +20,11 @@ Install Conda following the official guide: [https://docs.conda.io/projects/cond
 cd Downloads
 bash Miniconda3-latest-Linux-x86_64.sh
 ```
+
+The software has not been designed to work on Windows. If you are a Windows user you have three options:
+- Run it in Git Bash. Read the instructions [here](Git-Bash).
+- Run it from a Windows Subsystem for Linux (WSL). Read the instructions [here](WSL).
+- Use a virtual machine software like Oracle VirtualBox to access Linux.
 
 ## Cloning the project
 

@@ -277,10 +277,14 @@ class Report:
                 if 'multispecies' in plot_type:
                     multispecies = True
                     break
+                
             if (multispecies) and (len(np.unique(list(self.measurement_units.values()))) > 1):
-                msg = 'Be aware that the units across species are not the same and there are multispecies plots. '
-                msg += f'Units: {self.measurement_units}'
+                msg = f"Units in the multispecies plots will be converted to 'multispecies_units' ({self.multispecies_units}) for consistency. "
                 show_message(self, msg)
+                if self.multispecies_units in [None, ""]:
+                    error = f"Please specify the units in your configuration file by adding 'multispecies_units'. "
+                    error += f"Units for each species are: {self.measurement_units}."
+                    sys.exit(error)
 
             # set plot characteristics for all plot types (summary, station)
             self.plots_to_make = list(self.summary_plots_to_make)
@@ -2211,13 +2215,13 @@ class Report:
                     # make statsummary
                     func = getattr(self.plotting, 'make_table')
                     func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                         plot_options, statsummary=True, subsection=self.subsection, 
+                         plot_options, stats, statsummary=True, subsection=self.subsection, 
                          plotting_paradigm=plotting_paradigm, stats_df=stats_df)
                 else:
                     # make table/heatmap
                     func = getattr(self.plotting, 'make_{}'.format(base_plot_type))
                     func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                         plot_options, subsection=self.subsection, plotting_paradigm=plotting_paradigm, 
+                         plot_options, zstat, subsection=self.subsection, plotting_paradigm=plotting_paradigm, 
                          stats_df=stats_df)
                 
                 # save plot information for later formatting

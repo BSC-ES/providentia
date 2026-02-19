@@ -21,7 +21,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="FAQ" href="FAQ.html" />
-    <link rel="prev" title="Saved file formats" href="Saved-file-formats.html" /> 
+    <link rel="prev" title="Git Bash" href="Git-Bash.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -63,16 +63,14 @@
 <li class="toctree-l2"><a class="reference internal" href="Redirecting-output-to-a-file.html">Redirecting output to a file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Topics-on-HPC.html">Topics on HPC</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Saved-file-formats.html">Saved file formats</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Windows Subsystem for Linux</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#steps-to-install-wsl">Steps to install WSL</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#open-the-windows-powershell">1. Open the Windows Powershell</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#run-wsl">2. Run <code class="docutils literal notranslate"><span class="pre">wsl</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#run-wsl-status">3. Run <code class="docutils literal notranslate"><span class="pre">wsl</span> <span class="pre">--status</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#install-your-linux-distribution">4. Install your Linux distribution:</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="Running-on-Windows.html">Running on Windows</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="Git-Bash.html">Git Bash</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Windows Subsystem for Linux</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#steps-to-install-wsl">Steps to install WSL</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#install-providentia-on-wsl">Install Providentia on WSL</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#install-providentia-on-wsl">Install Providentia on WSL</a></li>
 </ul>
 </li>
 </ul>
@@ -100,6 +98,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="Other-topics.html">Other topics</a></li>
+          <li class="breadcrumb-item"><a href="Running-on-Windows.html">Running on Windows</a></li>
       <li class="breadcrumb-item active">Windows Subsystem for Linux</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/WSL.md.txt" rel="nofollow"> View page source</a>
@@ -174,25 +173,25 @@
 </section>
 <section id="install-providentia-on-wsl">
 <h2>Install Providentia on WSL<a class="headerlink" href="#install-providentia-on-wsl" title="Link to this heading"></a></h2>
-<p>We can now install Providentia:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/mnt/c/Users/YOURUSER/Desktop<span class="w"> </span><span class="o">(</span>your<span class="w"> </span>preferred<span class="w"> </span>location<span class="o">)</span>
-git<span class="w"> </span>clone<span class="w"> </span>https://github.com/BSC-ES/providentia.git
-</pre></div>
-</div>
-<p>We also need to install <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html">conda</a>. We recommend Miniconda because it is lightweight. After downloading the .sh file for Linux, run the installer from your terminal:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/mnt/c/Users/YOURUSER/Downloads
+<p>We need to install <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html">conda</a> on the WSL. We recommend Miniconda because it is lightweight. After downloading the .sh file for Linux, run the installer from your terminal:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/mnt/c/Users/<span class="o">{</span>user<span class="o">}</span>/Downloads
 bash<span class="w"> </span>Miniconda3-latest-Linux-x86_64.sh
 </pre></div>
 </div>
-<p>If conda is not detected after the installation finishes run:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;export PATH=&quot;/home/YOURUSERINWSL/miniconda3/bin:$PATH&quot;&#39;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.bashrc
+<p>If conda is not detected after the installation finishes, run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;export PATH=&quot;/home/{user}INWSL/miniconda3/bin:$PATH&quot;&#39;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.bashrc
 <span class="nb">source</span><span class="w"> </span>~/.bashrc
 conda<span class="w"> </span>init
 </pre></div>
 </div>
 <p>Close your WSL and reopen it.</p>
+<p>We can now install Providentia:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/mnt/c/Users/<span class="o">{</span>user<span class="o">}</span>/Desktop<span class="w"> </span><span class="o">(</span>your<span class="w"> </span>preferred<span class="w"> </span>location<span class="o">)</span>
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/BSC-ES/providentia.git
+</pre></div>
+</div>
 <p>Navigate to your Providentia directory and launch the dashboard:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/mnt/c/Users/YOURUSER/Desktop/providentia<span class="w"> </span><span class="o">(</span>your<span class="w"> </span>preferred<span class="w"> </span>location<span class="o">)</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>providentia
 ./bin/providentia
 </pre></div>
 </div>
@@ -208,10 +207,10 @@ conda<span class="w"> </span>init
 </pre></div>
 </div>
 <p>Now you should be able to open the dashboard:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./bin/providentia
 </pre></div>
 </div>
-<p>It will be blank as you don’t have any data on the WSL. If you have data in your Windows machine, change the paths in <code class="docutils literal notranslate"><span class="pre">providentia/settings/data_paths.yaml</span></code> to point to your local directories under <code class="docutils literal notranslate"><span class="pre">/mnt</span></code>. Remember that you can use the <a class="reference internal" href="Download.html"><span class="doc std std-doc">download mode</span></a> of Providentia to get data from Zenodo, ACTRIS and CAMS, and also from the MN5 if you have access to the machine.</p>
+<p>It will be blank as you don’t have any data on the WSL. If you have data in your Windows machine, change the local paths in <code class="docutils literal notranslate"><span class="pre">providentia/settings/data_paths.yaml</span></code> to point to your local directories under <code class="docutils literal notranslate"><span class="pre">/mnt</span></code>. By default it will download to and read from <code class="docutils literal notranslate"><span class="pre">/home/{user}/data</span></code>. Remember that you can use the <a class="reference internal" href="Download.html"><span class="doc std std-doc">download mode</span></a> of Providentia to get data from Zenodo, ACTRIS and CAMS, and also from the MN5 if you have access to the machine.</p>
 </section>
 </section>
 
@@ -219,7 +218,7 @@ conda<span class="w"> </span>init
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Saved-file-formats.html" class="btn btn-neutral float-left" title="Saved file formats" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Git-Bash.html" class="btn btn-neutral float-left" title="Git Bash" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="FAQ.html" class="btn btn-neutral float-right" title="FAQ" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
