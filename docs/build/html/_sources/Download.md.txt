@@ -31,18 +31,18 @@ Providentia supports four types of downloads. For detailed instructions, please 
      - For non-GHOST networks and interpolated/non-interpolated model data, no special action is required.
    - To see more information, check the [BSC download page](BSC-download).
 
-2. **Download of network from Zenodo**  
+2. **Download of GHOST network data from Zenodo**  
    - Downloads GHOST networks from the [GHOST Zenodo webpage](https://zenodo.org/records/10637450).  
    - How to get this type of download: answer `n` to the HPC prompt: _Do you want to download observational data from the BSC remote machine? (Otherwise, GHOST observational data will be retrieved from Zenodo)_ or set `dl_ghost_source` to `zenodo`.
    - To see more information, check the [Zenodo download page](Zenodo-download).
 
-3. **Download of network from ACTRIS (Thredds)**  
+3. **Download of ACTRIS network data from Thredds**  
    - Downloads observational networks from [ACTRIS Thredds](https://thredds.nilu.no/thredds/catalog.html).  
-   - How to get this type of download: put `actris/actris` in the `network` field in your configuration.
+   - How to get this type of download: write `actris/actris` on the `network` field in your configuration file.
    - To see more information, check the [ACTRIS download page](ACTRIS-download).
 
 4. **Download of non-interpolated model data from the Atmosphere Data Store (ADS)**  
-   - Downloads model outputs from the [Atmosphere Data Store](https://ads.atmosphere.copernicus.eu/datasets).  
+   - Downloads model outputs from the [Atmosphere Data Store](https://ads.atmosphere.copernicus.eu/datasets). You must have an ECMWF account to access this feature.
    - How to get this type of download: specify the model as `cams_analysis`, `cams_forecast` or `cams_reanalysis` in your configuration, and set `dl_interpolated` to `False`.
    - To see more information, check the [CAMS download page](CAMS-download).
 

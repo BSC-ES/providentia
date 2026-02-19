@@ -1,5 +1,9 @@
 # Windows Subsystem for Linux
 
+## Prerequisites
+
+Go to System Information and make sure your Windows OS is in the Pro version, and not Home, otherwise you won't have access to the virtualisation feature and will need to use a Virtual Machine instead of using the WSL.
+
 ## Steps to install WSL
 
 ### 1. Open the Windows Powershell
@@ -58,7 +62,7 @@ For information please visit https://aka.ms/enablevirtualization
 Press any key to continue...
 The installation process for distribution 'Ubuntu-22.04' failed with exit code: 1.
 ```
-It means that your virtualisation is not activated.
+It means that your virtualisation is not activated. This is probably due to your Windows not being the Pro version and therefore not having access to the Hyper-V feature that had to be checked in Step 2.
 
 6. Once it is installed, you can open the terminal running `wsl` from PowerShell or by opening the application named WSL. From inside you can see your Windows directories doing `cd /mnt/`. From outside, in Windows, you can see the folders of the subsystem in a section called Linux in your file explorer.
 

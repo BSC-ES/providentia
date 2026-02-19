@@ -64,6 +64,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Topics-on-HPC.html">Topics on HPC</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Saved-file-formats.html">Saved file formats</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Windows Subsystem for Linux</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#steps-to-install-wsl">Steps to install WSL</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#open-the-windows-powershell">1. Open the Windows Powershell</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#run-wsl">2. Run <code class="docutils literal notranslate"><span class="pre">wsl</span></code></a></li>
@@ -111,6 +112,10 @@
              
   <section class="tex2jax_ignore mathjax_ignore" id="windows-subsystem-for-linux">
 <h1>Windows Subsystem for Linux<a class="headerlink" href="#windows-subsystem-for-linux" title="Link to this heading"></a></h1>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h2>
+<p>Go to System Information and make sure your Windows OS is in the Pro version, and not Home, otherwise you won’t have access to the virtualisation feature and will need to use a Virtual Machine instead of using the WSL.</p>
+</section>
 <section id="steps-to-install-wsl">
 <h2>Steps to install WSL<a class="headerlink" href="#steps-to-install-wsl" title="Link to this heading"></a></h2>
 <section id="open-the-windows-powershell">
@@ -161,7 +166,7 @@
 <span class="n">The</span> <span class="n">installation</span> <span class="n">process</span> <span class="k">for</span> <span class="n">distribution</span> <span class="s1">&#39;Ubuntu-22.04&#39;</span> <span class="n">failed</span> <span class="k">with</span> <span class="n">exit</span> <span class="n">code</span><span class="p">:</span> <span class="mf">1.</span>
 </pre></div>
 </div>
-<p>It means that your virtualisation is not activated.</p>
+<p>It means that your virtualisation is not activated. This is probably due to your Windows not being the Pro version and therefore not having access to the Hyper-V feature that had to be checked in Step 2.</p>
 <ol class="arabic simple" start="6">
 <li><p>Once it is installed, you can open the terminal running <code class="docutils literal notranslate"><span class="pre">wsl</span></code> from PowerShell or by opening the application named WSL. From inside you can see your Windows directories doing <code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">/mnt/</span></code>. From outside, in Windows, you can see the folders of the subsystem in a section called Linux in your file explorer.</p></li>
 </ol>

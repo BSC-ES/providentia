@@ -161,40 +161,45 @@
 <td><p>Ensemble of the model (e.g. <code class="docutils literal notranslate"><span class="pre">000</span></code>, <code class="docutils literal notranslate"><span class="pre">001</span></code>). When multiple model IDs and multiple ensembles/domains are provided, all possible combinations of model, domain and ensemble will be used.</p></td>
 <td><p>All available, except in interpolation mode where the default is <code class="docutils literal notranslate"><span class="pre">000</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">model_resolution</span></code></p></td>
-<td><p>Optional</p></td>
-<td><p>Model resolution if different from observations.</p></td>
-<td><p>Same as <code class="docutils literal notranslate"><span class="pre">resolution</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">forecast</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">forecast</span></code></p></td>
 <td><p>Optional</p></td>
 <td><p>Controls how forecast data is handled: <code class="docutils literal notranslate"><span class="pre">day</span></code>, <code class="docutils literal notranslate"><span class="pre">daily</span></code>, <code class="docutils literal notranslate"><span class="pre">combined</span></code>, <code class="docutils literal notranslate"><span class="pre">dayN</span></code>, <code class="docutils literal notranslate"><span class="pre">dailyN</span></code>, <code class="docutils literal notranslate"><span class="pre">combinedN</span></code>. Multiple values of the same type can be provided (e.g. <code class="docutils literal notranslate"><span class="pre">day</span></code>, <code class="docutils literal notranslate"><span class="pre">day2</span></code>, <code class="docutils literal notranslate"><span class="pre">day3</span></code>), but different types cannot be mixed (i.e. <code class="docutils literal notranslate"><span class="pre">day</span></code> options cannot be combined with <code class="docutils literal notranslate"><span class="pre">daily</span></code> or <code class="docutils literal notranslate"><span class="pre">combined</span></code>). To limit to specific forecast days, append the day number to the option (e.g. <code class="docutils literal notranslate"><span class="pre">day1</span></code>, <code class="docutils literal notranslate"><span class="pre">daily2</span></code>, <code class="docutils literal notranslate"><span class="pre">combined3</span></code>). This variable must be set to a valid value when performing interpolation for forecast data.</p></td>
 <td><p>—</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">filter_species</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">filter_species</span></code></p></td>
 <td><p>Optional</p></td>
 <td><p>Filter read species by other species data within a data range. The first value set is the lower bound to filter by, and the second value the upper bound. Place a sign before each bound value to inform if the filter should be inclusive or exclusive of the bound, (e.g. <code class="docutils literal notranslate"><span class="pre">&lt;</span></code> or <code class="docutils literal notranslate"><span class="pre">&lt;=</span></code>). If not wishing to set either the lower or upper bounds, a <code class="docutils literal notranslate"><span class="pre">:</span></code> can be used. Optionally, a fill value can also be given as a third value to impose what the filtered data is set to, by default this is <code class="docutils literal notranslate"><span class="pre">NaN</span></code>. Multiple filters can be  set together separated by a comma (e.g. <code class="docutils literal notranslate"><span class="pre">network1:species1</span> <span class="pre">(&gt;lowerlim,</span> <span class="pre">&lt;=upperlim,</span> <span class="pre">fillvalue),</span> <span class="pre">network2:species2</span> <span class="pre">(:,</span> <span class="pre">&lt;upperlim)</span></code>).</p></td>
 <td><p>—</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ghost_root</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ghost_root</span></code></p></td>
 <td><p>Optional</p></td>
 <td><p>Root directory for GHOST observations, overwrites <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
 <td><p>From <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nonghost_root</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">nonghost_root</span></code></p></td>
 <td><p>Optional</p></td>
 <td><p>Root directory for non-GHOST observations, overwrites <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
 <td><p>From <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">mod_root</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">mod_root</span></code></p></td>
 <td><p>Optional</p></td>
 <td><p>Root directory for interpolated model data, overwrites <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
 <td><p>From <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">mod_to_interp_root</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">mod_to_interp_root</span></code></p></td>
 <td><p>Optional</p></td>
 <td><p>Root directory for non-interpolated model data, overwrites <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
 <td><p>From <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">config_dir</span></code></p></td>
+<td><p>Optional</p></td>
+<td><p>Path to all configuration files.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">configurations/</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cartopy_data_dir</span></code></p></td>
+<td><p>Optional</p></td>
+<td><p>Cartopy data directory.</p></td>
+<td><p>In HPC: <code class="docutils literal notranslate"><span class="pre">/gpfs/projects/bsc32/software/rhel/9.2/software/Cartopy/0.23.0-foss-2023b-Python-3.11.5/lib/python3.11/site-packages/cartopy/data</span></code>. In local: Downloaded from the internet on the fly.</p></td>
 </tr>
 </tbody>
 </table>
@@ -244,8 +249,40 @@
 <td><p>Boolean variable to set if you want to temporally colocate the observation and model data.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">spatial_colocation</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">temporal_colocation_active</span></code></p></td>
+<td><p>Boolean variable</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">spatial_colocation</span></code></p></td>
 <td><p>Boolean variable to set if you want to spatially colocate the observation and model data across multiple species.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">spatial_colocation_tolerance</span></code></p></td>
+<td><p>Spatial colocation tolerance to match stations by <code class="docutils literal notranslate"><span class="pre">longitudes</span></code>/<code class="docutils literal notranslate"><span class="pre">latitudes</span></code> and/or <code class="docutils literal notranslate"><span class="pre">measurement_altitudes</span></code> (in metres)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">19.053</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">spatial_colocation_validation</span></code></p></td>
+<td><p>Boolean variable to validate spatial colocation intersections via position using <code class="docutils literal notranslate"><span class="pre">spatial_colocation_tolerance</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">spatial_colocation_validation_tolerance</span></code></p></td>
+<td><p>Spatial colocation validation tolerance to validate station reference/station name match of stations by longitude/latitude position (in metres)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">10000.0</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">spatial_colocation_station_reference</span></code></p></td>
+<td><p>Boolean variable to indicate the use of <code class="docutils literal notranslate"><span class="pre">station_reference</span></code> variable for spatial colocation</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">spatial_colocation_station_name</span></code></p></td>
+<td><p>Boolean variable to indicate usage of <code class="docutils literal notranslate"><span class="pre">station_name</span></code> variable for spatial colocation</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">spatial_colocation_longitude_latitude</span></code></p></td>
+<td><p>Boolean variable to indicate the use of <code class="docutils literal notranslate"><span class="pre">longitude</span></code> and <code class="docutils literal notranslate"><span class="pre">latitude</span></code> variables for spatial colocation</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">spatial_colocation_measurement_altitude</span></code></p></td>
+<td><p>Boolean variable to indicate the use of <code class="docutils literal notranslate"><span class="pre">measurement_altitude</span></code> variable for spatial colocation</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">plot_characteristics_filename</span></code></p></td>
@@ -254,7 +291,7 @@
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">observations_data_label</span></code></p></td>
 <td><p>Alias for observational data</p></td>
-<td><p>—</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">observations</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">lower_bound</span></code></p></td>
 <td><p>Filter out data lower than this set limit. If multiple species are being read then this can either be one value, setting the same limit across species or multiple values per species (e.g. <code class="docutils literal notranslate"><span class="pre">3,</span> <span class="pre">4,</span> <span class="pre">5</span></code>).</p></td>
@@ -266,7 +303,7 @@
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">map_extent</span></code></p></td>
 <td><p>Set the map plot extents with the syntax: minimum longitude, maximum longitude, minimum latitude, maximum latitude (e.g. <code class="docutils literal notranslate"><span class="pre">-30,</span> <span class="pre">50,</span> <span class="pre">20,</span> <span class="pre">90</span></code>).</p></td>
-<td><p>—</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[-180,</span> <span class="pre">180,</span> <span class="pre">-90,</span> <span class="pre">90]</span></code> in Dashboard</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">remove_extreme_stations</span></code></p></td>
 <td><p>Type of extreme stations removal, from the options given in <code class="docutils literal notranslate"><span class="pre">remove_extreme_stations.yaml</span></code>.</p></td>
@@ -386,6 +423,10 @@
 <td><p>Determines whether to use all GHOST or all non-GHOST networks when the <code class="docutils literal notranslate"><span class="pre">observation</span></code> field uses the <code class="docutils literal notranslate"><span class="pre">*</span></code> wildcard.</p></td>
 <td><p>—</p></td>
 </tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">model_resolution</span></code></p></td>
+<td><p>Optional</p></td>
+<td><p>Model resolution if different from observations.</p></td>
+</tr>
 </tbody>
 </table>
 </section>
@@ -423,6 +464,10 @@
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dl_timeout</span></code></p></td>
 <td><p>Sets the timeout (in seconds) for downloads from HPC systems, covering interpolated and non-interpolated model data as well as GHOST and non-GHOST observations.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">180</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">model_resolution</span></code></p></td>
+<td><p>Optional</p></td>
+<td><p>Model resolution if different from observations.</p></td>
 </tr>
 </tbody>
 </table>
