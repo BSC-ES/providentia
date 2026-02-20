@@ -118,9 +118,9 @@ To check the status/output of an interpolation job, the following log files are 
 
 ## Input data
 
-### Observation data
+### Observational data
 
-Observation network data is read from the directories defined in `settings/data_paths.yaml`, with `ghost_root` for GHOST observations and `nonghost_root` for non-GHOST observations.
+Observational data is read from the directories defined in `settings/data_paths.yaml`, with `ghost_root` for GHOST observations and `nonghost_root` for non-GHOST observations.
 
 If no network can be located under `ghost_root` or `nonghost_root`, the interpolation will fail during submission.
 
