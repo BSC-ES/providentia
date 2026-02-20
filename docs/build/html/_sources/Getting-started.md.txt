@@ -4,13 +4,11 @@ If you have access to the HPC machines at Barcelona Supercomputing Center (BSC),
 
 We recommend working on local machines to everyone, including the users at BSC, because the interactive features of the dashboard are faster and you do not need to wait in queue to get resources and use the software. The only disadvantage is that the data (models and observations) stored on HPC cannot be accessed directly and need to be downloaded onto your local machine using the [download](Download) mode in advance. If you do not want to download the data and instead you prefer to use an HPC machine for your analysis, we recommend reading the Wiki section [Connection setup](Connection-setup).
 
-If you do not have access to the machines, you won't be able to use the download mode to get model data (only observations from limited sources, i.e. Zenodo for GHOST and NILU Thredds for ACTRIS). If you want to use your own data, consider checking the tutorial [2. Formatting model data](https://github.com/BSC-ES/providentia/blob/master/tutorials/2.%20Formatting%20model%20data.ipynb) and reading the section [Create your own data network](Create-your-own-data-network) to process and create netCDF files that Providentia can read.
+If you do not have access to the machines, you will only be able to use the download mode to get CAMS model data and observations from limited sources, i.e. Zenodo for GHOST and NILU Thredds for ACTRIS. If you want to use your own data, consider checking the tutorial [on how to format model data](https://github.com/BSC-ES/providentia/blob/master/tutorials/2.%20Formatting%20model%20data.ipynb) and reading the section [Create your own data network](Create-your-own-data-network) to process and create observational netCDF files that Providentia can read.
 
 ## Prerequisites
 
-Providentia works best on Linux and macOS.
-
-The software has not been designed to work on Windows, if you are a Windows user one of the best options is to run it from a Windows Subsystem for Linux ([WSL](WSL)). Alternatively, if you have a virtual machine software like Oracle VirtualBox, you can use that as well.
+Providentia works best on Linux and macOS. For these machines, these are the prerequisites:
 
 ### 1. Git
 Install Git by following the instructions here: [https://git-scm.com/install/linux](https://git-scm.com/install/linux)
@@ -22,6 +20,11 @@ Install Conda following the official guide: [https://docs.conda.io/projects/cond
 cd Downloads
 bash Miniconda3-latest-Linux-x86_64.sh
 ```
+
+The software has not been designed to work on Windows. If you are a Windows user you have three options:
+- Run it in Git Bash. Read the instructions [here](Git-Bash).
+- Run it from a Windows Subsystem for Linux (WSL). Read the instructions [here](WSL).
+- Use a virtual machine software like Oracle VirtualBox to access Linux.
 
 ## Cloning the project
 

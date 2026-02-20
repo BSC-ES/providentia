@@ -1337,7 +1337,7 @@ class ModelInterpolation(object):
             compress_return_code = compress_process.returncode
         except:
             self.log_file_str += 'NCO could not be found, please install it in your system ' 
-            self.log_file_str += 'with sudo apt install nco (Debian/Ubuntu) or brew install nco (macOS).\n'
+            self.log_file_str += 'with conda install -c conda-forge nco --override-channels.\n'
     
         # give 770 permissions for file and make owner bsc32 if machine isn't local
         if MACHINE != 'local':

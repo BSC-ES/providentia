@@ -267,6 +267,9 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--dl_timeout",
                                      dest="dl_timeout",
                                      help="download timeout seconds")
+            self.parser.add_argument("--dl_thredds_update",
+                                     dest="dl_thredds_update",
+                                     help="indicates whether to update ACTRIS filetrees reading from Thredds")
             self.parser.add_argument("--network_type",
                                      dest="network_type",
                                      help="accompanied with the wildcard in observations indicates whether to use all GHOST, non-GHOST or both observations")
@@ -298,7 +301,10 @@ class ProvArgumentParser(object):
                                      dest="logfile",
                                      action='store_true',
                                      help="redirect the output to a log file")
- 
+            self.parser.add_argument("--multispecies_units",
+                                     dest="multispecies_units",
+                                     help="Units of data in multispecies plots")
+            
         except Exception as error:
             log.error('Unhandled exception on Providentia: %s' % error, exc_info=True)
 

@@ -74,6 +74,7 @@
   "dl_interpolated": null,
   "dl_mode": "",
   "dl_timeout": null,
+  "dl_thredds_update": null,
   "network_type": "",
   "interp_n_neighbours": null,
   "interp_reverse_vertical_orientation": False,
@@ -83,6 +84,7 @@
   "interp_spinup_timesteps": 0,
   "interp_model_downsampling": "mean",
   "interp_model_upsampling": "fill",
+  "multispecies_units": null,
   "logfile": False,
   "aliases":
     {
@@ -151,6 +153,7 @@
       "interp_spinup_timesteps",
       "interp_model_downsampling",
       "interp_model_upsampling",
+      "multispecies_units",
     ],
   "non_writing_vars":
     [

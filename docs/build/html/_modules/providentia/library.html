@@ -452,7 +452,7 @@
              <span class="n">legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">set_obs_legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">map_extent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">annotate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
              <span class="n">hidedata</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">logx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">logy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">multispecies</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">regression</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
              <span class="n">threshold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">gerrity</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">plot_options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
-             <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+             <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">networkspeci</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">        Wrapper method to make a Providentia plot.</span>
 
@@ -514,6 +514,8 @@
 <span class="sd">            Figure width, defaults to None.</span>
 <span class="sd">        height : int or float, optional</span>
 <span class="sd">            Figure height, defaults to None.</span>
+<span class="sd">        networkspeci : str, optional</span>
+<span class="sd">            Selected networkspeci for non-multispecies plots</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -604,12 +606,30 @@
 
         <span class="c1"># get networkspeci to plot (for non-multispecies plots), taking first one preferentially</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">networkspecies</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">networkspeci</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">networkspecies</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">networkspeci</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s1">&#39;multispecies&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">plot_options</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">networkspecies</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;There are multiple species and this is not a multispecies plot, first one </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">networkspecies</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> is selected. &quot;</span>
+                    <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;If you want to select a specific one pass &#39;networkspeci&#39; to the plotting function &#39;plot&#39; with one of these options: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">networkspecies</span><span class="si">}</span><span class="s2">.&quot;</span>
+                    <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+                <span class="n">networkspeci</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">networkspecies</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">networkspeci</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">networkspecies</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Networkspeci is not valid, choose from: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">networkspecies</span><span class="si">}</span><span class="s1">.&#39;</span>
+                    <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+                    <span class="k">return</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;There are no available species.&#39;</span>
             <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
             <span class="k">return</span>
         <span class="n">speci</span> <span class="o">=</span> <span class="n">networkspeci</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">multispecies</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">measurement_units</span><span class="o">.</span><span class="n">values</span><span class="p">())))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Units in the multispecies plots will be converted to &#39;multispecies_units&#39; (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">multispecies_units</span><span class="si">}</span><span class="s2">) for consistency. &quot;</span>
+            <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">multispecies_units</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">]:</span>
+                <span class="n">error</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Please specify the units in your configuration file by adding &#39;multispecies_units&#39;. &quot;</span>
+                <span class="n">error</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Units for each species are: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">measurement_units</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
 
         <span class="c1"># for timeseries chunking</span>
         <span class="n">chunk_stat</span> <span class="o">=</span> <span class="kc">None</span>
@@ -654,10 +674,15 @@
         <span class="n">zstat</span><span class="p">,</span> <span class="n">base_zstat</span><span class="p">,</span> <span class="n">z_statistic_type</span><span class="p">,</span> <span class="n">z_statistic_sign</span><span class="p">,</span> <span class="n">z_statistic_period</span> <span class="o">=</span> <span class="n">get_z_statistic_info</span><span class="p">(</span><span class="n">plot_type</span><span class="o">=</span><span class="n">plot_type</span><span class="p">)</span> 
 
         <span class="c1"># if only 1 label passed for map plot, and stat is a bias statistic then throw error</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;map&#39;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">z_statistic_sign</span> <span class="o">==</span> <span class="s1">&#39;bias&#39;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">labelb</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Plotting a bias statistic, and only 1 label is set. Not making plot.&quot;</span>
-            <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
-            <span class="k">return</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;map&#39;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">z_statistic_sign</span> <span class="o">==</span> <span class="s1">&#39;bias&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">labelb</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Plotting a bias statistic, define labelb. Not making plot.&quot;</span>
+                <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">labela</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Plotting a bias statistic, define labela. Not making plot.&quot;</span>
+                <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+                <span class="k">return</span>
         
         <span class="c1"># if bias and threshold plots are in plot options throw error</span>
         <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;bias&#39;</span> <span class="ow">in</span> <span class="n">plot_options</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="s1">&#39;threshold&#39;</span> <span class="ow">in</span> <span class="n">plot_options</span><span class="p">):</span>
@@ -846,9 +871,6 @@
         <span class="c1"># take first defined networkspeci</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">networkspecies</span> <span class="o">=</span> <span class="p">[</span><span class="n">networkspeci</span><span class="p">]</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">networkspecies</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;More than 1 network or species defined, can only plot for 1 pair. Taking </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">networkspeci</span><span class="p">)</span>
-                <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
             
         <span class="c1"># legend plot (on its own axis)</span>
         <span class="k">if</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;legend&#39;</span><span class="p">:</span>
@@ -942,7 +964,7 @@
 
             <span class="c1"># make plot</span>
             <span class="n">func</span><span class="p">(</span><span class="n">relevant_ax</span><span class="p">,</span> <span class="n">networkspeci</span><span class="p">,</span> <span class="n">relevant_data_labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span> <span class="n">plot_options</span><span class="p">,</span>
-                <span class="n">statsummary</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">plotting_paradigm</span><span class="o">=</span><span class="s1">&#39;summary&#39;</span><span class="p">,</span> <span class="n">stats_df</span><span class="o">=</span><span class="n">stats_df</span><span class="p">)</span>     
+                 <span class="n">stats_to_plot</span><span class="p">,</span> <span class="n">statsummary</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">plotting_paradigm</span><span class="o">=</span><span class="s1">&#39;summary&#39;</span><span class="p">,</span> <span class="n">stats_df</span><span class="o">=</span><span class="n">stats_df</span><span class="p">)</span>     
 
             <span class="c1"># re-filter for original subsection</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;subsection&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">orig_ss</span>
@@ -1002,7 +1024,7 @@
 
             <span class="c1"># make plot</span>
             <span class="n">func</span><span class="p">(</span><span class="n">relevant_ax</span><span class="p">,</span> <span class="n">networkspeci</span><span class="p">,</span> <span class="n">relevant_data_labels</span><span class="p">,</span> 
-                <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span> <span class="n">plot_options</span><span class="p">,</span> <span class="n">plotting_paradigm</span><span class="o">=</span><span class="s1">&#39;summary&#39;</span><span class="p">,</span> 
+                <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span> <span class="n">plot_options</span><span class="p">,</span> <span class="n">zstat</span><span class="p">,</span> <span class="n">plotting_paradigm</span><span class="o">=</span><span class="s1">&#39;summary&#39;</span><span class="p">,</span> 
                 <span class="n">stats_df</span><span class="o">=</span><span class="n">stats_df</span><span class="p">)</span>
 
             <span class="c1"># re-filter for original subsection</span>
@@ -1720,7 +1742,8 @@
                     <span class="k">if</span> <span class="n">test_var</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                         <span class="n">var_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">test_var</span><span class="p">][:]</span>
                         <span class="k">return</span> <span class="n">var_data</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Variable &#39;</span><span class="si">{}</span><span class="s2">&#39; is not defined&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Variable &#39;</span><span class="si">{}</span><span class="s2">&#39; is not defined. &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Available variables: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
                 <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">var_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">var</span><span class="p">][:]</span>

@@ -404,7 +404,7 @@ What the first command does is creating an environment called `providentia-env_v
 ```bash
 conda create -n providentia-env_v3.0.2 python=3.11.5 -c conda-forge --override-channels
 conda activate providentia-env_v3.0.2
-conda install -c conda-forge cartopy jupyterlab ghostscript dask --override-channels
+conda install -c conda-forge cartopy jupyterlab ghostscript dask nco --override-channels
 pip install -r requirements.txt
 ```
 
@@ -415,7 +415,7 @@ module unload intel
 module load GCC/10.2.0
 conda create -p /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.2-nord4 -y python=3.11.5 -c conda-forge --override-channels
 conda activate /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.2-nord4
-conda install -c conda-forge cartopy jupyterlab ghostscript dask --override-channels
+conda install -c conda-forge cartopy jupyterlab ghostscript dask nco --override-channels
 pip install -r requirements.txt
 ```
 
@@ -424,7 +424,7 @@ pip install -r requirements.txt
 ```bash
 conda create -p /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.2 -y python=3.11.5 -c conda-forge --override-channels
 conda activate /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.2
-conda install -c conda-forge cartopy jupyterlab ghostscript dask --override-channels
+conda install -c conda-forge cartopy jupyterlab ghostscript dask nco --override-channels
 pip install -r requirements.txt
 ```
 

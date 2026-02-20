@@ -68,9 +68,10 @@ Apart from the common parameters, these are the fields used by all analysis and 
 | `observations_data_label` | Alias for observational data | `observations` |
 | `lower_bound` | Filter out data lower than this set limit. If multiple species are being read then this can either be one value, setting the same limit across species or multiple values per species (e.g. `3, 4, 5`). | — |
 | `upper_bound` | Filter out data above this set limit. If multiple species are being read then this can either be one value, setting the same limit across species or multiple values per species (e.g. `3, 4, 5`). | — |
-| `map_extent` | Set the map plot extents with the syntax: minimum longitude, maximum longitude, minimum latitude, maximum latitude (e.g. `-30, 50, 20, 90`). | `[-180, 180, -90, 90]` in Dashboard |
+| `map_extent` | Set the map plot extents with the syntax: minimum longitude, maximum longitude, minimum latitude, maximum latitude (e.g. `-30, 50, 20, 90`). | `[-180, 180, -90, 90]` in Dashboard, adapted to selected stations in Report and Library |
 | `remove_extreme_stations` | Type of extreme stations removal, from the options given in `remove_extreme_stations.yaml`. | — |
 | `resampling_resolution` | Resolution you want to resample your data to: `hourly`, `3hourly`, `6hourly`, `daily`, `monthly`, `annual`. | — |
+| `multispecies_units` | Units of data in multispecies plots | — |
 
 (dashboard-parameters)=
 ## Dashboard parameters
@@ -125,6 +126,7 @@ These parameters are used only in the [Download mode](Download). All of them are
 | `dl_ghost_source`  | Determines where GHOST observations are downloaded from: `bsc`, `zenodo`. | — |
 | `dl_interpolated`  | Specifies whether the interpolated versions of the model output should be downloaded: `True`, `False`. | — |
 | `dl_mode` | Selects what to download when both observations and model output are present in the configuration file: `obs`, `mod`, `both`. | — |
+| `dl_thredds_update` | Specifies if the datasets information from Thredds should be updated per species every time we download data. The information is stored [here](https://github.com/BSC-ES/providentia/tree/master/settings/internal/actris/files): `True`, `False`. | — |
 | `network_type` | Determines whether to use all GHOST or all non-GHOST networks when the observation field uses the `*` wildcard: `ghost`, `non-ghost`.  | — |
 | `dl_timeout` | Sets the timeout (in seconds) for downloads from HPC systems, covering interpolated and non-interpolated model data as well as GHOST and non-GHOST observations. | `180` |
 | `model_resolution` | Optional | Model resolution if different from observations. | Same as `resolution` |

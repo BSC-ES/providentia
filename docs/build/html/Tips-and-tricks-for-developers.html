@@ -459,7 +459,7 @@ make<span class="w"> </span>html
 <p>What the first command does is creating an environment called <code class="docutils literal notranslate"><span class="pre">providentia-env_v3.0.2</span></code> with the Python version 3.11.5, and installing <code class="docutils literal notranslate"><span class="pre">cartopy</span></code>, <code class="docutils literal notranslate"><span class="pre">jupyterlab</span></code>, <code class="docutils literal notranslate"><span class="pre">ghostscript</span></code> and <code class="docutils literal notranslate"><span class="pre">dask</span></code> with conda, and the Python packages from <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> using pip. The equivalent would be:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>providentia-env_v3.0.2<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.11.5<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>--override-channels
 conda<span class="w"> </span>activate<span class="w"> </span>providentia-env_v3.0.2
-conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>cartopy<span class="w"> </span>jupyterlab<span class="w"> </span>ghostscript<span class="w"> </span>dask<span class="w"> </span>--override-channels
+conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>cartopy<span class="w"> </span>jupyterlab<span class="w"> </span>ghostscript<span class="w"> </span>dask<span class="w"> </span>nco<span class="w"> </span>--override-channels
 pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
 </pre></div>
 </div>
@@ -470,7 +470,7 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
 module<span class="w"> </span>load<span class="w"> </span>GCC/10.2.0
 conda<span class="w"> </span>create<span class="w"> </span>-p<span class="w"> </span>/gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.2-nord4<span class="w"> </span>-y<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.11.5<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>--override-channels
 conda<span class="w"> </span>activate<span class="w"> </span>/gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.2-nord4
-conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>cartopy<span class="w"> </span>jupyterlab<span class="w"> </span>ghostscript<span class="w"> </span>dask<span class="w"> </span>--override-channels
+conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>cartopy<span class="w"> </span>jupyterlab<span class="w"> </span>ghostscript<span class="w"> </span>dask<span class="w"> </span>nco<span class="w"> </span>--override-channels
 pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
 </pre></div>
 </div>
@@ -479,7 +479,7 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
 <h3>Create providentia-env_v3.0.2 in MN5<a class="headerlink" href="#create-providentia-env-v3-0-2-in-mn5" title="Link to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>-p<span class="w"> </span>/gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.2<span class="w"> </span>-y<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.11.5<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>--override-channels
 conda<span class="w"> </span>activate<span class="w"> </span>/gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.2
-conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>cartopy<span class="w"> </span>jupyterlab<span class="w"> </span>ghostscript<span class="w"> </span>dask<span class="w"> </span>--override-channels
+conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>cartopy<span class="w"> </span>jupyterlab<span class="w"> </span>ghostscript<span class="w"> </span>dask<span class="w"> </span>nco<span class="w"> </span>--override-channels
 pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
 </pre></div>
 </div>

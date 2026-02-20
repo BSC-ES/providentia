@@ -303,7 +303,7 @@
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">map_extent</span></code></p></td>
 <td><p>Set the map plot extents with the syntax: minimum longitude, maximum longitude, minimum latitude, maximum latitude (e.g. <code class="docutils literal notranslate"><span class="pre">-30,</span> <span class="pre">50,</span> <span class="pre">20,</span> <span class="pre">90</span></code>).</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">[-180,</span> <span class="pre">180,</span> <span class="pre">-90,</span> <span class="pre">90]</span></code> in Dashboard</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[-180,</span> <span class="pre">180,</span> <span class="pre">-90,</span> <span class="pre">90]</span></code> in Dashboard, adapted to selected stations in Report and Library</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">remove_extreme_stations</span></code></p></td>
 <td><p>Type of extreme stations removal, from the options given in <code class="docutils literal notranslate"><span class="pre">remove_extreme_stations.yaml</span></code>.</p></td>
@@ -311,6 +311,10 @@
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">resampling_resolution</span></code></p></td>
 <td><p>Resolution you want to resample your data to: <code class="docutils literal notranslate"><span class="pre">hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">3hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">6hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">daily</span></code>, <code class="docutils literal notranslate"><span class="pre">monthly</span></code>, <code class="docutils literal notranslate"><span class="pre">annual</span></code>.</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">multispecies_units</span></code></p></td>
+<td><p>Units of data in multispecies plots</p></td>
 <td><p>—</p></td>
 </tr>
 </tbody>
@@ -457,15 +461,19 @@
 <td><p>Selects what to download when both observations and model output are present in the configuration file: <code class="docutils literal notranslate"><span class="pre">obs</span></code>, <code class="docutils literal notranslate"><span class="pre">mod</span></code>, <code class="docutils literal notranslate"><span class="pre">both</span></code>.</p></td>
 <td><p>—</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">network_type</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dl_thredds_update</span></code></p></td>
+<td><p>Specifies if the datasets information from Thredds should be updated per species every time we download data. The information is stored <a class="reference external" href="https://github.com/BSC-ES/providentia/tree/master/settings/internal/actris/files">here</a>: <code class="docutils literal notranslate"><span class="pre">True</span></code>, <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">network_type</span></code></p></td>
 <td><p>Determines whether to use all GHOST or all non-GHOST networks when the observation field uses the <code class="docutils literal notranslate"><span class="pre">*</span></code> wildcard: <code class="docutils literal notranslate"><span class="pre">ghost</span></code>, <code class="docutils literal notranslate"><span class="pre">non-ghost</span></code>.</p></td>
 <td><p>—</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dl_timeout</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dl_timeout</span></code></p></td>
 <td><p>Sets the timeout (in seconds) for downloads from HPC systems, covering interpolated and non-interpolated model data as well as GHOST and non-GHOST observations.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">180</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">model_resolution</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">model_resolution</span></code></p></td>
 <td><p>Optional</p></td>
 <td><p>Model resolution if different from observations.</p></td>
 </tr>

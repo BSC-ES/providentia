@@ -64,37 +64,38 @@ The installation process for distribution 'Ubuntu-22.04' failed with exit code: 
 ```
 It means that your virtualisation is not activated. This is probably due to your Windows not being the Pro version and therefore not having access to the Hyper-V feature that had to be checked in Step 2.
 
-6. Once it is installed, you can open the terminal running `wsl` from PowerShell or by opening the application named WSL. From inside you can see your Windows directories doing `cd /mnt/`. From outside, in Windows, you can see the folders of the subsystem in a section called Linux in your file explorer.
+Once it is installed, you can open the terminal running `wsl` from PowerShell or by opening the application named WSL. From inside you can see your Windows directories doing `cd /mnt/`. From outside, in Windows, you can see the folders of the subsystem in a section called Linux in your file explorer.
 
 ## Install Providentia on WSL
+
+We need to install [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) on the WSL. We recommend Miniconda because it is lightweight. After downloading the .sh file for Linux, run the installer from your terminal:
+
+```bash
+cd /mnt/c/Users/{user}/Downloads
+bash Miniconda3-latest-Linux-x86_64.sh
+```
+
+If conda is not detected after the installation finishes, run:
+
+```bash
+echo 'export PATH="/home/{user}INWSL/miniconda3/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+conda init
+```
+
+Close your WSL and reopen it.
 
 We can now install Providentia:
 
 ```bash
-cd /mnt/c/Users/YOURUSER/Desktop (your preferred location)
+cd /mnt/c/Users/{user}/Desktop (your preferred location)
 git clone https://github.com/BSC-ES/providentia.git
 ```
-
-We also need to install [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html). We recommend Miniconda because it is lightweight. After downloading the .sh file for Linux, run the installer from your terminal:
-
-```bash
-cd /mnt/c/Users/YOURUSER/Downloads
-bash Miniconda3-latest-Linux-x86_64.sh
-```
-
-If conda is not detected after the installation finishes run:
-
-```bash
-echo 'export PATH="/home/YOURUSERINWSL/miniconda3/bin:$PATH"' >> ~/.bashrc
-source ~/.bashrc
-conda init
-```
-Close your WSL and reopen it.
 
 Navigate to your Providentia directory and launch the dashboard:
 
 ```bash
-cd /mnt/c/Users/YOURUSER/Desktop/providentia (your preferred location)
+cd providentia
 ./bin/providentia
 ```
 
@@ -115,8 +116,8 @@ source ~/.bashrc
 
 Now you should be able to open the dashboard:
 
-```
+```bash
 ./bin/providentia
 ```
 
-It will be blank as you don't have any data on the WSL. If you have data in your Windows machine, change the paths in `providentia/settings/data_paths.yaml` to point to your local directories under `/mnt`. Remember that you can use the [download mode](Download) of Providentia to get data from Zenodo, ACTRIS and CAMS, and also from the MN5 if you have access to the machine.
+It will be blank as you don't have any data on the WSL. If you have data in your Windows machine, change the local paths in `providentia/settings/data_paths.yaml` to point to your local directories under `/mnt`. By default it will download to and read from `/home/{user}/data`. Remember that you can use the [download mode](Download) of Providentia to get data from Zenodo, ACTRIS and CAMS, and also from the MN5 if you have access to the machine.

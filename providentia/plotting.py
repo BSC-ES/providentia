@@ -33,7 +33,8 @@ from .statistics import (boxplot_inner_fences, calculate_statistic, group_period
 from .read_aux import drop_nans, get_valid_metadata
 from .plot_aux import (create_statistical_timeseries, get_multispecies_aliases, get_AERONET_sizedist_bin_radius,
                        get_taylor_diagram_ghelper_info, kde_fft, merge_cells, periodic_labels, 
-                       periodic_xticks, round_decimal_places, temp_axis_dict, get_fairmode_RV_exceendance)
+                       periodic_xticks, round_decimal_places, temp_axis_dict, get_fairmode_RV_exceendance,
+                       get_multispecies_conversion_factor, convert_multispecies_df_units)
 from .plot_formatting import set_axis_title
 from .warnings_prv import show_message
 
@@ -1679,6 +1680,16 @@ class Plotting:
 
                     # get data (flattened and drop NaNs)
                     data_array = drop_nans(self.canvas_instance.selected_station_data[ns]['flat'][valid_data_labels.index(data_label),0,:])
+                    
+                    # convert units
+                    if 'multispecies' in plot_options and self.read_instance.multispecies_units is not None:
+                        # get input and output units
+                        speci = ns.split('|')[1]
+                        conversion_factor = get_multispecies_conversion_factor(self.read_instance, speci)
+                        if conversion_factor is not None:
+                            msg = f'Converting units of {ns} for {data_label} to {self.read_instance.multispecies_units}.'
+                            show_message(self.read_instance, msg)
+                            data_array *= conversion_factor
 
                     # normalise data array
                     if 'normalise' in plot_options:
@@ -1804,7 +1815,11 @@ class Plotting:
             # replace subsection name by networkspecies if there is only one
             if (len(subsections) == 1) or (plotting_paradigm == 'station'):
                 stats_df = stats_df.droplevel(level='subsections')
-
+           
+            # convert units
+            if self.read_instance.multispecies_units is not None:
+                stats_df = convert_multispecies_df_units(self.read_instance, stats_df, [zstat], 'heatmap')
+            
         # determine if want to add annotations or not from plot_options
         if 'annotate' in plot_options:
             # get rounded labels
@@ -1998,9 +2013,6 @@ class Plotting:
                 new_colum_name = column.replace('weekly', 'W')
             elif 'monthly' in column:
                 new_colum_name = column.replace('monthly', 'M')
-            # remove _bias from columns
-            if '_bias' in new_colum_name:
-                new_colum_name = new_colum_name.replace('_bias', '')   
             columns[column] = new_colum_name
         stats_df = stats_df.rename(columns=columns)
   
@@ -2008,21 +2020,26 @@ class Plotting:
         col_labels = stats_df.columns.tolist()
         row_labels = stats_df.index.tolist()
 
-        # round dataframe
-        decimal_places = plot_characteristics['round_decimal_places']['table']
-        if Version(pd.__version__) >= Version("2.1.0"):
-            stats_df = stats_df.map(lambda x: round_decimal_places(x, decimal_places))
-        else: 
-            stats_df = stats_df.applymap(lambda x: round_decimal_places(x, decimal_places))
-
         # reports
         if self.read_instance.mode in ['report', 'library']:
             
             # get relevant data
             if 'multispecies' not in plot_options:
                 stats_df = stats_df.iloc[stats_df.index.get_level_values('networkspecies') == networkspeci]
+            elif self.read_instance.multispecies_units is not None:
+                # convert units
+                base_plot_type = 'statsummary' if statsummary else 'table'
+                stats_df = convert_multispecies_df_units(self.read_instance, stats_df, zstats, base_plot_type)
+            
             if plotting_paradigm == 'station':
                 stats_df = stats_df.iloc[stats_df.index.get_level_values('subsections') == subsection]
+
+            # round dataframe
+            decimal_places = plot_characteristics['round_decimal_places']['table']
+            if Version(pd.__version__) >= Version("2.1.0"):
+                stats_df = stats_df.map(lambda x: round_decimal_places(x, decimal_places))
+            else: 
+                stats_df = stats_df.applymap(lambda x: round_decimal_places(x, decimal_places))
 
             # get labels
             networkspecies = list(stats_df.index.get_level_values('networkspecies'))
@@ -2032,7 +2049,7 @@ class Plotting:
                 stats = list(stats_df.columns)
             else:
                 data_labels = list(stats_df.columns)
-
+                        
             # reset index after filtering
             stats_df = stats_df.reset_index()
 
@@ -2491,6 +2508,12 @@ class Plotting:
                 if mqi > 1:
                     bad_stations.append(station)
 
+            # show warning when data is not available
+            if np.all(np.isnan(x_points)) or np.all(np.isnan(y_points)):
+                msg = 'CRMSE / β·RMSᵤ or MB / β·RMSᵤ is nan for all stations.'
+                show_message(self.read_instance, msg)
+                return   
+            
             # create list for track_plot_elements
             self.fairmode_target_plot = []
 
@@ -2514,7 +2537,7 @@ class Plotting:
             # add MQI90
             self.faimode_target_annotate_text.append(f"\n\n{data_label}")
             self.faimode_target_annotate_colour.append('black')
-            if "MQI90" in plot_characteristics['annotate_options']:
+            if "MQI90" in plot_characteristics['annotate_options'] and not np.all(np.isnan(mqi_array)):
                 # calculate MQI90
                 mqi_sorted = sorted(mqi_array[~np.isnan(mqi_array)])
                 i_90 = int(0.9 * len(mqi_sorted)) - 1
