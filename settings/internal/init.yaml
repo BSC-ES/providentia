@@ -74,6 +74,7 @@
   "dl_interpolated": null,
   "dl_mode": "",
   "dl_timeout": null,
+  "dl_thredds_update": null,
   "network_type": "",
   "interp_n_neighbours": null,
   "interp_reverse_vertical_orientation": False,

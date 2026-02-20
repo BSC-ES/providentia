@@ -57,9 +57,6 @@ class Download(object):
         self.prv_user = env.get("PRV_USER")
         self.prv_password = env.get("PRV_PWD")
 
-        # get origin update (ACTRIS)
-        self.origin_update_choice = env.get("ORIGIN_UPDATE")
-
         # initialise default configuration variables
         # modified by commandline arguments, if given
         self.provconf = ProvConfiguration(self, **self.commandline_arguments)

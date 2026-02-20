@@ -290,9 +290,3 @@ wetpb: deposition lead mass flux
 wetv: deposition vanadium mass flux
 wetzn: deposition zinc mass flux
 ```
-
-## .env file
-
-An `.env` file will appear in the Providentia root directory when using the download mode. It is designed to store specific user preferences.
-
-   - **ORIGIN_UPDATE:** This setting specifies if the datasets information from Thredds should be updated per species every time we download data. The information is stored [here](https://github.com/BSC-ES/providentia/tree/master/settings/internal/actris/files).
