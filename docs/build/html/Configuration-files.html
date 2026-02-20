@@ -57,6 +57,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Configuration-fields.html">Configuration fields</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Metadata-fields.html">Metadata fields</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Command-line-configuration.html">Command line configuration</a></li>
 </ul>
 </li>
@@ -155,7 +156,7 @@
 <p>On top of this, numerous <a class="reference internal" href="Filtering.html"><span class="doc std std-doc">filter fields</span></a> can be also be set to filter data in a variety ways.</p>
 </section>
 <section id="subsections">
-<h2>Subsections<a class="headerlink" href="#subsections" title="Link to this heading"></a></h2>
+<span id="configuration-files-subsections"></span><h2>Subsections<a class="headerlink" href="#subsections" title="Link to this heading"></a></h2>
 <p>After defining the sections, the user can optionally create subsections and set specific information for each one. In order to do this, it is important to wrap the subsection names in double brackets (<code class="docutils literal notranslate"><span class="pre">[[</span> <span class="pre">]]</span></code>).</p>
 <p>These subsections <strong>MUST</strong> be located under the sections, and can be thought of as subsets that we want to compare in the analsysis, e.g. different regions, different QA methods etc.</p>
 <p>Above we defined two subsections as examples of different regions that we want to compare, <strong>Barcelona</strong> and <strong>Madrid</strong>. We select data just in those regions by keeping data within a certain longitude and latitude range, as follows:</p>
@@ -168,6 +169,7 @@
 <span class="n">longitude</span> <span class="o">=</span> <span class="o">-</span><span class="mf">4.57</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.42</span>
 </pre></div>
 </div>
+<p>Subsections contain only metadata fields and affect behavior exclusively in the visualization and analysis modes (Dashboard, Report and Library). For a complete list of available metadata fields, check the <a class="reference internal" href="Metadata-fields.html"><span class="doc std std-doc">Metadata fields</span></a> page.</p>
 <p>There are a wide number of <a class="reference internal" href="Filtering.html"><span class="doc std std-doc">filter fields</span></a> that can be used to filter data. If any variables are repeated between sections and subsections, the subsection variable will overwrite the information set in the section.</p>
 <p>The specific functionality of the sections and subsections differs between the different modes. For the reports, a report will be created per section, and then individual plots for each plot type will be made for each subsection, in each report. For the dashboard and when using Providentia as a library, you will only be able to load one section or subsection at a time.</p>
 </section>
