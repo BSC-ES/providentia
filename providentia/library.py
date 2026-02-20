@@ -508,7 +508,7 @@ class Providentia:
         # get networkspeci to plot (for non-multispecies plots), taking first one preferentially
         if len(self.networkspecies) > 0:
             if networkspeci is None:
-                if 'multispecies' not in plot_options:
+                if 'multispecies' not in plot_options and len(self.networkspecies) > 1:
                     msg = f"There are multiple species and this is not a multispecies plot, first one {self.networkspecies[0]} is selected. "
                     msg += f"If you want to select a specific one pass 'networkspeci' to the plotting function 'plot' with one of these options: {self.networkspecies}."
                     show_message(self, msg)
