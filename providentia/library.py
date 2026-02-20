@@ -353,7 +353,7 @@ class Providentia:
              legend=True, set_obs_legend=True, map_extent=None, annotate=False, bias=False, domain=False, 
              hidedata=False, logx=False, logy=False, multispecies=False, regression=False, smooth=False, 
              threshold=False, gerrity=False, plot_options=None, save=False, return_plot=False, format=None, 
-             width=None, height=None):
+             width=None, height=None, networkspeci=None):
         """ 
         Wrapper method to make a Providentia plot.
 
@@ -415,6 +415,8 @@ class Providentia:
             Figure width, defaults to None.
         height : int or float, optional
             Figure height, defaults to None.
+        networkspeci : str, optional
+            Selected networkspeci for non-multispecies plots
 
         Returns
         -------
@@ -505,7 +507,17 @@ class Providentia:
 
         # get networkspeci to plot (for non-multispecies plots), taking first one preferentially
         if len(self.networkspecies) > 0:
-            networkspeci = self.networkspecies[0]
+            if networkspeci is None:
+                if 'multispecies' not in plot_options:
+                    msg = f"There are multiple species and this is not a multispecies plot, first one {self.networkspecies[0]} is selected. "
+                    msg += f"If you want to select a specific one pass 'networkspeci' to the plotting function 'plot' with one of these options: {self.networkspecies}."
+                    show_message(self, msg)
+                networkspeci = self.networkspecies[0]
+            else:
+                if networkspeci not in self.networkspecies:
+                    msg = f'Networkspeci is not valid, choose from: {self.networkspecies}.'
+                    show_message(self, msg)
+                    return
         else:
             msg = 'There are no available species.'
             show_message(self, msg)
@@ -563,10 +575,15 @@ class Providentia:
         zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(plot_type=plot_type) 
 
         # if only 1 label passed for map plot, and stat is a bias statistic then throw error
-        if (base_plot_type == 'map') & (z_statistic_sign == 'bias') & (labelb == ''):
-            msg = "Plotting a bias statistic, and only 1 label is set. Not making plot."
-            show_message(self, msg)
-            return
+        if (base_plot_type == 'map') & (z_statistic_sign == 'bias'):
+            if (labelb == ''):
+                msg = "Plotting a bias statistic, define labelb. Not making plot."
+                show_message(self, msg)
+                return
+            if (labela == ''):
+                msg = "Plotting a bias statistic, define labela. Not making plot."
+                show_message(self, msg)
+                return
         
         # if bias and threshold plots are in plot options throw error
         if ('bias' in plot_options) & ('threshold' in plot_options):
@@ -755,9 +772,6 @@ class Providentia:
         # take first defined networkspeci
         else:
             networkspecies = [networkspeci]
-            if len(self.networkspecies) > 1:
-                msg = "More than 1 network or species defined, can only plot for 1 pair. Taking {}.".format(networkspeci)
-                show_message(self, msg)
             
         # legend plot (on its own axis)
         if base_plot_type == 'legend':
@@ -1608,7 +1622,8 @@ class Providentia:
                     if test_var in data.variables.keys():
                         var_data = data[test_var][:]
                         return var_data
-                msg = "Variable '{}' is not defined".format(var)
+                msg = "Variable '{}' is not defined. ".format(var)
+                msg += "Available variables: {}".format(data.variables.keys())
                 show_message(self, msg)
             else:
                 var_data = data[var][:]
