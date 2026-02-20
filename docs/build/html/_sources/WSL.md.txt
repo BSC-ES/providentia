@@ -64,7 +64,7 @@ The installation process for distribution 'Ubuntu-22.04' failed with exit code: 
 ```
 It means that your virtualisation is not activated. This is probably due to your Windows not being the Pro version and therefore not having access to the Hyper-V feature that had to be checked in Step 2.
 
-6. Once it is installed, you can open the terminal running `wsl` from PowerShell or by opening the application named WSL. From inside you can see your Windows directories doing `cd /mnt/`. From outside, in Windows, you can see the folders of the subsystem in a section called Linux in your file explorer.
+Once it is installed, you can open the terminal running `wsl` from PowerShell or by opening the application named WSL. From inside you can see your Windows directories doing `cd /mnt/`. From outside, in Windows, you can see the folders of the subsystem in a section called Linux in your file explorer.
 
 ## Install Providentia on WSL
 
