@@ -54,9 +54,10 @@
 <li class="toctree-l2"><a class="reference internal" href="#cloning-the-project">Cloning the project</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#running-the-tool-the-first-time">Running the tool the first time</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#accessing-the-data">Accessing the data</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#directory-tree-and-filename-conventions">Directory tree and filename conventions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-directory-tree-and-filename-conventions">Data directory tree and filename conventions</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#providentia-internal-directories">Providentia internal directories</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#statistics">Statistics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#launching-the-dashboard">Launching the dashboard</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#generating-a-report">Generating a report</a></li>
@@ -155,8 +156,8 @@ bash<span class="w"> </span>Miniconda3-latest-Linux-x86_64.sh
 <section id="accessing-the-data">
 <h2>Accessing the data<a class="headerlink" href="#accessing-the-data" title="Link to this heading"></a></h2>
 <p>When you open the dashboard on a local machine the first time, you don’t see anything on the dropdowns and you need to place the data into a local directory. By default, the data is read from <code class="docutils literal notranslate"><span class="pre">/home/{user}/data/providentia</span></code>. If for some reason you want to store it elsewhere you can edit the paths in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p>
-<section id="directory-tree-and-filename-conventions">
-<h3>Directory tree and filename conventions<a class="headerlink" href="#directory-tree-and-filename-conventions" title="Link to this heading"></a></h3>
+<section id="data-directory-tree-and-filename-conventions">
+<h3>Data directory tree and filename conventions<a class="headerlink" href="#data-directory-tree-and-filename-conventions" title="Link to this heading"></a></h3>
 <p>The datasets need to be saved following a very specific directory tree. The download mode takes care of that when saving the files, more details can be found in the <a class="reference internal" href="Download.html"><span class="doc std std-doc">download</span></a> section. However, if you are using your own data you will need to take that into account.</p>
 <p>By default, in the folder <code class="docutils literal notranslate"><span class="pre">/home/{user}/data/providentia</span></code> (or your preferred) there should be three folders:</p>
 <ul class="simple">
@@ -239,6 +240,34 @@ bash<span class="w"> </span>Miniconda3-latest-Linux-x86_64.sh
 </div>
 <p>If you are running Providentia on HPC, you will already see that there are options to choose from in the menu on the top. The data is being read from the paths specified in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p>
 </section>
+</section>
+<section id="providentia-internal-directories">
+<h2>Providentia internal directories<a class="headerlink" href="#providentia-internal-directories" title="Link to this heading"></a></h2>
+<p>When cloning the Providentia repository from GitHub, the project is automatically created with a predefined directory structure. These internal directories are required for the correct execution of Providentia and are used to store configuration files, intermediate outputs, results and visualizations.</p>
+<p>Providentia uses the following directories to store essential files during execution:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>├── configurations/     Configuration files required to run all Providentia modes.
+├── logs/               Output files generated during interpolation.
+├── notebooks/          Template notebooks.
+├── plots/              Saved plots when Providentia is used as a module.
+├── reports/            Generated reports.
+├── saved_data/         Configuration, NetCDF and NumPy files when used as a module.
+└── settings/           Files that configure various aspects of Providentia.
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">settings/</span></code> directory contains the main configuration files that control Providentia’s behavior. These files can be modified by the user to adapt and configure Providentia’s behavior according to their needs.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>├── basic_stats.yaml                 Defines the stats properties
+├── color_palettes.yaml              Defines the possible color palettes
+├── data_paths.yaml                  Defines dataset paths categorized by machine.              	
+├── experiment_bias_stats.yaml       Defines the experiment stats properties
+├── init_prov.yaml                   Stores initialization settings, including non-ghost available networks and resolutions.             
+├── interp_experiments.yaml          Specifies locations for non-interpolated experiments. 
+├── remove_extreme_stations.yaml     Defines criteria for filtering stations if you want to automatically remove them. 
+├── exceedances.yaml                 Stores threshold values for exceedance statistics             	 
+├── fairmode.yaml                    Stores configurations for the Fairmode plots.                
+├── plot_characteristics.yaml        Configures plot appearance settings.	
+└── report_plots.yaml                Defines plot types per report type.        
+</pre></div>
+</div>
 </section>
 <section id="statistics">
 <h2>Statistics<a class="headerlink" href="#statistics" title="Link to this heading"></a></h2>

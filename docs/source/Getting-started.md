@@ -57,7 +57,7 @@ In HPC, the environment is not created by the user as it is stored in a shared f
 
 When you open the dashboard on a local machine the first time, you don't see anything on the dropdowns and you need to place the data into a local directory. By default, the data is read from `/home/{user}/data/providentia`. If for some reason you want to store it elsewhere you can edit the paths in `settings/data_paths.yaml`. 
 
-### Directory tree and filename conventions
+### Data directory tree and filename conventions
 
 The datasets need to be saved following a very specific directory tree. The download mode takes care of that when saving the files, more details can be found in the [download](Download) section. However, if you are using your own data you will need to take that into account.
 
@@ -142,6 +142,38 @@ As observed, datasets must be saved per month, independently of their temporal r
 ```
 
 If you are running Providentia on HPC, you will already see that there are options to choose from in the menu on the top. The data is being read from the paths specified in `settings/data_paths.yaml`.
+
+## Providentia internal directories
+
+When cloning the Providentia repository from GitHub, the project is automatically created with a predefined directory structure. These internal directories are required for the correct execution of Providentia and are used to store configuration files, intermediate outputs, results and visualizations.
+
+Providentia uses the following directories to store essential files during execution:
+
+```
+├── configurations/     Configuration files required to run all Providentia modes.
+├── logs/               Output files generated during interpolation.
+├── notebooks/          Template notebooks.
+├── plots/              Saved plots when Providentia is used as a module.
+├── reports/            Generated reports.
+├── saved_data/         Configuration, NetCDF and NumPy files when used as a module.
+└── settings/           Files that configure various aspects of Providentia.
+```
+
+The `settings/` directory contains the main configuration files that control Providentia’s behavior. These files can be modified by the user to adapt and configure Providentia’s behavior according to their needs.
+
+```
+├── basic_stats.yaml                 Defines the stats properties
+├── color_palettes.yaml              Defines the possible color palettes
+├── data_paths.yaml                  Defines dataset paths categorized by machine.              	
+├── experiment_bias_stats.yaml       Defines the experiment stats properties
+├── init_prov.yaml                   Stores initialization settings, including non-ghost available networks and resolutions.             
+├── interp_experiments.yaml          Specifies locations for non-interpolated experiments. 
+├── remove_extreme_stations.yaml     Defines criteria for filtering stations if you want to automatically remove them. 
+├── exceedances.yaml                 Stores threshold values for exceedance statistics             	 
+├── fairmode.yaml                    Stores configurations for the Fairmode plots.                
+├── plot_characteristics.yaml        Configures plot appearance settings.	
+└── report_plots.yaml                Defines plot types per report type.        
+```
 
 ## Statistics
 
