@@ -6,7 +6,9 @@ Download the .exe file from https://git-scm.com/install/windows (Git-2.53.0-64-b
 
 ## Install Providentia on Git Bash
 
-Install Conda for Windows following the official guide: [https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html). We recommend Miniconda because it is lightweight. After downloading the .exe file, execute and follow the steps. In the step `Advanced Installation Options` check `Add installation to my PATH environment variable`.
+Install Conda for Windows following the official guide: [https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html). We recommend Miniconda because it is lightweight. If you get an error and your VPN is active, make sure to deactivate it before downloading it.
+
+After downloading the .exe file, execute and follow the steps. In the step `Advanced Installation Options` check `Add installation to my PATH environment variable`.
 
 Open the Git Bash application as an administrator and run:
 ```

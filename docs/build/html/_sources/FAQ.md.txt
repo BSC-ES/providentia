@@ -89,12 +89,6 @@ sudo apt install --reinstall libxcb-xinerama0 libxkbcommon-x11-0 libx11-xcb1 lib
 sudo apt install qtbase5-dev qtbase5-dev-tools qt5-qmake libqt5gui5 libqt5widgets5 libqt5core5a
 ```
 
-Edit your .bashrc file and add the line `export QT_QPA_PLATFORM_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/qt5/plugins/platform`.
-```
-vi ~/.bashrc
-source ~/.bashrc
-```
-
 ## Segmentation fault on Nord4
 
 This error appears when slurm is not able to submit the job properly. This is not a problem of Providentia, but of the machine. Try again, change machines or work locally.
