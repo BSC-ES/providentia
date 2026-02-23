@@ -2083,6 +2083,13 @@ class Plotting:
 
         # dashboard
         else:
+            # round dataframe
+            decimal_places = plot_characteristics['round_decimal_places']['table']
+            if Version(pd.__version__) >= Version("2.1.0"):
+                stats_df = stats_df.map(lambda x: round_decimal_places(x, decimal_places))
+            else: 
+                stats_df = stats_df.applymap(lambda x: round_decimal_places(x, decimal_places))
+
             # there is only statsummary
             if statsummary:
 
