@@ -585,6 +585,12 @@ class Providentia:
                 show_message(self, msg)
                 return
         
+        # make sure periodic, map, heatmap, taylor and table plots have a -[stat]
+        if base_plot_type in ['periodic', 'map', 'heatmap', 'taylor', 'table'] and zstat is None:
+            msg = f'{plot_type} plot needs a statistic -[stat].'
+            show_message(self, msg)
+            return
+            
         # if bias and threshold plots are in plot options throw error
         if ('bias' in plot_options) & ('threshold' in plot_options):
             msg = "Cannot make a bias plot showing threshold lines. Not making plot."
