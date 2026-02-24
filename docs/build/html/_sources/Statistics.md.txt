@@ -75,9 +75,43 @@ On the dashboard, in the plot options of the statsummary plot, the periodic stat
 
 Providentia statistical metrics come in two categories: **basic** and **model bias**. 
 
-Basic statistics are calculated independently for observational and model datasets. When not using the dashbaord, to get the bias between the calculated observational statistic and model statistics, the plot option **bias** can be added to the statistic name, e.g. **Mean_bias**. On the dashboard, the bias is set by using the **bias** plot option on the relevant plots.
+Basic statistics are calculated independently for observational and model datasets. The available ones are:
 
-Model bias statistics are calculated between paired observational and model data, and are thus only available when **temporal_colocation** is active. 
+| Statistic                                 | Meaning |
+| ----------------------------------------  | ------ |
+| Mean                                      | Mean |
+| StdDev                                    | Standard deviation |
+| Var                                       | Variance |
+| Min                                       | Minimum |
+| Max                                       | Maximum |
+| Data%                                     | Data availability |
+| Exceedances                               | Number of exceedances over the values defined in settings/exceedances.yaml |
+| p1, p5, p10, p25, p50, p75, p90, p95, p99 | Percentiles |
+| NStations                                 | Number of stations |
+| MDA8                                      | Daily maximum 8 hour average |
+
+When not using the dashbaord, to get the bias between the calculated observational statistic and model statistics, the plot option **bias** can be added to the statistic name, e.g. **Mean_bias**. On the dashboard, the bias is set by using the **bias** plot option on the relevant plots.
+
+Model bias statistics are calculated between paired observational and model data, and are thus only available when **temporal_colocation** is active. The available ones are:
+
+| Statistic | Meaning                                                                 |
+|-----------|-------------------------------------------------------------------------|
+| MB        | Mean bias                                                               |
+| NMB       | Normalised mean bias                                                    |
+| ME        | Mean error                                                              |
+| NME       | Normalised mean error                                                   |
+| MNB       | Mean normalised bias                                                    |
+| MNE       | Mean normalised error                                                   |
+| MFB       | Mean fractional bias                                                    |
+| MFE       | Mean fractional error                                                   |
+| RMSE      | Root mean square error                                                  |
+| NRMSE     | Normalised root mean square error                                       |
+| COE       | Coefficient of efficiency                                               |
+| FAC2      | Fraction of experiment values within a factor of two of observed values |
+| IOA       | Index of agreement                                                      |
+| R         | Pearson correlation coefficient                                         |
+| R2        | Coefficient of determination                                            |
+| UPA       | Unpaired peak accuracy                                                  |
 
 All available basic and model bias statistics in Providentia are described here:
 

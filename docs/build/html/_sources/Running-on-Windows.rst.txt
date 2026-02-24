@@ -5,5 +5,6 @@ Running on Windows
 .. toctree::
    :maxdepth: 2
 
-   Git-Bash.md
    WSL.md
+   VM.md
+   Git-Bash.md

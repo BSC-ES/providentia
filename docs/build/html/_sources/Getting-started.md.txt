@@ -14,7 +14,9 @@ Providentia works best on Linux and macOS. For these machines, these are the pre
 Install Git by following the instructions here: [https://git-scm.com/install/linux](https://git-scm.com/install/linux)
 
 ### 2. Conda
-Install Conda following the official guide: [https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html). We recommend Miniconda because it is lightweight. After downloading the .sh file, run the installer from your terminal:
+Install conda. We recommend Miniconda because it is lightweight. You can download the .sh file **for Linux** from [the official website](https://www.anaconda.com/docs/getting-started/miniconda/install#linux-2) after creating an account. If you get an error and your VPN is active, make sure to deactivate it before downloading it.
+
+From the terminal on the WSL run:
 
 ```bash
 cd Downloads
@@ -22,9 +24,9 @@ bash Miniconda3-latest-Linux-x86_64.sh
 ```
 
 The software has not been designed to work on Windows. If you are a Windows user you have three options:
+- Run it from a Windows Subsystem for Linux (WSL) if you have Windows Pro. Read the instructions [here](WSL). (**Recommended**)
+- Use a virtual machine software like Oracle VirtualBox to access Linux. Read the instructions [here](VM).
 - Run it in Git Bash. Read the instructions [here](Git-Bash).
-- Run it from a Windows Subsystem for Linux (WSL). Read the instructions [here](WSL).
-- Use a virtual machine software like Oracle VirtualBox to access Linux.
 
 ## Cloning the project
 

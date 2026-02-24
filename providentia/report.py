@@ -1228,13 +1228,19 @@ class Report:
             # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
             plot_options = plot_type.split('_')[1:]
 
+            # make sure periodic, map, heatmap, taylor and table plots have a -[stat]
+            if base_plot_type in ['periodic', 'map', 'heatmap', 'taylor', 'table'] and zstat is None:
+                msg = f'{plot_type} plot needs a statistic -[stat].'
+                show_message(self, msg)
+                continue
+
             # check if plot type if a dataframe
             plot_type_df = self.get_plot_type_df(base_plot_type)
 
             # do not make plot, if plot type is not a dataframe or multispecies, and have no data
             if (not plot_type_df) & ('multispecies' not in plot_options) & (have_nodata):
                 continue
-
+            
             # update dictionary to store statistical information if plot type is a dataframe
             if plot_type_df:
                 self.update_stats_tables('summary', base_plot_type, plot_type, zstat, networkspeci, plot_options)
@@ -1406,6 +1412,12 @@ class Report:
                 # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
                 plot_options = plot_type.split('_')[1:]
 
+                # make sure periodic, map, heatmap, taylor and table plots have a -[stat]
+                if base_plot_type in ['periodic', 'map', 'heatmap', 'taylor', 'table'] and zstat is None:
+                    msg = f'{plot_type} plot needs a statistic -[stat].'
+                    show_message(self, msg)
+                    continue
+                
                 # check if plot type if a dataframe
                 plot_type_df = self.get_plot_type_df(base_plot_type)
 

@@ -56,7 +56,7 @@ def plot(inst, statistic_mode, network_type, plot_type, plot_options=[], load=Tr
                 table = child
                 break
 
-        # extract data from the table/heatmap
+        # extract data
         data = []
         if base_plot_type in ['statsummary', 'table', 'contingencytable']:
             for (row, col), cell in table.get_celld().items():
@@ -129,7 +129,7 @@ def plot(inst, statistic_mode, network_type, plot_type, plot_options=[], load=Tr
                 values = child.get_array()
                 break
 
-        # extract data from the table
+        # extract data
         data = []
         for (lon, lat), val in zip(coordinates, values):
             data.append({
