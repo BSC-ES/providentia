@@ -352,7 +352,7 @@ class Download(object):
             if self.prv_user is None:
                 prv_user = ''
                 while prv_user == '':
-                    prv_user = input(f"\nInsert BSC {self.remote_machine} ssh user: ")
+                    prv_user = input(f"\nInsert BSC {self.remote_machine} ssh user (bsc032XXX): ")
                 self.prv_user = prv_user
             
             # ask for password if not in .env
