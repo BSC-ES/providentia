@@ -75,12 +75,12 @@
     "cams2_82_bis": ["metadata", "statsummary", "statsummary_multispecies_bias", "map-r", "map-MFB", "map-MFE", "timeseries_smooth", "timeseries_bias_smooth", "distribution", 
                      "scatter_annotate"],
 
-    "docs": {"summary": ["map-Mean", "timeseries", "periodic-Mean", "periodic-violin", "boxplot", "distribution",
-                         "scatter", "heatmap-RMSE", "table-RMSE", "statsummary", "taylor-r", 
-                         "fairmode-target", "fairmode-statsummary", "contingencytable", "metadata"],
-             "station": ["contingencytable"]
-    },
+    "debug": ['statsummary','statsummary_multispecies','statsummary_multispecies_bias','boxplot_multispecies'],
 
-    "debug": ["timeseries", "fairmode-target", "fairmode-statsummary"]
+    "training":['distribution'],
+
+    "training2":['map-MB','timeseries','timeseries_bias','statsummary_bias'],
+
+    "training3":['map-MB','timeseries','periodic-r','distribution','statsummary']
 
 }
