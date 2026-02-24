@@ -56,6 +56,14 @@
 <li class="toctree-l3"><a class="reference internal" href="#report-parameters">Report parameters</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#interpolation-parameters">Interpolation parameters</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#download-parameters">Download parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#models">Models</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#define-model-domain-and-ensemble-independently">1. Define model, domain and ensemble independently</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#combine-model-and-domain">2. Combine model and domain</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#combine-model-and-ensemble">3. Combine model and ensemble</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#combine-model-domain-and-ensemble">4. Combine model, domain and ensemble</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#aliases">Aliases</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Metadata-fields.html">Metadata fields</a></li>
@@ -480,6 +488,76 @@
 </tr>
 </tbody>
 </table>
+</section>
+<section id="models">
+<h2>Models<a class="headerlink" href="#models" title="Link to this heading"></a></h2>
+<p>In Providentia, models can be set in different ways depending on how the <strong>model, domain and ensemble</strong> are defined.</p>
+<section id="define-model-domain-and-ensemble-independently">
+<h3>1. Define model, domain and ensemble independently<a class="headerlink" href="#define-model-domain-and-ensemble-independently" title="Link to this heading"></a></h3>
+<p>You can specify each field separately:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams61_monarch_ph3</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">eu</span>
+<span class="na">ensemble</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">allmembers</span>
+</pre></div>
+</div>
+<p>You can also define only some of them:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams61_monarch_ph3</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">eu</span>
+</pre></div>
+</div>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams61_monarch_ph3</span>
+<span class="na">ensemble</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">allmembers</span>
+</pre></div>
+</div>
+<p>Or only the model:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams61_monarch_ph3</span>
+</pre></div>
+</div>
+</section>
+<section id="combine-model-and-domain">
+<h3>2. Combine model and domain<a class="headerlink" href="#combine-model-and-domain" title="Link to this heading"></a></h3>
+<p>The domain can be included directly in the model name:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams61_monarch_ph3-eu</span>
+<span class="na">ensemble</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">allmembers</span>
+</pre></div>
+</div>
+<p>Or:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams61_monarch_ph3-eu</span>
+</pre></div>
+</div>
+</section>
+<section id="combine-model-and-ensemble">
+<h3>3. Combine model and ensemble<a class="headerlink" href="#combine-model-and-ensemble" title="Link to this heading"></a></h3>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams61_monarch_ph3-allmembers</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">eu</span>
+</pre></div>
+</div>
+</section>
+<section id="combine-model-domain-and-ensemble">
+<h3>4. Combine model, domain and ensemble<a class="headerlink" href="#combine-model-domain-and-ensemble" title="Link to this heading"></a></h3>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams61_monarch_ph3-eu-allmembers</span>
+</pre></div>
+</div>
+</section>
+<section id="aliases">
+<h3>Aliases<a class="headerlink" href="#aliases" title="Link to this heading"></a></h3>
+<p>Aliases can simplify long model names.</p>
+<p>They work in two cases:</p>
+<ol class="arabic simple">
+<li><p><strong>Combined model, domain and ensemble</strong></p></li>
+</ol>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams61_monarch_ph3-eu-allmembers, cams_reanalysis_ensemble_validated-regional-000 (MONARCH, CAMS)</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p><strong>Independent fields with only one value each</strong></p></li>
+</ol>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams61_monarch_ph3 (MONARCH)</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">eu</span>
+<span class="na">ensemble</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">allmembers</span>
+</pre></div>
+</div>
+</section>
 </section>
 </section>
 
