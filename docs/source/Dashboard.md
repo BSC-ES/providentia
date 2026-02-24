@@ -9,7 +9,7 @@ Providentia's dashboard was designed to allow for interactive quick-look visuali
 To start the dashboard, run the following command in the command line. The configuration file is optional:
 
 ```
-./bin/providentia --config='/path/to/file/example.conf'
+./bin/providentia --config=/path/to/file/example.conf
 ```
 
 The dashboard mode only fetches content from one section of the configuration file.

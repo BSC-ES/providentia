@@ -40,8 +40,8 @@ On days where gpfs is full and there is no available disk space, we get this err
 * Clone the Providentia repository using `git clone https://github.com/BSC-ES/providentia.git`.
 * Open the dashboard using `/bin/providentia`, this will create the conda environment in your machine.
 * Add your model ID in `settings/interp_models.yaml` so that Providentia can know where to download the data from.
-* Use the [download](Download) mode to download the observations and models to interpolate by `./bin/providentia --config='/path/to/file/example.conf' --download`. The data will be downloaded into the paths defined in `settings/data_paths.yaml`.
-* After downloading the data do the interpolation as usual: `./bin/providentia --config='/path/to/file/example.conf' --interp`.
+* Use the [download](Download) mode to download the observations and models to interpolate by `./bin/providentia --config=/path/to/file/example.conf --download`. The data will be downloaded into the paths defined in `settings/data_paths.yaml`.
+* After downloading the data do the interpolation as usual: `./bin/providentia --config=/path/to/file/example.conf --interp`.
 
 ## Unknown Miniconda3/23.9.0-0 on Nord4
 

@@ -45,7 +45,7 @@ cd providentia
 ./bin/providentia
 ```
 
-The first time the software runs in a local machine it will create a conda environment called `providentia-env_v[version]` with all the modules needed. If you encountered any other problem, feel free to [contact us](Home).
+The first time the software runs in a local machine it will create a conda environment called `providentia-env_v[version]` with all the modules needed. If you encountered any other problem, feel free to [contact us](Meet-the-team).
 
 In HPC, the environment is not created by the user as it is stored in a shared folder. Every time we run Providentia on HPC, a wall time of 2 hours is requested, with 12 CPUs and 30Gb of total memory. This can be modified as desired using the bash options. You can check the available options with:
 
@@ -187,27 +187,31 @@ As explained, you can launch the dashboard by simply running:
 ./bin/providentia
 ```
 
-If you want to define which data is loaded in advance, you can use a configuration file. Some examples can be found under the folder `configurations`, for more details read the section [Configuration files](Configuration-files). Once you have it, you can specify its path in the command line with the argument `--config`:
-
-```
-./bin/providentia --config='/path/to/file/example.conf'
-```
-
-If you have multiple sections or subsections, a pop-up window will immediately appear where you can choose the section or subsection of interest. After that, the graphical window of Providentia will appear and you can begin using the tool.
-
 An initial set of plots will be displayed, including the timeseries, distribution, statistics summary, and periodic plots. To take full advantage of Providentia, you can explore the wide range of plotting options described in [Plot types and options](Plot-types-and-options). We also recommend reading the [Plot customisation](Plot-customisation) section.
 
 More details can be found in the [dashboard section](Dashboard).
 
+## Using a configuration file 
+
+If you want to define which data is loaded in advance, you can use a configuration file. Some examples can be found under the folder `configurations`, for more details read the section [Configuration files](Configuration-files). 
+
+Once you have a configuration file, you can specify it from the command line using the `--config` argument. If the file is located inside the `configurations/` folder, only the file name is required:
+
+```
+./bin/providentia --config=example.conf
+```
+
+If the file is stored in a different location, you can provide the full path:
+
+```
+./bin/providentia --config=/path/to/file/example.conf
+```
+
+If you have multiple sections or subsections, a pop-up window will immediately appear where you can choose the section or subsection of interest. After that, the graphical window of Providentia will appear and you can begin using the tool.
+
 ## Generating a report
 
 With the configuration file you can also generate PDF reports. In order to do this, you should use the argument `report`:
-
-```
-./bin/providentia --config=/path/to/file/example.conf --report
-```
-
-If your configuration file is inside the folder `configurations`, you don't need to specify the full path:
 
 ```
 ./bin/providentia --config=example.conf --report
