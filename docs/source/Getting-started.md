@@ -24,8 +24,8 @@ bash Miniconda3-latest-Linux-x86_64.sh
 ```
 
 The software has not been designed to work on Windows. If you are a Windows user you have three options:
-- Run it from a Windows Subsystem for Linux (WSL) if you have Windows Pro. Read the instructions [here](WSL). (Recommended!)
-- Use a virtual machine software like Oracle VirtualBox to access Linux.
+- Run it from a Windows Subsystem for Linux (WSL) if you have Windows Pro. Read the instructions [here](WSL). (**Recommended**)
+- Use a virtual machine software like Oracle VirtualBox to access Linux. Read the instructions [here](VM).
 - Run it in Git Bash. Read the instructions [here](Git-Bash).
 
 ## Cloning the project

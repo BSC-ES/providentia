@@ -1680,7 +1680,11 @@ class Plotting:
 
                     # get data (flattened and drop NaNs)
                     data_array = drop_nans(self.canvas_instance.selected_station_data[ns]['flat'][valid_data_labels.index(data_label),0,:])
-                    
+
+                    # normalise data array
+                    if 'normalise' in plot_options:
+                        data_array = data_array / norm_factor[data_label]
+                                        
                     # convert units
                     if 'multispecies' in plot_options and self.read_instance.multispecies_units is not None:
                         # get input and output units
@@ -1690,10 +1694,6 @@ class Plotting:
                             msg = f'Converting units of {ns} for {data_label} to {self.read_instance.multispecies_units}.'
                             show_message(self.read_instance, msg)
                             data_array *= conversion_factor
-
-                    # normalise data array
-                    if 'normalise' in plot_options:
-                        data_array = data_array / norm_factor[data_label]
 
                     # make boxplot
                     boxplot = relevant_axis.boxplot(x=data_array, positions=[positions[data_label_ii]], widths=widths, 

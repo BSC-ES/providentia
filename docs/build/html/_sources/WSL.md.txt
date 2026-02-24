@@ -6,7 +6,7 @@ Go to System Information and make sure your Windows OS is in the Pro version, an
 
 Go to Control panel -> Programs and Features -> Turn Windows features on and off and check if the options `Windows subsystem for Linux` and `Hyper-V` are checked, if they are not check them, apply the changes and restart your computer.
 
-## Steps to install WSL
+## Install WSL
 
 ### 1. Open the Windows Powershell
 
@@ -85,7 +85,7 @@ It means that your virtualisation is not activated. This is probably due to your
 
 Once it is installed, you can open the terminal running `wsl` from PowerShell or by opening the application named WSL. From the terminal you can access your Windows directories doing `cd /mnt/`. From outside, in Windows, you can see the folders of the subsystem in a section called Linux in your file explorer.
 
-## 5. Install conda on WSL
+## Install conda on WSL
 
 Once WSL is installed, we need to install conda. We recommend Miniconda because it is lightweight. You can download the .sh file **for Linux** from [the official website](https://www.anaconda.com/docs/getting-started/miniconda/install#linux-2) after creating an account. If you get an error and your VPN is active, make sure to deactivate it before downloading it.
 
@@ -106,7 +106,15 @@ conda init
 
 Close your WSL and reopen it.
 
-## 6. Install Providentia on WSL
+## Install git on WSL
+
+Install git using:
+
+```bash
+sudo apt install git
+```
+
+## Install Providentia on WSL
 
 We can now install Providentia:
 
@@ -146,7 +154,7 @@ Now you should be able to open the dashboard:
 
 It will be blank as you don't have any data on the WSL. 
 
-## 7. Download data onto your WSL
+## Download data onto your WSL
 
 If you want to store the data used by Providentia on your Windows machine, change the local paths in `providentia/settings/data_paths.yaml` to point to your local directories under `/mnt`. For example:
 
@@ -162,10 +170,10 @@ This setup will make Providentia download to and read the data from the folder `
 
 Remember that you can use the [download mode](Download) of Providentia to get data from Zenodo, ACTRIS and CAMS, and also from the MN5 if you have access to the machine.
 
-If you have access to MN5 and want to download data from there without using a password, you will need to create a public SSH key. In order to do this from WSL run:
+If you have access to MN5 and want to download data from there without using a password, you will need to create a public SSH key. In order to do this, run this command from the from WSL:
 
 ```bash
 ssh-keygen -t ed25519
 ```
 
-You can keep the paraphrase empty. Now copy the content within `~/.ssh/{yourkeyname}.pub` on WSL inside `~/.ssh/autorized_keys` on MN5 (you can connect to it as you would usually do). Once that's done, you can download data easily.
+You can click enter to save file to default location and keep the paraphrase empty. Now copy the content within `~/.ssh/id_ed25519.pub` on WSL inside `~/.ssh/autorized_keys` on MN5 (you can connect to it as you would usually do). Once that's done, you can download data easily.
