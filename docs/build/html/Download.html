@@ -90,10 +90,10 @@
 <section id="getting-started">
 <h2>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h2>
 <p>To start downloading data, simply add <code class="docutils literal notranslate"><span class="pre">--download</span></code> or <code class="docutils literal notranslate"><span class="pre">--dl</span></code> as a launch option along with the <strong>mandatory</strong> configuration file on the command line:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span> <span class="o">--</span><span class="n">download</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">file</span><span class="o">/</span><span class="n">example</span><span class="o">.</span><span class="n">conf</span> <span class="o">--</span><span class="n">download</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span> <span class="o">--</span><span class="n">dl</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">file</span><span class="o">/</span><span class="n">example</span><span class="o">.</span><span class="n">conf</span> <span class="o">--</span><span class="n">dl</span>
 </pre></div>
 </div>
 <p>This will get the data that needs to be downloaded from your configuration file and save it into the directories specified in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code> for <code class="docutils literal notranslate"><span class="pre">local</span></code>.</p>
@@ -119,7 +119,7 @@ or set <code class="docutils literal notranslate"><span class="pre">dl_ghost_sou
 </li>
 <li><p><strong>Download of GHOST network data from Zenodo</strong></p>
 <ul class="simple">
-<li><p>Downloads GHOST networks from the <a class="reference external" href="https://zenodo.org/records/10637450">GHOST Zenodo webpage</a>.</p></li>
+<li><p>Downloads GHOST networks from the <a class="reference external" href="https://zenodo.org/search?q=parent.id%3A10637449&amp;amp;f=allversions%3Atrue&amp;amp;l=list&amp;amp;p=1&amp;amp;s=10&amp;amp;sort=version">GHOST Zenodo webpage</a>.</p></li>
 <li><p>How to get this type of download: answer <code class="docutils literal notranslate"><span class="pre">n</span></code> to the HPC prompt: <em>Do you want to download observational data from the BSC remote machine? (Otherwise, GHOST observational data will be retrieved from Zenodo)</em> or set <code class="docutils literal notranslate"><span class="pre">dl_ghost_source</span></code> to <code class="docutils literal notranslate"><span class="pre">zenodo</span></code>.</p></li>
 <li><p>To see more information, check the <a class="reference internal" href="Zenodo-download.html"><span class="doc std std-doc">Zenodo download page</span></a>.</p></li>
 </ul>
@@ -194,6 +194,18 @@ or set <code class="docutils literal notranslate"><span class="pre">dl_ghost_sou
 <li><p><code class="docutils literal notranslate"><span class="pre">start_date</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">end_date</span></code></p></li>
 </ul>
+</section>
+<section id="example-configuration-file-with-wildcards">
+<h2>Example configuration file with wildcards<a class="headerlink" href="#example-configuration-file-with-wildcards" title="Link to this heading"></a></h2>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[WILDCARD]</span>
+<span class="na">network</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">EBAS</span>
+<span class="na">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">sconco3, sconcno2</span>
+<span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
+<span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">*</span>
+<span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">*</span>
+<span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams61_emep_ph2-eu-000</span>
+</pre></div>
+</div>
 <p><strong>Note:</strong> Using wildcards may result in large downloads, so use with caution.</p>
 </section>
 <section id="model-resolution">

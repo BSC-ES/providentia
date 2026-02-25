@@ -130,3 +130,84 @@ These parameters are used only in the [Download mode](Download). All of them are
 | `network_type` | Determines whether to use all GHOST or all non-GHOST networks when the observation field uses the `*` wildcard: `ghost`, `non-ghost`.  | — |
 | `dl_timeout` | Sets the timeout (in seconds) for downloads from HPC systems, covering interpolated and non-interpolated model data as well as GHOST and non-GHOST observations. | `180` |
 | `model_resolution` | Optional | Model resolution if different from observations. | Same as `resolution` |
+
+## Models
+
+In Providentia, models can be set in different ways depending on how the **model, domain and ensemble** are defined.
+
+### 1. Define model, domain and ensemble independently
+
+You can specify each field separately:
+
+```ini
+model = cams61_monarch_ph3
+domain = eu
+ensemble = allmembers
+```
+
+You can also define only some of them:
+
+```ini
+model = cams61_monarch_ph3
+domain = eu
+```
+
+```ini
+model = cams61_monarch_ph3
+ensemble = allmembers
+```
+
+Or only the model:
+
+```ini
+model = cams61_monarch_ph3
+```
+
+### 2. Combine model and domain
+
+The domain can be included directly in the model name:
+
+```ini
+model = cams61_monarch_ph3-eu
+ensemble = allmembers
+```
+
+Or:
+
+```ini
+model = cams61_monarch_ph3-eu
+```
+
+
+### 3. Combine model and ensemble
+
+```ini
+model = cams61_monarch_ph3-allmembers
+domain = eu
+```
+
+### 4. Combine model, domain and ensemble
+
+```ini
+model = cams61_monarch_ph3-eu-allmembers
+```
+
+### Aliases
+
+Aliases can simplify long model names.
+
+They work in two cases:
+
+1. **Combined model, domain and ensemble**
+
+```ini
+model = cams61_monarch_ph3-eu-allmembers, cams_reanalysis_ensemble_validated-regional-000 (MONARCH, CAMS)
+```
+
+2. **Independent fields with only one value each**
+
+```ini
+model = cams61_monarch_ph3 (MONARCH)
+domain = eu
+ensemble = allmembers
+```

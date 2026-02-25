@@ -28,7 +28,7 @@ from configuration import ProvConfiguration, load_conf
 
 # load the defined models and species yamls
 interp_models = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_models.yaml')))
-mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
+mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'mapping_species.yaml')))
 temporal_resolution_map = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'temporal_resolution_map.yaml')))
 interp_print_variables = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'interpolation_fields.yaml')))
 

@@ -11,13 +11,13 @@ The Interpolation mode allows to interpolate models against **GHOST** and **non-
 To start an interpolation, you need to add either `--interp`, `--interpolate` or `--interpolation` as a launch option along with the **mandatory** configuration file on the command line:
 
 ```
-./bin/providentia --config='/path/to/file/example.conf' --interp 
+./bin/providentia --config=/path/to/file/example.conf --interp 
 ```   
 ```
-./bin/providentia --config='/path/to/file/example.conf' --interpolate 
+./bin/providentia --config=/path/to/file/example.conf --interpolate 
 ```         
 ```
-./bin/providentia--config='/path/to/file/example.conf' --interpolation 
+./bin/providentia--config=/path/to/file/example.conf --interpolation 
 ```     
 
 The interpolation mode fetches all the content specified in your configuration file across all sections. To only run one specific section, add the `--section` parameter to the command.
@@ -51,7 +51,7 @@ Providentia is highly flexible when handling interpolation between model and obs
 
 When checking if an model is stored in a location with the corresponding domain, resolution, and species, consider that the species might not always be listed under the same name.
 
-The file `settings/internal/mapping_species.yaml` contains a dictionary mapping original species names to their alternative names. 
+The file `settings/mapping_species.yaml` contains a dictionary mapping original species names to their alternative names. 
 
 Note that the mapping species file is only used when the species name from the configuration file is not found in the expected location, meaning Povidentia first looks for the species written in the configuration file. If it is not found, it then searches for the corresponding mapped species in `mapping_species.yaml`.
 

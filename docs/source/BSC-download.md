@@ -63,7 +63,7 @@ An interpolated model consists of model output that have already been spatially 
 - Models are **saved** under the `mod_root` path specified in the `local` key of `settings/data_paths.yaml`.  
 - Models are **retrieved** from the `mod_root` path specified in the `storage5` or `mn5` key of `settings/data_paths.yaml`.
 
-your model data to be **retrieved** in a different directory, you can update the corresponding path in the `storage5` or `mn5` key to point to the correct location.
+If your model data to be **retrieved** in a different directory, you can update the corresponding path in the `storage5` or `mn5` key to point to the correct location.
 
 **Data format requirements:**
 

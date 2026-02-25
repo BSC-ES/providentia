@@ -120,13 +120,13 @@
 <section id="getting-started">
 <h2>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h2>
 <p>To start an interpolation, you need to add either <code class="docutils literal notranslate"><span class="pre">--interp</span></code>, <code class="docutils literal notranslate"><span class="pre">--interpolate</span></code> or <code class="docutils literal notranslate"><span class="pre">--interpolation</span></code> as a launch option along with the <strong>mandatory</strong> configuration file on the command line:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span> <span class="o">--</span><span class="n">interp</span> 
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">file</span><span class="o">/</span><span class="n">example</span><span class="o">.</span><span class="n">conf</span> <span class="o">--</span><span class="n">interp</span> 
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span> <span class="o">--</span><span class="n">interpolate</span> 
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">file</span><span class="o">/</span><span class="n">example</span><span class="o">.</span><span class="n">conf</span> <span class="o">--</span><span class="n">interpolate</span> 
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span><span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span> <span class="o">--</span><span class="n">interpolation</span> 
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span><span class="o">--</span><span class="n">config</span><span class="o">=/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">file</span><span class="o">/</span><span class="n">example</span><span class="o">.</span><span class="n">conf</span> <span class="o">--</span><span class="n">interpolation</span> 
 </pre></div>
 </div>
 <p>The interpolation mode fetches all the content specified in your configuration file across all sections. To only run one specific section, add the <code class="docutils literal notranslate"><span class="pre">--section</span></code> parameter to the command.</p>
@@ -154,7 +154,7 @@ Be aware that this can be demanding on the computer, so ensure your machine has 
 <section id="mapping-species">
 <h4>Mapping species<a class="headerlink" href="#mapping-species" title="Link to this heading"></a></h4>
 <p>When checking if an model is stored in a location with the corresponding domain, resolution, and species, consider that the species might not always be listed under the same name.</p>
-<p>The file <code class="docutils literal notranslate"><span class="pre">settings/internal/mapping_species.yaml</span></code> contains a dictionary mapping original species names to their alternative names.</p>
+<p>The file <code class="docutils literal notranslate"><span class="pre">settings/mapping_species.yaml</span></code> contains a dictionary mapping original species names to their alternative names.</p>
 <p>Note that the mapping species file is only used when the species name from the configuration file is not found in the expected location, meaning Povidentia first looks for the species written in the configuration file. If it is not found, it then searches for the corresponding mapped species in <code class="docutils literal notranslate"><span class="pre">mapping_species.yaml</span></code>.</p>
 </section>
 <section id="different-temporal-resolutions-between-observations-and-model">

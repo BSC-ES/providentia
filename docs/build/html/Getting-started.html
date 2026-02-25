@@ -60,6 +60,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#providentia-internal-directories">Providentia internal directories</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#statistics">Statistics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#launching-the-dashboard">Launching the dashboard</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-a-configuration-file">Using a configuration file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#generating-a-report">Generating a report</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#using-providentia-backend-functions">Using Providentia backend functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#interpolating-your-model-data-to-observations">Interpolating your model data to observations</a></li>
@@ -148,7 +149,7 @@ bash<span class="w"> </span>Miniconda3-latest-Linux-x86_64.sh
 <span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span>
 </pre></div>
 </div>
-<p>The first time the software runs in a local machine it will create a conda environment called <code class="docutils literal notranslate"><span class="pre">providentia-env_v[version]</span></code> with all the modules needed. If you encountered any other problem, feel free to <a class="reference internal" href="Home.html"><span class="doc std std-doc">contact us</span></a>.</p>
+<p>The first time the software runs in a local machine it will create a conda environment called <code class="docutils literal notranslate"><span class="pre">providentia-env_v[version]</span></code> with all the modules needed. If you encountered any other problem, feel free to <a class="reference internal" href="Meet-the-team.html"><span class="doc std std-doc">contact us</span></a>.</p>
 <p>In HPC, the environment is not created by the user as it is stored in a shared folder. Every time we run Providentia on HPC, a wall time of 2 hours is requested, with 12 CPUs and 30Gb of total memory. This can be modified as desired using the bash options. You can check the available options with:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">usage</span>
 </pre></div>
@@ -280,21 +281,25 @@ bash<span class="w"> </span>Miniconda3-latest-Linux-x86_64.sh
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span>
 </pre></div>
 </div>
-<p>If you want to define which data is loaded in advance, you can use a configuration file. Some examples can be found under the folder <code class="docutils literal notranslate"><span class="pre">configurations</span></code>, for more details read the section <a class="reference internal" href="Configuration-files.html"><span class="doc std std-doc">Configuration files</span></a>. Once you have it, you can specify its path in the command line with the argument <code class="docutils literal notranslate"><span class="pre">--config</span></code>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span>
+<p>An initial set of plots will be displayed, including the timeseries, distribution, statistics summary, and periodic plots. To take full advantage of Providentia, you can explore the wide range of plotting options described in <a class="reference internal" href="Plot-types-and-options.html"><span class="doc std std-doc">Plot types and options</span></a>. We also recommend reading the <a class="reference internal" href="Plot-customisation.html"><span class="doc std std-doc">Plot customisation</span></a> section.</p>
+<p>More details can be found in the <a class="reference internal" href="Dashboard.html"><span class="doc std std-doc">dashboard section</span></a>.</p>
+</section>
+<section id="using-a-configuration-file">
+<h2>Using a configuration file<a class="headerlink" href="#using-a-configuration-file" title="Link to this heading"></a></h2>
+<p>If you want to define which data is loaded in advance, you can use a configuration file. Some examples can be found under the folder <code class="docutils literal notranslate"><span class="pre">configurations</span></code>, for more details read the section <a class="reference internal" href="Configuration-files.html"><span class="doc std std-doc">Configuration files</span></a>.</p>
+<p>Once you have a configuration file, you can specify it from the command line using the <code class="docutils literal notranslate"><span class="pre">--config</span></code> argument. If the file is located inside the <code class="docutils literal notranslate"><span class="pre">configurations/</span></code> folder, only the file name is required:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="n">example</span><span class="o">.</span><span class="n">conf</span>
+</pre></div>
+</div>
+<p>If the file is stored in a different location, you can provide the full path:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">file</span><span class="o">/</span><span class="n">example</span><span class="o">.</span><span class="n">conf</span>
 </pre></div>
 </div>
 <p>If you have multiple sections or subsections, a pop-up window will immediately appear where you can choose the section or subsection of interest. After that, the graphical window of Providentia will appear and you can begin using the tool.</p>
-<p>An initial set of plots will be displayed, including the timeseries, distribution, statistics summary, and periodic plots. To take full advantage of Providentia, you can explore the wide range of plotting options described in <a class="reference internal" href="Plot-types-and-options.html"><span class="doc std std-doc">Plot types and options</span></a>. We also recommend reading the <a class="reference internal" href="Plot-customisation.html"><span class="doc std std-doc">Plot customisation</span></a> section.</p>
-<p>More details can be found in the <a class="reference internal" href="Dashboard.html"><span class="doc std std-doc">dashboard section</span></a>.</p>
 </section>
 <section id="generating-a-report">
 <h2>Generating a report<a class="headerlink" href="#generating-a-report" title="Link to this heading"></a></h2>
 <p>With the configuration file you can also generate PDF reports. In order to do this, you should use the argument <code class="docutils literal notranslate"><span class="pre">report</span></code>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">file</span><span class="o">/</span><span class="n">example</span><span class="o">.</span><span class="n">conf</span> <span class="o">--</span><span class="n">report</span>
-</pre></div>
-</div>
-<p>If your configuration file is inside the folder <code class="docutils literal notranslate"><span class="pre">configurations</span></code>, you don’t need to specify the full path:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="n">example</span><span class="o">.</span><span class="n">conf</span> <span class="o">--</span><span class="n">report</span>
 </pre></div>
 </div>

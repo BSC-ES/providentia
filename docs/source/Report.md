@@ -7,11 +7,11 @@ Providentia's report mode was designed to be able to generate complete PDF repor
 To start your report, simply add `--report` or `--reports` as a launch option along with the **mandatory** configuration file on the command line:
 
 ```
-./bin/providentia --config='/path/to/file/example.conf' --report
+./bin/providentia --config=/path/to/file/example.conf --report
 ```
 
 ```
-./bin/providentia --config='/path/to/file/example.conf' --reports
+./bin/providentia --config=/path/to/file/example.conf --reports
 ```
 
 The report mode fetches all the content specified in your configuration file across all sections. To only run one specific section, add the `--section` parameter to the command.

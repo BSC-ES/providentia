@@ -28,7 +28,7 @@ PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 # load the defined models paths, agrupations yaml and mapping species
 data_paths = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/data_paths.yaml')))
 interp_models = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_models.yaml')))
-mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
+mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'mapping_species.yaml')))
 dl_hpc = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'dl_hpc.yaml')))
 
 class Download(object):
@@ -352,7 +352,7 @@ class Download(object):
             if self.prv_user is None:
                 prv_user = ''
                 while prv_user == '':
-                    prv_user = input(f"\nInsert BSC {self.remote_machine} ssh user: ")
+                    prv_user = input(f"\nInsert BSC {self.remote_machine} ssh user (bsc032XXX): ")
                 self.prv_user = prv_user
             
             # ask for password if not in .env

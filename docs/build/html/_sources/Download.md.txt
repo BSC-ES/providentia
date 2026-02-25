@@ -7,11 +7,11 @@ Providentia's download mode retrieves modelled and observational data from BSC s
 To start downloading data, simply add `--download` or `--dl` as a launch option along with the **mandatory** configuration file on the command line:
 
 ```
-./bin/providentia --config='/path/to/file/example.conf' --download
+./bin/providentia --config=/path/to/file/example.conf --download
 ```
 
 ```
-./bin/providentia --config='/path/to/file/example.conf' --dl
+./bin/providentia --config=/path/to/file/example.conf --dl
 ```
 
 This will get the data that needs to be downloaded from your configuration file and save it into the directories specified in `settings/data_paths.yaml` for `local`.
@@ -32,7 +32,7 @@ Providentia supports four types of downloads. For detailed instructions, please 
    - To see more information, check the [BSC download page](BSC-download).
 
 2. **Download of GHOST network data from Zenodo**  
-   - Downloads GHOST networks from the [GHOST Zenodo webpage](https://zenodo.org/records/10637450).  
+   - Downloads GHOST networks from the [GHOST Zenodo webpage](https://zenodo.org/search?q=parent.id%3A10637449&f=allversions%3Atrue&l=list&p=1&s=10&sort=version).  
    - How to get this type of download: answer `n` to the HPC prompt: _Do you want to download observational data from the BSC remote machine? (Otherwise, GHOST observational data will be retrieved from Zenodo)_ or set `dl_ghost_source` to `zenodo`.
    - To see more information, check the [Zenodo download page](Zenodo-download).
 
@@ -75,6 +75,18 @@ You can use the `*` wildcard in the following fields to automatically select all
 - `resolution`  
 - `start_date`
 - `end_date`  
+
+## Example configuration file with wildcards
+
+```ini
+[WILDCARD]
+network = EBAS
+species = sconco3, sconcno2
+resolution = hourly
+start_date = *
+end_date = *
+model = cams61_emep_ph2-eu-000
+```
 
 **Note:** Using wildcards may result in large downloads, so use with caution.
 
