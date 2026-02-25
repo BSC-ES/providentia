@@ -25,7 +25,7 @@ defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'd
 multispecies_map = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.yaml')))
 mapping_species = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
 interp_models = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_models.yaml')))
-modes = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'modes.yaml')))
+modes = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'modes.yaml')))
 wildcard = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'wildcard.yaml')))
 
 # set current MACHINE
