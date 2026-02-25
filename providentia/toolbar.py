@@ -447,7 +447,7 @@ class NavigationToolbar(NavigationToolbar2QT):
 
         # reinitialise default configuration variables
         # no commandline arguments considered as reloading config
-        provconf = ProvConfiguration(self.read_instance)
+        provconf = ProvConfiguration(self.read_instance, **{'dashboard': True})
 
         # get current GHOST version
         current_ghost_version = self.read_instance.ghost_version

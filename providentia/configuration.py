@@ -68,7 +68,7 @@ class ProvConfiguration:
 
         # set mode
         active_modes = list(set(modes)&set(kwargs))
-        
+
         # choose the mode that is not the library one if multiple modes are active
         if len(active_modes) == 1:
             self.read_instance.mode = active_modes[0]
