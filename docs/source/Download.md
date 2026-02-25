@@ -64,6 +64,7 @@ Each of these variables corresponds directly to one of the questions asked durin
 | `dl_mode` | _Which type of data do you want to download? Observational, modelled or both? ([both]/obs/mod)_ | `obs` (download observations), `mod` (download models) or `both` (download both) |
 | `dl_thredds_update` | _File containing information of the files available in Thredds for {actris_parameter} ({info_path}) already exists. Do you want to update it (y/[n])?_ | `True` or `False`     |                 |
 | `network_type` | _Do you want to download all the GHOST networks? (Otherwise all the non-GHOST networks will be downloaded) ([y]/n)_   | `ghost` (use all GHOST networks) or `non-ghost` (use all non-GHOST networks)                |
+
 ## Using wildcards
 
 You can use the `*` wildcard in the following fields to automatically select all available values:
@@ -76,3 +77,23 @@ You can use the `*` wildcard in the following fields to automatically select all
 - `end_date`  
 
 **Note:** Using wildcards may result in large downloads, so use with caution.
+
+## Model resolution
+
+Models and observations may have different native temporal resolutions. In Providentia, interpolation between model data and observations includes:
+
+- Upsampling → duplicates temporal steps
+- Downsampling → cuts or aggregates temporal steps
+
+Now the data download and interpolation processes can be performed using the same configuration file, as in this example:
+
+```
+[PRV_sconco3_CHIMERE]
+network = EBAS
+species = sconco3
+resolution = daily
+start_date = 20180101
+end_date = 20180601
+model = cams61_chimere_ph2-eu-000 (CHIMERE)
+model_resolution = hourly
+```

@@ -196,6 +196,25 @@ or set <code class="docutils literal notranslate"><span class="pre">dl_ghost_sou
 </ul>
 <p><strong>Note:</strong> Using wildcards may result in large downloads, so use with caution.</p>
 </section>
+<section id="model-resolution">
+<h2>Model resolution<a class="headerlink" href="#model-resolution" title="Link to this heading"></a></h2>
+<p>Models and observations may have different native temporal resolutions. In Providentia, interpolation between model data and observations includes:</p>
+<ul class="simple">
+<li><p>Upsampling → duplicates temporal steps</p></li>
+<li><p>Downsampling → cuts or aggregates temporal steps</p></li>
+</ul>
+<p>Now the data download and interpolation processes can be performed using the same configuration file, as in this example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">PRV_sconco3_CHIMERE</span><span class="p">]</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">EBAS</span>
+<span class="n">species</span> <span class="o">=</span> <span class="n">sconco3</span>
+<span class="n">resolution</span> <span class="o">=</span> <span class="n">daily</span>
+<span class="n">start_date</span> <span class="o">=</span> <span class="mi">20180101</span>
+<span class="n">end_date</span> <span class="o">=</span> <span class="mi">20180601</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">cams61_chimere_ph2</span><span class="o">-</span><span class="n">eu</span><span class="o">-</span><span class="mi">000</span> <span class="p">(</span><span class="n">CHIMERE</span><span class="p">)</span>
+<span class="n">model_resolution</span> <span class="o">=</span> <span class="n">hourly</span>
+</pre></div>
+</div>
+</section>
 </section>
 
 
