@@ -3157,8 +3157,9 @@ class Plotting:
             
         # set element visibility
         if (data_label not in self.canvas_instance.plot_elements['data_labels_active']) & (data_label != 'ALL'):
-            for element in self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type]:
-                element.set_visible(False)
+            if base_plot_type not in ['metadata', 'map', 'heatmap', 'table', 'statsummary']:
+                for element in self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type]:
+                    element.set_visible(False)
 
     def get_markersize(self, relevant_axis, base_plot_type, networkspeci, plot_characteristics, 
                        data=None, active_map_valid_station_inds=[]):

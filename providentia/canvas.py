@@ -748,10 +748,11 @@ class Canvas(FigureCanvas):
             markersizes = np.full(len(self.active_map_valid_station_inds), self.plot_characteristics['map']['marker_zero_stations_selected']['s'])
             
             for collection in self.plot_axes['map'].collections:
+
                 if isinstance(collection, matplotlib.collections.PathCollection):
-                    
                     if Version(matplotlib.__version__) < Version("3.4"):
                         opacities = collection.get_facecolor()
+                        
                         # set alpha of all stations (initally assuming zero stations are selected)
                         opacities[:, -1] = self.plot_characteristics['map']['marker_zero_stations_selected']['alpha']
 
@@ -772,6 +773,7 @@ class Canvas(FigureCanvas):
 
                     else:   
                         opacities = collection.get_facecolor()[:,-1]
+
                         # set alpha of all stations (initally assuming zero stations are selected)
                         opacities[:] = self.plot_characteristics['map']['marker_zero_stations_selected']['alpha'] 
 

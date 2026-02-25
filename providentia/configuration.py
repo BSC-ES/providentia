@@ -22,8 +22,8 @@ from providentia.warnings_prv import show_message
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 data_paths = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'data_paths.yaml')))
 defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'defaults.yaml')))
-multispecies_map = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.yaml')))
-mapping_species = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
+multispecies_map = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'multispecies_shortcuts.yaml')))
+mapping_species = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'mapping_species.yaml')))
 interp_models = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_models.yaml')))
 modes = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'modes.yaml')))
 wildcard = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'wildcard.yaml')))
@@ -1337,10 +1337,6 @@ class ProvConfiguration:
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.resolution = default
 
-        # copy value of resolution into model_resolution
-        if not self.read_instance.model_resolution:
-            self.read_instance.model_resolution = self.read_instance.resolution 
-            
         # if number of networks and species is not the same,
         # and len of one of network or species == 1,
         # then duplicate respestive network/species
