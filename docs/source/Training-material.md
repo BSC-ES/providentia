@@ -9,6 +9,8 @@ On this page you will find up to date training material for Providentia. Trainin
 
 Below you will find the recorded videos and presentations of the last training sessions:
 
+* 25/02/2026: [Presentation](uploads/presentations/20260225_Providentia_Training_Session_Day_1.pdf)
+
 * 18/02/2025: [Presentation](uploads/presentations/20250218_Providentia_Training_Session.pdf) and [video](https://www.youtube.com/watch?v=5PUX9KfaI0w)
 
 * 16/10/2023: [Presentation](uploads/presentations/20231016_Providentia_Training_Session.pdf) and [video](https://youtu.be/G-L2VohxSz8?si=8qrMDHvhmP6i-QTX)
