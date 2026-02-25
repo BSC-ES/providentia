@@ -51,7 +51,7 @@ Providentia is highly flexible when handling interpolation between model and obs
 
 When checking if an model is stored in a location with the corresponding domain, resolution, and species, consider that the species might not always be listed under the same name.
 
-The file `settings/internal/mapping_species.yaml` contains a dictionary mapping original species names to their alternative names. 
+The file `settings/mapping_species.yaml` contains a dictionary mapping original species names to their alternative names. 
 
 Note that the mapping species file is only used when the species name from the configuration file is not found in the expected location, meaning Povidentia first looks for the species written in the configuration file. If it is not found, it then searches for the corresponding mapped species in `mapping_species.yaml`.
 
