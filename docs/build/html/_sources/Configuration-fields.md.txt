@@ -113,7 +113,7 @@ These parameters are used only in the [Interpolation mode](Interpolation). All o
 | `interp_model_downsampling` | Statistic for the downsampling of the model resolution to the observational resolution: `mean`, `median`. | `mean` |
 | `interp_model_upsampling` | Method for the upsampling of the model resolution to the observational resolution: `fill`, `gaps`. `fill` linearly fills between measurements, and `gaps` sets NaN values for times that the model does not have. | `fill` |
 | `network_type` | Determines whether to use all GHOST or all non-GHOST networks when the `observation` field uses the `*` wildcard.  | — |
-| `model_resolution` | Optional | Model resolution if different from observations. | Same as `resolution` |
+| `model_resolution` | Model resolution if different from observations. | Same as `resolution` |
 
 (download-parameters)=
 ## Download parameters
@@ -129,7 +129,7 @@ These parameters are used only in the [Download mode](Download). All of them are
 | `dl_thredds_update` | Specifies if the datasets information from Thredds should be updated per species every time we download data. The information is stored [here](https://github.com/BSC-ES/providentia/tree/master/settings/internal/actris/files): `True`, `False`. | — |
 | `network_type` | Determines whether to use all GHOST or all non-GHOST networks when the observation field uses the `*` wildcard: `ghost`, `non-ghost`.  | — |
 | `dl_timeout` | Sets the timeout (in seconds) for downloads from HPC systems, covering interpolated and non-interpolated model data as well as GHOST and non-GHOST observations. | `180` |
-| `model_resolution` | Optional | Model resolution if different from observations. | Same as `resolution` |
+| `model_resolution` | Model resolution if different from observations. | Same as `resolution` |
 
 ## Models
 

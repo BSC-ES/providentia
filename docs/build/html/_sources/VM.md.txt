@@ -12,7 +12,7 @@ Now, click the downloaded file.
 
 ![VM 2](uploads/vm/virtualbox_2_edit.png)
 
-click **“Next”**.
+Click **“Next”**.
 
 ![VM 3](uploads/vm/virtualbox_3_edit.png)
 
@@ -20,23 +20,23 @@ Now, click **“Next”**.
 
 ![VM 4](uploads/vm/virtualbox_4_edit.png)
 
-click **“Next"**.
+Click **“Next"**.
 
 ![VM 5](uploads/vm/virtualbox_5_edit.png)
 
-click **“Yes”**.
+Click **“Yes”**.
 
 ![VM 6](uploads/vm/virtualbox_6_edit.png)
 
-click **“Install”** to put VirtualBox in your operating system.
+Click **“Install”** to put VirtualBox in your operating system.
 
 ![VM 7](uploads/vm/virtualbox_7_edit.png)
 
-click **“Yes”**.
+Click **“Yes”**.
 
 ![VM 8](uploads/vm/virtualbox_8_edit.png)
 
-click **“Finish”** to finalize the installation and open VirtualBox.
+Click **“Finish”** to finalize the installation and open VirtualBox.
 
 ![VM 9](uploads/vm/virtualbox_9_edit.png)
 
