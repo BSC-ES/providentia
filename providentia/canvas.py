@@ -2950,7 +2950,7 @@ class Canvas(FigureCanvas):
                         # ensure hidedata option is handled second (to show smooth/regression after hiding data)
                         mod_plot_options.remove('hidedata')
                         mod_plot_options.insert(1, 'hidedata')
-                
+
                 for option in mod_plot_options:
                     
                     # get index to raise errors and uncheck options (in original plot options order)
