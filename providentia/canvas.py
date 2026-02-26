@@ -304,8 +304,11 @@ class Canvas(FigureCanvas):
             self.read_instance.cursor_function = 'handle_data_filter_update'
             QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
+        # filter data
+        # if filter class not yet intialised, then do so
         if self.filter_data is None:
             self.filter_data = DataFilter(self.read_instance)
+        # if it is, update filters, and update map and associated plots
         else:
             self.filter_data.filter_all()
             self.update_active_map()
@@ -442,10 +445,8 @@ class Canvas(FigureCanvas):
             # update plotted map z statistic
             self.update_map_z_statistic()
 
-            # if selected stations have changed from previous selected, update associated plots
-            if not np.array_equal(self.previous_relative_selected_station_inds,
-                                  self.relative_selected_station_inds):
-                self.update_associated_active_dashboard_plots()
+            # update associated plots
+            self.update_associated_active_dashboard_plots()
 
             # draw changes
             self.figure.canvas.draw_idle()
