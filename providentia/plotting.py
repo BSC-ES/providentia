@@ -987,8 +987,11 @@ class Plotting:
         # plot horizontal line across x axis at 0 if bias plot
         if add_bias_line:
             if 'bias' not in plot_options:
-               plot_characteristics['bias_line']['y'] = self.read_instance.modbias_stats[chunk_stat]['minimum_bias']
-            bias_line = relevant_axis.axhline(**plot_characteristics['bias_line'])
+               mb = self.read_instance.modbias_stats[chunk_stat]['minimum_bias']
+            else:
+               mb = plot_characteristics['bias_line']['y'] 
+            bias_line_chars = {k: v for k, v in plot_characteristics['bias_line'].items() if k != "y"}
+            bias_line = relevant_axis.axhline(y=mb, **bias_line_chars)
             # track plot elements if using dashboard 
             if self.read_instance.mode not in ['report', 'library']:
                 self.track_plot_elements('ALL', 'timeseries', 'bias_line', [bias_line], bias=bias)
