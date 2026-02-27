@@ -282,6 +282,14 @@ All plots have been tailored to appear nice in Jupyter notebooks, but any plot s
 
 On top of that, there are numerous arguments to the plot method that can be used to customise the plots, each of which are subsequently detailed.
 
+##### Species
+
+In non-multispecies plots you can choose the species that you want to plot using the `networkspeci` argument, e.g.:
+
+```
+networkspeci='EEA|sconco3'
+```
+
 ##### Legend
 
 For user convenience a legend has been integrated into each appropriate plot type. If this is not wanted, then this can be deactivated using the following argument to the plot method:

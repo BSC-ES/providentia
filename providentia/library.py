@@ -1455,28 +1455,34 @@ class Providentia:
             If both conf and config are None, the currently loaded configuration file is printed.
         """
 
-        # check have valid conf
-        valid_config = self.have_valid_config()
-        if not valid_config:
-            return
-
         # if conf or config not None, then print that file
         if conf:
             pass
         elif config:
-            conf = copy.deepcopy(config) 
+            conf = copy.deepcopy(config)
         # otherwise take it to be file previously loaded
         else:
+            # check have valid conf
+            valid_config = self.have_valid_config()
+            if not valid_config:
+                msg = "No valid configuration was passed"
+                show_message(self, msg)
+                return
             conf = copy.deepcopy(self.config)
 
-        # check file exists
-        if not os.path.isfile(conf):
-            msg = "The passed .conf file: '{}' does not exist.".format(conf)
-            show_message(self, msg)
-        # otherwise, print conf
-        else:
-            with open(conf, "r") as f:
-                self.logger.info(f.read())
+        # check if file exists
+        if not os.path.exists(conf):
+            # check if file exists inside configurations folder
+            if os.path.exists(join(self.config_dir, conf)):
+                conf = join(self.config_dir, conf)
+            else:
+                msg = "The passed .conf file: '{}' does not exist.".format(conf)
+                show_message(self, msg)
+                return
+
+        # open and read if it exists
+        with open(conf, "r") as f:
+            self.logger.info(f.read())
 
     def __str__(self):
         """
