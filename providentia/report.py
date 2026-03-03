@@ -67,7 +67,7 @@ class Report:
 
         # initialise default configuration variables
         # modified by commandline arguments, if given
-        provconf = ProvConfiguration(self, **self.commandline_arguments)
+        ProvConfiguration(self, **self.commandline_arguments)
 
         self.logger.info("Creating a Providentia Report...")
 
@@ -198,7 +198,7 @@ class Report:
 
             # update available models for selected fields
             get_valid_models(self, self.start_date, self.end_date, self.resolution,
-                                  self.network, self.species)
+                             self.network, self.species)
 
             # read data
             self.datareader.read_setup(['reset'])

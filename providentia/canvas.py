@@ -356,10 +356,12 @@ class Canvas(FigureCanvas):
             # update plots?
             if not self.read_instance.block_MPL_canvas_updates:
 
+                # update plotted map z statistic
+                self.update_map_z_statistic()
+
                 # if have selected stations on map, then now remake plots
                 if hasattr(self, 'relative_selected_station_inds'):
                     if len(self.relative_selected_station_inds) > 0:
-
                         # update associated plots with selected stations
                         self.update_associated_active_dashboard_plots()
 
@@ -936,11 +938,6 @@ class Canvas(FigureCanvas):
                         self.read_instance.block_MPL_canvas_updates = True
                         self.periodic_options.model().item(bias_index).setCheckState(QtCore.Qt.Unchecked)
                         self.read_instance.block_MPL_canvas_updates = False
-
-                # create structure to store data for statsummary plot
-                elif plot_type == 'statsummary':
-                    xlabel = ''
-                    ylabel = ''
                 
                 # create structure to store data for Taylor diagram
                 elif plot_type == 'taylor':
@@ -995,13 +992,13 @@ class Canvas(FigureCanvas):
                 if plot_type not in ['map', 'taylor', 'fairmode-statsummary']:
                     if plot_type == 'scatter':
                         harmonise_xy_lims_paradigm(self.read_instance, self, ax, plot_type, 
-                                                self.plot_characteristics[plot_type], plot_options, relim=True)
+                                                   self.plot_characteristics[plot_type], plot_options, relim=True)
                     else:
                         harmonise_xy_lims_paradigm(self.read_instance, self, ax, plot_type, 
-                                                self.plot_characteristics[plot_type], plot_options, relim=True, autoscale=True)
+                                                   self.plot_characteristics[plot_type], plot_options, relim=True, autoscale=True)
 
                 # set axes labels
-                if plot_type not in ['taylor', 'contingencytable']:
+                if plot_type not in ['taylor', 'contingencytable', 'statsummary']:
                     # set xlabel
                     set_axis_label(ax, 'x', xlabel, self.plot_characteristics[plot_type])
                     # set ylabel
@@ -1041,8 +1038,9 @@ class Canvas(FigureCanvas):
         if hasattr(self, 'relative_selected_station_inds'):
             # have no selected stations, so clear all previously plotted artists from selected station plots
             # cover plotting axes also
+            active_plots = self.read_instance.active_dashboard_plots
             if len(self.relative_selected_station_inds) == 0:      
-                for plot_type in self.read_instance.active_dashboard_plots:
+                for plot_type in active_plots:
                     if plot_type != 'None':
                         self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
                 self.top_right_canvas_cover.show() 
@@ -1054,7 +1052,7 @@ class Canvas(FigureCanvas):
                                           networkspecies=[self.read_instance.networkspeci])
 
                 # iterate through active_dashboard_plots
-                for plot_type in self.read_instance.active_dashboard_plots:
+                for plot_type in active_plots:
              
                     # update plot
                     if plot_type != 'None':
