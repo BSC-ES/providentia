@@ -144,9 +144,9 @@ class Download(object):
 
             # TODO: remove the filters instead
             # transform asterisk fields to a low and high date
-            for field, date_num in {'start_date' : '0', 'end_date' : '9'}.items():
+            for field, date_num in {'start_date' : '00010101', 'end_date' : '99991231'}.items():
                 if getattr(self, field) == '*':
-                    setattr(self, field, date_num * 8)
+                    setattr(self, field, date_num)
             
             # from here generate control if user stopped execution
             signal.signal(signal.SIGINT, self.sighandler)

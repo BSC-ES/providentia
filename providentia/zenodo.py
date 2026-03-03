@@ -188,9 +188,13 @@ class Zenodo:
         with ZipFile(zip_path) as zipf:
             zip_members = set(zipf.namelist())
 
-            # iterate through the different nc files and validate each one of them
+            self.download_instance.logger.info("\n    Gathering info for ZIP contents:")
+
+            # iterate through the different nc files inside the zip and validate each one of them
             for dir, file_info_dict in files_info.items():
-                for filename in file_info_dict["filenames"]:
+                self.download_instance.logger.info(f"\n    - {dir}")
+
+                for filename in tqdm(file_info_dict["filenames"], bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}', desc=f"      ZIP validation in progress... ({len(file_info_dict['filenames'])})"):
                     
                     tar_member = file_info_dict["tar_member"]
 
@@ -229,12 +233,13 @@ class Zenodo:
             filenames in the format of `species/species_YYYYMMM.nc` and tar_path
             with the absolute path of the `.tar.xz` archive inside the ZIP file.
         """
+        self.download_instance.logger.info("\n    Extracting TAR files to:")
 
         # iterate through each file
         for dir, file_info_dict in files_info.items():
-            self.download_instance.logger.info(f"\n  - {dir}")
+            self.download_instance.logger.info(f"\n    - {dir}")
 
-            for filename in tqdm(file_info_dict["filenames"], bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}', desc=f"    Extracting files ({len(file_info_dict['filenames'])})"):
+            for filename in tqdm(file_info_dict["filenames"], bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}', desc=f"      TAR extraction in progress... ({len(file_info_dict['filenames'])})"):
                 # open tar file
                 with tarfile.open(file_info_dict["tar_path"]) as tar:
                     try:
