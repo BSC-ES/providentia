@@ -769,6 +769,12 @@ class ProvConfiguration:
                 msg = "Models detected but no network specified, proceeding to download non-interpolated model output."
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
+            # set mod mode directly if download is done from storage5
+            elif self.read_instance.machine == "storage5":
+                self.read_instance.dl_interpolated = False
+                msg = "Transfer mode detected, proceding to copy non-interpolated model output."
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+
             # if there's models, ask the user whether they want interpolated or non-interpolated
             if not isinstance(self.read_instance.dl_interpolated, bool):
                 while True:
@@ -1041,6 +1047,7 @@ class ProvConfiguration:
                     ghost_mod_found = list(filter(lambda x:x.startswith(modid+'-'+domain), os.listdir(join(self.read_instance.mod_root,ghost_version))))
                     if ghost_mod_found:
                         available_ghost_versions.append(ghost_version)
+
         # if it is a concrete ensemble, then just get the model from the list
         else:
             mod_found = [model] if model in self.possible_models else []
@@ -1451,6 +1458,10 @@ class ProvConfiguration:
                     self.logger.error(error)
                     sys.exit(1)
                 self.read_instance.dl_mode = mode
+
+            # select models in case it is a storage5 transfer
+            elif self.read_instance.machine == "storage5":
+                self.read_instance.dl_mode = "mod"
 
             # if not provided, ask user interactively
             else:
