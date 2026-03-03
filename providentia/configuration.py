@@ -1455,7 +1455,7 @@ class ProvConfiguration:
                 mode = str(self.read_instance.dl_mode).lower()
                 if mode not in valid_modes:
                     error = f"Error: Invalid 'dl_mode': '{self.read_instance.dl_mode}'. Expected 'both', 'obs' or 'mod'."
-                    self.logger.error(error)
+                    self.read_instance.logger.error(error)
                     sys.exit(1)
                 self.read_instance.dl_mode = mode
 

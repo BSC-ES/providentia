@@ -169,14 +169,14 @@ class Zenodo:
 
         # fill the dictionary with the metadata
         for path in file_paths:
-            dir = join('/', *path.split('/')[:-3], self.download_instance.ghost_version, *path.split('/')[-3:-1])
+            dir = join('/', *path.split('/')[:-3], *path.split('/')[-3:-1])
 
             if dir not in files_info:
                 files_info[dir] = {
                     "network": path.split('/')[-4],
                     "resolution": path.split('/')[-3],
                     "species": path.split('/')[-2],
-                    "tar_member": f"{path.split('/')[-4]}/{path.split('/')[-3]}/{path.split('/')[-2]}.tar.xz",
+                    "tar_member": f"{path.split('/')[-5]}/{path.split('/')[-3]}/{path.split('/')[-2]}.tar.xz",
                     "filenames": [join(*path.split('/')[-2:])],
                 }
             else:
@@ -188,19 +188,13 @@ class Zenodo:
         with ZipFile(zip_path) as zipf:
             zip_members = set(zipf.namelist())
 
-            self.download_instance.logger.info("\n    Gathering info for ZIP contents:")
-
             # iterate through the different nc files inside the zip and validate each one of them
             for dir, file_info_dict in files_info.items():
-                self.download_instance.logger.info(f"\n    - {dir}")
-
-                for filename in tqdm(file_info_dict["filenames"], bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}', desc=f"      ZIP validation in progress... ({len(file_info_dict['filenames'])})"):
+                for filename in file_info_dict['filenames']:
                     
                     tar_member = file_info_dict["tar_member"]
 
                     if tar_member in zip_members:
-                        # extract valid tar member 
-                        zipf.extract(tar_member, self.temp_dir)
                         
                         # include the tar files that were on the ZIP file on the final directory
                         if dir not in valid_files_info:
@@ -211,8 +205,13 @@ class Zenodo:
                                 "tar_path": join(self.temp_dir, tar_member),
                                 "filenames": [filename],
                             }
+                            
+                            # extract valid tar member 
+                            zipf.extract(tar_member, self.temp_dir)
+                        
                         else:
                             valid_files_info[dir]["filenames"].append(filename)
+                    
                     else:
                         # throw a warning if nc file is not found in the zip file
                         msg = f"Missing archive in ZIP: {tar_member}"
@@ -367,7 +366,7 @@ class Zenodo:
                 for species, dates in species_dict.items():
                     for date in dates:
                         filename = f"{species}_{date}.nc"
-                        path = join(self.download_instance.ghost_root, network, resolution, species, filename)
+                        path = join(self.download_instance.ghost_root, network, self.download_instance.ghost_version , resolution, species, filename)
                         paths.append(path)
 
         return paths
