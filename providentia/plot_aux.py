@@ -835,7 +835,10 @@ def get_fairmode_RV_exceendance(read_instance, speci, RV, exc_threshold, units):
         read_instance.logger.error(conversion_factor)
         sys.exit(1)
     RV *= conversion_factor
-    exc_threshold *= conversion_factor
+    
+    # threshold can be None, as in the case of pm2p5
+    if exc_threshold is not None:
+        exc_threshold *= conversion_factor
         
     return RV, exc_threshold
 
