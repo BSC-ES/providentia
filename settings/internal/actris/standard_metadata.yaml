@@ -1,0 +1,25 @@
+doi:
+  value: []
+  standard_name: DOI
+  long_name: Digital identifier of an object
+  units: unitless
+  units_quantity: unitless
+  data_type: object
+  string_format: short
+  metadata_type: STATION MISCELLANEOUS
+  identifiers:
+    DOI: ""
+  description: Digital identifier of an object.
+
+actris_national_facility:
+  value: []
+  standard_name: ACTRIS national facility
+  long_name: Digital identifier of an object
+  units: unitless
+  units_quantity: unitless
+  data_type: object
+  string_format: short
+  metadata_type: STATION MISCELLANEOUS
+  identifiers:
+    ACTRIS national facility: ""
+  description: ACTRIS national facility.

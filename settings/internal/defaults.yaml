@@ -3,6 +3,14 @@ base_defaults: &base_defaults
   resolution:
   start_date:
   end_date:
+  cpus_per_task: 12
+  generate_file_tree: False
+  disable_file_tree: False
+  cores_explicit: False
+  observations_data_label: observations
+
+visualization_defaults: &visualization_defaults
+  <<: *base_defaults
   statistic_mode: Temporal|Spatial
   statistic_aggregation:
     Temporal|Spatial: Median
@@ -13,18 +21,33 @@ base_defaults: &base_defaults
   timeseries_statistic_aggregation: Median
   ensemble:
     - allmembers
+  temporal_colocation: True
+  temporal_colocation_active: False
+  spatial_colocation: True
+  spatial_colocation_tolerance: 19.053
+  spatial_colocation_station_reference: True
+  spatial_colocation_station_name: True
+  spatial_colocation_longitude_latitude: True
+  spatial_colocation_measurement_altitude: True
+  spatial_colocation_validation: True
+  spatial_colocation_validation_tolerance: 10000.0
 
-dashboard:
-  <<: *base_defaults
+dashboard: &dashboard
+  <<: *visualization_defaults
   network:
   active_dashboard_plots:
     - timeseries
     - statsummary
     - distribution
     - periodic
+  map_extent: 
+    - -180
+    - 180
+    - -90
+    - 90
 
 dashboard_empty:
-  <<: *base_defaults
+  <<: *dashboard
   network:
     - EBAS
   species:
@@ -32,37 +55,40 @@ dashboard_empty:
   resolution: hourly
   start_date: "20180101"
   end_date: "20190101"
-  active_dashboard_plots:
-    - timeseries
-    - statsummary
-    - distribution
-    - periodic
 
 report:
-  <<: *base_defaults
+  <<: *visualization_defaults
   network:
+  report_type: standard
+  report_summary: True
+  report_stations: False
+  report_title: Providentia Report
+  report_filename: PROVIDENTIA_Report
+  harmonise_summary: True
+  harmonise_stations: True
 
 library:
-  <<: *base_defaults
+  <<: *visualization_defaults
 
 interpolation:
+  <<: *base_defaults
   network:
-  species:
-  resolution:
-  start_date:
-  end_date:
   experiments:
   ensemble:
     - "000"
   interp_model_downsampling: mean
   interp_model_upsampling: fill
   interp_n_neighbours: 4
+  interp_reverse_vertical_orientation: False
+  interp_chunk_size: 16
+  interp_job_array_limit: 100
+  interp_multiprocessing: False
+  interp_spinup_timesteps: 0
+  interp_model_downsampling: mean
+  interp_model_upsampling: fill
 
 download:
-  species:
-  resolution:
-  start_date:
-  end_date:
+  <<: *base_defaults
   ensemble:
     - "000"
   dl_timeout: 180
