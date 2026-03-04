@@ -86,6 +86,10 @@ class Providentia:
         # set configuration variables, as well as any other defined variables
         self.valid_config = self.set_config(**self.kwargs)
 
+        # return if no valid configuration file
+        if not self.valid_config:
+            return
+
         # initialise DataReader class
         self.datareader = DataReader(self)
 
@@ -528,9 +532,10 @@ class Providentia:
             msg = f"Units in the multispecies plots will be converted to 'multispecies_units' ({self.multispecies_units}) for consistency. "
             show_message(self, msg)
             if self.multispecies_units in [None, ""]:
-                error = f"Please specify the units in your configuration file by adding 'multispecies_units'. "
-                error += f"Units for each species are: {self.measurement_units}."
-                sys.exit(error)
+                msg = f"Please specify the units in your configuration file by adding 'multispecies_units'. "
+                msg += f"Units for each species are: {self.measurement_units}."
+                show_message(self, msg)
+                return
 
         # for timeseries chunking
         chunk_stat = None
@@ -1338,11 +1343,11 @@ class Providentia:
             else:
                 error = 'Error: The path to the configuration file passed as an argument does not exist.'
                 self.logger.info(error)
-                sys.exit(1)
+                return
         else:
             error = "Error: The configuration file must be given as an argument: e.g. 'config=...'"
             self.logger.info(error)
-            sys.exit(1)
+            return
 
         # parse section
         # if section name provided, try and use that
@@ -1353,7 +1358,7 @@ class Providentia:
         if len(self.sections) == 0:
             error = "Error: No sections were found in the configuration file, make sure to name them using square brackets."
             self.logger.info(error)
-            sys.exit(1)
+            return
     
         self.have_section = False
         if hasattr(self, 'section'): 
@@ -1365,7 +1370,7 @@ class Providentia:
                 error += '\nTip: For subsections, add the name of the parent section followed by an interpunct (·) '
                 error += 'before the subsection name (e.g. SECTIONA·Spain). Available: {0}'.format(self.all_sections)
                 self.logger.info(error)
-                sys.exit(1)
+                return
 
         if not self.have_section:
             self.section = self.sections[0]
@@ -1692,7 +1697,7 @@ class Providentia:
 
         if not hasattr(self, 'data_in_memory'):
             self.logger.info('Error: Data has not been loaded. Use the load() method')
-            sys.exit(1)
+            return False
         else:
             return True
         
@@ -1708,7 +1713,7 @@ class Providentia:
 
         if not self.valid_config:
             self.logger.info("Error: A valid configuration file has not been read. Please reinitialise your Providentia object with a valid file: prv.Providentia('filename.conf')")
-            sys.exit(1)
+            return False
         else:
             return True
 
