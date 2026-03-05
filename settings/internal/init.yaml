@@ -210,6 +210,8 @@
       "upper_bound",
       "active_dashboard_plots",
       "plot_characteristics_filename",
+      "report_summary",
+      "report_stations",
     ],
   "tests": False,
 }
