@@ -1253,6 +1253,47 @@ class Download(object):
                 initial_check_nc_files.append(join(path, nc_file))
 
         return initial_check_nc_files
+    
+    def classify_paths(self, file_paths):
+        files_info = {}
+
+        # fill the dictionary with the metadata
+        for local_path in file_paths:
+            remote_dir = join('/', *local_path.split('/')[:-1])
+            nc_file = local_path.split('/')[-1]
+            
+            if remote_dir not in files_info:
+                files_info[remote_dir] = {
+                    "remote_dir": remote_dir,
+                    "nc_files": [nc_file],
+                }
+            else:
+                files_info[remote_dir]["nc_files"].append(nc_file)
+        
+        return files_info
+    
+    def download_non_interpolated_sftp(self, files_to_download_info):
+        for local_dir, files_to_download_dict in files_to_download_info.items():
+
+                remote_dir = files_to_download_dict["remote_dir"]
+                
+                # print source and destination
+                self.logger.info(f"\n  - {remote_dir}, source: {local_dir} ({self.remote_machine})")
+    
+                # create directories if they don't exist
+                os.makedirs(remote_dir, exist_ok=True)
+
+                # download each individual nc file using sftp protocol
+                for nc_file in tqdm(files_to_download_dict['nc_files'], bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',
+                                    desc=f"    Downloading files ({len(files_to_download_dict['nc_files'])})"):
+                    local_path = join(remote_dir,nc_file)
+                    # get last downloaded file in case there was a keyboard interrupt
+                    self.latest_nc_file_path = local_path
+
+                    # initialize the timeout and get the file
+                    self.ncfile_dl_start_time = time.time()
+                    remote_path = join(local_dir, nc_file)
+                    self.sftp.get(remote_path, local_path, callback=self.check_time) 
 
     def download_non_interpolated_model(self, model, initial_check, files_to_download=None):
         """
@@ -1274,10 +1315,6 @@ class Download(object):
             A list of file paths intended for download.
         """
 
-        # check if ssh exists and check if still active, connect if not
-        if (self.ssh is None) or (self.ssh.get_transport().is_active()):
-            self.connect()  
-
         # get model id and the domain
         mod_id, domain, ensemble = model.split("-")
         
@@ -1285,6 +1322,10 @@ class Download(object):
             # print current model
             self.logger.info('\n'+'-'*40)
             self.logger.info(f"\nDownloading {model} non-interpolated model data from {self.remote_machine}...")
+
+            # check if ssh exists and check if still active, connect if not
+            if (self.ssh is None) or (self.ssh.get_transport().is_active()):
+                self.connect()  
 
             # look for the model in the remote machine
             model_exists, remote_dir = self.find_model(mod_id, domain, initial_check)
@@ -1302,36 +1343,15 @@ class Download(object):
 
             return initial_check_nc_files
                         
+        elif files_to_download:
+            
+            files_to_download_info = self.classify_paths(files_to_download)
+
+            self.logger.info(f"\n{model} model data to download ({len(files_to_download)}):")
+
+            self.download_non_interpolated_sftp(files_to_download_info)
+        
         else:
-            self.logger.info(f"\n{model} model data to download ({len(res_spec_dir)}):")
-
-            # print source and destination
-            self.logger.info(f"\n  - {local_dir}, source: {remote_dir} ({self.remote_machine})")
- 
-            # create directories if they don't exist
-            if not os.path.exists(local_dir):
-                os.makedirs(local_dir) 
-
-            if not initial_check and not self.logfile:
-                # print the tqdm bar if output goes to screen        
-                valid_nc_files_iter = tqdm(valid_nc_files, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Downloading files ({len(valid_nc_files)})")
-            else:
-                # do not print the bar if it is the initial check
-                valid_nc_files_iter = valid_nc_files
-
-            # download each individual nc file using sftp protocol
-            for nc_file in valid_nc_files_iter:
-                local_path = join(local_dir,nc_file)
-                if initial_check:
-                    initial_check_nc_files.append(local_path)
-                else:
-                    # get last downloaded file in case there was a keyboard interrupt
-                    self.latest_nc_file_path = local_path
-
-                    # initialize the timeout and get the file
-                    self.ncfile_dl_start_time = time.time()
-                    remote_path = join(remote_dir, nc_file)
-                    self.sftp.get(remote_path, local_path, callback=self.check_time) 
 
             # tell the user if not valid resolution specie date combinations
             msg = "There is no available model output to be downloaded."
