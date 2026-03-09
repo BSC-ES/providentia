@@ -4,6 +4,7 @@ import ast
 import configparser
 import copy
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 import logging
 import math
 import os
@@ -1362,11 +1363,16 @@ class ProvConfiguration:
 
         # check end date is bigger than start date
         if self.read_instance.start_date != '*' and self.read_instance.end_date != '*':
-            if self.read_instance.start_date >= self.read_instance.end_date:
+            if self.read_instance.start_date > self.read_instance.end_date:
                 error = f'Error: Start date ({self.read_instance.start_date}) exceeds end date ({self.read_instance.end_date}).'
                 self.read_instance.logger.error(error)
                 sys.exit(1)
-
+            # in interpolation, if months are the same add a month to end date
+            elif self.read_instance.start_date == self.read_instance.end_date and self.read_instance.mode == 'interpolation':
+                self.read_instance.end_date = (datetime.strptime(self.read_instance.start_date, "%Y%m") + relativedelta(months=1)).strftime("%Y%m")
+                msg = f'Setting end date to be {self.read_instance.end_date} for interpolation.'
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+                
         # create empty directories for the observations and models
         if MACHINE == "local":
             for path in [self.read_instance.nonghost_root, self.read_instance.ghost_root, self.read_instance.mod_root, self.read_instance.mod_to_interp_root]:
@@ -1970,7 +1976,7 @@ def load_conf(self, fpath=None):
     from providentia.configuration import read_conf
 
     if fpath is None:
-        self.read_instance.logger.info("No configuration file found")
+        self.read_instance.logger.error("No configuration file found")
         sys.exit(1)
 
     # if DEFAULT is not present, then return
