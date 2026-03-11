@@ -11,14 +11,7 @@ assignees: ''
 A clear and concise description of what the bug is.
 
 **Configuration file**
-If you are using the dashboard, please download the configuration file from there. Do not write the path to your configuration file, only copy and paste its content using code blocks (```) .
-
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+If you are using the dashboard, please download the configuration file from there. Do not write the path to your configuration file, only copy and paste its content using code blocks (```).
 
 **Details**
 If you are creating a reports, add here your definition of report plots, e.g. `['timeseries', 'taylor-r', 'scatter']`.

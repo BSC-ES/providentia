@@ -22,19 +22,14 @@ The standard plot types consist of:
 - FAIRMODE statistics summary plot (`fairmode-statsummary`)
 - Contingency table (`contingencytable`)
 
-Some of these plots are created for specific statistics, namely: `map`, `periodic`, `heatmap`, `taylor` and `table`. In the report and library modes, this statistic is defined by aggregating the `-[stat]` field to the plot type. `[stat]` should be replaced with any of the base statistic names (e.g. p5, Mean) or model bias names (e.g. r2, RMSE). For example to show the median values spatially, `map-p50` would be set as the plot name or `map-r2` to show the coefficient of determination. The available statistic names are documented in `settings/basic_stats.yaml` and `settings/model_bias_stats.yaml`. For the Taylor diagram, only `r`and `r2`can be used.
-
-The timeseries can also be used to show how statistics vary in time. In order to do this, we need to add `-[stat]` and the temporal resolution after the plot type name (e.g. `timeseries-Mean-daily`, `timeseries-r2-monthly`, `timeseries-r-annual`).
-
-For the `metadata` plot the metadata displayed is set to a default list of metadata fields. For the `statsummary` plot the statistics displayed are set to a default list of absolute and bias statistics. These default options can be changed in `settings/plot_characteristics.yaml`.
-
 ### Map (`map`)
 
 ![Map colorbar](uploads/plot_types/map-cb.png)
-
 ![Map](uploads/plot_types/map.png)
 
 ### Metadata (`metadata`)
+
+For the `metadata` plot the metadata displayed is set to a default list of metadata fields. These default options can be changed in `settings/plot_characteristics.yaml`.
 
 ![Metadata](uploads/plot_types/metadata.png)
 
@@ -74,6 +69,8 @@ For the `metadata` plot the metadata displayed is set to a default list of metad
 
 ### Statistics summary (`statsummary`)
 
+For the `statsummary` plot the statistics displayed are set to a default list of absolute and bias statistics. These default options can be changed in `settings/plot_characteristics.yaml`.
+
 ![Statsummary](uploads/plot_types/statsummary.png)
 
 ### Taylor diagram (`taylor`)
@@ -91,6 +88,12 @@ For the `metadata` plot the metadata displayed is set to a default list of metad
 ### Contingency table (`contingencytable`) - Only per station
 
 ![contingencytable](uploads/plot_types/contingencytable.png)
+
+## Choosing a statistic to plot (`-[stat]`)
+
+Some of these plots are created for specific statistics, namely: `map`, `periodic`, `heatmap`, `taylor` and `table`. In the report and library modes, this statistic is defined by aggregating the `-[stat]` field to the plot type. `[stat]` should be replaced with any of the base statistic names (e.g. p5, Mean) or model bias names (e.g. r2, RMSE). For example to show the median values spatially, `map-p50` would be set as the plot name or `map-r2` to show the coefficient of determination. The available statistic names are documented in `settings/basic_stats.yaml` and `settings/model_bias_stats.yaml`. For the Taylor diagram, only `r`and `r2`can be used.
+
+The timeseries can also be used to show how statistics vary in time. In order to do this, we need to add `-[stat]` and the temporal resolution after the plot type name (e.g. `timeseries-Mean-daily`, `timeseries-r2-monthly`, `timeseries-r-annual`).
 
 ## Plot options
 
@@ -126,8 +129,8 @@ If the configuration option `_annotate` is added, a box will be created on the p
 
 Plot types: 
 - Dashboard: `map`, `timeseries`, `periodic`, `periodic-violin`, `distribution`, `scatter`, `boxplot`, `taylor`, `fairmode-target`
-- Report: `map`, `timeseries`, `periodic`, `distribution`, `scatter`, `boxplot`, `heatmap`, `taylor`, `fairmode-target`
-- Library: `map`, `timeseries`, `periodic`, `distribution`, `scatter`, `boxplot`, `heatmap`, `taylor`, `fairmode-target`
+- Report: `map`, `timeseries`, `periodic`, `periodic-violin`, `distribution`, `scatter`, `boxplot`, `heatmap`, `taylor`, `fairmode-target`
+- Library: `map`, `timeseries`, `periodic`, `periodic-violin`, `distribution`, `scatter`, `boxplot`, `heatmap`, `taylor`, `fairmode-target`
 
 ### Get the bias of the data (`_bias`)
 
