@@ -1,10 +1,10 @@
-# Training material
+# Presentations
 
-On this page you will find up to date training material for Providentia. Training material is divided into two categories.
+On this page you will find up to date training material and presentations for Providentia in three categories.
 
 1. Training sessions - for providing an extensive overview of all Providentia functionalities.
 2. User meetings - for informing on specific new features of each new release.
-3. Presentations involving Providentia at scientific or technical conferences and workshops outside BSC.
+3. Scientific or technical conferences and workshops outside BSC.
 
 ## Training sessions
 
@@ -36,7 +36,7 @@ Below you will find the recorded videos and presentations of the last user meeti
 
 * 23/03/2023: [Presentation](uploads/presentations/20230323_Providentia_User_Meeting.pdf)
 
-## Presentations
+## Scientific or technical conferences and workshops
 
 Below you will find the presentations involving Providentia at scientific or technical conferences and workshops outside BSC:
 
