@@ -605,10 +605,6 @@ class SubmitInterpolation(object):
             # if list is empty or have no arguments after iteration, return message stating that
             if len(self.arguments) == 0 or not new_arguments:
                 msg = '\nNO INTERSECTING OBSERVATIONAL AND EXPERIMENT DATA FOR INTERPOLATION. \n' 
-                if self.start_date == self.end_date:
-                    msg += 'If you want to interpolate data for one month, '
-                    msg += 'you need to set the end date to be the next one. \n'
-                    msg += 'e.g. For November 2018, this is 201811 to 201812.'
             else:
                 msg = '\n***INTERSECTING OBSERVATIONAL AND EXPERIMENTAL DATA IS AVAILABLE FOR INTERPOLATION.***'
                 
