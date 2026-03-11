@@ -20,9 +20,7 @@ If you are just starting with Providentia please see our handy starting guide: [
 
 We also have a number of tutorial notebooks that outline Providentia's features. Please see the [tutorials](https://github.com/BSC-ES/providentia/tree/master/tutorials) subdirectory to find these.
 
-If you wish to see the videos and presentations of all previous Providentia training sessions, please see here: [Training](Training-material)
-
-If you wish to see all scientific and technical presentations releated to Providentia, please see here: [Presentations](Presentations)
+If you wish to see the previous Providentia training sessions and scientific and technical presentations, please see here: [Presentations](Presentations)
 
 The full contents of the Providentia ReadtheDocs documentation can be found here: [Table of Contents](https://providentia.readthedocs.io/en/latest/)
 
