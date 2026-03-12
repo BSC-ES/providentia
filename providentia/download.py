@@ -412,54 +412,100 @@ class Download(object):
 
                 self.logger.info(f"\nRemote machine credentials saved on {join(PROVIDENTIA_ROOT, '.env')}")
                     
-    def select_files_to_download(self, nc_files_to_download):
+    def select_files_to_download(self, nc_filepaths_to_download):
         """
         Checks a list of files against the local filesystem and returns
         the subset of files that are not already downloaded. 
 
         Parameters
         ----------
-        nc_files_to_download : list of str
+        nc_filepaths_to_download : list of str or dict
             A list of file paths intended for download.
 
         Returns
         -------
-        not_downloaded_files : list of str
+        not_downloaded_paths : list of str
             A list of file paths that are either not present locally or should be 
             re-downloaded depending on the `dl_overwrite` attribute.
         """
         
         # initialise list of non-downloaded files
-        not_downloaded_files = []
-        if nc_files_to_download:
-            # get the downloaded and not downloaded files
-            not_downloaded_files = list(filter(lambda x:not os.path.exists(x), nc_files_to_download))
-            downloaded_files = list(filter(lambda x:os.path.exists(x), nc_files_to_download))
+        not_downloaded_paths = []
+        
+        if nc_filepaths_to_download:
             
-            # get the files that were downloaded before the execution
-            downloaded_before_execution_files = list(filter(lambda x:self.prov_start_time > os.path.getctime(x), downloaded_files))
-
-            # if there was any file downloaded before the execution    
-            if downloaded_before_execution_files:
-                # make the user choose between overwriting or not overwriting
-                if not isinstance(self.dl_overwrite, bool):
-                    # ask if user wants to overwrite
-                    while True:
-                        dl_overwrite = input("\nThere are some files that were already downloaded in a previous download, do you want to overwrite them ([y]/n)? ").lower() 
-                        if dl_overwrite in ['y', 'n', '']:
-                            break
+            # TODO clean when the dictionary is implemented in all modes
+            if type(nc_filepaths_to_download) == dict:
                     
-                    # get the boolean value
-                    self.dl_overwrite = dl_overwrite != 'n'
+                for dir, dir_dict in nc_filepaths_to_download.items():
 
-                # if user wants to overwrite then add the files downloaded before the execution as if they were never downloaded
-                if self.dl_overwrite:
-                    not_downloaded_files += downloaded_before_execution_files
-                # change overwritten files boolean to True to indicate that some files were ignored
+                    downloaded_files = list(filter(lambda x:os.path.exists(x), dir_dict["nc_filepaths"]))
+
+                    # get the files that were downloaded before the execution
+                    downloaded_before_execution_files = list(filter(lambda x:self.prov_start_time > os.path.getctime(x), downloaded_files))
+
+                    # if there was any file downloaded before the execution    
+                    if downloaded_before_execution_files:
+                        if not isinstance(self.dl_overwrite, bool):
+                            # ask if user wants to overwrite
+                            while True:
+                                dl_overwrite = input("\nThere are some files that were already downloaded in a previous download, do you want to overwrite them ([y]/n)? ").lower() 
+                                if dl_overwrite in ['y', 'n', '']:
+                                    break
+                            
+                            # get the boolean value
+                            self.dl_overwrite = dl_overwrite != 'n'
+                        
+                        # indicate that some files are going to be skipped
+                        if self.dl_overwrite is False:
+                            self.overwritten_files_flag = True
+                        
+                        break
+            
+                not_downloaded_paths = {}
+
+                if self.overwritten_files_flag is True:
+
+                    for dir, dir_dict in nc_filepaths_to_download.items():
+                        # get the downloaded and not downloaded files
+                        dir_not_downloaded_paths = list(filter(lambda x:not os.path.exists(x), dir_dict["nc_filepaths"]))
+
+                        if dir_not_downloaded_paths:
+                            not_downloaded_paths[dir] = {"remote_dir" : dir_dict["remote_dir"],
+                                                        "nc_filepaths" : dir_not_downloaded_paths}
+                
                 else:
-                    self.overwritten_files_flag = True
+                    not_downloaded_paths = nc_filepaths_to_download
 
-        return not_downloaded_files
+            else:
+                # get the downloaded and not downloaded files
+                not_downloaded_paths = list(filter(lambda x:not os.path.exists(x), nc_filepaths_to_download))
+                downloaded_files = list(filter(lambda x:os.path.exists(x), nc_filepaths_to_download))
+                
+                # get the files that were downloaded before the execution
+                downloaded_before_execution_files = list(filter(lambda x:self.prov_start_time > os.path.getctime(x), downloaded_files))
+
+                # if there was any file downloaded before the execution    
+                if downloaded_before_execution_files:
+                    # make the user choose between overwriting or not overwriting
+                    if not isinstance(self.dl_overwrite, bool):
+                        # ask if user wants to overwrite
+                        while True:
+                            dl_overwrite = input("\nThere are some files that were already downloaded in a previous download, do you want to overwrite them ([y]/n)? ").lower() 
+                            if dl_overwrite in ['y', 'n', '']:
+                                break
+                        
+                        # get the boolean value
+                        self.dl_overwrite = dl_overwrite != 'n'
+
+                    # if user wants to overwrite then add the files downloaded before the execution as if they were never downloaded
+                    if self.dl_overwrite:
+                        not_downloaded_paths += downloaded_before_execution_files
+                    # change overwritten files boolean to True to indicate that some files were ignored
+                    else:
+                        self.overwritten_files_flag = True
+
+        return not_downloaded_paths
 
     def download_nonghost_network(self, network, initial_check, files_to_download=None):
         """
@@ -1223,6 +1269,7 @@ class Download(object):
                 # store the available files for each path
                 if nc_files:
                     path_files_dict[local_dir] = {"nc_files" : nc_files,
+                                                  "remote_dir" : resolution_species_dir,
                                                   "mod_id" : mod_id, 
                                                   "species" : species, 
                                                   "resolution" : resolution}
@@ -1234,9 +1281,9 @@ class Download(object):
         return path_files_dict
     
     def build_nc_file_paths_in_range(self, path_files_dict, initial_check):
-        initial_check_nc_files = []
+        initial_check_nc_files = {}
 
-        for path, model_dict in path_files_dict.items():
+        for dir, model_dict in path_files_dict.items():
             nc_files = model_dict["nc_files"]
 
             valid_nc_files = self.get_valid_nc_files_in_date_range(nc_files) 
@@ -1245,55 +1292,43 @@ class Download(object):
             # warning if model + species + resolution + network + date range combination gets no matching results       
             if not valid_nc_files:                 
                 msg = (f"There is no data available in {self.remote_machine} from {self.start_date} to {self.end_date} "
-                       f"for {model_dict["mod_id"]} model {model_dict["species"]} species at {model_dict["resolution"]} resolution.")
+                       f"for {model_dict['mod_id']} model {model_dict['species']} species at {model_dict['resolution']} resolution.")
                 show_message(self, msg, deactivate=initial_check)
                 continue 
 
             for nc_file in valid_nc_files:
-                initial_check_nc_files.append(join(path, nc_file))
+                if dir not in initial_check_nc_files:
+                    initial_check_nc_files[dir] =  {"remote_dir" : model_dict["remote_dir"],
+                                                    "nc_filepaths" : [join(dir, nc_file)]}
+                else:
+                    initial_check_nc_files[dir]["nc_filepaths"].append(join(dir, nc_file))
 
         return initial_check_nc_files
-    
-    def classify_paths(self, file_paths):
-        files_info = {}
-
-        # fill the dictionary with the metadata
-        for local_path in file_paths:
-            remote_dir = join('/', *local_path.split('/')[:-1])
-            nc_file = local_path.split('/')[-1]
-            
-            if remote_dir not in files_info:
-                files_info[remote_dir] = {
-                    "remote_dir": remote_dir,
-                    "nc_files": [nc_file],
-                }
-            else:
-                files_info[remote_dir]["nc_files"].append(nc_file)
-        
-        return files_info
     
     def download_non_interpolated_sftp(self, files_to_download_info):
         for local_dir, files_to_download_dict in files_to_download_info.items():
 
-                remote_dir = files_to_download_dict["remote_dir"]
+            remote_dir = files_to_download_dict["remote_dir"]
+
+            # print source and destination
+            self.logger.info(f"\n  - {remote_dir}, source: {local_dir} ({self.remote_machine})")
+
+            # create directories if they don't exist
+            os.makedirs(local_dir, exist_ok=True)
+
+            # download each individual nc file using sftp protocol
+            for nc_file in tqdm(files_to_download_dict['nc_filepaths'], 
+                                bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',
+                                desc=f"    Downloading files ({len(files_to_download_dict['nc_filepaths'])})"):
+                local_path = join(remote_dir,nc_file)
                 
-                # print source and destination
-                self.logger.info(f"\n  - {remote_dir}, source: {local_dir} ({self.remote_machine})")
-    
-                # create directories if they don't exist
-                os.makedirs(remote_dir, exist_ok=True)
+                # get last downloaded file in case there was a keyboard interrupt
+                self.latest_nc_file_path = local_path
 
-                # download each individual nc file using sftp protocol
-                for nc_file in tqdm(files_to_download_dict['nc_files'], bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',
-                                    desc=f"    Downloading files ({len(files_to_download_dict['nc_files'])})"):
-                    local_path = join(remote_dir,nc_file)
-                    # get last downloaded file in case there was a keyboard interrupt
-                    self.latest_nc_file_path = local_path
-
-                    # initialize the timeout and get the file
-                    self.ncfile_dl_start_time = time.time()
-                    remote_path = join(local_dir, nc_file)
-                    self.sftp.get(remote_path, local_path, callback=self.check_time) 
+                # initialize the timeout and get the file
+                self.ncfile_dl_start_time = time.time()
+                remote_path = join(local_dir, nc_file)
+                self.sftp.get(remote_path, local_path, callback=self.check_time) 
 
     def download_non_interpolated_model(self, model, initial_check, files_to_download=None):
         """
@@ -1344,12 +1379,10 @@ class Download(object):
             return initial_check_nc_files
                         
         elif files_to_download:
-            
-            files_to_download_info = self.classify_paths(files_to_download)
 
             self.logger.info(f"\n{model} model data to download ({len(files_to_download)}):")
 
-            self.download_non_interpolated_sftp(files_to_download_info)
+            self.download_non_interpolated_sftp(files_to_download)
         
         else:
 
