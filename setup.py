@@ -32,9 +32,9 @@ REQUIREMENTS = {
         'PyYAML==6.0.1',
         'python-dotenv==1.2.1',
         'paramiko==4.0.0',
-        'memray==1.19.1',
         'cdsapi==0.7.7',
-        'pycountry==24.6.1'
+        'pycountry==24.6.1',
+        'xskillscore==0.0.28'
     ],
     'setup': [
         'setuptools_scm',

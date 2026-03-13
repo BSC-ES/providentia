@@ -31,7 +31,7 @@ PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 # load the defined models paths, agrupations yaml and mapping species
 data_paths = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/data_paths.yaml')))
 interp_models = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_models.yaml')))
-mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
+mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'mapping_species.yaml')))
 dl_hpc = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'dl_hpc.yaml')))
 temporal_resolution_map = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'temporal_resolution_map.yaml')))
 
@@ -60,9 +60,6 @@ class Download(object):
         # get ssh user and password 
         self.prv_user = env.get("PRV_USER")
         self.prv_password = env.get("PRV_PWD")
-
-        # get origin update (ACTRIS)
-        self.origin_update_choice = env.get("ORIGIN_UPDATE")
 
         # initialise default configuration variables
         # modified by commandline arguments, if given
@@ -129,7 +126,7 @@ class Download(object):
         """Execute the Providentia download process for all configured sections."""
         
         for section_ind, section in enumerate(self.sections):
-            self.logger.info('Starting to download for {} section'.format(section))
+            self.logger.info(f"\nStarting {section} section download...")
 
             # update for new section parameters
             self.section = section
@@ -151,9 +148,9 @@ class Download(object):
 
             # TODO: remove the filters instead
             # transform asterisk fields to a low and high date
-            for field, date_num in {'start_date' : '0', 'end_date' : '9'}.items():
+            for field, date_num in {'start_date' : '00010101', 'end_date' : '99991231'}.items():
                 if getattr(self, field) == '*':
-                    setattr(self, field, date_num * 8)
+                    setattr(self, field, date_num)
             
             # from here generate control if user stopped execution
             signal.signal(signal.SIGINT, self.sighandler)
@@ -260,24 +257,24 @@ class Download(object):
                     download_model_fun = self.copy_non_interpolated_model
                 # local model download
                 else:
-                    for model in self.experiments:
-                        # CAMS model
-                        if model.startswith(tuple(cams_options.keys())):
-                            self.cams = Cams(self)
-                            initial_check_nc_files = self.cams.download_cams_model(model, initial_check=True)
+                    download_model_fun = self.download_model if self.dl_interpolated else self.download_non_interpolated_model
+
+                for model in self.experiments:
+                    # CAMS model
+                    if model.startswith(tuple(cams_options.keys())):
+                        self.cams = Cams(self)
+                        initial_check_nc_files = self.cams.download_cams_model(model, initial_check=True)
+                        files_to_download = self.select_files_to_download(initial_check_nc_files)
+                        if not initial_check_nc_files or files_to_download:
+                            self.cams.download_cams_model(model, initial_check=False, files_to_download=files_to_download)
+                    # BSC machines
+                    else:
+                        # iterate the models download
+                        for model in self.experiments.keys():
+                            initial_check_nc_files = download_model_fun(model, initial_check=True)
                             files_to_download = self.select_files_to_download(initial_check_nc_files)
                             if not initial_check_nc_files or files_to_download:
-                                self.cams.download_cams_model(model, initial_check=False, files_to_download=files_to_download)
-                        # BSC machines
-                        else:
-                            download_model_fun = self.download_model if self.dl_interpolated else self.download_non_interpolated_model
-                    
-                            # iterate the models download
-                            for model in self.experiments.keys():
-                                initial_check_nc_files = download_model_fun(model, initial_check=True)
-                                files_to_download = self.select_files_to_download(initial_check_nc_files)
-                                if not initial_check_nc_files or files_to_download:
-                                    download_model_fun(model, initial_check=False, files_to_download=files_to_download)
+                                download_model_fun(model, initial_check=False, files_to_download=files_to_download)
 
             # remove section variables from memory
             for k in self.section_opts:
@@ -293,6 +290,9 @@ class Download(object):
             # reinitialise default configuration variables
             # modified by commandline arguments, if given
             self.provconf = ProvConfiguration(self, **self.commandline_arguments)
+
+            if section_ind != len(self.sections) - 1:
+                self.logger.info('\n'+'='*70)
 
         # show message in case models or observations were ignored
         if self.overwritten_files_flag == True:
@@ -356,7 +356,7 @@ class Download(object):
             if self.prv_user is None:
                 prv_user = ''
                 while prv_user == '':
-                    prv_user = input(f"\nInsert BSC {self.remote_machine} ssh user: ")
+                    prv_user = input(f"\nInsert BSC {self.remote_machine} ssh user (bsc032XXX): ")
                 self.prv_user = prv_user
             
             # ask for password if not in .env

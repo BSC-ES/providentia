@@ -81,6 +81,8 @@ class Dashboard(QtWidgets.QWidget):
         # modified by commandline arguments, if given
         self.provconf = ProvConfiguration(self, **self.commandline_arguments)
 
+        self.logger.info("Starting Providentia dashboard...")
+
         # update variables from config file (if available)
         self.from_conf = False
         self.current_config = {}
@@ -394,8 +396,6 @@ class Dashboard(QtWidgets.QWidget):
 
     def init_ui(self):
         """Initialise the user interface layout, widgets, and signal connections."""
-
-        self.logger.info("Starting Providentia dashboard...")
 
         # set window title
         self.window_title = "Providentia"

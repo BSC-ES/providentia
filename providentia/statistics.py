@@ -956,10 +956,14 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
             # temporally colocate data (if active)
             if read_instance.temporal_colocation:
                 data_array_a[:, read_instance.temporal_colocation_nans[networkspeci]] = np.nan
-                
+
             # get data cut for relevant stations
             data_array_a = data_array_a[:,station_inds,:]
-
+            
+            # do resampling
+            if map:
+                data_array_a = resample_data_array(read_instance, data_array_a)
+                
         # for other cases, get cut of selected station data for data_labels_a
         else:
             data_label_a_indices = np.array([canvas_instance.selected_station_data_labels[networkspeci].index(label) for label in data_labels_a], dtype=np.int32)
@@ -1097,6 +1101,10 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                     
                 # get data cut for relevant stations
                 data_array_b = data_array_b[:,station_inds,:]
+
+                # do resampling
+                if map:
+                    data_array_b = resample_data_array(read_instance, data_array_b)
 
             # for other cases, get cut of selected station data for data_labels_b
             else:
@@ -1998,3 +2006,47 @@ def get_fairmode_data(read_instance, canvas_instance, networkspeci, data_labels)
     data_array = data_array[:, valid_station_idxs, :]
 
     return data_array, valid_station_idxs
+
+def resample_data_array(read_instance, data_array):
+    """
+    Resample data array if resampling resolution is active
+
+    Parameters
+    ----------
+    read_instance : object
+        The source instance containing filtered data, resolution settings, and metadata.
+    data_array : np.array
+        Data array without selection of stations
+
+    Returns
+    -------
+    np.array
+        Resampled data array
+    """
+
+    # do resampling
+    if read_instance.resampling_resolution != 'None':
+        
+        # flatten data label dimension for creation of pandas dataframe
+        data_array_reduced = data_array.reshape(data_array.shape[0]*data_array.shape[1], 
+                                                data_array.shape[2])
+
+        # create dataframe with time as rows and stations as columns
+        df_data_array = pd.DataFrame(
+            data_array_reduced.T,  # transpose so time is rows
+            index=pd.DatetimeIndex(read_instance.time_array),
+            columns=np.arange(data_array_reduced.shape[0]),
+            dtype=np.float32
+        )
+
+        # resample
+        temporal_resolution_to_output_code = get_frequency_code(read_instance.resampling_resolution)
+        data_array_df_resampled = df_data_array.resample(temporal_resolution_to_output_code).mean()
+
+        # save back out as numpy array (reshaping to get back networkspecies dimension)
+        data_array_resampled = data_array_df_resampled.to_numpy().transpose()
+        data_array = data_array_resampled.reshape(data_array.shape[0], 
+                                                        data_array.shape[1], 
+                                                        data_array_resampled.shape[1])
+        
+    return data_array

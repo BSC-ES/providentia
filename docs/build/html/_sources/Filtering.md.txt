@@ -194,7 +194,7 @@ calibration_factor = *10
 calibration_factor = /10
 ```
 
-The calibration factor can also be defined independently for diferent models:
+The calibration factor can also be defined independently for different models:
 ```
 calibration_factor = a54s-regional-000 (*0.62), a4xf-regional-000 (*0.51)
 ```

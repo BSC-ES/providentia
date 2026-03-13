@@ -28,7 +28,7 @@ from configuration import ProvConfiguration, load_conf
 
 # load the defined models and species yamls
 interp_models = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_models.yaml')))
-mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
+mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'mapping_species.yaml')))
 temporal_resolution_map = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'temporal_resolution_map.yaml')))
 interp_print_variables = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'interpolation_fields.yaml')))
 
@@ -61,7 +61,7 @@ class SubmitInterpolation(object):
         # initialize commandline arguments, if given
         self.provconf = ProvConfiguration(self, **self.commandline_arguments)
 
-        print()
+        print("Starting Providentia interpolation...")
 
         # update variables from config file
         if self.config != '':  
@@ -126,7 +126,7 @@ class SubmitInterpolation(object):
         """Execute the Providentia interpolation workflow for all configured sections."""
         
         for section_ind, section in enumerate(self.sections):
-            print('Starting to interpolate for {} section'.format(section))
+            print(f"\nStarting {section} section interpolation...\n")
 
             # update for new section parameters
             self.section = section
@@ -144,7 +144,7 @@ class SubmitInterpolation(object):
             self.provconf.check_validity()
 
             # print variables used, if all species are used print "All Species"        
-            print("\nVariables used for the interpolation:\n")
+            print("Variables used for the interpolation:\n")
             for arg in interp_print_variables:
                 if arg != "models":
                     print(f"{arg}: {getattr(self, arg)}")
@@ -215,6 +215,9 @@ class SubmitInterpolation(object):
             # reinitialise default configuration variables
             # modified by commandline arguments, if given
             self.provconf = ProvConfiguration(self, **self.commandline_arguments)
+
+            if section_ind != len(self.sections) - 1:
+                print('\n'+'='*70)
 
     def gather_arguments(self):
         """Gather list of arguments for all unique tasks to process, as defined in the configuration file."""
@@ -602,10 +605,6 @@ class SubmitInterpolation(object):
             # if list is empty or have no arguments after iteration, return message stating that
             if len(self.arguments) == 0 or not new_arguments:
                 msg = '\nNO INTERSECTING OBSERVATIONAL AND EXPERIMENT DATA FOR INTERPOLATION. \n' 
-                if self.start_date == self.end_date:
-                    msg += 'If you want to interpolate data for one month, '
-                    msg += 'you need to set the end date to be the next one. \n'
-                    msg += 'e.g. For November 2018, this is 201811 to 201812.'
             else:
                 msg = '\n***INTERSECTING OBSERVATIONAL AND EXPERIMENTAL DATA IS AVAILABLE FOR INTERPOLATION.***'
                 
@@ -942,7 +941,7 @@ class SubmitInterpolation(object):
             process_time = np.max(process_times)
             queue_time = interpolation_time - process_time
             overhead_time = total_time - interpolation_time
-            print('\nALL {} INTERPOLATION TASKS COMPLETED SUCCESSFULLY IN {:.2f} MINUTES\n'
+            print('\nALL {} INTERPOLATION TASKS COMPLETED SUCCESSFULLY IN {:.2f} MINUTES'
                   '({:.2f} MINUTES PROCESSING, {:.2f} MINUTES QUEUING, {:.2f} MINUTES ON OVERHEADS)'.
                   format(len(self.output_log_roots), total_time, process_time, queue_time, overhead_time))
         else:
@@ -1031,7 +1030,7 @@ class SubmitInterpolation(object):
 
         # have 0 failed/non-finished tasks?
         if (len(failed_tasks) == 0) & (len(not_finished_tasks) == 0):
-            print('\nALL {} INTERPOLATION TASKS COMPLETED SUCCESSFULLY IN {:.2f} MINUTES\n'.
+            print('\nALL {} INTERPOLATION TASKS COMPLETED SUCCESSFULLY IN {:.2f} MINUTES'.
                   format(len(self.output_log_roots), total_time))
         else:
             print('\n{}/{} INTERPOLATION TASKS FINISHED SUCCESSFULLY IN {:.2f} MINUTES'.format(

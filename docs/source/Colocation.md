@@ -14,7 +14,7 @@ Temporal colocation is used to temporally pair observations and model data, with
 
 When temporal colocation is active, you will have access to more plot types (scatter, taylor, fairmode-target, and fairmode-statsummary). See [here](Plot-types-and-options) for more information about plot types. Additionally model bias statistics will also be available (e.g. r). See [here](available_statistics) for more information about available statistics.
 
-Temporal colocation can be set in the configuration file by setting a boolean as follows, be default it is **True**:
+Temporal colocation can be set in the configuration file by setting a boolean as follows, by default it is **True**:
 
 ```
 temporal_colocation = False
@@ -36,7 +36,7 @@ When loading more than one species you may want to ensure that the available sta
 
 After activating spatial colocation, any stations that do not have valid data for any of the loaded species are dropped.
 
-Spatial colocation can be set in the configuration file by setting a boolean as follows, be default it is **True**:
+Spatial colocation can be set in the configuration file by setting a boolean as follows, by default it is **True**:
 
 ```
 spatial_colocation = False

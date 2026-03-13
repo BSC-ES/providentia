@@ -1,12 +1,16 @@
 name: providentia-env_v3.0.2
 channels:
   - conda-forge
+  - nodefaults
 dependencies:
   - python==3.11.5
-  - cartopy
-  - jupyterlab
-  - ghostscript
-  - dask
+  - cartopy=0.25.0
+  - jupyterlab==4.5.3
+  - ghostscript==10.06.0
+  - dask==2026.1.2
+  - nco==5.3.6
+  - pyproj==3.7.2 
+  - proj=9.7.1
   - pip
   - pip:
     - -r requirements.txt

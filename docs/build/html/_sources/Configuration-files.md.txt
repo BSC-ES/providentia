@@ -59,6 +59,7 @@ For a list of available fields and their descriptions that can be set per sectio
 
 On top of this, numerous [filter fields](Filtering) can be also be set to filter data in a variety ways.
 
+(configuration-files-subsections)=
 ## Subsections
 
 After defining the sections, the user can optionally create subsections and set specific information for each one. In order to do this, it is important to wrap the subsection names in double brackets (`[[ ]]`).
@@ -76,6 +77,8 @@ longitude = 1.5, 2.5
 latitude = 39.57, 42.2
 longitude = -4.57, -2.42
 ```
+
+Subsections contain only metadata fields and affect behavior exclusively in the visualization and analysis modes (Dashboard, Report and Library). For a complete list of available metadata fields, check the [Metadata fields](Metadata-fields) page.
 
 There are a wide number of [filter fields](Filtering) that can be used to filter data. If any variables are repeated between sections and subsections, the subsection variable will overwrite the information set in the section.  
 

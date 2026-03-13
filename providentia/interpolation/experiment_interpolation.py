@@ -917,7 +917,7 @@ class ModelInterpolation(object):
                     failed_files += 1
                     continue
 
-                # for forceast data, get valid indices of file time per forecast day
+                # for forecast data, get valid indices of file time per forecast day
                 if self.forecast:
 
                     # get indices of file time within each forecast day (excluding spinup timsesteps)
@@ -1337,7 +1337,7 @@ class ModelInterpolation(object):
             compress_return_code = compress_process.returncode
         except:
             self.log_file_str += 'NCO could not be found, please install it in your system ' 
-            self.log_file_str += 'with sudo apt install nco (Debian/Ubuntu) or brew install nco (macOS).\n'
+            self.log_file_str += 'with conda install -c conda-forge nco --override-channels.\n'
     
         # give 770 permissions for file and make owner bsc32 if machine isn't local
         if MACHINE != 'local':

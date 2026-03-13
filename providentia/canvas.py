@@ -304,8 +304,11 @@ class Canvas(FigureCanvas):
             self.read_instance.cursor_function = 'handle_data_filter_update'
             QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
+        # filter data
+        # if filter class not yet intialised, then do so
         if self.filter_data is None:
             self.filter_data = DataFilter(self.read_instance)
+        # if it is, update filters, and update map and associated plots
         else:
             self.filter_data.filter_all()
             self.update_active_map()
@@ -353,10 +356,12 @@ class Canvas(FigureCanvas):
             # update plots?
             if not self.read_instance.block_MPL_canvas_updates:
 
+                # update plotted map z statistic
+                self.update_map_z_statistic()
+
                 # if have selected stations on map, then now remake plots
                 if hasattr(self, 'relative_selected_station_inds'):
                     if len(self.relative_selected_station_inds) > 0:
-
                         # update associated plots with selected stations
                         self.update_associated_active_dashboard_plots()
 
@@ -442,10 +447,8 @@ class Canvas(FigureCanvas):
             # update plotted map z statistic
             self.update_map_z_statistic()
 
-            # if selected stations have changed from previous selected, update associated plots
-            if not np.array_equal(self.previous_relative_selected_station_inds,
-                                  self.relative_selected_station_inds):
-                self.update_associated_active_dashboard_plots()
+            # update associated plots
+            self.update_associated_active_dashboard_plots()
 
             # draw changes
             self.figure.canvas.draw_idle()
@@ -748,10 +751,11 @@ class Canvas(FigureCanvas):
             markersizes = np.full(len(self.active_map_valid_station_inds), self.plot_characteristics['map']['marker_zero_stations_selected']['s'])
             
             for collection in self.plot_axes['map'].collections:
+
                 if isinstance(collection, matplotlib.collections.PathCollection):
-                    
                     if Version(matplotlib.__version__) < Version("3.4"):
                         opacities = collection.get_facecolor()
+                        
                         # set alpha of all stations (initally assuming zero stations are selected)
                         opacities[:, -1] = self.plot_characteristics['map']['marker_zero_stations_selected']['alpha']
 
@@ -772,6 +776,7 @@ class Canvas(FigureCanvas):
 
                     else:   
                         opacities = collection.get_facecolor()[:,-1]
+
                         # set alpha of all stations (initally assuming zero stations are selected)
                         opacities[:] = self.plot_characteristics['map']['marker_zero_stations_selected']['alpha'] 
 
@@ -933,11 +938,6 @@ class Canvas(FigureCanvas):
                         self.read_instance.block_MPL_canvas_updates = True
                         self.periodic_options.model().item(bias_index).setCheckState(QtCore.Qt.Unchecked)
                         self.read_instance.block_MPL_canvas_updates = False
-
-                # create structure to store data for statsummary plot
-                elif plot_type == 'statsummary':
-                    xlabel = ''
-                    ylabel = ''
                 
                 # create structure to store data for Taylor diagram
                 elif plot_type == 'taylor':
@@ -992,13 +992,13 @@ class Canvas(FigureCanvas):
                 if plot_type not in ['map', 'taylor', 'fairmode-statsummary']:
                     if plot_type == 'scatter':
                         harmonise_xy_lims_paradigm(self.read_instance, self, ax, plot_type, 
-                                                self.plot_characteristics[plot_type], plot_options, relim=True)
+                                                   self.plot_characteristics[plot_type], plot_options, relim=True)
                     else:
                         harmonise_xy_lims_paradigm(self.read_instance, self, ax, plot_type, 
-                                                self.plot_characteristics[plot_type], plot_options, relim=True, autoscale=True)
+                                                   self.plot_characteristics[plot_type], plot_options, relim=True, autoscale=True)
 
                 # set axes labels
-                if plot_type not in ['taylor', 'contingencytable']:
+                if plot_type not in ['taylor', 'contingencytable', 'statsummary']:
                     # set xlabel
                     set_axis_label(ax, 'x', xlabel, self.plot_characteristics[plot_type])
                     # set ylabel
@@ -1038,8 +1038,9 @@ class Canvas(FigureCanvas):
         if hasattr(self, 'relative_selected_station_inds'):
             # have no selected stations, so clear all previously plotted artists from selected station plots
             # cover plotting axes also
+            active_plots = self.read_instance.active_dashboard_plots
             if len(self.relative_selected_station_inds) == 0:      
-                for plot_type in self.read_instance.active_dashboard_plots:
+                for plot_type in active_plots:
                     if plot_type != 'None':
                         self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
                 self.top_right_canvas_cover.show() 
@@ -1051,7 +1052,7 @@ class Canvas(FigureCanvas):
                                           networkspecies=[self.read_instance.networkspeci])
 
                 # iterate through active_dashboard_plots
-                for plot_type in self.read_instance.active_dashboard_plots:
+                for plot_type in active_plots:
              
                     # update plot
                     if plot_type != 'None':
@@ -2947,7 +2948,7 @@ class Canvas(FigureCanvas):
                         # ensure hidedata option is handled second (to show smooth/regression after hiding data)
                         mod_plot_options.remove('hidedata')
                         mod_plot_options.insert(1, 'hidedata')
-                
+
                 for option in mod_plot_options:
                     
                     # get index to raise errors and uncheck options (in original plot options order)

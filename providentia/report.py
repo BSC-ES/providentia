@@ -67,7 +67,7 @@ class Report:
 
         # initialise default configuration variables
         # modified by commandline arguments, if given
-        provconf = ProvConfiguration(self, **self.commandline_arguments)
+        ProvConfiguration(self, **self.commandline_arguments)
 
         self.logger.info("Creating a Providentia Report...")
 
@@ -140,7 +140,7 @@ class Report:
 
         # iterate through configuration sections
         for section_ind, (filename, section) in enumerate(zip(self.filenames, self.parent_section_names)):
-            self.logger.info('Starting to create PDF for {} section'.format(section))
+            self.logger.info('\nStarting to create PDF for {} section'.format(section))
 
             # update for new section parameters
             self.section = section
@@ -198,7 +198,7 @@ class Report:
 
             # update available models for selected fields
             get_valid_models(self, self.start_date, self.end_date, self.resolution,
-                                  self.network, self.species)
+                             self.network, self.species)
 
             # read data
             self.datareader.read_setup(['reset'])
@@ -277,10 +277,14 @@ class Report:
                 if 'multispecies' in plot_type:
                     multispecies = True
                     break
+                
             if (multispecies) and (len(np.unique(list(self.measurement_units.values()))) > 1):
-                msg = 'Be aware that the units across species are not the same and there are multispecies plots. '
-                msg += f'Units: {self.measurement_units}'
+                msg = f"Units in the multispecies plots will be converted to 'multispecies_units' ({self.multispecies_units}) for consistency. "
                 show_message(self, msg)
+                if self.multispecies_units in [None, ""]:
+                    error = f"Please specify the units in your configuration file by adding 'multispecies_units'. "
+                    error += f"Units for each species are: {self.measurement_units}."
+                    sys.exit(error)
 
             # set plot characteristics for all plot types (summary, station)
             self.plots_to_make = list(self.summary_plots_to_make)
@@ -300,6 +304,9 @@ class Report:
                     vars(self).pop(k)
                 except:
                     pass
+
+            if section_ind != len(self.parent_section_names) - 1:
+                self.logger.info('\n'+'='*70)
 
     def start_pdf(self, filename):
         """
@@ -1164,9 +1171,9 @@ class Report:
         
         # if have 0 relevant stations, continue to next networkspeci
         if self.n_stations == 0:
-            self.logger.info('No valid stations for {}, {}. Not making summmary plots'.format(networkspeci, self.subsection))
+            self.logger.info('\nNo valid stations for {}, {}. Not making summmary plots'.format(networkspeci, self.subsection))
         else:
-            self.logger.info('Making {}, {} summary plots'.format(networkspeci, self.subsection)) 
+            self.logger.info('\nMaking {}, {} summary plots'.format(networkspeci, self.subsection)) 
 
         # create nested dictionary to store statistical information across all networkspecies
         if networkspeci not in self.stats_summary[self.subsection]:
@@ -1221,13 +1228,19 @@ class Report:
             # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
             plot_options = plot_type.split('_')[1:]
 
+            # make sure periodic, map, heatmap, taylor and table plots have a -[stat]
+            if base_plot_type in ['periodic', 'map', 'heatmap', 'taylor', 'table'] and zstat is None:
+                msg = f'{plot_type} plot needs a statistic -[stat].'
+                show_message(self, msg)
+                continue
+
             # check if plot type if a dataframe
             plot_type_df = self.get_plot_type_df(base_plot_type)
 
             # do not make plot, if plot type is not a dataframe or multispecies, and have no data
             if (not plot_type_df) & ('multispecies' not in plot_options) & (have_nodata):
                 continue
-
+            
             # update dictionary to store statistical information if plot type is a dataframe
             if plot_type_df:
                 self.update_stats_tables('summary', base_plot_type, plot_type, zstat, networkspeci, plot_options)
@@ -1253,7 +1266,7 @@ class Report:
                     chunk_stat = copy.deepcopy(zstat)
                     chunk_resolution = plot_type.split('-')[2].split('_')[0]
 
-            self.logger.info('Making summary {0}'.format(plot_type))
+            self.logger.info('\nMaking summary {0}'.format(plot_type))
 
             if base_plot_type in ['fairmode-target', 'fairmode-statsummary']:
                 # warning for fairmode plots if species aren't PM2.5, PM10, NO2 or O3
@@ -1399,6 +1412,12 @@ class Report:
                 # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
                 plot_options = plot_type.split('_')[1:]
 
+                # make sure periodic, map, heatmap, taylor and table plots have a -[stat]
+                if base_plot_type in ['periodic', 'map', 'heatmap', 'taylor', 'table'] and zstat is None:
+                    msg = f'{plot_type} plot needs a statistic -[stat].'
+                    show_message(self, msg)
+                    continue
+                
                 # check if plot type if a dataframe
                 plot_type_df = self.get_plot_type_df(base_plot_type)
 
@@ -1454,7 +1473,7 @@ class Report:
                         chunk_stat = copy.deepcopy(zstat)
                         chunk_resolution = plot_type.split('-')[2].split('_')[0]
 
-                self.logger.info('Making station {2} for {3} ({0}/{1})'.format(i+1, 
+                self.logger.info('\nMaking station {2} for {3} ({0}/{1})'.format(i+1, 
                                                                     len(self.relevant_station_inds),
                                                                     plot_type, 
                                                                     self.current_station_name))   
@@ -2208,13 +2227,13 @@ class Report:
                     # make statsummary
                     func = getattr(self.plotting, 'make_table')
                     func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                         plot_options, statsummary=True, subsection=self.subsection, 
+                         plot_options, stats, statsummary=True, subsection=self.subsection, 
                          plotting_paradigm=plotting_paradigm, stats_df=stats_df)
                 else:
                     # make table/heatmap
                     func = getattr(self.plotting, 'make_{}'.format(base_plot_type))
                     func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                         plot_options, subsection=self.subsection, plotting_paradigm=plotting_paradigm, 
+                         plot_options, zstat, subsection=self.subsection, plotting_paradigm=plotting_paradigm, 
                          stats_df=stats_df)
                 
                 # save plot information for later formatting
