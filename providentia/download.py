@@ -1451,16 +1451,19 @@ class Download(object):
         """
 
         valid_nc_files = []
+
         for nc_file in sorted(nc_files):
-            if ".nc" in nc_file:
+            if nc_file.endswith(".nc"):
                 ym = nc_file[:-3].split("_")[1]
+                
                 # from yyyymm to yyyymmdd
                 if len(ym) == 6:
                     ym = '{}01'.format(ym)
                 # from yyyymmddhh to yyyymmdd
                 elif len(ym) == 10:
                     ym = ym[:-2]
-                # get the date range
+
+                # filter files out of the data range
                 if int(ym) >= int(self.start_date) and int(ym) < int(self.end_date):
                     valid_nc_files.append(nc_file)
                     
