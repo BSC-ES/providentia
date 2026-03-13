@@ -144,6 +144,10 @@ def get_machine():
     
     # get BSC machine name (if have one)
     machine = os.environ.get('BSC_MACHINE', None)
+    
+    # rename storage BSC machine
+    if machine == 'stg':
+        machine = 'storage5'
 
     # set current machine
     if machine is None:
@@ -164,8 +168,6 @@ def get_machine():
                     time.sleep(1)
         if "bscearth" in hostname:
             machine = "workstation"
-        elif "transfer" in hostname:
-            machine = "storage5"
         elif ip == "84.88.185.205":
             machine = "oper"
         elif ip == "84.88.185.48":

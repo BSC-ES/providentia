@@ -7,4 +7,5 @@ Configuration
 
    Configuration-files.md
    Configuration-fields.md
+   Metadata-fields.md
    Command-line-configuration.md

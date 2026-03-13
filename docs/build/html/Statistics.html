@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -6,21 +8,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Statistics &mdash; Providentia 3.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=08bfcbec"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=08bfcbec"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -96,7 +94,6 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Training-material.html">Training material</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the team</a></li>
 <li class="toctree-l1"><a class="reference internal" href="History.html">History of Providentia</a></li>
@@ -184,8 +181,105 @@
 <section id="available-statistical-metrics">
 <span id="available-statistics"></span><h2>Available statistical metrics<a class="headerlink" href="#available-statistical-metrics" title="Link to this heading"></a></h2>
 <p>Providentia statistical metrics come in two categories: <strong>basic</strong> and <strong>model bias</strong>.</p>
-<p>Basic statistics are calculated independently for observational and model datasets. When not using the dashbaord, to get the bias between the calculated observational statistic and model statistics, the plot option <strong>bias</strong> can be added to the statistic name, e.g. <strong>Mean_bias</strong>. On the dashboard, the bias is set by using the <strong>bias</strong> plot option on the relevant plots.</p>
-<p>Model bias statistics are calculated between paired observational and model data, and are thus only available when <strong>temporal_colocation</strong> is active.</p>
+<p>Basic statistics are calculated independently for observational and model datasets. The available ones are:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Statistic</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Mean</p></td>
+<td><p>Mean</p></td>
+</tr>
+<tr class="row-odd"><td><p>StdDev</p></td>
+<td><p>Standard deviation</p></td>
+</tr>
+<tr class="row-even"><td><p>Var</p></td>
+<td><p>Variance</p></td>
+</tr>
+<tr class="row-odd"><td><p>Min</p></td>
+<td><p>Minimum</p></td>
+</tr>
+<tr class="row-even"><td><p>Max</p></td>
+<td><p>Maximum</p></td>
+</tr>
+<tr class="row-odd"><td><p>Data%</p></td>
+<td><p>Data availability</p></td>
+</tr>
+<tr class="row-even"><td><p>Exceedances</p></td>
+<td><p>Number of exceedances over the values defined in settings/exceedances.yaml</p></td>
+</tr>
+<tr class="row-odd"><td><p>p1, p5, p10, p25, p50, p75, p90, p95, p99</p></td>
+<td><p>Percentiles</p></td>
+</tr>
+<tr class="row-even"><td><p>NStations</p></td>
+<td><p>Number of stations</p></td>
+</tr>
+<tr class="row-odd"><td><p>MDA8</p></td>
+<td><p>Daily maximum 8 hour average</p></td>
+</tr>
+</tbody>
+</table>
+<p>When not using the dashbaord, to get the bias between the calculated observational statistic and model statistics, the plot option <strong>bias</strong> can be added to the statistic name, e.g. <strong>Mean_bias</strong>. On the dashboard, the bias is set by using the <strong>bias</strong> plot option on the relevant plots.</p>
+<p>Model bias statistics are calculated between paired observational and model data, and are thus only available when <strong>temporal_colocation</strong> is active. The available ones are:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Statistic</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>MB</p></td>
+<td><p>Mean bias</p></td>
+</tr>
+<tr class="row-odd"><td><p>NMB</p></td>
+<td><p>Normalised mean bias</p></td>
+</tr>
+<tr class="row-even"><td><p>ME</p></td>
+<td><p>Mean error</p></td>
+</tr>
+<tr class="row-odd"><td><p>NME</p></td>
+<td><p>Normalised mean error</p></td>
+</tr>
+<tr class="row-even"><td><p>MNB</p></td>
+<td><p>Mean normalised bias</p></td>
+</tr>
+<tr class="row-odd"><td><p>MNE</p></td>
+<td><p>Mean normalised error</p></td>
+</tr>
+<tr class="row-even"><td><p>MFB</p></td>
+<td><p>Mean fractional bias</p></td>
+</tr>
+<tr class="row-odd"><td><p>MFE</p></td>
+<td><p>Mean fractional error</p></td>
+</tr>
+<tr class="row-even"><td><p>RMSE</p></td>
+<td><p>Root mean square error</p></td>
+</tr>
+<tr class="row-odd"><td><p>NRMSE</p></td>
+<td><p>Normalised root mean square error</p></td>
+</tr>
+<tr class="row-even"><td><p>COE</p></td>
+<td><p>Coefficient of efficiency</p></td>
+</tr>
+<tr class="row-odd"><td><p>FAC2</p></td>
+<td><p>Fraction of experiment values within a factor of two of observed values</p></td>
+</tr>
+<tr class="row-even"><td><p>IOA</p></td>
+<td><p>Index of agreement</p></td>
+</tr>
+<tr class="row-odd"><td><p>R</p></td>
+<td><p>Pearson correlation coefficient</p></td>
+</tr>
+<tr class="row-even"><td><p>R2</p></td>
+<td><p>Coefficient of determination</p></td>
+</tr>
+<tr class="row-odd"><td><p>UPA</p></td>
+<td><p>Unpaired peak accuracy</p></td>
+</tr>
+</tbody>
+</table>
 <p>All available basic and model bias statistics in Providentia are described here:</p>
 </section>
 <section id="basic-statistics">

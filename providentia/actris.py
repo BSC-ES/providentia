@@ -86,7 +86,12 @@ class Actris:
         while True:
             # set up URL with pagination
             url = f"{base_url}/{ghost_actris_variables[var]}/page/{page}"
-            response = requests.get(url)
+            try:
+                response = requests.get(url)
+            except:
+                self.download_instance.logger.error(
+                    f"Error connecting to server at {url}")
+                sys.exit()
 
             # check if the response is valid and contains data
             if response.status_code != 200:
@@ -1339,27 +1344,26 @@ class Actris:
                     
             # if file exists
             else:
-                # ask if user wants to update file information from NILU Thredds
-                if self.download_instance.origin_update_choice not in ['y','n', '']:
-                    while self.download_instance.origin_update_choice not in ['y','n', '']:
-                        self.download_instance.origin_update_choice = input(f"\nFile containing information of the files available in Thredds for {var} ({info_path}) already exists. Do you want to update it (y/[n])? ").lower() 
-                    # ask if user wants to remember the decision
-                    remind_txt = None
-                    while remind_txt not in ['y','n', '']:
-                        remind_txt = input("\nDo you want to remember your decision for future downloads ([y]/n)? ").lower() 
-                    # save the decision
-                    if remind_txt in ['y', '']:
-                        with open(join(PROVIDENTIA_ROOT, ".env"),"a") as f:
-                            f.write(f"ORIGIN_UPDATE={self.download_instance.origin_update_choice}\n")
-                if self.download_instance.origin_update_choice in ['n', '']:
-                    # get files information
-                    files_info = yaml.safe_load(open(join(CURRENT_PATH, info_path)))
-                    files_info = {k: v for k, v in files_info.items() if k.strip() and v}
-                else:
+                # make the user wants to update file information from NILU Thredds
+                if not isinstance(self.download_instance.dl_thredds_update, bool):
+                    # ask if user wants to update
+                    while True:
+                        dl_thredds_update = input(f"\nFile containing information of the files available in Thredds for {actris_parameter} ({info_path}) already exists. Do you want to update it (y/[n])? ").lower() 
+                        if dl_thredds_update in ['y','n','']:
+                            break
+                    
+                    # get the boolean value
+                    self.download_instance.dl_thredds_update = dl_thredds_update not in ['n', '']
+
+                if self.download_instance.dl_thredds_update:
                     # get files information
                     combined_data = self.get_files_per_var(base_url, var)
                     all_files = combined_data[var]['files']
                     files_info = self.get_files_info(all_files, var, info_path)
+                else:
+                    # get files information
+                    files_info = yaml.safe_load(open(join(CURRENT_PATH, info_path)))
+                    files_info = {k: v for k, v in files_info.items() if k.strip() and v}
             
             # go to next variable if no data is found
             if files_info is not None:

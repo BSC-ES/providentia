@@ -20,13 +20,14 @@ Some of these fields are required depending on the mode. If a parameter required
 | `ghost_version` | Optional | GHOST version used when a GHOST network is selected. | `1.5` |
 | `domain` | Optional | Domain of the model (e.g. `regional`, `global`). When multiple model IDs and multiple ensembles/domains are provided, all possible combinations of model, domain and ensemble will be used. Options are defined under the `available_domains` key in `available_inputs.yaml` and can be modified by the user. | All available |
 | `ensemble` | Optional | Ensemble of the model (e.g. `000`, `001`). When multiple model IDs and multiple ensembles/domains are provided, all possible combinations of model, domain and ensemble will be used. | All available, except in interpolation mode where the default is `000` |
-| `model_resolution` | Optional | Model resolution if different from observations. | Same as `resolution` |
 | `forecast` | Optional | Controls how forecast data is handled: `day`, `daily`, `combined`, `dayN`, `dailyN`, `combinedN`. Multiple values of the same type can be provided (e.g. `day`, `day2`, `day3`), but different types cannot be mixed (i.e. `day` options cannot be combined with `daily` or `combined`). To limit to specific forecast days, append the day number to the option (e.g. `day1`, `daily2`, `combined3`). This variable must be set to a valid value when performing interpolation for forecast data. | — |
 | `filter_species` | Optional | Filter read species by other species data within a data range. The first value set is the lower bound to filter by, and the second value the upper bound. Place a sign before each bound value to inform if the filter should be inclusive or exclusive of the bound, (e.g. `<` or `<=`). If not wishing to set either the lower or upper bounds, a `:` can be used. Optionally, a fill value can also be given as a third value to impose what the filtered data is set to, by default this is `NaN`. Multiple filters can be  set together separated by a comma (e.g. `network1:species1 (>lowerlim, <=upperlim, fillvalue), network2:species2 (:, <upperlim)`). | — |
 | `ghost_root` | Optional | Root directory for GHOST observations, overwrites `data_paths.yaml` | From `data_paths.yaml` |
 | `nonghost_root` | Optional | Root directory for non-GHOST observations, overwrites `data_paths.yaml` | From `data_paths.yaml` |
 | `mod_root` | Optional | Root directory for interpolated model data, overwrites `data_paths.yaml` | From `data_paths.yaml` |
 | `mod_to_interp_root` | Optional | Root directory for non-interpolated model data, overwrites `data_paths.yaml` | From `data_paths.yaml` |
+| `config_dir` | Optional | Path to all configuration files. | `configurations/` |
+| `cartopy_data_dir` | Optional | Cartopy data directory. | In HPC: `/gpfs/projects/bsc32/software/rhel/9.2/software/Cartopy/0.23.0-foss-2023b-Python-3.11.5/lib/python3.11/site-packages/cartopy/data`. In local: Downloaded from the internet on the fly. |
 
 If the number of networks and species are **both** multiple but not equal, Providentia will throw the error `Error: The number of "network" and "species" fields is not the same.` and the user will be required to clearly specify which networks and species they want. For example, this would not be accepted:
 
@@ -54,14 +55,23 @@ Apart from the common parameters, these are the fields used by all analysis and 
 | `periodic_statistic_mode` | Periodic statistic mode: `Independent`, `Cycle`. | `Independent` |
 | `periodic_statistic_aggregation` | Periodic aggregation statistic: `Median`, `Mean`, `p1`, `p5`, `p10`, `p25`, `p75`, `p90`, `p95`, `p99`. | `Median` |
 | `temporal_colocation` | Boolean variable to set if you want to temporally colocate the observation and model data. | `True` |
+| `temporal_colocation_active` | Boolean variable | `False` |
 | `spatial_colocation` | Boolean variable to set if you want to spatially colocate the observation and model data across multiple species. | `True` |
+| `spatial_colocation_tolerance` | Spatial colocation tolerance to match stations by `longitudes`/`latitudes` and/or `measurement_altitudes` (in metres) | `19.053` |
+| `spatial_colocation_validation` | Boolean variable to validate spatial colocation intersections via position using `spatial_colocation_tolerance` | `True` |
+| `spatial_colocation_validation_tolerance` | Spatial colocation validation tolerance to validate station reference/station name match of stations by longitude/latitude position (in metres) | `10000.0` |
+| `spatial_colocation_station_reference` | Boolean variable to indicate the use of `station_reference` variable for spatial colocation |  `True` |
+| `spatial_colocation_station_name` | Boolean variable to indicate usage of `station_name` variable for spatial colocation |  `True` |
+| `spatial_colocation_longitude_latitude` | Boolean variable to indicate the use of `longitude` and `latitude` variables for spatial colocation |  `True` |
+| `spatial_colocation_measurement_altitude` | Boolean variable to indicate the use of `measurement_altitude` variable for spatial colocation |  `True` |
 | `plot_characteristics_filename` | The path to the file containing the plot characteristics. | — |
-| `observations_data_label` | Alias for observational data | — |
+| `observations_data_label` | Alias for observational data | `observations` |
 | `lower_bound` | Filter out data lower than this set limit. If multiple species are being read then this can either be one value, setting the same limit across species or multiple values per species (e.g. `3, 4, 5`). | — |
 | `upper_bound` | Filter out data above this set limit. If multiple species are being read then this can either be one value, setting the same limit across species or multiple values per species (e.g. `3, 4, 5`). | — |
-| `map_extent` | Set the map plot extents with the syntax: minimum longitude, maximum longitude, minimum latitude, maximum latitude (e.g. `-30, 50, 20, 90`). | — |
+| `map_extent` | Set the map plot extents with the syntax: minimum longitude, maximum longitude, minimum latitude, maximum latitude (e.g. `-30, 50, 20, 90`). | `[-180, 180, -90, 90]` in Dashboard, adapted to selected stations in Report and Library |
 | `remove_extreme_stations` | Type of extreme stations removal, from the options given in `remove_extreme_stations.yaml`. | — |
 | `resampling_resolution` | Resolution you want to resample your data to: `hourly`, `3hourly`, `6hourly`, `daily`, `monthly`, `annual`. | — |
+| `multispecies_units` | Units of data in multispecies plots | — |
 
 (dashboard-parameters)=
 ## Dashboard parameters
@@ -103,6 +113,7 @@ These parameters are used only in the [Interpolation mode](Interpolation). All o
 | `interp_model_downsampling` | Statistic for the downsampling of the model resolution to the observational resolution: `mean`, `median`. | `mean` |
 | `interp_model_upsampling` | Method for the upsampling of the model resolution to the observational resolution: `fill`, `gaps`. `fill` linearly fills between measurements, and `gaps` sets NaN values for times that the model does not have. | `fill` |
 | `network_type` | Determines whether to use all GHOST or all non-GHOST networks when the `observation` field uses the `*` wildcard.  | — |
+| `model_resolution` | Model resolution if different from observations. | Same as `resolution` |
 
 (download-parameters)=
 ## Download parameters
@@ -115,5 +126,88 @@ These parameters are used only in the [Download mode](Download). All of them are
 | `dl_ghost_source`  | Determines where GHOST observations are downloaded from: `bsc`, `zenodo`. | — |
 | `dl_interpolated`  | Specifies whether the interpolated versions of the model output should be downloaded: `True`, `False`. | — |
 | `dl_mode` | Selects what to download when both observations and model output are present in the configuration file: `obs`, `mod`, `both`. | — |
+| `dl_thredds_update` | Specifies if the datasets information from Thredds should be updated per species every time we download data. The information is stored [here](https://github.com/BSC-ES/providentia/tree/master/settings/internal/actris/files): `True`, `False`. | — |
 | `network_type` | Determines whether to use all GHOST or all non-GHOST networks when the observation field uses the `*` wildcard: `ghost`, `non-ghost`.  | — |
 | `dl_timeout` | Sets the timeout (in seconds) for downloads from HPC systems, covering interpolated and non-interpolated model data as well as GHOST and non-GHOST observations. | `180` |
+| `model_resolution` | Model resolution if different from observations. | Same as `resolution` |
+
+## Models
+
+In Providentia, models can be set in different ways depending on how the **model, domain and ensemble** are defined.
+
+### 1. Define model, domain and ensemble independently
+
+You can specify each field separately:
+
+```ini
+model = cams61_monarch_ph3
+domain = eu
+ensemble = allmembers
+```
+
+You can also define only some of them:
+
+```ini
+model = cams61_monarch_ph3
+domain = eu
+```
+
+```ini
+model = cams61_monarch_ph3
+ensemble = allmembers
+```
+
+Or only the model:
+
+```ini
+model = cams61_monarch_ph3
+```
+
+### 2. Combine model and domain
+
+The domain can be included directly in the model name:
+
+```ini
+model = cams61_monarch_ph3-eu
+ensemble = allmembers
+```
+
+Or:
+
+```ini
+model = cams61_monarch_ph3-eu
+```
+
+
+### 3. Combine model and ensemble
+
+```ini
+model = cams61_monarch_ph3-allmembers
+domain = eu
+```
+
+### 4. Combine model, domain and ensemble
+
+```ini
+model = cams61_monarch_ph3-eu-allmembers
+```
+
+### Aliases
+
+Aliases can simplify long model names.
+
+They work in two cases:
+
+1. **Combined model, domain and ensemble**
+
+```ini
+model = cams61_monarch_ph3-eu-allmembers, cams_reanalysis_ensemble_validated-regional-000 (MONARCH, CAMS)
+```
+
+2. **Independent fields with only one value each**
+
+```ini
+model = cams61_monarch_ph3 (MONARCH)
+domain = eu
+ensemble = allmembers
+```

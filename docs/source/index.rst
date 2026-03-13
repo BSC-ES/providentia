@@ -16,7 +16,6 @@ Contents
    Statistics.md
    Other-topics.rst
    FAQ.md
-   Training-material.md
    Presentations.md
    Meet-the-team.md
    History.md

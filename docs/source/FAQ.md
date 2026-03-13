@@ -40,8 +40,8 @@ On days where gpfs is full and there is no available disk space, we get this err
 * Clone the Providentia repository using `git clone https://github.com/BSC-ES/providentia.git`.
 * Open the dashboard using `/bin/providentia`, this will create the conda environment in your machine.
 * Add your model ID in `settings/interp_models.yaml` so that Providentia can know where to download the data from.
-* Use the [download](Download) mode to download the observations and models to interpolate by `./bin/providentia --config='/path/to/file/example.conf' --download`. The data will be downloaded into the paths defined in `settings/data_paths.yaml`.
-* After downloading the data do the interpolation as usual: `./bin/providentia --config='/path/to/file/example.conf' --interp`.
+* Use the [download](Download) mode to download the observations and models to interpolate by `./bin/providentia --config=/path/to/file/example.conf --download`. The data will be downloaded into the paths defined in `settings/data_paths.yaml`.
+* After downloading the data do the interpolation as usual: `./bin/providentia --config=/path/to/file/example.conf --interp`.
 
 ## Unknown Miniconda3/23.9.0-0 on Nord4
 
@@ -87,16 +87,6 @@ In some machines (for example, users using WSL to access Linux from Windows), we
 sudo apt update
 sudo apt install --reinstall libxcb-xinerama0 libxkbcommon-x11-0 libx11-xcb1 libxrender1 libxi6 libxcb1 libxext6
 sudo apt install qtbase5-dev qtbase5-dev-tools qt5-qmake libqt5gui5 libqt5widgets5 libqt5core5a
-```
-
-Then add to .bashrc:
-```
-export QT_QPA_PLATFORM_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/qt5/plugins/platforms
-```
-
-And load:
-```
-source .bashrc
 ```
 
 ## Segmentation fault on Nord4

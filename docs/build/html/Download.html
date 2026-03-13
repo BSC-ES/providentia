@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -6,19 +8,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Overview &mdash; Providentia 3.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=08bfcbec"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=08bfcbec"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" /> 
@@ -55,7 +53,6 @@
 <li class="toctree-l1"><a class="reference internal" href="Statistics.html">Statistics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Training-material.html">Training material</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the team</a></li>
 <li class="toctree-l1"><a class="reference internal" href="History.html">History of Providentia</a></li>
@@ -92,10 +89,10 @@
 <section id="getting-started">
 <h2>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h2>
 <p>To start downloading data, simply add <code class="docutils literal notranslate"><span class="pre">--download</span></code> or <code class="docutils literal notranslate"><span class="pre">--dl</span></code> as a launch option along with the <strong>mandatory</strong> configuration file on the command line:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span> <span class="o">--</span><span class="n">download</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">file</span><span class="o">/</span><span class="n">example</span><span class="o">.</span><span class="n">conf</span> <span class="o">--</span><span class="n">download</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span> <span class="o">--</span><span class="n">dl</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">file</span><span class="o">/</span><span class="n">example</span><span class="o">.</span><span class="n">conf</span> <span class="o">--</span><span class="n">dl</span>
 </pre></div>
 </div>
 <p>This will get the data that needs to be downloaded from your configuration file and save it into the directories specified in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code> for <code class="docutils literal notranslate"><span class="pre">local</span></code>.</p>
@@ -119,23 +116,23 @@ or set <code class="docutils literal notranslate"><span class="pre">dl_ghost_sou
 <li><p>To see more information, check the <a class="reference internal" href="BSC-download.html"><span class="doc std std-doc">BSC download page</span></a>.</p></li>
 </ul>
 </li>
-<li><p><strong>Download of network from Zenodo</strong></p>
+<li><p><strong>Download of GHOST network data from Zenodo</strong></p>
 <ul class="simple">
-<li><p>Downloads GHOST networks from the <a class="reference external" href="https://zenodo.org/records/10637450">GHOST Zenodo webpage</a>.</p></li>
+<li><p>Downloads GHOST networks from the <a class="reference external" href="https://zenodo.org/search?q=parent.id%3A10637449&amp;amp;f=allversions%3Atrue&amp;amp;l=list&amp;amp;p=1&amp;amp;s=10&amp;amp;sort=version">GHOST Zenodo webpage</a>.</p></li>
 <li><p>How to get this type of download: answer <code class="docutils literal notranslate"><span class="pre">n</span></code> to the HPC prompt: <em>Do you want to download observational data from the BSC remote machine? (Otherwise, GHOST observational data will be retrieved from Zenodo)</em> or set <code class="docutils literal notranslate"><span class="pre">dl_ghost_source</span></code> to <code class="docutils literal notranslate"><span class="pre">zenodo</span></code>.</p></li>
 <li><p>To see more information, check the <a class="reference internal" href="Zenodo-download.html"><span class="doc std std-doc">Zenodo download page</span></a>.</p></li>
 </ul>
 </li>
-<li><p><strong>Download of network from ACTRIS (Thredds)</strong></p>
+<li><p><strong>Download of ACTRIS network data from Thredds</strong></p>
 <ul class="simple">
 <li><p>Downloads observational networks from <a class="reference external" href="https://thredds.nilu.no/thredds/catalog.html">ACTRIS Thredds</a>.</p></li>
-<li><p>How to get this type of download: put <code class="docutils literal notranslate"><span class="pre">actris/actris</span></code> in the <code class="docutils literal notranslate"><span class="pre">network</span></code> field in your configuration.</p></li>
+<li><p>How to get this type of download: write <code class="docutils literal notranslate"><span class="pre">actris/actris</span></code> on the <code class="docutils literal notranslate"><span class="pre">network</span></code> field in your configuration file.</p></li>
 <li><p>To see more information, check the <a class="reference internal" href="ACTRIS-download.html"><span class="doc std std-doc">ACTRIS download page</span></a>.</p></li>
 </ul>
 </li>
 <li><p><strong>Download of non-interpolated model data from the Atmosphere Data Store (ADS)</strong></p>
 <ul class="simple">
-<li><p>Downloads model outputs from the <a class="reference external" href="https://ads.atmosphere.copernicus.eu/datasets">Atmosphere Data Store</a>.</p></li>
+<li><p>Downloads model outputs from the <a class="reference external" href="https://ads.atmosphere.copernicus.eu/datasets">Atmosphere Data Store</a>. You must have an ECMWF account to access this feature.</p></li>
 <li><p>How to get this type of download: specify the model as <code class="docutils literal notranslate"><span class="pre">cams_analysis</span></code>, <code class="docutils literal notranslate"><span class="pre">cams_forecast</span></code> or <code class="docutils literal notranslate"><span class="pre">cams_reanalysis</span></code> in your configuration, and set <code class="docutils literal notranslate"><span class="pre">dl_interpolated</span></code> to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
 <li><p>To see more information, check the <a class="reference internal" href="CAMS-download.html"><span class="doc std std-doc">CAMS download page</span></a>.</p></li>
 </ul>
@@ -173,7 +170,11 @@ or set <code class="docutils literal notranslate"><span class="pre">dl_ghost_sou
 <td><p><em>Which type of data do you want to download? Observational, modelled or both? ([both]/obs/mod)</em></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">obs</span></code> (download observations), <code class="docutils literal notranslate"><span class="pre">mod</span></code> (download models) or <code class="docutils literal notranslate"><span class="pre">both</span></code> (download both)</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">network_type</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dl_thredds_update</span></code></p></td>
+<td><p><em>File containing information of the files available in Thredds for {actris_parameter} ({info_path}) already exists. Do you want to update it (y/[n])?</em></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">network_type</span></code></p></td>
 <td><p><em>Do you want to download all the GHOST networks? (Otherwise all the non-GHOST networks will be downloaded) ([y]/n)</em></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">ghost</span></code> (use all GHOST networks) or <code class="docutils literal notranslate"><span class="pre">non-ghost</span></code> (use all non-GHOST networks)</p></td>
 </tr>
@@ -192,7 +193,38 @@ or set <code class="docutils literal notranslate"><span class="pre">dl_ghost_sou
 <li><p><code class="docutils literal notranslate"><span class="pre">start_date</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">end_date</span></code></p></li>
 </ul>
+</section>
+<section id="example-configuration-file-with-wildcards">
+<h2>Example configuration file with wildcards<a class="headerlink" href="#example-configuration-file-with-wildcards" title="Link to this heading"></a></h2>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[WILDCARD]</span>
+<span class="na">network</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">EBAS</span>
+<span class="na">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">sconco3, sconcno2</span>
+<span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
+<span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">*</span>
+<span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">*</span>
+<span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams61_emep_ph2-eu-000</span>
+</pre></div>
+</div>
 <p><strong>Note:</strong> Using wildcards may result in large downloads, so use with caution.</p>
+</section>
+<section id="model-resolution">
+<h2>Model resolution<a class="headerlink" href="#model-resolution" title="Link to this heading"></a></h2>
+<p>Models and observations may have different native temporal resolutions. In Providentia, interpolation between model data and observations includes:</p>
+<ul class="simple">
+<li><p>Upsampling → duplicates temporal steps</p></li>
+<li><p>Downsampling → cuts or aggregates temporal steps</p></li>
+</ul>
+<p>Now the data download and interpolation processes can be performed using the same configuration file, as in this example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">PRV_sconco3_CHIMERE</span><span class="p">]</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">EBAS</span>
+<span class="n">species</span> <span class="o">=</span> <span class="n">sconco3</span>
+<span class="n">resolution</span> <span class="o">=</span> <span class="n">daily</span>
+<span class="n">start_date</span> <span class="o">=</span> <span class="mi">20180101</span>
+<span class="n">end_date</span> <span class="o">=</span> <span class="mi">20180601</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">cams61_chimere_ph2</span><span class="o">-</span><span class="n">eu</span><span class="o">-</span><span class="mi">000</span> <span class="p">(</span><span class="n">CHIMERE</span><span class="p">)</span>
+<span class="n">model_resolution</span> <span class="o">=</span> <span class="n">hourly</span>
+</pre></div>
+</div>
 </section>
 </section>
 

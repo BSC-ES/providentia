@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -6,24 +8,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FAQ &mdash; Providentia 3.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=08bfcbec"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=08bfcbec"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Training material" href="Training-material.html" />
-    <link rel="prev" title="Saved file formats" href="Saved-file-formats.html" /> 
+    <link rel="next" title="Presentations" href="Presentations.html" />
+    <link rel="prev" title="Git Bash" href="Git-Bash.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -69,7 +67,6 @@
 <li class="toctree-l2"><a class="reference internal" href="#why-is-data-that-i-have-already-downloaded-being-redownloaded-after-upgrading-to-3-0-0">Why is data that I have already downloaded being redownloaded after upgrading to 3.0.0?</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="Training-material.html">Training material</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the team</a></li>
 <li class="toctree-l1"><a class="reference internal" href="History.html">History of Providentia</a></li>
@@ -136,8 +133,8 @@
 <li><p>Clone the Providentia repository using <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/BSC-ES/providentia.git</span></code>.</p></li>
 <li><p>Open the dashboard using <code class="docutils literal notranslate"><span class="pre">/bin/providentia</span></code>, this will create the conda environment in your machine.</p></li>
 <li><p>Add your model ID in <code class="docutils literal notranslate"><span class="pre">settings/interp_models.yaml</span></code> so that Providentia can know where to download the data from.</p></li>
-<li><p>Use the <a class="reference internal" href="Download.html"><span class="doc std std-doc">download</span></a> mode to download the observations and models to interpolate by <code class="docutils literal notranslate"><span class="pre">./bin/providentia</span> <span class="pre">--config='/path/to/file/example.conf'</span> <span class="pre">--download</span></code>. The data will be downloaded into the paths defined in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p></li>
-<li><p>After downloading the data do the interpolation as usual: <code class="docutils literal notranslate"><span class="pre">./bin/providentia</span> <span class="pre">--config='/path/to/file/example.conf'</span> <span class="pre">--interp</span></code>.</p></li>
+<li><p>Use the <a class="reference internal" href="Download.html"><span class="doc std std-doc">download</span></a> mode to download the observations and models to interpolate by <code class="docutils literal notranslate"><span class="pre">./bin/providentia</span> <span class="pre">--config=/path/to/file/example.conf</span> <span class="pre">--download</span></code>. The data will be downloaded into the paths defined in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p></li>
+<li><p>After downloading the data do the interpolation as usual: <code class="docutils literal notranslate"><span class="pre">./bin/providentia</span> <span class="pre">--config=/path/to/file/example.conf</span> <span class="pre">--interp</span></code>.</p></li>
 </ul>
 </section>
 <section id="unknown-miniconda3-23-9-0-0-on-nord4">
@@ -178,14 +175,6 @@ It is also possible your cache file is out-of-date; it may help to try:
 <span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">qtbase5</span><span class="o">-</span><span class="n">dev</span> <span class="n">qtbase5</span><span class="o">-</span><span class="n">dev</span><span class="o">-</span><span class="n">tools</span> <span class="n">qt5</span><span class="o">-</span><span class="n">qmake</span> <span class="n">libqt5gui5</span> <span class="n">libqt5widgets5</span> <span class="n">libqt5core5a</span>
 </pre></div>
 </div>
-<p>Then add to .bashrc:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">QT_QPA_PLATFORM_PLUGIN_PATH</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">x86_64</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">gnu</span><span class="o">/</span><span class="n">qt5</span><span class="o">/</span><span class="n">plugins</span><span class="o">/</span><span class="n">platforms</span>
-</pre></div>
-</div>
-<p>And load:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="o">.</span><span class="n">bashrc</span>
-</pre></div>
-</div>
 </section>
 <section id="segmentation-fault-on-nord4">
 <h2>Segmentation fault on Nord4<a class="headerlink" href="#segmentation-fault-on-nord4" title="Link to this heading"></a></h2>
@@ -204,8 +193,8 @@ It is also possible your cache file is out-of-date; it may help to try:
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Saved-file-formats.html" class="btn btn-neutral float-left" title="Saved file formats" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Training-material.html" class="btn btn-neutral float-right" title="Training material" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Git-Bash.html" class="btn btn-neutral float-left" title="Git Bash" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Presentations.html" class="btn btn-neutral float-right" title="Presentations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

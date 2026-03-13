@@ -4,6 +4,7 @@ import ast
 import configparser
 import copy
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 import logging
 import math
 import os
@@ -22,11 +23,12 @@ from providentia.warnings_prv import show_message
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 data_paths = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'data_paths.yaml')))
 defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'defaults.yaml')))
-multispecies_map = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.yaml')))
-mapping_species = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
+multispecies_map = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'multispecies_shortcuts.yaml')))
+mapping_species = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'mapping_species.yaml')))
 interp_models = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_models.yaml')))
-modes = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'modes.yaml')))
+modes = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'modes.yaml')))
 wildcard = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'wildcard.yaml')))
+actris_standard_metadata = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'standard_metadata.yaml')))
 
 # set current MACHINE
 MACHINE = get_machine()
@@ -67,26 +69,23 @@ class ProvConfiguration:
         self.var_defaults.update(modifiable_var_defaults)
 
         # set mode
-        active_modes = list(set(modes)&set(kwargs))
-        
+        active_modes = list(set(modes) & set(kwargs))
+
         # choose the mode that is not the library one if multiple modes are active
         if len(active_modes) == 1:
             self.read_instance.mode = active_modes[0]
         else:
             non_library = [m for m in active_modes if m not in "library"]
-
-            if len(non_library) != 1:
-                error = f"Error: More than one non-interactive mode is active: {', '.join(non_library)}"
-                self.read_instance.logger.error(error)
-                sys.exit(1)
-
             self.read_instance.mode = non_library[0]
 
-        # if variable is given by command line, set that value, otherwise set as default value
+        # if variable is given by command line, set that value, otherwise set as init value
         for k, val in self.var_defaults.items():
             val = kwargs.get(k, val)
             setattr(self.read_instance, k, self.parse_parameter(k, val))
-                
+
+        # direct output to filescreen
+        self.switch_logging()
+        
         # set default values of the current mode
         self.read_instance.default_values = defaults['dashboard_empty'] if self.read_instance.mode == 'dashboard' and self.read_instance.config == '' else defaults[self.read_instance.mode]
         
@@ -99,10 +98,6 @@ class ProvConfiguration:
                 # set argument
                 val = kwargs.get(kwarg, val)
                 setattr(self.read_instance, kwarg, self.parse_parameter(kwarg, val))
-
-        # direct output to file/screen
-        if hasattr(self.read_instance, 'logger') is False:
-            self.switch_logging()
 
     def parse_parameter(self, key, value, deactivate_warning=False):
         """
@@ -125,9 +120,9 @@ class ProvConfiguration:
         """
         
         # make sure we don't pass strings instead of booleans for true and false
-        if value == 'true':
+        if str(value).lower() == 'true':
             value = True
-        elif value == 'false':
+        elif str(value).lower() == 'false':
             value = False
         
         # check wildcard '*'
@@ -136,8 +131,8 @@ class ProvConfiguration:
             self.read_instance.logger.error(error)
             sys.exit(1)
             
-        elif value != '*' and '*' in str(value).split(','):
-            error = f"Error: The wildcard ('*') in the '{key}' parameter does not allow multiple values."
+        elif '*' in str(value).split(','):
+            error = f"Error: The wildcard ('*') in the '{key}' parameter cannot be combined with other values. Use '*' on its own or remove it from the list."
             self.read_instance.logger.error(error)
             sys.exit(1)
 
@@ -288,29 +283,7 @@ class ProvConfiguration:
             self.read_instance.standard_metadata = get_standard_metadata({'standard_units':'', 'units_quantity':''})
 
             # add ACTRIS variables to standard metadata
-            self.read_instance.standard_metadata.update(
-                {'doi': {'value': [], 
-                         'standard_name': 'DOI', 
-                         'long_name': 'Digital identifier of an object',   
-                         'units': 'unitless', 
-                         'units_quantity': 'unitless', 
-                         'data_type': object, 
-                         'string_format': 'short', 
-                         'metadata_type': 'STATION MISCELLANEOUS', 
-                         'identifiers': {'DOI':''}, 
-                         'description': 'Digital identifier of an object.'},
-                 'actris_national_facility': {'value': [], 
-                                              'standard_name': 'ACTRIS national facility', 
-                                              'long_name': 'Digital identifier of an object',   
-                                              'units': 'unitless', 
-                                              'units_quantity': 'unitless', 
-                                              'data_type': object, 
-                                              'string_format': 'short', 
-                                              'metadata_type': 'STATION MISCELLANEOUS', 
-                                              'identifiers': {'ACTRIS national facility':''}, 
-                                              'description': 'ACTRIS national facility.'}
-                }
-            )
+            self.read_instance.standard_metadata.update(actris_standard_metadata)
 
             # create list of GHOST metadata variables to read
             self.read_instance.ghost_metadata_vars_to_read = [key for key in self.read_instance.standard_metadata.keys() if
@@ -322,7 +295,7 @@ class ProvConfiguration:
 
             return str(value)
 
-        elif key in ['network', 'observation', 'framework']:
+        elif key in ['network', 'observation', 'framework', 'species', 'domain']:
             # parse network
 
             if isinstance(value, str):
@@ -332,19 +305,6 @@ class ProvConfiguration:
                 # parse multiple networks
                 if ',' in value:
                     return [network.strip() for network in value.split(',')]
-                else:
-                    return [value.strip()]
-
-        elif key == 'species':
-            # parse species
-
-            if isinstance(value, str):
-                # treat leaving the field blank as default
-                if value == '':
-                    return self.var_defaults[key]
-                # parse multiple species
-                if ',' in value:
-                    return [speci.strip() for speci in value.split(',')]
                 else:
                     return [value.strip()]
 
@@ -361,25 +321,14 @@ class ProvConfiguration:
                 else:        
                     return value.strip()
 
-        elif key == 'start_date':
-            # parse start_date
+        elif key in ['end_date','start_date']:
+            # parse date
 
             if (isinstance(value, str)) or (isinstance(value, int)):
                 # treat leaving the field blank as default
                 if value == '':
                     return self.var_defaults[key]
-                # throw error if start_date is empty str
-                value = str(value)
-                return value.strip()
-
-        elif key == 'end_date':
-            # parse end_date
-
-            if (isinstance(value, str)) or (isinstance(value, int)):
-                # treat leaving the field blank as default
-                if value == '':
-                    return self.var_defaults[key]
-                # throw error if start_date is empty str
+                # throw error if date is empty str
                 value = str(value)
                 return value.strip()
 
@@ -503,19 +452,6 @@ class ProvConfiguration:
                 else:
                     return sorted(list(value))
             # otherwise, return empty list
-            else:
-                return []
-
-        elif key == 'domain':
-            # parse domain
-
-            if value is not None:
-                # treat leaving the field blank as default
-                if value == '':
-                    return self.var_defaults[key]
-                # split list, if only one domain, then creates list of one element
-                domains = [dom.strip() for dom in value.split(",")]      
-                return domains
             else:
                 return []
 
@@ -716,14 +652,6 @@ class ProvConfiguration:
                 else:
                     return [value.strip()]
         
-        elif key in ['statistic_mode','statistic_aggregation','periodic_statistic_mode','periodic_statistic_aggregation',
-                     'timeseries_statistic_aggregation','interp_n_neighbours','interp_reverse_vertical_orientation',
-                     'interp_chunk_size','interp_job_array_limit','interp_multiprocessing','interp_spinup_timesteps',
-                     'interp_model_downsampling','interp_model_upsampling']:
-            # treat leaving the field blank as default
-            if value == '':
-                return self.var_defaults[key]
-        
         elif key == 'cpus_per_task':
             if value is not None:
                 return math.ceil(float(value))
@@ -767,6 +695,12 @@ class ProvConfiguration:
             if not self.read_instance.network:
                 self.read_instance.dl_interpolated = False
                 msg = "Models detected but no network specified, proceeding to download non-interpolated model output."
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+
+            # set mod mode directly if download is done from storage5
+            elif self.read_instance.machine == "storage5":
+                self.read_instance.dl_interpolated = False
+                msg = "Transfer mode detected, proceding to copy non-interpolated model output."
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
             # if there's models, ask the user whether they want interpolated or non-interpolated
@@ -1041,6 +975,7 @@ class ProvConfiguration:
                     ghost_mod_found = list(filter(lambda x:x.startswith(modid+'-'+domain), os.listdir(join(self.read_instance.mod_root,ghost_version))))
                     if ghost_mod_found:
                         available_ghost_versions.append(ghost_version)
+
         # if it is a concrete ensemble, then just get the model from the list
         else:
             mod_found = [model] if model in self.possible_models else []
@@ -1316,8 +1251,8 @@ class ProvConfiguration:
                     setattr(self.read_instance, field, default[self.read_instance.statistic_mode])
 
             # set the defined defaults
-            elif not current_value:
-                if default:
+            elif current_value in [[], "", None]:
+                if default is not None:
                     setattr(self.read_instance, field, default)
                 else:
                     error = f"Error: '{field}' was not defined in the configuration file. It is mandatory for the '{self.read_instance.mode}' mode."
@@ -1340,9 +1275,9 @@ class ProvConfiguration:
             self.read_instance.resolution = default
 
         # copy value of resolution into model_resolution
-        if not self.read_instance.model_resolution:
+        if self.read_instance.mode == 'download' and not self.read_instance.model_resolution:
             self.read_instance.model_resolution = self.read_instance.resolution 
-            
+
         # if number of networks and species is not the same,
         # and len of one of network or species == 1,
         # then duplicate respestive network/species
@@ -1430,11 +1365,16 @@ class ProvConfiguration:
 
         # check end date is bigger than start date
         if self.read_instance.start_date != '*' and self.read_instance.end_date != '*':
-            if self.read_instance.start_date >= self.read_instance.end_date:
+            if self.read_instance.start_date > self.read_instance.end_date:
                 error = f'Error: Start date ({self.read_instance.start_date}) exceeds end date ({self.read_instance.end_date}).'
                 self.read_instance.logger.error(error)
                 sys.exit(1)
-
+            # in interpolation, if months are the same add a month to end date
+            elif self.read_instance.start_date == self.read_instance.end_date and self.read_instance.mode == 'interpolation':
+                self.read_instance.end_date = (datetime.strptime(self.read_instance.start_date, "%Y%m") + relativedelta(months=1)).strftime("%Y%m")
+                msg = f'Setting end date to be {self.read_instance.end_date} for interpolation.'
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+                
         # create empty directories for the observations and models
         if MACHINE == "local":
             for path in [self.read_instance.nonghost_root, self.read_instance.ghost_root, self.read_instance.mod_root, self.read_instance.mod_to_interp_root]:
@@ -1450,9 +1390,13 @@ class ProvConfiguration:
                 mode = str(self.read_instance.dl_mode).lower()
                 if mode not in valid_modes:
                     error = f"Error: Invalid 'dl_mode': '{self.read_instance.dl_mode}'. Expected 'both', 'obs' or 'mod'."
-                    self.logger.error(error)
+                    self.read_instance.logger.error(error)
                     sys.exit(1)
                 self.read_instance.dl_mode = mode
+
+            # select models in case it is a storage5 transfer
+            elif self.read_instance.machine == "storage5":
+                self.read_instance.dl_mode = "mod"
 
             # if not provided, ask user interactively
             else:
@@ -1502,7 +1446,7 @@ class ProvConfiguration:
             self.read_instance.calibration_factor = calibration_factor_dict
 
         if len(self.read_instance.active_dashboard_plots) != 4 and 'active_dashboard_plots' in self.read_instance.default_values:
-            error = 'Error: there must be 4 "active_dashboard_plots"'
+            error = 'Error: There must be 4 "active_dashboard_plots"'
             self.read_instance.logger.error(error)
             sys.exit(1)
         
@@ -1741,7 +1685,7 @@ class ProvConfiguration:
             self.read_instance.logger.removeHandler(self.read_instance.logger.handlers[0])
 
         # interpolation does not use this feature
-        if self.read_instance.logfile != False and self.read_instance.mode != 'interpolation':
+        if self.read_instance.logfile is not None and self.read_instance.mode != 'interpolation':
             # default path, default name
             if self.read_instance.logfile == True:
                 # get log filename and filepath
@@ -1763,6 +1707,7 @@ class ProvConfiguration:
             # redirect output to a file
             handler = logging.FileHandler(file_path)
             print(f"Output redirected to {file_path}")
+        
         else:
             # redirect output to terminal
             handler = logging.StreamHandler(sys.stdout)
@@ -2033,7 +1978,7 @@ def load_conf(self, fpath=None):
     from providentia.configuration import read_conf
 
     if fpath is None:
-        self.read_instance.logger.info("No configuration file found")
+        self.read_instance.logger.error("No configuration file found")
         sys.exit(1)
 
     # if DEFAULT is not present, then return

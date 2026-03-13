@@ -16,8 +16,7 @@ RUN wget https://repo.continuum.io/archive/Anaconda3-2024.02-1-Linux-x86_64.sh \
 ENV PATH /root/anaconda3/bin:$PATH
 RUN conda update --all -y
 
-RUN conda install -c conda-forge cartopy -y \
-&& conda install -c conda-forge jupyterlab -y
+RUN conda install -c conda-forge cartopy=0.25.0 jupyterlab==4.5.3 ghostscript==10.06.0 dask==2026.1.2 nco==5.3.6 pyproj=3.7.2 proj=9.7.1 --override-channels
 
 RUN pip install -r /tmp/Providentia/requirements.txt
 

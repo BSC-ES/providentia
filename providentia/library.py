@@ -86,6 +86,10 @@ class Providentia:
         # set configuration variables, as well as any other defined variables
         self.valid_config = self.set_config(**self.kwargs)
 
+        # return if no valid configuration file
+        if not self.valid_config:
+            return
+
         # initialise DataReader class
         self.datareader = DataReader(self)
 
@@ -353,7 +357,7 @@ class Providentia:
              legend=True, set_obs_legend=True, map_extent=None, annotate=False, bias=False, domain=False, 
              hidedata=False, logx=False, logy=False, multispecies=False, regression=False, smooth=False, 
              threshold=False, gerrity=False, plot_options=None, save=False, return_plot=False, format=None, 
-             width=None, height=None):
+             width=None, height=None, networkspeci=None):
         """ 
         Wrapper method to make a Providentia plot.
 
@@ -415,6 +419,8 @@ class Providentia:
             Figure width, defaults to None.
         height : int or float, optional
             Figure height, defaults to None.
+        networkspeci : str, optional
+            Selected networkspeci for non-multispecies plots
 
         Returns
         -------
@@ -505,12 +511,31 @@ class Providentia:
 
         # get networkspeci to plot (for non-multispecies plots), taking first one preferentially
         if len(self.networkspecies) > 0:
-            networkspeci = self.networkspecies[0]
+            if networkspeci is None:
+                if 'multispecies' not in plot_options and len(self.networkspecies) > 1:
+                    msg = f"There are multiple species and this is not a multispecies plot, first one {self.networkspecies[0]} is selected. "
+                    msg += f"If you want to select a specific one pass 'networkspeci' to the plotting function 'plot' with one of these options: {self.networkspecies}."
+                    show_message(self, msg)
+                networkspeci = self.networkspecies[0]
+            else:
+                if networkspeci not in self.networkspecies:
+                    msg = f'Networkspeci is not valid, choose from: {self.networkspecies}.'
+                    show_message(self, msg)
+                    return
         else:
             msg = 'There are no available species.'
             show_message(self, msg)
             return
         speci = networkspeci.split('|')[-1]
+
+        if (multispecies) and (len(np.unique(list(self.measurement_units.values()))) > 1):
+            msg = f"Units in the multispecies plots will be converted to 'multispecies_units' ({self.multispecies_units}) for consistency. "
+            show_message(self, msg)
+            if self.multispecies_units in [None, ""]:
+                msg = f"Please specify the units in your configuration file by adding 'multispecies_units'. "
+                msg += f"Units for each species are: {self.measurement_units}."
+                show_message(self, msg)
+                return
 
         # for timeseries chunking
         chunk_stat = None
@@ -555,11 +580,22 @@ class Providentia:
         zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(plot_type=plot_type) 
 
         # if only 1 label passed for map plot, and stat is a bias statistic then throw error
-        if (base_plot_type == 'map') & (z_statistic_sign == 'bias') & (labelb == ''):
-            msg = "Plotting a bias statistic, and only 1 label is set. Not making plot."
+        if (base_plot_type == 'map') & (z_statistic_sign == 'bias'):
+            if (labelb == ''):
+                msg = "Plotting a bias statistic, define labelb. Not making plot."
+                show_message(self, msg)
+                return
+            if (labela == ''):
+                msg = "Plotting a bias statistic, define labela. Not making plot."
+                show_message(self, msg)
+                return
+        
+        # make sure periodic, map, heatmap, taylor and table plots have a -[stat]
+        if base_plot_type in ['periodic', 'map', 'heatmap', 'taylor', 'table'] and zstat is None:
+            msg = f'{plot_type} plot needs a statistic -[stat].'
             show_message(self, msg)
             return
-        
+            
         # if bias and threshold plots are in plot options throw error
         if ('bias' in plot_options) & ('threshold' in plot_options):
             msg = "Cannot make a bias plot showing threshold lines. Not making plot."
@@ -747,9 +783,6 @@ class Providentia:
         # take first defined networkspeci
         else:
             networkspecies = [networkspeci]
-            if len(self.networkspecies) > 1:
-                msg = "More than 1 network or species defined, can only plot for 1 pair. Taking {}.".format(networkspeci)
-                show_message(self, msg)
             
         # legend plot (on its own axis)
         if base_plot_type == 'legend':
@@ -843,7 +876,7 @@ class Providentia:
 
             # make plot
             func(relevant_ax, networkspeci, relevant_data_labels, self.plot_characteristics[plot_type], plot_options,
-                statsummary=True, plotting_paradigm='summary', stats_df=stats_df)     
+                 stats_to_plot, statsummary=True, plotting_paradigm='summary', stats_df=stats_df)     
 
             # re-filter for original subsection
             kwargs['subsection'] = orig_ss
@@ -903,7 +936,7 @@ class Providentia:
 
             # make plot
             func(relevant_ax, networkspeci, relevant_data_labels, 
-                self.plot_characteristics[plot_type], plot_options, plotting_paradigm='summary', 
+                self.plot_characteristics[plot_type], plot_options, zstat, plotting_paradigm='summary', 
                 stats_df=stats_df)
 
             # re-filter for original subsection
@@ -1310,11 +1343,11 @@ class Providentia:
             else:
                 error = 'Error: The path to the configuration file passed as an argument does not exist.'
                 self.logger.info(error)
-                sys.exit(1)
+                return
         else:
             error = "Error: The configuration file must be given as an argument: e.g. 'config=...'"
             self.logger.info(error)
-            sys.exit(1)
+            return
 
         # parse section
         # if section name provided, try and use that
@@ -1325,7 +1358,7 @@ class Providentia:
         if len(self.sections) == 0:
             error = "Error: No sections were found in the configuration file, make sure to name them using square brackets."
             self.logger.info(error)
-            sys.exit(1)
+            return
     
         self.have_section = False
         if hasattr(self, 'section'): 
@@ -1337,7 +1370,7 @@ class Providentia:
                 error += '\nTip: For subsections, add the name of the parent section followed by an interpunct (·) '
                 error += 'before the subsection name (e.g. SECTIONA·Spain). Available: {0}'.format(self.all_sections)
                 self.logger.info(error)
-                sys.exit(1)
+                return
 
         if not self.have_section:
             self.section = self.sections[0]
@@ -1427,28 +1460,34 @@ class Providentia:
             If both conf and config are None, the currently loaded configuration file is printed.
         """
 
-        # check have valid conf
-        valid_config = self.have_valid_config()
-        if not valid_config:
-            return
-
         # if conf or config not None, then print that file
         if conf:
             pass
         elif config:
-            conf = copy.deepcopy(config) 
+            conf = copy.deepcopy(config)
         # otherwise take it to be file previously loaded
         else:
+            # check have valid conf
+            valid_config = self.have_valid_config()
+            if not valid_config:
+                msg = "No valid configuration was passed"
+                show_message(self, msg)
+                return
             conf = copy.deepcopy(self.config)
 
-        # check file exists
-        if not os.path.isfile(conf):
-            msg = "The passed .conf file: '{}' does not exist.".format(conf)
-            show_message(self, msg)
-        # otherwise, print conf
-        else:
-            with open(conf, "r") as f:
-                self.logger.info(f.read())
+        # check if file exists
+        if not os.path.exists(conf):
+            # check if file exists inside configurations folder
+            if os.path.exists(join(self.config_dir, conf)):
+                conf = join(self.config_dir, conf)
+            else:
+                msg = "The passed .conf file: '{}' does not exist.".format(conf)
+                show_message(self, msg)
+                return
+
+        # open and read if it exists
+        with open(conf, "r") as f:
+            self.logger.info(f.read())
 
     def __str__(self):
         """
@@ -1600,7 +1639,8 @@ class Providentia:
                     if test_var in data.variables.keys():
                         var_data = data[test_var][:]
                         return var_data
-                msg = "Variable '{}' is not defined".format(var)
+                msg = "Variable '{}' is not defined. ".format(var)
+                msg += "Available variables: {}".format(data.variables.keys())
                 show_message(self, msg)
             else:
                 var_data = data[var][:]
@@ -1657,7 +1697,7 @@ class Providentia:
 
         if not hasattr(self, 'data_in_memory'):
             self.logger.info('Error: Data has not been loaded. Use the load() method')
-            sys.exit(1)
+            return False
         else:
             return True
         
@@ -1673,7 +1713,7 @@ class Providentia:
 
         if not self.valid_config:
             self.logger.info("Error: A valid configuration file has not been read. Please reinitialise your Providentia object with a valid file: prv.Providentia('filename.conf')")
-            sys.exit(1)
+            return False
         else:
             return True
 

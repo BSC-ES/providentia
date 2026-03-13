@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -6,19 +8,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Library &mdash; Providentia 3.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=08bfcbec"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=08bfcbec"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -74,7 +72,6 @@
 <li class="toctree-l1"><a class="reference internal" href="Statistics.html">Statistics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Training-material.html">Training material</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the team</a></li>
 <li class="toctree-l1"><a class="reference internal" href="History.html">History of Providentia</a></li>
@@ -312,6 +309,13 @@
 <h5>Plot customisation<a class="headerlink" href="#plot-customisation" title="Link to this heading"></a></h5>
 <p>All plots have been tailored to appear nice in Jupyter notebooks, but any plot settings can be modified by the user, per plot type, in <code class="docutils literal notranslate"><span class="pre">settings/plot_characteristics.yaml</span></code>.</p>
 <p>On top of that, there are numerous arguments to the plot method that can be used to customise the plots, each of which are subsequently detailed.</p>
+<section id="species">
+<h6>Species<a class="headerlink" href="#species" title="Link to this heading"></a></h6>
+<p>In non-multispecies plots you can choose the species that you want to plot using the <code class="docutils literal notranslate"><span class="pre">networkspeci</span></code> argument, e.g.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">networkspeci</span><span class="o">=</span><span class="s1">&#39;EEA|sconco3&#39;</span>
+</pre></div>
+</div>
+</section>
 <section id="legend">
 <h6>Legend<a class="headerlink" href="#legend" title="Link to this heading"></a></h6>
 <p>For user convenience a legend has been integrated into each appropriate plot type. If this is not wanted, then this can be deactivated using the following argument to the plot method:</p>
@@ -535,7 +539,10 @@
 <li class="toctree-l2"><a class="reference internal" href="Notebooks.html#tutorials">Tutorials</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="Reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reference.html">Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Reference.html#providentia.library.Providentia"><code class="docutils literal notranslate"><span class="pre">Providentia</span></code></a></li>
+</ul>
+</li>
 </ul>
 </div>
 </section>

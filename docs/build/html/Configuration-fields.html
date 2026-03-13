@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -6,23 +8,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Configuration fields &mdash; Providentia 3.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=08bfcbec"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=08bfcbec"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Command line configuration" href="Command-line-configuration.html" />
+    <link rel="next" title="Metadata fields" href="Metadata-fields.html" />
     <link rel="prev" title="Configuration files" href="Configuration-files.html" /> 
 </head>
 
@@ -58,8 +56,17 @@
 <li class="toctree-l3"><a class="reference internal" href="#report-parameters">Report parameters</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#interpolation-parameters">Interpolation parameters</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#download-parameters">Download parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#models">Models</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#define-model-domain-and-ensemble-independently">1. Define model, domain and ensemble independently</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#combine-model-and-domain">2. Combine model and domain</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#combine-model-and-ensemble">3. Combine model and ensemble</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#combine-model-domain-and-ensemble">4. Combine model, domain and ensemble</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#aliases">Aliases</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Metadata-fields.html">Metadata fields</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Command-line-configuration.html">Command line configuration</a></li>
 </ul>
 </li>
@@ -70,7 +77,6 @@
 <li class="toctree-l1"><a class="reference internal" href="Statistics.html">Statistics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Training-material.html">Training material</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the team</a></li>
 <li class="toctree-l1"><a class="reference internal" href="History.html">History of Providentia</a></li>
@@ -163,40 +169,45 @@
 <td><p>Ensemble of the model (e.g. <code class="docutils literal notranslate"><span class="pre">000</span></code>, <code class="docutils literal notranslate"><span class="pre">001</span></code>). When multiple model IDs and multiple ensembles/domains are provided, all possible combinations of model, domain and ensemble will be used.</p></td>
 <td><p>All available, except in interpolation mode where the default is <code class="docutils literal notranslate"><span class="pre">000</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">model_resolution</span></code></p></td>
-<td><p>Optional</p></td>
-<td><p>Model resolution if different from observations.</p></td>
-<td><p>Same as <code class="docutils literal notranslate"><span class="pre">resolution</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">forecast</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">forecast</span></code></p></td>
 <td><p>Optional</p></td>
 <td><p>Controls how forecast data is handled: <code class="docutils literal notranslate"><span class="pre">day</span></code>, <code class="docutils literal notranslate"><span class="pre">daily</span></code>, <code class="docutils literal notranslate"><span class="pre">combined</span></code>, <code class="docutils literal notranslate"><span class="pre">dayN</span></code>, <code class="docutils literal notranslate"><span class="pre">dailyN</span></code>, <code class="docutils literal notranslate"><span class="pre">combinedN</span></code>. Multiple values of the same type can be provided (e.g. <code class="docutils literal notranslate"><span class="pre">day</span></code>, <code class="docutils literal notranslate"><span class="pre">day2</span></code>, <code class="docutils literal notranslate"><span class="pre">day3</span></code>), but different types cannot be mixed (i.e. <code class="docutils literal notranslate"><span class="pre">day</span></code> options cannot be combined with <code class="docutils literal notranslate"><span class="pre">daily</span></code> or <code class="docutils literal notranslate"><span class="pre">combined</span></code>). To limit to specific forecast days, append the day number to the option (e.g. <code class="docutils literal notranslate"><span class="pre">day1</span></code>, <code class="docutils literal notranslate"><span class="pre">daily2</span></code>, <code class="docutils literal notranslate"><span class="pre">combined3</span></code>). This variable must be set to a valid value when performing interpolation for forecast data.</p></td>
 <td><p>—</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">filter_species</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">filter_species</span></code></p></td>
 <td><p>Optional</p></td>
 <td><p>Filter read species by other species data within a data range. The first value set is the lower bound to filter by, and the second value the upper bound. Place a sign before each bound value to inform if the filter should be inclusive or exclusive of the bound, (e.g. <code class="docutils literal notranslate"><span class="pre">&lt;</span></code> or <code class="docutils literal notranslate"><span class="pre">&lt;=</span></code>). If not wishing to set either the lower or upper bounds, a <code class="docutils literal notranslate"><span class="pre">:</span></code> can be used. Optionally, a fill value can also be given as a third value to impose what the filtered data is set to, by default this is <code class="docutils literal notranslate"><span class="pre">NaN</span></code>. Multiple filters can be  set together separated by a comma (e.g. <code class="docutils literal notranslate"><span class="pre">network1:species1</span> <span class="pre">(&gt;lowerlim,</span> <span class="pre">&lt;=upperlim,</span> <span class="pre">fillvalue),</span> <span class="pre">network2:species2</span> <span class="pre">(:,</span> <span class="pre">&lt;upperlim)</span></code>).</p></td>
 <td><p>—</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ghost_root</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ghost_root</span></code></p></td>
 <td><p>Optional</p></td>
 <td><p>Root directory for GHOST observations, overwrites <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
 <td><p>From <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nonghost_root</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">nonghost_root</span></code></p></td>
 <td><p>Optional</p></td>
 <td><p>Root directory for non-GHOST observations, overwrites <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
 <td><p>From <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">mod_root</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">mod_root</span></code></p></td>
 <td><p>Optional</p></td>
 <td><p>Root directory for interpolated model data, overwrites <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
 <td><p>From <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">mod_to_interp_root</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">mod_to_interp_root</span></code></p></td>
 <td><p>Optional</p></td>
 <td><p>Root directory for non-interpolated model data, overwrites <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
 <td><p>From <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">config_dir</span></code></p></td>
+<td><p>Optional</p></td>
+<td><p>Path to all configuration files.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">configurations/</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cartopy_data_dir</span></code></p></td>
+<td><p>Optional</p></td>
+<td><p>Cartopy data directory.</p></td>
+<td><p>In HPC: <code class="docutils literal notranslate"><span class="pre">/gpfs/projects/bsc32/software/rhel/9.2/software/Cartopy/0.23.0-foss-2023b-Python-3.11.5/lib/python3.11/site-packages/cartopy/data</span></code>. In local: Downloaded from the internet on the fly.</p></td>
 </tr>
 </tbody>
 </table>
@@ -246,8 +257,40 @@
 <td><p>Boolean variable to set if you want to temporally colocate the observation and model data.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">spatial_colocation</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">temporal_colocation_active</span></code></p></td>
+<td><p>Boolean variable</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">spatial_colocation</span></code></p></td>
 <td><p>Boolean variable to set if you want to spatially colocate the observation and model data across multiple species.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">spatial_colocation_tolerance</span></code></p></td>
+<td><p>Spatial colocation tolerance to match stations by <code class="docutils literal notranslate"><span class="pre">longitudes</span></code>/<code class="docutils literal notranslate"><span class="pre">latitudes</span></code> and/or <code class="docutils literal notranslate"><span class="pre">measurement_altitudes</span></code> (in metres)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">19.053</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">spatial_colocation_validation</span></code></p></td>
+<td><p>Boolean variable to validate spatial colocation intersections via position using <code class="docutils literal notranslate"><span class="pre">spatial_colocation_tolerance</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">spatial_colocation_validation_tolerance</span></code></p></td>
+<td><p>Spatial colocation validation tolerance to validate station reference/station name match of stations by longitude/latitude position (in metres)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">10000.0</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">spatial_colocation_station_reference</span></code></p></td>
+<td><p>Boolean variable to indicate the use of <code class="docutils literal notranslate"><span class="pre">station_reference</span></code> variable for spatial colocation</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">spatial_colocation_station_name</span></code></p></td>
+<td><p>Boolean variable to indicate usage of <code class="docutils literal notranslate"><span class="pre">station_name</span></code> variable for spatial colocation</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">spatial_colocation_longitude_latitude</span></code></p></td>
+<td><p>Boolean variable to indicate the use of <code class="docutils literal notranslate"><span class="pre">longitude</span></code> and <code class="docutils literal notranslate"><span class="pre">latitude</span></code> variables for spatial colocation</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">spatial_colocation_measurement_altitude</span></code></p></td>
+<td><p>Boolean variable to indicate the use of <code class="docutils literal notranslate"><span class="pre">measurement_altitude</span></code> variable for spatial colocation</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">plot_characteristics_filename</span></code></p></td>
@@ -256,7 +299,7 @@
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">observations_data_label</span></code></p></td>
 <td><p>Alias for observational data</p></td>
-<td><p>—</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">observations</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">lower_bound</span></code></p></td>
 <td><p>Filter out data lower than this set limit. If multiple species are being read then this can either be one value, setting the same limit across species or multiple values per species (e.g. <code class="docutils literal notranslate"><span class="pre">3,</span> <span class="pre">4,</span> <span class="pre">5</span></code>).</p></td>
@@ -268,7 +311,7 @@
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">map_extent</span></code></p></td>
 <td><p>Set the map plot extents with the syntax: minimum longitude, maximum longitude, minimum latitude, maximum latitude (e.g. <code class="docutils literal notranslate"><span class="pre">-30,</span> <span class="pre">50,</span> <span class="pre">20,</span> <span class="pre">90</span></code>).</p></td>
-<td><p>—</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[-180,</span> <span class="pre">180,</span> <span class="pre">-90,</span> <span class="pre">90]</span></code> in Dashboard, adapted to selected stations in Report and Library</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">remove_extreme_stations</span></code></p></td>
 <td><p>Type of extreme stations removal, from the options given in <code class="docutils literal notranslate"><span class="pre">remove_extreme_stations.yaml</span></code>.</p></td>
@@ -276,6 +319,10 @@
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">resampling_resolution</span></code></p></td>
 <td><p>Resolution you want to resample your data to: <code class="docutils literal notranslate"><span class="pre">hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">3hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">6hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">daily</span></code>, <code class="docutils literal notranslate"><span class="pre">monthly</span></code>, <code class="docutils literal notranslate"><span class="pre">annual</span></code>.</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">multispecies_units</span></code></p></td>
+<td><p>Units of data in multispecies plots</p></td>
 <td><p>—</p></td>
 </tr>
 </tbody>
@@ -388,6 +435,10 @@
 <td><p>Determines whether to use all GHOST or all non-GHOST networks when the <code class="docutils literal notranslate"><span class="pre">observation</span></code> field uses the <code class="docutils literal notranslate"><span class="pre">*</span></code> wildcard.</p></td>
 <td><p>—</p></td>
 </tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">model_resolution</span></code></p></td>
+<td><p>Model resolution if different from observations.</p></td>
+<td><p>Same as <code class="docutils literal notranslate"><span class="pre">resolution</span></code></p></td>
+</tr>
 </tbody>
 </table>
 </section>
@@ -418,16 +469,94 @@
 <td><p>Selects what to download when both observations and model output are present in the configuration file: <code class="docutils literal notranslate"><span class="pre">obs</span></code>, <code class="docutils literal notranslate"><span class="pre">mod</span></code>, <code class="docutils literal notranslate"><span class="pre">both</span></code>.</p></td>
 <td><p>—</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">network_type</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dl_thredds_update</span></code></p></td>
+<td><p>Specifies if the datasets information from Thredds should be updated per species every time we download data. The information is stored <a class="reference external" href="https://github.com/BSC-ES/providentia/tree/master/settings/internal/actris/files">here</a>: <code class="docutils literal notranslate"><span class="pre">True</span></code>, <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">network_type</span></code></p></td>
 <td><p>Determines whether to use all GHOST or all non-GHOST networks when the observation field uses the <code class="docutils literal notranslate"><span class="pre">*</span></code> wildcard: <code class="docutils literal notranslate"><span class="pre">ghost</span></code>, <code class="docutils literal notranslate"><span class="pre">non-ghost</span></code>.</p></td>
 <td><p>—</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dl_timeout</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dl_timeout</span></code></p></td>
 <td><p>Sets the timeout (in seconds) for downloads from HPC systems, covering interpolated and non-interpolated model data as well as GHOST and non-GHOST observations.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">180</span></code></p></td>
 </tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">model_resolution</span></code></p></td>
+<td><p>Model resolution if different from observations.</p></td>
+<td><p>Same as <code class="docutils literal notranslate"><span class="pre">resolution</span></code></p></td>
+</tr>
 </tbody>
 </table>
+</section>
+<section id="models">
+<h2>Models<a class="headerlink" href="#models" title="Link to this heading"></a></h2>
+<p>In Providentia, models can be set in different ways depending on how the <strong>model, domain and ensemble</strong> are defined.</p>
+<section id="define-model-domain-and-ensemble-independently">
+<h3>1. Define model, domain and ensemble independently<a class="headerlink" href="#define-model-domain-and-ensemble-independently" title="Link to this heading"></a></h3>
+<p>You can specify each field separately:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams61_monarch_ph3</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">eu</span>
+<span class="na">ensemble</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">allmembers</span>
+</pre></div>
+</div>
+<p>You can also define only some of them:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams61_monarch_ph3</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">eu</span>
+</pre></div>
+</div>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams61_monarch_ph3</span>
+<span class="na">ensemble</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">allmembers</span>
+</pre></div>
+</div>
+<p>Or only the model:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams61_monarch_ph3</span>
+</pre></div>
+</div>
+</section>
+<section id="combine-model-and-domain">
+<h3>2. Combine model and domain<a class="headerlink" href="#combine-model-and-domain" title="Link to this heading"></a></h3>
+<p>The domain can be included directly in the model name:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams61_monarch_ph3-eu</span>
+<span class="na">ensemble</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">allmembers</span>
+</pre></div>
+</div>
+<p>Or:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams61_monarch_ph3-eu</span>
+</pre></div>
+</div>
+</section>
+<section id="combine-model-and-ensemble">
+<h3>3. Combine model and ensemble<a class="headerlink" href="#combine-model-and-ensemble" title="Link to this heading"></a></h3>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams61_monarch_ph3-allmembers</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">eu</span>
+</pre></div>
+</div>
+</section>
+<section id="combine-model-domain-and-ensemble">
+<h3>4. Combine model, domain and ensemble<a class="headerlink" href="#combine-model-domain-and-ensemble" title="Link to this heading"></a></h3>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams61_monarch_ph3-eu-allmembers</span>
+</pre></div>
+</div>
+</section>
+<section id="aliases">
+<h3>Aliases<a class="headerlink" href="#aliases" title="Link to this heading"></a></h3>
+<p>Aliases can simplify long model names.</p>
+<p>They work in two cases:</p>
+<ol class="arabic simple">
+<li><p><strong>Combined model, domain and ensemble</strong></p></li>
+</ol>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams61_monarch_ph3-eu-allmembers, cams_reanalysis_ensemble_validated-regional-000 (MONARCH, CAMS)</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p><strong>Independent fields with only one value each</strong></p></li>
+</ol>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams61_monarch_ph3 (MONARCH)</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">eu</span>
+<span class="na">ensemble</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">allmembers</span>
+</pre></div>
+</div>
+</section>
 </section>
 </section>
 
@@ -436,7 +565,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Configuration-files.html" class="btn btn-neutral float-left" title="Configuration files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Command-line-configuration.html" class="btn btn-neutral float-right" title="Command line configuration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Metadata-fields.html" class="btn btn-neutral float-right" title="Metadata fields" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

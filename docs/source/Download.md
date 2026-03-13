@@ -7,11 +7,11 @@ Providentia's download mode retrieves modelled and observational data from BSC s
 To start downloading data, simply add `--download` or `--dl` as a launch option along with the **mandatory** configuration file on the command line:
 
 ```
-./bin/providentia --config='/path/to/file/example.conf' --download
+./bin/providentia --config=/path/to/file/example.conf --download
 ```
 
 ```
-./bin/providentia --config='/path/to/file/example.conf' --dl
+./bin/providentia --config=/path/to/file/example.conf --dl
 ```
 
 This will get the data that needs to be downloaded from your configuration file and save it into the directories specified in `settings/data_paths.yaml` for `local`.
@@ -31,18 +31,18 @@ Providentia supports four types of downloads. For detailed instructions, please 
      - For non-GHOST networks and interpolated/non-interpolated model data, no special action is required.
    - To see more information, check the [BSC download page](BSC-download).
 
-2. **Download of network from Zenodo**  
-   - Downloads GHOST networks from the [GHOST Zenodo webpage](https://zenodo.org/records/10637450).  
+2. **Download of GHOST network data from Zenodo**  
+   - Downloads GHOST networks from the [GHOST Zenodo webpage](https://zenodo.org/search?q=parent.id%3A10637449&f=allversions%3Atrue&l=list&p=1&s=10&sort=version).  
    - How to get this type of download: answer `n` to the HPC prompt: _Do you want to download observational data from the BSC remote machine? (Otherwise, GHOST observational data will be retrieved from Zenodo)_ or set `dl_ghost_source` to `zenodo`.
    - To see more information, check the [Zenodo download page](Zenodo-download).
 
-3. **Download of network from ACTRIS (Thredds)**  
+3. **Download of ACTRIS network data from Thredds**  
    - Downloads observational networks from [ACTRIS Thredds](https://thredds.nilu.no/thredds/catalog.html).  
-   - How to get this type of download: put `actris/actris` in the `network` field in your configuration.
+   - How to get this type of download: write `actris/actris` on the `network` field in your configuration file.
    - To see more information, check the [ACTRIS download page](ACTRIS-download).
 
 4. **Download of non-interpolated model data from the Atmosphere Data Store (ADS)**  
-   - Downloads model outputs from the [Atmosphere Data Store](https://ads.atmosphere.copernicus.eu/datasets).  
+   - Downloads model outputs from the [Atmosphere Data Store](https://ads.atmosphere.copernicus.eu/datasets). You must have an ECMWF account to access this feature.
    - How to get this type of download: specify the model as `cams_analysis`, `cams_forecast` or `cams_reanalysis` in your configuration, and set `dl_interpolated` to `False`.
    - To see more information, check the [CAMS download page](CAMS-download).
 
@@ -62,6 +62,7 @@ Each of these variables corresponds directly to one of the questions asked durin
 | `dl_ghost_source`  | _Do you want to download observational data from the BSC remote machine? (Otherwise, GHOST observational data will be retrieved from Zenodo) ([y]/n)_ | `bsc` (download from BSC remote machine) or `zenodo` (retrieve from Zenodo)  |
 | `dl_interpolated`  | _Model data was detected in the configuration file. Do you want to download the interpolated version? (Otherwise, the non-interpolated model data will be downloaded) ([y]/n)_ | `True` (download interpolated) or `False` (download non-interpolated)                                |
 | `dl_mode` | _Which type of data do you want to download? Observational, modelled or both? ([both]/obs/mod)_ | `obs` (download observations), `mod` (download models) or `both` (download both) |
+| `dl_thredds_update` | _File containing information of the files available in Thredds for {actris_parameter} ({info_path}) already exists. Do you want to update it (y/[n])?_ | `True` or `False`     |                 |
 | `network_type` | _Do you want to download all the GHOST networks? (Otherwise all the non-GHOST networks will be downloaded) ([y]/n)_   | `ghost` (use all GHOST networks) or `non-ghost` (use all non-GHOST networks)                |
 
 ## Using wildcards
@@ -75,4 +76,36 @@ You can use the `*` wildcard in the following fields to automatically select all
 - `start_date`
 - `end_date`  
 
+## Example configuration file with wildcards
+
+```ini
+[WILDCARD]
+network = EBAS
+species = sconco3, sconcno2
+resolution = hourly
+start_date = *
+end_date = *
+model = cams61_emep_ph2-eu-000
+```
+
 **Note:** Using wildcards may result in large downloads, so use with caution.
+
+## Model resolution
+
+Models and observations may have different native temporal resolutions. In Providentia, interpolation between model data and observations includes:
+
+- Upsampling → duplicates temporal steps
+- Downsampling → cuts or aggregates temporal steps
+
+Now the data download and interpolation processes can be performed using the same configuration file, as in this example:
+
+```
+[PRV_sconco3_CHIMERE]
+network = EBAS
+species = sconco3
+resolution = daily
+start_date = 20180101
+end_date = 20180601
+model = cams61_chimere_ph2-eu-000 (CHIMERE)
+model_resolution = hourly
+```
