@@ -542,7 +542,7 @@ class Download(object):
         # if not valid network, check if user put the network on init.yaml 
         if network not in self.nonghost_available_networks:
             msg = f"The {network} network could not be found on {join(PROVIDENTIA_ROOT,'settings','available_inputs.yaml')} nonghost_available_networks list."
-            msg += "\nPlease, add the network to the list and execute again."
+            msg += "\nPlease, add the network to the list and execute again.\n"
             show_message(self, msg, deactivate=initial_check)
             return
         
@@ -559,7 +559,7 @@ class Download(object):
         if not_available_resolutions:
             available_resolutions = set(self.resolution) - not_available_resolutions
             msg = f"The resolution/s {', '.join(available_resolutions)} could not be found on {join(PROVIDENTIA_ROOT,'settings','available_inputs.yaml')} nonghost_available_resolutions list."
-            msg += "\nPlease, add the necessary resolutions to the list and execute again."
+            msg += "\nPlease, add the necessary resolutions to the list and execute again.\n"
             show_message(self, msg, deactivate=initial_check)
             return
 
@@ -943,7 +943,7 @@ class Download(object):
             show_message(self, msg, deactivate=initial_check)
             return
 
-        sftp_resolutions = self.model_resolution if self.model_resolution else set(self.sftp.listdir(remote_dir)).intersection(self.nonghost_available_resolutions)
+        sftp_resolutions = self.resolution if self.resolution else set(self.sftp.listdir(remote_dir)).intersection(self.nonghost_available_resolutions)
         for resolution in sftp_resolutions:
             try:
                 sftp_species = self.species if self.species else set(self.sftp.listdir(join(remote_dir,resolution))).intersection(self.available_species)

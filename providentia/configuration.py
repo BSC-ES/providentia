@@ -1086,7 +1086,7 @@ class ProvConfiguration:
         # supressed warning deactivation
         if model_exists is False:
             msg = (f"Model ID '{modid}' not found. Checked in:\n{msg}" + 
-                   f"Please, add the model ID to the file or ensure it exists on the HPC path.")
+                   f"Please, add the model ID to the file or ensure it exists on the HPC path.\n")
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             return []
 
