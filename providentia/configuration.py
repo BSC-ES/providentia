@@ -283,6 +283,9 @@ class ProvConfiguration:
             self.read_instance.standard_metadata = get_standard_metadata({'standard_units':'', 'units_quantity':''})
 
             # add ACTRIS variables to standard metadata
+            for actris_dict in actris_standard_metadata.values():
+                if actris_dict["data_type"] == 'object':
+                    actris_dict["data_type"] = object
             self.read_instance.standard_metadata.update(actris_standard_metadata)
 
             # create list of GHOST metadata variables to read
@@ -1069,22 +1072,24 @@ class ProvConfiguration:
                         model_exists = True
                         break
                 
-                msg += f"Cannot find the model ID '{modid}' in '{join('settings', 'interp_models.yaml')}'. Please add it to the file. "
+                msg += f"1. Local config: '{join('settings', 'interp_models.yaml')}'\n"
 
                 # search in hpc mod_to_interp_path
                 if model_exists is False:
                     self.read_instance.connect() 
-                    mod_to_interp_path = join(self.read_instance.mod_to_interp_remote_path,modid,domain)
+                    mod_to_interp_path = join(self.read_instance.mod_to_interp_remote_path, modid, domain)
 
                     try:
                         self.read_instance.sftp.stat(mod_to_interp_path)
                         model_exists = True
                     except FileNotFoundError:
-                        msg += f"Cannot find the model ID {modid} with the {domain} domain in '{mod_to_interp_path}'."
+                        msg += f"2. Remote HPC path: '{mod_to_interp_path}'\n"
 
         # if model does not exist, exit
         # supressed warning deactivation
         if model_exists is False:
+            msg = (f"Model ID '{modid}' not found. Checked in:\n{msg}" + 
+                   f"Please, add the model ID to the file or ensure it exists on the HPC path.\n")
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             return []
 
