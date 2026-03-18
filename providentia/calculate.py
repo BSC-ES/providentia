@@ -1,6 +1,6 @@
 """
 Classes for the calculation of basic and model bias statistics.
-
+    
 Function defintions mainly stem from: 
 https://www.tandfonline.com/doi/pdf/10.1080/10962247.2016.1265027 ,
 https://www.cmascenter.org/conference/2003/session_poster/yu_abstract3.pdf ,
@@ -1074,3 +1074,126 @@ class ModBias(object):
         """
 
         return contingency_table.gerrity_score().values.item()
+
+    @staticmethod
+    def calculate_gerrity(obs, mod, multi_category_edges = [0, 0.1, 0.4, 0.8, 50]):
+        """ Calculate multicategory Gerrity score.
+        """
+
+        if obs.size == 0:
+            return np.NaN
+        else:
+            obs_xr = copy.deepcopy(obs)
+            mod_xr = copy.deepcopy(mod)
+            obs_xr = xr.DataArray(np.ma.masked_invalid(obs_xr))
+            mod_xr = xr.DataArray(np.ma.masked_invalid(mod_xr))
+            contingency = xs.Contingency(
+                obs_xr, mod_xr,
+                np.array(multi_category_edges), np.array(multi_category_edges),
+                    dim=[obs_xr.dims[-1]]
+                )
+            print(contingency)
+            return contingency.gerrity_score().to_numpy()
+        
+    @staticmethod
+    def calculate_slope(obs, mod):
+
+        if obs.size == 0:
+            return np.NaN
+        else:
+            obs_xr = copy.deepcopy(obs)
+            mod_xr = copy.deepcopy(mod)
+            obs_xr = xr.DataArray(np.ma.masked_invalid(obs_xr))
+            mod_xr = xr.DataArray(np.ma.masked_invalid(mod_xr))
+            return xs.linslope(obs_xr,mod_xr,dim=[obs_xr.dims[-1]],skipna=True).to_numpy()
+        
+    @staticmethod
+    def calculate_pss(obs, mod, multi_category_edges = [0, 50, 10000]):
+
+        if obs.size == 0:
+            return np.NaN
+        else:
+            obs_xr = copy.deepcopy(obs)
+            mod_xr = copy.deepcopy(mod)
+            obs_xr = xr.DataArray(np.ma.masked_invalid(obs_xr))
+            mod_xr = xr.DataArray(np.ma.masked_invalid(mod_xr))
+            contingency = xs.Contingency(
+                obs_xr, mod_xr,
+                np.array(multi_category_edges), np.array(multi_category_edges),
+                    dim=[obs_xr.dims[-1]]
+                )
+            return contingency.peirce_score().to_numpy()
+    
+    @staticmethod
+    def calculate_hitrate(obs, mod, multi_category_edges = [0, 50, 10000]):
+
+        if obs.size == 0:
+            return np.NaN
+        else:
+            obs_xr = copy.deepcopy(obs)
+            mod_xr = copy.deepcopy(mod)
+            obs_xr = xr.DataArray(np.ma.masked_invalid(obs_xr))
+            mod_xr = xr.DataArray(np.ma.masked_invalid(mod_xr))
+            print(obs_xr.size,obs_xr.count())
+            print(mod_xr.size,mod_xr.count())
+            contingency = xs.Contingency(
+                obs_xr, mod_xr,
+                np.array(multi_category_edges), np.array(multi_category_edges),
+                    dim=[obs_xr.dims[-1]]
+                )
+            return contingency.hit_rate().fillna(-1).to_numpy()
+        
+    @staticmethod
+    def calculate_falserate(obs, mod, multi_category_edges = [0, 50, 10000]):
+
+        if obs.size == 0:
+            return np.NaN
+        else:
+            obs_xr = copy.deepcopy(obs)
+            mod_xr = copy.deepcopy(mod)
+            obs_xr = xr.DataArray(np.ma.masked_invalid(obs_xr))
+            mod_xr = xr.DataArray(np.ma.masked_invalid(mod_xr))
+            contingency = xs.Contingency(
+                obs_xr, mod_xr,
+                np.array(multi_category_edges), np.array(multi_category_edges),
+                    dim=[obs_xr.dims[-1]]
+                )
+            return contingency.false_alarm_rate().to_numpy()
+
+    @staticmethod        
+    def calculate_falseratio(obs, mod, multi_category_edges = [0, 50, 10000]):
+
+        if obs.size == 0:
+            return np.NaN
+        else:
+            obs_xr = copy.deepcopy(obs)
+            mod_xr = copy.deepcopy(mod)
+            obs_xr = xr.DataArray(np.ma.masked_invalid(obs_xr))
+            mod_xr = xr.DataArray(np.ma.masked_invalid(mod_xr))
+            print(obs_xr.size,obs_xr.count())
+            print(mod_xr.size,mod_xr.count())
+            contingency = xs.Contingency(
+                obs_xr, mod_xr,
+                np.array(multi_category_edges), np.array(multi_category_edges),
+                    dim=[obs_xr.dims[-1]]
+                )
+            return contingency.false_alarm_ratio().fillna(-1).to_numpy()
+        
+    @staticmethod
+    def calculate_gss(obs, mod, multi_category_edges = [0, 50, 10000]):
+
+        if obs.size == 0:
+            return np.NaN
+        else:
+            obs_xr = copy.deepcopy(obs)
+            mod_xr = copy.deepcopy(mod)
+            obs_xr = xr.DataArray(np.ma.masked_invalid(obs_xr))
+            mod_xr = xr.DataArray(np.ma.masked_invalid(mod_xr))
+            print(obs_xr.size,obs_xr.count())
+            print(mod_xr.size,mod_xr.count())
+            contingency = xs.Contingency(
+                obs_xr, mod_xr,
+                np.array(multi_category_edges), np.array(multi_category_edges),
+                    dim=[obs_xr.dims[-1]]
+                )
+            return contingency.equit_threat_score().fillna(-1).to_numpy()
