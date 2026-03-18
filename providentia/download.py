@@ -22,6 +22,9 @@ from .configuration import ProvConfiguration, load_conf
 from .read_aux import check_for_ghost
 from .warnings_prv import show_message
 from .zenodo import Zenodo
+from .download_aux import (find_model, find_available_resolutions, 
+                           find_available_species, find_available_nc_files,
+                           build_nc_file_paths_in_range, download_non_interpolated_sftp)
 
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 
@@ -30,6 +33,7 @@ data_paths = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/data_paths.yam
 interp_models = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_models.yaml')))
 mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'mapping_species.yaml')))
 dl_hpc = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'dl_hpc.yaml')))
+temporal_resolution_map = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'temporal_resolution_map.yaml')))
 
 class Download(object):
     """Main class responsible for handling Providentia data downloads."""
@@ -170,11 +174,11 @@ class Download(object):
                             # get user input to know which kind of network wants
                             while True:
                                 download_source = input("\nDo you want to download all the GHOST networks? (Otherwise all the non-GHOST networks will be downloaded) ([y]/n): ").lower()
-                                if download_source in ['','y','n']:
+                                if download_source in ['', 'y', 'n']:
                                     break
                             
                             # get the boolean value from the answer of the user
-                            self.reading_ghost = download_source in ['','y']
+                            self.reading_ghost = download_source in ['', 'y']
 
                     # if there are GHOST networks, ask the user whether they want to download it from zenodo or HPC machines
                     if self.reading_ghost:
@@ -182,7 +186,7 @@ class Download(object):
                             # ask whether the user wants to download from the zenodo or bsc machine
                             while True: 
                                 dl_ghost_source = input("\nDo you want to download observational data from the BSC remote machine? (Otherwise, GHOST observational data will be retrieved from Zenodo) ([y]/n): ").lower()
-                                if dl_ghost_source in ['','y','n']:
+                                if dl_ghost_source in ['', 'y', 'n']:
                                     break
 
                             self.dl_ghost_source = 'bsc' if dl_ghost_source in ['', 'y'] else 'zenodo'
@@ -411,54 +415,100 @@ class Download(object):
 
                 self.logger.info(f"\nRemote machine credentials saved on {join(PROVIDENTIA_ROOT, '.env')}")
                     
-    def select_files_to_download(self, nc_files_to_download):
+    def select_files_to_download(self, nc_filepaths_to_download):
         """
         Checks a list of files against the local filesystem and returns
         the subset of files that are not already downloaded. 
 
         Parameters
         ----------
-        nc_files_to_download : list of str
+        nc_filepaths_to_download : list of str or dict
             A list of file paths intended for download.
 
         Returns
         -------
-        not_downloaded_files : list of str
+        not_downloaded_paths : list of str
             A list of file paths that are either not present locally or should be 
             re-downloaded depending on the `dl_overwrite` attribute.
         """
         
         # initialise list of non-downloaded files
-        not_downloaded_files = []
-        if nc_files_to_download:
-            # get the downloaded and not downloaded files
-            not_downloaded_files = list(filter(lambda x:not os.path.exists(x), nc_files_to_download))
-            downloaded_files = list(filter(lambda x:os.path.exists(x), nc_files_to_download))
+        not_downloaded_paths = []
+        
+        if nc_filepaths_to_download:
             
-            # get the files that were downloaded before the execution
-            downloaded_before_execution_files = list(filter(lambda x:self.prov_start_time > os.path.getctime(x), downloaded_files))
-
-            # if there was any file downloaded before the execution    
-            if downloaded_before_execution_files:
-                # make the user choose between overwriting or not overwriting
-                if not isinstance(self.dl_overwrite, bool):
-                    # ask if user wants to overwrite
-                    while True:
-                        dl_overwrite = input("\nThere are some files that were already downloaded in a previous download, do you want to overwrite them ([y]/n)? ").lower() 
-                        if dl_overwrite in ['y','n','']:
-                            break
+            # TODO clean when the dictionary is implemented in all modes
+            if type(nc_filepaths_to_download) == dict:
                     
-                    # get the boolean value
-                    self.dl_overwrite = dl_overwrite != 'n'
+                for dir, dir_dict in nc_filepaths_to_download.items():
 
-                # if user wants to overwrite then add the files downloaded before the execution as if they were never downloaded
-                if self.dl_overwrite:
-                    not_downloaded_files += downloaded_before_execution_files
-                # change overwritten files boolean to True to indicate that some files were ignored
+                    downloaded_files = list(filter(lambda x:os.path.exists(join(dir, x)), dir_dict["nc_files"]))
+
+                    # get the files that were downloaded before the execution
+                    downloaded_before_execution_files = list(filter(lambda x:self.prov_start_time > os.path.getctime(join(dir, x)), downloaded_files))
+
+                    # if there was any file downloaded before the execution    
+                    if downloaded_before_execution_files:
+                        if not isinstance(self.dl_overwrite, bool):
+                            # ask if user wants to overwrite
+                            while True:
+                                dl_overwrite = input("\nThere are some files that were already downloaded in a previous download, do you want to overwrite them ([y]/n)? ").lower() 
+                                if dl_overwrite in ['y', 'n', '']:
+                                    break
+                            
+                            # get the boolean value
+                            self.dl_overwrite = dl_overwrite != 'n'
+                        
+                        # indicate that some files are going to be skipped
+                        if self.dl_overwrite is False:
+                            self.overwritten_files_flag = True
+                        
+                        break
+            
+                not_downloaded_paths = {}
+
+                if self.overwritten_files_flag is True:
+
+                    for dir, dir_dict in nc_filepaths_to_download.items():
+                        # get the downloaded and not downloaded files
+                        dir_not_downloaded_paths = list(filter(lambda x:not os.path.exists(join(dir, x)), dir_dict["nc_files"]))
+
+                        if dir_not_downloaded_paths:
+                            not_downloaded_paths[dir] = {"remote_dir" : dir_dict["remote_dir"],
+                                                        "nc_files" : dir_not_downloaded_paths}
+                
                 else:
-                    self.overwritten_files_flag = True
+                    not_downloaded_paths = nc_filepaths_to_download
 
-        return not_downloaded_files
+            else:
+                # get the downloaded and not downloaded files
+                not_downloaded_paths = list(filter(lambda x:not os.path.exists(x), nc_filepaths_to_download))
+                downloaded_files = list(filter(lambda x:os.path.exists(x), nc_filepaths_to_download))
+                
+                # get the files that were downloaded before the execution
+                downloaded_before_execution_files = list(filter(lambda x:self.prov_start_time > os.path.getctime(x), downloaded_files))
+
+                # if there was any file downloaded before the execution    
+                if downloaded_before_execution_files:
+                    # make the user choose between overwriting or not overwriting
+                    if not isinstance(self.dl_overwrite, bool):
+                        # ask if user wants to overwrite
+                        while True:
+                            dl_overwrite = input("\nThere are some files that were already downloaded in a previous download, do you want to overwrite them ([y]/n)? ").lower() 
+                            if dl_overwrite in ['y', 'n', '']:
+                                break
+                        
+                        # get the boolean value
+                        self.dl_overwrite = dl_overwrite != 'n'
+
+                    # if user wants to overwrite then add the files downloaded before the execution as if they were never downloaded
+                    if self.dl_overwrite:
+                        not_downloaded_paths += downloaded_before_execution_files
+                    # change overwritten files boolean to True to indicate that some files were ignored
+                    else:
+                        self.overwritten_files_flag = True
+
+        return not_downloaded_paths
 
     def download_nonghost_network(self, network, initial_check, files_to_download=None):
         """
@@ -492,7 +542,7 @@ class Download(object):
         # if not valid network, check if user put the network on init.yaml 
         if network not in self.nonghost_available_networks:
             msg = f"The {network} network could not be found on {join(PROVIDENTIA_ROOT,'settings','available_inputs.yaml')} nonghost_available_networks list."
-            msg += "\nPlease, add the network to the list and execute again."
+            msg += "\nPlease, add the network to the list and execute again.\n"
             show_message(self, msg, deactivate=initial_check)
             return
         
@@ -509,7 +559,7 @@ class Download(object):
         if not_available_resolutions:
             available_resolutions = set(self.resolution) - not_available_resolutions
             msg = f"The resolution/s {', '.join(available_resolutions)} could not be found on {join(PROVIDENTIA_ROOT,'settings','available_inputs.yaml')} nonghost_available_resolutions list."
-            msg += "\nPlease, add the necessary resolutions to the list and execute again."
+            msg += "\nPlease, add the necessary resolutions to the list and execute again.\n"
             show_message(self, msg, deactivate=initial_check)
             return
 
@@ -893,7 +943,7 @@ class Download(object):
             show_message(self, msg, deactivate=initial_check)
             return
 
-        sftp_resolutions = self.model_resolution if self.model_resolution else set(self.sftp.listdir(remote_dir)).intersection(self.nonghost_available_resolutions)
+        sftp_resolutions = self.resolution if self.resolution else set(self.sftp.listdir(remote_dir)).intersection(self.nonghost_available_resolutions)
         for resolution in sftp_resolutions:
             try:
                 sftp_species = self.species if self.species else set(self.sftp.listdir(join(remote_dir,resolution))).intersection(self.available_species)
@@ -995,6 +1045,7 @@ class Download(object):
                             self.sftp.get(remote_path, local_path, callback=self.check_time) 
             
             return initial_check_nc_files
+        
 
     def download_non_interpolated_model(self, model, initial_check, files_to_download=None):
         """
@@ -1016,277 +1067,47 @@ class Download(object):
             A list of file paths intended for download.
         """
 
-        # check if ssh exists and check if still active, connect if not
-        if (self.ssh is None) or (self.ssh.get_transport().is_active()):
-            self.connect()  
+        # get model id and the domain
+        mod_id, domain, ensemble = model.split("-")
         
-        if not initial_check:
+        if initial_check:
             # print current model
             self.logger.info('\n'+'-'*40)
             self.logger.info(f"\nDownloading {model} non-interpolated model data from {self.remote_machine}...")
+
+            # check if ssh exists and check if still active, connect if not
+            if (self.ssh is None) or (self.ssh.get_transport().is_active()):
+                self.connect()  
+
+            # look for the model in the remote machine
+            model_exists, remote_dir = find_model(self, mod_id, domain, initial_check)
+
+            if not model_exists:
+                return
             
-        # get resolution and species combinations
-        res_spec_dir = []
-
-        # get model id and the domain
-        mod_id, domain, ensemble = model.split("-")
-
-        # initialise warning message and model exists boolean
-        msg = ""
-        model_exists = False
-
-        # see if the model is any of the interp_models.yaml lists
-        for model_type, model_dict in interp_models.items():
-            if mod_id in model_dict["models"]:
-                model_exists = True
-                break
-        
-        # if it is in the list, check if the paths work
-        if model_exists is True:
-            # get boolean to False again until the paths works
-            model_exists = False
-
-            # get all paths that work
-            # if there is none, show a warning
-            mod_dir_functional_list = []    
-            for mod_dir in model_dict["paths"]:
-                # esarchive in transfer5 is located inside gpfs
-                if "/esarchive/" == mod_dir[:11] and self.remote_hostname.startswith('transfer'):
-                    mod_dir = join("/gpfs/archive/bsc32/",mod_dir[1:])
-                # check if directory exists in the remote machine
-                try:
-                    self.sftp.stat(mod_dir)
-                    mod_dir_functional_list.append(mod_dir)      
-                except FileNotFoundError:
-                    pass
-
-            # if none of the paths are in this current machine, break
-            if not mod_dir_functional_list:
-                msg += f"None of the paths specified in {join('settings', 'interp_models.yaml')} are available on the remote machine ({self.remote_machine}). "
-            # if any path works, get the first one that has the model
-            else:
-                # get first functional directory  
-                for mod_dir in mod_dir_functional_list:
-                    remote_dir = join(mod_dir,mod_id,domain)
-                    # check if remote model and domain directories exist in the remote machine
-                    try:
-                        self.sftp.stat(remote_dir)
-                        model_exists = True
-                        break
-                    except FileNotFoundError:
-                        pass
-
-                # if the model-domain combination is not possible, show the warning
-                if model_exists is False:
-                    msg += f"There is no data available for the {mod_id} model with the {domain} domain in none of the paths specified in {join('settings', 'interp_models.yaml')} in the remote machine ({self.remote_machine}). "
-
-        # if model was not in the list or any of the paths were available
-        # or there was no valid path model combination then search in the gpfs directory
-        if model_exists is False:
-            # get all possible models
-            mod_to_interp_path = join(self.mod_to_interp_remote_path,mod_id,domain)
-            try:
-                self.sftp.stat(mod_to_interp_path)
-                remote_dir = mod_to_interp_path
-                model_exists = True
-            except FileNotFoundError:
-                pass 
+            valid_resolutions = find_available_resolutions(self, remote_dir, mod_id, domain, initial_check)
             
-            # add to the message if model was not found in the gpfs remote directory
-            msg += f"Cannot find the {mod_id} model with the {domain} domain in '{self.mod_to_interp_remote_path}'."    
-        
-        # if the model-domain combination is not possible, break
-        if model_exists is False:
-            show_message(self, msg, deactivate=initial_check)
-            return
+            valid_resolutions_species_dir = find_available_species(self, valid_resolutions, remote_dir, ensemble, mod_id, domain, initial_check)
 
-        # get all the resolutions available in the remote directory
-        sftp_resolutions = self.model_resolution if self.model_resolution else set(self.sftp.listdir(remote_dir)).intersection(self.nonghost_available_resolutions)
+            path_files_dict = find_available_nc_files(self, valid_resolutions_species_dir, initial_check)
 
-        # iterate through the resolutions
-        for resolution in sftp_resolutions:
-            try:
-                # get available species ("normal" and mapped)
-                available_species = self.available_species+[spec[0] for spec in mapping_species.values()]
-                sftp_species = self.species if self.species else set(self.sftp.listdir(join(remote_dir,resolution))).intersection(available_species)
-            except FileNotFoundError:
-                msg = f"There is no data available in {self.remote_machine} for the {mod_id} model with the {domain} domain at {resolution} resolution."
-                show_message(self, msg, deactivate=initial_check)
-                continue
+            initial_check_nc_files = build_nc_file_paths_in_range(self, path_files_dict, initial_check)
 
-            # iterate through the species
-            for speci_to_process in sftp_species: 
-                # initialize boolean that saves whether species was found
-                species_exists = False
-                species = speci_to_process
-                # first try with the original species
-                try:
-                    # if it is an ensemble member
-                    if ensemble.isdigit() or ensemble == 'allmembers':
-                        res_spec = join(remote_dir,resolution,species)
-                    # if it is an ensemble statistic
-                    else:
-                        res_spec = join(remote_dir,resolution,"ensemble-stats",species+"_"+ensemble)
-  
-                    self.sftp.stat(res_spec)
-                    species_exists = True
-                # if there are none, try with the mapped species
-                except FileNotFoundError:
-                    # change species name to the species to map
-                    if speci_to_process in mapping_species:
-                        for mapping_speci in mapping_species[speci_to_process]:
-                            try:
-                                # if it is an ensemble member
-                                if ensemble.isdigit() or ensemble == 'allmembers':
-                                    res_spec = join(remote_dir,resolution, mapping_speci)
-                                # if it is an ensemble statistic
-                                else:
-                                    res_spec = join(remote_dir,resolution, "ensemble-stats", species + "_" + ensemble)
-  
-                                self.sftp.stat(res_spec)  
-                                species_exists = True
-                                break
-                            except FileNotFoundError:
-                                pass
-                
-                # if no species were found, then show the message
-                if species_exists is False:
-                    msg = f"There is no data available in {self.remote_machine} for the {mod_id} model with the {domain} domain for {species} species at {resolution} resolution."
-                    show_message(self, msg, deactivate=initial_check)
-                    continue
-
-                # add the path with the resolution and species combination to the list
-                res_spec_dir.append(res_spec)
-                        
-        # print the species, resolution and model combinations that are going to be downloaded
-        if res_spec_dir:
-
-            # initialise list with all the nc files to be downloaded
-            initial_check_nc_files = []
-
-            if not initial_check:
-                self.logger.info(f"\n{model} model data to download ({len(res_spec_dir)}):")
-            
-            # get all the nc files in the date range
-            for remote_dir in res_spec_dir:
-                         
-                # get nc files
-                nc_files = self.sftp.listdir(remote_dir)
-
-                if nc_files:
-                    # if it is an ensemble member
-                    if ensemble.isdigit() or ensemble == 'allmembers':
-                        # get the domain, resolution and species from the path
-                        domain, resolution, species = remote_dir.split('/')[-3:]
-
-                        # identify format of the directory
-                        # the format is a tuple of how many - and how many _ are there
-                        # the directory format is choosen by popularity
-                        formats_list = [(file.count("-"), file.count("_")) for file in nc_files]
-                        number_of_formats_dict = {format: formats_list.count(format) for format in set(formats_list)}
-                        format = max(number_of_formats_dict, key=number_of_formats_dict.get)
-                        
-                        # filter and get only the files that follow the format (number of dashes and hyphens and end of file)
-                        nc_files = list(filter(lambda x:(x.count("-"),x.count("_")) == format and x.endswith(".nc"),nc_files))
-                        
-                        # example: od550du_2019040212.nc (0,1)
-                        if format == (0, 1):
-                            # when there is no ensemble in the name only allmembers and 000 are valid
-                            if ensemble == '000' or ensemble == 'allmembers':
-                                nc_files = list(filter(lambda x:x.split("_")[0] == species, nc_files))
-
-                        # example: od550du-000_2021020812.nc (1,1)
-                        elif format == (1, 1):
-                            # filter by ensemble in case that ensemble is not allmembers
-                            if ensemble != 'allmembers':
-                                nc_files = list(filter(lambda x:x.split("_")[0] == species+'-'+ensemble,nc_files))
-
-                        # unknown format
-                        else:
-                            error = f"It is not possible to download this nc file type yet. Please, contact the developers. Files to download: {nc_files}"
-                            self.logger.error(error)
-                            sys.exit(1)
-                    
-                    # if it is an ensemble statistic
-                    else:
-                        # get the domain, resolution and species from the path
-                        domain, resolution, _, species = remote_dir.split('/')[-4:]
-                        species = species.split("_",1)[0]
-
-                        # filter the nc files to only get the ones that have the correct species and stats
-                        nc_files = list(filter(lambda x:x.split("_")[0] == species and "_".join(x[:-3].split("_")[2:]) == ensemble, nc_files))
-                
-                # add ensemble-stats directory if it is an ensemble member
-                if ensemble.isdigit() or ensemble == 'allmembers':
-                    local_dir = join(self.mod_to_interp_root,mod_id,domain,resolution,species)
-                else:
-                    local_dir = join(self.mod_to_interp_root,mod_id,domain,resolution,"ensemble-stats",species+"_"+ensemble)
-
-                # print source and destination
-                if not initial_check:
-                    self.logger.info(f"\n  - {local_dir}, source: {remote_dir} ({self.remote_machine})")
-                    
-                # if there is no options with the ensemble, tell the user
-                if nc_files == []:
-                    msg = f"There is no data available in {self.remote_machine} for the {mod_id} model with the {domain} domain with the {ensemble} ensemble."
-                    show_message(self, msg, deactivate=initial_check)
-                    continue
-
-                # get the nc files in the date range        
-                valid_nc_files = self.get_valid_nc_files_in_date_range(nc_files)
-
-                # warning if model + species + resolution + network + date range combination gets no matching results       
-                if not valid_nc_files:                 
-                    msg = f"There is no data available in {self.remote_machine} from {self.start_date} to {self.end_date} for {model} model {species} species at {resolution} resolution."
-                    show_message(self, msg, deactivate=initial_check)
-                    continue
-
-                # download the valid resolution specie date combinations
-                else:
-                    
-                    # create directories if they don't exist
-                    if not os.path.exists(local_dir):
-                        os.makedirs(local_dir) 
-
-                    # sort nc_files
-                    valid_nc_files.sort() 
-
-                    if not initial_check:
-                        # get the ones that are not already downloaded
-                        valid_nc_files = list(filter(lambda x:join(local_dir,x) in files_to_download, valid_nc_files))
-                        if not valid_nc_files:
-                            msg = "Files were already downloaded."
-                            show_message(self, msg, deactivate=initial_check)     
-                            continue    
-
-                    if not initial_check and not self.logfile:
-                        # print the tqdm bar if output goes to screen        
-                        valid_nc_files_iter = tqdm(valid_nc_files, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Downloading files ({len(valid_nc_files)})")
-                    else:
-                        # do not print the bar if it is the initial check
-                        valid_nc_files_iter = valid_nc_files
-
-                    # download each individual nc file using sftp protocol
-                    for nc_file in valid_nc_files_iter:
-                        local_path = join(local_dir,nc_file)
-                        if initial_check:
-                            initial_check_nc_files.append(local_path)
-                        else:
-                            # get last downloaded file in case there was a keyboard interrupt
-                            self.latest_nc_file_path = local_path
-
-                            # initialize the timeout and get the file
-                            self.ncfile_dl_start_time = time.time()
-                            remote_path = join(remote_dir, nc_file)
-                            self.sftp.get(remote_path, local_path, callback=self.check_time) 
-            
             return initial_check_nc_files
+                        
+        elif files_to_download:
 
-        # tell the user if not valid resolution specie date combinations
+            self.logger.info(f"\n{model} model data to download ({len(files_to_download)}):")
+
+            download_non_interpolated_sftp(self, files_to_download)
+        
         else:
+
+            # tell the user if not valid resolution specie date combinations
             msg = "There is no available model output to be downloaded."
             show_message(self, msg, deactivate=initial_check)
-            
+
+    # TODO         
     def copy_non_interpolated_model(self, model, initial_check, files_to_download=None):
         """
         Copy from esarchive to gpfs interpolated model data from a remote machine via SFTP.
@@ -1630,16 +1451,19 @@ class Download(object):
         """
 
         valid_nc_files = []
+
         for nc_file in sorted(nc_files):
-            if ".nc" in nc_file:
+            if nc_file.endswith(".nc"):
                 ym = nc_file[:-3].split("_")[1]
+                
                 # from yyyymm to yyyymmdd
                 if len(ym) == 6:
                     ym = '{}01'.format(ym)
                 # from yyyymmddhh to yyyymmdd
                 elif len(ym) == 10:
                     ym = ym[:-2]
-                # get the date range
+
+                # filter files out of the data range
                 if int(ym) >= int(self.start_date) and int(ym) < int(self.end_date):
                     valid_nc_files.append(nc_file)
                     
