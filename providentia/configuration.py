@@ -283,6 +283,9 @@ class ProvConfiguration:
             self.read_instance.standard_metadata = get_standard_metadata({'standard_units':'', 'units_quantity':''})
 
             # add ACTRIS variables to standard metadata
+            for actris_dict in actris_standard_metadata.values():
+                if actris_dict["data_type"] == 'object':
+                    actris_dict["data_type"] = object
             self.read_instance.standard_metadata.update(actris_standard_metadata)
 
             # create list of GHOST metadata variables to read
