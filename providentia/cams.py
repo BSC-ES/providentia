@@ -238,7 +238,7 @@ class Cams(object):
 
         # get the level and apply it if the species is multi level
         level_variable = 'level' if 'level' in cams_dict else 'model_level'
-        if cams_species in cams_variables_level[url]['multi']:
+        if level == 'multi':
             # choose the maximum level if there was a level increase at some point
             if 'level_boundary' in cams_dict:
                 boundary_date = datetime.combine(cams_dict['level_boundary'], datetime.min.time())
@@ -736,7 +736,9 @@ class Cams(object):
                 continue
             
             # get the species' level
-            level = 'multi' if cams_species in cams_variables_level[url]['multi'] else 'single'
+            level = ('multi' if 'multi' in cams_variables_level 
+                            and cams_species in cams_variables_level[url]['multi'] 
+                            else 'single')
 
             # get model resolution
             resolution_list = self.download_instance.model_resolution if self.download_instance.model_resolution else self.download_instance.resolution

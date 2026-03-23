@@ -47,6 +47,7 @@ cams_analysis:
     stream: false
     split: false
     lookahead_days: 0
+
 cams_forecast:
   regional:
     dataset: cams-europe-air-quality-forecasts
@@ -185,6 +186,7 @@ cams_forecast:
     dated_file_format: data_mlev_yyyy-mm-dd.nc
     split: true
     lookahead_days: 5
+
 cams_reanalysis:
   regional:
     dataset: cams-europe-air-quality-reanalyses
@@ -276,3 +278,27 @@ cams_reanalysis:
     stream: false
     split: false
     lookahead_days: 0
+
+era5_reanalysis:
+  global:
+    dataset: reanalysis-era5-single-levels
+    resolution: hourly
+    product_type: reanalysis
+    url: https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels?tab=download
+    variable:
+      - 10m_u_component_of_wind
+      - 10m_v_component_of_wind
+      - 2m_dewpoint_temperature
+      - 2m_temperature
+      - boundary_layer_height
+      - cloud_base_height
+      - high_cloud_cover
+      - instantaneous_10m_wind_gust
+      - low_cloud_cover
+      - mean_sea_level_pressure
+      - sea_surface_temperature
+      - snow_depth
+      - snowfall
+      - surface_pressure
+      - total_cloud_cover
+      - total_precipitation
