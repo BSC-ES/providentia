@@ -26,6 +26,7 @@ cams_formatting = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'intern
 ghost_cams_variables = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'ghost_cams_variables.yaml')))
 cams_stream = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_stream.yaml')))
 cams_species_units = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_species_units.yaml')))
+cdsapirc_urls = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cdsapirc_urls.yaml')))
 
 class Cams(object):
     """
@@ -281,11 +282,35 @@ class Cams(object):
             personal_access_token = input("\nEnter your personal access token, which you can find at https://ads.atmosphere.copernicus.eu/profile after login: ")
             # create the .cdsapirc file with the user's acces token
             with open(cdsapirc_path, "w") as f:
-                f.write("url: https://ads.atmosphere.copernicus.eu/api\n")
+                f.write(f"url: {self.cdsapirc_url}\n")
                 f.write(f"key: {personal_access_token}\n")
         else:
             self.download_instance.logger.error("Error: Cannot proceed without '.cdsapirc'. CAMS model data download requires this file.")
             sys.exit(1)
+
+    def change_cdsapirc(self, cdsapirc_path):
+        """
+        Change the `.cdsapirc` configuration file required for the CAMS API.
+        
+        Parameters
+        ----------
+        cdsapirc_path : str
+            Absolute path where the `.cdsapirc` file will be created.
+        """    
+
+        # get .cdsapirc file contents
+        with open(cdsapirc_path, 'r') as f:
+            data = f.readlines()
+
+        # change url if necessary
+        for i, line in enumerate(data):
+            if line.startswith("url"):
+                if self.cdsapirc_url not in line:
+                    data[i] = f"url: {self.cdsapirc_url}\n"
+                    with open(cdsapirc_path, 'w') as f:
+                        f.truncate(0)
+                        f.writelines(data)
+                break
 
     def get_model(self, cams_dict, u_count, config_modid, dataset, ensemble_option, initial_check=False):
         """
@@ -664,9 +689,18 @@ class Cams(object):
         # create cdsapirc file in case it was not created
         cdsapirc_path = join(os.getenv("HOME"),'.cdsapirc')
 
+        # get url for .cdsapirc 
+        for model_type in cdsapirc_urls:
+            if model_type in model:
+                break
+
+        self.cdsapirc_url = cdsapirc_urls[model_type]
+
         # create csapirc file necessary for the download
         if not os.path.isfile(cdsapirc_path):
             self.create_cdsapirc(cdsapirc_path)
+        else:
+            self.change_cdsapirc(cdsapirc_path)
 
         # get model id and the domain
         config_modid, domain, ensemble_options = model.split("-")
