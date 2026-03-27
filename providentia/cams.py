@@ -246,6 +246,7 @@ class Cams(object):
                     request[level_variable] = cams_dict[level_variable]['before_increase']
                 else: 
                     request[level_variable] = cams_dict[level_variable]['after_increase']
+            
             # without a level increase, just get the level
             else:
                 request[level_variable] = cams_dict[level_variable]
