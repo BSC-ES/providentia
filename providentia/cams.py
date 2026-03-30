@@ -96,7 +96,7 @@ class Cams(object):
             return minstart, maxend       
         
         # do the webscrapping depending if there is whole dates or only month
-        if cams_dict['month_names'] is False:
+        if cams_dict['months_list'] is False:
             # get the minstart and maxend dictionary
             minstart_dict = re.findall(r'"minStart":".*?"', r, re.DOTALL)
             maxend_dict = re.findall(r'"maxEnd":".*?"', r, re.DOTALL)
@@ -204,20 +204,21 @@ class Cams(object):
         is_valid = True
 
         # add leadtime hour to the request if the dataset has it
-        if 'leadtime_hour' in cams_dict:
+        if 'leadtime_hour' in cams_dict and level in cams_dict['leadtime_hour']:
             request["leadtime_hour"] = cams_dict['leadtime_hour'][level]
 
-        # add type to the request if the dataset has it
-        if 'type' in cams_dict:
-            request["type"] = cams_dict['type']
-
-        # pass numerical date if the request allows it, pass month as a text
-        if cams_dict['month_names'] is False:
+        # pass numerical date if the request allows it, pass month as a list
+        if cams_dict['months_list'] is False:
             request["date"] = f"{current_cams_date.strftime('%Y-%m-%d')}/{next_cams_date.strftime('%Y-%m-%d')}"
         else:
             request["year"] = str(current_cams_date.year)
             request["month"] = str(current_cams_date.strftime('%m'))
 
+        # pass days as a list if the request needs it
+        if cams_dict['days_list'] is True:
+            request["day"] = [f"{i:02d}" for i in 
+                             range(1, (next_cams_date - current_cams_date).days + 2)]
+            
         # add interim and or validated stream to the request
         if cams_dict['stream'] is True:
             # check whether the stream is available for the year
@@ -228,14 +229,6 @@ class Cams(object):
                 return request, is_valid
                 
             request["type"] = stream
-
-        # add type to the request if the dataset has it
-        if 'type' in cams_dict:
-            request["type"] = cams_dict['type']
-
-        # add the model if models are available in the dataset
-        if 'models' in cams_dict:
-            request["model"] = mod_id
 
         # get the level and apply it if the species is multi level
         level_variable = 'level' if 'level' in cams_dict else 'model_level'
@@ -251,13 +244,12 @@ class Cams(object):
             else:
                 request[level_variable] = cams_dict[level_variable]
         
-        # add time to the request
-        if 'time' in cams_dict:
-            request['time'] = cams_dict['time']
-
-        # add data_format to the request
-        if 'data_format' in cams_dict:
-            request['data_format'] = cams_dict['data_format']
+        # copy shared fields from config into the request
+        shared_variables = ['time', 'type', 'model', 'data_format', 'product_type', 'download_format']
+        
+        for shared_variable in shared_variables:
+            if shared_variable in cams_dict:
+                request[shared_variable] = cams_dict[shared_variable]
 
         return request, is_valid
 
@@ -441,7 +433,7 @@ class Cams(object):
         elif prefix == 'cams_forecast' and domain == 'global':
             time = input_file['forecast_reference_time'][0]
             time = datetime.fromtimestamp(int(time))
-        elif prefix == 'cams_reanalysis' and domain == 'global':
+        elif prefix in ['cams_reanalysis', 'era5_reanalysis'] and domain == 'global':
             time = input_file['valid_time'][0]
             time = datetime.fromtimestamp(int(time))
         

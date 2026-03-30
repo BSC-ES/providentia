@@ -1,7 +1,7 @@
 cams_analysis:
   regional:
     dataset: cams-europe-air-quality-forecasts
-    models:
+    model:
       - ensemble
       - chimere
       - dehm
@@ -38,7 +38,8 @@ cams_analysis:
       multi: '0'
     forecast: false
     level: '0'
-    month_names: false
+    months_list: false
+    days_list: false
     time: [
         "00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00",
         "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00" ]
@@ -51,7 +52,7 @@ cams_analysis:
 cams_forecast:
   regional:
     dataset: cams-europe-air-quality-forecasts
-    models:
+    model:
       - ensemble
       - chimere
       - dehm
@@ -92,7 +93,8 @@ cams_forecast:
             '80', '81', '82', '83', '84', '85', '86', '87', '88', '89', '90', '91', '92', '93', '94', '95', '96' ]
     forecast: true
     level: '0'
-    month_names: false
+    months_list: false
+    days_list: false
     time: 00:00
     data_format: netcdf_zip
     calendar: standard
@@ -108,6 +110,8 @@ cams_forecast:
     type: forecast
     url: https://ads.atmosphere.copernicus.eu/datasets/cams-global-atmospheric-composition-forecasts?tab=download
     variable:
+      - 10m_u_component_of_wind
+      - 10m_v_component_of_wind
       - 2m_dewpoint_temperature
       - 2m_temperature
       - ammonia
@@ -115,6 +119,7 @@ cams_forecast:
       - asymmetry_factor_1020nm
       - asymmetry_factor_440nm
       - attenuated_backscatter_due_to_aerosol_532nm_from_ground
+      - boundary_layer_height
       - carbon_monoxide
       - cloud_base_height
       - dust_aerosol_optical_depth_550nm
@@ -124,6 +129,7 @@ cams_forecast:
       - formaldehyde
       - fraction_of_cloud_cover
       - glyoxal
+      - high_cloud_cover
       - hydrogen_chloride
       - hydrogen_fluoride
       - isoprene
@@ -159,6 +165,7 @@ cams_forecast:
       - total_aerosol_optical_depth_440nm
       - total_aerosol_optical_depth_500nm
       - total_aerosol_optical_depth_550nm
+      - total_cloud_cover
       - total_fine_mode_aerosol_optical_depth_500nm
       - total_precipitation
       - visibility
@@ -178,7 +185,8 @@ cams_forecast:
       before_increase : '60'
       after_increase : '137'
     level_boundary : 2019-07-09
-    month_names: false
+    months_list: false
+    days_list: false
     time: 00:00
     data_format: netcdf_zip
     calendar: proleptic_gregorian
@@ -190,7 +198,7 @@ cams_forecast:
 cams_reanalysis:
   regional:
     dataset: cams-europe-air-quality-reanalyses
-    models:
+    model:
       - ensemble
       - chimere
       - emep
@@ -208,21 +216,25 @@ cams_reanalysis:
     variable:
       - ammonia
       - carbon_monoxide
+      - dust
       - formaldehyde
       - glyoxal
       - nitrogen_dioxide
       - nitrogen_monoxide
       - non_methane_vocs
       - ozone
-      - particulate_matter_2.5um
-      - total_elementary_carbon
       - particulate_matter_10um
-      - dust
+      - particulate_matter_2.5um
       - pm10_sea_salt_dry
+      - pm2.5_ammonium
+      - pm2.5_nitrate
+      - pm2.5_sulphate
       - sulphur_dioxide
+      - total_elementary_carbon
     forecast: false
     level: '0'
-    month_names: true
+    months_list: true
+    days_list: false
     calendar: standard
     stream: true
     split: false
@@ -232,6 +244,8 @@ cams_reanalysis:
     resolution: 3hourly
     url: https://ads.atmosphere.copernicus.eu/datasets/cams-global-reanalysis-eac4?tab=download
     variable:
+      - 10m_u_component_of_wind
+      - 10m_v_component_of_wind
       - 2m_dewpoint_temperature
       - 2m_temperature
       - ammonia
@@ -243,6 +257,7 @@ cams_reanalysis:
       - ethene
       - formaldehyde
       - fraction_of_cloud_cover
+      - high_cloud_cover
       - isoprene
       - lead
       - mean_sea_level_pressure
@@ -265,9 +280,11 @@ cams_reanalysis:
       - sulphur_dioxide
       - surface_pressure
       - total_aerosol_optical_depth_550nm
+      - total_cloud_cover
     forecast: false
     model_level: '60'
-    month_names: false
+    months_list: false
+    days_list: false
     time: [
         "00:00", "03:00", "06:00",
         "09:00", "12:00", "15:00",
@@ -283,7 +300,6 @@ era5_reanalysis:
   global:
     dataset: reanalysis-era5-single-levels
     resolution: hourly
-    product_type: reanalysis
     url: https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels?tab=download
     variable:
       - 10m_u_component_of_wind
@@ -294,7 +310,6 @@ era5_reanalysis:
       - cloud_base_height
       - high_cloud_cover
       - instantaneous_10m_wind_gust
-      - low_cloud_cover
       - mean_sea_level_pressure
       - sea_surface_temperature
       - snow_depth
@@ -302,3 +317,23 @@ era5_reanalysis:
       - surface_pressure
       - total_cloud_cover
       - total_precipitation
+    forecast: false
+    months_list: true 
+    days_list: true
+    time: [
+        "00:00", "01:00", "02:00",
+        "03:00", "04:00", "05:00",
+        "06:00", "07:00", "08:00",
+        "09:00", "10:00", "11:00",
+        "12:00", "13:00", "14:00",
+        "15:00", "16:00", "17:00",
+        "18:00", "19:00", "20:00",
+        "21:00", "22:00", "23:00"
+    ]
+    calendar: proleptic_gregorian
+    stream: false
+    split: false
+    lookahead_days: 0
+    product_type: reanalysis
+    data_format: netcdf
+    download_format: zip 

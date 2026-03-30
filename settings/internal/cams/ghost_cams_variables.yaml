@@ -9,9 +9,7 @@ blh: boundary_layer_height # new GHOST variable
 cfracmax:
   - fraction_of_cloud_cover
   - total_cloud_cover
-cldbot:
-  - cloud_base_height
-  - low_cloud_cover
+cldbot: cloud_base_height
 cldtop: high_cloud_cover # new GHOST variable
 dir10:
   - 10m_u_component_of_wind
