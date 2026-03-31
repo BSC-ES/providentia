@@ -463,26 +463,32 @@ class ModelInterpolation(object):
                 # get longitude and latitude grid centre values
                 self.mod_lons_centre = np.float32(mod_nc_root[lon_centre_varname][:])
                 self.mod_lats_centre = np.float32(mod_nc_root[lat_centre_varname][:])
+
+                # get flag for reversed coordinates
+                self.reverse_coords = ((mod_nc_root[lon_centre_varname][0] - mod_nc_root[lon_centre_varname][1] > 0) or
+                                        (mod_nc_root[lat_centre_varname][0] - mod_nc_root[lat_centre_varname][1] > 0))
                 
                 # check if there are coordinates to remap
                 lons_to_remap = self.mod_lons_centre[np.where(self.mod_lons_centre > 180.0)]
                 lats_to_remap = self.mod_lats_centre[np.where(self.mod_lats_centre > 90.0)]
-                self.coords_remapping = False
-                if len(lons_to_remap) > 0 or len(lats_to_remap) > 0:
-                    if self.mod_grid_type == 'crs':
+
+                # get flag that indicates need of longitude and latitude coordinates remapping
+                self.remap_coords = len(lons_to_remap) > 0 or len(lats_to_remap) > 0
+
+                if self.mod_grid_type == 'crs':
+                    if self.remap_coords:
                         # correct model grid longitude/latitude centre variables to be between -180:180 and -90:90 respectively
                         self.mod_lons_centre[np.where(self.mod_lons_centre > 180.0)] = self.mod_lons_centre[np.where(self.mod_lons_centre > 180.0)] - 360.0
                         self.mod_lats_centre[np.where(self.mod_lats_centre > 90.0)] = self.mod_lats_centre[np.where(self.mod_lats_centre > 90.0)] - 180.0
-                        
+                    
+                    if self.remap_coords or self.reverse_coords:
                         # sort coordinates
                         self.mod_lons_centre = sorted(self.mod_lons_centre)
                         self.mod_lats_centre = sorted(self.mod_lats_centre) 
-
-                        # set variable for values reassignation later
-                        self.coords_remapping = True    
-                    else: 
-                        self.log_file_str += 'Cannot handle grid of type: {} with these coordinates. Please remap. Terminating process'.format(self.mod_grid_type)
-                        create_output_logfile(1, self.log_file_str)
+ 
+                else: 
+                    self.log_file_str += 'Cannot handle grid of type: {} with these coordinates. Please remap. Terminating process'.format(self.mod_grid_type)
+                    create_output_logfile(1, self.log_file_str)
                 
                 # close model netCDF root
                 mod_nc_root.close()
@@ -979,10 +985,33 @@ class ModelInterpolation(object):
                         self.x = [x if x <= 180 else x - 360 for x in self.x]
                         self.y = [y if y <= 90 else y - 180 for y in self.y]
 
-                        # assign and sort coordinates
-                        xr_data = xr_data.assign_coords(longitude=self.x).sortby('longitude')
-                        xr_data = xr_data.assign_coords(latitude=self.y).sortby('latitude')
+                    if self.reverse_coords:
+                        self.x = sorted(self.x)
+                        self.y = sorted(self.y)
 
+                    if self.remap_coords or self.reverse_coords:
+                        # assign and sort coordinates
+                        # xr_data = xr_data.assign_coords(longitude=self.x, latitude=self.y)
+                        # xr_data = xr_data.set_index(longitude='longitude', latitude='latitude')
+
+                        # TODO remove
+                        self.log_file_str += f"Latitude: {str(self.y)}\n"
+
+                        # assign and sort coordinates
+                        xr_data = xr_data.assign_coords(longitude=self.x)
+                        xr_data = xr_data.chunk({"longitude": -1}) # single chunk along longitude
+                        xr_data = xr_data.sortby("longitude")
+
+                        xr_data = xr_data.assign_coords(latitude=self.y)
+                        xr_data = xr_data.chunk({"latitude": -1}) # single chunk along longitude
+                        xr_data = xr_data.sortby("latitude")
+                    
+                        # xr_data = xr_data.chunk({'latitude': 100, 'longitude': 100})
+                        # xr_data = xr_data.assign_coords(
+                        #     longitude=self.x,
+                        #     latitude=self.y
+                        # ).sortby(['latitude', 'longitude'])
+                    
                     # do resampling
                     if resampling_direction:
                         # downsampling (finer to coarser)
