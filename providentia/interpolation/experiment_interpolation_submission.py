@@ -1261,7 +1261,9 @@ class SubmitInterpolation(object):
             error = result.stderr
             if error == '':
                 error = 'Unknown error'
-            print(f"Error in submission using the arguments: {result.args[3:-1]}: {error}", flush=True)
+            print(f"Error in submission using the arguments: {result.args[3:-1]}: "
+                  f"\nError: {error}" 
+                  f"\nReturn code: {result.returncode}", flush=True)
 
     def get_all_models(self):
         """

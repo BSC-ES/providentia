@@ -243,7 +243,7 @@ class Cams(object):
             # without a level increase, just get the level
             else:
                 request[level_variable] = cams_dict[level_variable]
-        
+
         # copy shared fields from config into the request
         shared_variables = ['time', 'type', 'model', 'data_format', 'product_type', 'download_format']
         
@@ -763,8 +763,8 @@ class Cams(object):
             
             # get the species' level
             level = ('multi' if 'multi' in cams_variables_level 
-                            and cams_species in cams_variables_level[url]['multi'] 
-                            else 'single')
+                    and cams_species in cams_variables_level[url]['multi'] 
+                    else 'single')
 
             # get model resolution
             resolution_list = self.download_instance.model_resolution if self.download_instance.model_resolution else self.download_instance.resolution
