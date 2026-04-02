@@ -6,7 +6,6 @@ import datetime
 import multiprocessing
 import os
 import sys
-import time
 
 from dateutil.relativedelta import relativedelta
 from netCDF4 import Dataset
@@ -53,8 +52,6 @@ class DataReader:
         models_to_read : list, optional
             A list of models to add to arrays.
         """
-
-        start = time.time()
 
         # changing time dimension ?
         if ('reset' in operations) or ('read_left' in operations) or ('read_right' in operations) or ('cut_left' in operations) or ('cut_right' in operations):
@@ -624,9 +621,6 @@ class DataReader:
                         str_model += f" ({alias})"
                     self.read_instance.logger.info(str_model)
                     mods_printed.append(model)
-
-        print('TOTAL READ TIME: {}'.format(time.time()-start))
-        print('---------------------------------------------------') 
 
 
     def read_basic_metadata(self):     
