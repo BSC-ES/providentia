@@ -12,8 +12,8 @@ cfracmax:
 cldbot: cloud_base_height
 cldtop: high_cloud_cover # new GHOST variable
 dir10:
-  - 10m_u_component_of_wind
-  - 10m_v_component_of_wind
+  - u10
+  - v10
 gus10 : instantaneous_10m_wind_gust # new GHOST variable
 lbsco532: attenuated_backscatter_due_to_aerosol_532nm_from_ground
 od1020aero: total_aerosol_optical_depth_1020nm
@@ -65,9 +65,11 @@ sconcso4: sulphate_aerosol_mixing_ratio
 si: snow_depth
 slp: mean_sea_level_pressure
 spd10:
-  - 10m_u_component_of_wind
-  - 10m_v_component_of_wind
+  - u10
+  - v10
 sst: sea_surface_temperature
 t2: 2m_temperature
 td2: 2m_dewpoint_temperature
+u10: 10m_u_component_of_wind
+v10: 10m_v_component_of_wind
 vdist: visibility

@@ -982,6 +982,7 @@ class SubmitInterpolation(object):
         else:
             n_cpus = self.n_cpus
             msg = f'Using {n_cpus} CPUs.'
+
         print(msg)
 
         # cap number of cpus to not be larger than number of tasks
