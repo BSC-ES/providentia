@@ -14,7 +14,7 @@ cldtop: high_cloud_cover # new GHOST variable
 dir10:
   - u10
   - v10
-gus10 : instantaneous_10m_wind_gust # new GHOST variable
+gust10 : instantaneous_10m_wind_gust # new GHOST variable
 lbsco532: attenuated_backscatter_due_to_aerosol_532nm_from_ground
 od1020aero: total_aerosol_optical_depth_1020nm
 od380aero: total_aerosol_optical_depth_380nm
