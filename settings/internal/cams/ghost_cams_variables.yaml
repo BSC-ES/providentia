@@ -5,11 +5,23 @@ acprec: total_precipitation
 acsnow: snowfall
 asy1020aero: asymmetry_factor_1020nm
 asy440aero: asymmetry_factor_440nm
+aswin: surface_solar_radiation_downwards
+aswincs: surface_solar_radiation_downward_clear_sky
+aswindir: total_sky_direct_solar_radiation_at_surface
+aswindircs: clear_sky_direct_solar_radiation_at_surface
+aswtoa: toa_incident_solar_radiation
+auvin: downward_uv_radiation_at_the_surface
 blh: boundary_layer_height # new GHOST variable
-cfracmax:
-  - fraction_of_cloud_cover
-  - total_cloud_cover
+cfracmax: []
+  # - fraction_of_cloud_cover
+  # - total_cloud_cover
+cld : 
+  - aswin
+  - aswincs
 cldbot: cloud_base_height
+clddf: 
+  - aswindir 
+  - aswindircs 
 cldtop: high_cloud_cover # new GHOST variable
 dir10:
   - u10
@@ -23,6 +35,10 @@ od500aero: total_aerosol_optical_depth_500nm
 od500aerofine: total_fine_mode_aerosol_optical_depth_500nm
 od550aero: total_aerosol_optical_depth_550nm
 od550du: dust_aerosol_optical_depth_550nm # new GHOST variable
+pblh: boundary_layer_height
+photi: 
+  - aswin
+  - aswtoa
 pm1: particulate_matter_1um
 pm10: particulate_matter_10um
 pm10du: dust
@@ -70,6 +86,10 @@ spd10:
 sst: sea_surface_temperature
 t2: 2m_temperature
 td2: 2m_dewpoint_temperature
+tphclp: tropopause_height_cold_point # SDL
+tphdyn: tropopause_height_dynamical # SDL
+tphwmo1: tropopause_height_wmo_1st_thermal_lapse_rate # SDL
+tphwmo2: tropopause_height_wmo_2nd_thermal_lapse_rate # SDL
 u10: 10m_u_component_of_wind
 v10: 10m_v_component_of_wind
 vdist: visibility

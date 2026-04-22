@@ -31,7 +31,7 @@ cdsapirc_urls = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal
 class Cams(object):
     """
     Class that manages the interaction with the Copernicus Atmosphere Data Store
-    to retrieve CAMS datasets, validate requested models and dates, and
+    to retrieve CAMS and ERA5 datasets, validate requested models and dates, and
     convert downloaded NetCDF files into the Providentia-compatible format.
     """
 
@@ -611,8 +611,30 @@ class Cams(object):
             dir10_data[i] = degrees
 
         return dir10_data
+    
+    def calculate_radiation(self, radiation1_data, radiation2_data):
+        """
+        Calculate the radiation from two different radiations.
 
-    def format_wind(self, output_filepath, species):    
+        Parameters
+        ----------
+        radiation1_data : np.array
+            Array that stores the dividend of the radiation.
+        radiation2_data : np.array
+            Array that stores the divisor of the radiation.
+        """
+        # create empty array to store the operation result
+        radiation_result_data = np.empty_like(radiation1_data, dtype='float32')
+
+        # calculate speed in chunks to not run out of memory
+        for i in range(radiation1_data.shape[0]):
+            radiation1 = radiation1_data[i]
+            radiation2 = radiation2_data[i]
+            radiation_result_data[i] = radiation1 / radiation2
+
+        return radiation_result_data
+
+    def format_product(self, output_filepath, species, ghost_cams_variables):    
         """
         Combine u and v components of wind to create
         a standardized Providentia-compatible NetCDF
@@ -628,17 +650,24 @@ class Cams(object):
 
         self.download_instance.logger.info(f"Formatting {output_filepath}") 
 
-        # open u10 netcdf file  
-        input_filepath_u10 = output_filepath.replace(species, "u10")    
-        input_file_u10 = Dataset(input_filepath_u10, 'r', format="NETCDF4") 
+        var1, var2 = ghost_cams_variables[species]
 
-        # open v10 netcdf file 
-        input_filepath_v10 = output_filepath.replace(species, "v10")    
-        input_file_v10 = Dataset(input_filepath_v10, 'r', format="NETCDF4") 
+        # open var1 netcdf file  
+        input_filepath_var1 = output_filepath.replace(species, var1)    
+        input_file_var1 = Dataset(input_filepath_var1, 'r', format="NETCDF4") 
 
-        # get the speed/direction calculation function 
-        calculate_wind = self.calculate_dir10 if species == "dir10" else self.calculate_spd10
+        # open var2 netcdf file 
+        input_filepath_var2 = output_filepath.replace(species, var2)    
+        input_file_var2 = Dataset(input_filepath_var2, 'r', format="NETCDF4") 
 
+        # get the speed/direction/radiation calculation function 
+        if species == "dir10":
+            calculate_product = self.calculate_dir10
+        elif species ==  "spd10":
+            calculate_product = self.calculate_spd10    
+        else:
+            calculate_product = self.calculate_radiation
+    
         # create new netcdf file
         output_file = Dataset(output_filepath, 'w', format="NETCDF4") 
         output_file.set_auto_mask(True)	
@@ -647,32 +676,32 @@ class Cams(object):
         self.download_instance.latest_nc_file_path = output_filepath
 
         # create the dimensions
-        for input_dim_name, output_dim_name in input_file_u10.dimensions.items():
+        for input_dim_name, output_dim_name in input_file_var1.dimensions.items():
             output_file.createDimension(input_dim_name, output_dim_name.size)
 
         # copy variables
-        for input_var_name in input_file_u10.variables:  
+        for input_var_name in input_file_var1.variables:  
             # get the variable
-            input_var_u10 = input_file_u10[input_var_name]
+            input_var_var1 = input_file_var1[input_var_name]
 
             # get the speed/direction from the u and v components of wind
-            if input_var_name == "u10":
-                input_var_v10 = input_file_v10["v10"]
-                data = calculate_wind(input_var_u10[:], input_var_v10[:])
+            if input_var_name == var1:
+                input_var_var2 = input_file_var2[var2]
+                data = calculate_product(input_var_var1[:], input_var_var2[:])
                 output_var_name = species
             # copy the data of u for the rest of the variables
             else:       
-                data = input_var_u10[:]
+                data = input_var_var1[:]
                 output_var_name = input_var_name
 
             # create the variable
-            output_var = output_file.createVariable(output_var_name, input_var_u10.datatype, input_var_u10.dimensions)
+            output_var = output_file.createVariable(output_var_name, input_var_var1.datatype, input_var_var1.dimensions)
 
             # add attributes to the variable
-            output_var.setncatts(input_var_u10.__dict__)
+            output_var.setncatts(input_var_var1.__dict__)
             
             # change the direction units to degrees
-            if input_var_name == "u10" and species == "dir10":
+            if input_var_name == var1 and species == "dir10":
                 output_var.setncattr('units', 'degrees') 
 
             # add the data to the variable
@@ -680,8 +709,8 @@ class Cams(object):
         
         # close the original and new netcdf files
         output_file.close()
-        input_file_u10.close()    
-        input_file_v10.close()      
+        input_file_var1.close()    
+        input_file_var2.close()      
 
     def split_nc_file(self, input_file_name, all_dates, cams_dict, temp_dir, prefix, domain, level):
         """
@@ -798,7 +827,7 @@ class Cams(object):
         if not initial_check:
             # print current model
             self.download_instance.logger.info('\n'+'-'*40)
-            self.download_instance.logger.info(f"\nDownloading {model} model data from the Atmosphere Data Store...")
+            self.download_instance.logger.info(f"\nDownloading {model} model data from the Atmosphere/Climate Data Store...")
 
         # create cdsapirc file in case it was not created
         cdsapirc_path = join(os.getenv("HOME"),'.cdsapirc')
@@ -892,7 +921,7 @@ class Cams(object):
 
                 for cams_species, ghost_species in cams_ghost_species_list:
 
-                    if ghost_species not in ['dir10', 'spd10']:
+                    if ghost_species not in ['dir10', 'spd10', 'cld', 'clddf', 'photi']:
 
                         # check if the mapped species are available in the dataset
                         if cams_species not in cams_dict['variable']:
@@ -945,7 +974,7 @@ class Cams(object):
                         # get filename depending whether it is a download for the whole month or just a day
                         date_format = '%Y%m' if cams_dict['forecast'] is False else '%Y%m%d'
                         
-                        if ghost_species not in ['dir10', 'spd10']:
+                        if ghost_species not in ['dir10', 'spd10', 'cld', 'clddf', 'photi']:
 
                             # create dictionary to do the request
                             request, is_valid = self.create_request(cams_species, cams_dict, current_cams_date, next_cams_date, level, stream, url, mod_id, initial_check)
@@ -1037,7 +1066,7 @@ class Cams(object):
                         else:
                             all_dates = [current_cams_date]
 
-                        if ghost_species not in ['dir10', 'spd10']:
+                        if ghost_species not in ['dir10', 'spd10', 'cld', 'clddf', 'photi']:
 
                             # split the forecast file
                             if not initial_check:
@@ -1047,7 +1076,7 @@ class Cams(object):
                         # iterate through all dates to format each of the day files
                         for date in all_dates:
                                 
-                            if ghost_species not in ['dir10', 'spd10'] and not initial_check:
+                            if ghost_species not in ['dir10', 'spd10', 'cld', 'clddf', 'photi'] and not initial_check:
                                 # get the file format
                                 if "dated_file_format" in cams_dict and len(all_dates) != 1:
                                     zip_file_name = cams_dict["dated_file_format"].replace("yyyy", f"{date.year:04d}") \
@@ -1065,8 +1094,8 @@ class Cams(object):
                                 initial_check_nc_files.append(final_path)
 
                             # format the ncfiles
-                            elif ghost_species in ['dir10', 'spd10']:
-                                self.format_wind(final_path, ghost_species)
+                            elif ghost_species in ['dir10', 'spd10', 'cld', 'clddf', 'photi']:
+                                self.format_product(final_path, ghost_species, ghost_cams_variables)
                             else:
                                 self.format_data(input_filepath, final_path, ghost_species, prefix, 
                                                 domain, resolution, cams_species, url)
