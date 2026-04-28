@@ -15,11 +15,11 @@ blh: boundary_layer_height # new GHOST variable
 cfracmax: []
   # - fraction_of_cloud_cover
   # - total_cloud_cover
-cld : 
+cld :  # new GHOST variable
   - aswin
   - aswincs
 cldbot: cloud_base_height
-clddf: 
+clddf:  # new GHOST variable
   - aswindir 
   - aswindircs 
 cldtop: high_cloud_cover # new GHOST variable
@@ -36,7 +36,7 @@ od500aerofine: total_fine_mode_aerosol_optical_depth_500nm
 od550aero: total_aerosol_optical_depth_550nm
 od550du: dust_aerosol_optical_depth_550nm # new GHOST variable
 pblh: boundary_layer_height
-photi: 
+photi:  # new GHOST variable
   - aswin
   - aswtoa
 pm1: particulate_matter_1um
@@ -86,10 +86,6 @@ spd10:
 sst: sea_surface_temperature
 t2: 2m_temperature
 td2: 2m_dewpoint_temperature
-tphclp: tropopause_height_cold_point # SDL
-tphdyn: tropopause_height_dynamical # SDL
-tphwmo1: tropopause_height_wmo_1st_thermal_lapse_rate # SDL
-tphwmo2: tropopause_height_wmo_2nd_thermal_lapse_rate # SDL
 u10: 10m_u_component_of_wind
 v10: 10m_v_component_of_wind
 vdist: visibility

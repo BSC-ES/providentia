@@ -701,8 +701,11 @@ class Cams(object):
             output_var.setncatts(input_var_var1.__dict__)
             
             # change the direction units to degrees
-            if input_var_name == var1 and species == "dir10":
-                output_var.setncattr('units', 'degrees') 
+            if input_var_name == var1:
+                if species == "dir10":
+                    output_var.setncattr('units', 'degrees') 
+                elif species in ["cld", "clddf", "photi"]:
+                    output_var.setncattr('units', 'unitless') 
 
             # add the data to the variable
             output_var[:] = data
