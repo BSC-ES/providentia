@@ -307,6 +307,7 @@ era5_reanalysis:
       - 2m_dewpoint_temperature
       - 2m_temperature
       - boundary_layer_height
+      - clear_sky_direct_solar_radiation_at_surface
       - cloud_base_height
       - high_cloud_cover
       - instantaneous_10m_wind_gust
@@ -315,8 +316,12 @@ era5_reanalysis:
       - snow_depth
       - snowfall
       - surface_pressure
+      - surface_solar_radiation_downwards
+      - surface_solar_radiation_downward_clear_sky
+      - toa_incident_solar_radiation
       - total_cloud_cover
       - total_precipitation
+      - total_sky_direct_solar_radiation_at_surface
     forecast: false
     months_list: true 
     days_list: true
