@@ -110,7 +110,7 @@ class Actris:
                 doi = item.get("md_identification", {}).get(
                     "identifier", {}).get("pid")
                 opendap_urls = [protocol_dict['dataset_url'] for protocol_dict in item.get(
-                    'md_distribution_information', []) if protocol_dict.get('protocol') == 'OPeNDAP']
+                    'md_distribution_information', []) if protocol_dict.get('protocol') == 'OpenDAP']
 
                 # print DOI and OPeNDAP URL if both are present
                 if doi and opendap_urls:
@@ -1148,9 +1148,9 @@ class Actris:
 
         # print errors and warnings if any
         if errors:
-            self.download_instance.logger.info(f"    === ERRORS ({len(errors)}) ===")
+            self.download_instance.logger.error(f"    === ERRORS ({len(errors)}) ===")
             for e in errors:
-                self.download_instance.logger.info(f"    {e}")
+                self.download_instance.logger.error(f"    {e}")
 
         if warnings:
             self.download_instance.logger.info(f"    === WARNINGS ({len(warnings)}) ===")
@@ -1163,7 +1163,7 @@ class Actris:
         pool.join()
 
         if len(errors) == len(args_list):
-            self.download_instance.logger.info('All datasets have thrown an error, aborting.')
+            self.download_instance.logger.error('All datasets have thrown an error, aborting.')
             return
 
         # get combined data and metadata after read
@@ -1314,7 +1314,7 @@ class Actris:
             
             # check if variable name is available
             if var not in ghost_actris_variables.keys():
-                self.download_instance.logger.info(f"Data for {var} cannot be downloaded because it was not mapped in 'settings/internal/actris/ghost_actris_variables.yaml'.")
+                self.download_instance.logger.error(f"Data for {var} cannot be downloaded because it was not mapped in 'settings/internal/actris/ghost_actris_variables.yaml'.")
                 continue
             else:
                 actris_parameter = ghost_actris_variables[var]
@@ -1332,7 +1332,7 @@ class Actris:
             info_path = self.get_files_path(var)
 
             # define NILU path
-            base_url = "https://prod-actris-md.nilu.no/metadata/content"
+            base_url = "https://prod-actris-md2.nilu.no/metadata/content"
             
             # if file does not exist
             if not os.path.isfile(info_path):
@@ -1488,4 +1488,4 @@ class Actris:
                     pass
 
             else:
-                self.download_instance.logger.info(f'No files were found at {self.resolution} resolution for {var}. You can check what is available at {info_path}.')
+                self.download_instance.logger.error(f'No files were found at {self.resolution} resolution for {var}. You can check what is available at {info_path}.')
