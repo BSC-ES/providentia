@@ -1,0 +1,390 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ERA5 &mdash; Providentia 3.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=08bfcbec"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Library" href="Library-mode.html" />
+    <link rel="prev" title="CAMS" href="CAMS-download.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Providentia
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Home.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Getting-started.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="Modes.html">Modes</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Interpolation.html">Interpolation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dashboard.html">Dashboard</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Report.html">Report</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="Download-mode.html">Download</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="Download-mode.html#overview">Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="BSC-download.html">BSC HPC machines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ACTRIS-download.html">ACTRIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Zenodo-download.html">Zenodo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CAMS-download.html">CAMS</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">ERA5</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#available-era5-datasets">Available ERA5 datasets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#how-to-enable-era5-download">How to enable ERA5 download</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#era5-hourly-data-on-single-levels-from-1940-to-present">1. ERA5 hourly data on single levels from 1940 to present</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reanalysis-tropopause-data-repository">2. Reanalysis Tropopause Data Repository</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cds-era5-ghost-species-mapping">CDS ERA5-GHOST species mapping</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sdl-era5-ghost-species-mapping">SDL ERA5-GHOST species mapping</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Library-mode.html">Library</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Colocation.html">Colocation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Filtering.html">Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Forecast.html">Forecast</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Statistics.html">Statistics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the team</a></li>
+<li class="toctree-l1"><a class="reference internal" href="History.html">History of Providentia</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tips-and-tricks-for-developers.html">Tips and tricks for developers</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Providentia</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="Modes.html">Modes</a></li>
+          <li class="breadcrumb-item"><a href="Download-mode.html">Download</a></li>
+      <li class="breadcrumb-item active">ERA5</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/ERA5-download.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="era5">
+<h1>ERA5<a class="headerlink" href="#era5" title="Link to this heading"></a></h1>
+<p>Providentia’s download mode supports downloading model output data provided by <strong>ERA5</strong> from the <strong>Climate Data Store</strong> (CDL):</p>
+<p><a class="reference external" href="https://ads.atmosphere.copernicus.eu/datasets">https://ads.atmosphere.copernicus.eu/datasets</a></p>
+<p>and the <strong>Simulation and Data Laboratory ‘Climate Science’</strong> (SDL) at the Jülich Supercomputing Centre:</p>
+<p><a class="reference external" href="https://datapub.fz-juelich.de/slcs/">https://datapub.fz-juelich.de/slcs/</a></p>
+<p>An ECMWF account is required to download the files. For a tutorial on how to create and set up your account, see the <a class="reference internal" href="ADS.html"><span class="doc std std-doc">ECMWF Account setup</span></a> page.</p>
+<p>Data requests may take some time to complete. After starting a request from Providentia, you can monitor its progress by following the steps described in the <a class="reference internal" href="Check-CAMS-download.html"><span class="doc std std-doc">Check ECMWF download</span></a> page.</p>
+<section id="available-era5-datasets">
+<h2>Available ERA5 datasets<a class="headerlink" href="#available-era5-datasets" title="Link to this heading"></a></h2>
+<p>Currently, two ERA5 datasets are available for download:</p>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="#era5-hourly-data-on-single-levels-from-1940-to-present"><strong>ERA5 hourly data on single levels from 1940 to present</strong></a> (CDL)</p></li>
+<li><p><a class="reference internal" href="#reanalysis-tropopause-data-repository"><strong>Reanalysis Tropopause Data Repository</strong></a> (SDL)</p></li>
+</ol>
+</section>
+<section id="how-to-enable-era5-download">
+<span id="id1"></span><h2>How to enable ERA5 download<a class="headerlink" href="#how-to-enable-era5-download" title="Link to this heading"></a></h2>
+<p>To download ERA5 data, include one of the following model names along with the domain:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">era5_reanalysis-global</span></code> - <a class="reference internal" href="#era5-hourly-data-on-single-levels-from-1940-to-present"><strong>ERA5 hourly data on single levels from 1940 to present</strong></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">era5_tropopause-global</span></code> - <a class="reference internal" href="#reanalysis-tropopause-data-repository"><strong>Reanalysis Tropopause Data Repository</strong></a></p></li>
+</ul>
+<p>Once you have selected the dataset and specified the model and domain, make sure to set:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">dl_interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
+</pre></div>
+</div>
+<p>or</p>
+<p>Answer <code class="docutils literal notranslate"><span class="pre">n</span></code> to the prompt:</p>
+<p><em>“Model data was detected in the configuration file. Do you want to download the interpolated version? (Otherwise, the non-interpolated model data will be downloaded)”</em></p>
+</section>
+<section id="era5-hourly-data-on-single-levels-from-1940-to-present">
+<h2>1. ERA5 hourly data on single levels from 1940 to present<a class="headerlink" href="#era5-hourly-data-on-single-levels-from-1940-to-present" title="Link to this heading"></a></h2>
+<p><a class="reference external" href="https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels?tab=overview">Dataset Link</a></p>
+<p>Using this dataset you can download <strong>Global Reanalysis data</strong>.</p>
+<p>This dataset contains single-level data.</p>
+<p>Only hourly data is available in this dataset. You must set <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">hourly</span></code> in your configuration file; otherwise, the download will not work.</p>
+<section id="mandatory-fields-for-regional-reanalysis-data">
+<h3>Mandatory fields for regional reanalysis data<a class="headerlink" href="#mandatory-fields-for-regional-reanalysis-data" title="Link to this heading"></a></h3>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">era5_reanalysis</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">global</span>
+<span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
+</pre></div>
+</div>
+</section>
+<section id="available-variables-species">
+<h3>Available variables (Species)<a class="headerlink" href="#available-variables-species" title="Link to this heading"></a></h3>
+<p>These are the available species:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">acprec</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">acsnow</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">aswin</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">aswincs</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">aswindir</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">aswindircs</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">aswtoa</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">blh</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cld</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cldbot</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">clddf</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cldtop</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dir10</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gust10</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">photi</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pshltr</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">si</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">slp</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">spd10</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sst</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">t2</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">td2</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">u10</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">v10</span></code></p></li>
+</ul>
+<blockquote>
+<div><p>Providentia can only read species in GHOST format. If you want to know the mapping from CDS ERA5 variables to GHOST species, please refer to the <a class="reference internal" href="#cds-era5-ghost-species-mapping">CDS ERA5-GHOST species mapping</a> section.</p>
+</div></blockquote>
+</section>
+<section id="product-species">
+<h3>Product Species<a class="headerlink" href="#product-species" title="Link to this heading"></a></h3>
+<p>There are five derived variables computed from two ERA5 variables. When downloading one of these, the two original variables are also downloaded, formatted and saved together with the final result.</p>
+</section>
+<section id="id2">
+<h3>Product Species<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<p>There are five derived variables computed from two ERA5 variables. When downloading one of these, the two original variables are also downloaded, formatted and saved together with the final result.</p>
+<section id="cld">
+<h4>cld<a class="headerlink" href="#cld" title="Link to this heading"></a></h4>
+<p><strong>cld</strong> is computed from <strong>aswin</strong> and <strong>aswincs</strong>, which in CDS are:</p>
+<ul class="simple">
+<li><p>surface_solar_radiation_downwards</p></li>
+<li><p>surface_solar_radiation_downward_clear_sky</p></li>
+</ul>
+<p>When creating <strong>cld</strong>, both variables are also downloaded and saved.</p>
+<p><strong>Formula:</strong></p>
+<div class="math notranslate nohighlight">
+\[
+\begin{aligned}
+\text{cld} &amp;= \frac{\text{aswin}}{\text{aswincs}}
+\end{aligned}
+\]</div>
+</section>
+<section id="clddf">
+<h4>clddf<a class="headerlink" href="#clddf" title="Link to this heading"></a></h4>
+<p><strong>clddf</strong> is computed from <strong>aswindir</strong> and <strong>aswindircs</strong>, which in CDS are:</p>
+<ul class="simple">
+<li><p>total_sky_direct_solar_radiation_at_surface</p></li>
+<li><p>clear_sky_direct_solar_radiation_at_surface</p></li>
+</ul>
+<p>When creating <strong>clddf</strong>, both variables are also downloaded and saved.</p>
+<p><strong>Formula:</strong></p>
+<div class="math notranslate nohighlight">
+\[
+\begin{aligned}
+\text{clddf} &amp;= \frac{\text{aswindir}}{\text{aswindircs}}
+\end{aligned}
+\]</div>
+</section>
+<section id="dir10">
+<h4>dir10<a class="headerlink" href="#dir10" title="Link to this heading"></a></h4>
+<p><strong>dir10</strong> is computed from <strong>u10</strong> and <strong>v10</strong>, which in CDS are:</p>
+<ul class="simple">
+<li><p>10m_u_component_of_wind</p></li>
+<li><p>10m_v_component_of_wind</p></li>
+</ul>
+<p>When downloading <strong>dir10</strong>, both variables are also downloaded and saved.</p>
+<p><strong>Formula:</strong></p>
+<div class="math notranslate nohighlight">
+\[
+\begin{aligned}
+\text{dir10} &amp;= \frac{180}{\pi}\arctan2(-u10,\,-v10)
+\end{aligned}
+\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{aligned}
+\text{if } \text{dir10} &amp;&lt; 0 \\
+\text{dir10} &amp;= \text{dir10} + 360
+\end{aligned}
+\end{split}\]</div>
+</section>
+<section id="photi">
+<h4>photi<a class="headerlink" href="#photi" title="Link to this heading"></a></h4>
+<p><strong>photi</strong> is computed from <strong>aswin</strong> and <strong>aswtoa</strong>, which in CDS are:</p>
+<ul class="simple">
+<li><p>surface_solar_radiation_downwards</p></li>
+<li><p>toa_incident_solar_radiation</p></li>
+</ul>
+<p>When creating <strong>photi</strong>, both variables are also downloaded and saved.</p>
+<p><strong>Formula:</strong></p>
+<div class="math notranslate nohighlight">
+\[
+\begin{aligned}
+\text{photi} &amp;= \frac{\text{aswin}}{\text{aswtoa}}
+\end{aligned}
+\]</div>
+</section>
+<section id="spd10">
+<h4>spd10<a class="headerlink" href="#spd10" title="Link to this heading"></a></h4>
+<p><strong>spd10</strong> is computed from <strong>u10</strong> and <strong>v10</strong>, which in CDS are:</p>
+<ul class="simple">
+<li><p>10m_u_component_of_wind</p></li>
+<li><p>10m_v_component_of_wind</p></li>
+</ul>
+<p>When downloading <strong>spd10</strong>, both variables are also downloaded and saved.</p>
+<p><strong>Formula:</strong></p>
+<div class="math notranslate nohighlight">
+\[
+\begin{aligned}
+\text{spd10} &amp;= \sqrt{u10^2 + v10^2} 
+\end{aligned}
+\]</div>
+</section>
+</section>
+</section>
+<section id="reanalysis-tropopause-data-repository">
+<h2>2. Reanalysis Tropopause Data Repository<a class="headerlink" href="#reanalysis-tropopause-data-repository" title="Link to this heading"></a></h2>
+<p><a class="reference external" href="https://datapub.fz-juelich.de/slcs/tropopause/index.html">Dataset Link</a></p>
+<p>Using this dataset you can download <strong>Global Tropopause Reanalysis data</strong>.</p>
+<p>This dataset contains single-level data.</p>
+<p>Only hourly data is available in this dataset. You must set <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">hourly</span></code> in your configuration file; otherwise, the download will not work.</p>
+<section id="id3">
+<h3>Mandatory fields for regional reanalysis data<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">era5_tropopause</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">global</span>
+<span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
+</pre></div>
+</div>
+</section>
+<section id="id4">
+<h3>Available variables (Species)<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<p>These are the available species:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">tphclp</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tphdyn</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tphwmo1</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tphwmo2</span></code></p></li>
+</ul>
+<blockquote>
+<div><p>Providentia can only read species in GHOST format. If you want to know the mapping from SDL ERA5 variables to GHOST species, please refer to the <a class="reference internal" href="#sdl-era5-ghost-species-mapping">SDL ERA5-GHOST species mapping</a> section.</p>
+</div></blockquote>
+</section>
+</section>
+<section id="cds-era5-ghost-species-mapping">
+<h2>CDS ERA5-GHOST species mapping<a class="headerlink" href="#cds-era5-ghost-species-mapping" title="Link to this heading"></a></h2>
+<p>Here is the mapping between CDS ERA5 variables and GHOST species names:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">acprec</span> <span class="p">:</span> <span class="n">total_precipitation</span>
+<span class="n">acsnow</span> <span class="p">:</span> <span class="n">snowfall</span>
+<span class="n">aswin</span> <span class="p">:</span> <span class="n">surface_solar_radiation_downwards</span>
+<span class="n">aswincs</span> <span class="p">:</span> <span class="n">surface_solar_radiation_downward_clear_sky</span>
+<span class="n">aswindir</span> <span class="p">:</span> <span class="n">total_sky_direct_solar_radiation_at_surface</span>
+<span class="n">aswindircs</span> <span class="p">:</span> <span class="n">clear_sky_direct_solar_radiation_at_surface</span>
+<span class="n">aswtoa</span> <span class="p">:</span> <span class="n">toa_incident_solar_radiation</span>
+<span class="n">blh</span> <span class="p">:</span> <span class="n">boundary_layer_height</span>
+<span class="n">cld</span> <span class="p">:</span> <span class="p">[</span><span class="n">aswin</span><span class="p">,</span> <span class="n">aswincs</span><span class="p">]</span>
+<span class="n">cldbot</span> <span class="p">:</span> <span class="n">cloud_base_height</span>
+<span class="n">clddf</span> <span class="p">:</span> <span class="p">[</span><span class="n">aswindir</span><span class="p">,</span> <span class="n">aswindircs</span><span class="p">]</span>
+<span class="n">cldtop</span> <span class="p">:</span> <span class="n">high_cloud_cover</span>
+<span class="n">dir10</span> <span class="p">:</span> <span class="p">[</span><span class="n">u10</span><span class="p">,</span> <span class="n">v10</span><span class="p">]</span>
+<span class="n">gust10</span> <span class="p">:</span> <span class="n">instantaneous_10m_wind_gust</span>
+<span class="n">photi</span> <span class="p">:</span> <span class="p">[</span><span class="n">aswin</span><span class="p">,</span> <span class="n">aswtoa</span><span class="p">]</span>
+<span class="n">pshltr</span> <span class="p">:</span> <span class="n">surface_pressure</span>
+<span class="n">si</span> <span class="p">:</span> <span class="n">snow_depth</span>
+<span class="n">slp</span> <span class="p">:</span> <span class="n">mean_sea_level_pressure</span>
+<span class="n">spd10</span> <span class="p">:</span> <span class="p">[</span><span class="n">u10</span><span class="p">,</span> <span class="n">v10</span><span class="p">]</span>
+<span class="n">sst</span> <span class="p">:</span> <span class="n">sea_surface_temperature</span>
+<span class="n">t2</span> <span class="p">:</span> <span class="mi">2</span><span class="n">m_temperature</span>
+<span class="n">td2</span> <span class="p">:</span> <span class="mi">2</span><span class="n">m_dewpoint_temperature</span>
+<span class="n">u10</span> <span class="p">:</span> <span class="mi">10</span><span class="n">m_u_component_of_wind</span>
+<span class="n">v10</span> <span class="p">:</span> <span class="mi">10</span><span class="n">m_v_component_of_wind</span>
+</pre></div>
+</div>
+</section>
+<section id="sdl-era5-ghost-species-mapping">
+<h2>SDL ERA5-GHOST species mapping<a class="headerlink" href="#sdl-era5-ghost-species-mapping" title="Link to this heading"></a></h2>
+<p>Here is the mapping between SDL ERA5 variables and GHOST species names:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tphclp</span><span class="p">:</span> <span class="n">clp_z</span> <span class="c1"># cold point height</span>
+<span class="n">tphdyn</span><span class="p">:</span> <span class="n">dyn_z</span> <span class="c1"># dynamical tropopause height</span>
+<span class="n">tphwmo1</span><span class="p">:</span> <span class="n">wmo_1st_z</span> <span class="c1"># WMO 1st tropopause height</span>
+<span class="n">tphwmo2</span><span class="p">:</span> <span class="n">wmo_2nd_z</span> <span class="c1"># WMO 2nd tropopause height</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="CAMS-download.html" class="btn btn-neutral float-left" title="CAMS" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Library-mode.html" class="btn btn-neutral float-right" title="Library" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2026, Dene Bowdalo, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa, Amalia Vradi.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
