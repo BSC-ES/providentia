@@ -389,6 +389,11 @@ class Plotting:
         # iterate through read models and plot grid domain edges on map
         for model in data_labels:
             if model != self.read_instance.observations_data_label:
+                if (('grid_edge_longitude' not in self.read_instance.plotting_params[model]) or 
+                    ('grid_edge_latitude' not in self.read_instance.plotting_params[model])):
+                    msg = f'There is no model data for {model}, domain grid cannot be added on map.'
+                    show_message(self.read_instance, msg)
+                    continue
                 # create matplotlib polygon object from model grid edge map projection coordinates
                 grid_edge_outline_poly = \
                     Polygon(np.vstack((self.read_instance.plotting_params[model]['grid_edge_longitude'],
@@ -864,8 +869,8 @@ class Plotting:
         # automatically sets limit as figure width
         plot_txt._get_wrap_line_width = lambda: ax_width_px
 
-        # track plot elements if using dashboard 
-        if self.read_instance.mode not in ['report', 'library']:
+        # track plot elements 
+        if self.read_instance.mode not in ['report']:
             self.track_plot_elements(self.read_instance.observations_data_label, 'metadata', 'plot', [plot_txt], bias=False)
 
     def make_map(self, relevant_axis, networkspeci, plot_characteristics, plot_options, zstat=None, labela='', 
@@ -911,8 +916,8 @@ class Plotting:
                                                       c=z_statistic, transform=self.canvas_instance.datacrs,
                                                       **plot_characteristics['plot'])
         
-        # track plot elements if using dashboard 
-        if self.read_instance.mode not in ['report', 'library']:
+        # track plot elements
+        if self.read_instance.mode not in ['report']:
             self.track_plot_elements(self.read_instance.observations_data_label, 'map', 'plot', [self.stations_scatter], bias=False)
 
     def make_timeseries(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options, 
@@ -992,8 +997,8 @@ class Plotting:
                mb = plot_characteristics['bias_line']['y'] 
             bias_line_chars = {k: v for k, v in plot_characteristics['bias_line'].items() if k != "y"}
             bias_line = relevant_axis.axhline(y=mb, **bias_line_chars)
-            # track plot elements if using dashboard 
-            if self.read_instance.mode not in ['report', 'library']:
+            # track plot elements
+            if self.read_instance.mode not in ['report']:
                 self.track_plot_elements('ALL', 'timeseries', 'bias_line', [bias_line], bias=bias)
 
         # iterate through data labels
@@ -1034,8 +1039,8 @@ class Plotting:
                 # if self.canvas_instance.timeseries_smooth_window_sl.value() != (len(ts)*2 - 1):
                 #     self.canvas_instance.timeseries_smooth_window_sl.setMaximum(int(len(ts)*2 - 1))
 
-            # track plot elements if using dashboard 
-            if self.read_instance.mode not in ['report', 'library']:
+            # track plot elements 
+            if self.read_instance.mode not in ['report']:
                 self.track_plot_elements(data_label, 'timeseries', 'plot', self.timeseries_plot[-1], bias=bias)
 
     def make_periodic(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options, zstat=None):
@@ -1197,8 +1202,8 @@ class Plotting:
                                                            alpha=0.0)
                         violins.extend(limit_plot)
 
-                    # track plot elements if using dashboard 
-                    if self.read_instance.mode not in ['report', 'library']:
+                    # track plot elements
+                    if self.read_instance.mode not in ['report']:
                         self.track_plot_elements(data_label, 'periodic-violin', 'violin_plot_{}'.format(relevant_temporal_resolution), violins, bias=False)
                         self.track_plot_elements(data_label, 'periodic-violin', 'Median_plot_{}'.format(relevant_temporal_resolution), median_plots, bias=False)
 
@@ -1215,8 +1220,8 @@ class Plotting:
                     bias_lines = []
                     for mb in minimum_bias:
                         bias_lines += [relevant_sub_ax.axhline(y=mb, **plot_characteristics['bias_line'])]
-                    # track plot elements if using dashboard 
-                    if self.read_instance.mode not in ['report', 'library']:
+                    # track plot elements
+                    if self.read_instance.mode not in ['report']:
                         self.track_plot_elements('ALL', 'periodic', 'bias_line_{}'.format(relevant_temporal_resolution), 
                                                  bias_lines, bias=bias)
 
@@ -1244,8 +1249,8 @@ class Plotting:
                                                                zorder=self.read_instance.plotting_params[data_label]['zorder'], 
                                                                **plot_characteristics['plot'])
 
-                    # track plot elements if using dashboard 
-                    if self.read_instance.mode not in ['report', 'library']:
+                    # track plot elements
+                    if self.read_instance.mode not in ['report']:
                         self.track_plot_elements(data_label, 'periodic', 'plot_{}'.format(relevant_temporal_resolution), self.periodic_plots, bias=bias)
 
     def make_distribution(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options,
@@ -1326,8 +1331,8 @@ class Plotting:
         # also remove observations from cut_data_labels
         if bias:
             bias_line = [relevant_axis.axhline(**plot_characteristics['bias_line'])]
-            # track plot elements if using dashboard 
-            if self.read_instance.mode not in ['report', 'library']:
+            # track plot elements
+            if self.read_instance.mode not in ['report']:
                 self.track_plot_elements('ALL', 'distribution', 'bias_line', bias_line, bias=bias)
             if self.read_instance.observations_data_label in cut_data_labels:
                 cut_data_labels.remove(self.read_instance.observations_data_label)
@@ -1470,8 +1475,8 @@ class Plotting:
                                                             color=self.read_instance.plotting_params[data_label]['colour'], 
                                                             **plot_characteristics['plot'])
 
-                # track plot elements if using dashboard 
-                if self.read_instance.mode not in ['report', 'library']:
+                # track plot elements
+                if self.read_instance.mode not in ['report']:
                     self.track_plot_elements(data_label, 'distribution', 'plot', self.distribution_plot, bias=bias)
 
         # if have made PDFs for violin plot then return it
@@ -1560,8 +1565,8 @@ class Plotting:
                                                    color=self.read_instance.plotting_params[data_label]['colour'],
                                                    **plot_characteristics['plot'])
 
-            # track plot elements if using dashboard 
-            if self.read_instance.mode not in ['report', 'library']:
+            # track plot elements 
+            if self.read_instance.mode not in ['report']:
                 self.track_plot_elements(data_label, 'scatter', 'plot', self.scatter_plot, bias=False)
 
     def make_boxplot(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options):
@@ -1709,8 +1714,8 @@ class Plotting:
                     for patch in boxplot['boxes']:
                         patch.set(facecolor='white')
 
-                    # track plot elements if using dashboard 
-                    if self.read_instance.mode not in ['report', 'library']:
+                    # track plot elements
+                    if self.read_instance.mode not in ['report']:
                         self.track_plot_elements(data_label, 'boxplot', 'plot', boxplot, bias=False)
 
         # set xticklabels 
@@ -1933,9 +1938,10 @@ class Plotting:
             for tick in relevant_axis.get_yticklabels():
                 tick.set_verticalalignment("center")
 
-        # track plot elements if using dashboard 
-        if self.read_instance.mode not in ['report', 'library']:
-            self.track_plot_elements(self.read_instance.observations_data_label, 'heatmap', 'plot', heatmap, bias=bias)
+        # track plot elements
+        if self.read_instance.mode not in ['report']:
+            print(heatmap)
+            self.track_plot_elements(self.read_instance.observations_data_label, 'heatmap', 'plot', [heatmap], bias=bias)
 
     def make_table(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options,
                    zstats=None, statsummary=False, subsection=None, plotting_paradigm=None, stats_df=None):
@@ -2175,8 +2181,8 @@ class Plotting:
             table.set_fontsize(plot_characteristics['fontsize'])
             table.auto_set_column_width(np.arange(-1, len(col_labels)+1))
 
-        # track plot elements if using dashboard 
-        if self.read_instance.mode not in ['report', 'library']:
+        # track plot elements
+        if self.read_instance.mode not in ['report']:
             if statsummary:
                 self.track_plot_elements(self.read_instance.observations_data_label, 'statsummary', 'plot', [table], bias=bias)
             else:
@@ -2368,8 +2374,8 @@ class Plotting:
                                                                     mec=self.read_instance.plotting_params[data_label]['colour'],
                                                                     label=data_label) 
 
-            # track plot elements if using dashboard 
-            if self.read_instance.mode not in ['report', 'library']:
+            # track plot elements
+            if self.read_instance.mode not in ['report']:
                 self.track_plot_elements(data_label, 'taylor', 'plot', self.taylor_plot, bias=False)
 
         return True
@@ -2540,8 +2546,8 @@ class Plotting:
                                    marker=marker, **plot_characteristics['plot'])
                 self.fairmode_target_plot.append(stations_dots[0])
 
-            # track plot elements if using dashboard 
-            if self.read_instance.mode not in ['report', 'library']:
+            # track plot elements
+            if self.read_instance.mode not in ['report']:
                 self.track_plot_elements(data_label, 'fairmode-target', 'plot', self.fairmode_target_plot, bias=False)
 
             # add MQI90
@@ -2584,6 +2590,8 @@ class Plotting:
         # create legend
         legend_elements = []
         for classification in np.unique(classifications):
+            if classification == np.nan:
+                continue
             if classification not in plot_characteristics['markers'][f'{classification_type}_classification']:
                 marker = 'h'
             else:
@@ -2860,8 +2868,8 @@ class Plotting:
                 # add the dots to the track plot elements list
                 self.fairmode_statsummary_plot.append(stations_dots[0])
                 
-            # track plot elements if using dashboard 
-            if self.read_instance.mode not in ['report', 'library']:
+            # track plot elements
+            if self.read_instance.mode not in ['report']:
                 self.track_plot_elements(data_label, 'fairmode-statsummary', 'plot', 
                                          self.fairmode_statsummary_plot, bias=False)
                         
@@ -3087,8 +3095,8 @@ class Plotting:
                     table.set_fontsize(plot_characteristics['fontsize'])
                     table.auto_set_column_width(np.arange(-1, len(results_df.columns)+1))
                     
-                # track plot elements if using dashboard 
-                if self.read_instance.mode not in ['report', 'library']:
+                # track plot elements
+                if self.read_instance.mode not in ['report']:
                     self.track_plot_elements(data_label, 'contingencytable', 'plot', [table], bias=False)
             
     def track_plot_elements(self, data_label, base_plot_type, element_type, plot_object, bias=False):
@@ -3128,7 +3136,8 @@ class Plotting:
             self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label] = {}
 
         # add list for element type if does not yet exist
-        if element_type not in self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label]:
+        # in library mode save elements of current plot only
+        if element_type not in self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label] or self.read_instance.mode == 'library':
             self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type] = []
         # if does exist already then remove plot element return, as element has already been plotted
         else:
@@ -3158,11 +3167,12 @@ class Plotting:
             # add list of lines
             self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type] += plot_object
             
-        # set element visibility
-        if (data_label not in self.canvas_instance.plot_elements['data_labels_active']) & (data_label != 'ALL'):
-            if base_plot_type not in ['metadata', 'map', 'heatmap', 'table', 'statsummary']:
-                for element in self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type]:
-                    element.set_visible(False)
+        # in dashboard set element visibility
+        if self.read_instance.mode not in ['report', 'library']:
+            if (data_label not in self.canvas_instance.plot_elements['data_labels_active']) & (data_label != 'ALL'):
+                if base_plot_type not in ['metadata', 'map', 'heatmap', 'table', 'statsummary']:
+                    for element in self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type]:
+                        element.set_visible(False)
 
     def get_markersize(self, relevant_axis, base_plot_type, networkspeci, plot_characteristics, 
                        data=None, active_map_valid_station_inds=[]):

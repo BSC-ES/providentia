@@ -835,7 +835,7 @@ class Cams(object):
                         except requests.exceptions.HTTPError as err:
                             # invalid credential on .cdsapirc
                             if err.response.status_code == 401: 
-                                self.download_instance.logger.info(
+                                self.download_instance.logger.error(
                                     "\nBad request (401): Client Error. Invalid credentials in the .cdsapirc file. "
                                     "Removing authentication file...\n"
                                     "Please run the program again so Providentia can recreate the file automatically, "
@@ -846,17 +846,17 @@ class Cams(object):
                                 return
                             # bad request
                             if err.response.status_code == 400: 
-                                self.download_instance.logger.info("\nBad request (400): The server could not understand the request.")
-                                self.download_instance.logger.info(f"Details: {err}")
+                                self.download_instance.logger.error("\nBad request (400): The server could not understand the request.")
+                                self.download_instance.logger.error(f"Details: {err}")
                             # connection error
                             elif err.response.status_code == 500: 
-                                self.download_instance.logger.info("\nServer error (500): The server encountered an error while processing the request.")
-                                self.download_instance.logger.info(f"Details: {err}")
-                                self.download_instance.logger.info("Please try again later.")
+                                self.download_instance.logger.error("\nServer error (500): The server encountered an error while processing the request.")
+                                self.download_instance.logger.error(f"Details: {err}")
+                                self.download_instance.logger.error("Please try again later.")
                                 return
                             else:
-                                self.download_instance.logger.info(f"\nUnexpected error ({err.response.status_code}):")
-                                self.download_instance.logger.info(f"Details: {err}")
+                                self.download_instance.logger.error(f"\nUnexpected error ({err.response.status_code}):")
+                                self.download_instance.logger.error(f"Details: {err}")
                             # next download
                             current_cams_date = next_cams_date + timedelta(days=1)
                             continue
