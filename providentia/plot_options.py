@@ -96,8 +96,8 @@ def linear_regression(read_instance, canvas_instance, relevant_axis, networkspec
                                                  zorder=read_instance.plotting_params[data_label]['zorder']+len(cut_data_labels),
                                                  **plot_characteristics['regression'])
             
-            # track plot elements if using dashboard 
-            if read_instance.mode not in ['report', 'library']:
+            # track plot elements
+            if read_instance.mode not in ['report']:
                 canvas_instance.plotting.track_plot_elements(data_label, base_plot_type, 'regression', regression_line, bias=False)
 
 def smooth(read_instance, canvas_instance, relevant_axis, networkspeci, data_labels, base_plot_type, 
@@ -191,8 +191,8 @@ def smooth(read_instance, canvas_instance, relevant_axis, networkspeci, data_lab
                                          zorder=read_instance.plotting_params[data_label]['zorder']+len(cut_data_labels),
                                          **plot_characteristics['smooth']['format'])
 
-        # track plot elements if using dashboard 
-        if read_instance.mode not in ['report', 'library']:
+        # track plot elements
+        if read_instance.mode not in ['report']:
             canvas_instance.plotting.track_plot_elements(data_label, base_plot_type, 'smooth', smooth_line, bias=bias)
 
 def threshold(read_instance, canvas_instance, relevant_axis, networkspeci, base_plot_type, 
@@ -229,8 +229,8 @@ def threshold(read_instance, canvas_instance, relevant_axis, networkspeci, base_
         threshold_line = relevant_axis.axvline(x=threshold, 
                                                **plot_characteristics['threshold_line'])
 
-    # track plot elements if using dashboard 
-    if read_instance.mode not in ['report', 'library']:
+    # track plot elements
+    if read_instance.mode not in ['report']:
         canvas_instance.plotting.track_plot_elements('ALL', base_plot_type, 'threshold', [threshold_line], bias=False)
 
 def annotation(read_instance, canvas_instance, relevant_axis, networkspeci, data_labels, base_plot_type, 
@@ -367,8 +367,8 @@ def annotation(read_instance, canvas_instance, relevant_axis, networkspeci, data
         bbox.patch.set(**plot_characteristics['annotate_bbox'])
         relevant_axis.add_artist(bbox)
 
-        # track plot elements if using dashboard 
-        if read_instance.mode not in ['report', 'library']:
+        # track plot elements
+        if read_instance.mode not in ['report']:
             canvas_instance.plotting.track_plot_elements('ALL', base_plot_type, 'annotate', [bbox], bias=bias)
     else:
         msg = '{} could not be annotated'.format(base_plot_type)

@@ -92,7 +92,7 @@ class Zenodo:
             
             # for other errors, print response content and raise exception
             error = f"Error {resp.status_code}: {resp.text}"
-            self.download_instance.logger.info(error)
+            self.download_instance.logger.error(error)
             sys.exit(1)
 
     def download_zip(self, network, artifact_network):

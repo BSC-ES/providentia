@@ -110,7 +110,7 @@ def test_make_fairmode_statsummary(inst, statistic_mode, network_type):
 
 
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
-def test_make_fairmode_statsummary(inst, statistic_mode, network_type):
+def test_make_boxplot(inst, statistic_mode, network_type):
     plot(inst, statistic_mode, network_type, 'boxplot')
 
 
