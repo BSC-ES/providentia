@@ -4,9 +4,9 @@ Providentia's download mode supports downloading model output data provided by *
 
 [https://ads.atmosphere.copernicus.eu/datasets](https://ads.atmosphere.copernicus.eu/datasets)
 
-An ECMWF account is required to download the files. For a tutorial on how to create and set up your account, see the [Account setup in Atmosphere Data Store](#ADS) page.
+An ECMWF account is required to download the files. For a tutorial on how to create and set up your account, see the [ECMWF Account setup](#ADS) page.
 
-Data requests may take some time to complete. After starting a request from Providentia, you can monitor its progress by following the steps described in the [Check CAMS download](Check-CAMS-download) page.
+Data requests may take some time to complete. After starting a request from Providentia, you can monitor its progress by following the steps described in the [Check ECMWF download](Check-CAMS-download) page.
 
 ## Available CAMS datasets
 
@@ -22,11 +22,11 @@ Currently, four CAMS datasets are available for download:
 
 To download CAMS data from the Atmosphere Data Store, include one of the following model names along with the domain. For details about available models, streams, and specific resolutions, see the corresponding sections below:
 
-* `cams_analysis_<model>-regional` — [CAMS European Air Quality Forecasts](#1-cams-european-air-quality-forecasts)
-* `cams_forecast_<model>-regional` — [CAMS European Air Quality Forecasts](#1-cams-european-air-quality-forecasts)
-* `cams_forecast-global` — [CAMS Global Atmospheric Composition Forecasts](#2-cams-global-atmospheric-composition-forecasts)
-* `cams_reanalysis_<model>_<stream>-regional` — [CAMS European Air Quality Reanalyses](#3-cams-european-air-quality-reanalyses)
-* `cams_reanalysis-global` — [CAMS Global Reanalysis (EAC4)](#4-cams-global-reanalysis-eac4)
+* `cams_analysis_<model>-regional` - [CAMS European Air Quality Forecasts](#1-cams-european-air-quality-forecasts)
+* `cams_forecast_<model>-regional` - [CAMS European Air Quality Forecasts](#1-cams-european-air-quality-forecasts)
+* `cams_forecast-global` - [CAMS Global Atmospheric Composition Forecasts](#2-cams-global-atmospheric-composition-forecasts)
+* `cams_reanalysis_<model>_<stream>-regional` - [CAMS European Air Quality Reanalyses](#3-cams-european-air-quality-reanalyses)
+* `cams_reanalysis-global` - [CAMS Global Reanalysis (EAC4)](#4-cams-global-reanalysis-eac4)
 
 Once you have selected the dataset and specified the model and domain, make sure to set:
 

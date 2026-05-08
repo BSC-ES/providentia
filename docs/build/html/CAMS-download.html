@@ -20,7 +20,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="ACTRIS" href="ACTRIS-download.html" />
+    <link rel="next" title="ERA5" href="ERA5-download.html" />
     <link rel="prev" title="Zenodo" href="Zenodo-download.html" /> 
 </head>
 
@@ -53,6 +53,7 @@
 <li class="toctree-l2 current"><a class="reference internal" href="Download-mode.html">Download</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="Download-mode.html#overview">Overview</a></li>
 <li class="toctree-l3"><a class="reference internal" href="BSC-download.html">BSC HPC machines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ACTRIS-download.html">ACTRIS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="Zenodo-download.html">Zenodo</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">CAMS</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#available-cams-datasets">Available CAMS datasets</a></li>
@@ -64,7 +65,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#cams-ghost-species-mapping">CAMS-GHOST species mapping</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="ACTRIS-download.html">ACTRIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ERA5-download.html">ERA5</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Library-mode.html">Library</a></li>
@@ -114,8 +115,8 @@
 <h1>CAMS<a class="headerlink" href="#cams" title="Link to this heading"></a></h1>
 <p>Providentia’s download mode supports downloading model output data provided by <strong>CAMS</strong> from the <strong>Atmosphere Data Store</strong>:</p>
 <p><a class="reference external" href="https://ads.atmosphere.copernicus.eu/datasets">https://ads.atmosphere.copernicus.eu/datasets</a></p>
-<p>An ECMWF account is required to download the files. For a tutorial on how to create and set up your account, see the <a class="reference internal" href="ADS.html"><span class="doc std std-doc">Account setup in Atmosphere Data Store</span></a> page.</p>
-<p>Data requests may take some time to complete. After starting a request from Providentia, you can monitor its progress by following the steps described in the <a class="reference internal" href="Check-CAMS-download.html"><span class="doc std std-doc">Check CAMS download</span></a> page.</p>
+<p>An ECMWF account is required to download the files. For a tutorial on how to create and set up your account, see the <a class="reference internal" href="ADS.html"><span class="doc std std-doc">ECMWF Account setup</span></a> page.</p>
+<p>Data requests may take some time to complete. After starting a request from Providentia, you can monitor its progress by following the steps described in the <a class="reference internal" href="Check-CAMS-download.html"><span class="doc std std-doc">Check ECMWF download</span></a> page.</p>
 <section id="available-cams-datasets">
 <h2>Available CAMS datasets<a class="headerlink" href="#available-cams-datasets" title="Link to this heading"></a></h2>
 <p>Currently, four CAMS datasets are available for download:</p>
@@ -130,11 +131,11 @@
 <span id="how-to-enable-ads-download"></span><h2>How to enable Atmosphere Data Store download<a class="headerlink" href="#how-to-enable-atmosphere-data-store-download" title="Link to this heading"></a></h2>
 <p>To download CAMS data from the Atmosphere Data Store, include one of the following model names along with the domain. For details about available models, streams, and specific resolutions, see the corresponding sections below:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">cams_analysis_&lt;model&gt;-regional</span></code> — <a class="reference internal" href="#cams-european-air-quality-forecasts">CAMS European Air Quality Forecasts</a></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">cams_forecast_&lt;model&gt;-regional</span></code> — <a class="reference internal" href="#cams-european-air-quality-forecasts">CAMS European Air Quality Forecasts</a></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">cams_forecast-global</span></code> — <a class="reference internal" href="#cams-global-atmospheric-composition-forecasts">CAMS Global Atmospheric Composition Forecasts</a></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">cams_reanalysis_&lt;model&gt;_&lt;stream&gt;-regional</span></code> — <a class="reference internal" href="#cams-european-air-quality-reanalyses">CAMS European Air Quality Reanalyses</a></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">cams_reanalysis-global</span></code> — <a class="reference internal" href="#cams-global-reanalysis-eac4">CAMS Global Reanalysis (EAC4)</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cams_analysis_&lt;model&gt;-regional</span></code> - <a class="reference internal" href="#cams-european-air-quality-forecasts">CAMS European Air Quality Forecasts</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cams_forecast_&lt;model&gt;-regional</span></code> - <a class="reference internal" href="#cams-european-air-quality-forecasts">CAMS European Air Quality Forecasts</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cams_forecast-global</span></code> - <a class="reference internal" href="#cams-global-atmospheric-composition-forecasts">CAMS Global Atmospheric Composition Forecasts</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cams_reanalysis_&lt;model&gt;_&lt;stream&gt;-regional</span></code> - <a class="reference internal" href="#cams-european-air-quality-reanalyses">CAMS European Air Quality Reanalyses</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cams_reanalysis-global</span></code> - <a class="reference internal" href="#cams-global-reanalysis-eac4">CAMS Global Reanalysis (EAC4)</a></p></li>
 </ul>
 <p>Once you have selected the dataset and specified the model and domain, make sure to set:</p>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">dl_interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
@@ -800,7 +801,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Zenodo-download.html" class="btn btn-neutral float-left" title="Zenodo" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="ACTRIS-download.html" class="btn btn-neutral float-right" title="ACTRIS" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="ERA5-download.html" class="btn btn-neutral float-right" title="ERA5" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

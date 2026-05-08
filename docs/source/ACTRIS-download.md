@@ -2,7 +2,7 @@
 
 Providentia's download mode supports downloading ACTRIS in-situ measurements from the production server at NILU:
 
-[https://prod-actris-md.nilu.no/index.html](https://prod-actris-md.nilu.no/index.html)
+[https://prod-actris-md2.nilu.no/index.html](https://prod-actris-md2.nilu.no/index.html)
 
 ## Available datasets
 

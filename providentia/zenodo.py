@@ -331,6 +331,7 @@ class Zenodo:
                             msg =  f"No valid dates for species '{species}', resolution '{resolution}', "
                             f"network '{network}' in the requested date range."
                             show_message(self.download_instance, msg)
+                            continue
 
                         valid_filetree[network][resolution][species] = valid_dates
                     else:

@@ -107,7 +107,7 @@
                            <span class="n">period_conf</span><span class="p">,</span> <span class="n">representativity_conf</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.filter</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFilter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.plotting</span><span class="w"> </span><span class="kn">import</span> <span class="n">Plotting</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.plot_aux</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_taylor_diagram_ghelper</span><span class="p">,</span> <span class="n">get_plot_data</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.plot_aux</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_taylor_diagram_ghelper</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.plot_formatting</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">format_plot_options</span><span class="p">,</span> <span class="n">format_axis</span><span class="p">,</span> <span class="n">set_axis_label</span><span class="p">,</span> <span class="n">set_axis_title</span><span class="p">,</span> 
                               <span class="n">harmonise_xy_lims_paradigm</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.read</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataReader</span>
@@ -204,9 +204,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">data_labels</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">observations_data_label</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_labels_raw</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">observations_data_label</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">networkspecies</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">|</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">network</span><span class="p">,</span><span class="n">speci</span><span class="p">)</span> <span class="k">for</span> <span class="n">network</span><span class="p">,</span> <span class="n">speci</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">)]</span>
-
-        <span class="c1"># show warning to load data</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">warning_to_load</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Wrapper method to read data.&quot;&quot;&quot;</span>
@@ -458,7 +455,7 @@
              <span class="n">legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">set_obs_legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">map_extent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">annotate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
              <span class="n">hidedata</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">logx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">logy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">multispecies</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">regression</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
              <span class="n">threshold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">gerrity</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">plot_options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
-             <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">networkspeci</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save_data</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+             <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">networkspeci</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">        Wrapper method to make a Providentia plot.</span>
 
@@ -1098,7 +1095,7 @@
             <span class="n">current_station_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">station_names</span><span class="p">[</span><span class="n">networkspeci</span><span class="p">][</span><span class="n">station_ind</span><span class="p">]</span>
             <span class="n">current_station_reference</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">station_references</span><span class="p">[</span><span class="n">networkspeci</span><span class="p">][</span><span class="n">station_ind</span><span class="p">]</span>
         <span class="k">elif</span> <span class="n">n_stations</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;No valid stations for </span><span class="si">{}</span><span class="s1"> in </span><span class="si">{}</span><span class="s1"> subsection. Not making </span><span class="si">{}</span><span class="s1"> plot&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">networkspeci</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsection</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;No valid stations for </span><span class="si">{}</span><span class="s1"> in </span><span class="si">{}</span><span class="s1"> subsection. Not making </span><span class="si">{}</span><span class="s1"> plot&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">networkspeci</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsection</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">))</span>
             <span class="k">return</span>
         
         <span class="c1"># set xlabel / ylabel</span>
@@ -1244,28 +1241,6 @@
         <span class="c1"># elif return_plot is passed then return plot axis/axes</span>
         <span class="k">elif</span> <span class="n">return_plot</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">fig</span>
-        <span class="k">elif</span> <span class="n">save_data</span><span class="p">:</span>
-            <span class="c1"># get dictionary with data per plot type</span>
-            <span class="n">plot_data</span> <span class="o">=</span> <span class="n">get_plot_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_plot_type</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">zstat</span><span class="p">,</span> 
-                                      <span class="n">relevant_data_labels</span><span class="p">,</span> <span class="n">networkspecies</span><span class="p">,</span> <span class="n">labela</span><span class="p">,</span> <span class="n">labelb</span><span class="p">,</span>
-                                      <span class="n">plot_options</span><span class="p">)</span>
-            
-            <span class="c1"># if save_data is boolean then auto generate fname</span>
-            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">save_data</span><span class="p">)</span> <span class="o">==</span> <span class="nb">bool</span><span class="p">:</span>
-                <span class="n">data_fname</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="s1">&#39;saved_data/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">plot_type</span><span class="p">))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">data_fname</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">save</span><span class="p">)</span>
-
-            <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="n">plot_data</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">plot_data</span><span class="p">[</span><span class="n">axis</span><span class="p">]:</span>
-                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">plot_data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                        <span class="n">fname</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">data_fname</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">axis</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">.csv&#39;</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">fname</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">data_fname</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">.csv&#39;</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Saving </span><span class="si">{}</span><span class="s1"> figure data to </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">plot_type</span><span class="p">,</span> <span class="n">fname</span><span class="p">))</span>
-                    <span class="n">plot_data</span><span class="p">[</span><span class="n">axis</span><span class="p">][</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
         <span class="c1"># otherwise show plot</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
@@ -1475,11 +1450,11 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">from_conf</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">error</span> <span class="o">=</span> <span class="s1">&#39;Error: The path to the configuration file passed as an argument does not exist.&#39;</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
                 <span class="k">return</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">error</span> <span class="o">=</span> <span class="s2">&quot;Error: The configuration file must be given as an argument: e.g. &#39;config=...&#39;&quot;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="c1"># parse section</span>
@@ -1490,7 +1465,7 @@
         <span class="c1"># check if configuration file has a section title</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sections</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">error</span> <span class="o">=</span> <span class="s2">&quot;Error: No sections were found in the configuration file, make sure to name them using square brackets.&quot;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
             <span class="k">return</span>
     
         <span class="bp">self</span><span class="o">.</span><span class="n">have_section</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1502,7 +1477,7 @@
                 <span class="n">error</span> <span class="o">=</span> <span class="s1">&#39;Error: The section specified in the command line (</span><span class="si">{0}</span><span class="s1">) does not exist.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">section</span><span class="p">)</span>
                 <span class="n">error</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Tip: For subsections, add the name of the parent section followed by an interpunct (·) &#39;</span>
                 <span class="n">error</span> <span class="o">+=</span> <span class="s1">&#39;before the subsection name (e.g. SECTIONA·Spain). Available: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_sections</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
                 <span class="k">return</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">have_section</span><span class="p">:</span>
@@ -1823,9 +1798,7 @@
         <span class="c1"># read data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>  
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">invalid_read</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Error: No valid data to read.&#39;</span><span class="p">)</span>
-            <span class="c1"># if data is invalid, do not show &#39;Error: Data has not been loaded. Use the load() method&#39;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">warning_to_load</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;No valid data to read&#39;</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="c1"># filter</span>
@@ -1848,8 +1821,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;data_in_memory&#39;</span><span class="p">):</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">warning_to_load</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Error: Data has not been loaded. Use the load() method&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Error: Data has not been loaded. Use the load() method&#39;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span></div>
@@ -1868,7 +1840,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid_config</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Error: A valid configuration file has not been read. Please reinitialise your Providentia object with a valid file: prv.Providentia(&#39;filename.conf&#39;)&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Error: A valid configuration file has not been read. Please reinitialise your Providentia object with a valid file: prv.Providentia(&#39;filename.conf&#39;)&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span></div>
