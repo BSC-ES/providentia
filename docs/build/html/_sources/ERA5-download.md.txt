@@ -93,11 +93,9 @@ These are the available species:
 
 There are five derived variables computed from two ERA5 variables. When downloading one of these, the two original variables are also downloaded, formatted and saved together with the final result.
 
-#### cld
-
 ### Product Species
 
-There are five derived variables computed from two ERA5 variables. When downloading one of these, the two original variables are also downloaded, formatted, and saved together with the final result.
+There are five derived variables computed from two ERA5 variables. When downloading one of these, the two original variables are also downloaded, formatted and saved together with the final result.
 
 #### cld
 
@@ -110,9 +108,11 @@ When creating **cld**, both variables are also downloaded and saved.
 
 **Formula:**
 
-\[
-\text{cld} = \frac{\text{aswin}}{\text{aswincs}}
-\]
+$$
+\begin{aligned}
+\text{cld} &= \frac{\text{aswin}}{\text{aswincs}}
+\end{aligned}
+$$
 
 #### clddf
 
@@ -125,11 +125,11 @@ When creating **clddf**, both variables are also downloaded and saved.
 
 **Formula:**
 
-\[
-\text{clddf} = \frac{\text{aswindir}}{\text{aswindircs}}
-\]
-
-#### dir10
+$$
+\begin{aligned}
+\text{clddf} &= \frac{\text{aswindir}}{\text{aswindircs}}
+\end{aligned}
+$$
 
 #### dir10
 
@@ -142,13 +142,18 @@ When downloading **dir10**, both variables are also downloaded and saved.
 
 **Formula:**
 
-\[
-\text{dir10} = \left( \frac{180}{\pi} \cdot \arctan2(-u10, -v10) \right)
-\]
+$$
+\begin{aligned}
+\text{dir10} &= \frac{180}{\pi}\arctan2(-u10,\,-v10)
+\end{aligned}
+$$
 
-\[
-\text{if } \text{dir10} < 0 \;\Rightarrow\; \text{dir10} = \text{dir10} + 360
-\]
+$$
+\begin{aligned}
+\text{if } \text{dir10} &< 0 \\
+\text{dir10} &= \text{dir10} + 360
+\end{aligned}
+$$
 
 #### photi
 
@@ -161,9 +166,11 @@ When creating **photi**, both variables are also downloaded and saved.
 
 **Formula:**
 
-\[
-\text{photi} = \frac{\text{aswin}}{\text{aswtoa}}
-\]
+$$
+\begin{aligned}
+\text{photi} &= \frac{\text{aswin}}{\text{aswtoa}}
+\end{aligned}
+$$
 
 #### spd10
 
@@ -176,9 +183,11 @@ When downloading **spd10**, both variables are also downloaded and saved.
 
 **Formula:**
 
-\[
-\text{spd10} = \sqrt{u10^2 + v10^2}
-\]
+$$
+\begin{aligned}
+\text{spd10} &= \sqrt{u10^2 + v10^2} 
+\end{aligned}
+$$
 
 ## 2. Reanalysis Tropopause Data Repository
 
@@ -222,17 +231,17 @@ aswindir : total_sky_direct_solar_radiation_at_surface
 aswindircs : clear_sky_direct_solar_radiation_at_surface
 aswtoa : toa_incident_solar_radiation
 blh : boundary_layer_height
-cld : ['aswin', 'aswincs']
+cld : [aswin, aswincs]
 cldbot : cloud_base_height
-clddf : ['aswindir', 'aswindircs']
+clddf : [aswindir, aswindircs]
 cldtop : high_cloud_cover
-dir10 : ['u10', 'v10']
+dir10 : [u10, v10]
 gust10 : instantaneous_10m_wind_gust
-photi : ['aswin', 'aswtoa']
+photi : [aswin, aswtoa]
 pshltr : surface_pressure
 si : snow_depth
 slp : mean_sea_level_pressure
-spd10 : ['u10', 'v10']
+spd10 : [u10, v10]
 sst : sea_surface_temperature
 t2 : 2m_temperature
 td2 : 2m_dewpoint_temperature

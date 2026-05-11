@@ -5,6 +5,8 @@ import math
 import os
 import sys
 
+from itertools import product
+import matplotlib
 from matplotlib import transforms
 from matplotlib.colors import cnames
 from matplotlib.projections import PolarAxes
@@ -13,6 +15,7 @@ import mpl_toolkits.axisartist.grid_finder as gf
 from netCDF4 import Dataset
 import numpy as np
 import pandas as pd
+from pandas.testing import assert_frame_equal
 from scipy.signal import convolve
 from scipy.signal.windows import gaussian
 from scipy.sparse import coo_matrix
@@ -20,7 +23,7 @@ import seaborn as sns
 import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join, get_conversion_factor, get_standard_parameters_by_speci
-from .statistics import calculate_statistic, get_z_statistic_sign, get_z_statistic_type
+from .statistics import calculate_statistic, get_z_statistic_sign, get_z_statistic_type, exceedance_lim
 from .warnings_prv import show_message
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
@@ -957,3 +960,240 @@ def convert_multispecies_df_units(read_instance, stats_df, zstats, base_plot_typ
                     stats_df.iloc[mask, :] *= conversion_factor
 
     return stats_df
+
+def handle_test_or_save_df(read_instance, df, plot_type, filename, data_label, element_type, path, tests_generate_output):
+    """
+    Save dataframe or assert if dataframe generates the same outputs as the dataframes saved in tests folder
+
+    Parameters
+    ----------
+    read_instance : object
+        An instance of the application class responsible for data reading operations.
+    df : pd.DataFrame
+        Data to be downloaded
+    plot_type : str
+        Plot type
+    filename : str
+        Filename
+    data_label : str
+        Data label
+    element_type : str
+        Element type.
+    path : str
+        Path to save file
+    tests_generate_output : bool
+        Indicates if we want to regenerate dataframes saved in tests folder
+    """
+
+    if read_instance.tests:
+        generated_output = df
+        generated_output = generated_output.replace('', np.nan)
+        print('Generated_output')
+        print(generated_output)
+        if tests_generate_output:
+            # during tests save empty spaces in dataframe as 'nan' because pd.read_csv creates nans on indices 
+            # and it is not possible to compare the dataframes
+            # it is also possible to modify the behaviour of pd.read_csv to avoid reading nans defining keep_default_na=False
+            # but in that way we hide the nans in the data and not only in the indices
+            save_df(read_instance, df, plot_type, filename, 
+                    data_label, element_type, path, na_rep=np.nan)   
+            
+        # read expected output
+        parse_dates = []
+        if "time" in generated_output.columns:
+            parse_dates.append("time")
+        expected_output = pd.read_csv(
+            f"{path}/{filename}.csv",
+            parse_dates=parse_dates
+        )
+        print('Expected_output')
+        print(expected_output)
+        assert assert_frame_equal(
+            generated_output, expected_output, atol=1e-5) is None
+            
+    else:
+        save_df(read_instance, df, plot_type, filename, 
+                data_label, element_type, path)   
+
+def save_df(read_instance, df, plot_type, filename, data_label, element_type, path, na_rep=''):
+    """
+    Save dataframe to CSV file
+
+    Parameters
+    ----------
+    read_instance : object
+        An instance of the application class responsible for data reading operations.
+    df : pd.DataFrame
+        Data to be downloaded
+    plot_type : str
+        Plot type
+    filename : str
+        Filename
+    data_label : str
+        Data label
+    element_type : str
+        Element type.
+    path : str
+        Path to save file
+    na_rep : str, np.nan, optional
+        Representation of nans in saved dataframe
+    """
+
+    fname = join(PROVIDENTIA_ROOT, f'{path}/{filename}.csv')
+    msg = f'Saving {plot_type} figure data (data label: {data_label}, element type: {element_type}) to {fname}'
+    read_instance.logger.info(msg)
+    df.to_csv(fname, index=False, na_rep=na_rep)
+
+def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, plot_type, zstat, 
+                              labela, labelb, plot_options, path, tests_generate_output):
+    """
+    Extract data into dataframe and save to to CSV file
+
+    Parameters
+    ----------
+    read_instance : object
+        An instance of the application class responsible for data reading operations.
+    canvas_instance : object
+        An instance of the application class responsible for plotting operations.
+    base_plot_type : str
+        Base plot type without statistical information.
+    plot_type : str
+        Plot type
+    zstat : str
+        Statistic to plot.
+    labela : str
+        Label of first dataset.
+    labelb : str
+        Label of second dataset (if defined then a bias plot is made).
+    plot_options : list
+        Plot options
+    tests_generate_output : bool, optional
+        Indicates if tests need to regenerate CSV files with plot data
+    """
+
+    print('Downloading data...')
+
+    if 'bias' in plot_options:
+        plot_element_varname = 'bias'
+    else:
+        plot_element_varname = 'absolute'
+    if plot_element_varname not in canvas_instance.plot_elements[base_plot_type]:
+        return
+
+    for data_label in canvas_instance.plot_elements[base_plot_type][plot_element_varname]:
+        for element_type in canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label]:
+            plot_elements = canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type]
+            
+            # for FAIRMODE target plot combine all dots (saved individually so that they can have different colors) in one Line2D
+            if base_plot_type == 'fairmode-target':
+                x_array = []
+                y_array = []
+                for dot in plot_elements:
+                    x_array.append(dot.get_xdata().tolist()[0])
+                    y_array.append(dot.get_ydata().tolist()[0])
+                plot_elements = [matplotlib.lines.Line2D(xdata=x_array, ydata=y_array)]
+                        
+            for plot_element_i, plot_element in enumerate(plot_elements):
+
+                if base_plot_type in ['statsummary', 'heatmap', 'table', 'contingencytable']:
+                    data = []
+                    if base_plot_type in ['statsummary', 'table', 'contingencytable']:
+                        items = plot_element.get_celld().items()
+                    elif base_plot_type == 'heatmap':
+                        items = np.ndenumerate(plot_element.get_children()[0].get_array())
+                    for (x, y), value in items:
+                        data.append({
+                            "x": x,
+                            "y": y,
+                            "z": value.get_text().get_text() if base_plot_type != 'heatmap' else value
+                        })
+                    df = pd.DataFrame(data, columns=["x", "y", "z"])
+                    df = df.pivot(index="x", columns="y", values="z").sort_index().rename_axis(index=None, columns=None)
+                    df.columns = df.columns.astype(str)
+                    # contingency plots have an index that starts at -1, reindex to start from 0
+                    if base_plot_type == 'contingencytable':
+                        df.index = range(len(df))
+                    filename = f"{plot_type}_{element_type}"   
+                    handle_test_or_save_df(read_instance, df, plot_type, filename, data_label, element_type, 
+                                           path, tests_generate_output)
+                    
+                elif base_plot_type in ['timeseries', 'distribution', 'scatter', 'fairmode-target',
+                                        'fairmode-statsummary', 'taylor', 'boxplot', 'periodic', 'periodic-violin']:
+                    
+                    # skip periodic violin shapes
+                    if isinstance(plot_element, matplotlib.collections.FillBetweenPolyCollection):
+                        continue
+
+                    # extract annotations
+                    if isinstance(plot_element, matplotlib.offsetbox.AnchoredOffsetbox):
+                        data = []
+                        for annotation in plot_element.get_child().get_children():
+                            data.append({
+                                "dataset": annotation.get_text().split('|')[0].strip(),
+                                "annotation": annotation.get_text().split('|')[1].strip()
+                            })
+                        df = pd.DataFrame(data)
+                        filename = f"{plot_type}_{data_label}_{element_type}_{plot_element_i}"
+                    # extract plot data
+                    else:
+                        data = []
+                        # extract patches in boxplot
+                        if isinstance(plot_element, matplotlib.patches.PathPatch):
+                            xy = plot_element.get_path().vertices
+                        else:
+                            xy = plot_element.get_xydata()
+                        for x, y in xy:
+                            data.append({
+                                # convert time from unix to actual
+                                "time" if base_plot_type == "timeseries" \
+                                else read_instance.observations_data_label if base_plot_type == "scatter" \
+                                else data_label if base_plot_type == "distribution"
+                                else "x": 
+                                    pd.to_datetime(x, unit="D", utc=True).round("S") 
+                                    if base_plot_type == "timeseries" else x, 
+                                "y" if base_plot_type == "boxplot" \
+                                else "density" if base_plot_type == "distribution" \
+                                else data_label: y,
+                            })
+                        df = pd.DataFrame(data)
+                        filename = f"{plot_type}_{data_label}_{element_type}_{plot_element_i}"
+                    handle_test_or_save_df(read_instance, df, plot_type, filename, data_label, element_type, 
+                                           path, tests_generate_output)
+
+                elif base_plot_type in ['map']:
+
+                    # extract annotations
+                    if isinstance(plot_element, matplotlib.offsetbox.AnchoredOffsetbox):
+                        data = []
+                        for annotation in plot_element.get_child().get_children():
+                            data.append({
+                                "dataset": annotation.get_text().split('|')[0].strip(),
+                                "annotation": annotation.get_text().split('|')[1].strip()
+                            })
+                        df = pd.DataFrame(data)
+                        filename = f"{plot_type}_{data_label}_{element_type}_{plot_element_i}"
+                    # extract plot data
+                    else:
+
+                        coordinates = plot_element.get_offsets()
+                        values = plot_element.get_array()
+
+                        # extract data
+                        data = []
+                        for (lon, lat), val in zip(coordinates, values):
+                            data.append({
+                                "Latitude": lon,
+                                "Longitude": lat,
+                                zstat: val
+                            })
+                        label = ''
+                        if (labela != '') and (labelb == ''):
+                            label = labela
+                        elif (labelb != '')  and (labela == ''):
+                            label = labelb
+                        elif (labela != '') and (labelb != ''):
+                            label = f'{labela}-{labelb}'
+                        df = pd.DataFrame(data)
+                        filename = f"{plot_type}_{element_type}_{label}"
+                    handle_test_or_save_df(read_instance, df, plot_type, filename, data_label, element_type, 
+                                           path, tests_generate_output)

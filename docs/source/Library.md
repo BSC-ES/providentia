@@ -376,6 +376,20 @@ save='fname'
 
 where `save` is the name of the file to save to. If save is set as: `save=True`, then the filename will be automatically generated and saved in the `plots` directory.
 
+#### Saving plot data
+
+Use `save_data` to store the plot elements as CSV files.
+
+```
+plot_obj = provi.plot(plot_type, save_data=True)
+```
+
+By default, the files will be saved in the `saved_data` folder, users can change the path by passing `save_data_path`.
+
+```
+plot_obj = provi.plot(plot_type, save_data=True, save_data_path='path')
+```
+
 #### Plot types
 
 In this section the available plot types will de detailed, with any specific subtleties involved in calling the plotting method detailed. Available plot options are also stated per plot type. 

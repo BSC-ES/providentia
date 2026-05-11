@@ -22,7 +22,7 @@ from .fields_menus import (init_metadata, init_period, init_representativity, me
                            period_conf, representativity_conf)
 from .filter import DataFilter
 from .plotting import Plotting
-from .plot_aux import get_taylor_diagram_ghelper
+from .plot_aux import get_taylor_diagram_ghelper, download_plot_data_to_csv
 from .plot_formatting import (format_plot_options, format_axis, set_axis_label, set_axis_title, 
                               harmonise_xy_lims_paradigm)
 from .read import DataReader
@@ -117,6 +117,12 @@ class Providentia:
         self.data_labels = [self.observations_data_label] + list(self.experiments.values())
         self.data_labels_raw = [self.observations_data_label] + list(self.experiments.keys())
         self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
+
+        # show warning to load data
+        self.warning_to_load = True
+
+        self.plot_elements = {}
+        self.plot_elements['data_labels_active'] = self.data_labels
 
     def read(self):
         """Wrapper method to read data."""
@@ -357,7 +363,8 @@ class Providentia:
              legend=True, set_obs_legend=True, map_extent=None, annotate=False, bias=False, domain=False, 
              hidedata=False, logx=False, logy=False, multispecies=False, regression=False, smooth=False, 
              threshold=False, gerrity=False, plot_options=None, save=False, return_plot=False, format=None, 
-             width=None, height=None, networkspeci=None):
+             width=None, height=None, networkspeci=None, save_data=False, save_data_path="saved_data", 
+             tests_generate_output=False):
         """ 
         Wrapper method to make a Providentia plot.
 
@@ -421,7 +428,13 @@ class Providentia:
             Figure height, defaults to None.
         networkspeci : str, optional
             Selected networkspeci for non-multispecies plots
-
+        save_data : str, optional
+            Indicates if you want to save data to CSV
+        save_data_path : str, optional
+            Path to save data, defaults to folder saved_data
+        tests_generate_output : bool, optional
+            Indicates if tests need to regenerate CSV files with plot data
+        
         Returns
         -------
         matplotlib.figure.Figure or None
@@ -997,7 +1010,7 @@ class Providentia:
             current_station_name = self.station_names[networkspeci][station_ind]
             current_station_reference = self.station_references[networkspeci][station_ind]
         elif n_stations == 0:
-            self.logger.info('No valid stations for {} in {} subsection. Not making {} plot'.format(networkspeci, self.subsection, plot_type))
+            self.logger.error('No valid stations for {} in {} subsection. Not making {} plot'.format(networkspeci, self.subsection, plot_type))
             return
         
         # set xlabel / ylabel
@@ -1128,6 +1141,12 @@ class Providentia:
             # hide colourbar if requested, we still need to create it to get the correct cmap / bounds in the maps
             if not cb:
                 cb_ax.set_visible(False)
+
+        # download data to CSV file
+        if save_data:
+            download_plot_data_to_csv(self, self, base_plot_type, plot_type, zstat, 
+                                      labela, labelb, plot_options, save_data_path, 
+                                      tests_generate_output)
 
         # if save is passed then save plot and return
         if save:
@@ -1342,11 +1361,11 @@ class Providentia:
                 self.from_conf = True
             else:
                 error = 'Error: The path to the configuration file passed as an argument does not exist.'
-                self.logger.info(error)
+                self.logger.error(error)
                 return
         else:
             error = "Error: The configuration file must be given as an argument: e.g. 'config=...'"
-            self.logger.info(error)
+            self.logger.error(error)
             return
 
         # parse section
@@ -1357,7 +1376,7 @@ class Providentia:
         # check if configuration file has a section title
         if len(self.sections) == 0:
             error = "Error: No sections were found in the configuration file, make sure to name them using square brackets."
-            self.logger.info(error)
+            self.logger.error(error)
             return
     
         self.have_section = False
@@ -1369,7 +1388,7 @@ class Providentia:
                 error = 'Error: The section specified in the command line ({0}) does not exist.'.format(self.section)
                 error += '\nTip: For subsections, add the name of the parent section followed by an interpunct (·) '
                 error += 'before the subsection name (e.g. SECTIONA·Spain). Available: {0}'.format(self.all_sections)
-                self.logger.info(error)
+                self.logger.error(error)
                 return
 
         if not self.have_section:
@@ -1676,7 +1695,9 @@ class Providentia:
         # read data
         self.read()  
         if self.invalid_read:
-            self.logger.info('No valid data to read')
+            self.logger.error('Error: No valid data to read.')
+            # if data is invalid, do not show 'Error: Data has not been loaded. Use the load() method'
+            self.warning_to_load = False
             return
 
         # filter
@@ -1696,7 +1717,8 @@ class Providentia:
         """
 
         if not hasattr(self, 'data_in_memory'):
-            self.logger.info('Error: Data has not been loaded. Use the load() method')
+            if self.warning_to_load:
+                self.logger.error('Error: Data has not been loaded. Use the load() method')
             return False
         else:
             return True
@@ -1712,7 +1734,7 @@ class Providentia:
         """
 
         if not self.valid_config:
-            self.logger.info("Error: A valid configuration file has not been read. Please reinitialise your Providentia object with a valid file: prv.Providentia('filename.conf')")
+            self.logger.error("Error: A valid configuration file has not been read. Please reinitialise your Providentia object with a valid file: prv.Providentia('filename.conf')")
             return False
         else:
             return True

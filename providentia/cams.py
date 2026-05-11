@@ -239,10 +239,12 @@ class Cams(object):
             if 'level_boundary' in cams_dict:
                 boundary_date = datetime.combine(cams_dict['level_boundary'], datetime.min.time())
                 boundary_date = boundary_date.astimezone(timezone.utc) if boundary_date.tzinfo else boundary_date.replace(tzinfo=timezone.utc)
+                
                 if current_cams_date <= boundary_date:
                     request[level_variable] = cams_dict[level_variable]['before_increase']
                 else: 
                     request[level_variable] = cams_dict[level_variable]['after_increase']
+            
             # without a level increase, just get the level
             else:
                 request[level_variable] = cams_dict[level_variable]
