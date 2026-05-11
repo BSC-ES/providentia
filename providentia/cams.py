@@ -166,7 +166,7 @@ class Cams(object):
 
         return cams_start_date, cams_end_date
 
-    def create_request(self, cams_species, cams_dict, current_cams_date, next_cams_date, level, stream, url, mod_id, initial_check):
+    def create_request(self, cams_species, cams_dict, current_cams_date, next_cams_date, level, stream, mod_id, initial_check):
         """
         Build the request required by the Copernicus Atmosphere Data Store API.
 
@@ -184,8 +184,6 @@ class Cams(object):
             Variable level type, 'single' or 'multi'.
         stream : str or None
             CAMS data stream, 'validated' or 'interim'.
-        url : str
-            CAMS dataset URL.
         mod_id : str or None
             Model identifier for multi-model datasets.
         initial_check : bool
@@ -230,6 +228,10 @@ class Cams(object):
                 
             request["type"] = stream
 
+        # add the model if models are available in the dataset
+        if 'model' in cams_dict:
+            request["model"] = mod_id
+
         # get the level and apply it if the species is multi level
         level_variable = 'level' if 'level' in cams_dict else 'model_level'
         if level == 'multi':
@@ -246,7 +248,7 @@ class Cams(object):
                 request[level_variable] = cams_dict[level_variable]
 
         # copy shared fields from config into the request
-        shared_variables = ['time', 'type', 'model', 'data_format', 'product_type', 'download_format']
+        shared_variables = ['time', 'type', 'data_format', 'product_type', 'download_format']
         
         for shared_variable in shared_variables:
             if shared_variable in cams_dict:
@@ -339,7 +341,7 @@ class Cams(object):
         
         if u_count == 1:
             # e.g. cams_forecast
-            if "models" in cams_dict:
+            if "model" in cams_dict:
                 msg = f"The model '{config_modid}' is missing the model. Please add one (e.g. '{config_modid}_ensemble')."
                 show_message(self.download_instance, msg, deactivate=initial_check)
                 return mod_id, stream, error
@@ -348,13 +350,13 @@ class Cams(object):
             # e.g. cams_analysis_ensemble
             last_element = config_modid.rsplit("_", 1)[1]
 
-            if cams_dict.get("stream") and "models" in cams_dict:
+            if cams_dict.get("stream") and "model" in cams_dict:
                 msg = f"The '{dataset}' dataset needs a model and a stream. Please add one (e.g. 'cams_reanalysis_ensemble_interim')."    
                 show_message(self.download_instance, msg, deactivate=initial_check)
                 return mod_id, stream, error
 
-            if "models" in cams_dict:
-                if last_element not in cams_dict["models"]:
+            if "model" in cams_dict:
+                if last_element not in cams_dict["model"]:
                     msg = f"Cannot find the {last_element} model in the '{dataset}' dataset."    
                     show_message(self.download_instance, msg, deactivate=initial_check)
                     return mod_id, stream, error
@@ -366,7 +368,7 @@ class Cams(object):
             
         elif u_count == 3:
             # e.g. cams_reanalysis_ensemble_interim
-            if not (cams_dict.get("stream") and "models" in cams_dict):
+            if not (cams_dict.get("stream") and "model" in cams_dict):
                 msg = f"The '{dataset}' dataset does not admit models and streams, change the model in the configuration file."    
                 show_message(self.download_instance, msg, deactivate=initial_check)
                 return mod_id, stream, error
@@ -374,7 +376,7 @@ class Cams(object):
             # extract model and stream
             _, temp_mod_id, temp_stream = config_modid.rsplit("_", 2)
 
-            if temp_mod_id not in cams_dict["models"]:
+            if temp_mod_id not in cams_dict["model"]:
                 msg = f"Cannot find the {temp_mod_id} model in the '{dataset}' dataset."    
                 show_message(self.download_instance, msg, deactivate=initial_check)
                 return mod_id, stream, error
@@ -980,7 +982,7 @@ class Cams(object):
                         if ghost_species not in ['dir10', 'spd10', 'cld', 'clddf', 'photi']:
 
                             # create dictionary to do the request
-                            request, is_valid = self.create_request(cams_species, cams_dict, current_cams_date, next_cams_date, level, stream, url, mod_id, initial_check)
+                            request, is_valid = self.create_request(cams_species, cams_dict, current_cams_date, next_cams_date, level, stream, mod_id, initial_check)
 
                             # jump to the next date
                             if not is_valid:

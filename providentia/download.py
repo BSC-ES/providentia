@@ -21,7 +21,6 @@ from providentia.auxiliar import CURRENT_PATH, join
 from .configuration import ProvConfiguration, load_conf
 from .read_aux import check_for_ghost
 from .tropopause import Tropopause
-from .tropopause import Tropopause
 from .warnings_prv import show_message
 from .zenodo import Zenodo
 from .download_aux import (find_model, find_available_resolutions, 
