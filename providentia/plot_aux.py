@@ -961,7 +961,7 @@ def convert_multispecies_df_units(read_instance, stats_df, zstats, base_plot_typ
 
     return stats_df
 
-def handle_test_or_save_df(read_instance, df, plot_type, filename, data_label, element_type, path, tests_generate_output):
+def handle_test_or_save_df(read_instance, df, filename, path, tests_generate_output):
     """
     Save dataframe or assert if dataframe generates the same outputs as the dataframes saved in tests folder
 
@@ -971,14 +971,8 @@ def handle_test_or_save_df(read_instance, df, plot_type, filename, data_label, e
         An instance of the application class responsible for data reading operations.
     df : pd.DataFrame
         Data to be downloaded
-    plot_type : str
-        Plot type
     filename : str
         Filename
-    data_label : str
-        Data label
-    element_type : str
-        Element type.
     path : str
         Path to save file
     tests_generate_output : bool
@@ -995,8 +989,7 @@ def handle_test_or_save_df(read_instance, df, plot_type, filename, data_label, e
             # and it is not possible to compare the dataframes
             # it is also possible to modify the behaviour of pd.read_csv to avoid reading nans defining keep_default_na=False
             # but in that way we hide the nans in the data and not only in the indices
-            save_df(read_instance, df, plot_type, filename, 
-                    data_label, element_type, path, na_rep=np.nan)   
+            save_df(df, filename, path, na_rep=np.nan)   
             
         # read expected output
         parse_dates = []
@@ -1012,10 +1005,9 @@ def handle_test_or_save_df(read_instance, df, plot_type, filename, data_label, e
             generated_output, expected_output, atol=1e-5) is None
             
     else:
-        save_df(read_instance, df, plot_type, filename, 
-                data_label, element_type, path)   
+        save_df(df, filename, path)   
 
-def save_df(read_instance, df, plot_type, filename, data_label, element_type, path, na_rep=''):
+def save_df(df, filename, path, na_rep=''):
     """
     Save dataframe to CSV file
 
@@ -1040,12 +1032,10 @@ def save_df(read_instance, df, plot_type, filename, data_label, element_type, pa
     """
 
     fname = join(PROVIDENTIA_ROOT, f'{path}/{filename}.csv')
-    msg = f'Saving {plot_type} figure data (data label: {data_label}, element type: {element_type}) to {fname}'
-    read_instance.logger.info(msg)
     df.to_csv(fname, index=False, na_rep=na_rep)
 
-def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, plot_type, zstat, 
-                              labela, labelb, plot_options, path, tests_generate_output):
+def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, plot_type, plot_options, 
+                              path, tests_generate_output=False, labela='', labelb=''):
     """
     Extract data into dataframe and save to to CSV file
 
@@ -1059,8 +1049,6 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
         Base plot type without statistical information.
     plot_type : str
         Plot type
-    zstat : str
-        Statistic to plot.
     labela : str
         Label of first dataset.
     labelb : str
@@ -1071,8 +1059,6 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
         Indicates if tests need to regenerate CSV files with plot data
     """
 
-    print('Downloading data...')
-
     if 'bias' in plot_options:
         plot_element_varname = 'bias'
     else:
@@ -1080,6 +1066,7 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
     if plot_element_varname not in canvas_instance.plot_elements[base_plot_type]:
         return
 
+    msgs = []
     for data_label in canvas_instance.plot_elements[base_plot_type][plot_element_varname]:
         for element_type in canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label]:
             plot_elements = canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type]
@@ -1114,9 +1101,10 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                     if base_plot_type == 'contingencytable':
                         df.index = range(len(df))
                     filename = f"{plot_type}_{element_type}"   
-                    handle_test_or_save_df(read_instance, df, plot_type, filename, data_label, element_type, 
-                                           path, tests_generate_output)
-                    
+                    handle_test_or_save_df(read_instance, df, filename, path, tests_generate_output)
+                    msg = f'\n- Data label: {data_label}, element type: {element_type}, file {path}/{filename}.csv'
+                    msgs.append(msg)
+
                 elif base_plot_type in ['timeseries', 'distribution', 'scatter', 'fairmode-target',
                                         'fairmode-statsummary', 'taylor', 'boxplot', 'periodic', 'periodic-violin']:
                     
@@ -1157,8 +1145,9 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                             })
                         df = pd.DataFrame(data)
                         filename = f"{plot_type}_{data_label}_{element_type}_{plot_element_i}"
-                    handle_test_or_save_df(read_instance, df, plot_type, filename, data_label, element_type, 
-                                           path, tests_generate_output)
+                    handle_test_or_save_df(read_instance, df, filename, path, tests_generate_output)
+                    msg = f'\n- Data label: {data_label}, element type: {element_type}, file {path}/{filename}.csv'
+                    msgs.append(msg)
 
                 elif base_plot_type in ['map']:
 
@@ -1184,7 +1173,7 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                             data.append({
                                 "Latitude": lon,
                                 "Longitude": lat,
-                                zstat: val
+                                "Statistic": val
                             })
                         label = ''
                         if (labela != '') and (labelb == ''):
@@ -1195,5 +1184,10 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                             label = f'{labela}-{labelb}'
                         df = pd.DataFrame(data)
                         filename = f"{plot_type}_{element_type}_{label}"
-                    handle_test_or_save_df(read_instance, df, plot_type, filename, data_label, element_type, 
-                                           path, tests_generate_output)
+                    handle_test_or_save_df(read_instance, df, filename, path, tests_generate_output)
+                    msg = f'\n- Data label: {data_label}, element type: {element_type}, file {path}/{filename}.csv'
+                    msgs.append(msg)
+                    
+    msg = f'Saving {plot_type} figure data to CSV:'
+    msg += ''.join(msgs)
+    show_message(read_instance, msg)

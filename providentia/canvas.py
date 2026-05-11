@@ -27,7 +27,7 @@ from .dashboard_interactivity import HoverAnnotation
 from .dashboard_interactivity import legend_picker_func, picker_block_func, zoom_map_func
 from .filter import DataFilter
 from .plotting import Plotting
-from .plot_aux import get_map_extent
+from .plot_aux import get_map_extent, download_plot_data_to_csv
 from .plot_formatting import format_axis, harmonise_xy_lims_paradigm, log_validity, set_axis_label, set_axis_title
 from .plot_options import annotation, linear_regression, log_axes, smooth, threshold
 from .read_aux import get_possible_resampling_resolutions, get_frequency_code
@@ -154,7 +154,7 @@ class Canvas(FigureCanvas):
             self.read_instance.update_plot_axis(self, position + 2, plot_type)
 
             # gather menu, save buttons and elements for plot type 
-            for menu_button, save_button in zip(self.menu_buttons, self.save_buttons):
+            for menu_button, save_button, save_data_button in zip(self.menu_buttons, self.save_buttons, self.save_data_buttons):
                 menu_plot_type = menu_button.objectName().split('_menu')[0]
                 if plot_type in ['periodic_violin','fairmode_target','fairmode_statsummary']:
                     plot_type = plot_type.replace('_','-')
@@ -162,10 +162,12 @@ class Canvas(FigureCanvas):
                 if plot_type == menu_plot_type:
                     menu_button.show()
                     save_button.show()
+                    save_data_button.show()
 
         # show map buttons
         self.map_menu.buttons['settings_button'].show()
         self.map_menu.buttons['save_button'].show()
+        self.map_menu.buttons['save_data_button'].show()
 
         # update layout fields
         self.read_instance.update_layout_fields(self)
@@ -2720,6 +2722,7 @@ class Canvas(FigureCanvas):
         # create array with buttons and elements to edit when the canvas is resized or the plots are changed
         self.menu_buttons = []
         self.save_buttons = []
+        self.save_data_buttons = []
         self.elements = []
         for plot_type in settings_dict.keys():
             if plot_type in ['periodic-violin','fairmode-target','fairmode-statsummary']:
@@ -2728,6 +2731,7 @@ class Canvas(FigureCanvas):
             if plot_type != 'metadata':
                 self.menu_buttons.append(getattr(self, plot_type + '_menu').buttons['settings_button'])
                 self.save_buttons.append(getattr(self, plot_type + '_menu').buttons['save_button'])
+                self.save_data_buttons.append(getattr(self, plot_type + '_menu').buttons['save_data_button'])
                 self.elements.append(getattr(self, plot_type + '_elements'))
 
         # make sure white containers are above buttons
@@ -3894,6 +3898,57 @@ class Canvas(FigureCanvas):
         self.figure.canvas.draw_idle()
 
         return None
+
+    def save_data_dialog(self):
+        """ 
+        Function to create the dialog box to choose directory where each plot figure data will be saved
+
+        Parameters
+        ----------
+        plot_type : str
+            Plot type
+        relevant_temporal_resolution : str
+            Temporal resolution
+        """
+
+        options = QtWidgets.QFileDialog.Options()
+        options |=  QtWidgets.QFileDialog.DontUseNativeDialog
+        path = QtWidgets.QFileDialog.getExistingDirectory(
+                    self.read_instance,
+                    "Choose folder to save data",
+                    options=options
+                )
+        if path:
+            return path
+        
+    def save_axis_figure_data_func(self):
+        """
+        Function to save each plot figure data
+        """
+        
+        # get option and plot names
+        event_source = self.sender()
+        plot_type = event_source.objectName().split('_save')[0]
+        if plot_type in ['periodic_violin','fairmode_target','fairmode_statsummary']:
+            plot_type = plot_type.replace('_','-')
+        plot_options = copy.deepcopy(self.current_plot_options[plot_type])
+
+        tests_generate_output=False
+        if plot_type == 'map':
+            labela = self.map_z1.currentText()
+            labelb = self.map_z2.currentText()
+        else:
+            labela = ''
+            labelb = ''
+
+        # get folder where data will be saved
+        path = self.save_data_dialog()
+        
+        # save figure
+        if path is not None:      
+            print(path, plot_type)        
+            download_plot_data_to_csv(self.read_instance, self, plot_type, plot_type, 
+                                      plot_options, path, tests_generate_output, labela, labelb)
 
     def update_aggregation_statistic(self):
         """ 

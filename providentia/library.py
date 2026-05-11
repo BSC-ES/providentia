@@ -1144,9 +1144,10 @@ class Providentia:
 
         # download data to CSV file
         if save_data:
-            download_plot_data_to_csv(self, self, base_plot_type, plot_type, zstat, 
-                                      labela, labelb, plot_options, save_data_path, 
-                                      tests_generate_output)
+            self.logger.info('Downloading data...')
+            download_plot_data_to_csv(self, self, base_plot_type, plot_type, plot_options, 
+                                      save_data_path, tests_generate_output, 
+                                      labela, labelb)
 
         # if save is passed then save plot and return
         if save:
