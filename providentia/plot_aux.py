@@ -1139,7 +1139,7 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                                 else "x": 
                                     pd.to_datetime(x, unit="D", utc=True).round("S") 
                                     if base_plot_type == "timeseries" else x, 
-                                "y" if base_plot_type == "boxplot" \
+                                "y" if base_plot_type in ["boxplot",  "fairmode-target"] \
                                 else "density" if base_plot_type == "distribution" \
                                 else data_label: y,
                             })
