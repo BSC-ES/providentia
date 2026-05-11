@@ -1051,8 +1051,9 @@ class ProvConfiguration:
         
         # local download and interpolation
         else:
+            # TODO Hardcoded ERA5
             # cams model is directly valid
-            if model.startswith(tuple(model_options.keys())):
+            if model.startswith(tuple(model_options.keys())) or model.startswith("era5_tropopause"):
                 return [model]
 
             # local interpolation

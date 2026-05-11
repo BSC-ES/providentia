@@ -157,7 +157,16 @@ class Download(object):
             signal.signal(signal.SIGINT, self.sighandler)
             
             # only the local download iterates through the networks
-            if self.machine in "local":                        
+            if self.machine in "local":    
+
+                # warn the user when incorrect dl_mode is selected  
+                if not self.mode and self.dl_mode == 'mod':
+                    msg = "If only observations are provided and 'mod' is selected, no download will be performed."
+                    show_message(self, msg) 
+                elif not self.network and self.dl_mode == 'obs':
+                    msg = "If only models are provided and 'obs' is selected, no download will be performed."
+                    show_message(self, msg)   
+
                 # networks
                 if self.network and self.dl_mode != 'mod':
 

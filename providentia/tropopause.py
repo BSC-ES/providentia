@@ -231,9 +231,15 @@ class Tropopause(object):
             temp_dir = join(temp_root_dir, dir_tail)
 
             if valid_species:
-                # iterate through all dates to format each of the day files
-                for date in tqdm(all_dates, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"Downloading {valid_species} ({len(all_dates)})"):
+                
+                # print progress depending on initial check 
+                if initial_check:
+                    dates_iterator = all_dates
+                else:
+                    dates_iterator = tqdm(all_dates, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"\nDownloading and formating {', '.join(valid_species)} ({len(all_dates)})")
 
+                # iterate through all dates to format each of the day files
+                for date in dates_iterator:
                     # create temporal dir to store the middle zip file with its directories
                     os.makedirs(temp_dir, exist_ok=True)
 
@@ -242,13 +248,13 @@ class Tropopause(object):
                     # get temporal path
                     temp_path = join(temp_dir, temp_file)
 
-                    base_url = "https://datapub.fz-juelich.de/slcs/tropopause/data/v2/era5/"
-
                     if not initial_check:
+                        # create url
+                        base_url = "https://datapub.fz-juelich.de/slcs/tropopause/data/v2/era5/"
                         file_url = f"{base_url}{date.year}/{temp_file}"
 
+                        # submit the request
                         r = requests.get(file_url)
-
                         with open(temp_path, "wb") as out:
                             out.write(r.content)
 
@@ -273,8 +279,6 @@ class Tropopause(object):
                         
                         # change the last downloaded file
                         self.download_instance.latest_nc_file_path = "/path/to/file"
-
-                        self.download_instance.logger.info('')
 
         # remove the temp directory tail
         if os.path.exists(temp_root_dir):
