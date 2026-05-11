@@ -100,29 +100,10 @@ class Report:
             self.logger.error(error)
             sys.exit(1)
 
-        # if some filename has not been provided through the configuration file use default names
-        if len(self.filenames) != len(self.parent_section_names):
-            msg = 'Warning: Report filename/s (report_filename) has not been defined in '
-            msg += 'configuration file for one or more sections. '
-            if len(self.parent_section_names) == 1:
-                self.filenames.append(self.report_filename)
-                msg += f'Setting filename to be {self.report_filename}.'
-            else:
-                self.filenames = []
-                for i, parent_section in enumerate(self.parent_section_names):
-                    if 'report_filename' in self.sub_opts[parent_section].keys():
-                        self.filenames.append(self.sub_opts[parent_section]['report_filename'])
-                    else:
-                        # add a number next to the filename to avoid overwriting
-                        self.filenames.append(f'{self.report_filename}_{i}')
-                msg += f'Setting filenames to be {self.filenames}.'
-            self.logger.info(msg)
-        
         # select section if passed through command line arguments
         if "section" in self.commandline_arguments.keys():
             if self.commandline_arguments["section"] in self.all_sections:
                 index = self.parent_section_names.index(self.commandline_arguments["section"].split("·")[0])
-                self.filenames = [self.filenames[index]]
                 self.parent_section_names = [self.parent_section_names[index]]
             else:
                 error = "Error: Section {} does not exist in configuration file.".format(self.commandline_arguments["section"])
@@ -139,7 +120,7 @@ class Report:
         """Execute the Providentia report workflow for all configured sections."""
 
         # iterate through configuration sections
-        for section_ind, (filename, section) in enumerate(zip(self.filenames, self.parent_section_names)):
+        for section_ind, section in enumerate(self.parent_section_names):
             self.logger.info('\nStarting to create PDF for {} section'.format(section))
 
             # update for new section parameters
@@ -185,6 +166,17 @@ class Report:
 
             # now all variables have been parsed, check validity of those, throwing errors where necessary
             provconf.check_validity()
+
+            # if some filename has not been provided through the configuration file use default names
+            if 'report_filename' in self.section_opts:
+                filename = self.self.section_opts['report_filename']
+            else:
+                # add a number next to the filename to avoid overwriting
+                filename = f'{self.report_filename}_{section_ind}'
+
+                msg = 'Warning: Report filename (report_filename) has not been defined in '
+                msg += f"configuration file section '{section}'. Setting filename to be '{filename}'."
+                self.logger.info(msg)
 
             # set some key configuration variables
             self.periodic_relevant_temporal_resolutions = get_periodic_relevant_temporal_resolutions(self.resolution)
