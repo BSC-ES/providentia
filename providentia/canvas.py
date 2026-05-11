@@ -3899,16 +3899,9 @@ class Canvas(FigureCanvas):
 
         return None
 
-    def save_data_dialog(self):
+    def save_axis_figure_data_dialog(self):
         """ 
         Function to create the dialog box to choose directory where each plot figure data will be saved
-
-        Parameters
-        ----------
-        plot_type : str
-            Plot type
-        relevant_temporal_resolution : str
-            Temporal resolution
         """
 
         options = QtWidgets.QFileDialog.Options()
@@ -3942,11 +3935,10 @@ class Canvas(FigureCanvas):
             labelb = ''
 
         # get folder where data will be saved
-        path = self.save_data_dialog()
+        path = self.save_axis_figure_data_dialog()
         
         # save figure
-        if path is not None:      
-            print(path, plot_type)        
+        if path is not None:
             download_plot_data_to_csv(self.read_instance, self, plot_type, plot_type, 
                                       plot_options, path, tests_generate_output, labela, labelb)
 

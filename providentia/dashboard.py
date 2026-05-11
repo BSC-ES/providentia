@@ -1207,9 +1207,9 @@ class Dashboard(QtWidgets.QWidget):
                     ax.remove()
 
                 # hide qt elements for previous plot type
-                for menu_button, save_button, element in zip(self.mpl_canvas.menu_buttons, 
-                                                             self.mpl_canvas.save_buttons, 
-                                                             self.mpl_canvas.elements):
+                for menu_button, save_button, save_data_button, element in zip(
+                    self.mpl_canvas.menu_buttons, self.mpl_canvas.save_buttons, 
+                    self.mpl_canvas.save_data_buttons, self.mpl_canvas.elements):
 
                     menu_plot_type = menu_button.objectName().split('_menu')[0]
                     if menu_plot_type in ['periodic_violin','fairmode_target','fairmode_statsummary']:
@@ -1218,6 +1218,7 @@ class Dashboard(QtWidgets.QWidget):
                     if previous_plot_type == menu_plot_type:
                         menu_button.hide()
                         save_button.hide()
+                        save_data_button.hide()
                         if previous_plot_type in ['periodic-violin','fairmode-target','fairmode-statsummary']:
                             previous_plot_type = previous_plot_type.replace('-','_')
                         for element in getattr(self.mpl_canvas, previous_plot_type + '_elements'):
