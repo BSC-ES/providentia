@@ -385,6 +385,17 @@
 <p>where <code class="docutils literal notranslate"><span class="pre">save</span></code> is the name of the file to save to. If save is set as: <code class="docutils literal notranslate"><span class="pre">save=True</span></code>, then the filename will be automatically generated and saved in the <code class="docutils literal notranslate"><span class="pre">plots</span></code> directory.</p>
 </section>
 </section>
+<section id="saving-plot-data">
+<h5>Saving plot data<a class="headerlink" href="#saving-plot-data" title="Link to this heading"></a></h5>
+<p>Use <code class="docutils literal notranslate"><span class="pre">save_data</span></code> to store the plot elements as CSV files.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plot_obj</span> <span class="o">=</span> <span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_type</span><span class="p">,</span> <span class="n">save_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>By default, the files will be saved in the <code class="docutils literal notranslate"><span class="pre">saved_data</span></code> folder, users can change the path by passing <code class="docutils literal notranslate"><span class="pre">save_data_path</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plot_obj</span> <span class="o">=</span> <span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_type</span><span class="p">,</span> <span class="n">save_data</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save_data_path</span><span class="o">=</span><span class="s1">&#39;path&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
 <section id="plot-types">
 <h5>Plot types<a class="headerlink" href="#plot-types" title="Link to this heading"></a></h5>
 <p>In this section the available plot types will de detailed, with any specific subtleties involved in calling the plotting method detailed. Available plot options are also stated per plot type.</p>

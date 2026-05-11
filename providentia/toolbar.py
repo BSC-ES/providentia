@@ -154,7 +154,7 @@ class NavigationToolbar(NavigationToolbar2QT):
                         show_message(self.read_instance, msg)
                 except Exception as e:
                     msg = 'There was an error saving the file.'
-                    self.read_instance.logger.info(e)
+                    self.read_instance.logger.error(e)
                     show_message(self.read_instance, msg)
 
     def check_for_axis_limit_changes(self, previous_state, current_state):
@@ -355,7 +355,7 @@ class NavigationToolbar(NavigationToolbar2QT):
         except Exception as e:
             msg = 'There was an error loading the configuration file.'
             show_message(self.read_instance, msg)
-            self.read_instance.logger.info(e)
+            self.read_instance.logger.error(e)
 
     def connect_lasso(self):
         """

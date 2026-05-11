@@ -832,7 +832,7 @@ class Report:
 
                 # make legend?
                 if 'legend' in plot_characteristics_vars:
-                    if (base_plot_type in ['scatter', 'fairmode-target', 'fairmode-statsummary']) or ('bias' in plot_options) or (z_statistic_sign == 'bias'):
+                    if (base_plot_type in ['scatter', 'fairmode-target']) or ('bias' in plot_options) or (z_statistic_sign == 'bias'):
                         set_obs = False
                     else:
                         set_obs = True
@@ -1163,7 +1163,7 @@ class Report:
         
         # if have 0 relevant stations, continue to next networkspeci
         if self.n_stations == 0:
-            self.logger.info('\nNo valid stations for {}, {}. Not making summmary plots'.format(networkspeci, self.subsection))
+            self.logger.error('\nNo valid stations for {}, {}. Not making summmary plots'.format(networkspeci, self.subsection))
         else:
             self.logger.info('\nMaking {}, {} summary plots'.format(networkspeci, self.subsection)) 
 

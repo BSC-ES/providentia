@@ -453,11 +453,11 @@ class ModelInterpolation(object):
                 # if not terminate process
                 # longitude coordinate is valid if 'lon' is contained within name
                 if ('lon' not in lon_centre_varname):
-                    self.log_file_str += 'Longitude grid centre coordinate incorrectly named. Terminating process.'
+                    self.log_file_str += 'Longitude grid centre coordinate incorrectly named. Set it by defining variable coordinates. Terminating process.'
                     create_output_logfile(1, self.log_file_str)
                 # latitude coordinate is valid if 'lat' is contained within name
                 if ('lat' not in lat_centre_varname):
-                    self.log_file_str += 'Latitude grid centre coordinate incorrectly named. Terminating process.'
+                    self.log_file_str += 'Latitude grid centre coordinate incorrectly named. Set it by defining variable coordinates. Terminating process.'
                     create_output_logfile(1, self.log_file_str)
 
                 # get longitude and latitude grid centre values

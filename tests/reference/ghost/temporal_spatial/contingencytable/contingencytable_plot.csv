@@ -1,0 +1,9 @@
+-1,0,1,2,3,4,5
+nan,,,,MONARCH,,
+observations,Good,Fair,Moderate,Poor,Very poor,Extremely poor
+Good,6,0,0,0,0,0
+Fair,306,1112,3,0,0,0
+Moderate,10,586,47,0,0,0
+Poor,0,2,0,0,0,0
+Very poor,0,0,0,0,0,0
+Extremely poor,0,0,0,0,0,0
