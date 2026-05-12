@@ -690,6 +690,26 @@
           "function": "interactive_elements_button_func",
         },
 
+      "save_button":
+        {
+          "element_type": "button",
+          "formatting_dict": "save_icon",
+          "size": [20, 20],
+          "path": "resources/save_fig_icon.png",
+          "object_name": "metadata_save_button",
+          "function": "save_axis_figure_func",
+        },
+
+      "save_data_button":
+        {
+          "element_type": "button",
+          "formatting_dict": "save_icon",
+          "size": [20, 20],
+          "path": "resources/save_data_icon.png",
+          "object_name": "metadata_save_data_button",
+          "function": "save_axis_figure_data_func",
+        },
+
       "container":
         {
           "element_type": "container",

@@ -126,3 +126,8 @@ def test_make_contingencytable(inst, statistic_mode, network_type):
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities[0:3])
 def test_make_gerritytable(inst, statistic_mode, network_type):
     plot(inst, statistic_mode, network_type, 'contingencytable', ['gerrity'])
+
+
+@pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
+def test_make_metadata(inst, statistic_mode, network_type):
+    plot(inst, statistic_mode, network_type, 'metadata')

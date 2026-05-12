@@ -3137,7 +3137,8 @@ class Plotting:
 
         # add list for element type if does not yet exist
         # in library mode save elements of current plot only
-        if element_type not in self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label] or self.read_instance.mode == 'library':
+        if ((element_type not in self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label]) 
+            or (self.read_instance.mode == 'library')):
             self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type] = []
         # if does exist already then remove plot element return, as element has already been plotted
         else:

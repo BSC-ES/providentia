@@ -316,10 +316,10 @@ class Dashboard(QtWidgets.QWidget):
                     plot_type = plot_type.replace('-','_')
 
                 # proceed once have objects for plot type
-                # if plot type is metadata or None the axes and are initalising the qt element geometry
+                # if plot type is None the axes and are initalising the qt element geometry
                 # then as there are no menu buttons for these cases, there are axes formatting issues.
                 # as a workaround set the plot type to be timeseries
-                if (plot_type == menu_plot_type) or ((plot_type in ['metadata','None']) & (menu_plot_type == 'timeseries')):
+                if (plot_type == menu_plot_type) or ((plot_type in ['None']) & (menu_plot_type == 'timeseries')):
                     
                     # get position of menu button (set in 1848 x 1016 resolution)
                     x = self.mpl_canvas.plot_characteristics_templates['general']['settings_menu']['position_'
@@ -336,7 +336,7 @@ class Dashboard(QtWidgets.QWidget):
                     new_button_geometry = QtCore.QRect(x, y, 18, 18)
                     
                     # set menu and save button geometry
-                    if plot_type not in ['metadata','None']:
+                    if plot_type not in ['None']:
                         # apply new geometry to menu and save buttons
                         menu_button.setGeometry(new_button_geometry)
                         save_button.setGeometry(int(menu_button.x() - ((30 * canvas_width) / 1848)), int(menu_button.y()), 20, 20)
@@ -344,8 +344,9 @@ class Dashboard(QtWidgets.QWidget):
 
                         # show buttons if active
                         if show_buttons:
-                            menu_button.show()
-                            save_button.show()
+                            if plot_type != 'metadata':
+                                menu_button.show()
+                                save_button.show()
                             save_data_button.show()
 
                         # apply new geometry to container elements

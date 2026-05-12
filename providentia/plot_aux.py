@@ -1001,6 +1001,8 @@ def handle_test_or_save_df(read_instance, df, filename, path, tests_generate_out
         )
         print('Expected_output')
         print(expected_output)
+        if 'metadata' in filename:
+            expected_output["value"] = expected_output["value"].astype(str)
         assert assert_frame_equal(
             generated_output, expected_output, atol=1e-5) is None
             
@@ -1149,7 +1151,30 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                     msg = f'\n- Data label: {data_label}, element type: {element_type}, file {path}/{filename}.csv'
                     msgs.append(msg)
 
-                elif base_plot_type in ['map']:
+                elif base_plot_type == 'metadata':
+                    text = plot_element.get_text().split('\n')
+                    column_names = []
+                    values = []
+                    for line in text:
+                        if ':' in line:
+                            title = line.split(':')[0]
+                            value = ' '.join(line.split(':')[1:]).strip()
+                            column_names.append(title)
+                            values.append(value)
+                        else:
+                            column_names.append('Stations')
+                            values.append(line.split(' Stations')[0])
+
+                    df = pd.DataFrame(columns=column_names)
+                    df.loc[0] = values
+                    df.columns = [str(col) for col in df.columns]
+                    df = df.T.reset_index().rename(columns={"index": "key", 0: "value"})
+                    filename = f"{plot_type}_{data_label}_{element_type}_{plot_element_i}"
+                    handle_test_or_save_df(read_instance, df, filename, path, tests_generate_output)
+                    msg = f'\n- Data label: {data_label}, element type: {element_type}, file {path}/{filename}.csv'
+                    msgs.append(msg)
+
+                elif base_plot_type == 'map':
 
                     # extract annotations
                     if isinstance(plot_element, matplotlib.offsetbox.AnchoredOffsetbox):
@@ -1159,7 +1184,6 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                                 "dataset": annotation.get_text().split('|')[0].strip(),
                                 "annotation": annotation.get_text().split('|')[1].strip()
                             })
-                        df = pd.DataFrame(data)
                         filename = f"{plot_type}_{data_label}_{element_type}_{plot_element_i}"
                     # extract plot data
                     else:
@@ -1182,8 +1206,8 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                             label = labelb
                         elif (labela != '') and (labelb != ''):
                             label = f'{labela}-{labelb}'
-                        df = pd.DataFrame(data)
                         filename = f"{plot_type}_{element_type}_{label}"
+                    df = pd.DataFrame(data)
                     handle_test_or_save_df(read_instance, df, filename, path, tests_generate_output)
                     msg = f'\n- Data label: {data_label}, element type: {element_type}, file {path}/{filename}.csv'
                     msgs.append(msg)

@@ -2727,13 +2727,12 @@ class Canvas(FigureCanvas):
         for plot_type in settings_dict.keys():
             if plot_type in ['periodic-violin','fairmode-target','fairmode-statsummary']:
                 plot_type = plot_type.replace('-','_')
-            # TODO: Remove this when we add options to metadata plot
-            if plot_type != 'metadata':
-                self.menu_buttons.append(getattr(self, plot_type + '_menu').buttons['settings_button'])
-                self.save_buttons.append(getattr(self, plot_type + '_menu').buttons['save_button'])
-                self.save_data_buttons.append(getattr(self, plot_type + '_menu').buttons['save_data_button'])
-                self.elements.append(getattr(self, plot_type + '_elements'))
 
+            self.menu_buttons.append(getattr(self, plot_type + '_menu').buttons['settings_button'])
+            self.save_buttons.append(getattr(self, plot_type + '_menu').buttons['save_button'])
+            self.save_data_buttons.append(getattr(self, plot_type + '_menu').buttons['save_data_button'])
+            self.elements.append(getattr(self, plot_type + '_elements'))
+            
         # make sure white containers are above buttons
         for element in self.elements:
             for sub_element in element:
