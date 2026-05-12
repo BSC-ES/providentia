@@ -27,3 +27,11 @@ cams_reanalysis:
     latitude: latitude
     model_level: level
     valid_time: time
+era5_reanalysis:
+  global:
+    longitude: longitude
+    latitude: latitude
+    model_level: level
+    valid_time: time
+    expver: 
+    number: 

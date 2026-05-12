@@ -622,6 +622,7 @@ class DataReader:
                     self.read_instance.logger.info(str_model)
                     mods_printed.append(model)
 
+
     def read_basic_metadata(self):     
         """
         Extracts unique basic station metadata and handles spatial colocation across multiple networkspecies (if set) in parallel.

@@ -463,25 +463,60 @@ class ModelInterpolation(object):
                 # get longitude and latitude grid centre values
                 self.mod_lons_centre = np.float32(mod_nc_root[lon_centre_varname][:])
                 self.mod_lats_centre = np.float32(mod_nc_root[lat_centre_varname][:])
-                
-                # check if there are coordinates to remap
-                lons_to_remap = self.mod_lons_centre[np.where(self.mod_lons_centre > 180.0)]
-                lats_to_remap = self.mod_lats_centre[np.where(self.mod_lats_centre > 90.0)]
-                self.coords_remapping = False
-                if len(lons_to_remap) > 0 or len(lats_to_remap) > 0:
-                    if self.mod_grid_type == 'crs':
-                        # correct model grid longitude/latitude centre variables to be between -180:180 and -90:90 respectively
-                        self.mod_lons_centre[np.where(self.mod_lons_centre > 180.0)] = self.mod_lons_centre[np.where(self.mod_lons_centre > 180.0)] - 360.0
-                        self.mod_lats_centre[np.where(self.mod_lats_centre > 90.0)] = self.mod_lats_centre[np.where(self.mod_lats_centre > 90.0)] - 180.0
-                        
-                        # sort coordinates
-                        self.mod_lons_centre = sorted(self.mod_lons_centre)
-                        self.mod_lats_centre = sorted(self.mod_lats_centre) 
 
-                        # set variable for values reassignation later
-                        self.coords_remapping = True    
-                    else: 
-                        self.log_file_str += 'Cannot handle grid of type: {} with these coordinates. Please remap. Terminating process'.format(self.mod_grid_type)
+                # Check for monotonicity before any shifts
+                if not (np.all(np.diff(self.mod_lons_centre) > 0) or np.all(np.diff(self.mod_lons_centre) < 0)):
+                    self.log_file_str += "Longitude is not monotonic. Terminating process."
+                    create_output_logfile(1, self.log_file_str)
+
+                if not (np.all(np.diff(self.mod_lats_centre) > 0) or np.all(np.diff(self.mod_lats_centre) < 0)):
+                    self.log_file_str += "Latitude is not monotonic. Terminating process."
+                    create_output_logfile(1, self.log_file_str)
+
+                # check for unusual ranges
+                lon_min = float(self.mod_lons_centre.min())
+                lon_max = float(self.mod_lons_centre.max())
+                lat_min = float(self.mod_lats_centre.min())
+                lat_max = float(self.mod_lats_centre.max())
+                if (lon_min < 0) or (lon_max > 360):
+                    self.log_file_str += "Longitude range is unusual - needs manual inspection. Terminating process."
+                    create_output_logfile(1, self.log_file_str)
+                if (lat_min < -90) or (lat_max > 180):
+                    self.log_file_str += "Latitude range is unusual - needs manual inspection. Terminating process."
+                    create_output_logfile(1, self.log_file_str)
+
+                # check if need to order or shift coordinates, only do if regular grid type
+
+                # need to shift coordinates
+                # longitudes are 0-360? (0 centred over Greenwich)
+                self.shift_lon = lon_max > 180
+                # latitudes are 0-180? (0 = South Pole, 90 = Equator, 180 = North Pole)
+                self.shift_lat = (lat_min >= 0) and (lat_max > 90)
+
+                # shift coordinates
+                if (self.shift_lon) or (self.shift_lat):
+                    if self.mod_grid_type == 'crs':
+                        if self.shift_lon:
+                            self.mod_lons_centre = ((self.mod_lons_centre  + 180) % 360) - 180
+                        if self.shift_lat:
+                            self.mod_lats_centre = self.mod_lats_centre - 90
+                    else:
+                        self.log_file_str += 'Cannot handle grid of type: {} with shifted coordinates. Terminating process.'.format(self.mod_grid_type)
+                        create_output_logfile(1, self.log_file_str)
+
+                # need to order coordinates?
+                self.order_lon = not np.all(np.diff(self.mod_lons_centre) > 0)
+                self.order_lat = not np.all(np.diff(self.mod_lats_centre) > 0)
+
+                # order coordinates
+                if (self.order_lon) or (self.order_lat):
+                    if self.mod_grid_type == 'crs':
+                        if self.order_lon:
+                            self.mod_lons_centre = np.sort(self.mod_lons_centre)
+                        if self.order_lat:
+                            self.mod_lats_centre = np.sort(self.mod_lats_centre)
+                    else:
+                        self.log_file_str += 'Cannot handle grid of type: {} with unordered coordinates. Terminating process.'.format(self.mod_grid_type)
                         create_output_logfile(1, self.log_file_str)
                 
                 # close model netCDF root
@@ -972,17 +1007,16 @@ class ModelInterpolation(object):
                                            data=read_data,
                                            coords=dict(time=valid_file_time_dt, latitude=self.y, longitude=self.x))
                     
-                    # reassign values to correct coordinates if model centre coordinates have been remapped 
-                    # (only in the case of regular grids)
-                    if self.coords_remapping:
-                        # correct 1D arrays
-                        self.x = [x if x <= 180 else x - 360 for x in self.x]
-                        self.y = [y if y <= 90 else y - 180 for y in self.y]
-
-                        # assign and sort coordinates
-                        xr_data = xr_data.assign_coords(longitude=self.x).sortby('longitude')
-                        xr_data = xr_data.assign_coords(latitude=self.y).sortby('latitude')
-
+                    # shift or order coordinates if needed (only in the case of regular grids)
+                    if self.shift_lon:
+                        self.x = ((self.x + 180) % 360) - 180
+                    if self.shift_lat:
+                        self.y = self.y - 90
+                    if (self.shift_lon) or (self.shift_lat):
+                        xr_data = xr_data.assign_coords(longitude=self.x, latitude=self.y)
+                    if (self.order_lon) or (self.order_lat):
+                        xr_data = xr_data.sortby(['latitude', 'longitude'])
+                    
                     # do resampling
                     if resampling_direction:
                         # downsampling (finer to coarser)
