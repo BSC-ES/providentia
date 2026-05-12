@@ -1,4 +1,5 @@
 base_defaults: &base_defaults
+  ghost_features: med
   species:
   resolution:
   start_date:
@@ -49,7 +50,7 @@ dashboard: &dashboard
 dashboard_empty:
   <<: *dashboard
   network:
-    - EBAS
+    - GHOST
   species:
     - sconco3
   resolution: hourly

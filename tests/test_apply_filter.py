@@ -108,14 +108,14 @@ def test_apply_period(inst, statistic_mode, network_type):
 
 
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
-def test_apply_representativity(inst, statistic_mode, network_type):
+def test_apply_coverage(inst, statistic_mode, network_type):
     inst.load()
     if network_type == 'ghost':
-        inst.filter('all_representativity_percent', limit=50)
+        inst.filter('total_coverage', limit=50)
     else:
-        inst.filter('all_representativity_percent', limit=20)
+        inst.filter('total_coverage', limit=20)
     check_filter_data(inst, statistic_mode, network_type,
-                      filter='representativity')
+                      filter='coverage')
 
 
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)

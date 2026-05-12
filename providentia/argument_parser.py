@@ -56,6 +56,9 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--ghost_version",
                                      dest="ghost_version",
                                      help="set GHOST version data to work with")
+            self.parser.add_argument("--ghost_features",
+                                     dest="ghost_features",
+                                     help="set level of GHOST features to read")
             self.parser.add_argument('--conf', '--config', 
                                      dest="config",
                                      help='specifies the config file to read') 

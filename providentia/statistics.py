@@ -4,6 +4,7 @@ from calendar import monthrange
 import copy
 import datetime
 import sys
+import time
 
 import matplotlib
 from matplotlib import colors
@@ -85,7 +86,7 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
         # temporally colocate data array
         if read_instance.temporal_colocation:
             data_array[:, read_instance.temporal_colocation_nans[networkspeci]] = np.nan
-        
+
         # get selected station indices
         canvas_instance.station_inds[networkspeci] = get_station_inds(read_instance, canvas_instance, networkspeci, station_index)
 
@@ -95,9 +96,13 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
         # get NaNs in data array
         nan_data_array = np.isnan(data_array)
 
+        # check if have valid data left
+        has_valid_data = data_array.size > 0 and not np.isnan(data_array).all()
+
         # if data array has no valid data for selected stations, do not cut data array
         # data array has valid data and is not all nan?
-        if data_array.size > 0 and not np.all(nan_data_array):
+        #if data_array.size > 0 and not np.all(nan_data_array):
+        if has_valid_data:
 
             # set metadata cut for relevant stations
             canvas_instance.selected_station_metadata[networkspeci] = read_instance.metadata_in_memory[networkspeci][canvas_instance.station_inds[networkspeci],:]
@@ -222,7 +227,7 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
             canvas_instance.selected_station_data[networkspeci]['flat'] = canvas_instance.selected_station_data[networkspeci]['per_station'].reshape(canvas_instance.selected_station_data[networkspeci]['per_station'].shape[0],
                                                                                                                                                      1,
                                                                                                                                                      canvas_instance.selected_station_data[networkspeci]['per_station'].shape[1]*canvas_instance.selected_station_data[networkspeci]['per_station'].shape[2])
-
+            
             # set active data array for statistical mode
             if read_instance.statistic_mode in ['Spatial|Temporal', 'Temporal|Spatial']:
                 canvas_instance.selected_station_data[networkspeci]['active_mode'] = canvas_instance.selected_station_data[networkspeci]['per_station']
@@ -437,10 +442,8 @@ def boxplot_inner_fences(data):
     #otherwise, calculated Tukey boxplot inner fences
     else:    
 
-        #calculate the 25th percentile 
-        p25 = np.nanpercentile(data, 25, method='nearest')
-        #calculate the 75th percentile 
-        p75 = np.nanpercentile(data, 75, method='nearest')
+        #calculate the 25th and 75th percentile 
+        p25, p75 = np.nanpercentile(data, [25, 75], method='nearest')
 
         #calculate the interquartile range
         iqr = p75-p25
@@ -567,7 +570,7 @@ def group_periodic(read_instance, canvas_instance, networkspeci, period_resoluti
     # ------------------------------------------------------------------
     # Flattened mode
     # ------------------------------------------------------------------
-    if (statistic_mode == 'Flattened') and (not per_station) and (base_zstat not in ['NStations','MDA8']):
+    if (statistic_mode == 'Flattened') and (not per_station) and (base_zstat not in ['NStations','NUniqueStations','MDA8']):
 
         # grouped_data shape before flattening: (n_chunks, n_labels, n_stations, chunk_time)
         n_chunks, n_labels, n_stations, chunk_time = periodic_data.shape
@@ -754,7 +757,7 @@ def group_temporal(read_instance, canvas_instance, networkspeci, chunk_resolutio
     # ------------------------------------------------------------------
     # Flattened mode
     # ------------------------------------------------------------------
-    if (statistic_mode == 'Flattened') and (not per_station) and (base_zstat not in ['NStations','MDA8']):
+    if (statistic_mode == 'Flattened') and (not per_station) and (base_zstat not in ['NStations','NUniqueStations','MDA8']):
         if grouped_data.ndim == 4:
             # grouped_data shape: (n_chunks, n_labels, n_stations, chunk_time)
             n_chunks, n_labels, n_stations, chunk_time = grouped_data.shape
@@ -844,6 +847,20 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
         A dictionary of calculated statistics if multiple are requested, otherwise a single array.
     """
 
+    # if zstats is str then make it a list
+    if type(zstats) != list:
+        zstats = [zstats]
+
+    # check if have statistics to calculate
+    # if not return
+    if len(zstats) == 0:
+        z_statistic = np.array([], dtype=np.float32)
+        if map:
+            station_inds = np.array([], dtype=np.int32)
+            return z_statistic, station_inds 
+        else:
+            return z_statistic
+
     # if statistic mode is None, then take the global one
     if not statistic_mode:
         statistic_mode = read_instance.statistic_mode 
@@ -870,15 +887,125 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
     data_labels_a = [label for label in data_labels_a if label != '']
     data_labels_b = [label for label in data_labels_b if label != '']
 
-    # if zstats is str then make it a list
-    if type(zstats) != list:
-        zstats = [zstats]
+    # for map statistics, get active map valid station indices and then data_labels_a data 
+    if (map) or (per_station):
+
+        # get relevant station indices
+        if per_station:
+            station_inds = canvas_instance.station_inds[networkspeci]
+
+        elif map:
+            if read_instance.temporal_colocation:
+                inds = read_instance.valid_station_inds_temporal_colocation[networkspeci]
+            else:
+                inds = read_instance.valid_station_inds[networkspeci]
+            # if have just data_labels_a, station indices are simply those relevant for data_labels_a
+            if len(data_labels_b) == 0:
+                if data_labels_a[0] not in inds:
+                    error = f'Data label {data_labels_a[0]} not in array. Options: {list(inds.keys())}'
+                    read_instance.logger.error(error)
+                    sys.exit(1)
+                station_inds = inds[data_labels_a[0]]
+            # elif have data_labels_b, get intersection of data_labels_a and data_labels_b valid station indices
+            else:
+                if data_labels_a[0] not in inds:
+                    error = f'Data label {data_labels_a[0]} not in array. Options: {list(inds.keys())}'
+                    read_instance.logger.error(error)
+                    sys.exit(1)
+                if data_labels_b[0] not in inds:
+                    error = f'Data label {data_labels_b[0]} not in array. Options: {list(inds.keys())}'
+                    read_instance.logger.error(error)
+                    sys.exit(1)
+                station_inds = np.intersect1d(inds[data_labels_a[0]], inds[data_labels_b[0]])
+
+        # check if valid station data
+        # if not return
+        if len(station_inds) == 0:
+            z_statistic = np.array([], dtype=np.float32)
+            if map:
+                station_inds = np.array([], dtype=np.int32)
+                return z_statistic, station_inds 
+            elif per_station:
+                return z_statistic
+
+        # get data array_a
+        data_label_a_indices = np.array([read_instance.data_labels.index(label) for label in data_labels_a], dtype=np.int32)    
+        data_array_a = read_instance.data_in_memory_filtered[networkspeci][data_label_a_indices,:,:]
+
+        # temporally colocate data (if active)
+        if read_instance.temporal_colocation:
+            data_array_a[:, read_instance.temporal_colocation_nans[networkspeci]] = np.nan
+
+        # get data cut for relevant stations
+        data_array_a = data_array_a[:,station_inds,:]
+
+        # do resampling
+        if map:
+            data_array_a = resample_data_array(read_instance, data_array_a)
+            
+        # if have second data array, read it
+        if len(data_labels_b) != 0:
+            # get data array_b
+            data_label_b_indices = np.array([read_instance.data_labels.index(label) for label in data_labels_b], dtype=np.int32)
+            data_array_b = read_instance.data_in_memory_filtered[networkspeci][data_label_b_indices,:,:]
+
+            # temporally colocate data (if active)
+            if read_instance.temporal_colocation:
+                data_array_b[:, read_instance.temporal_colocation_nans[networkspeci]] = np.nan
+                
+            # get data cut for relevant stations
+            data_array_b = data_array_b[:,station_inds,:]
+
+            # do resampling
+            if map:
+                data_array_b = resample_data_array(read_instance, data_array_b)
+
+    # for other cases, get cut of selected station data for data_labels_a
+    else:
+        data_label_a_indices = np.array([canvas_instance.selected_station_data_labels[networkspeci].index(label) for label in data_labels_a], dtype=np.int32)
+                    
+        # for grouping data take per_station array
+        if (chunk_resolution is not None) or (period is not None):
+            data_array_a_ps = canvas_instance.selected_station_data[networkspeci]['per_station'][data_label_a_indices]
+        # otherwise work out which arrays you need 
+        else:
+            # get zstatistic period per statistic
+            z_statistic_periods = []
+            for zstat in zstats:
+                _, _, _, _, z_statistic_period = get_z_statistic_info(zstat=zstat)
+                z_statistic_periods.append(z_statistic_period)
+
+            # check arrays needed for all statistics - if have a statistic that requires grouping, then need per_station array, 
+            # if have a statistic that requires MDA8 or NStations then need per_station array, otherwise can just use active mode array
+            check_arrays = [('NStations' in zstat) or ('MDA8' in zstat) or (z_statistic_periods[ii] is not None) 
+                            for ii, zstat in enumerate(zstats)]
+
+            # need to load per station array?
+            if np.any(check_arrays):
+                data_array_a_ps = canvas_instance.selected_station_data[networkspeci]['per_station'][data_label_a_indices]
+            # need to load active mode array?
+            if not np.all(check_arrays):
+                data_array_a_am = canvas_instance.selected_station_data[networkspeci]['active_mode'][data_label_a_indices]
+
+        # if have second data array, read it
+        if len(data_labels_b) != 0:
+            data_label_b_indices = np.array([canvas_instance.selected_station_data_labels[networkspeci].index(label) for label in data_labels_b], dtype=np.int32)
+
+            # for grouping data take per_station array
+            if (chunk_resolution is not None) or (period is not None):
+                data_array_b_ps = canvas_instance.selected_station_data[networkspeci]['per_station'][data_label_b_indices]
+            # otherwise work out which arrays you need 
+            else:
+                # need to load per station array?
+                if np.any(check_arrays):
+                    data_array_b_ps = canvas_instance.selected_station_data[networkspeci]['per_station'][data_label_b_indices]
+                # need to load active mode array?
+                if not np.all(check_arrays):
+                    data_array_b_am = canvas_instance.selected_station_data[networkspeci]['active_mode'][data_label_b_indices]
 
     # iterate through zstats and calculate statistics
     stats_calc = {}
     for zstat in zstats:
-
-        #print()
 
         # initialise nan_padding_counts as None (used to track padded NaNs in grouped arrays)
         nan_padding_counts_a = None
@@ -887,95 +1014,26 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
         # get zstat information 
         zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=zstat)
 
-        #if (z_statistic_period is not None) & (period is not None) & (chunk_resolution is not None):
-        #    print('Stat:{}, Mode:{}, zstat period:{}, period:{}, resolution:{}'.format(zstat, statistic_mode, z_statistic_period, period, chunk_resolution))
-        #elif (z_statistic_period is not None) & (period is not None):
-        #    print('Stat:{}, Mode:{}, zstat period:{}, period:{}'.format(zstat, statistic_mode, z_statistic_period, period))
-        #elif (z_statistic_period is not None) & (chunk_resolution is not None):
-        #    print('Stat:{}, Mode:{}, zstat period:{}, resolution:{}'.format(zstat, statistic_mode, z_statistic_period, chunk_resolution))
-        #elif (period is not None) & (chunk_resolution is not None):
-        #    print('Stat:{}, Mode:{}, period:{}, resolution:{}'.format(zstat, statistic_mode, period, chunk_resolution))
-        #elif (z_statistic_period is not None):
-        #    print('Stat:{}, Mode:{}, zstat period:{}'.format(zstat, statistic_mode, z_statistic_period))
-        #elif (period is not None):
-        #    print('Stat:{}, Mode:{}, period:{}'.format(zstat, statistic_mode, period))
-        #elif (chunk_resolution is not None):
-        #    print('Stat:{}, Mode:{}, resolution:{}'.format(zstat, statistic_mode, chunk_resolution))
-        #else:
-        #    print('Stat:{}, Mode:{}'.format(zstat, statistic_mode))
-
         # if are calculating a periodic statistic, and stat is Data%, ensure the mode is Independent to ensure calculate is correct
         if (periodic_statistic_mode) and (base_zstat == 'Data%'):
             periodic_statistic_mode = 'Independent'
 
-        # for map statistics, get active map valid station indices and then data_labels_a data 
-        if (map) or (per_station):
-
-            # get relevant station indices
-            if per_station:
-                station_inds = canvas_instance.station_inds[networkspeci]
-
-            elif map:
-                if read_instance.temporal_colocation:
-                    inds = read_instance.valid_station_inds_temporal_colocation[networkspeci]
-                else:
-                    inds = read_instance.valid_station_inds[networkspeci]
-                # if have just data_labels_a, station indices are simply those relevant for data_labels_a
-                if len(data_labels_b) == 0:
-                    if data_labels_a[0] not in inds:
-                        error = f'Data label {data_labels_a[0]} not in array. Options: {list(inds.keys())}'
-                        read_instance.logger.error(error)
-                        sys.exit(1)
-                    station_inds = inds[data_labels_a[0]]
-                # elif have data_labels_b, get intersection of data_labels_a and data_labels_b valid station indices
-                else:
-                    if data_labels_a[0] not in inds:
-                        error = f'Data label {data_labels_a[0]} not in array. Options: {list(inds.keys())}'
-                        read_instance.logger.error(error)
-                        sys.exit(1)
-                    if data_labels_b[0] not in inds:
-                        error = f'Data label {data_labels_b[0]} not in array. Options: {list(inds.keys())}'
-                        read_instance.logger.error(error)
-                        sys.exit(1)
-                    station_inds = np.intersect1d(inds[data_labels_a[0]], inds[data_labels_b[0]])
-
-            # check if valid station data
-            # if not return
-            if len(station_inds) == 0:
-                z_statistic = np.array([], dtype=np.float32)
-                if map:
-                    station_inds = np.array([], dtype=np.int32)
-                    return z_statistic, station_inds 
-                elif per_station:
-                    return z_statistic
-                
-            # get data array_a
-            data_label_a_indices = np.array([read_instance.data_labels.index(label) for label in data_labels_a], dtype=np.int32)
-            data_array_a = copy.deepcopy(read_instance.data_in_memory_filtered[networkspeci][data_label_a_indices,:,:])
-
-            # temporally colocate data (if active)
-            if read_instance.temporal_colocation:
-                data_array_a[:, read_instance.temporal_colocation_nans[networkspeci]] = np.nan
-
-            # get data cut for relevant stations
-            data_array_a = data_array_a[:,station_inds,:]
-            
-            # do resampling
-            if map:
-                data_array_a = resample_data_array(read_instance, data_array_a)
-                
-        # for other cases, get cut of selected station data for data_labels_a
+        # get dictionary containing necessary information for calculation of selected statistic
+        if z_statistic_type == 'basic':
+            stats_dict = copy.deepcopy(basic_stats[base_zstat])
         else:
-            data_label_a_indices = np.array([canvas_instance.selected_station_data_labels[networkspeci].index(label) for label in data_labels_a], dtype=np.int32)
-                        
-            # for grouping data take per_station array
-            if (chunk_resolution is not None) or (period is not None) or (z_statistic_period is not None) or (base_zstat in ['NStations','MDA8']):
-                data_array_a = canvas_instance.selected_station_data[networkspeci]['per_station'][data_label_a_indices]
-            # otherwise take active mode
-            else:
-                data_array_a = canvas_instance.selected_station_data[networkspeci]['active_mode'][data_label_a_indices]
+            stats_dict = copy.deepcopy(modbias_stats[base_zstat])
 
-        #print('Data Array a: ', data_array_a.shape)
+        # ensure data_array is correct one for statistic type
+        if (not map) & (not per_station):
+            if (chunk_resolution is not None) or (period is not None) or (z_statistic_period is not None) or (base_zstat in ['NStations', 'NUniqueStations', 'MDA8']):
+                data_array_a = data_array_a_ps
+                if len(data_labels_b) != 0:
+                    data_array_b = data_array_b_ps
+            else:
+                data_array_a = data_array_a_am
+                if len(data_labels_b) != 0:
+                    data_array_b = data_array_b_am
 
         # if need to mask data, then do so
         if mask is not None:
@@ -986,41 +1044,28 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
             # group data per hour, shape after is (24, label, station, time_per_hour_tiled)
             data_array_a, nan_padding_counts_a = group_periodic(read_instance, canvas_instance, networkspeci, 'hour', False, '', '', data_array_a, return_nan_padding_counts=True)
-                
-            #print('Data Array a, forecast daily group periodic: ', data_array_a.shape)
 
             # reshape to add a forecast day dimension, shape after is (24, label, station, fct, time_per_hour)
             data_array_a = np.reshape(data_array_a, 
                                       (data_array_a.shape[0], data_array_a.shape[1], data_array_a.shape[2], read_instance.max_forecast_days, -1), 
                                       order='F')
 
-            #print('Data Array a, reshape forecast period: ', data_array_a.shape)
-
         # if need to temporally chunk data, then do so
         if chunk_resolution is not None:
-            if ((chunk_resolution == read_instance.active_resolution) & (statistic_mode in ['Temporal|Spatial', 'Spatial|Temporal']) & (forecast_type != 'daily')) or ((chunk_resolution == read_instance.active_resolution) & (statistic_mode == 'Flattened') & (base_zstat in ['NStations','MDA8']) & (forecast_type != 'daily')):
+            if ((chunk_resolution == read_instance.active_resolution) & (statistic_mode in ['Temporal|Spatial', 'Spatial|Temporal']) & (forecast_type != 'daily')) or ((chunk_resolution == read_instance.active_resolution) & (statistic_mode == 'Flattened') & (base_zstat in ['NStations','NUniqueStations','MDA8']) & (forecast_type != 'daily')):
                 data_array_a = np.expand_dims(np.transpose(data_array_a, (2,0,1)), -1)
                 if len(data_labels_b) == 0:
                     chunk_resolution = None
             else:
                 data_array_a, nan_padding_counts_a = group_temporal(read_instance, canvas_instance, networkspeci, chunk_resolution, per_station, statistic_mode, base_zstat, data_array_a, prev_nan_padding_counts=nan_padding_counts_a, return_nan_padding_counts=True)            
-            #print('Data Array a, group temporal: ', data_array_a.shape)
 
         # if need to group data for a period, then do so
         # this can be for calculating statistics per period, or an integated periodic statistic
         elif period is not None:
             data_array_a, nan_padding_counts_a = group_periodic(read_instance, canvas_instance, networkspeci, period, per_station, statistic_mode, base_zstat, data_array_a, return_nan_padding_counts=True)
-            #print('Data Array a, group periodic: ', data_array_a.shape)
 
         elif z_statistic_period is not None:
             data_array_a, nan_padding_counts_a = group_periodic(read_instance, canvas_instance, networkspeci, z_statistic_period, per_station, statistic_mode, base_zstat, data_array_a, return_nan_padding_counts=True)
-            #print('Data Array a, group periodic: ', data_array_a.shape)
-
-        # get dictionary containing necessary information for calculation of selected statistic
-        if z_statistic_type == 'basic':
-            stats_dict = copy.deepcopy(basic_stats[base_zstat])
-        else:
-            stats_dict = copy.deepcopy(modbias_stats[base_zstat])
 
         # if have no data_labels_b, calculate 'absolute' basic statistic
         if len(data_labels_b) == 0:
@@ -1034,12 +1079,13 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
             # need to do the aggregation inside function for the calculation of NStations and MDA8
             # this is due to handling excepetions in how these are calculated across modes
-            elif base_zstat in ['NStations','MDA8']:
+            elif base_zstat in ['NStations','NUniqueStations','MDA8']:
                 function_arguments['statistic_mode'] = statistic_mode
                 function_arguments['statistic_aggregation'] = statistic_aggregation
                 function_arguments['per_station'] = per_station
                 if z_statistic_period is not None:
                     function_arguments['periodic_statistic_mode'] = periodic_statistic_mode
+                    function_arguments['periodic_statistic_aggregation'] = periodic_statistic_aggregation
                     
             # add argument to correct caculation of Data%, when using groups because of padded NaNs
             elif (base_zstat == 'Data%') & (nan_padding_counts_a is not None):
@@ -1054,8 +1100,6 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
                     # aggregation in each group, per station, by periodic statistic
                     z_statistic = aggregation(data_array_a, periodic_statistic_aggregation, axis=-1).transpose()
-
-                    #print('Calculating Stat, Cycle Aggregation ', z_statistic.shape)
 
                     # need to reshape nan_padding_counts if set as argument
                     if 'nan_padding_counts' in function_arguments:
@@ -1073,49 +1117,17 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                     # calculate statistic per periodic grouping per station
                     z_statistic = getattr(Stats, stats_dict['function'])(data_array_a, **function_arguments).transpose()
 
-                    #print('Calculating Stat, Independent Aggregation ', z_statistic.shape)
-
                     # aggregate data per station (removing period dimension)
-                    if base_zstat != 'NStations':
+                    if base_zstat not in ['NStations', 'NUniqueStations']:
                         z_statistic = aggregation(z_statistic, periodic_statistic_aggregation, axis=-1).transpose()
 
             # calculate statistics per station 
             else:
                 z_statistic = getattr(Stats, stats_dict['function'])(data_array_a, **function_arguments)
-            
-            #print('Calculated Stat: ', z_statistic.shape)
 
         # else, get data_labels_b data then calculate 'difference' statistic
         else:
 
-            # get data_labels_b data for map
-            if (map) or (per_station):
-
-                # get data array_b
-                data_label_b_indices = np.array([read_instance.data_labels.index(label) for label in data_labels_b], dtype=np.int32)
-                data_array_b = copy.deepcopy(read_instance.data_in_memory_filtered[networkspeci][data_label_b_indices,:,:])
-
-                # temporally colocate data (if active)
-                if read_instance.temporal_colocation:
-                    data_array_b[:, read_instance.temporal_colocation_nans[networkspeci]] = np.nan
-                    
-                # get data cut for relevant stations
-                data_array_b = data_array_b[:,station_inds,:]
-
-                # do resampling
-                if map:
-                    data_array_b = resample_data_array(read_instance, data_array_b)
-
-            # for other cases, get cut of selected station data for data_labels_b
-            else:
-                data_label_b_indices = np.array([canvas_instance.selected_station_data_labels[networkspeci].index(label) for label in data_labels_b], dtype=np.int32)
-
-                # for grouping data take per_station array
-                if (chunk_resolution is not None) or (period is not None) or (z_statistic_period is not None) or (base_zstat in ['NStations','MDA8']):
-                    data_array_b = canvas_instance.selected_station_data[networkspeci]['per_station'][data_label_b_indices]
-                # otherwise take active mode
-                else:
-                    data_array_b = canvas_instance.selected_station_data[networkspeci]['active_mode'][data_label_b_indices]
             # if need to mask data, then do so
             if mask is not None:
                 data_array_b[mask[data_label_b_indices]] = np.nan
@@ -1133,7 +1145,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
             # if need to temporally chunk data, then do so
             if chunk_resolution is not None:
-                if ((chunk_resolution == read_instance.active_resolution) & (statistic_mode in ['Temporal|Spatial', 'Spatial|Temporal']) & (forecast_type != 'daily')) or ((chunk_resolution == read_instance.active_resolution) & (statistic_mode == 'Flattened') & (base_zstat in ['NStations','MDA8']) & (forecast_type != 'daily')):
+                if ((chunk_resolution == read_instance.active_resolution) & (statistic_mode in ['Temporal|Spatial', 'Spatial|Temporal']) & (forecast_type != 'daily')) or ((chunk_resolution == read_instance.active_resolution) & (statistic_mode == 'Flattened') & (base_zstat in ['NStations','NUniqueStations','MDA8']) & (forecast_type != 'daily')):
                     data_array_b = np.expand_dims(np.transpose(data_array_b, (2,0,1)), -1)
                     chunk_resolution = None
                 else:
@@ -1160,12 +1172,13 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
                 # need to do the aggregation inside function for the calculation of NStations and MDA8
                 # this is due to handling excepetions in how these are calculated across modes
-                elif base_zstat in ['NStations','MDA8']:
+                elif base_zstat in ['NStations','NUniqueStations','MDA8']:
                     function_arguments_a['statistic_mode'] = statistic_mode
                     function_arguments_a['statistic_aggregation'] = statistic_aggregation
                     function_arguments_a['per_station'] = per_station
                     if z_statistic_period is not None:
                         function_arguments_a['periodic_statistic_mode'] = periodic_statistic_mode
+                        function_arguments_a['periodic_statistic_aggregation'] = periodic_statistic_aggregation
                         
                 function_arguments_b = copy.deepcopy(function_arguments_a)
 
@@ -1204,7 +1217,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                         statistic_b = getattr(Stats, stats_dict['function'])(data_array_b, **function_arguments_b).transpose()
 
                         # aggregate data per station (removing period dimension)
-                        if base_zstat != 'NStations':
+                        if base_zstat not in ['NStations', 'NUniqueStations']:
                             statistic_a = aggregation(statistic_a, periodic_statistic_aggregation, axis=-1).transpose()
                             statistic_b = aggregation(statistic_b, periodic_statistic_aggregation, axis=-1).transpose()
 
@@ -1270,13 +1283,12 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
         # reshape forecast data
         if forecast_type == 'daily':
-            if base_zstat in ['NStations','MDA8']:
+            if base_zstat in ['NStations','NUniqueStations','MDA8']:
                 n_chunks, n_labels, n_forecast_days = z_statistic.shape
                 z_statistic = z_statistic.transpose(0, 2, 1).reshape(-1, n_labels, order='F')
             else:
                 n_chunks, n_labels, n_stations, n_forecast_days = z_statistic.shape
                 z_statistic = z_statistic.transpose(0, 3, 1, 2).reshape(-1, n_labels, n_stations, order='F')
-            #print('Calculated Stat Forecast reshape: ', z_statistic.shape)
 
         # return map statistics
         if map:
@@ -1293,16 +1305,14 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
         # otherwise, save desired statistic for specific statistical calculation mode 
         else:
             if reduction:
-                if (statistic_mode == 'Temporal|Spatial') & ((base_zstat not in ['NStations','MDA8']) or (z_statistic_period is not None)):
+                if (statistic_mode == 'Temporal|Spatial') & ((base_zstat not in ['NStations','NUniqueStations','MDA8']) or (z_statistic_period is not None)):
                     z_statistic = aggregation(z_statistic, statistic_aggregation, axis=-1)
-                elif (statistic_mode in ['Flattened', 'Spatial|Temporal']) & ((base_zstat not in ['NStations','MDA8']) or (z_statistic_period is not None)):
-                    if base_zstat in ['NStations','MDA8']:
+                elif (statistic_mode in ['Flattened', 'Spatial|Temporal']) & ((base_zstat not in ['NStations','NUniqueStations','MDA8']) or (z_statistic_period is not None)):
+                    if base_zstat in ['NStations','NUniqueStations','MDA8']:
                         z_statistic = aggregation(z_statistic, statistic_aggregation, axis=-1)
                     else:
                         z_statistic = np.squeeze(z_statistic, axis=-1)
             stats_calc[zstat] = z_statistic
-
-            #print('Final: ', z_statistic.shape)
 
     # return statistics calculated (if just one statistic then remove dict)
     if len(zstats) == 1:
@@ -1859,7 +1869,7 @@ def aggregation(data_array, statistic_aggregation, axis=0):
     else:
         error = 'Aggregation statistic {0} is not available. '.format(statistic_aggregation)
         error += 'The options are: Mean, Median, p1, p5, p10, p25, p75, p90, p95 and p99'
-        read_instance.logger.error(error)
+        print(error)
         sys.exit(1) 
 
     return aggregated_data
@@ -1926,9 +1936,9 @@ def get_fairmode_data(read_instance, canvas_instance, networkspeci, data_labels)
     Returns
     -------
     data_array : numpy.ndarray
-        The processed data array filtered by FAIRMODE representativity and coverage criteria.
+        The processed data array filtered by FAIRMODE coverage criteria.
     valid_station_idxs : numpy.ndarray
-        A boolean mask indicating which stations met the FAIRMODE representativity threshold.
+        A boolean mask indicating which stations met the FAIRMODE coverage threshold.
     """
 
     # get coverage
@@ -1966,8 +1976,8 @@ def get_fairmode_data(read_instance, canvas_instance, networkspeci, data_labels)
         data_array[days_to_nan_expanded] = np.nan
 
     # get indices of valid stations
-    obs_representativity = Stats.calculate_data_avail_fraction(data_array[0, :, :])
-    valid_station_idxs = obs_representativity >= coverage
+    obs_coverage = Stats.calculate_data_avail_fraction(data_array[0, :, :])
+    valid_station_idxs = obs_coverage >= coverage
 
     # do some extra processing for hourly resolution data
     if read_instance.active_resolution == 'hourly':

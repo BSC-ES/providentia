@@ -899,6 +899,10 @@ class PopUpWindow(QtWidgets.QWidget):
                             
         # add available species
         available_species = sorted(self.read_instance.available_observation_data[self.read_instance.selected_widget_network[label_ii]][self.read_instance.selected_resolution][self.read_instance.selected_widget_matrix[label_ii]])
+        # remove currently selected species 
+        if ((self.page_memory['multispecies']['network'][label_ii].currentText() == self.read_instance.selected_network)
+           & (self.read_instance.selected_species in available_species)):
+            available_species.remove(self.read_instance.selected_species)
         self.page_memory['multispecies']['species'][label_ii].addItems(available_species)
         
         # update species and set current text in species widget
@@ -972,9 +976,6 @@ class PopUpWindow(QtWidgets.QWidget):
             # reset bounds and apply values on widgets
             self.read_instance.selected_widget_apply.update({label_ii: False})
 
-            # remove previous networkspeci from lists
-            self.update_filter_species(label_ii, add_filter_species=False)
-
             # if network, matrix or species have changed then respective
             # current selection for the changed param
             if event_source == self.page_memory['multispecies']['network'][label_ii]:
@@ -989,13 +990,22 @@ class PopUpWindow(QtWidgets.QWidget):
                 self.read_instance.selected_widget_species.update({label_ii: changed_param})
             elif event_source == self.page_memory['multispecies']['current_lower'][label_ii]:
                 self.read_instance.selected_widget_lower.update({label_ii: changed_param})
+                if self.read_instance.selected_widget_lower[label_ii] != ':':
+                    self.page_memory['multispecies']['current_lower'][label_ii].setText(str(self.read_instance.selected_widget_lower[label_ii]))
             elif event_source == self.page_memory['multispecies']['current_upper'][label_ii]:
                 self.read_instance.selected_widget_upper.update({label_ii: changed_param})
+                if self.read_instance.selected_widget_upper[label_ii] != ':':
+                    self.page_memory['multispecies']['current_upper'][label_ii].setText(str(self.read_instance.selected_widget_upper[label_ii]))
             elif event_source == self.page_memory['multispecies']['current_filter_species_fill_value'][label_ii]:
                 self.read_instance.selected_widget_filter_species_fill_value.update({label_ii: changed_param})
+                if self.read_instance.selected_widget_filter_species_fill_value[label_ii] != str(np.nan):
+                    self.page_memory['multispecies']['current_filter_species_fill_value'][label_ii].setText(str(self.read_instance.selected_widget_filter_species_fill_value[label_ii]))
 
             # update multispecies filtering fields
-            self.update_multispecies_fields(label_ii)
+            if event_source in [self.page_memory['multispecies']['network'][label_ii], self.page_memory['multispecies']['matrix'][label_ii], self.page_memory['multispecies']['species'][label_ii]]:
+                self.update_multispecies_fields(label_ii)
+            else:
+                self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
 
     def update_filter_species(self, label_ii, add_filter_species=True):
         """
@@ -1008,64 +1018,105 @@ class PopUpWindow(QtWidgets.QWidget):
         add_filter_species : bool, optional
             Indicator to add (True) or remove (False) the filter.
         """
+
+        # get selected networkspeci on menu
+        selected_networkspeci = '{}|{}'.format(self.read_instance.selected_network, self.read_instance.selected_species)
         
-        # get selected network, species and bounds
+        # get selected filter network, species and bounds
         network = self.read_instance.selected_widget_network[label_ii]
         speci = self.read_instance.selected_widget_species[label_ii]
         networkspeci = network + '|' + speci
         current_lower = self.read_instance.selected_widget_lower[label_ii]
         current_upper = self.read_instance.selected_widget_upper[label_ii]
         current_filter_species_fill_value = self.read_instance.selected_widget_filter_species_fill_value[label_ii]
-
-        # get filter species after changes
+        # set current filter species bounds and fill value
         current_filter_species = [current_lower, current_upper, current_filter_species_fill_value]
 
         # if apply button is checked or filter_species in configuration file, add networkspecies in filter_species
         if add_filter_species:
 
+            # do not allow filtering by same networkspecies as that currently selected 
+            if networkspeci == selected_networkspeci:
+                msg = 'filter_species cannot be the same as currently selected network-species ({}).'.format(networkspeci)
+                show_message(self.read_instance, msg)
+                self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
+                return
+
             # do not add to filter_species if lower and upper bounds are nan
             if current_lower == str(np.nan) or current_upper == str(np.nan):
-                msg = 'Data bounds cannot be empty.'
+                msg = 'filter_species data bounds cannot be empty.'
                 show_message(self.read_instance, msg)
                 self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
                 return
 
             # only add to filter_species when lower bound if it contains :, > or >=
+            # if lower bound has a < symbol, change it to >, and show message 
             if ('<' in current_lower):
-                msg = 'Lower bound ({}) for {} cannot contain < or <=. '.format(current_lower, networkspeci)
+                msg = 'filter_species lower bound ({}) for {} cannot contain < or <=. '.format(current_lower, networkspeci)
+                current_lower = '>=' + current_lower.replace('<', '').replace('=', '')
+                msg += 'Setting it to be {}.'.format(current_lower)
+                self.page_memory['multispecies']['current_lower'][label_ii].blockSignals(True)
+                self.page_memory['multispecies']['current_lower'][label_ii].setText(current_lower)
+                self.read_instance.selected_widget_lower[label_ii] = current_lower
+                self.page_memory['multispecies']['current_lower'][label_ii].blockSignals(False)
                 show_message(self.read_instance, msg)
-                self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
-                return
+            # if have no symbols then change it to be >= 
             elif (':' not in current_lower) and ('>' not in current_lower):
-                msg = 'Lower bound ({}) for {} should contain > or >=. '.format(current_lower, networkspeci)
-                show_message(self.read_instance, msg)
-                self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
-                return
+                current_lower = '>=' + current_lower
+                self.page_memory['multispecies']['current_lower'][label_ii].blockSignals(True)
+                self.page_memory['multispecies']['current_lower'][label_ii].setText(current_lower)
+                self.read_instance.selected_widget_lower[label_ii] = current_lower
+                self.page_memory['multispecies']['current_lower'][label_ii].blockSignals(False)
 
             # only add to filter_species when upper bound if it contains :, < or <=
+            # if upper bound has a > symbol, change it to <, and show message 
             if ('>' in current_upper):
-                msg = 'Upper bound ({}) for {} cannot contain > or >=. '.format(current_upper, networkspeci)
+                msg = 'filter_species upper bound ({}) for {} cannot contain > or >=. '.format(current_upper, networkspeci)
+                current_upper = '<=' + current_upper.replace('>', '').replace('=', '')
+                msg += 'Setting it to be {}.'.format(current_upper)
+                self.page_memory['multispecies']['current_upper'][label_ii].blockSignals(True)
+                self.page_memory['multispecies']['current_upper'][label_ii].setText(current_upper)
+                self.read_instance.selected_widget_upper[label_ii] = current_upper
+                self.page_memory['multispecies']['current_upper'][label_ii].blockSignals(False)
                 show_message(self.read_instance, msg)
-                self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
-                return
+            # if have no symbols then change it to be <= 
             elif (':' not in current_upper) and ('<' not in current_upper):
-                msg = 'Upper bound ({}) for {} should contain < or <=. '.format(current_upper, networkspeci)
-                show_message(self.read_instance, msg)
-                self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
-                return
+                current_upper = '<=' + current_upper
+                self.page_memory['multispecies']['current_upper'][label_ii].blockSignals(True)
+                self.page_memory['multispecies']['current_upper'][label_ii].setText(current_upper)
+                self.read_instance.selected_widget_upper[label_ii] = current_upper
+                self.page_memory['multispecies']['current_upper'][label_ii].blockSignals(False)
+
+            # set filter species after potential changes
+            current_filter_species = [current_lower, current_upper, current_filter_species_fill_value]
 
             # add or update networkspeci
             # check selected lower and upper bounds and fill value are numbers or nan
             try:
+                if label_ii in self.read_instance.multispecies_active_line_inds.keys():
+                    previous_line_sel = self.read_instance.multispecies_active_line_inds[label_ii]
+                    previous_networkspeci = previous_line_sel[0]
+                    previous_filter_species = previous_line_sel[1]
+                    del self.read_instance.selected_filter_species[previous_networkspeci][self.read_instance.selected_filter_species[previous_networkspeci].index(previous_filter_species)]
+                    del self.read_instance.multispecies_active_line_inds[label_ii]
+                    if len(self.read_instance.selected_filter_species[previous_networkspeci]) == 0:
+                        del self.read_instance.selected_filter_species[previous_networkspeci]
+
                 if networkspeci in self.read_instance.selected_filter_species.keys():
                     if current_filter_species not in self.read_instance.selected_filter_species[networkspeci]:
                         self.read_instance.selected_filter_species[networkspeci].append(current_filter_species)
+                        self.read_instance.multispecies_active_line_inds[label_ii] = [networkspeci, current_filter_species] 
+                    else:
+                        msg = 'filter_species with same bounds already exists for {}. '.format(networkspeci)
+                        show_message(self.read_instance, msg)
+                        self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
                 else:
                     self.read_instance.selected_filter_species[networkspeci] = [current_filter_species]
+                    self.read_instance.multispecies_active_line_inds[label_ii] = [networkspeci, current_filter_species] 
 
             # if any of the fields are not numbers, return from function
             except ValueError:
-                msg = 'Data limit fields must be numeric.'
+                msg = 'filter_species data bounds must be numeric.'
                 show_message(self.read_instance, msg)
                 self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
                 return
@@ -1084,16 +1135,16 @@ class PopUpWindow(QtWidgets.QWidget):
                 self.read_instance.qa_per_species = {speci:get_default_qa(self.read_instance, speci) 
                                                      for speci in qa_species}
 
-        # if apply button is unchecked, remove networkspecies from filter_species
+        # if apply button is unchecked, remove current line from filter_species
         else:
-            # remove from filter_species
-            filter_species_aux = copy.deepcopy(self.read_instance.selected_filter_species)
-            if networkspeci in filter_species_aux.keys():
-                if current_filter_species in filter_species_aux[networkspeci]:
-                    sub_networkspeci_ii = self.read_instance.selected_filter_species[networkspeci].index(current_filter_species)
-                    del self.read_instance.selected_filter_species[networkspeci][sub_networkspeci_ii]
-                    if len(self.read_instance.selected_filter_species[networkspeci]) == 0:
-                        del self.read_instance.selected_filter_species[networkspeci]
+            if label_ii in self.read_instance.multispecies_active_line_inds.keys():
+                previous_line_sel = self.read_instance.multispecies_active_line_inds[label_ii]
+                previous_networkspeci = previous_line_sel[0]
+                previous_filter_species = previous_line_sel[1]
+                del self.read_instance.selected_filter_species[previous_networkspeci][self.read_instance.selected_filter_species[previous_networkspeci].index(previous_filter_species)]
+                del self.read_instance.multispecies_active_line_inds[label_ii]
+                if len(self.read_instance.selected_filter_species[previous_networkspeci]) == 0:
+                    del self.read_instance.selected_filter_species[previous_networkspeci]
 
             # remove from qa_per_species
             if ((speci in self.read_instance.qa_per_species) and 
@@ -1119,9 +1170,6 @@ class PopUpWindow(QtWidgets.QWidget):
         if model not in self.menu_current['models']['forecast']:
             if model in self.read_instance.init_models:
                 model = self.read_instance.init_models[model]
-
-        # Build a combined key for network and species (used for accessing forecast data)
-        networkspeci = '{}|{}'.format(self.read_instance.selected_network, self.read_instance.selected_species)
 
         # --- CASE 1: Model is checked ---
         if event_source.isChecked():

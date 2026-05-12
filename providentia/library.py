@@ -17,9 +17,9 @@ import yaml
 from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics, Tee
 from .configuration import load_conf
 from .configuration import ProvConfiguration
-from .fields_menus import (init_metadata, init_period, init_representativity, metadata_conf,
-                           update_metadata_fields, update_period_fields, update_representativity_fields,
-                           period_conf, representativity_conf)
+from .fields_menus import (init_metadata, init_period, init_coverage, metadata_conf,
+                           update_metadata_fields, update_period_fields, update_coverage_fields,
+                           period_conf, coverage_conf)
 from .filter import DataFilter
 from .plotting import Plotting
 from .plot_aux import get_taylor_diagram_ghelper, download_plot_data_to_csv
@@ -80,8 +80,8 @@ class Providentia:
         self.basic_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
         self.modbias_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/model_bias_stats.yaml')))
 
-        # load representativity information
-        self.representativity_info = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/representativity.yaml')))
+        # load coverage information
+        self.coverage_info = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/coverage.yaml')))
 
         # set configuration variables, as well as any other defined variables
         self.valid_config = self.set_config(**self.kwargs)
@@ -152,7 +152,7 @@ class Providentia:
         field : str
             Field to filter by.
         limit : str, optional
-            Limit for filtering representativity fields.
+            Limit for filtering coverage fields.
         keep : str or list of str, optional
             Data to keep.
         remove : str or list of str, optional
@@ -182,16 +182,20 @@ class Providentia:
             if type(remove) == str:
                 remove = [remove]
 
-        # field is a represenativity field?
-        if field in self.representativity_menu['rangeboxes']['map_vars']:
+        # field is a coverage field?
+        if (field in self.coverage_menu['rangeboxes']['map_vars']) or (field in self.coverage_menu['rangeboxes']['map_vars_old']):
             do_filter = True
 
-            field_index = self.representativity_menu['rangeboxes']['map_vars'].index(field)
+            if field in self.coverage_menu['rangeboxes']['map_vars']:
+                field_index = self.coverage_menu['rangeboxes']['map_vars'].index(field)
+            elif field in self.coverage_menu['rangeboxes']['map_vars_old']:
+                field_index = self.coverage_menu['rangeboxes']['map_vars_old'].index(field)
+                
             # ensure limit is set for field
             if limit is not None:
-                self.representativity_menu['rangeboxes']['current_lower'][field_index] = limit
+                self.coverage_menu['rangeboxes']['current_lower'][field_index] = limit
             else:
-                msg = "When filtering by representativity field: {}, 'limit' must be passed as an argument.".format(field)
+                msg = "When filtering by coverage field: {}, 'limit' must be passed as an argument.".format(field)
                 show_message(self, msg)
                 return
 
@@ -321,12 +325,12 @@ class Providentia:
             self.logger.info(f'Resetting all data filters.')
 
         # initialise structures to store fields
-        init_representativity(self)
+        init_coverage(self)
         init_period(self)
         init_metadata(self)
 
         # update available fields
-        update_representativity_fields(self)
+        update_coverage_fields(self)
         update_period_fields(self)
 
         # for non-GHOST delete valid station indices variables because we do not want to 
@@ -340,7 +344,7 @@ class Providentia:
         
         # apply set fields at initalisation for filtering
         if initialise:
-            representativity_conf(self)
+            coverage_conf(self)
             period_conf(self)
             metadata_conf(self)
 
@@ -1065,7 +1069,7 @@ class Providentia:
                                 title = '{} {}'.format(map_title, title)
 
                         else:
-                            if zstat == 'NStations':
+                            if zstat in ['NStations', 'NUniqueStations']:
                                 title = '{}'.format(stat_label)
                             else:
                                 title = '{} at {} stations'.format(stat_label, n_stations)

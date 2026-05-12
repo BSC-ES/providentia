@@ -1,0 +1,83 @@
+max:
+  variables:
+    - all
+
+  metadata:
+    - all
+
+med:
+  variables:
+    - season_code
+    - weekday_weekend_code
+    - day_night_code
+
+  metadata:
+    - station_reference
+    - station_timezone
+    - latitude
+    - longitude
+    - altitude
+    - sampling_height
+    - measurement_altitude
+    - station_name
+    - city
+    - country
+    - administrative_country_division_1
+    - administrative_country_division_2
+    - population
+    - representative_radius
+    - area_classification
+    - station_classification
+    - land_use
+    - measurement_scale
+    - ESDAC_Iwahashi_landform_classification
+    - ESDAC_Meybeck_landform_classification
+    - GHSL_settlement_model_classification
+    - Joly-Peuch_classification_code
+    - Koppen-Geiger_classification
+    - MODIS_MCD12C1_v6_IGBP_land_use
+    - MODIS_MCD12C1_v6_UMD_land_use
+    - MODIS_MCD12C1_v6_LAI
+    - WMO_region
+    - WWF_TEOW_terrestrial_ecoregion
+    - WWF_TEOW_biogeographical_realm
+    - WWF_TEOW_biome
+    - UMBC_anthrome_classification
+    - EDGAR_v4.3.2_annual_average_BC_emissions
+    - EDGAR_v4.3.2_annual_average_CO_emissions
+    - EDGAR_v4.3.2_annual_average_NH3_emissions
+    - EDGAR_v4.3.2_annual_average_NMVOC_emissions
+    - EDGAR_v4.3.2_annual_average_NOx_emissions
+    - EDGAR_v4.3.2_annual_average_OC_emissions
+    - EDGAR_v4.3.2_annual_average_PM10_emissions
+    - EDGAR_v4.3.2_annual_average_biogenic_PM2.5_emissions
+    - EDGAR_v4.3.2_annual_average_fossilfuel_PM2.5_emissions
+    - EDGAR_v4.3.2_annual_average_SO2_emissions
+    - ASTER_v3_altitude
+    - ETOPO1_altitude
+    - GHSL_built_up_area_density
+    - GHSL_population_density
+    - GPW_population_density
+    - NOAA-DMSP-OLS_v4_nighttime_stable_lights
+    - OMI_level3_column_cloud_screened_annual_average_NO2
+    - OMI_level3_tropospheric_column_annual_average_NO2
+    - OMI_level3_tropospheric_column_cloud_screened_annual_average_NO2
+    - GSFC_coastline_proximity
+    - primary_sampling_type
+    - primary_sampling_instrument_name
+    - sample_preparation_types
+    - sample_preparation_techniques
+    - measurement_methodology
+    - measuring_instrument_name
+    - measuring_instrument_sampling_type
+
+min:
+  variables:
+    - none
+
+  metadata: 
+    - latitude
+    - longitude
+    - measurement_altitude
+    - area_classification
+    - station_classification

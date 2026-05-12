@@ -146,7 +146,7 @@ If wanting to apply a filter not set in the configuration file, this can be done
 provi.filter(field, ...)
 ```
 
-where `field` is the field to filter by. The fields to filter by can be representativity fields, period fields or metadata fields.
+where `field` is the field to filter by. The fields to filter by can be coverage fields, period fields or metadata fields.
 
 If the field is numeric, lower and upper limits to retain data between can be set as follows:
 
@@ -170,7 +170,7 @@ If multiple values are wanted to be removed concurrently, the arguments passed s
 provi.filter(field, remove=['Spain','France'])
 ```           
 
-For the specific case of representativity fields, the argument passed should be `limit`:
+For the specific case of coverage fields, the argument passed should be `limit`:
 
 ```
 provi.filter(rep_field, limit=20)

@@ -371,3 +371,22 @@ def get_standard_units(initial_units, standard_parameter_speci):
     
     conv_obj = unit_conversion(initial_units, initial_units, standard_parameter_speci)
     return conv_obj.output_standard_units
+
+def is_same_or_view(child, parent):
+    """
+    Returns True if:
+      - child *is* parent (same object)
+      - child is a VIEW of parent (shares memory)
+    Returns False if:
+      - child is a COPY (no shared memory)
+    """
+    # Case 1: same object
+    if child is parent:
+        return True
+    
+    # Case 2: child is a view of parent
+    if np.shares_memory(child, parent):
+        return True
+    
+    # Otherwise: independent copy
+    return False

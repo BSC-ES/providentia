@@ -649,3 +649,60 @@ class InputDialog(QtWidgets.QWidget):
         self.selected_option, self.okpressed = dialog.getItem(read_instance, title, msg, options, 0, False)
         if not self.okpressed:
             return
+
+def create_custom_cursor(size=24):
+    """ 
+    Create custom loading cursor (Providentia logo).
+
+    Parameters
+    ----------
+    size : int
+        Size of the cursor in pixels
+    """ 
+
+    pix = QtGui.QPixmap(join(PROVIDENTIA_ROOT, "assets/logo.png"))
+    pix = pix.scaled(size,size,QtCore.Qt.KeepAspectRatio,QtCore.Qt.SmoothTransformation)
+    return QtGui.QCursor(pix)
+
+def set_cursor(cursor_function, function, size=24):
+    """ 
+    Set custom cursor when performing a function that takes time to execute, 
+    and restore it to normal when finished.
+
+    Parameters
+    ----------
+    cursor_function : str
+        Name of the function which currently owns the cursor, to avoid resetting the cursor if it is already set by another function
+    function : str
+        Name of the function which is trying to set the cursor
+    size : int
+        Size of the cursor in pixels
+
+    Returns
+    -------
+    str
+        Function which owns thr cursor, to be used for restoring the cursor to normal when function is finished
+    """
+
+    cursor = QtWidgets.QApplication.overrideCursor()
+    if cursor is None:
+        pix = create_custom_cursor(size)
+        QtWidgets.QApplication.setOverrideCursor(pix)
+        return function
+    else:
+        return cursor_function
+
+def unset_cursor(cursor_function, function):
+    """ 
+    Unset custom cursor if the function which owns the cursor is the one trying to restore it,
+    to avoid restoring the cursor to normal if it is still being used by another function.
+
+    Parameters
+    ----------
+    cursor_function : str
+        Name of the function which currently owns the cursor, to avoid resetting the cursor if it is already set by another function
+    function : str
+        Name of the function which is trying to set the cursor
+    """
+    if cursor_function == function:
+        QtWidgets.QApplication.restoreOverrideCursor()

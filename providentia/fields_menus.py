@@ -79,7 +79,7 @@ def init_models(instance):
     # if not, create it
     if not hasattr(instance, 'models_menu'):
         instance.models_menu = {'window_title': 'Models', 
-                                     'page_title': 'Select Model/s', 
+                                     'page_title': 'Select Models', 
                                      'models': {}}
         instance.models_menu['select_buttons'] = ['all', 'clear']
     
@@ -104,8 +104,8 @@ def init_multispecies(instance):
     # do not have object instance already?
     # if not, create it
     if not hasattr(instance, 'multispecies_menu'):
-        instance.multispecies_menu = {'window_title': 'Multispecies Filtering', 
-                                      'page_title': 'Select Network/s and Specie/s to Filter by',
+        instance.multispecies_menu = {'window_title': 'Species Filtering', 
+                                      'page_title': 'Select species to filter by',
                                       'multispecies': {},
                                      }
 
@@ -121,30 +121,31 @@ def init_multispecies(instance):
     instance.multispecies_menu['multispecies']['previous_filter_species_fill_value'] = {}
 
 
-def init_representativity(instance):
+def init_coverage(instance):
     """
-    Initialise the internal dictionary structure and default values for data representativity percentage fields.
+    Initialise the internal dictionary structure and default values for data coverage percentage fields.
 
     Parameters
     ----------
     instance : object
-        An object instance to be updated with representativity menu configurations.
+        An object instance to be updated with coverage menu configurations.
     """
 
     # do not have object instance already?
     # if not, create it
-    if not hasattr(instance, 'representativity_menu'):
-        instance.representativity_menu = {'window_title': '% Data Representativity', 
-                                          'page_title': 'Select Minimum Required % Data Representativity', 
+    if not hasattr(instance, 'coverage_menu'):
+        instance.coverage_menu = {'window_title': '% Data Coverage', 
+                                          'page_title': 'Select Minimum Required % Data Coverage', 
                                           'rangeboxes':{}}
     
     # reset fields
-    instance.representativity_menu['rangeboxes']['tooltips'] = []
-    instance.representativity_menu['rangeboxes']['labels'] = [] 
-    instance.representativity_menu['rangeboxes']['current_lower'] = []                                                  
-    instance.representativity_menu['rangeboxes']['map_vars'] = []
-    instance.representativity_menu['rangeboxes']['subtitles'] = []
-    instance.representativity_menu['rangeboxes']['subtitle_inds'] = []
+    instance.coverage_menu['rangeboxes']['tooltips'] = []
+    instance.coverage_menu['rangeboxes']['labels'] = [] 
+    instance.coverage_menu['rangeboxes']['current_lower'] = []    
+    instance.coverage_menu['rangeboxes']['map_vars_old'] = []                                              
+    instance.coverage_menu['rangeboxes']['map_vars'] = []
+    instance.coverage_menu['rangeboxes']['subtitles'] = []
+    instance.coverage_menu['rangeboxes']['subtitle_inds'] = []
 
 
 def init_period(instance):
@@ -292,24 +293,28 @@ def update_qa(instance):
     instance.qa_menu['checkboxes']['map_vars'] = np.sort(list(qa_map_vars))
 
 
-def update_representativity_fields(instance):
+def update_coverage_fields(instance):
     """
-    Update the data representativity menu labels and values based on the active data resolution and network type.
+    Update the data coverage menu labels and values based on the active data resolution and network type.
 
     Parameters
     ----------
     instance : object
-        An object instance to be updated with representativity menu configurations.
+        An object instance to be updated with coverage menu configurations.
     """
 
     # get previously set rangebox labels / values
-    previous_mapped_labels = copy.deepcopy(instance.representativity_menu['rangeboxes']['map_vars'])
-    previous_lower = copy.deepcopy(instance.representativity_menu['rangeboxes']['current_lower'])
+    previous_mapped_labels = copy.deepcopy(instance.coverage_menu['rangeboxes']['map_vars'])
+    previous_mapped_labels_old = copy.deepcopy(instance.coverage_menu['rangeboxes']['map_vars_old'])
+    previous_lower = copy.deepcopy(instance.coverage_menu['rangeboxes']['current_lower'])
     
-    # build representativity menu
-    network_type = 'ghost' if instance.reading_ghost else 'nonghost'
+    # build coverage menu
+    if (instance.reading_ghost) & (instance.ghost_features == 'max'):
+        network_type = 'ghost'
+    else:
+        network_type = 'nonghost'
 
-    # set resolution to get representativity information based on active resolution
+    # set resolution to get coverage information based on active resolution
     if instance.resolution in ['hourly', 'hourly_instantaneous']:
         resolution = 'hourly'
     elif instance.resolution in ['3hourly', '3hourly_instantaneous']:
@@ -323,23 +328,24 @@ def update_representativity_fields(instance):
     elif instance.resolution == 'annual':
         resolution = 'annual'
 
-    instance.representativity_menu['rangeboxes']['map_vars'] = instance.representativity_info[network_type][resolution]['map_vars']
-    instance.representativity_menu['rangeboxes']['labels'] = instance.representativity_info[network_type][resolution]['labels']
-    instance.representativity_menu['rangeboxes']['subtitles'] = instance.representativity_info[network_type][resolution]['subtitles']
-    instance.representativity_menu['rangeboxes']['subtitle_inds'] = instance.representativity_info[network_type][resolution]['subtitle_inds']
+    instance.coverage_menu['rangeboxes']['map_vars'] = instance.coverage_info[network_type][resolution]['map_vars']
+    instance.coverage_menu['rangeboxes']['map_vars_old'] = instance.coverage_info[network_type][resolution]['map_vars_old']
+    instance.coverage_menu['rangeboxes']['labels'] = instance.coverage_info[network_type][resolution]['labels']
+    instance.coverage_menu['rangeboxes']['subtitles'] = instance.coverage_info[network_type][resolution]['subtitles']
+    instance.coverage_menu['rangeboxes']['subtitle_inds'] = instance.coverage_info[network_type][resolution]['subtitle_inds']
     
-    # initialise rangebox values --> for data representativity fields
+    # initialise rangebox values --> for data coverage fields
     # the default is 0%, for max gap fields % the default is 100%
-    instance.representativity_menu['rangeboxes']['current_lower'] = []
-    for label_ii, label_mapped in enumerate(instance.representativity_menu['rangeboxes']['map_vars']):
+    instance.coverage_menu['rangeboxes']['current_lower'] = []
+    for label_ii, (label_mapped, label_mapped_old) in enumerate(zip(instance.coverage_menu['rangeboxes']['map_vars'], instance.coverage_menu['rangeboxes']['map_vars_old'])):
         if 'max_gap' in label_mapped:
-            instance.representativity_menu['rangeboxes']['current_lower'].append('100')
+            instance.coverage_menu['rangeboxes']['current_lower'].append('100')
         else:
-            instance.representativity_menu['rangeboxes']['current_lower'].append('0')
+            instance.coverage_menu['rangeboxes']['current_lower'].append('0')
 
         # label previously existed?
-        if label_mapped in previous_mapped_labels:
-            instance.representativity_menu['rangeboxes']['current_lower'][label_ii] = \
+        if (label_mapped in previous_mapped_labels) or (label_mapped_old in previous_mapped_labels_old):
+            instance.coverage_menu['rangeboxes']['current_lower'][label_ii] = \
                 previous_lower[previous_mapped_labels.index(label_mapped)]
 
 
@@ -391,7 +397,6 @@ def update_period_fields(instance):
             if label in instance.period_menu['checkboxes']['remove_selected']:
                 instance.period_menu['checkboxes']['remove_selected'].remove(label)
 
-
 def update_metadata_fields(instance):
     """
     Update the metadata menu with unique categorical fields or numeric boundaries 
@@ -409,125 +414,144 @@ def update_metadata_fields(instance):
         An object instance to be updated with metadata menu configurations.
     """
 
+    metadata_menu = instance.metadata_menu
+    metadata_vars = instance.metadata_vars_to_read
+    standard_metadata = instance.standard_metadata
+    metadata_in_memory = instance.metadata_in_memory
+    networkspecies = instance.networkspecies
 
     # before doing anything check if have all current metadata variables in menu
     # if not, this is either because it is initialised empty, 
     # or because of changing between GHOST and non-GHOST data
     # if there is a difference, fill metadata menu with empty values
     reset_meta = False
-    for metadata_type_ii, metadata_type in enumerate(instance.metadata_menu['navigation_buttons']['labels']):
-        required_vars = [metadata_var for metadata_var in instance.metadata_vars_to_read
-            if (instance.standard_metadata[metadata_var]['metadata_type'] == metadata_type)
-                 & (instance.standard_metadata[metadata_var]['data_type'] != object)]
-        if len(required_vars) != len(instance.metadata_menu[metadata_type]['rangeboxes']['labels']):
+    nav_labels = metadata_menu['navigation_buttons']['labels']
+
+    for metadata_type in nav_labels:
+        required_vars = [
+            mv for mv in metadata_vars
+            if standard_metadata[mv]['metadata_type'] == metadata_type
+            and standard_metadata[mv]['data_type'] != object
+        ]
+        if len(required_vars) != len(metadata_menu[metadata_type]['rangeboxes']['labels']):
             reset_meta = True
             break
 
     # reinitialise metadata menu
     if reset_meta:
         init_metadata(instance)
+        metadata_menu = instance.metadata_menu
 
-    # update metadata menu
-    for meta_var in instance.metadata_vars_to_read:
-        
-        # get all metadata values for field across all networks and species
-        meta_var_field = []
+    # normalise network/species to lists (avoid conversion inside loop)
+    if isinstance(instance.network, str):
+        instance.network = [instance.network]
+    if isinstance(instance.species, str):
+        instance.species = [instance.species]
 
-        # transform to list if there is only one species / network
-        if isinstance(instance.network, str):
-            instance.network = [instance.network]
-        if isinstance(instance.species, str):
-            instance.species = [instance.species]
+    # main metadata update loop
+    for meta_var in metadata_vars:
+        md_info = standard_metadata[meta_var]
+        metadata_type = md_info['metadata_type']
+        dtype = md_info['data_type']
 
-        for networkspeci in instance.networkspecies:
-            # remove data for stations with 0 measurements
-            # this is done only for non-GHOST because the data files are forced to contain data for all possible stations
-            if hasattr(instance, 'valid_station_inds') and (not instance.reading_ghost):
+        # gather metadata across all networks/species
+        chunks = []
+
+        for netspec in networkspecies:
+            arr = metadata_in_memory[netspec][meta_var]
+
+            # apply valid station mask (non-GHOST only)
+            if hasattr(instance, "valid_station_inds") and not instance.reading_ghost:
                 if instance.temporal_colocation:
-                    valid_station_inds = instance.valid_station_inds_temporal_colocation[networkspeci][instance.observations_data_label]
+                    inds = instance.valid_station_inds_temporal_colocation[netspec][instance.observations_data_label]
                 else:
-                    valid_station_inds = instance.valid_station_inds[networkspeci][instance.observations_data_label]
-                valid_meta_var_field = instance.metadata_in_memory[networkspeci][meta_var][valid_station_inds, :]
-                meta_var_field.extend(valid_meta_var_field.flatten())
-            # just flatten
+                    inds = instance.valid_station_inds[netspec][instance.observations_data_label]
+                chunks.append(arr[inds].ravel())
             else:
-                meta_var_field.extend(instance.metadata_in_memory[networkspeci][meta_var].flatten())
+                chunks.append(arr.ravel())
 
-        meta_var_field = np.array(meta_var_field)
-        
-        # get metadata variable type/data type
-        metadata_type = instance.standard_metadata[meta_var]['metadata_type']
-        metadata_data_type = instance.standard_metadata[meta_var]['data_type']
+        # one fast concatenate
+        meta_vals = np.concatenate(chunks)
 
-        # remove NaNs from metadata values
-        meta_var_field_nan_removed = meta_var_field[(meta_var_field != 'nan') & (~pd.isna(meta_var_field))]
-
-        # update pop-up metadata menu object with read metadata values
-        # for non-numeric metadata gets all the unique fields per metadata variable
-        # and sets the available fields as such
-        if metadata_data_type == object:
-            # get previous fields in menu 
-            previous_fields = copy.deepcopy(instance.metadata_menu[metadata_type][meta_var]['checkboxes']['labels'])
-            previous_keep = copy.deepcopy(instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected'])
-            previous_remove = copy.deepcopy(instance.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_selected'])
-
-            # update new labels
-            instance.metadata_menu[metadata_type][meta_var]['checkboxes']['labels'] = np.unique(meta_var_field_nan_removed)
-            
-            # if field previously existed, then copy across checkbox settings for field
-            # else set initial checkboxes to be all blank
-            instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected'] = []
-            instance.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_selected'] = []
-            for field in instance.metadata_menu[metadata_type][meta_var]['checkboxes']['labels']:
-                if field in previous_fields:
-                    if field in previous_keep:
-                        instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected'].append(field)
-                    if field in previous_remove:
-                        instance.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_selected'].append(field)
-            
-            # set defaults to be empty
-            instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_default'] = []
-            instance.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_default'] = []
-
-        # for numeric fields get the minimum and maximum boundaries of each metadata variable
-        # if previous set values vary from min/max boundaries, copy across the values
-        # set as min/max as nan if have no numeric metadata for variable
+        # remove NaNs / "nan"
+        if dtype == object:
+            # object/string metadata
+            mask = (meta_vals != 'nan') & (meta_vals != "") & (~pd.isna(meta_vals))
         else:
-            meta_var_index = instance.metadata_menu[metadata_type]['rangeboxes']['labels'].index(meta_var)
-            previous_lower_default = copy.deepcopy(instance.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index])
-            previous_upper_default = copy.deepcopy(instance.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index])
-            previous_lower = copy.deepcopy(instance.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index])
-            previous_upper = copy.deepcopy(instance.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index])
+            # numeric metadata
+            mask = ~np.isnan(meta_vals)
 
-            # have some numeric values for existing metadata variable?
-            if len(meta_var_field_nan_removed) > 0:
-                min_val = str(np.min(meta_var_field_nan_removed))
-                max_val = str(np.max(meta_var_field_nan_removed))
+        meta_vals_clean = meta_vals[mask]
 
-                # if previous lower > previous default lower bound then copy across (and also not 'nan')
-                # initially set as min extent
-                instance.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index] = min_val
-                if (previous_lower != 'nan') & (previous_lower_default != 'nan'):
-                    if previous_lower > previous_lower_default:
-                        instance.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index] = copy.deepcopy(previous_lower)
-                # if previous upper < previous default upper bound then copy across (and also not 'nan')
-                # initially set as max extent
-                instance.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index] = max_val
-                if (previous_upper != 'nan') & (previous_upper_default != 'nan'):
-                    if previous_upper < previous_upper_default:
-                        instance.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index] = copy.deepcopy(previous_upper)
-                # set defaults to min/max extents
-                instance.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index] = min_val
-                instance.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index] = max_val
-            # do not have update_representativity_fields some numeric values for metadata variable so set as 'nan'
-            else:
-                instance.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index] = 'nan'
-                instance.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index] = 'nan'
-                instance.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index] = 'nan'
-                instance.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index] = 'nan'
-                if meta_var in instance.metadata_menu[metadata_type]['rangeboxes']['apply_selected']:
-                    instance.metadata_menu[metadata_type]['rangeboxes']['apply_selected'].remove(meta_var)
+        # update metadata menu for categorical (object) fields
+        if dtype == object:
+            mm = metadata_menu[metadata_type][meta_var]['checkboxes']
 
+            # get previous settings
+            prev_fields = mm['labels']
+            prev_set = set(prev_fields)
+            prev_keep = set(mm['keep_selected'])
+            prev_remove = set(mm['remove_selected'])
+
+            # new unique sorted values
+            new_fields = np.unique(meta_vals_clean)
+            mm['labels'] = new_fields
+
+            # rebuild keep/remove efficiently
+            keep = []
+            remove = []
+            for f in new_fields:
+                if f in prev_set:
+                    if f in prev_keep:
+                        keep.append(f)
+                    if f in prev_remove:
+                        remove.append(f)
+
+            mm['keep_selected'] = keep
+            mm['remove_selected'] = remove
+            mm['keep_default'] = []
+            mm['remove_default'] = []
+            continue
+
+        # update numeric metadata fields (rangeboxes)
+        mm = metadata_menu[metadata_type]['rangeboxes']
+        idx = mm['labels'].index(meta_var)
+
+        prev_lower_def = mm['lower_default'][idx]
+        prev_upper_def = mm['upper_default'][idx]
+        prev_lower = mm['current_lower'][idx]
+        prev_upper = mm['current_upper'][idx]
+
+        if len(meta_vals_clean) > 0:
+            mn = str(np.min(meta_vals_clean))
+            mx = str(np.max(meta_vals_clean))
+
+            # apply previous settings if stricter
+            new_lower = mn
+            if prev_lower not in ("nan", None) and prev_lower_def not in ("nan", None):
+                if prev_lower > prev_lower_def:
+                    new_lower = prev_lower
+
+            new_upper = mx
+            if prev_upper not in ("nan", None) and prev_upper_def not in ("nan", None):
+                if prev_upper < prev_upper_def:
+                    new_upper = prev_upper
+
+            mm['current_lower'][idx] = new_lower
+            mm['current_upper'][idx] = new_upper
+            mm['lower_default'][idx] = mn
+            mm['upper_default'][idx] = mx
+
+        else:
+            # No numeric metadata → set NAN
+            mm['current_lower'][idx] = 'nan'
+            mm['lower_default'][idx] = 'nan'
+            mm['current_upper'][idx] = 'nan'
+            mm['upper_default'][idx] = 'nan'
+
+            # remove "apply selected" if invalid
+            if meta_var in mm['apply_selected']:
+                mm['apply_selected'].remove(meta_var)
 
 def multispecies_conf(instance):
     """
@@ -570,20 +594,21 @@ def multispecies_conf(instance):
             instance.multispecies_initialisation = False
 
 
-def representativity_conf(instance):
+def coverage_conf(instance):
     """
-    Configure representativity filter variables using settings loaded from a configuration file.
+    Configure coverage filter variables using settings loaded from a configuration file.
 
     Parameters
     ----------
     instance : object
-        An object instance to be updated with representativity menu configurations.
+        An object instance to be updated with coverage menu configurations.
     """
 
-    for i, label in enumerate(instance.representativity_menu['rangeboxes']['map_vars']):
+    for i, (label, label_old) in enumerate(zip(instance.coverage_menu['rangeboxes']['map_vars'], instance.coverage_menu['rangeboxes']['map_vars_old'])):
         if hasattr(instance, label):
-            instance.representativity_menu['rangeboxes']['current_lower'][i] = str(getattr(instance, label))
-
+            instance.coverage_menu['rangeboxes']['current_lower'][i] = str(getattr(instance, label))
+        elif hasattr(instance, label_old):
+            instance.coverage_menu['rangeboxes']['current_lower'][i] = str(getattr(instance, label_old))
 
 def period_conf(instance):
     """

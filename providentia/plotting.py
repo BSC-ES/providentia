@@ -1807,9 +1807,12 @@ class Plotting:
                                                  cut_data_labels, [])
 
             # create stats dataframe
-            stats_df = pd.DataFrame(data=stats_calc, 
-                                    index=cut_data_labels,
-                                    dtype=np.float64)
+            if len(stats_calc) == 0:
+                stats_df = pd.DataFrame(index=cut_data_labels, dtype=np.float64)
+            else:
+                stats_df = pd.DataFrame(data=stats_calc, 
+                                        index=cut_data_labels,
+                                        dtype=np.float64)
 
         # get subsections
         subsections = list(np.unique(stats_df.index.get_level_values(1)))
@@ -2002,9 +2005,12 @@ class Plotting:
                                                  cut_data_labels, [])
 
             # create stats dataframe
-            stats_df = pd.DataFrame(data=stats_calc, 
-                                    index=cut_data_labels,
-                                    dtype=np.float64)
+            if len(stats_calc) == 0:
+                stats_df = pd.DataFrame(index=cut_data_labels, dtype=np.float64)
+            else:
+                stats_df = pd.DataFrame(data=stats_calc, 
+                                        index=cut_data_labels,
+                                        dtype=np.float64)
         
         # when we have 1 stat in the statsummary, the column name is 0
         # we need to rename it to the stat name

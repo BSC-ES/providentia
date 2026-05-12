@@ -3,6 +3,7 @@
 import ast
 import copy
 import sys
+import time
 
 import numpy as np
 import pandas as pd
@@ -82,73 +83,122 @@ class DataFilter:
 
     def filter_by_species(self):
         """
-        Filters read species by other species to filter by.
-        For each other species a lower and upper limit are set. 
-        Where values for each species are outside of these ranges, or NaN,
-        then impose NaNs upon all read species in memory.
-        Only filter if spatial colocation is True.
+        Filters read species using one or more "filter species".
+
+        For each filter species, one or more lower/upper limit rules are defined.
+        Wherever the filter-species data satisfy a given rule OR are NaN, the corresponding
+        elements in *all* read species are overwritten with that rule's fill value.
+
+        Filtering is only performed if:
+        - filter_species is set 
+        - spatial_colocation is active
         """
 
-        # filter all read species by set species ranges
-        if (self.read_instance.filter_species) and (self.read_instance.spatial_colocation):
+        # ------------------------------------------------------------------
+        # Only run if filter species are configured AND spatial colocation is active
+        # ------------------------------------------------------------------
+        if not (self.read_instance.filter_species and self.read_instance.spatial_colocation):
+            return
 
-            # iterate through all species to filter by
-            for filter_networkspeci, speci_all_limits in self.read_instance.filter_species.items():
-                
-                # get where data is inside bounds or NaN
-                for speci_limit in speci_all_limits:
+        # Local bindings to reduce repeated deep attribute lookups
+        ri = self.read_instance
+        networkspecies = ri.networkspecies
+        obs_index = self.obs_index
+        data_in_memory_filtered = ri.data_in_memory_filtered
+        filter_data_in_memory = ri.filter_data_in_memory
 
-                    # initialise array to set where temporally to filter species
-                    # initialse being all False, set as True where data is inside given bounds for species
-                    inds_to_filter = np.full(self.read_instance.data_in_memory_filtered[self.read_instance.networkspecies[0]][self.obs_index,:,:].shape, False)    
+        # ------------------------------------------------------------------
+        # Helper to parse a bound string such as:
+        #   '>10', '>=10', '<5', '<=5', ':'
+        #
+        # Returns:
+        #   is_open      : bool   True if bound is ':' (i.e. no bound)
+        #   inclusive    : bool   True if '=' is present
+        #   value        : float or None
+        # ------------------------------------------------------------------
+        def _parse_bound(bound_str):
+            is_open = (':' in bound_str)
+            if is_open:
+                return True, False, None
 
-                    # get lower and upper limits for species
-                    lower_limit = speci_limit[0]
-                    upper_limit = speci_limit[1]
-                    filter_species_fill_value = speci_limit[2]
+            inclusive = ('=' in bound_str)
+            value = float(bound_str.replace('>', '').replace('<', '').replace('=', ''))
+            return False, inclusive, value
 
-                    # remove symbols from limits and transform into float
-                    if lower_limit != ':':
-                        lower_limit_val = float(lower_limit.replace('>', '').replace('=', ''))
-                    if upper_limit != ':':
-                        upper_limit_val = float(upper_limit.replace('<', '').replace('=', ''))
+        # ------------------------------------------------------------------
+        # Iterate over each filter species
+        # ------------------------------------------------------------------
+        for filter_networkspeci, speci_all_limits in ri.filter_species.items():
 
-                    # get filter conditions
-                    if ':' in upper_limit and ':' in lower_limit:
-                        return
-                    if ':' in upper_limit:
-                        if '=' in lower_limit:
-                            valid_inds_per_species = (self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] >= lower_limit_val)
-                        else:
-                            valid_inds_per_species = (self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] > lower_limit_val)
-                    elif ':' in lower_limit:
-                        if '=' in upper_limit:
-                            valid_inds_per_species = (self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] <= upper_limit_val)
-                        else:
-                            valid_inds_per_species = (self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] < upper_limit_val)
+            # Data for the current filter species
+            # Shape is expected to match the "station x time" layout used below
+            data = filter_data_in_memory[filter_networkspeci]
+
+            # Cache NaN mask once per filter species (used for every limit)
+            nan_mask = np.isnan(data)
+
+            # ------------------------------------------------------------------
+            # Apply each limit independently
+            # ------------------------------------------------------------------
+            for speci_limit in speci_all_limits:
+
+                lower_limit = speci_limit[0]
+                upper_limit = speci_limit[1]
+                filter_species_fill_value = speci_limit[2]
+
+                # Parse bounds
+                lower_open, lower_inclusive, lower_value = _parse_bound(lower_limit)
+                upper_open, upper_inclusive, upper_value = _parse_bound(upper_limit)
+
+                # --------------------------------------------------------------
+                # If BOTH bounds are open (':' and ':'), return immediately
+                # --------------------------------------------------------------
+                if lower_open and upper_open:
+                    return
+
+                # --------------------------------------------------------------
+                # Build validity mask for current filter species and current bound rule
+                # --------------------------------------------------------------
+                if upper_open:
+                    # Only lower bound is active
+                    if lower_inclusive:
+                        valid_inds_per_species = (data >= lower_value)
                     else:
-                        if '=' in upper_limit and '=' in lower_limit:
-                            valid_inds_per_species = np.logical_and.reduce((self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] >= lower_limit_val,
-                                                                            self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] <= upper_limit_val))
-                        elif '=' in upper_limit and '=' not in lower_limit:
-                            valid_inds_per_species = np.logical_and.reduce((self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] > lower_limit_val,
-                                                                            self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] <= upper_limit_val))
-                        elif '=' not in upper_limit and '=' in lower_limit:
-                            valid_inds_per_species = np.logical_and.reduce((self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] >= lower_limit_val,
-                                                                            self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] < upper_limit_val))
-                        else:
-                            valid_inds_per_species = np.logical_and.reduce((self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] > lower_limit_val,
-                                                                            self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] < upper_limit_val))
+                        valid_inds_per_species = (data > lower_value)
 
-                    valid_inds_per_species = np.logical_or.reduce((valid_inds_per_species, 
-                                                                   np.isnan(self.read_instance.filter_data_in_memory[filter_networkspeci][:,:])))
-                    
-                    # update inds_to_filter array, making True all instances where we have data inside of bounds
-                    inds_to_filter = np.any([inds_to_filter, valid_inds_per_species], axis=0)
-                    
-                    # set all inds to filter as fill value for all networkspecies in memory
-                    for networkspeci in self.read_instance.networkspecies:
-                        self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index, inds_to_filter] = filter_species_fill_value      
+                elif lower_open:
+                    # Only upper bound is active
+                    if upper_inclusive:
+                        valid_inds_per_species = (data <= upper_value)
+                    else:
+                        valid_inds_per_species = (data < upper_value)
+
+                else:
+                    # Both lower and upper bounds are active
+                    if lower_inclusive:
+                        lower_mask = (data >= lower_value)
+                    else:
+                        lower_mask = (data > lower_value)
+
+                    if upper_inclusive:
+                        upper_mask = (data <= upper_value)
+                    else:
+                        upper_mask = (data < upper_value)
+
+                    # Equivalent to np.logical_and.reduce((lower_mask, upper_mask))
+                    # but faster and simpler for just two conditions
+                    valid_inds_per_species = lower_mask & upper_mask
+
+                # --------------------------------------------------------------
+                # NaNs in the filter species are always treated as valid-to-filter
+                # --------------------------------------------------------------
+                valid_inds_per_species |= nan_mask
+
+                # --------------------------------------------------------------
+                # Apply THIS RULE'S fill value immediately to all read species
+                # --------------------------------------------------------------
+                for networkspeci in networkspecies:
+                    data_in_memory_filtered[networkspeci][obs_index, valid_inds_per_species] = filter_species_fill_value
 
     def filter_data_limits(self):
         """ 
@@ -190,9 +240,9 @@ class DataFilter:
             lower_bound *= conversion_factor
             upper_bound *= conversion_factor
 
-            # filter all observational/model data out of bounds of lower/upper limits
-            inds_out_of_bounds = np.logical_or(self.read_instance.data_in_memory_filtered[networkspeci][:,:,:] < lower_bound,
-                                               self.read_instance.data_in_memory_filtered[networkspeci][:,:,:] > upper_bound)
+            # filter all observational/model data out of bounds of lower/upper limits            
+            arr = self.read_instance.data_in_memory_filtered[networkspeci]
+            inds_out_of_bounds = (arr < lower_bound) | (arr > upper_bound)
             self.read_instance.data_in_memory_filtered[networkspeci][inds_out_of_bounds] = np.nan
 
     def filter_by_period(self):
@@ -313,13 +363,16 @@ class DataFilter:
         """
 
         # get set variables names representing percentage data availability (native and non-native)
-        active_data_availablity_vars = self.read_instance.representativity_menu['rangeboxes']['map_vars']
+        if float(self.read_instance.ghost_version) < 1.6:
+            active_data_availablity_vars = self.read_instance.coverage_menu['rangeboxes']['map_vars_old']
+        else:
+            active_data_availablity_vars = self.read_instance.coverage_menu['rangeboxes']['map_vars']
 
         try:
             data_availability_lower_bounds = []
             for var_ii, var in enumerate(active_data_availablity_vars):
                 data_availability_lower_bounds.append(
-                    np.float32(self.read_instance.representativity_menu['rangeboxes']['current_lower'][var_ii]))
+                    np.float32(self.read_instance.coverage_menu['rangeboxes']['current_lower'][var_ii]))
         # if any of the fields are not numbers, return from function
         except ValueError:
             msg = 'Data availability fields must be numeric.'
@@ -338,6 +391,7 @@ class DataFilter:
                 
                 # variable is GHOST native?
                 if 'native' in var:
+
                     var_index = varname_array.index(var)
                     
                     # iterate through network / species  
@@ -349,7 +403,7 @@ class DataFilter:
                             if data_availability_lower_bounds[var_ii] < 100:
                                 inds_to_screen = data_array[networkspeci][var_index,:,:] > data_availability_lower_bounds[var_ii]
                                 self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index, inds_to_screen] = np.nan
-                        # data representativity variable?
+                        # data coverage variable?
                         else:
                             # bound is > 0?
                             if data_availability_lower_bounds[var_ii] > 0:
@@ -365,7 +419,7 @@ class DataFilter:
                     # bound is == 100?
                     if data_availability_lower_bounds[var_ii] == 100:
                         continue
-                # data representativity variable?
+                # data coverage variable?
                 else:
                     # bound == 0?
                     if data_availability_lower_bounds[var_ii] == 0:
@@ -397,7 +451,7 @@ class DataFilter:
                         # iterate through networkspecies  
                         for networkspeci in self.read_instance.networkspecies:
 
-                            # data representativity variable?
+                            # data coverage variable?
                             data_availability_percent = Stats.calculate_data_avail_fraction(
                                 self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,period_inds[0]:period_inds[-1]+1])
                             inds_to_screen = np.where(data_availability_percent < data_availability_lower_bounds[var_ii])[0]
@@ -936,7 +990,7 @@ class DataFilter:
                     self.read_instance.valid_station_inds[networkspeci][data_label] = \
                         valid_station_inds[np.arange(len(station_data_availability_number), dtype=np.int32)[station_data_availability_number > 1]]
                     
-                    # get colocated model data array (first subset by valid observational stations)
+                    # get colocated model data array 
                     mod_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[networkspeci][self.read_instance.data_labels.index(data_label),:,:])
                     mod_data[self.read_instance.temporal_colocation_nans[networkspeci]] = np.nan
                     mod_data = mod_data[valid_station_inds,:]

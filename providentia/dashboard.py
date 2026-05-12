@@ -20,10 +20,10 @@ from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
 from .canvas import Canvas
 from .configuration import load_conf
 from .configuration import ProvConfiguration
-from .dashboard_elements import ComboBox, QVLine, InputDialog
+from .dashboard_elements import ComboBox, QVLine, InputDialog, set_cursor, unset_cursor
 from .dashboard_elements import set_formatting
-from .fields_menus import (init_models, init_flags, init_qa, update_qa, init_metadata, init_multispecies, init_period, init_representativity,
-                           multispecies_conf, update_representativity_fields, update_period_fields, update_metadata_fields)
+from .fields_menus import (init_models, init_flags, init_qa, update_qa, init_metadata, init_multispecies, init_period, init_coverage,
+                           multispecies_conf, update_coverage_fields, update_period_fields, update_metadata_fields)
 from .plot_aux import get_taylor_diagram_ghelper
 from .plot_formatting import format_axis
 from .pop_up_window import PopUpWindow
@@ -70,8 +70,8 @@ class Dashboard(QtWidgets.QWidget):
         self.basic_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
         self.modbias_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/model_bias_stats.yaml')))
 
-        # load representativity information
-        self.representativity_info = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/representativity.yaml')))
+        # load coverage information
+        self.coverage_info = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/coverage.yaml')))
 
         # save warnings that appear next in to show them after the UI is initialised
         self.delay = True
@@ -450,10 +450,10 @@ class Dashboard(QtWidgets.QWidget):
         self.bu_QA.setToolTip('Select standardised quality assurance flags to filter by')
         self.bu_flags = set_formatting(QtWidgets.QPushButton('FLAGS', self), self.formatting_dict['menu_button'])
         self.bu_flags.setToolTip('Select standardised data reporter provided flags to filter by')
-        self.bu_models = set_formatting(QtWidgets.QPushButton('MODS', self), self.formatting_dict['menu_button'])
+        self.bu_models = set_formatting(QtWidgets.QPushButton('MODELS', self), self.formatting_dict['menu_button'])
         self.bu_models.setToolTip('Select model/s data to read')
-        self.bu_multispecies = set_formatting(QtWidgets.QPushButton('MULTI', self), self.formatting_dict['menu_button'])
-        self.bu_multispecies.setToolTip('Select data to filter by')
+        self.bu_multispecies = set_formatting(QtWidgets.QPushButton('SPECIES', self), self.formatting_dict['menu_button'])
+        self.bu_multispecies.setToolTip('Select species data to filter by')
         self.bu_read = set_formatting(QtWidgets.QPushButton('READ', self), self.formatting_dict['menu_button'],
                                       extra_arguments={'color': 'green'})
         self.bu_read.setToolTip('Read selected configuration of data into memory')
@@ -463,10 +463,9 @@ class Dashboard(QtWidgets.QWidget):
         # filters section
         self.lb_data_filter = set_formatting(QtWidgets.QLabel(self, text="Filters"), self.formatting_dict['menu_title'])
         self.lb_data_filter.setToolTip('Select criteria to filter data by')
-        self.bu_rep = set_formatting(QtWidgets.QPushButton('% REP', self), self.formatting_dict['menu_button'])
-        self.bu_rep.setToolTip('Select % desired representativity in data across '
-                               'whole record and for specific temporal periods')
-        self.bu_meta = set_formatting(QtWidgets.QPushButton('META', self), self.formatting_dict['menu_button'])
+        self.bu_rep = set_formatting(QtWidgets.QPushButton('COVERAGE', self), self.formatting_dict['menu_button'])
+        self.bu_rep.setToolTip('Select data coverage to apply')
+        self.bu_meta = set_formatting(QtWidgets.QPushButton('METADATA', self), self.formatting_dict['menu_button'])
         self.bu_meta.setToolTip('Select metadata to filter by')
         self.bu_reset = set_formatting(QtWidgets.QPushButton('RESET', self), self.formatting_dict['menu_button'],
                                        extra_arguments={'color': 'red'})
@@ -589,12 +588,12 @@ class Dashboard(QtWidgets.QWidget):
         self.cb_statistic_mode.currentTextChanged.connect(self.handle_config_bar_params_change)
 
         # setup pop-up window menu tree for flags, qa, models, 
-        # % data representativity, data periods and metadata
+        # % data coverage, data periods and metadata
         init_flags(self)
         init_qa(self)
         init_models(self)
         init_multispecies(self)
-        init_representativity(self)
+        init_coverage(self)
         init_period(self)
         self.metadata_vars_to_read = []
         init_metadata(self)
@@ -630,7 +629,7 @@ class Dashboard(QtWidgets.QWidget):
         self.bu_models.clicked.connect(partial(self.generate_pop_up_window, self.models_menu))
         self.bu_multispecies.clicked.connect(partial(self.generate_pop_up_window, self.multispecies_menu))
         self.bu_meta.clicked.connect(partial(self.generate_pop_up_window, self.metadata_menu))
-        self.bu_rep.clicked.connect(partial(self.generate_pop_up_window, self.representativity_menu))
+        self.bu_rep.clicked.connect(partial(self.generate_pop_up_window, self.coverage_menu))
         self.bu_period.clicked.connect(partial(self.generate_pop_up_window, self.period_menu))
 
         # Enable interactivity of functions which update MPL canvas
@@ -742,6 +741,7 @@ class Dashboard(QtWidgets.QWidget):
             self.previous_chunk_stat = 'None'
             self.previous_chunk_resolution = 'None'
             self.init_models = []
+            self.cursor_function = None
 
             self.performing_read = False
 
@@ -769,6 +769,7 @@ class Dashboard(QtWidgets.QWidget):
             self.selected_widget_upper = dict()
             self.selected_widget_filter_species_fill_value = dict()
             self.selected_widget_apply = dict()
+            self.multispecies_active_line_inds = dict()
             
             # set variable stating first read
             self.first_read = True
@@ -811,15 +812,17 @@ class Dashboard(QtWidgets.QWidget):
         if self.selected_network in available_networks:
             self.cb_network.setCurrentText(self.selected_network)
         else:
-            msg = f'Selected network {self.selected_network} is not available. Choosing {self.cb_network.currentText()} as it is the first option in the dropdown.'
-            show_message(self, msg)
-            self.selected_network = self.cb_network.currentText()
+            if self.config_bar_initialisation:
+                msg = f'Network {self.selected_network} is not available.'
+                self.logger.error(msg)
+                sys.exit(1)
+            else:
+                msg = f'Network {self.selected_network} is not available. Choosing {self.cb_network.currentText()} as it is the first option in the dropdown.'
+                show_message(self, msg)
+                self.selected_network = self.cb_network.currentText()
 
-        # turn off some features if using non-GHOST data (on for ACTRIS)
-        if check_for_ghost(self.selected_network) or self.selected_network == 'actris/actris':
-            self.enable_ghost_buttons()
-        else:
-            self.disable_ghost_buttons()
+        # update buttons
+        self.update_ghost_buttons('update_configuration_bar_fields')
         
         # update resolution field
         available_resolutions = list(self.available_observation_data[self.selected_network].keys())
@@ -829,7 +832,14 @@ class Dashboard(QtWidgets.QWidget):
         if self.selected_resolution in available_resolutions:
             self.cb_resolution.setCurrentText(self.selected_resolution)
         else:
-            self.selected_resolution = self.cb_resolution.currentText()
+            if self.config_bar_initialisation:
+                msg = f'Resolution {self.selected_resolution} is not available.'
+                self.logger.error(msg)
+                sys.exit(1)
+            else:
+                msg = f'Resolution {self.selected_resolution} is not available. Choosing {self.cb_resolution.currentText()} as it is the first option in the dropdown.'
+                show_message(self, msg)
+                self.selected_resolution = self.cb_resolution.currentText()
 
         # update matrix field
         available_matrices = sorted(self.available_observation_data[self.selected_network][self.selected_resolution])
@@ -845,10 +855,41 @@ class Dashboard(QtWidgets.QWidget):
         if self.selected_species in available_species:
             self.cb_species.setCurrentText(self.selected_species)
         else:
-            self.selected_species = self.cb_species.currentText()
+            if self.config_bar_initialisation:
+                msg = f'Species {self.selected_species} is not available.'
+                self.logger.error(msg)
+                sys.exit(1)
+            else:
+                msg = f'Species {self.selected_species} is not available. Choosing {self.cb_species.currentText()} as it is the first option in the dropdown.'
+                show_message(self, msg)
+                self.selected_species = self.cb_species.currentText()
 
         #update networkspecies field
         self.selected_networkspeci = '{}|{}'.format(self.selected_network, self.selected_species)
+
+        # check if have filter species data
+        for filter_networkspeci in copy.deepcopy(self.selected_filter_species).keys():
+            filter_networkspeci_split = filter_networkspeci.split('|')
+            filter_network = filter_networkspeci_split[0]
+            filter_speci = filter_networkspeci_split[1]
+            filter_matrix = self.parameter_dictionary[filter_speci]['matrix']
+            if filter_network not in available_networks:
+                del self.selected_filter_species[filter_networkspeci]
+                msg = f'Filter species {filter_networkspeci} is not available. Dropping it.'
+                show_message(self, msg)
+                continue
+            available_filter_matrices = sorted(self.available_observation_data[filter_network][self.selected_resolution])
+            if filter_matrix not in available_filter_matrices:
+                del self.selected_filter_species[filter_networkspeci]
+                msg = f'Filter species {filter_networkspeci} is not available. Dropping it.'
+                show_message(self, msg)
+                continue
+            available_filter_species = sorted(self.available_observation_data[filter_network][self.selected_resolution][filter_matrix])
+            if filter_speci not in available_filter_species:
+                del self.selected_filter_species[filter_networkspeci]
+                msg = f'Filter species {filter_networkspeci} is not available. Dropping it.'
+                show_message(self, msg)
+                continue
 
         # update statistic mode field
         available_statistic_modes = ['Flattened', 'Spatial|Temporal', 'Temporal|Spatial']
@@ -856,7 +897,14 @@ class Dashboard(QtWidgets.QWidget):
         if self.selected_statistic_mode in available_statistic_modes:
             self.cb_statistic_mode.setCurrentText(self.selected_statistic_mode)
         else:
-            self.selected_statistic_mode = self.cb_statistic_mode.currentText()
+            if self.config_bar_initialisation:
+                msg = f'Statistic mode {self.selected_statistic_mode} is not available.'
+                self.logger.error(msg)
+                sys.exit(1)
+            else:
+                msg = f'Statistic mode {self.selected_statistic_mode} is not available. Choosing {self.cb_statistic_mode.currentText()} as it is the first option in the dropdown.'
+                show_message(self, msg)
+                self.selected_statistic_mode = self.cb_statistic_mode.currentText()
 
         # update statistic aggregation field
         if self.selected_statistic_mode == 'Flattened':
@@ -869,7 +917,14 @@ class Dashboard(QtWidgets.QWidget):
         if self.selected_statistic_aggregation in available_aggregation_statistics:
             self.cb_statistic_aggregation.setCurrentText(self.selected_statistic_aggregation)
         else:
-            self.selected_statistic_aggregation = self.cb_statistic_aggregation.currentText()
+            if self.config_bar_initialisation:
+                msg = f'Statistic aggregation {self.selected_statistic_aggregation} is not available.'
+                self.logger.error(msg)
+                sys.exit(1)
+            else:
+                msg = f'Statistic aggregation {self.selected_statistic_aggregation} is not available. Choosing {self.cb_statistic_aggregation.currentText()} as it is the first option in the dropdown.'
+                show_message(self, msg)
+                self.selected_statistic_aggregation = self.cb_statistic_aggregation.currentText()
 
         # update statsummary periodic statistic aggregation field
         available_periodic_statistics = ['Mean', 'Median', 'p1', 'p5', 'p10', 'p25', 'p75', 'p90', 'p95', 'p99']
@@ -877,7 +932,14 @@ class Dashboard(QtWidgets.QWidget):
         if self.selected_periodic_statistic_aggregation in available_periodic_statistics:
             self.mpl_canvas.statsummary_periodic_aggregation.setCurrentText(self.selected_periodic_statistic_aggregation)
         else:
-            self.selected_periodic_statistic_aggregation = self.mpl_canvas.statsummary_periodic_aggregation.currentText()
+            if self.config_bar_initialisation:
+                msg = f'Periodic statistic aggregation {self.selected_periodic_statistic_aggregation} is not available.'
+                self.logger.error(msg)
+                sys.exit(1)
+            else:
+                msg = f'Periodic statistic aggregation {self.selected_periodic_statistic_aggregation} is not available. Choosing {self.mpl_canvas.statsummary_periodic_aggregation.currentText()} as it is the first option in the dropdown.'
+                show_message(self, msg) 
+                self.selected_periodic_statistic_aggregation = self.mpl_canvas.statsummary_periodic_aggregation.currentText()
         
         # update statsummary periodic statistic mode field
         available_periodic_modes = ['Independent', 'Cycle']
@@ -885,7 +947,14 @@ class Dashboard(QtWidgets.QWidget):
         if self.selected_periodic_statistic_mode in available_periodic_modes:
             self.mpl_canvas.statsummary_periodic_mode.setCurrentText(self.selected_periodic_statistic_mode)
         else:
-            self.selected_periodic_statistic_mode = self.mpl_canvas.statsummary_periodic_mode.currentText()
+            if self.config_bar_initialisation:
+                msg = f'Periodic statistic mode {self.selected_periodic_statistic_mode} is not available.'
+                self.logger.error(msg)
+                sys.exit(1)
+            else:
+                msg = f'Periodic statistic mode {self.selected_periodic_statistic_mode} is not available. Choosing {self.mpl_canvas.statsummary_periodic_mode.currentText()} as it is the first option in the dropdown.'
+                show_message(self, msg)
+                self.selected_periodic_statistic_mode = self.mpl_canvas.statsummary_periodic_mode.currentText()
 
         # update timeseries statistic field
         if self.selected_statistic_mode == 'Flattened':
@@ -898,7 +967,14 @@ class Dashboard(QtWidgets.QWidget):
         if self.selected_timeseries_statistic_aggregation in available_timeseries_statistics:
             self.mpl_canvas.timeseries_stat.setCurrentText(self.selected_timeseries_statistic_aggregation)
         else:
-            self.selected_timeseries_statistic_aggregation = self.mpl_canvas.timeseries_stat.currentText()
+            if self.config_bar_initialisation:
+                msg = f'Timeseries statistic aggregation {self.selected_timeseries_statistic_aggregation} is not available.'
+                self.logger.error(msg)
+                sys.exit(1)
+            else:
+                msg = f'Timeseries statistic aggregation {self.selected_timeseries_statistic_aggregation} is not available. Choosing {self.mpl_canvas.timeseries_stat.currentText()} as it is the first option in the dropdown.'
+                show_message(self, msg)
+                self.selected_timeseries_statistic_aggregation = self.mpl_canvas.timeseries_stat.currentText()
 
         # update available models for selected fields
         get_valid_models(self, self.le_start_date.text(), self.le_end_date.text(), self.selected_resolution,
@@ -1383,9 +1459,7 @@ class Dashboard(QtWidgets.QWidget):
             return
 
         # update mouse cursor to a waiting cursor
-        if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
-            self.cursor_function = 'handle_data_selection_update'
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+        self.cursor_function = set_cursor(self.cursor_function, 'handle_data_selection_update')
 
         # clear previously selected relative/absolute station indices
         self.mpl_canvas.relative_selected_station_inds = np.array([], dtype=np.int32)
@@ -1622,8 +1696,7 @@ class Dashboard(QtWidgets.QWidget):
 
             # restore mouse cursor to normal if have no valid data after read
             if self.invalid_read:
-                if self.cursor_function == 'handle_data_selection_update':
-                    QtWidgets.QApplication.restoreOverrideCursor()
+                unset_cursor(self.cursor_function, 'handle_data_selection_update')
                 return
 
             # if species has changed, or first read, update species specific lower/upper limits
@@ -1664,6 +1737,9 @@ class Dashboard(QtWidgets.QWidget):
             # unset variable to allow updating of MPL canvas
             self.block_MPL_canvas_updates = False
 
+            # update GHOST buttons
+            self.update_ghost_buttons('handle_data_selection_update')
+
             # update MPL canvas
             self.mpl_canvas.update_MPL_canvas()
 
@@ -1672,8 +1748,7 @@ class Dashboard(QtWidgets.QWidget):
                 self.first_read = False
 
         # restore mouse cursor to normal
-        if self.cursor_function == 'handle_data_selection_update':
-            QtWidgets.QApplication.restoreOverrideCursor()
+        unset_cursor(self.cursor_function, 'handle_data_selection_update')
 
         # update performing read variable to false 
         self.performing_read = False
@@ -1682,20 +1757,18 @@ class Dashboard(QtWidgets.QWidget):
         self.block_MPL_canvas_updates = False
 
     def reset_options(self):
-        """Restore all filter fields, metadata, and representativity settings to their initial values."""
+        """Restore all filter fields, metadata, and coverage settings to their initial values."""
 
         # return if canvas updates blocked or not yet read data
         if (self.block_MPL_canvas_updates) or (not hasattr(self, 'reading_ghost')):
             return
 
-        # set mouse cursor to hourglass
-        if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
-            self.cursor_function = 'reset_options'
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+        # set mouse cursor
+        self.cursor_function = set_cursor(self.cursor_function, 'reset_options')
 
-        # reset representativity fields        
-        init_representativity(self)
-        update_representativity_fields(self)
+        # reset coverage fields        
+        init_coverage(self)
+        update_coverage_fields(self)
 
         # reset period fields 
         init_period(self)
@@ -1731,34 +1804,49 @@ class Dashboard(QtWidgets.QWidget):
             update_metadata_fields(self)
 
         # Restore mouse cursor to normal
-        if self.cursor_function == 'reset_options':
-            QtWidgets.QApplication.restoreOverrideCursor()
+        unset_cursor(self.cursor_function, 'reset_options')
 
-    def disable_ghost_buttons(self):
-        """Disable and restyle interface buttons that are exclusive to GHOST data."""
+    def update_ghost_buttons(self, event_source):
+        """Update the state of GHOST-exclusive buttons based on the current data selection."""
         
-        # change background-color to indicate that it's nonusable
-        self.bu_flags = set_formatting(self.bu_flags, self.formatting_dict['menu_button_disabled'], disabled=True)
-        self.bu_QA = set_formatting(self.bu_QA, self.formatting_dict['menu_button_disabled'], disabled=True)
-        self.bu_period = set_formatting(self.bu_period, self.formatting_dict['menu_button_disabled'], disabled=True)
-        
-        # disable buttons
-        self.bu_flags.setEnabled(False)
-        self.bu_QA.setEnabled(False)
-        self.bu_period.setEnabled(False)
+        # initalise all buttons as being inactive
+        qa_active = False
+        flags_active = False    
+        period_active = False
 
-    def enable_ghost_buttons(self):
-        """Restore and enable the interface buttons exclusive for GHOST data."""
+        # if have a GHOST network then QA and flags are active
+        # also GHOST features are not set to min then period is also active
+        if check_for_ghost(self.selected_network):
+            qa_active = True
+            flags_active = True
+            if self.ghost_features != 'min': 
+                period_active = True
+        # if are reading ACTRIS network then QA and flags are active     
+        elif self.selected_network == 'actris/actris':
+            qa_active = True
+            flags_active = True
 
-        # reset formatting as now enabled again
-        self.bu_flags = set_formatting(self.bu_flags, self.formatting_dict['menu_button'])
-        self.bu_QA = set_formatting(self.bu_QA, self.formatting_dict['menu_button'])
-        self.bu_period = set_formatting(self.bu_period, self.formatting_dict['menu_button'])
-
-        # enable buttons        
-        self.bu_flags.setEnabled(True)
-        self.bu_QA.setEnabled(True)
-        self.bu_period.setEnabled(True)
+        # update buttons
+        if event_source == 'update_configuration_bar_fields':
+            if qa_active:
+                self.bu_QA = set_formatting(self.bu_QA, self.formatting_dict['menu_button'])
+                self.bu_QA.setEnabled(True)
+            else:
+                self.bu_QA = set_formatting(self.bu_QA, self.formatting_dict['menu_button_disabled'], disabled=True)
+                self.bu_QA.setEnabled(False)
+            if flags_active:
+                self.bu_flags = set_formatting(self.bu_flags, self.formatting_dict['menu_button'])
+                self.bu_flags.setEnabled(True)
+            else:
+                self.bu_flags = set_formatting(self.bu_flags, self.formatting_dict['menu_button_disabled'], disabled=True)
+                self.bu_flags.setEnabled(False)
+        elif event_source == 'handle_data_selection_update':
+            if period_active:
+                self.bu_period = set_formatting(self.bu_period, self.formatting_dict['menu_button'])
+                self.bu_period.setEnabled(True)
+            else:
+                self.bu_period = set_formatting(self.bu_period, self.formatting_dict['menu_button_disabled'], disabled=True)
+                self.bu_period.setEnabled(False)
 
 # generate Providentia dashboard
 def main(**kwargs):

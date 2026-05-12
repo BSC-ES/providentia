@@ -196,7 +196,7 @@
         {
           "plot":
             {
-              "loc": "upper center",
+              "loc": "upper left",
               "columnspacing": 1,
               "ncol": 3,
               "fontsize": 7.5,

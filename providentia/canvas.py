@@ -22,7 +22,7 @@ from PyQt5 import QtCore, QtWidgets
 from providentia.auxiliar import CURRENT_PATH, join
 from .canvas_menus import SettingsMenu
 from .dashboard_elements import ComboBox
-from .dashboard_elements import set_formatting
+from .dashboard_elements import set_formatting, set_cursor, unset_cursor
 from .dashboard_interactivity import HoverAnnotation
 from .dashboard_interactivity import legend_picker_func, picker_block_func, zoom_map_func
 from .filter import DataFilter
@@ -302,9 +302,7 @@ class Canvas(FigureCanvas):
             return None
 
         # update mouse cursor to a waiting cursor
-        if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
-            self.read_instance.cursor_function = 'handle_data_filter_update'
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+        self.read_instance.cursor_function = set_cursor(self.read_instance.cursor_function, 'handle_data_filter_update')
 
         # filter data
         # if filter class not yet intialised, then do so
@@ -316,8 +314,7 @@ class Canvas(FigureCanvas):
             self.update_active_map()
 
         # restore mouse cursor to normal
-        if self.read_instance.cursor_function == 'handle_data_filter_update':
-            QtWidgets.QApplication.restoreOverrideCursor()
+        unset_cursor(self.read_instance.cursor_function, 'handle_data_filter_update')
 
         return None
 
@@ -333,9 +330,7 @@ class Canvas(FigureCanvas):
                 return None
 
             # update mouse cursor to a waiting cursor
-            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
-                self.read_instance.cursor_function = 'handle_resampling_update'
-                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            self.read_instance.cursor_function = set_cursor(self.read_instance.cursor_function, 'handle_resampling_update')
 
             # update resampling statistics
             self.update_resampling_statistics()
@@ -371,8 +366,7 @@ class Canvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            if self.read_instance.cursor_function == 'handle_resampling_update':
-                QtWidgets.QApplication.restoreOverrideCursor()
+            unset_cursor(self.read_instance.cursor_function, 'handle_resampling_update')
 
         return None
 
@@ -470,9 +464,7 @@ class Canvas(FigureCanvas):
             self.read_instance.block_config_bar_handling_updates = True
 
             # update mouse cursor to a waiting cursor
-            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
-                self.read_instance.cursor_function = 'handle_statistic_mode_update'
-                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            self.read_instance.cursor_function = set_cursor(self.read_instance.cursor_function, 'handle_statistic_mode_update')
 
             # update mode
             self.read_instance.selected_statistic_mode = self.read_instance.cb_statistic_mode.currentText()
@@ -496,8 +488,7 @@ class Canvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            if self.read_instance.cursor_function == 'handle_statistic_mode_update':
-                QtWidgets.QApplication.restoreOverrideCursor()   
+            unset_cursor(self.read_instance.cursor_function, 'handle_statistic_mode_update')
 
         return None
 
@@ -514,9 +505,7 @@ class Canvas(FigureCanvas):
             self.read_instance.block_config_bar_handling_updates = True
 
             # update mouse cursor to a waiting cursor
-            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
-                self.read_instance.cursor_function = 'handle_statistic_aggregation_update'
-                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            self.read_instance.cursor_function = set_cursor(self.read_instance.cursor_function, 'handle_statistic_aggregation_update')
 
             # update aggregation statistic
             self.update_aggregation_statistic()
@@ -531,8 +520,7 @@ class Canvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            if self.read_instance.cursor_function == 'handle_statistic_aggregation_update':
-                QtWidgets.QApplication.restoreOverrideCursor()
+            unset_cursor(self.read_instance.cursor_function, 'handle_statistic_aggregation_update')
 
         return None
 
@@ -543,9 +531,7 @@ class Canvas(FigureCanvas):
         """
             
         # update mouse cursor to a waiting cursor
-        if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
-            self.read_instance.cursor_function = 'handle_temporal_colocate_update'
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+        self.read_instance.cursor_function = set_cursor(self.read_instance.cursor_function, 'handle_temporal_colocate_update')
 
         # else, if have loaded model data, check if colocate checkbox is checked or unchecked
         check_state = self.read_instance.ch_colocate.checkState()
@@ -608,8 +594,7 @@ class Canvas(FigureCanvas):
                 self.figure.canvas.draw_idle()
 
         # restore mouse cursor to normal
-        if self.read_instance.cursor_function == 'handle_temporal_colocate_update':
-            QtWidgets.QApplication.restoreOverrideCursor()
+        unset_cursor(self.read_instance.cursor_function, 'handle_temporal_colocate_update')
 
         return None
 
@@ -650,7 +635,7 @@ class Canvas(FigureCanvas):
         if labela not in self.read_instance.data_labels:
             self.map_z1.setCurrentText(self.read_instance.observations_data_label)
             self.map_z2.setCurrentTextText('')
-        elif labelb not in self.read_instance.data_labels:
+        elif (labelb not in self.read_instance.data_labels) & (labelb != ''):
             self.map_z1.setCurrentText(self.read_instance.observations_data_label)
             self.map_z2.setCurrentText('')
 
@@ -1094,7 +1079,7 @@ class Canvas(FigureCanvas):
         self.legend = self.plot_axes['legend'].legend(**legend_plot_characteristics['plot'], 
                                                       prop=legend_plot_characteristics['prop'])
 
-        # setup element picker in legend
+        # setup element picker in legend, and clip legend text to axis bounds
         for legend_label in self.legend.texts:
             legend_label.set_picker(True)
         
@@ -1138,7 +1123,7 @@ class Canvas(FigureCanvas):
                 z_stat_items = copy.deepcopy(self.read_instance.basic_and_bias_z_stats)
 
             # remove nonsensical available map stats 
-            nonsensical_map_stats = ['NStations','MDA8'] 
+            nonsensical_map_stats = ['NStations','NUniqueStations','MDA8'] 
             for nonsensical_map_stat in nonsensical_map_stats:
                 if nonsensical_map_stat in z_stat_items:
                     z_stat_items = z_stat_items[z_stat_items != nonsensical_map_stat]
@@ -1169,12 +1154,12 @@ class Canvas(FigureCanvas):
             self.map_z1.setCurrentText(selected_z1_array)
             self.map_z2.setCurrentText(selected_z2_array)
 
-            # allow handling updates to the configuration bar again
-            self.read_instance.block_config_bar_handling_updates = False
-
             # update plotted map z statistic
             if not self.read_instance.block_MPL_canvas_updates:
                 self.update_map_z_statistic()
+
+            # allow handling updates to the configuration bar again
+            self.read_instance.block_config_bar_handling_updates = False
 
         return None
 
@@ -1187,9 +1172,7 @@ class Canvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:  
         
             # update mouse cursor to a waiting cursor
-            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
-                self.read_instance.cursor_function = 'handle_timeseries_aggregation_statistic_update'
-                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            self.read_instance.cursor_function = set_cursor(self.read_instance.cursor_function, 'handle_timeseries_aggregation_statistic_update')
 
             # update timeseries aggregation statistic
             self.update_timeseries_aggregation_statistic()
@@ -1209,8 +1192,7 @@ class Canvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            if self.read_instance.cursor_function == 'handle_timeseries_aggregation_statistic_update':
-                QtWidgets.QApplication.restoreOverrideCursor()
+            unset_cursor(self.read_instance.cursor_function, 'handle_timeseries_aggregation_statistic_update')
 
         return None
 
@@ -1221,10 +1203,9 @@ class Canvas(FigureCanvas):
         """
         
         if not self.read_instance.block_config_bar_handling_updates:
+
             # update mouse cursor to a waiting cursor
-            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
-                self.read_instance.cursor_function = 'handle_timeseries_chunk_statistic_update'
-                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            self.read_instance.cursor_function = set_cursor(self.read_instance.cursor_function, 'handle_timeseries_chunk_statistic_update')
 
             # update chunk statistic / resolution
             self.update_timeseries_chunk_statistics()
@@ -1290,8 +1271,7 @@ class Canvas(FigureCanvas):
                 self.read_instance.previous_chunk_resolution = new_chunk_resolution
 
             # restore mouse cursor to normal
-            if self.read_instance.cursor_function == 'handle_timeseries_chunk_statistic_update':
-                QtWidgets.QApplication.restoreOverrideCursor()
+            unset_cursor(self.read_instance.cursor_function, 'handle_timeseries_chunk_statistic_update')
 
         return None
     
@@ -1385,9 +1365,7 @@ class Canvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:
 
             # update mouse cursor to a waiting cursor
-            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
-                self.read_instance.cursor_function = 'handle_periodic_statistic_update'
-                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            self.read_instance.cursor_function = set_cursor(self.read_instance.cursor_function, 'handle_periodic_statistic_update')
 
             # set variable that blocks configuration bar handling updates until all changes
             # to the periodic statistic combobox are made
@@ -1434,8 +1412,7 @@ class Canvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            if self.read_instance.cursor_function == 'handle_periodic_statistic_update':
-                QtWidgets.QApplication.restoreOverrideCursor()
+            unset_cursor(self.read_instance.cursor_function, 'handle_periodic_statistic_update')
 
         return None
 
@@ -1448,9 +1425,7 @@ class Canvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:
 
             # update mouse cursor to a waiting cursor
-            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
-                self.read_instance.cursor_function = 'handle_taylor_correlation_statistic_update'
-                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            self.read_instance.cursor_function = set_cursor(self.read_instance.cursor_function, 'handle_taylor_correlation_statistic_update')
 
             # set variable that blocks configuration bar handling updates until all
             # changes to the statistic combobox are made
@@ -1488,8 +1463,7 @@ class Canvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            if self.read_instance.cursor_function == 'handle_taylor_correlation_statistic_update':
-                QtWidgets.QApplication.restoreOverrideCursor()
+            unset_cursor(self.read_instance.cursor_function, 'handle_taylor_correlation_statistic_update')
 
         return None
 
@@ -1555,9 +1529,7 @@ class Canvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:
 
             # update mouse cursor to a waiting cursor
-            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
-                self.read_instance.cursor_function = 'handle_statsummary_statistics_update'
-                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            self.read_instance.cursor_function = set_cursor(self.read_instance.cursor_function, 'handle_statsummary_statistics_update')
 
             # set variable that blocks configuration bar handling updates until all changes
             # to the statsummary statistics combobox are made
@@ -1651,8 +1623,7 @@ class Canvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            if self.read_instance.cursor_function == 'handle_statsummary_statistics_update':
-                QtWidgets.QApplication.restoreOverrideCursor()
+            unset_cursor(self.read_instance.cursor_function, 'handle_statsummary_statistics_update')
 
     def handle_statsummary_cycle_update(self):
         """
@@ -1663,9 +1634,7 @@ class Canvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:
             
             # update mouse cursor to a waiting cursor
-            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
-                self.read_instance.cursor_function = 'handle_statsummary_cycle_update'
-                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            self.read_instance.cursor_function = set_cursor(self.read_instance.cursor_function, 'handle_statsummary_cycle_update')
 
             # set variable that blocks configuration bar handling updates until all changes
             # to the statsummary periodic cycle combobox are made
@@ -1703,8 +1672,7 @@ class Canvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            if self.read_instance.cursor_function == 'handle_statsummary_cycle_update':
-                QtWidgets.QApplication.restoreOverrideCursor()
+            unset_cursor(self.read_instance.cursor_function, 'handle_statsummary_cycle_update')
 
         return None
     
@@ -1717,9 +1685,7 @@ class Canvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:
 
             # update mouse cursor to a waiting cursor
-            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
-                self.read_instance.cursor_function = 'handle_statsummary_periodic_aggregation_update'
-                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            self.read_instance.cursor_function = set_cursor(self.read_instance.cursor_function, 'handle_statsummary_periodic_aggregation_update')
 
             # set variable that blocks configuration bar handling updates until all changes
             # to the statsummary periodic aggregation combobox are made
@@ -1740,8 +1706,7 @@ class Canvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            if self.read_instance.cursor_function == 'handle_statsummary_periodic_aggregation_update':
-                QtWidgets.QApplication.restoreOverrideCursor()
+            unset_cursor(self.read_instance.cursor_function, 'handle_statsummary_periodic_aggregation_update')
 
         return None
     
@@ -1754,9 +1719,7 @@ class Canvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:
 
             # update mouse cursor to a waiting cursor
-            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
-                self.read_instance.cursor_function = 'handle_statsummary_periodic_mode_update'
-                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            self.read_instance.cursor_function = set_cursor(self.read_instance.cursor_function, 'handle_statsummary_periodic_mode_update')
 
             # set variable that blocks configuration bar handling updates until all changes
             # to the statsummary periodic mode combobox are made
@@ -1777,8 +1740,7 @@ class Canvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            if self.read_instance.cursor_function == 'handle_statsummary_periodic_mode_update':
-                QtWidgets.QApplication.restoreOverrideCursor()
+            unset_cursor(self.read_instance.cursor_function, 'handle_statsummary_periodic_mode_update')
 
         return None
     
@@ -1791,9 +1753,7 @@ class Canvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:
 
             # update mouse cursor to a waiting cursor
-            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
-                self.read_instance.cursor_function = 'handle_fairmode_target_classification_update'
-                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            self.read_instance.cursor_function = set_cursor(self.read_instance.cursor_function, 'handle_fairmode_target_classification_update')
 
             # set variable that blocks configuration bar handling updates until all changes
             # to the classification combobox are made
@@ -1813,8 +1773,7 @@ class Canvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            if self.read_instance.cursor_function == 'handle_fairmode_target_classification_update':
-                QtWidgets.QApplication.restoreOverrideCursor()
+            unset_cursor(self.read_instance.cursor_function, 'handle_fairmode_target_classification_update')
 
         return None
     
@@ -2004,10 +1963,8 @@ class Canvas(FigureCanvas):
                     self.read_instance.block_MPL_canvas_updates = False
                     return
             
-            # set mouse cursor to hourglass
-            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
-                self.cursor_function = 'select_all_stations'
-                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            # set mouse cursor
+            self.read_instance.cursor_function = set_cursor(self.read_instance.cursor_function, 'select_all_stations')
 
             # make copy of current full array relative selected stations indices, before selecting new ones
             self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
@@ -2046,12 +2003,11 @@ class Canvas(FigureCanvas):
             if not np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds):
                 self.update_associated_active_dashboard_plots()
 
-            # draw changes
-            self.figure.canvas.draw_idle()
+                # draw changes
+                self.figure.canvas.draw_idle()
 
             # Restore mouse cursor to normal
-            if self.cursor_function == 'select_all_stations':
-                QtWidgets.QApplication.restoreOverrideCursor()
+            unset_cursor(self.read_instance.cursor_function, 'select_all_stations')
 
         return None
 
@@ -2077,10 +2033,8 @@ class Canvas(FigureCanvas):
                     self.read_instance.block_MPL_canvas_updates = False
                     return
             
-            # set mouse cursor to hourglass
-            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
-                self.cursor_function = 'select_intersect_stations'
-                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            # set mouse cursor
+            self.read_instance.cursor_function = set_cursor(self.read_instance.cursor_function, 'select_intersect_stations')
             
             # make copy of current full array relative selected stations indices, before selecting new ones
             self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
@@ -2145,12 +2099,11 @@ class Canvas(FigureCanvas):
             if not np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds):
                 self.update_associated_active_dashboard_plots()
 
-            # draw changes
-            self.figure.canvas.draw_idle()
+                # draw changes
+                self.figure.canvas.draw_idle()
 
             # Restore mouse cursor to normal
-            if self.cursor_function == 'select_intersect_stations':
-                QtWidgets.QApplication.restoreOverrideCursor()
+            unset_cursor(self.read_instance.cursor_function, 'select_intersect_stations')
 
         return None
 
@@ -2176,10 +2129,8 @@ class Canvas(FigureCanvas):
                     self.read_instance.block_MPL_canvas_updates = False
                     return
                 
-            # set mouse cursor to hourglass
-            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
-                self.cursor_function = 'select_extent_stations'
-                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            # set mouse cursor
+            self.read_instance.cursor_function = set_cursor(self.read_instance.cursor_function, 'select_extent_stations')
 
             # get map extent (in data coords)
             self.read_instance.map_extent = get_map_extent(self)
@@ -2237,12 +2188,11 @@ class Canvas(FigureCanvas):
             if not np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds):
                 self.update_associated_active_dashboard_plots()
 
-            # draw changes
-            self.figure.canvas.draw_idle()
+                # draw changes
+                self.figure.canvas.draw_idle()
 
             # Restore mouse cursor to normal
-            if self.cursor_function == 'select_extent_stations':
-                QtWidgets.QApplication.restoreOverrideCursor()
+            unset_cursor(self.read_instance.cursor_function, 'select_extent_stations')
 
         return None
 
@@ -2276,10 +2226,8 @@ class Canvas(FigureCanvas):
         else:
             self.figure.canvas.widgetlock(self.station_pick)
         
-        # set mouse cursor to hourglass
-        if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
-            self.cursor_function = 'station_select'
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+        # set mouse cursor
+        self.read_instance.cursor_function = set_cursor(self.read_instance.cursor_function, 'station_select')
 
         # unselect all/intersect/extent checkboxes
         self.unselect_map_checkboxes()
@@ -2296,22 +2244,22 @@ class Canvas(FigureCanvas):
         # transform lasso coordinates from projected to standard geographic coordinates
         lasso_path.vertices = self.datacrs.transform_points(self.plotcrs, lasso_path_vertices[:, 0], lasso_path_vertices[:, 1])[:, :2]
 
-        # get absolute selected indices of stations on map (the station coordinates contained within lasso)
+        # get absolute selected indices of stations on map
         absolute_selected_station_inds = np.nonzero(lasso_path.contains_points(self.map_points_coordinates))[0]
 
         # if have no valid selected indices, add a small tolerance (variable by visible map extent) to try get a match 
         if len(absolute_selected_station_inds) == 0:
-            # take first selected point coordinates and get matches of stations within tolerance 
-            self.read_instance.map_extent = get_map_extent(self)
-            tolerance = np.average([self.read_instance.map_extent[1]-self.read_instance.map_extent[0],
-                                    self.read_instance.map_extent[3]-self.read_instance.map_extent[2]]) / 100.0
-            point_coordinates = lasso_path.vertices[0:1,:]
-            sub_abs_vals = np.abs(self.map_points_coordinates[None,:,:] - point_coordinates[:,None,:])
-            absolute_selected_station_inds = np.arange(len(self.active_map_valid_station_inds))[np.all(np.any(sub_abs_vals<=tolerance,axis=0),axis=1)]
+           # take first selected point coordinates and get matches of stations within tolerance 
+           self.read_instance.map_extent = get_map_extent(self)
+           tolerance = np.average([self.read_instance.map_extent[1]-self.read_instance.map_extent[0],
+                                   self.read_instance.map_extent[3]-self.read_instance.map_extent[2]]) / 100.0
+           point_coordinates = lasso_path.vertices[0:1,:]
+           sub_abs_vals = np.abs(self.map_points_coordinates[None,:,:] - point_coordinates[:,None,:])
+           absolute_selected_station_inds = np.arange(len(self.active_map_valid_station_inds))[np.all(np.any(sub_abs_vals<=tolerance,axis=0),axis=1)]
             
-            # if more than 1 point selected, limit this to be just nearest point
-            if len(absolute_selected_station_inds) > 1:
-                absolute_selected_station_inds = np.array([absolute_selected_station_inds[np.argmin(np.sum(sub_abs_vals[0,absolute_selected_station_inds,:],axis=1))]], dtype=np.int32)
+           # if more than 1 point selected, limit this to be just nearest point
+           if len(absolute_selected_station_inds) > 1:
+               absolute_selected_station_inds = np.array([absolute_selected_station_inds[np.argmin(np.sum(sub_abs_vals[0,absolute_selected_station_inds,:],axis=1))]], dtype=np.int32)
 
         # handle left click event
         if event.button is MouseButton.LEFT:
@@ -2325,8 +2273,7 @@ class Canvas(FigureCanvas):
             # if have zero stations selected then return, doing nothing to selection
             if len(absolute_selected_station_inds) == 0:
                 # restore mouse cursor to normal
-                if self.cursor_function == 'station_select':
-                    QtWidgets.QApplication.restoreOverrideCursor()
+                unset_cursor(self.read_instance.cursor_function, 'station_select')
                 return 
 
             # update absolute indices of selected stations
@@ -2349,17 +2296,16 @@ class Canvas(FigureCanvas):
             self.update_map_station_selection()
             self.update_associated_active_dashboard_plots()
 
-        # draw changes
-        self.figure.canvas.draw_idle()
+            # draw changes
+            self.figure.canvas.draw_idle()
 
         # unlock canvas drawing
         if self.figure.canvas.widgetlock.isowner(self.station_pick):
             self.figure.canvas.widgetlock.release(self.station_pick)
 
         # restore mouse cursor to normal
-        if self.cursor_function == 'station_select':
-            QtWidgets.QApplication.restoreOverrideCursor()
-        
+        unset_cursor(self.read_instance.cursor_function, 'station_select')
+
     def onlassoselect(self, verts):
         """ 
         Function that handles station selection upon lasso selection with left click.
@@ -2380,10 +2326,8 @@ class Canvas(FigureCanvas):
         if len(self.active_map_valid_station_inds) == 0:
             return
 
-        # set mouse cursor to hourglass
-        if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
-            self.cursor_function = 'onlassoselect'
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+        # set mouse cursor
+        self.read_instance.cursor_function = set_cursor(self.read_instance.cursor_function, 'onlassoselect')
 
         # unselect all/intersect/extent checkboxes
         self.unselect_map_checkboxes()
@@ -2404,16 +2348,16 @@ class Canvas(FigureCanvas):
 
         # if have no valid selected indices, add a small tolerance (variable by visible map extent) to try get a match 
         if len(self.absolute_selected_station_inds) == 0:
-            # take first selected point coordinates and get matches of stations within tolerance 
-            self.read_instance.map_extent = get_map_extent(self)
-            tolerance = np.average([self.read_instance.map_extent[1]-self.read_instance.map_extent[0],
-                                    self.read_instance.map_extent[3]-self.read_instance.map_extent[2]]) / 100.0
-            point_coordinates = lasso_path.vertices[0:1,:]
-            sub_abs_vals = np.abs(self.map_points_coordinates[None,:,:] - point_coordinates[:,None,:])
-            self.absolute_selected_station_inds = np.arange(len(self.active_map_valid_station_inds))[np.all(np.any(sub_abs_vals<=tolerance,axis=0),axis=1)]
-            # if more than 1 point selected, limit this to be just nearest point
-            if len(self.absolute_selected_station_inds) > 1:
-                self.absolute_selected_station_inds = np.array([self.absolute_selected_station_inds[np.argmin(np.sum(sub_abs_vals[0,self.absolute_selected_station_inds,:],axis=1))]], dtype=np.int32)
+           # take first selected point coordinates and get matches of stations within tolerance 
+           self.read_instance.map_extent = get_map_extent(self)
+           tolerance = np.average([self.read_instance.map_extent[1]-self.read_instance.map_extent[0],
+                                   self.read_instance.map_extent[3]-self.read_instance.map_extent[2]]) / 100.0
+           point_coordinates = lasso_path.vertices[0:1,:]
+           sub_abs_vals = np.abs(self.map_points_coordinates[None,:,:] - point_coordinates[:,None,:])
+           self.absolute_selected_station_inds = np.arange(len(self.active_map_valid_station_inds))[np.all(np.any(sub_abs_vals<=tolerance,axis=0),axis=1)]
+           # if more than 1 point selected, limit this to be just nearest point
+           if len(self.absolute_selected_station_inds) > 1:
+               self.absolute_selected_station_inds = np.array([self.absolute_selected_station_inds[np.argmin(np.sum(sub_abs_vals[0,self.absolute_selected_station_inds,:],axis=1))]], dtype=np.int32)
 
         # get absolute non-selected station inds
         self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
@@ -2430,12 +2374,11 @@ class Canvas(FigureCanvas):
             self.update_map_station_selection()
             self.update_associated_active_dashboard_plots()
 
-        # draw changes
-        self.figure.canvas.draw_idle()
+            # draw changes
+            self.figure.canvas.draw_idle()
 
         # restore mouse cursor to normal
-        if self.cursor_function == 'onlassoselect':
-            QtWidgets.QApplication.restoreOverrideCursor()
+        unset_cursor(self.read_instance.cursor_function, 'onlassoselect')
 
         return None
 

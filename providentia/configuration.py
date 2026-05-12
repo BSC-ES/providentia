@@ -101,7 +101,7 @@ class ProvConfiguration:
 
     def parse_parameter(self, key, value, deactivate_warning=False):
         """
-        Standardizes and transforms Providentia configuration values.
+        Standardises and transforms Providentia configuration values.
 
         Parameters
         ----------
@@ -263,8 +263,9 @@ class ProvConfiguration:
             # get GHOST networks
             self.read_instance.ghost_available_networks = list(standard_networks.keys()) 
             
-            # EBAS_network_priorities was added from v1.5 onwards
+            # get EBAS_network_priorities (v1.5 onwards)
             if key not in ['1.2', '1.3', '1.3.1', '1.3.2', '1.3.3', '1.4']:
+                # EBAS network priorities
                 from GHOST_standards import EBAS_network_priorities
                 self.read_instance.ghost_available_networks += EBAS_network_priorities
 
@@ -288,11 +289,7 @@ class ProvConfiguration:
                     actris_dict["data_type"] = object
             self.read_instance.standard_metadata.update(actris_standard_metadata)
 
-            # create list of GHOST metadata variables to read
-            self.read_instance.ghost_metadata_vars_to_read = [key for key in self.read_instance.standard_metadata.keys() if
-                                                              pd.isnull(self.read_instance.standard_metadata[key]['metadata_type']) == False]
-            self.read_instance.ghost_metadata_dtype = [(key, self.read_instance.standard_metadata[key]['data_type']) 
-                                                       for key in self.read_instance.ghost_metadata_vars_to_read]
+            # set standard data flags
             self.read_instance.standard_data_flag_name_to_data_flag_code = standard_data_flag_name_to_data_flag_code
             self.read_instance.standard_QA_name_to_QA_code = standard_QA_name_to_QA_code
 
@@ -1196,30 +1193,6 @@ class ProvConfiguration:
             for option in option_list:
                 setattr(self.read_instance, option, None)
                      
-        # check if species is valid
-        if self.read_instance.species:
-            species = copy.deepcopy(self.read_instance.species)
-            for speci in species:
-                # If ACTRIS in network or framework, map speci name to BSC convention
-                if 'actris/actris' in self.read_instance.network:
-                    # load ACTRIS mapping files
-                    ghost_actris_variables = yaml.safe_load(open(join(
-                        PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'ghost_actris_variables.yaml')))
-                    if speci in ghost_actris_variables.values():
-                        result = [speci_bsc for speci_bsc, speci_actris in ghost_actris_variables.items() if speci_actris == speci]
-                        if len(result) == 1:
-                            idx = self.read_instance.species.index(speci)
-                            self.read_instance.species[idx] = result[0]
-                            speci = result[0]
-                        else:
-                            error = f'Error: ACTRIS species "{speci}" cannot be mapped. Replace {speci} by one of {result}.'
-                            self.read_instance.logger.error(error)
-                            sys.exit(1)
-                if ('*' not in speci) and (speci not in self.read_instance.parameter_dictionary):
-                    error = f'Error: species "{speci}" not valid.'
-                    self.read_instance.logger.error(error)
-                    sys.exit(1)
-
         # get non-default fields on config file if launching from a config file
         if hasattr(self.read_instance, "sub_opts"):
             self.read_instance.fields_per_section = {}
@@ -1270,17 +1243,74 @@ class ProvConfiguration:
             elif field == 'interp_model_upsampling' and current_value not in ['fill', 'gaps']:
                 setattr(self.read_instance, field, default)
 
-        # check resolution
-        # if not interpolation or download, get first resolution in list
-        if (',' in self.read_instance.resolution) and (self.read_instance.mode not in ['interpolation', 'download']):
-            default = self.read_instance.resolution.split(',')[0]
-            msg = "Resolution (resolution) contains multiple values. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-            self.read_instance.resolution = default
+        # map to multiple species if have * wildcard
+        # also duplicate out associated network
+        # remove any species for which there exists no data
+        new_species = copy.deepcopy(self.read_instance.species)
+        for speci_ii, speci in enumerate(self.read_instance.species): 
+            if speci != '*' and '*' in speci:
+                # throw mapping error if species not able to be mapped
+                if speci not in multispecies_map:
+                    error = f'Error: not able to map species "{speci}".'
+                    self.read_instance.logger.error(error)
+                    sys.exit(1)
+                
+                mapped_species = multispecies_map[speci]
+                del new_species[speci_ii]
+                new_species[speci_ii:speci_ii] = mapped_species
+                # in download mode is not necessary to duplicate the networks
+                if self.read_instance.mode != 'download':
+                    network_to_duplicate = self.read_instance.network[speci_ii]
+                    del self.read_instance.network[speci_ii]
+                    self.read_instance.network[speci_ii:speci_ii] = [network_to_duplicate]*len(mapped_species)
+        self.read_instance.species = copy.deepcopy(new_species)
 
-        # copy value of resolution into model_resolution
-        if self.read_instance.mode == 'download' and not self.read_instance.model_resolution:
-            self.read_instance.model_resolution = self.read_instance.resolution 
+        # check if species is valid
+        if self.read_instance.species:
+            species = copy.deepcopy(self.read_instance.species)
+            for speci in species:
+                # If ACTRIS in network or framework, map speci name to BSC convention
+                if 'actris/actris' in self.read_instance.network:
+                    # load ACTRIS mapping files
+                    ghost_actris_variables = yaml.safe_load(open(join(
+                        PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'ghost_actris_variables.yaml')))
+                    if speci in ghost_actris_variables.values():
+                        result = [speci_bsc for speci_bsc, speci_actris in ghost_actris_variables.items() if speci_actris == speci]
+                        if len(result) == 1:
+                            idx = self.read_instance.species.index(speci)
+                            self.read_instance.species[idx] = result[0]
+                            speci = result[0]
+                        else:
+                            error = f'Error: ACTRIS species "{speci}" cannot be mapped. Replace {speci} by one of {result}.'
+                            self.read_instance.logger.error(error)
+                            sys.exit(1)
+
+        # remove species that are not in the current ghost version
+        invalid_species = set(self.read_instance.species) - set(self.read_instance.available_species) - {'*'}     
+        if invalid_species:                                                            
+            msg = f'Removing invalid species {", ".join(invalid_species)} for the current GHOST version ({self.read_instance.ghost_version})'
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+            for inv_species in invalid_species:
+                self.read_instance.species.remove(inv_species)
+            # exit if there are no valid species left
+            if not self.read_instance.species:
+                error = f"Error: No valid species for the current GHOST version ({self.read_instance.ghost_version})"
+                self.read_instance.logger.error(error)
+                sys.exit(1)
+
+        # check if network is valid for non-dashboard modes (only works for GHOST networks)
+        if self.read_instance.mode != 'dashboard':
+            invalid_networks = [network for network in self.read_instance.network if '/' not in network and network not in self.read_instance.ghost_available_networks]
+            if invalid_networks:
+                msg = f'Removing invalid network(s) {", ".join(invalid_networks)} for the current GHOST version ({self.read_instance.ghost_version})'
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+                for inv_network in invalid_networks:
+                    self.read_instance.network.remove(inv_network)
+            # exit if there are no valid networks left            
+            if not self.read_instance.network:
+                error = f"Error: No valid network for the current GHOST version ({self.read_instance.ghost_version})"
+                self.read_instance.logger.error(error)
+                sys.exit(1)
 
         # if number of networks and species is not the same,
         # and len of one of network or species == 1,
@@ -1333,10 +1363,22 @@ class ProvConfiguration:
             self.read_instance.network = [self.read_instance.network[0]]
             self.read_instance.species = [self.read_instance.species[0]]
 
+        # initialise networkspeci as first network and species pair
         if self.read_instance.network and self.read_instance.species:
-            # initialise networkspeci as first network and species pair
             self.read_instance.networkspeci = '{}|{}'.format(self.read_instance.network[0],
-                                                            self.read_instance.species[0]) 
+                                                             self.read_instance.species[0]) 
+
+        # check resolution
+        # if not interpolation or download, get first resolution in list
+        if (',' in self.read_instance.resolution) and (self.read_instance.mode not in ['interpolation', 'download']):
+            default = self.read_instance.resolution.split(',')[0]
+            msg = "Resolution (resolution) contains multiple values. Using '{}' as default.".format(default)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+            self.read_instance.resolution = default
+
+        # copy value of resolution into model_resolution
+        if self.read_instance.mode == 'download' and not self.read_instance.model_resolution:
+            self.read_instance.model_resolution = self.read_instance.resolution 
 
         # set active resolution, resampling_resolution when set, otherwise resolution
         if self.read_instance.resampling_resolution != 'None':
@@ -1346,7 +1388,6 @@ class ProvConfiguration:
           
         # check and format start_date and end_date
         dates = ['start_date', 'end_date']
-
         for date_var_name in dates:
             date = getattr(self.read_instance, date_var_name)
             
@@ -1420,95 +1461,81 @@ class ProvConfiguration:
             self.read_instance.logger.error(error)
             sys.exit(1)
 
-        # check calibration factor
-        if self.read_instance.calibration_factor:
-
-            # detect if calibration factor is passed by model
-            calibration_by_model = not self.read_instance.calibration_factor[0][0] in ['+', '-', '*', '/']
-
-            # control that calibration factor not by model can only be one element
-            if not calibration_by_model and len(self.read_instance.calibration_factor) > 1:
-                error = "Error: When calibration factor is not provided by the model, only one value can be passed."
-                self.read_instance.logger.error(error)
-                sys.exit(1)
-
-            # create dictionary per model
-            calibration_factor_dict = {}
-
-            # if calibration is by model
-            if calibration_by_model:
-                for i, model in enumerate(self.read_instance.experiments):
-                    for calibration_factor in self.read_instance.calibration_factor:
-                        if model in calibration_factor:
-                            calibration_factor_mod = calibration_factor.split("(")[1][:-1]
-                            calibration_factor_dict[model] = calibration_factor_mod
-            # if the same calibration is applied to all models
+        # check multiprocessing for interpolation in local runs, and activate if not on
+        if (MACHINE == 'local') and (not self.read_instance.interp_multiprocessing) and (self.read_instance.mode == 'interpolation'):
+            msg = 'During interpolation, multiprocessing must be turned on for local runs, activating...'
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+            self.read_instance.interp_multiprocessing = True
+            if 1 <= self.read_instance.cpus_per_task <= self.read_instance.available_cpus:
+                default = self.read_instance.cpus_per_task
             else:
-                calibration_factor_dict = {model:self.read_instance.calibration_factor[0] for model in self.read_instance.experiments}                 
+                default = self.read_instance.available_cpus
+                msg = "Number of cores ('{}') cannot be superior than number of available cpus ('{}') ".format(self.read_instance.cpus_per_task, default)
+                msg += "or less than 1. Using '{}' as default.".format(default)
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+            self.read_instance.n_cpus = default
 
-            # replace calibration factors by new dictionary
-            self.read_instance.calibration_factor = calibration_factor_dict
+        # visualisation only validity checks 
+        if self.read_instance.mode not in ['download', 'interpolation']: 
 
-        if len(self.read_instance.active_dashboard_plots) != 4 and 'active_dashboard_plots' in self.read_instance.default_values:
-            error = 'Error: There must be 4 "active_dashboard_plots"'
-            self.read_instance.logger.error(error)
-            sys.exit(1)
-        
-        # if filter_species is active, and spatial_colocation is not active, then cannot filter by species
-        # set filter_species to empty dict and advise user of this
-        if (self.read_instance.filter_species) and (not self.read_instance.spatial_colocation):
-            self.read_instance.filter_species = {}
-            msg = 'Spatial colocation (spatial_colocation) must be set to True if wanting to filter by species.'
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-
-        # map to multiple species if have * wildcard
-        # also duplicate out associated network
-        # remove any species for which there exists no data
-        new_species = copy.deepcopy(self.read_instance.species)
-        for speci_ii, speci in enumerate(self.read_instance.species): 
-            if speci != '*' and '*' in speci:
-                # throw mapping error if species not able to be mapped
-                if speci not in multispecies_map:
-                    error = f'Error: not able to map species "{speci}".'
-                    self.read_instance.logger.error(error)
-                    sys.exit(1)
-                
-                mapped_species = multispecies_map[speci]
-                del new_species[speci_ii]
-                new_species[speci_ii:speci_ii] = mapped_species
-                # in download mode is not necessary to duplicate the networks
-                if self.read_instance.mode != 'download':
-                    network_to_duplicate = self.read_instance.network[speci_ii]
-                    del self.read_instance.network[speci_ii]
-                    self.read_instance.network[speci_ii:speci_ii] = [network_to_duplicate]*len(mapped_species)
-        self.read_instance.species = copy.deepcopy(new_species)
-
-        # get species and filter species which are not on the current ghost version
-        invalid_species = set(self.read_instance.species) - set(self.read_instance.available_species) - {'*'}
-        invalid_filter_species = set(map(lambda x:x.split('|')[1], self.read_instance.filter_species)) - set(self.read_instance.available_species) - {'*'}                          
-        
-        # check species, remove the ones that are not on the ghost version       
-        if invalid_species:                                                            
-            msg = f'Removing invalid species {", ".join(invalid_species)} for the current GHOST version ({self.read_instance.ghost_version})'
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-            for inv_species in invalid_species:
-                self.read_instance.species.remove(inv_species)
-            # exit if there are no valid species left
-            if not self.read_instance.species:
-                error = f"Error: No valid species for the current GHOST version ({self.read_instance.ghost_version})"
+            # check have 4 active dashboard plots
+            if len(self.read_instance.active_dashboard_plots) != 4 and 'active_dashboard_plots' in self.read_instance.default_values and self.read_instance.mode == 'dashboard':
+                error = 'Error: There must be 4 "active_dashboard_plots"'
                 self.read_instance.logger.error(error)
                 sys.exit(1)
 
-        # check filter species, remove the ones that are not on the ghost version     
-        if invalid_filter_species:
-            msg = f'Removing invalid filter species {", ".join(invalid_filter_species)} for the current GHOST version ({self.read_instance.ghost_version})'
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-            # remove them from the filter_species atribute
-            for filter_species in self.read_instance.filter_species.keys():
-                if filter_species.split('|')[1] in invalid_filter_species:
-                    del self.read_instance.filter_species[filter_species]
+            # do checks on filter_species
+            filter_species_copy = copy.deepcopy(self.read_instance.filter_species)
+            invalid_filter_species = []
+            for networkspeci, filter_species in filter_species_copy.items():
+                # if have a separator then perform some checks
+                if '|' in networkspeci: 
+                    networkspeci_split = networkspeci.split('|')
+                    network = networkspeci_split[0]
+                    speci = networkspeci_split[1]
+                    # check if species is valid
+                    if speci not in self.read_instance.parameter_dictionary:
+                        invalid_filter_species.append(networkspeci)
+                    # check if network is valid (only works for GHOST networks)
+                    elif ('/' not in network) and (network not in self.read_instance.ghost_available_networks):
+                        invalid_filter_species.append(networkspeci)
+                # if do not have a separator then perform some checks
+                else:
+                    # if have just defined a network, then throw error as cannot assume species to filter by
+                    if networkspeci in self.read_instance.ghost_available_networks:
+                        invalid_filter_species.append(networkspeci)
+                    # if have more than 1 network, then throw error as cannot assume network to filter by
+                    elif len(self.read_instance.network) > 1:
+                        invalid_filter_species.append(networkspeci)
+                    # elif have just 1 network, then try to see if can assume network to filter by, and if not throw error
+                    elif len(self.read_instance.network) == 1:
+                        # check if species is valid
+                        if networkspeci not in self.read_instance.parameter_dictionary:
+                            invalid_filter_species.append(networkspeci)
+                        # if valid, then define new networkspeci and assign it, deleting the previous entry
+                        else:                        
+                            new_networkspeci = '{}|{}'.format(self.read_instance.network[0], networkspeci)
+                            if new_networkspeci in self.read_instance.filter_species.keys():
+                                for filter_speci in filter_species:
+                                    self.read_instance.filter_species[new_networkspeci].append(filter_speci)
+                            else:
+                                self.read_instance.filter_species[new_networkspeci] = filter_species
+                            del self.read_instance.filter_species[networkspeci]
 
-        if self.read_instance.mode not in ['download', 'interpolation']: 
+            # give error if have invalid filter species, and remove them from filter_species 
+            if invalid_filter_species:
+                msg = f'Removing invalid filter species {", ".join(invalid_filter_species)} for the current GHOST version ({self.read_instance.ghost_version})'
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+                for invalid_filter_speci in invalid_filter_species:
+                    del self.read_instance.filter_species[invalid_filter_speci]
+
+            # if filter_species is active, and spatial_colocation is not active, then cannot filter by species
+            # set filter_species to empty dict and advise user of this
+            if (self.read_instance.filter_species) and (not self.read_instance.spatial_colocation):
+                self.read_instance.filter_species = {}
+                msg = 'Spatial colocation (spatial_colocation) must be set to True if wanting to filter by species.'
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+
             # create variable for all unique species (plus filter species)
             filter_species = []
             species_plus_filter_species = copy.deepcopy(self.read_instance.species)
@@ -1575,6 +1602,42 @@ class ProvConfiguration:
                             upper_bound_dict[speci] = np.float32(self.read_instance.parameter_dictionary[speci]['extreme_upper_limit'])
                 self.read_instance.upper_bound = upper_bound_dict
 
+            # check bounds inside filter_species
+            if self.read_instance.filter_species:
+                for networkspeci in self.read_instance.filter_species: 
+                    for networkspeci_limit_ii, networkspeci_limit in enumerate(self.read_instance.filter_species[networkspeci]):
+                        
+                        # get bounds
+                        lower_limit = networkspeci_limit[0]
+                        upper_limit = networkspeci_limit[1]
+                        filter_species_fill_value = networkspeci_limit[2]
+                        
+                        # modify lower bound to be :, contain > or >=
+                        # if lower bound has a < symbol, change it to >, and show message 
+                        if ('<' in lower_limit):
+                            msg = 'filter_species lower bound ({}) for {} cannot contain < or <=. '.format(lower_limit, networkspeci)
+                            lower_limit = '>=' + lower_limit.replace('<', '').replace('=', '')
+                            msg += 'Setting it to be {}.'.format(lower_limit)
+                            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+                        # if have no symbols then change it to be >= 
+                        elif (':' not in lower_limit) and ('>' not in lower_limit):
+                            lower_limit = '>=' + lower_limit
+
+                        # modify upper bound to be :, contain < or <=
+                        # if upper bound has a > symbol, change it to <, and show message 
+                        if ('>' in upper_limit):
+                            msg = 'filter_species upper bound ({}) for {} cannot contain > or >=. '.format(upper_limit, networkspeci)
+                            upper_limit = '<=' + upper_limit.replace('>', '').replace('=', '')
+                            msg += 'Setting it to be {}.'.format(upper_limit)
+                            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+                        # if have no symbols then change it to be <= 
+                        elif (':' not in upper_limit) and ('<' not in upper_limit):
+                            upper_limit = '<=' + upper_limit
+                        
+                        # update symbols next to values
+                        self.read_instance.filter_species[networkspeci][networkspeci_limit_ii] = [lower_limit, upper_limit, 
+                                                                                                filter_species_fill_value]
+
             # create a variable to set qa per species (including filter species), setting defaults in the process
             if isinstance(self.read_instance.qa, dict):
                 self.read_instance.qa_per_species = {speci:get_default_qa(self.read_instance, speci) 
@@ -1584,98 +1647,76 @@ class ProvConfiguration:
             else:
                 self.read_instance.qa_per_species = {speci:self.read_instance.qa for speci in species_plus_filter_species}
 
-        # add to qa
-        if self.read_instance.add_qa:
-            for qa_flag_to_add in self.read_instance.add_qa:
-                if qa_flag_to_add not in self.read_instance.qa:
-                    self.read_instance.qa.append(qa_flag_to_add)
+            # check calibration factor
+            if self.read_instance.calibration_factor:
+
+                # detect if calibration factor is passed by model
+                calibration_by_model = not self.read_instance.calibration_factor[0][0] in ['+', '-', '*', '/']
+
+                # control that calibration factor not by model can only be one element
+                if not calibration_by_model and len(self.read_instance.calibration_factor) > 1:
+                    error = "Error: When calibration factor is not provided by the model, only one value can be passed."
+                    self.read_instance.logger.error(error)
+                    sys.exit(1)
+
+                # create dictionary per model
+                calibration_factor_dict = {}
+
+                # if calibration is by model
+                if calibration_by_model:
+                    for i, model in enumerate(self.read_instance.experiments):
+                        for calibration_factor in self.read_instance.calibration_factor:
+                            if model in calibration_factor:
+                                calibration_factor_mod = calibration_factor.split("(")[1][:-1]
+                                calibration_factor_dict[model] = calibration_factor_mod
+                # if the same calibration is applied to all models
+                else:
+                    calibration_factor_dict = {model:self.read_instance.calibration_factor[0] for model in self.read_instance.experiments}                 
+
+                # replace calibration factors by new dictionary
+                self.read_instance.calibration_factor = calibration_factor_dict
+
+            # add to qa
+            if self.read_instance.add_qa:
+                for qa_flag_to_add in self.read_instance.add_qa:
+                    if qa_flag_to_add not in self.read_instance.qa:
+                        self.read_instance.qa.append(qa_flag_to_add)
+                    for speci in self.read_instance.qa_per_species:
+                        if qa_flag_to_add not in self.read_instance.qa_per_species[speci]:
+                            self.read_instance.qa_per_species[speci].append(qa_flag_to_add)
+
+                self.read_instance.qa = sorted(self.read_instance.qa) 
                 for speci in self.read_instance.qa_per_species:
-                    if qa_flag_to_add not in self.read_instance.qa_per_species[speci]:
-                        self.read_instance.qa_per_species[speci].append(qa_flag_to_add)
+                    self.read_instance.qa_per_species[speci] = sorted(self.read_instance.qa_per_species[speci])
 
-            self.read_instance.qa = sorted(self.read_instance.qa) 
-            for speci in self.read_instance.qa_per_species:
-                self.read_instance.qa_per_species[speci] = sorted(self.read_instance.qa_per_species[speci])
+            # subtract from qa
+            if self.read_instance.subtract_qa:
+                for qa_flag_to_remove in self.read_instance.subtract_qa:
+                    if qa_flag_to_remove in self.read_instance.qa:
+                        self.read_instance.qa.remove(qa_flag_to_remove)
+                    for speci in self.read_instance.qa_per_species:
+                        if qa_flag_to_remove in self.read_instance.qa_per_species[speci]:
+                            self.read_instance.qa_per_species[speci].remove(qa_flag_to_remove)
 
-        # subtract from qa
-        if self.read_instance.subtract_qa:
-            for qa_flag_to_remove in self.read_instance.subtract_qa:
-                if qa_flag_to_remove in self.read_instance.qa:
-                    self.read_instance.qa.remove(qa_flag_to_remove)
+                self.read_instance.qa = sorted(self.read_instance.qa) 
                 for speci in self.read_instance.qa_per_species:
-                    if qa_flag_to_remove in self.read_instance.qa_per_species[speci]:
-                        self.read_instance.qa_per_species[speci].remove(qa_flag_to_remove)
+                    self.read_instance.qa_per_species[speci] = sorted(self.read_instance.qa_per_species[speci])
 
-            self.read_instance.qa = sorted(self.read_instance.qa) 
-            for speci in self.read_instance.qa_per_species:
-                self.read_instance.qa_per_species[speci] = sorted(self.read_instance.qa_per_species[speci])
+            # add to flags
+            if self.read_instance.add_flags:
+                for flag_to_add in self.read_instance.add_flags:
+                    if flag_to_add not in self.read_instance.flags:
+                        self.read_instance.flags.append(flag_to_add)
 
-        # add to flags
-        if self.read_instance.add_flags:
-            for flag_to_add in self.read_instance.add_flags:
-                if flag_to_add not in self.read_instance.flags:
-                    self.read_instance.flags.append(flag_to_add)
+                self.read_instance.flags = sorted(self.read_instance.flags) 
 
-            self.read_instance.flags = sorted(self.read_instance.flags) 
+            # subtract from flags
+            if self.read_instance.subtract_flags:
+                for flag_to_remove in self.read_instance.subtract_flags:
+                    if flag_to_remove in self.read_instance.flags:
+                        self.read_instance.flags.remove(flag_to_remove)
 
-        # subtract from flags
-        if self.read_instance.subtract_flags:
-            for flag_to_remove in self.read_instance.subtract_flags:
-                if flag_to_remove in self.read_instance.flags:
-                    self.read_instance.flags.remove(flag_to_remove)
-
-            self.read_instance.flags = sorted(self.read_instance.flags) 
-        
-        # check bounds inside filter_species
-        if self.read_instance.filter_species:
-            for networkspeci in self.read_instance.filter_species: 
-                for networkspeci_limit_ii, networkspeci_limit in enumerate(self.read_instance.filter_species[networkspeci]):
-                    
-                    # get bounds
-                    lower_limit = networkspeci_limit[0]
-                    upper_limit = networkspeci_limit[1]
-                    filter_species_fill_value = networkspeci_limit[2]
-                    
-                    # modify lower bound to be :, contain > or >=
-                    if ('<' in lower_limit):
-                        msg = 'Lower bound ({}) for {} cannot contain < or <=. '.format(lower_limit, networkspeci)
-                        lower_limit = '>=' + lower_limit.replace('<', '').replace('=', '')
-                        msg += 'Setting it to be {}.'.format(lower_limit)
-                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-                    elif (':' not in lower_limit) and ('>' not in lower_limit):
-                        msg = 'Lower bound ({}) for {} should contain > or >=. '.format(lower_limit, networkspeci)
-                        lower_limit = '>=' + lower_limit
-                        msg += 'Setting it to be {}.'.format(lower_limit)
-                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-
-                    # modify upper bound to be :, contain < or <=
-                    if ('>' in upper_limit):
-                        msg = 'Upper bound ({}) for {} cannot contain > or >=. '.format(upper_limit, networkspeci)
-                        upper_limit = '<=' + upper_limit.replace('>', '').replace('=', '')
-                        msg += 'Setting it to be {}.'.format(upper_limit)
-                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-                    elif (':' not in upper_limit) and ('<' not in upper_limit):
-                        msg = 'Upper bound ({}) for {} should contain < or <=. '.format(upper_limit, networkspeci)
-                        upper_limit = '<=' + upper_limit
-                        msg += 'Setting it to be {}.'.format(upper_limit)
-                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-                    
-                    # update symbols next to values
-                    self.read_instance.filter_species[networkspeci][networkspeci_limit_ii] = [lower_limit, upper_limit, 
-                                                                                              filter_species_fill_value]
-
-        if (MACHINE == 'local') and (not self.read_instance.interp_multiprocessing) and (self.read_instance.mode == 'interpolation'):
-            msg = 'During interpolation, multiprocessing must be turned on for local runs, activating...'
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-            self.read_instance.interp_multiprocessing = True
-            if 1 <= self.read_instance.cpus_per_task <= self.read_instance.available_cpus:
-                default = self.read_instance.cpus_per_task
-            else:
-                default = self.read_instance.available_cpus
-                msg = "Number of cores ('{}') cannot be superior than number of available cpus ('{}') ".format(self.read_instance.cpus_per_task, default)
-                msg += "or less than 1. Using '{}' as default.".format(default)
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-            self.read_instance.n_cpus = default
+                self.read_instance.flags = sorted(self.read_instance.flags)
 
     def switch_logging(self):
         """Set up logging for the session, either to a file or to the terminal."""
@@ -2022,8 +2063,12 @@ def split_options(read_instance, conf_string, separator="||"):
             removes = removes.split(",")
             removes = [r.strip() for r in removes]
         elif ("keep:" in conf_string) and ("remove:" in conf_string):
-            msg = 'In order to define the keep and remove options, these must be separated by ||.'
+            msg = 'In order to define both keep and remove options, they must be separated by ||.'
             show_message(msg, from_conf=read_instance.from_conf)
+        else:
+            keeps = conf_string[:]
+            keeps = keeps.split(",")
+            keeps = [k.strip() for k in keeps]
     else:
         if "keep:" in conf_string:
             keep_start, keep_end = conf_string.find("keep:"), conf_string.find(separator)

@@ -19,9 +19,9 @@ import re
 from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
 from .configuration import load_conf
 from .configuration import ProvConfiguration
-from .fields_menus import (init_representativity, init_period, init_metadata,
-                           update_representativity_fields, update_period_fields, update_metadata_fields,
-                           representativity_conf, period_conf, metadata_conf)
+from .fields_menus import (init_coverage, init_period, init_metadata,
+                           update_coverage_fields, update_period_fields, update_metadata_fields,
+                           coverage_conf, period_conf, metadata_conf)
 from .filter import DataFilter
 from .plotting import Plotting
 from .plot_aux import get_taylor_diagram_ghelper, set_map_extent
@@ -62,8 +62,8 @@ class Report:
         self.basic_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
         self.modbias_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/model_bias_stats.yaml')))
 
-        # load representativity information
-        self.representativity_info = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/representativity.yaml')))
+        # load coverage information
+        self.coverage_info = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/coverage.yaml')))
 
         # initialise default configuration variables
         # modified by commandline arguments, if given
@@ -955,9 +955,9 @@ class Report:
                     self.experiments = forecast_models
 
                 # update fields available for filtering
-                init_representativity(self)
-                update_representativity_fields(self)
-                representativity_conf(self)
+                init_coverage(self)
+                update_coverage_fields(self)
+                coverage_conf(self)
                 init_period(self)
                 update_period_fields(self)
                 period_conf(self)

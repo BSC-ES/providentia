@@ -1,5 +1,6 @@
 {
   "ghost_version": "1.5",
+  "ghost_features": "",
   "conf": "",
   "config": "",
   "config_dir": "configurations/",
@@ -93,6 +94,7 @@
   "fixed_section_vars":
     [
       "ghost_version",
+      "ghost_features",
       "conf",
       "config",
       "config_dir",

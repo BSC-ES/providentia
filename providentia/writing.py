@@ -450,7 +450,7 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
         # GHOST data
         if prv.reading_ghost:
 
-            # set GHOST data variable (e.g. representativity)
+            # set GHOST data variable (e.g. coverage)
             var = fout.createVariable('{}_ghost_data'.format(networkspeci), 'f4', 
                                      ('ghost_data_variable', station_dimension_var, 'time',))
             # set attributes and data
@@ -663,12 +663,12 @@ def export_configuration(prv, cname, separator="||"):
         if prv.flag_menu['checkboxes']['remove_selected']:
             options['section']['flags'] = ",".join(str(i) for i in prv.flag_menu['checkboxes']['remove_selected'])
 
-    # representativity
-    representativity_vars = prv.representativity_menu['rangeboxes']['labels']
-    for i, label in enumerate(representativity_vars):
-        representativity_limit = prv.representativity_menu['rangeboxes']['current_lower'][i] 
-        if float(representativity_limit) != 0:  
-            options['section'][label] = representativity_limit
+    # coverage
+    coverage_vars = prv.coverage_menu['rangeboxes']['map_vars']
+    for i, label in enumerate(coverage_vars):
+        coverage_limit = prv.coverage_menu['rangeboxes']['current_lower'][i] 
+        if float(coverage_limit) != 0:  
+            options['section'][label] = coverage_limit
 
     # period
     if prv.period_menu['checkboxes']['keep_selected'] or prv.period_menu['checkboxes']['remove_selected']:

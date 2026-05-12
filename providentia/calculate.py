@@ -38,7 +38,7 @@ class Stats(object):
     """Class for the calculation of basic statistics."""
 
     @staticmethod
-    def calculate_mean(data):
+    def calculate_mean(data, weights=None):
         """
         Calculate mean
 
@@ -56,7 +56,10 @@ class Stats(object):
         if data.size == 0:
             return np.nan
         else:
-            return np.nanmean(data, axis=-1)
+            if weights is not None:
+                return np.nanmean(data, axis=-1, weights=weights)
+            else:
+                return np.nanmean(data, axis=-1)
 
     @staticmethod
     def calculate_median(data):
@@ -289,7 +292,116 @@ class Stats(object):
 
             return stations_number
 
+    @staticmethod
+    def calculate_stations_number_unique(data, statistic_mode, statistic_aggregation, per_station,
+                                        periodic_statistic_mode=None, periodic_statistic_aggregation=None):
+        """
+        Calculate number of unique stations across the full domain.
 
+        A station is counted once if it has at least one non-NaN value anywhere
+        across all times and all groups.
+
+        Parameters
+        ----------
+        data : numpy.array
+            Data array
+        statistic_mode : str
+            Statistic mode
+        statistic_aggregation : str
+            Statistic aggregation
+        per_station : bool
+            Per station
+        periodic_statistic_mode : str
+            Periodic statistic mode
+        periodic_statistic_aggregation : str
+            Periodic statistic aggregation
+
+        Returns
+        -------
+        float or numpy.ndarray
+            Number of unique stations across the full domain
+        """
+
+        if data.size == 0:
+            return np.nan
+        else:
+
+            # ----------------------------------------------------------
+            # PERIODIC CYCLE MODE
+            #
+            # In this mode the original function counts stations along axis=0,
+            # so the layout is effectively:
+            #   (station, label, period, ...)
+            #
+            # We therefore preserve:
+            #   station axis = 0
+            #   label axis   = 1
+            #
+            # and collapse everything else.
+            # ----------------------------------------------------------
+            if periodic_statistic_mode == 'Cycle':
+
+                station_axis = 0
+                label_axis = 1
+
+                axes_to_reduce = tuple(
+                    ax for ax in range(data.ndim)
+                    if ax not in (station_axis, label_axis)
+                )
+
+                if len(axes_to_reduce) > 0:
+                    stations_valid = np.any(~np.isnan(data), axis=axes_to_reduce)
+                else:
+                    stations_valid = ~np.isnan(data)
+
+                # stations_valid should now have shape (station, label)
+                stations_number = np.count_nonzero(stations_valid, axis=station_axis).astype('float32')
+
+            # ----------------------------------------------------------
+            # ALL OTHER CASES
+            #
+            # Usual layout is:
+            #   (label, station, time)
+            # or grouped variants where label is still before station.
+            #
+            # We preserve label axis and station axis, and collapse all others.
+            # ----------------------------------------------------------
+            else:
+
+                if data.ndim == 5:
+                    station_axis = data.ndim - 3
+                else:
+                    station_axis = data.ndim - 2
+
+                # For the usual non-cycle cases, label axis is:
+                #   0 for 3D (label, station, time)
+                #   1 for grouped/independent cases like (group, label, station, time)
+                if data.ndim == 3:
+                    label_axis = 0
+                else:
+                    label_axis = 1
+
+                axes_to_reduce = tuple(
+                    ax for ax in range(data.ndim)
+                    if ax not in (label_axis, station_axis)
+                )
+
+                if len(axes_to_reduce) > 0:
+                    stations_valid = np.any(~np.isnan(data), axis=axes_to_reduce)
+                else:
+                    stations_valid = ~np.isnan(data)
+
+                # After reduction, count stations along the remaining station axis
+                remaining_axes = [ax for ax in range(data.ndim) if ax not in axes_to_reduce]
+                station_axis_reduced = remaining_axes.index(station_axis)
+
+                stations_number = np.count_nonzero(
+                    stations_valid,
+                    axis=station_axis_reduced
+                ).astype('float32')
+
+            return stations_number
+    
     @staticmethod
     def calculate_data_avail_number(data):
         """
@@ -336,7 +448,7 @@ class Stats(object):
 
     @staticmethod
     def calculate_mda8(data, statistic_mode, statistic_aggregation, per_station,
-                       periodic_statistic_mode=None):
+                       periodic_statistic_mode=None, periodic_statistic_aggregation=None):
         """
         Calculate MDA8 (daily maximum 8 hour average) 
 
@@ -352,7 +464,9 @@ class Stats(object):
             Per station
         periodic_statistic_mode : str
             Periodic statistic mode
-            
+        periodic_statistic_aggregation : str
+            Periodic statistic aggregation
+
         Returns
         -------
         float

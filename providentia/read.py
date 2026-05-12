@@ -6,23 +6,29 @@ import datetime
 import multiprocessing
 import os
 import sys
+import time
 
+import cftime
 from dateutil.relativedelta import relativedelta
-from netCDF4 import Dataset
+from netCDF4 import Dataset, num2date, chartostring
 import numpy as np
+from packaging.version import Version
 import pandas as pd
+import yaml
 
-from providentia.auxiliar import get_standard_units, get_standard_parameters_by_speci
-from .fields_menus import (init_representativity, init_period, init_metadata,
-                           update_representativity_fields, update_period_fields, update_metadata_fields,
-                           representativity_conf, period_conf, metadata_conf)
+from providentia.auxiliar import CURRENT_PATH, join, get_standard_units, get_standard_parameters_by_speci
+from .fields_menus import (init_coverage, init_period, init_metadata,
+                           update_coverage_fields, update_period_fields, update_metadata_fields,
+                           coverage_conf, period_conf, metadata_conf)
 from .plot_aux import update_plotting_parameters
 from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, get_yearmonths_to_read, 
-                       init_shared_vars_read_netcdf_data, read_netcdf_data, read_netcdf_metadata, 
+                       init_shared_vars_read_netcdf_data, read_netcdf_data_new, read_netcdf_metadata, 
                        check_forecast_dimension)
 from .spatial_colocation import SpatialColocation
 from .warnings_prv import show_message
 
+# get current path and providentia root path
+PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 
 class DataReader:
     """ Class for reading data into memory """
@@ -53,6 +59,12 @@ class DataReader:
             A list of models to add to arrays.
         """
 
+        prints = True
+
+        if prints:
+            print('----------------------START READ--------------------------')
+            start = time.time()
+
         # changing time dimension ?
         if ('reset' in operations) or ('read_left' in operations) or ('read_right' in operations) or ('cut_left' in operations) or ('cut_right' in operations):
 
@@ -64,13 +76,13 @@ class DataReader:
             self.read_instance.reading_ghost = check_for_ghost(self.read_instance.network[0])
 
             # re-initialise and update fields for active resolution
-            init_representativity(self.read_instance)
+            init_coverage(self.read_instance)
             init_period(self.read_instance)
-            update_representativity_fields(self.read_instance)
+            update_coverage_fields(self.read_instance)
             update_period_fields(self.read_instance)
             # if loading from a conf file then load new fields
             if self.read_instance.from_conf:
-                representativity_conf(self.read_instance)
+                coverage_conf(self.read_instance)
                 period_conf(self.read_instance)
 
             # get active frequency code
@@ -145,9 +157,17 @@ class DataReader:
                     self.read_instance.time_array < datetime.datetime.strptime(str(year+1)+'0101','%Y%m%d')], axis=0)) 
                     for year in np.unique([int(str(yyyymm)[:4]) for yyyymm in self.read_instance.yearmonths])])
 
+                if prints:
+                    print('Time to reset arrays: {}'.format(time.time()-start))
+                    last = time.time()
+
                 # get unique basic metadata across networkspecies
                 # for this step include filter networkspecies
                 self.read_basic_metadata()
+
+                if prints:
+                    print('Time to read basic metadata: {}'.format(time.time()-last))
+                    last = time.time()
 
                 # iterate through station_references per networkspecies
                 # if have 0 valid stations then drop  
@@ -160,7 +180,7 @@ class DataReader:
                             show_message(self.read_instance, msg)
                         elif networkspeci in self.read_instance.filter_networkspecies:
                             self.read_instance.filter_networkspecies.remove(networkspeci)
-                            self.read_instance.filter_species.remove(networkspeci.split('|')[1])
+                            del self.read_instance.filter_species[networkspeci]
                             msg = 'There is no available observational data for the filter network|species: {}. Dropping.'.format(networkspeci)
                             show_message(self.read_instance, msg)
 
@@ -172,6 +192,10 @@ class DataReader:
                 # set invalid_read to be False if have data to read
                 self.read_instance.invalid_read = False
 
+                if prints:
+                    print('Time to check invaid read: {}'.format(time.time()-last))
+                    last = time.time()
+
         # need to reset all data structures 
         if 'reset' in operations:  
 
@@ -182,6 +206,10 @@ class DataReader:
             # get list of yearmonths to read
             yearmonths_to_read = get_yearmonths_to_read(self.read_instance.yearmonths, self.read_instance.start_date,
                                                         self.read_instance.end_date, self.read_instance.resolution)
+
+            if prints:
+                print('Time to check yearmonths to read: {}'.format(time.time()-last))
+                last = time.time()
 
             # check if any of the model data has a forecast dimension to handle 
             # only for report / library modes as dashboard handled previously
@@ -207,12 +235,12 @@ class DataReader:
                                                             np.full((len(self.read_instance.station_references[networkspeci]),
                                                                      len(self.read_instance.time_array)),
                                                                      np.nan, dtype=np.float32) for networkspeci in self.read_instance.filter_networkspecies}
+
+
             else:
                 self.read_instance.filter_data_in_memory = {}
 
-            # initialise variables and get representativity resolutions
-            self.read_instance.ghost_data_in_memory = {}
-            self.read_instance.ghost_data_vars_to_read = []
+            # get resolution for getting selection of coverage variables
             if self.read_instance.resolution in ['hourly', 'hourly_instantaneous']:
                 resolution = 'hourly'
             elif self.read_instance.resolution in ['daily', '3hourly', '6hourly', '3hourly_instantaneous', '6hourly_instantaneous']:
@@ -220,21 +248,50 @@ class DataReader:
             elif self.read_instance.resolution == 'monthly':
                 resolution = 'monthly'
 
-            # get data variables which change per measurement (for filtering)
+            # set GHOST variables and metadata to read
             if self.read_instance.reading_ghost:
-                # get representativity fields (only native because non-native and all are calculated on-the-fly)
-                self.read_instance.ghost_data_vars_to_read = [var for var 
-                                                              in self.read_instance.representativity_info['ghost'][resolution]['map_vars'] 
-                                                              if 'native' in var]
-                # add annual native representativity percent    
-                self.read_instance.ghost_data_vars_to_read.append('annual_native_representativity_percent') 
 
-                # add periodic code variables
-                self.read_instance.ghost_data_vars_to_read.append('season_code')
-                if self.read_instance.resolution != 'monthly':
-                    self.read_instance.ghost_data_vars_to_read.append('weekday_weekend_code')
-                if self.read_instance.resolution not in ['monthly', 'daily']:
-                    self.read_instance.ghost_data_vars_to_read.append('day_night_code')
+                # get list of GHOST variables to read (set by ghost_features variable)
+                # load ghost_feature.yaml
+                ghost_features = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'ghost_features.yaml')))
+                wanted_ghost_features = ghost_features[self.read_instance.ghost_features]
+
+                # get list of GHOST metadata variables to read
+                if wanted_ghost_features['metadata'][0] == 'all':
+                    ghost_metadata_vars_to_read = list(self.read_instance.standard_metadata.keys())
+                else:
+                    ghost_metadata_vars_to_read = wanted_ghost_features['metadata']
+                self.read_instance.metadata_vars_to_read = [key for key in ghost_metadata_vars_to_read if
+                                                            pd.isnull(self.read_instance.standard_metadata[key]['metadata_type']) == False]
+                self.read_instance.metadata_dtype = [(key, self.read_instance.standard_metadata[key]['data_type']) 
+                                                      for key in self.read_instance.metadata_vars_to_read]
+
+                # want all variables?
+                if wanted_ghost_features['variables'][0] == 'all':
+                    # add coverage variables
+                    if float(self.read_instance.ghost_version) < 1.6:
+                        self.read_instance.ghost_data_vars_to_read = [var for var 
+                                                                      in self.read_instance.coverage_info['ghost'][resolution]['map_vars_old'] 
+                                                                      if 'native' in var]
+                    else:
+                        self.read_instance.ghost_data_vars_to_read = [var for var 
+                                                                      in self.read_instance.coverage_info['ghost'][resolution]['map_vars'] 
+                                                                      if 'native' in var]  
+                    
+                    # add period codes
+                    self.read_instance.ghost_data_vars_to_read.append('season_code')
+                    if self.read_instance.resolution != 'monthly':
+                        self.read_instance.ghost_data_vars_to_read.append('weekday_weekend_code')
+                    if self.read_instance.resolution not in ['monthly', 'daily']:
+                        self.read_instance.ghost_data_vars_to_read.append('day_night_code')
+
+                # want no variables?
+                elif wanted_ghost_features['variables'][0] == 'none':
+                    self.read_instance.ghost_data_vars_to_read = []
+
+                # otherwise, take set variables
+                else:
+                    self.read_instance.ghost_data_vars_to_read = wanted_ghost_features['variables']
 
                 # initialise data in memory for GHOST with NaN for these variables
                 self.read_instance.ghost_data_in_memory = {networkspeci:
@@ -243,28 +300,36 @@ class DataReader:
                                                  len(self.read_instance.time_array)),
                                                  np.nan, dtype=np.float32) for networkspeci in self.read_instance.networkspecies} 
             
-            if self.read_instance.reading_ghost:
-                representativity_valid_vars = self.read_instance.representativity_info['ghost'][resolution]['map_vars']
-            else:
-                representativity_valid_vars = self.read_instance.representativity_info['nonghost'][resolution]['map_vars']
+                # get valid coverage variables
+                if float(self.read_instance.ghost_version) < 1.6:
+                    coverage_valid_vars = self.read_instance.coverage_info['ghost'][resolution]['map_vars_old']
+                else:
+                    coverage_valid_vars = self.read_instance.coverage_info['ghost'][resolution]['map_vars']
 
-            # metadata 
-            # non-GHOST
-            if not self.read_instance.reading_ghost:
+            # set metadata to read for non-GHOST data
+            else:
+                self.read_instance.ghost_data_in_memory = {}
+                self.read_instance.ghost_data_vars_to_read = []
+                if float(self.read_instance.ghost_version) < 1.6:
+                    coverage_valid_vars = self.read_instance.coverage_info['nonghost'][resolution]['map_vars_old']
+                else:
+                    coverage_valid_vars = self.read_instance.coverage_info['nonghost'][resolution]['map_vars']
+
+                # set metadata to read 
                 self.read_instance.metadata_dtype = [(nonghost_var, self.read_instance.standard_metadata[nonghost_var]['data_type'])
                                                       for nonghost_var in self.read_instance.nonghost_metadata_vars_to_read]
                 self.read_instance.metadata_vars_to_read = self.read_instance.nonghost_metadata_vars_to_read
-            # GHOST
-            else:
-                self.read_instance.metadata_dtype = self.read_instance.ghost_metadata_dtype
-                self.read_instance.metadata_vars_to_read = self.read_instance.ghost_metadata_vars_to_read
+
+            if prints:
+                print('Setting arrays: {}'.format(time.time()-last))
+                last = time.time()  
 
             # show warning when there is a non-defined field if launching from a config file
             if hasattr(self.read_instance, "non_default_fields_per_section"):
                 # get all the valid args in one list
                 period_set = ['period'] if self.read_instance.reading_ghost else []
                 valid_fields = self.read_instance.metadata_vars_to_read + self.read_instance.ghost_data_vars_to_read + \
-                    period_set + representativity_valid_vars
+                    period_set + coverage_valid_vars
 
                 # remove all the valid fields from the invalid field list
                 self.read_instance.invalid_fields = {field_name: fields-set(valid_fields)
@@ -283,16 +348,43 @@ class DataReader:
                         for k in section_invalid_fields:
                             # control if the atribute exists because in report mode the subsection ones are not set yet
                             if hasattr(self.read_instance, k):
-                                delattr(self.read_instance, k)                 
+                                delattr(self.read_instance, k)  
 
-            self.read_instance.metadata_in_memory = {networkspeci: 
-                                                     np.full((len(self.read_instance.station_references['{}'.format(networkspeci)]),
-                                                              len(self.read_instance.yearmonths)),
-                                                              np.nan, dtype=self.read_instance.metadata_dtype) 
-                                                              for networkspeci in self.read_instance.networkspecies}
+            if prints:
+                print('Warnings: {}'.format(time.time()-last))
+                last = time.time()              
+
+            #self.read_instance.metadata_in_memory = {networkspeci: 
+            #                                         np.full((len(self.read_instance.station_references['{}'.format(networkspeci)]),
+            #                                                  len(self.read_instance.yearmonths)),
+            #                                                  np.nan, dtype=self.read_instance.metadata_dtype) 
+            #                                                  for networkspeci in self.read_instance.networkspecies}
+
+            metadata_dtype = self.read_instance.metadata_dtype
+            station_refs = self.read_instance.station_references
+            yearmonths_len = len(self.read_instance.yearmonths)
+
+            metadata_in_memory = {}
+
+            for netspec in self.read_instance.networkspecies:
+                n_stations = len(station_refs[netspec])
+                # fastest initialization: empty + fill
+                arr = np.empty((n_stations, yearmonths_len), dtype=metadata_dtype)
+                arr[:] = np.nan
+                metadata_in_memory[netspec] = arr
+
+            self.read_instance.metadata_in_memory = metadata_in_memory
+
+            if prints:
+                print('Set metadata in memory: {}'.format(time.time()-last))
+                last = time.time()
 
             # read data 
             self.read_data(yearmonths_to_read, self.read_instance.data_labels)
+
+            if prints:
+                print('Time to read: {}'.format(time.time()-last))
+                last = time.time()
 
             # update measurement units for all species (take standard units for each speci from parameter dictionary)
             # non-GHOST
@@ -317,6 +409,10 @@ class DataReader:
 
             # update plotting parameters colours, zorder and model grid edges
             update_plotting_parameters(self.read_instance) 
+
+            if prints:
+                print('Update plotting params: {}'.format(time.time()-last))
+                last = time.time()
 
         # need to read on left / read on right / cut on left / cut on right (for dashboard)
         if ('read_left' in operations) or ('read_right' in operations) or ('cut_left' in operations) or ('cut_right' in operations):  
@@ -575,12 +671,30 @@ class DataReader:
             delattr(self.read_instance, 'valid_station_inds')
             delattr(self.read_instance, 'valid_station_inds_temporal_colocation')
 
+        if prints:
+            print('Deleting station inds: {}'.format(time.time()-last))
+            last = time.time()
+
         # re-initialise and update metadata fields for read metadata
         init_metadata(self.read_instance)
+
+        if prints:
+            print('init metadata: {}'.format(time.time()-last))
+            last = time.time()
+
         update_metadata_fields(self.read_instance)
+
+        if prints:
+            print('Updating metadata: {}'.format(time.time()-last))
+            last = time.time()
+
         # if loading from a conf file then load metadata fields
         if self.read_instance.from_conf:
             metadata_conf(self.read_instance)
+
+        if prints:
+            print('Updating metadata conf: {}'.format(time.time()-last))
+            last = time.time()
 
         # determine if have daily forecast active or not
         self.read_instance.daily_forecast = np.any([True for data_label in self.read_instance.data_labels if '-daily' in data_label])
@@ -622,10 +736,15 @@ class DataReader:
                     self.read_instance.logger.info(str_model)
                     mods_printed.append(model)
 
+        if prints:
+            print('Ending read func: {}'.format(time.time()-last))
+            last = time.time()       
+            print('TOTAL READ TIME: {}'.format(time.time()-start))
+            print('----------------------END READ--------------------------')
 
     def read_basic_metadata(self):     
         """
-        Extracts unique basic station metadata and handles spatial colocation across multiple networkspecies (if set) in parallel.
+        Extracts unique basic station metadata and handles spatial colocation across multiple networkspecies (if set).
         The basic metadata fields are: station_reference, station_name, longitude, latitude, measurement_altitude, 
         station_classification and area_classification.
         """
@@ -677,13 +796,12 @@ class DataReader:
                     show_message(self.read_instance, msg)
                 elif networkspeci in self.read_instance.filter_networkspecies:
                     self.read_instance.filter_networkspecies.remove(networkspeci)
-                    if networkspeci.split('|')[1] in self.read_instance.filter_species:
-                        self.read_instance.filter_species.remove(networkspeci.split('|')[1])
+                    del self.read_instance.filter_species[networkspeci]
                     msg = 'There is no available observational data for the filter network|species: {}. Dropping.'.format(networkspeci)
                     show_message(self.read_instance, msg)
                 continue
                 
-            # get basic metadata for speci - read in parallel
+            # get basic metadata for speci
                 
             # define arrays for storing speci metadata
             speci_station_references = []
@@ -692,14 +810,11 @@ class DataReader:
             speci_station_latitudes = []
             speci_station_measurement_altitudes = []
 
-            # read metadata in parallel
+            # read metadata
             tuple_arguments = []
             for fname in relevant_files:
                 tuple_arguments.append((fname, self.read_instance.reading_ghost, self.read_instance.logger))
-            pool = multiprocessing.Pool(self.read_instance.n_cpus)
-            returned_data = pool.map(read_netcdf_metadata, tuple_arguments)
-            pool.close()
-            pool.join()
+            returned_data = [read_netcdf_metadata(args) for args in tuple_arguments]
 
             # unzip returned data
             for returned_data_per_month in returned_data:
@@ -738,8 +853,8 @@ class DataReader:
                 ncdf_root = Dataset(relevant_files[0])
                 self.read_instance.nonghost_units[speci] = ncdf_root[speci].units
 
-                # get list of nonghost variables to read (subset of GHOST variables)
-                for ghost_metadata_var in self.read_instance.ghost_metadata_vars_to_read:
+                # get list of nonghost variables to read (subset of full GHOST variables)
+                for ghost_metadata_var in list(self.read_instance.standard_metadata.keys()):
                     if (ghost_metadata_var in ncdf_root.variables) & (ghost_metadata_var not in self.read_instance.nonghost_metadata_vars_to_read):
                         self.read_instance.nonghost_metadata_vars_to_read.append(ghost_metadata_var) 
 
@@ -768,7 +883,9 @@ class DataReader:
             
             # for GHOST data, just set up some variables for checks
             else:
-                basic_metadata_read = [speci_station_references, speci_station_longitudes, speci_station_latitudes, speci_station_names, speci_station_measurement_altitudes]
+                basic_metadata_read = [speci_station_references, speci_station_longitudes, 
+                                       speci_station_latitudes, speci_station_names,
+                                       speci_station_measurement_altitudes]
                 have_station_name = True
                 have_measurement_altitude = True
 
@@ -779,8 +896,8 @@ class DataReader:
                 sys.exit(1) 
 
             # get unique station references and apply unique indices to the other variables        
-            speci_station_references, station_unique_indices = np.unique(speci_station_references, return_index=True)
-            self.read_instance.station_references[networkspeci] = speci_station_references
+            unique_station_references, station_unique_indices = np.unique(speci_station_references, return_index=True)
+            self.read_instance.station_references[networkspeci] = unique_station_references
             self.read_instance.station_longitudes[networkspeci] = speci_station_longitudes[station_unique_indices]
             self.read_instance.station_latitudes[networkspeci] = speci_station_latitudes[station_unique_indices]
             if have_station_name:
@@ -811,7 +928,6 @@ class DataReader:
                         self.read_instance.station_measurement_altitudes[ns] = self.read_instance.station_measurement_altitudes[ns][ns_intersects]
                     if ns in self.read_instance.station_names:
                         self.read_instance.station_names[ns] = self.read_instance.station_names[ns][ns_intersects]
-
 
     def check_forecast(self, yearmonths_to_read=None, data_labels=None, data_labels_raw=None, networkspecies=None):
         """
@@ -1258,17 +1374,25 @@ class DataReader:
             List of data labels representing the datasets to be loaded into memory.
         """
 
+        prints = False
+        if prints:
+            last = time.time()
+
         # create arrays to share across processes (for parallel multiprocessing use)
         # this only works for numerical dtypes, i.e. not strings
-        timestamp_array_shared = multiprocessing.RawArray(ctypes.c_int64, len(self.read_instance.timestamp_array))
-        if (self.read_instance.reading_ghost or self.read_instance.network[0] == 'actris/actris') & (self.read_instance.observations_data_label in data_labels):
-            flags_shared = multiprocessing.RawArray(ctypes.c_uint8, len(self.read_instance.flags))
-        else:
-            flags_shared = None
+        #timestamp_array_shared = multiprocessing.RawArray(ctypes.c_int64, len(self.read_instance.timestamp_array))
+        #if (self.read_instance.reading_ghost or self.read_instance.network[0] == 'actris/actris') & (self.read_instance.observations_data_label in data_labels):
+        #    flags_shared = multiprocessing.RawArray(ctypes.c_uint8, len(self.read_instance.flags))
+        #else:
+        #    flags_shared = None
         # fill arrays
-        timestamp_array_shared[:] = self.read_instance.timestamp_array
-        if (self.read_instance.reading_ghost or self.read_instance.network[0] == 'actris/actris') & (self.read_instance.observations_data_label in data_labels):
-            flags_shared[:] = self.read_instance.flags
+        #timestamp_array_shared[:] = self.read_instance.timestamp_array
+        #if (self.read_instance.reading_ghost or self.read_instance.network[0] == 'actris/actris') & (self.read_instance.observations_data_label in data_labels):
+        #    flags_shared[:] = self.read_instance.flags
+
+        if prints:
+            print('-----Time to setup shared time memory: {}'.format(time.time()-last))
+            last = time.time()
 
         # create dictionary for saving files to read
         self.read_instance.files_to_read = {}
@@ -1353,6 +1477,10 @@ class DataReader:
                 yearmonths_to_read_intersect = list(set(yearmonths_to_read) & set(available_yearmonths))
                 self.read_instance.files_to_read[networkspeci][base_data_label] = sorted([file_root+str(yyyymm)+'.nc' for yyyymm in yearmonths_to_read_intersect])
                 
+            if prints:
+                print('-----Time to get relevant file start dates: {}'.format(time.time()-last))
+                last = time.time()
+
             # if active qa == default qa, no need to screen by QA, so inform reading function of this
             default_qa = get_default_qa(self.read_instance, speci)
             if self.read_instance.qa_per_species[speci] == default_qa:
@@ -1360,52 +1488,65 @@ class DataReader:
             else:
                 default_qa_active = False
 
+            if prints:
+                print('-----Time to get default QA: {}'.format(time.time()-last))
+                last = time.time()
+
             # create network/speci specific arrays to share across processes (for parallel multiprocessing use)
             # this only works for numerical dtypes, i.e. not strings
-            if not filter_read:
-                data_in_memory_shared_shape = (len(data_labels), len(self.read_instance.station_references[networkspeci]), len(self.read_instance.time_array))
-            else:
-                data_in_memory_shared_shape = (1, len(self.read_instance.station_references[networkspeci]), len(self.read_instance.time_array))
-            data_in_memory_shared = multiprocessing.RawArray(ctypes.c_float, data_in_memory_shared_shape[0] * data_in_memory_shared_shape[1] * data_in_memory_shared_shape[2])  
-            if (self.read_instance.reading_ghost or self.read_instance.network[0] == 'actris/actris') & (self.read_instance.observations_data_label in data_labels):
-                qa_shared = multiprocessing.RawArray(ctypes.c_uint8, len(self.read_instance.qa_per_species[speci]))
-                if not filter_read:
-                    ghost_data_in_memory_shared_shape = (len(self.read_instance.ghost_data_vars_to_read), len(self.read_instance.station_references[networkspeci]), len(self.read_instance.time_array))
-                    ghost_data_in_memory_shared = multiprocessing.RawArray(ctypes.c_float, ghost_data_in_memory_shared_shape[0] * ghost_data_in_memory_shared_shape[1] * ghost_data_in_memory_shared_shape[2])  
-                else:
-                    ghost_data_in_memory_shared_shape = None
-                    ghost_data_in_memory_shared = None
-            else:
-                qa_shared = None
-                ghost_data_in_memory_shared_shape = None
-                ghost_data_in_memory_shared = None
+            #if not filter_read:
+            #    data_in_memory_shared_shape = (len(data_labels), len(self.read_instance.station_references[networkspeci]), len(self.read_instance.time_array))
+            #else:
+            #    data_in_memory_shared_shape = (1, len(self.read_instance.station_references[networkspeci]), len(self.read_instance.time_array))
+            #data_in_memory_shared = multiprocessing.RawArray(ctypes.c_float, data_in_memory_shared_shape[0] * data_in_memory_shared_shape[1] * data_in_memory_shared_shape[2])  
+            #if (self.read_instance.reading_ghost or self.read_instance.network[0] == 'actris/actris') & (self.read_instance.observations_data_label in data_labels):
+            #    qa_shared = multiprocessing.RawArray(ctypes.c_uint8, len(self.read_instance.qa_per_species[speci]))
+            #    if not filter_read:
+            #        ghost_data_in_memory_shared_shape = (len(self.read_instance.ghost_data_vars_to_read), len(self.read_instance.station_references[networkspeci]), len(self.read_instance.time_array))
+            #        ghost_data_in_memory_shared = multiprocessing.RawArray(ctypes.c_float, ghost_data_in_memory_shared_shape[0] * ghost_data_in_memory_shared_shape[1] * ghost_data_in_memory_shared_shape[2])  
+            #    else:
+            #        ghost_data_in_memory_shared_shape = None
+            #        ghost_data_in_memory_shared = None
+            #else:
+            #    qa_shared = None
+            #    ghost_data_in_memory_shared_shape = None
+            #    ghost_data_in_memory_shared = None
 
             # wrap data_in_memory_shared and ghost_data_in_memory_shared as numpy arrays so we can easily manipulate the data.
-            data_in_memory_shared_np = np.frombuffer(data_in_memory_shared, dtype=np.float32).reshape(data_in_memory_shared_shape)
-            if (self.read_instance.reading_ghost) & (self.read_instance.observations_data_label in data_labels) & (not filter_read):
-                ghost_data_in_memory_shared_np = np.frombuffer(ghost_data_in_memory_shared, dtype=np.float32).reshape(ghost_data_in_memory_shared_shape)
+            #data_in_memory_shared_np = np.frombuffer(data_in_memory_shared, dtype=np.float32).reshape(data_in_memory_shared_shape)
+            #if (self.read_instance.reading_ghost) & (self.read_instance.observations_data_label in data_labels) & (not filter_read):
+            #    ghost_data_in_memory_shared_np = np.frombuffer(ghost_data_in_memory_shared, dtype=np.float32).reshape(ghost_data_in_memory_shared_shape)
 
             # fill arrays
-            if not filter_read:
-                data_label_indices = [self.read_instance.data_labels.index(data_label) for data_label in data_labels]
-                np.copyto(data_in_memory_shared_np, self.read_instance.data_in_memory[networkspeci][data_label_indices, :, :])
-            else:
-                np.copyto(data_in_memory_shared_np, self.read_instance.filter_data_in_memory[networkspeci][:, :])
+            #if not filter_read:
+            #    data_label_indices = [self.read_instance.data_labels.index(data_label) for data_label in data_labels]
+            #    np.copyto(data_in_memory_shared_np, self.read_instance.data_in_memory[networkspeci][data_label_indices, :, :])
+            #else:
+            #    np.copyto(data_in_memory_shared_np, self.read_instance.filter_data_in_memory[networkspeci][:, :])
             
-            if (self.read_instance.reading_ghost or self.read_instance.network[0] == 'actris/actris') & (self.read_instance.observations_data_label in data_labels):      
-                qa_shared[:] = self.read_instance.qa_per_species[speci]
-                if (self.read_instance.reading_ghost):      
-                    if not filter_read:
-                        np.copyto(ghost_data_in_memory_shared_np, self.read_instance.ghost_data_in_memory[networkspeci])  
+            #if (self.read_instance.reading_ghost or self.read_instance.network[0] == 'actris/actris') & (self.read_instance.observations_data_label in data_labels):      
+            #    qa_shared[:] = self.read_instance.qa_per_species[speci]
+            #    if (self.read_instance.reading_ghost):      
+            #        if not filter_read:
+            #            np.copyto(ghost_data_in_memory_shared_np, self.read_instance.ghost_data_in_memory[networkspeci])  
             
+            if prints:
+                print('-----Time to setup shared memory: {}'.format(time.time()-last))
+                last = time.time()
+
             # iterate and read species data in all relevant netCDF files (either in serial/parallel)
 
             # read data in parallel
             # setup pool of N workers on N CPUs
-            pool = multiprocessing.Pool(self.read_instance.n_cpus, initializer=init_shared_vars_read_netcdf_data, 
-                                        initargs=(data_in_memory_shared, data_in_memory_shared_shape, 
-                                                  ghost_data_in_memory_shared, ghost_data_in_memory_shared_shape, 
-                                                  timestamp_array_shared, qa_shared, flags_shared))
+            #pool = multiprocessing.Pool(self.read_instance.n_cpus, initializer=init_shared_vars_read_netcdf_data, 
+            #                            initargs=(data_in_memory_shared, data_in_memory_shared_shape, 
+            #                                      ghost_data_in_memory_shared, ghost_data_in_memory_shared_shape, 
+            #                                      timestamp_array_shared, qa_shared, flags_shared))
+            #pool = multiprocessing.Pool(4, initializer=init_shared_vars_read_netcdf_data, 
+            #                            initargs=(data_in_memory_shared, data_in_memory_shared_shape, 
+            #                                      ghost_data_in_memory_shared, ghost_data_in_memory_shared_shape, 
+            #                                      timestamp_array_shared, qa_shared, flags_shared))
+
             # read netCDF files in parallel
             tuple_argument_fields = ['filename', 'station_references', 'station_names', 'speci', 
                                      'observations_data_label', 'data_label', 'data_labels', 
@@ -1432,7 +1573,7 @@ class DataReader:
                     tuple_arguments.append((fname, self.read_instance.station_references[networkspeci], 
                                             self.read_instance.station_names[networkspeci], speci, 
                                             self.read_instance.observations_data_label, 
-                                            base_data_label, data_labels, 
+                                            base_data_label, self.read_instance.data_labels, 
                                             self.read_instance.reading_ghost, 
                                             self.read_instance.ghost_data_vars_to_read, 
                                             self.read_instance.metadata_dtype, 
@@ -1441,32 +1582,59 @@ class DataReader:
                                             default_qa_active, filter_read, 
                                             network, forecast_indices))
 
-            returned_data = pool.map(read_netcdf_data, tuple_arguments)
+            if prints:
+                print('-----Time to setup arguments: {}'.format(time.time()-last))
+                last = time.time()
 
-            pool.close()
+            # Manually initialize shared memory for the current process
+            #init_shared_vars_read_netcdf_data(
+            #    data_in_memory_shared,
+            #    data_in_memory_shared_shape,
+            #    ghost_data_in_memory_shared,
+            #    ghost_data_in_memory_shared_shape,
+            #    timestamp_array_shared,
+            #    qa_shared,
+            #    flags_shared
+            #)
+
+            if prints:
+                print('-----Time to initialise: {}'.format(time.time()-last))
+                last = time.time()
+
+            #returned_data = pool.map(read_netcdf_data, tuple_arguments)
+            #returned_data = pool.imap_unordered(read_netcdf_data, tuple_arguments)
+            returned_data = [self.read_netcdf_data_newer(args) for args in tuple_arguments]
+
+            #returned_data = [read_netcdf_data_new(self.read_instance, args) for args in tuple_arguments]
+
+            #pool.close()
             # wait for worker processes to terminate before continuing
-            pool.join()
+            #pool.join()
             
             # do not read data if there are not enough datasets (less than 2 timesteps)
             if not returned_data:
                 continue
+            
+            if prints:
+                print('-----Time to read all files: {}'.format(time.time()-last))
+                last = time.time()
 
             # finalise assignment of non-filter species
             if not filter_read:
                 # iterate through read file data and place metadata into full array as appropriate
-                for returned_data_ii, returned_data_per_month in enumerate(returned_data):
-                    returned_filename = tuple_arguments[returned_data_ii][tuple_argument_fields.index('filename')]
-                    returned_data_label = tuple_arguments[returned_data_ii][tuple_argument_fields.index('data_label')]
-                    returned_yearmonth = returned_filename.split('_')[-1][:6]
-                    if returned_data_label == self.read_instance.observations_data_label:
+            #    for returned_data_ii, returned_data_per_month in enumerate(returned_data):
+            #        returned_filename = tuple_arguments[returned_data_ii][tuple_argument_fields.index('filename')]
+            #        returned_data_label = tuple_arguments[returned_data_ii][tuple_argument_fields.index('data_label')]
+            #        returned_yearmonth = returned_filename.split('_')[-1][:6]
+            #        if returned_data_label == self.read_instance.observations_data_label:
                         # if returned_data_per_month is empty list, do not add
-                        if len(returned_data_per_month) > 0:
-                            self.read_instance.metadata_in_memory[networkspeci][:, self.read_instance.yearmonths.index(returned_yearmonth)] = returned_data_per_month[:, 0]
+            #            if len(returned_data_per_month) > 0:
+            #                self.read_instance.metadata_in_memory[networkspeci][:, self.read_instance.yearmonths.index(returned_yearmonth)] = returned_data_per_month[:, 0]
 
                 # save to data in memory
-                self.read_instance.data_in_memory[networkspeci][data_label_indices, :, :] = data_in_memory_shared_np
-                if (self.read_instance.reading_ghost) & (self.read_instance.observations_data_label in data_labels):
-                    self.read_instance.ghost_data_in_memory[networkspeci] = ghost_data_in_memory_shared_np
+                #self.read_instance.data_in_memory[networkspeci][data_label_indices, :, :] = data_in_memory_shared_np
+                #if (self.read_instance.reading_ghost) & (self.read_instance.observations_data_label in data_labels):
+                #    self.read_instance.ghost_data_in_memory[networkspeci] = ghost_data_in_memory_shared_np
 
                 # set data array for final validation checks
                 data_array = self.read_instance.data_in_memory[networkspeci]
@@ -1474,10 +1642,14 @@ class DataReader:
             # finalise assignment of filter species
             else:
                 # save to filter data in memory
-                self.read_instance.filter_data_in_memory[networkspeci][:, :] = data_in_memory_shared_np
+                #self.read_instance.filter_data_in_memory[networkspeci][:, :] = data_in_memory_shared_np
 
                 # set data array for final validation checks
                 data_array = self.read_instance.filter_data_in_memory[networkspeci]
+
+            if prints:
+                print('-----Time to finalise arrays: {}'.format(time.time()-last))
+                last = time.time()
 
             # check if read data array consist of arrays full of -9999.0 or nan values or if they are empty
             if (data_array.size == 0) or \
@@ -1491,3 +1663,436 @@ class DataReader:
 
                 self.read_instance.logger.error(error)
                 sys.exit(1) 
+
+            if prints:
+                print('-----Time to validate arrays: {}'.format(time.time()-last))
+
+    def read_netcdf_data_newer(self, tuple_arguments):
+            """
+            Handles the reading and filtering of observational or model netCDF data.
+
+            Parameters
+            ----------
+            tuple_arguments : tuple
+                A collection of arguments including file paths, station references, species names, 
+                shared memory handles, and quality control settings.
+
+            Returns
+            -------
+            numpy.ndarray or list or None
+                Returns a structured metadata array if reading observations; an empty list if no 
+                stations are found; or None for model data or missing files.
+            """
+
+            prints = False
+
+            start = time.time()
+
+            # assign arguments from tuple to variables
+            relevant_file, station_references, station_names, speci,\
+            observations_data_label, data_label, data_labels, reading_ghost, ghost_data_vars_to_read,\
+            metadata_dtype, metadata_vars_to_read, logger, default_qa, filter_read, network, forecast_indices = tuple_arguments
+
+            networkspeci = '{}|{}'.format(network,speci)
+
+            # get active data array in memory
+            if filter_read:
+                data_in_memory = self.read_instance.filter_data_in_memory[networkspeci]
+                data_in_memory = data_in_memory[np.newaxis, :]
+            else:
+                data_in_memory = self.read_instance.data_in_memory[networkspeci]
+
+            if prints:
+                print('(1) Passed arguments: {}'.format(time.time()-start))
+                last = time.time()
+
+            if prints:
+                print('(2) Wrap arrays: {}'.format(time.time()-last))
+                last = time.time()
+
+            # read netCDF frame
+            ncdf_root = Dataset(relevant_file, mode="r")
+
+            # get file time (handle monthly resolution data differently to hourly/daily
+            # as num2date does not support 'months since' units)
+            #file_time = ncdf_root['time'][:] 
+            #time_units = ncdf_root['time'].units
+            
+            #if 'months' in time_units:
+            #    monthly_start_date = time_units.split(' ')[2]
+            #    file_time_dt = pd.date_range(start=monthly_start_date, periods=1, freq='MS')
+            #else:
+            #    file_time_dt = num2date(file_time, units=time_units)
+                
+            #    # convert to pandas datetime
+            #    if Version(cftime.__version__) <= Version("1.0.3.4"):
+            #        # remove microseconds
+            #        file_time_dt = pd.to_datetime([t.replace(microsecond=0) for t in file_time_dt])
+            #    else:
+            #        # bug fix for newer versions of cftime
+            #        file_time_dt = file_time_dt.astype('datetime64[s]')
+            #        file_time_dt = pd.to_datetime([t for t in file_time_dt])
+
+            # get file time as integer timestamp
+            #file_timestamp = file_time_dt.asi8
+
+            # ---- FAST & EXACT asi8 TIME BLOCK ----
+
+            time_var = ncdf_root.variables["time"]
+
+            # numeric time values (hours)
+            file_time = time_var[:].astype("int64")
+
+            # origin: "2018-12-01 00:00:00"
+            origin_str = time_var.units.split("since")[1].strip()
+
+            # convert to NumPy datetime64[ns]
+            # Replace " " with "T" to satisfy ISO-8601
+            origin_ns = np.datetime64(origin_str.replace(" ", "T"), "ns")
+
+            # vectorized computation: origin + N hours
+            file_timestamp = origin_ns + file_time * np.timedelta64(1, "h")
+
+            # convert to asi8 int64 nanoseconds
+            file_timestamp = file_timestamp.astype("int64")
+
+            if prints:
+                print('(3) Get time: {}'.format(time.time()-last))
+                last = time.time()
+
+            # get valid file time indices (i.e. those times in active full time array)
+            valid_file_time_indices = np.where(np.logical_and(file_timestamp>=self.read_instance.timestamp_array[0], 
+                                                            file_timestamp<=self.read_instance.timestamp_array[-1]))[0]
+
+            # get indices relative to active full timestamp array
+            full_array_time_indices = np.searchsorted(self.read_instance.timestamp_array, file_timestamp[valid_file_time_indices])
+
+            if prints:
+                print('(4) Get time indices: {}'.format(time.time()-last))
+                last = time.time()
+
+            # get all station references in file (do little extra work to get non-GHOST observational station references)
+            if (not reading_ghost) & (data_label == observations_data_label):
+                if 'station_reference' in ncdf_root.variables:
+                    station_reference_var = 'station_reference'
+                elif 'station_code' in ncdf_root.variables:
+                    station_reference_var = 'station_code'
+                elif 'station_name' in ncdf_root.variables:
+                    station_reference_var = 'station_name'
+                else: 
+                    error = 'Error: {} cannot be read because it has no station_name.'.format(relevant_file)
+                    logger.error(error)
+                    sys.exit(1)
+
+                meta_shape = ncdf_root[station_reference_var].shape
+                file_station_references = ncdf_root[station_reference_var][:]
+                meta_val_dtype = np.array([file_station_references[0]]).dtype
+
+                if len(meta_shape) == 2:
+                    if meta_val_dtype == np.dtype(object):
+                        file_station_references = np.array([''.join(val) for val in file_station_references])
+                    else:
+                        file_station_references = chartostring(file_station_references)
+
+            # GHOST and interpolated model data
+            else:
+                file_station_references = ncdf_root['station_reference'][:]
+
+            # get indices of all non-NaN stations (can be NaN for some non-GHOST files)
+            #non_nan_station_indices = np.array([ref_ii for ref_ii, ref in enumerate(file_station_references) if ref.lower() != 'nan'])
+            #file_station_references = file_station_references[non_nan_station_indices]
+
+            # get indices of file station station references that are contained in all unique station references array
+            #current_file_station_indices = np.where(np.in1d(file_station_references, station_references))[0]
+
+            # for all unique station references that are contained within file station references array
+            # get the index of the station reference in the unique station references array 
+            #index = np.argsort(station_references)
+            #sorted_station_references = station_references[index]
+            #sorted_index = np.searchsorted(sorted_station_references, file_station_references[current_file_station_indices])
+            #full_array_station_indices = np.take(index, sorted_index, mode="clip")
+
+            # --- FAST station reference extraction inside worker ---
+
+            # 1. Ensure numpy array of strings
+            refs = np.asarray(file_station_references).astype(str)
+
+            # 2. Remove 'nan' (vectorized)
+            mask_not_nan = np.char.lower(refs) != "nan"
+            refs = refs[mask_not_nan]
+
+            # 3. Membership test via set (much faster than np.in1d)
+            station_ref_set = set(station_references)
+            mask_present = np.fromiter((r in station_ref_set for r in refs), dtype=bool, count=len(refs))
+            current_file_station_indices = np.where(mask_present)[0]
+
+            if len(current_file_station_indices) == 0:
+                return [] if (data_label == observations_data_label and not filter_read) else None
+
+            # 4. Fast mapping to full array indices
+            station_to_index = {ref: i for i, ref in enumerate(station_references)}
+
+            valid_refs = refs[current_file_station_indices]
+
+            full_array_station_indices = np.fromiter(
+                (station_to_index[r] for r in valid_refs),
+                dtype=np.int32,
+                count=len(valid_refs)
+            )
+
+            # if have zero current_file_station_indices in all unique station references, 
+            # then check if it is because of old-style of Providentia-interpolation output, 
+            # where all station_references were for 'station_name'  
+            if (data_label != observations_data_label) & (len(current_file_station_indices) == 0):
+
+                # get indices of file station station references that are contained in all unique station references array
+                current_file_station_indices = np.where(np.in1d(file_station_references, station_names))[0]
+
+                # for all unique station references that are contained within file station references array
+                # get the index of the station reference in the unique station references array 
+                index = np.argsort(station_names)
+                sorted_station_names = station_names[index]
+                sorted_index = np.searchsorted(sorted_station_names, file_station_references[current_file_station_indices])
+                full_array_station_indices = np.take(index, sorted_index, mode="clip")
+
+            # if still have zero current_file_station_indices in all unique station references (can happen due to station colocation)
+            # then return from function without reading
+            if len(current_file_station_indices) == 0:
+                # return empty metadata list if reading observations
+                if (data_label == observations_data_label) & (not filter_read):
+                    return []
+                else:
+                    return 
+
+            # get first and last station index for current file to read only relevant subset of data, 
+            # and adjust current_file_station_indices to be relative to subset of data to read
+            fsi = current_file_station_indices[0]
+            lsi = current_file_station_indices[-1] + 1
+            current_file_station_indices_adjusted = current_file_station_indices - fsi
+
+            if prints:
+                print('(5) Get station indices: {}'.format(time.time()-last))
+                last = time.time()
+
+            # read observations
+            if data_label == observations_data_label:
+
+                # read species variable
+                # GHOST
+                if reading_ghost:
+                    # if need to filter by qa load non-filtered array, otherwise load prefiltered array (if available)
+                    if (default_qa) & ('{}_prefiltered_defaultqa'.format(speci) in list(ncdf_root.variables.keys())):
+                        species_data = ncdf_root['{}_prefiltered_defaultqa'.format(speci)][fsi:lsi, valid_file_time_indices]
+                        species_data = species_data[current_file_station_indices_adjusted]
+                        # set read_qa to False to not filter by them
+                        read_qa = False
+                    else:
+                        species_data = ncdf_root[speci][fsi:lsi, valid_file_time_indices]
+                        species_data = species_data[current_file_station_indices_adjusted]
+                        read_qa = True
+                # non-GHOST
+                else:
+                    # transpose array to swap station and time dimensions
+                    if ncdf_root[speci].dimensions == ('time', 'station'):
+                        species_data = ncdf_root[speci][valid_file_time_indices, fsi:lsi].T
+                        species_data = species_data[current_file_station_indices_adjusted]
+                    # do not transpose
+                    else:
+                        species_data = ncdf_root[speci][fsi:lsi, valid_file_time_indices]
+                        species_data = species_data[current_file_station_indices_adjusted]
+
+                    # if network is actris then read qa
+                    if network == 'actris/actris':
+                        read_qa = True
+                
+                if prints:
+                    print('(6) Read species data: {}'.format(time.time()-last))
+                    last = time.time()
+
+                # reading GHOST data?
+                if reading_ghost:
+
+                    # read GHOST data variables
+                    if not filter_read:
+                        for ghost_data_var_ii, ghost_data_var in enumerate(ghost_data_vars_to_read):
+                            ghost_data = ncdf_root[ghost_data_var][fsi:lsi, valid_file_time_indices]
+                            ghost_data = ghost_data[current_file_station_indices_adjusted]
+                            self.read_instance.ghost_data_in_memory[networkspeci][ghost_data_var_ii, 
+                                full_array_station_indices[:, np.newaxis], full_array_time_indices[np.newaxis, :]] = ghost_data
+
+                if prints:
+                    print('(7) Read GHOST variables: {}'.format(time.time()-last))
+                    last = time.time()
+
+                if (reading_ghost) or (network == 'actris/actris'):
+                    # if some qa flags selected then screen observations
+                    if read_qa:
+                        if len(self.read_instance.qa_per_species[speci]) > 0:
+                            # screen out observations which are associated with any of the selected qa flags
+                            qa_data = ncdf_root['qa'][fsi:lsi, valid_file_time_indices, :]
+                            qa_data = qa_data[current_file_station_indices_adjusted]
+                            species_data[np.isin(qa_data, self.read_instance.qa_per_species[speci]).any(axis=2)] = np.nan
+                        
+                    # if some data provider flags selected then screen observations
+                    if len(self.read_instance.flags) > 0:
+                        # screen out observations which are associated with any of the selected data provider flags
+                        flag_data = ncdf_root['flag'][fsi:lsi, valid_file_time_indices, :]
+                        flag_data = flag_data[current_file_station_indices_adjusted]
+                        species_data[np.isin(flag_data, self.read_instance.flags).any(axis=2)] = np.nan
+                        
+                if prints:
+                    print('(8) Read QA: {}'.format(time.time()-last))
+                    last = time.time()
+
+                # write filtered species data to shared file data
+                data_in_memory[data_labels.index(observations_data_label), full_array_station_indices[:, np.newaxis], 
+                            full_array_time_indices[np.newaxis, :]] = species_data
+
+                if prints:
+                    print('(9) Wrote species data: {}'.format(time.time()-last))
+                    last = time.time()
+
+                # get file metadata
+                if not filter_read:
+                    for meta_var in metadata_vars_to_read:
+                        # do extra work for non-GHOST data 
+                        if not reading_ghost:
+                            # get correct variable name for .nc
+                            if meta_var == 'longitude':
+                                if "longitude" in ncdf_root.variables:
+                                    meta_var_nc = 'longitude'
+                                else:
+                                    meta_var_nc = 'lon'
+                            elif meta_var == 'latitude':
+                                if "latitude" in ncdf_root.variables:
+                                    meta_var_nc = 'latitude'
+                                else:
+                                    meta_var_nc = 'lat'
+                            elif meta_var == 'altitude':
+                                if "altitude" in ncdf_root.variables:
+                                    meta_var_nc = 'altitude'
+                                else:
+                                    meta_var_nc = 'alt'
+                            elif meta_var == 'station_reference':
+                                if 'station_reference' in ncdf_root.variables:
+                                    meta_var_nc = 'station_reference'
+                                elif 'station_code' in ncdf_root.variables:
+                                    meta_var_nc = 'station_code'
+                                elif 'station_name' in ncdf_root.variables:
+                                    meta_var_nc = 'station_name'
+                            elif meta_var == 'area_classification':
+                                if 'area_classification' in ncdf_root.variables:
+                                    meta_var_nc = 'area_classification'
+                                else:
+                                    meta_var_nc = 'station_area'
+                            elif meta_var == 'station_classification':
+                                if 'station_classification' in ncdf_root.variables:
+                                    meta_var_nc = 'station_classification'
+                                else:
+                                    meta_var_nc = 'station_type'
+                            else:
+                                meta_var_nc = meta_var
+                
+                            # check meta variable is in netCDF
+                            if meta_var_nc not in ncdf_root.variables:
+                                continue
+
+                            meta_shape = ncdf_root[meta_var_nc].shape
+                            meta_val = ncdf_root[meta_var_nc][fsi:lsi]
+                            meta_val = meta_val[current_file_station_indices_adjusted]
+                            meta_val_dtype = np.array([meta_val[0]]).dtype
+
+                            # do str formatting where neccessary
+                            if meta_val_dtype not in [np.int8, np.int16, np.int32, np.int64, 
+                                                    np.uint8, np.uint16, np.uint32, np.uint64,
+                                                    np.float16, np.float32, np.float64]:
+
+                                if len(meta_shape) == 2:
+                                    if meta_val_dtype == np.dtype(object):
+                                        meta_val = np.array([''.join(val) for val in meta_val])
+                                    else:
+                                        meta_val = chartostring(meta_val)
+                            
+                            # do str formatting (capitalization) to the metadata
+                            if isinstance(meta_val,str):
+                                meta_val = np.char.capitalize(meta_val)
+
+                        # GHOST metadata
+                        else:
+                            meta_var_nc = meta_var
+
+                            # check meta variable is in netCDF
+                            if meta_var_nc not in ncdf_root.variables:
+                                continue
+                            
+                            # get metadata
+                            meta_val = ncdf_root[meta_var_nc][fsi:lsi]
+                            meta_val = meta_val[current_file_station_indices_adjusted]
+
+                        # put metadata in array
+                        self.read_instance.metadata_in_memory[networkspeci][meta_var][full_array_station_indices, 0] = meta_val
+
+                if prints:
+                    print('(10) Read metadata: {}'.format(time.time()-last))
+                    last = time.time()
+
+            # model data
+            else:
+
+                # determine if data is structured as forecast data or not
+                if 'forecast_day' in ncdf_root[speci].dimensions:
+                    have_forecast = True
+                    #if so, check what type of forecast data
+                    # check if have daily forecast set
+                    daily_forecast = np.any([True for data_label in data_labels if '-daily' in data_label])    
+                    # check if have combined forecast set
+                    combined_forecast = np.any([True for data_label in data_labels if '-combined' in data_label]) 
+                    # check if have day forecast set
+                    day_forecast = np.any([True for data_label in data_labels if '-day' in data_label])
+                # data is not structured as forecast
+                else:
+                    have_forecast = False
+                
+                # if have no passed forecast indices, then take first day preferentially (if data is structured as forecast data)
+                if len(forecast_indices) == 0:
+                    forecast_indices = np.array([0], dtype=np.int32)
+
+                # iterate through forecast indices
+                for forecast_index in forecast_indices:
+
+                    # if want a specific forecast day, and it is available in the netCDF, then take it 
+                    if have_forecast:
+                        # daily forecast
+                        if daily_forecast:
+                            data_label_forecast = '{}-daily{}'.format(data_label, forecast_index+1)
+                        # combined forecast
+                        elif combined_forecast:
+                            data_label_forecast = '{}-combined{}'.format(data_label, forecast_index+1)
+                        # N day forecast
+                        elif day_forecast:
+                            data_label_forecast = '{}-day{}'.format(data_label, forecast_index+1)
+                        else:
+                            data_label_forecast = data_label
+                        relevant_data = ncdf_root[speci][fsi:lsi, valid_file_time_indices, forecast_index]
+                        relevant_data = relevant_data[current_file_station_indices_adjusted]
+
+                    # else if forecast day not available in the netCDF, then just take the data as it is
+                    else:
+                        relevant_data = ncdf_root[speci][fsi:lsi, valid_file_time_indices]
+                        relevant_data = relevant_data[current_file_station_indices_adjusted]
+                        data_label_forecast = data_label
+
+                    # mask out fill values for parameter field
+                    relevant_data[relevant_data.mask] = np.nan
+
+                    # put data in array
+                    data_in_memory[data_labels.index(data_label_forecast), full_array_station_indices[:, np.newaxis], 
+                                full_array_time_indices[np.newaxis, :]] = relevant_data
+
+            # close netCDF
+            ncdf_root.close()
+
+            if prints:
+                print('Total: {}'.format(time.time()-start))
+
+            return True
