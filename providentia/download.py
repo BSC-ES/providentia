@@ -20,6 +20,7 @@ from .cams import (Cams, cams_options)
 from providentia.auxiliar import CURRENT_PATH, join
 from .configuration import ProvConfiguration, load_conf
 from .read_aux import check_for_ghost
+from .tropopause import Tropopause
 from .warnings_prv import show_message
 from .zenodo import Zenodo
 from .download_aux import (find_model, find_available_resolutions, 
@@ -156,7 +157,16 @@ class Download(object):
             signal.signal(signal.SIGINT, self.sighandler)
             
             # only the local download iterates through the networks
-            if self.machine in "local":                        
+            if self.machine in "local":    
+
+                # warn the user when incorrect dl_mode is selected  
+                if not self.mode and self.dl_mode == 'mod':
+                    msg = "If only observations are provided and 'mod' is selected, no download will be performed."
+                    show_message(self, msg) 
+                elif not self.network and self.dl_mode == 'obs':
+                    msg = "If only models are provided and 'obs' is selected, no download will be performed."
+                    show_message(self, msg)   
+
                 # networks
                 if self.network and self.dl_mode != 'mod':
 
@@ -267,6 +277,14 @@ class Download(object):
                         files_to_download = self.select_files_to_download(initial_check_nc_files)
                         if not initial_check_nc_files or files_to_download:
                             self.cams.download_cams_model(model, initial_check=False, files_to_download=files_to_download)
+                   
+                    elif model.startswith("era5_tropopause"):
+                        self.tropopause = Tropopause(self)
+                        initial_check_nc_files = self.tropopause.download_tropopause_model(model, initial_check=True)
+                        files_to_download = self.select_files_to_download(initial_check_nc_files)
+                        if not initial_check_nc_files or files_to_download:
+                            self.tropopause.download_tropopause_model(model, initial_check=False, files_to_download=files_to_download)
+
                     # BSC machines
                     else:
                         # iterate the models download
