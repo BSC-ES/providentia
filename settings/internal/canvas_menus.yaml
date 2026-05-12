@@ -21,6 +21,16 @@
           "function": "save_axis_figure_func",
         },
 
+      "save_data_button":
+        {
+          "element_type": "button",
+          "formatting_dict": "save_icon",
+          "size": [20, 20],
+          "path": "resources/save_data_icon.png",
+          "object_name": "map_save_data_button",
+          "function": "save_axis_figure_data_func",
+        },
+
       "container":
         {
           "element_type": "container",
@@ -240,6 +250,16 @@
           "function": "save_axis_figure_func",
         },
 
+      "save_data_button":
+        {
+          "element_type": "button",
+          "formatting_dict": "save_icon",
+          "size": [20, 20],
+          "path": "resources/save_data_icon.png",
+          "object_name": "timeseries_save_data_button",
+          "function": "save_axis_figure_data_func",
+        },
+
       "container":
         {
           "element_type": "container",
@@ -440,6 +460,16 @@
           "function": "save_axis_figure_func",
         },
 
+      "save_data_button":
+        {
+          "element_type": "button",
+          "formatting_dict": "save_icon",
+          "size": [20, 20],
+          "path": "resources/save_data_icon.png",
+          "object_name": "periodic_save_data_button",
+          "function": "save_axis_figure_data_func",
+        },
+
       "container":
         {
           "element_type": "container",
@@ -559,6 +589,16 @@
           "function": "save_axis_figure_func",
         },
 
+      "save_data_button":
+        {
+          "element_type": "button",
+          "formatting_dict": "save_icon",
+          "size": [20, 20],
+          "path": "resources/save_data_icon.png",
+          "object_name": "periodic_violin_save_data_button",
+          "function": "save_axis_figure_data_func",
+        },
+
       "container":
         {
           "element_type": "container",
@@ -650,16 +690,6 @@
           "function": "interactive_elements_button_func",
         },
 
-      "save_button":
-        {
-          "element_type": "button",
-          "formatting_dict": "save_icon",
-          "size": [20, 20],
-          "path": "resources/save_fig_icon.png",
-          "object_name": "metadata_save_button",
-          "function": "save_axis_figure_func",
-        },
-
       "container":
         {
           "element_type": "container",
@@ -717,6 +747,16 @@
           "path": "resources/save_fig_icon.png",
           "object_name": "distribution_save_button",
           "function": "save_axis_figure_func",
+        },
+
+      "save_data_button":
+        {
+          "element_type": "button",
+          "formatting_dict": "save_icon",
+          "size": [20, 20],
+          "path": "resources/save_data_icon.png",
+          "object_name": "distribution_save_data_button",
+          "function": "save_axis_figure_data_func",
         },
 
       "container":
@@ -797,6 +837,16 @@
           "path": "resources/save_fig_icon.png",
           "object_name": "scatter_save_button",
           "function": "save_axis_figure_func",
+        },
+
+      "save_data_button":
+        {
+          "element_type": "button",
+          "formatting_dict": "save_icon",
+          "size": [20, 20],
+          "path": "resources/save_data_icon.png",
+          "object_name": "scatter_save_data_button",
+          "function": "save_axis_figure_data_func",
         },
 
       "container":
@@ -898,6 +948,16 @@
           "path": "resources/save_fig_icon.png",
           "object_name": "statsummary_save_button",
           "function": "save_axis_figure_func",
+        },
+
+      "save_data_button":
+        {
+          "element_type": "button",
+          "formatting_dict": "save_icon",
+          "size": [20, 20],
+          "path": "resources/save_data_icon.png",
+          "object_name": "statsummary_save_data_button",
+          "function": "save_axis_figure_data_func",
         },
 
       "container":
@@ -1031,6 +1091,16 @@
           "function": "save_axis_figure_func",
         },
 
+      "save_data_button":
+        {
+          "element_type": "button",
+          "formatting_dict": "save_icon",
+          "size": [20, 20],
+          "path": "resources/save_data_icon.png",
+          "object_name": "boxplot_save_data_button",
+          "function": "save_axis_figure_data_func",
+        },
+
       "container":
         {
           "element_type": "container",
@@ -1088,6 +1158,16 @@
           "path": "resources/save_fig_icon.png",
           "object_name": "taylor_save_button",
           "function": "save_axis_figure_func",
+        },
+
+      "save_data_button":
+        {
+          "element_type": "button",
+          "formatting_dict": "save_icon",
+          "size": [20, 20],
+          "path": "resources/save_data_icon.png",
+          "object_name": "taylor_save_data_button",
+          "function": "save_axis_figure_data_func",
         },
 
       "container":
@@ -1188,6 +1268,16 @@
           "function": "save_axis_figure_func",
         },
 
+      "save_data_button":
+        {
+          "element_type": "button",
+          "formatting_dict": "save_icon",
+          "size": [20, 20],
+          "path": "resources/save_data_icon.png",
+          "object_name": "fairmode_target_save_data_button",
+          "function": "save_axis_figure_data_func",
+        },
+
       "container":
         {
           "element_type": "container",
@@ -1285,6 +1375,16 @@
           "function": "save_axis_figure_func",
         },
 
+      "save_data_button":
+        {
+          "element_type": "button",
+          "formatting_dict": "save_icon",
+          "size": [20, 20],
+          "path": "resources/save_data_icon.png",
+          "object_name": "fairmode_statsummary_save_data_button",
+          "function": "save_axis_figure_data_func",
+        },
+
       "container":
         {
           "element_type": "container",
@@ -1342,6 +1442,16 @@
           "path": "resources/save_fig_icon.png",
           "object_name": "contingencytable_save_button",
           "function": "save_axis_figure_func",
+        },
+
+      "save_data_button":
+        {
+          "element_type": "button",
+          "formatting_dict": "save_icon",
+          "size": [20, 20],
+          "path": "resources/save_data_icon.png",
+          "object_name": "contingencytable_save_data_button",
+          "function": "save_axis_figure_data_func",
         },
 
       "container":
