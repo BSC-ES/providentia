@@ -20,35 +20,31 @@ body:
     validations:
       required: false
   - type: textarea
-    id: what-happened
+    id: description
     attributes:
-      label: What happened?
+      label: Description
       description: Also tell us, what did you expect to happen?
-      placeholder: Tell us what you see!
-      value: "A bug happened!"
     validations:
       required: true
-  - type: textarea
+  - type: input
     id: commit
     attributes:
       label: Commit
       description: What commit of our software are you running? Run git log in the terminal and copy commit hash.
     validations:
       required: true
-  - type: dropdown
+  - type: checkboxes
     id: machines
     attributes:
       label: What machines are you seeing the problem on?
-      multiple: true
       options:
         - Local
         - Nord4
         - MN5
-  - type: dropdown
+  - type: checkboxes
     id: mode
     attributes:
       label: What mode are you seeing the problem on?
-      multiple: true
       options:
         - Download
         - Interpolation
