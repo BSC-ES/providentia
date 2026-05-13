@@ -41,6 +41,8 @@ body:
         - label: Local
         - label: Nord4
         - label: MN5
+    validations:
+      required: true
   - type: checkboxes
     id: mode
     attributes:
@@ -50,7 +52,9 @@ body:
         - label: Interpolation
         - label: Dashboard
         - label: Report
-        - label: Library
+        - label: Library    
+    validations:
+      required: true
   - type: textarea
     id: config
     attributes:
