@@ -1037,7 +1037,7 @@ def save_df(df, filename, path, na_rep=''):
     df.to_csv(fname, index=False, na_rep=na_rep)
 
 def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, plot_type, plot_options, 
-                              path, tests_generate_output=False, labela='', labelb=''):
+                              path, networkspeci, tests_generate_output=False, labela='', labelb=''):
     """
     Extract data into dataframe and save to to CSV file
 
@@ -1139,7 +1139,7 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                                 else read_instance.observations_data_label if base_plot_type == "scatter" \
                                 else data_label if base_plot_type == "distribution"
                                 else "x": 
-                                    pd.to_datetime(x, unit="D", utc=True).round("S") 
+                                    pd.to_datetime(x, unit="D", utc=True).round("s") 
                                     if base_plot_type == "timeseries" else x, 
                                 "y" if base_plot_type in ["boxplot",  "fairmode-target"] \
                                 else "density" if base_plot_type == "distribution" \
@@ -1194,9 +1194,29 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                         # extract data
                         data = []
                         for (lon, lat), val in zip(coordinates, values):
+                            lon_ind = np.where(read_instance.station_longitudes[networkspeci]==lon)
+                            lat_ind = np.where(read_instance.station_latitudes[networkspeci]==lat)
+                            intersect_ind = np.intersect1d(lon_ind, lat_ind)
+
+                            # if there is only one common lon and lat pair
+                            # use intersection index to search for station name and reference
+                            if (intersect_ind.size == 1):
+                                station_ind = intersect_ind[0]
+                            else:
+                                station_ind = None
+                            
+                            if station_ind is not None:
+                                station_name = read_instance.station_names[networkspeci][station_ind]
+                                station_reference = read_instance.station_references[networkspeci][station_ind]
+                            else:
+                                station_name = np.nan
+                                station_reference = np.nan
+
                             data.append({
-                                "Latitude": lon,
+                                "Station name": station_name,
+                                "Station reference": station_reference,
                                 "Longitude": lat,
+                                "Latitude": lon,
                                 "Statistic": val
                             })
                         label = ''

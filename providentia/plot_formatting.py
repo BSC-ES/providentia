@@ -409,8 +409,8 @@ def harmonise_xy_lims_paradigm(read_instance, canvas_instance, relevant_axs, bas
         
             else:
                 # round up the limit hours to the whole hour
-                left = pd.to_datetime(left).ceil('H')   
-                right = pd.to_datetime(right).floor('H')
+                left = pd.to_datetime(left).ceil('h')   
+                right = pd.to_datetime(right).floor('h')
 
                 # set frequency to hourly when there's less than 7 days 
                 freq = 'h' if n_days < 7 else 'D'
