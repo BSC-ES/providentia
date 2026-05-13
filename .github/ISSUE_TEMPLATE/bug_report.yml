@@ -38,19 +38,19 @@ body:
     attributes:
       label: What machines are you seeing the problem on?
       options:
-        - Local
-        - Nord4
-        - MN5
+        - label: Local
+        - label: Nord4
+        - label: MN5
   - type: checkboxes
     id: mode
     attributes:
       label: What mode are you seeing the problem on?
       options:
-        - Download
-        - Interpolation
-        - Dashboard
-        - Report
-        - Library
+        - label: Download
+        - label: Interpolation
+        - label: Dashboard
+        - label: Report
+        - label: Library
   - type: textarea
     id: config
     attributes:
