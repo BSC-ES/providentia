@@ -60,7 +60,7 @@ body:
       validations:
         required: true
   - type: textarea
-    id: logs
+    id: config
     attributes:
       label: Configuration file
       description: Please copy and paste your configuration file. This will be automatically formatted into code, so no need for backticks.
