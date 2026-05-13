@@ -44,8 +44,6 @@ body:
         - Local
         - Nord4
         - MN5
-      validations:
-        required: true
   - type: dropdown
     id: mode
     attributes:
@@ -57,8 +55,6 @@ body:
         - Dashboard
         - Report
         - Library
-      validations:
-        required: true
   - type: textarea
     id: config
     attributes:
