@@ -1146,7 +1146,7 @@ class Providentia:
         if save_data:
             self.logger.info('Downloading data...')
             download_plot_data_to_csv(self, self, base_plot_type, plot_type, plot_options, 
-                                      save_data_path, tests_generate_output, 
+                                      save_data_path, networkspeci, tests_generate_output,
                                       labela, labelb)
 
         # if save is passed then save plot and return

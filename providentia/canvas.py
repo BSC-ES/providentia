@@ -3939,7 +3939,8 @@ class Canvas(FigureCanvas):
         # save figure
         if path is not None:
             download_plot_data_to_csv(self.read_instance, self, plot_type, plot_type, 
-                                      plot_options, path, tests_generate_output, labela, labelb)
+                                      plot_options, path, self.read_instance.networkspeci, 
+                                      tests_generate_output, labela, labelb)
 
     def update_aggregation_statistic(self):
         """ 
