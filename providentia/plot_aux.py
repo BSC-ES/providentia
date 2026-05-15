@@ -1137,12 +1137,11 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                                 # convert time from unix to actual
                                 "time" if base_plot_type == "timeseries" \
                                 else read_instance.observations_data_label if base_plot_type == "scatter" \
-                                else data_label if base_plot_type == "distribution"
+                                else "concentration" if base_plot_type == "distribution"
                                 else "x": 
                                     pd.to_datetime(x, unit="D", utc=True).round("s") 
                                     if base_plot_type == "timeseries" else x, 
                                 "y" if base_plot_type in ["boxplot",  "fairmode-target"] \
-                                else "density" if base_plot_type == "distribution" \
                                 else data_label: y,
                             })
                         df = pd.DataFrame(data)

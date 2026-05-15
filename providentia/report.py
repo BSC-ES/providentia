@@ -169,7 +169,7 @@ class Report:
 
             # if some filename has not been provided through the configuration file use default names
             if 'report_filename' in self.section_opts:
-                filename = self.self.section_opts['report_filename']
+                filename = self.section_opts['report_filename']
             else:
                 # add a number next to the filename to avoid overwriting
                 filename = f'{self.report_filename}_{section_ind}'
