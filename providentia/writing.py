@@ -91,7 +91,7 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
 
             # do resampling (if set)
             if prv.resampling_resolution != 'None':
-                data_array, time_array_resampled = do_resampling(prv, data_array, writing=True)
+                data_array, time_array_resampled = do_resampling(prv, data_array, update=False)
 
             # set time array
             time_array = prv.time_index_after_filter
@@ -284,7 +284,7 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
 
             # do resampling (if set)
             if prv.resampling_resolution != 'None':
-                data_array, time_array_resampled = do_resampling(prv, data_array, writing=True)
+                data_array, time_array_resampled = do_resampling(prv, data_array, update=False)
 
             # set time array
             time_array = prv.time_index_after_filter

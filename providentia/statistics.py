@@ -248,7 +248,7 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
             canvas_instance.selected_station_data_max[networkspeci] = current_max
             canvas_instance.selected_station_stddev_max[networkspeci] = np.nanmax(np.nanstd(canvas_instance.selected_station_data[networkspeci]['flat'], axis=-1))
 
-def do_resampling(read_instance, data_array, writing=False):
+def do_resampling(read_instance, data_array, update=True):
     """
     Handles the temporal resampling of the data array based on the specified resolution.
 
@@ -258,15 +258,15 @@ def do_resampling(read_instance, data_array, writing=False):
         The instance containing configuration parameters such as resampling resolution and time arrays.
     data_array : numpy.ndarray
         The input data array to be resampled, typically with dimensions (labels, stations, time).
-    writing : bool, optional
-        Flag indicating if the function is being called for writing output data (default is False).
+    update : bool, optional
+        Flag indicating if the function updates relevant internal variables.
 
     Returns
     -------
     numpy.ndarray
         The resampled data array.
     pandas.DatetimeIndex, optional
-        The new time index if writing is True.
+        The new time index if update is False (for writing).
     """
 
     # if resampling resolution is None, then do not resample
@@ -276,7 +276,7 @@ def do_resampling(read_instance, data_array, writing=False):
         do_resampling = True
 
     # update relevant/nonrelevant periodic temporal resolutions 
-    if not writing:
+    if update:
         read_instance.periodic_relevant_temporal_resolutions = get_periodic_relevant_temporal_resolutions(read_instance.active_resolution)    
         read_instance.periodic_nonrelevant_temporal_resolutions = get_periodic_nonrelevant_temporal_resolutions(read_instance.active_resolution) 
 
@@ -333,19 +333,19 @@ def do_resampling(read_instance, data_array, writing=False):
         data_array_resampled = data_array_resampled.reshape(data_array.shape[0], data_array.shape[1], data_array_resampled.shape[1])
 
         # update time index and return
-        if writing:
-            return data_array_resampled, data_array_df_resampled.index
-        else:
+        if update:
             read_instance.time_index = data_array_df_resampled.index
             return data_array_resampled
+        else:
+            return data_array_resampled, data_array_df_resampled.index
 
     # resampling not neccessary?
     else:
-        if writing:
-            return data_array, read_instance.time_index_after_filter
-        else:
+        if update:
             read_instance.time_index = read_instance.time_index_after_filter
             return data_array
+        else:
+            return data_array, read_instance.time_index_after_filter
 
 def merge_forecast_days(read_instance, networkspeci, data_labels, unique_base_data_labels, data_array):
     """
@@ -941,7 +941,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
         # do resampling
         if map:
-            data_array_a = resample_data_array(read_instance, data_array_a)
+            data_array_a, _ = do_resampling(read_instance, data_array_a, update=False)
             
         # if have second data array, read it
         if len(data_labels_b) != 0:
@@ -958,7 +958,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
             # do resampling
             if map:
-                data_array_b = resample_data_array(read_instance, data_array_b)
+                data_array_b, _ = do_resampling(read_instance, data_array_b, update=False)
 
     # for other cases, get cut of selected station data for data_labels_a
     else:
@@ -2016,47 +2016,3 @@ def get_fairmode_data(read_instance, canvas_instance, networkspeci, data_labels)
     data_array = data_array[:, valid_station_idxs, :]
 
     return data_array, valid_station_idxs
-
-def resample_data_array(read_instance, data_array):
-    """
-    Resample data array if resampling resolution is active
-
-    Parameters
-    ----------
-    read_instance : object
-        The source instance containing filtered data, resolution settings, and metadata.
-    data_array : np.array
-        Data array without selection of stations
-
-    Returns
-    -------
-    np.array
-        Resampled data array
-    """
-
-    # do resampling
-    if read_instance.resampling_resolution != 'None':
-        
-        # flatten data label dimension for creation of pandas dataframe
-        data_array_reduced = data_array.reshape(data_array.shape[0]*data_array.shape[1], 
-                                                data_array.shape[2])
-
-        # create dataframe with time as rows and stations as columns
-        df_data_array = pd.DataFrame(
-            data_array_reduced.T,  # transpose so time is rows
-            index=pd.DatetimeIndex(read_instance.time_array),
-            columns=np.arange(data_array_reduced.shape[0]),
-            dtype=np.float32
-        )
-
-        # resample
-        temporal_resolution_to_output_code = get_frequency_code(read_instance.resampling_resolution)
-        data_array_df_resampled = df_data_array.resample(temporal_resolution_to_output_code).mean()
-
-        # save back out as numpy array (reshaping to get back networkspecies dimension)
-        data_array_resampled = data_array_df_resampled.to_numpy().transpose()
-        data_array = data_array_resampled.reshape(data_array.shape[0], 
-                                                        data_array.shape[1], 
-                                                        data_array_resampled.shape[1])
-        
-    return data_array
