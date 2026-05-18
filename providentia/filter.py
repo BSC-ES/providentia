@@ -363,7 +363,7 @@ class DataFilter:
         """
 
         # get set variables names representing percentage data availability (native and non-native)
-        if float(self.read_instance.ghost_version) < 1.6:
+        if float('.'.join(self.read_instance.ghost_version.split('.')[:2])) < 1.6:
             active_data_availablity_vars = self.read_instance.coverage_menu['rangeboxes']['map_vars_old']
         else:
             active_data_availablity_vars = self.read_instance.coverage_menu['rangeboxes']['map_vars']
@@ -961,7 +961,7 @@ class DataFilter:
                         station_data_availability_number = np.array([])
                     else:
                         station_data_availability_number = Stats.calculate_data_avail_number(obs_data)
-                    
+
                     # get indices of stations with > 1 available measurements
                     self.read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label] = \
                         np.arange(len(station_data_availability_number), dtype=np.int32)[station_data_availability_number > 1]                    

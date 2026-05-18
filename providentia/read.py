@@ -23,7 +23,7 @@ from .fields_menus import (init_coverage, init_period, init_metadata,
 from .plot_aux import update_plotting_parameters
 from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, get_yearmonths_to_read, 
                        init_shared_vars_read_netcdf_data, read_netcdf_data_new, read_netcdf_metadata, 
-                       check_forecast_dimension)
+                       check_forecast_dimension, time_var_to_asi8)
 from .spatial_colocation import SpatialColocation
 from .warnings_prv import show_message
 
@@ -59,7 +59,7 @@ class DataReader:
             A list of models to add to arrays.
         """
 
-        prints = True
+        prints = False
 
         if prints:
             print('----------------------START READ--------------------------')
@@ -269,10 +269,10 @@ class DataReader:
                 # want all variables?
                 if wanted_ghost_features['variables'][0] == 'all':
                     # add coverage variables
-                    if float(self.read_instance.ghost_version) < 1.6:
+                    if float('.'.join(self.read_instance.ghost_version.split('.')[:2])) < 1.6:
                         self.read_instance.ghost_data_vars_to_read = [var for var 
-                                                                      in self.read_instance.coverage_info['ghost'][resolution]['map_vars_old'] 
-                                                                      if 'native' in var]
+                                                                    in self.read_instance.coverage_info['ghost'][resolution]['map_vars_old'] 
+                                                                    if 'native' in var]
                     else:
                         self.read_instance.ghost_data_vars_to_read = [var for var 
                                                                       in self.read_instance.coverage_info['ghost'][resolution]['map_vars'] 
@@ -301,7 +301,7 @@ class DataReader:
                                                  np.nan, dtype=np.float32) for networkspeci in self.read_instance.networkspecies} 
             
                 # get valid coverage variables
-                if float(self.read_instance.ghost_version) < 1.6:
+                if float('.'.join(self.read_instance.ghost_version.split('.')[:2])) < 1.6:
                     coverage_valid_vars = self.read_instance.coverage_info['ghost'][resolution]['map_vars_old']
                 else:
                     coverage_valid_vars = self.read_instance.coverage_info['ghost'][resolution]['map_vars']
@@ -310,7 +310,7 @@ class DataReader:
             else:
                 self.read_instance.ghost_data_in_memory = {}
                 self.read_instance.ghost_data_vars_to_read = []
-                if float(self.read_instance.ghost_version) < 1.6:
+                if float('.'.join(self.read_instance.ghost_version.split('.')[:2])) < 1.6:
                     coverage_valid_vars = self.read_instance.coverage_info['nonghost'][resolution]['map_vars_old']
                 else:
                     coverage_valid_vars = self.read_instance.coverage_info['nonghost'][resolution]['map_vars']
@@ -1693,7 +1693,12 @@ class DataReader:
             observations_data_label, data_label, data_labels, reading_ghost, ghost_data_vars_to_read,\
             metadata_dtype, metadata_vars_to_read, logger, default_qa, filter_read, network, forecast_indices = tuple_arguments
 
+            # define networkspeci
             networkspeci = '{}|{}'.format(network,speci)
+            
+            # get yearmonth index
+            file_yearmonth = relevant_file.split('_')[-1][:6]
+            yearmonth_index = self.read_instance.yearmonths.index(file_yearmonth)
 
             # get active data array in memory
             if filter_read:
@@ -1736,25 +1741,10 @@ class DataReader:
             # get file time as integer timestamp
             #file_timestamp = file_time_dt.asi8
 
-            # ---- FAST & EXACT asi8 TIME BLOCK ----
 
+            # get file time as integer timestamp
             time_var = ncdf_root.variables["time"]
-
-            # numeric time values (hours)
-            file_time = time_var[:].astype("int64")
-
-            # origin: "2018-12-01 00:00:00"
-            origin_str = time_var.units.split("since")[1].strip()
-
-            # convert to NumPy datetime64[ns]
-            # Replace " " with "T" to satisfy ISO-8601
-            origin_ns = np.datetime64(origin_str.replace(" ", "T"), "ns")
-
-            # vectorized computation: origin + N hours
-            file_timestamp = origin_ns + file_time * np.timedelta64(1, "h")
-
-            # convert to asi8 int64 nanoseconds
-            file_timestamp = file_timestamp.astype("int64")
+            file_timestamp = time_var_to_asi8(time_var)
 
             if prints:
                 print('(3) Get time: {}'.format(time.time()-last))
@@ -2030,7 +2020,7 @@ class DataReader:
                             meta_val = meta_val[current_file_station_indices_adjusted]
 
                         # put metadata in array
-                        self.read_instance.metadata_in_memory[networkspeci][meta_var][full_array_station_indices, 0] = meta_val
+                        self.read_instance.metadata_in_memory[networkspeci][meta_var][full_array_station_indices, yearmonth_index] = meta_val
 
                 if prints:
                     print('(10) Read metadata: {}'.format(time.time()-last))

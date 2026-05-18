@@ -17,6 +17,18 @@ import pandas as pd
 from providentia.auxiliar import CURRENT_PATH, join
 from providentia.warnings_prv import show_message
 
+_CFTIME_CLASS = {
+    "standard": cftime.DatetimeGregorian,
+    "gregorian": cftime.DatetimeGregorian,
+    "proleptic_gregorian": cftime.DatetimeProlepticGregorian,
+    "julian": cftime.DatetimeJulian,
+    "noleap": cftime.DatetimeNoLeap,
+    "365_day": cftime.DatetimeNoLeap,
+    "all_leap": cftime.DatetimeAllLeap,
+    "366_day": cftime.DatetimeAllLeap,
+    "360_day": cftime.Datetime360Day,
+}
+
 # initialise dictionary for storing pointers to shared memory variables in read step 
 shared_memory_vars = {}
 
@@ -1757,3 +1769,346 @@ def get_valid_metadata(read_instance, variable, valid_station_idxs, networkspeci
         valid_metadata.append(first_valid_station_metadata)
 
     return valid_metadata
+
+
+def _is_leap_year(year):
+    """
+    Determine whether a given year is a leap year under the standard Gregorian rule.
+
+    This helper is used when constructing monthly timestamps for calendars that
+    require explicit month-length handling.
+
+    Parameters
+    ----------
+    year : int
+        Calendar year to test.
+
+    Returns
+    -------
+    bool
+        True if the year is a leap year under the standard Gregorian rule,
+        otherwise False.
+    """
+    return (year % 4 == 0) and ((year % 100 != 0) or (year % 400 == 0))
+
+
+def _days_in_month(year, month, calendar):
+    """
+    Return the number of days in a month for a specified calendar.
+
+    The helper supports both standard/Gregorian-like calendars and non-standard
+    netCDF calendars such as ``360_day``, ``365_day`` / ``noleap``, and
+    ``366_day`` / ``all_leap``. It is primarily used when constructing dates
+    from ``months since ...`` offsets.
+
+    Parameters
+    ----------
+    year : int
+        Calendar year of the target month.
+    month : int
+        Month number in the range 1-12.
+    calendar : str
+        NetCDF calendar name. Examples include ``'standard'``, ``'gregorian'``,
+        ``'proleptic_gregorian'``, ``'360_day'``, ``'365_day'``, ``'noleap'``,
+        ``'366_day'``, or ``'all_leap'``.
+
+    Returns
+    -------
+    int
+        Number of days in the requested month under the specified calendar.
+    """
+    if calendar == "360_day":
+        return 30
+
+    if month in (1, 3, 5, 7, 8, 10, 12):
+        return 31
+    if month in (4, 6, 9, 11):
+        return 30
+
+    # February
+    if calendar in ("all_leap", "366_day"):
+        return 29
+    if calendar in ("noleap", "365_day"):
+        return 28
+
+    return 29 if _is_leap_year(year) else 28
+
+
+def _parse_origin_parts(origin_str):
+    """
+    Parse a netCDF time-origin string into its date and time components.
+
+    Parsing is delegated to ``pandas.Timestamp`` so that common ISO-like and
+    netCDF-style origin strings are handled consistently.
+
+    Parameters
+    ----------
+    origin_str : str
+        Origin timestamp string extracted from a netCDF ``units`` attribute,
+        for example ``'2018-12-01'`` or ``'2018-12-01 00:00:00'``.
+
+    Returns
+    -------
+    year : int
+        Parsed year component.
+    month : int
+        Parsed month component.
+    day : int
+        Parsed day component.
+    hour : int
+        Parsed hour component.
+    minute : int
+        Parsed minute component.
+    second : int
+        Parsed second component.
+    microsecond : int
+        Parsed microsecond component.
+    """
+    ts = pd.Timestamp(origin_str)
+    return ts.year, ts.month, ts.day, ts.hour, ts.minute, ts.second, ts.microsecond
+
+
+def _add_months_to_ym(year, month, delta_months):
+    """
+    Add an integer number of months to a ``(year, month)`` pair.
+
+    This helper is used when converting ``months since ...`` time coordinates
+    into concrete calendar dates.
+
+    Parameters
+    ----------
+    year : int
+        Starting year.
+    month : int
+        Starting month in the range 1-12.
+    delta_months : int
+        Integer number of months to add. May be positive, zero, or negative.
+
+    Returns
+    -------
+    new_year : int
+        Year after the month offset has been applied.
+    new_month : int
+        Month after the month offset has been applied, in the range 1-12.
+    """
+    total = year * 12 + (month - 1) + int(delta_months)
+    new_year = total // 12
+    new_month = (total % 12) + 1
+    return new_year, new_month
+
+
+def _num2date_months(values, origin_str, calendar):
+    """
+    Convert ``months since ...`` offsets into calendar-aware datetime objects.
+
+    This helper explicitly handles monthly data, including non-standard netCDF
+    calendars. The function assumes that the monthly offsets are integer-valued,
+    which is the normal case for monthly data files. If the day-of-month in the
+    origin timestamp is not valid in a target month, it is clamped to the last
+    valid day of that month for the chosen calendar.
+
+    Parameters
+    ----------
+    values : numpy.ndarray
+        Numeric month offsets read from the netCDF ``time`` variable. These are
+        expected to be integer month counts.
+    origin_str : str
+        Origin timestamp string extracted from the netCDF ``units`` attribute.
+    calendar : str
+        NetCDF calendar name associated with the time variable.
+
+    Returns
+    -------
+    dates : list
+        List of calendar-aware datetime objects, typically instances of the
+        appropriate ``cftime`` datetime class for the requested calendar.
+    """
+    values = np.asarray(values, dtype=np.float64)
+
+    if not np.allclose(values, np.round(values), equal_nan=False):
+        raise ValueError(
+            f"Monthly time coordinate contains non-integer month offsets: {values}"
+        )
+
+    offsets = np.round(values).astype(int)
+
+    year, month, day, hour, minute, second, microsecond = _parse_origin_parts(origin_str)
+    cls = _CFTIME_CLASS.get(calendar, cftime.DatetimeGregorian)
+
+    out = []
+    for delta_months in offsets:
+        yy, mm = _add_months_to_ym(year, month, delta_months)
+        dd = min(day, _days_in_month(yy, mm, calendar))
+        out.append(cls(yy, mm, dd, hour, minute, second, microsecond))
+
+    return out
+
+
+def _seconds_to_asi8(seconds):
+    """
+    Convert integer Unix seconds to int64 nanosecond timestamps.
+
+    This helper is used to preserve the historical Providentia behavior of
+    working at whole-second resolution while still returning timestamps in the
+    same integer-nanosecond format as ``DatetimeIndex.asi8``.
+
+    Parameters
+    ----------
+    seconds : array-like
+        Integer or float-like Unix seconds since 1970-01-01 00:00:00. Values
+        are converted to int64 seconds before scaling to nanoseconds.
+
+    Returns
+    -------
+    timestamps : numpy.ndarray
+        One-dimensional array of int64 nanosecond timestamps.
+    """
+    seconds = np.asarray(seconds, dtype=np.int64)
+    return seconds * 1_000_000_000
+
+
+def _dates_to_asi8_seconds(dates, calendar):
+    """
+    Convert datetime-like objects to int64 nanosecond timestamps at second resolution.
+
+    This helper intentionally discards sub-second precision. That behavior is
+    designed to match the historical Providentia logic, which explicitly removed
+    microseconds or cast decoded dates to ``datetime64[s]`` before obtaining
+    integer timestamps. This avoids problems caused by tiny floating-point artefacts
+    in decoded time coordinates.
+
+    Parameters
+    ----------
+    dates : sequence
+        Sequence of datetime-like objects. This may contain standard Python
+        ``datetime`` objects, NumPy datetime-like objects, pandas-compatible
+        datetime values, or ``cftime`` datetime instances.
+    calendar : str
+        NetCDF calendar name used to interpret ``cftime`` dates correctly.
+
+    Returns
+    -------
+    timestamps : numpy.ndarray
+        One-dimensional array of int64 nanosecond timestamps corresponding to
+        whole-second times only. Any sub-second precision in the input is
+        intentionally discarded.
+    """
+    dates = np.asarray(dates, dtype=object)
+
+    if dates.size == 0:
+        return np.array([], dtype=np.int64)
+
+    first = dates.flat[0]
+
+    # ------------------------------------------------------
+    # cftime path (works for DatetimeGregorian too)
+    # ------------------------------------------------------
+    if isinstance(first, cftime.datetime):
+        seconds = cftime.date2num(
+            dates.tolist(),
+            units="seconds since 1970-01-01 00:00:00",
+            calendar=calendar
+        )
+        seconds = np.floor(np.asarray(seconds, dtype=np.float64)).astype(np.int64)
+        return _seconds_to_asi8(seconds)
+
+    # ------------------------------------------------------
+    # Standard datetime-like path
+    # ------------------------------------------------------
+    dt64_s = pd.to_datetime(dates).to_numpy(dtype="datetime64[s]")
+    seconds = dt64_s.astype(np.int64)
+    return _seconds_to_asi8(seconds)
+
+
+def time_var_to_asi8(time_var):
+    """
+    Convert a netCDF ``time`` variable to integer nanosecond timestamps.
+
+    The function supports the common resolutions used in Providentia:
+    hourly, 3-hourly, 6-hourly, daily, and monthly. It also respects the
+    ``calendar`` attribute on the netCDF time variable.
+
+    A fast vectorized conversion path is used for standard/Gregorian-like
+    calendars when the units are expressed in seconds, minutes, hours, or
+    days since a standard origin timestamp. Monthly data and non-standard
+    calendars automatically fall back to a safer calendar-aware conversion path.
+
+    IMPORTANT:
+    ----------
+    This function intentionally normalizes all timestamps to whole-second
+    precision. That mirrors the historical Providentia behavior and avoids
+    issues caused by tiny floating-point artefacts in decoded netCDF times.
+
+    Parameters
+    ----------
+    time_var : netCDF4.Variable
+        NetCDF time variable. The variable must contain numeric offsets and a
+        ``units`` attribute of the form ``'<unit> since <origin>'``. If present,
+        the ``calendar`` attribute is also used to ensure correct interpretation
+        of the time axis.
+
+    Returns
+    -------
+    file_timestamp : numpy.ndarray
+        One-dimensional array of int64 nanosecond timestamps in Unix-epoch
+        nanoseconds (``asi8`` style), suitable for comparison against
+        pandas/NumPy ``datetime64[ns]``-based integer time axes.
+    """
+    units = time_var.units.strip()
+    calendar = getattr(time_var, "calendar", "standard")
+    values = np.asarray(time_var[:], dtype=np.float64)
+
+    unit_part, origin_part = units.split("since", 1)
+    unit = unit_part.strip().lower()
+    origin_str = origin_part.strip()
+
+    # ------------------------------------------------------
+    # FAST PATH for standard/Gregorian-like calendars
+    # and second/minute/hour/day units
+    #
+    # We intentionally normalize to whole seconds.
+    # ------------------------------------------------------
+    standard_cals = {"standard", "gregorian", "proleptic_gregorian"}
+
+    sec_per_unit = {
+        "second": 1,
+        "seconds": 1,
+        "sec": 1,
+        "secs": 1,
+        "minute": 60,
+        "minutes": 60,
+        "min": 60,
+        "mins": 60,
+        "hour": 3600,
+        "hours": 3600,
+        "hr": 3600,
+        "hrs": 3600,
+        "day": 86400,
+        "days": 86400,
+    }
+
+    if calendar in standard_cals and unit in sec_per_unit:
+        try:
+            origin_s = np.datetime64(origin_str.replace(" ", "T"), "s").astype(np.int64)
+            delta_s = np.floor(values * sec_per_unit[unit]).astype(np.int64)
+            return _seconds_to_asi8(origin_s + delta_s)
+        except Exception:
+            # Fall through to safe path if the fast path fails to parse
+            pass
+
+    # ------------------------------------------------------
+    # MONTHLY path
+    # ------------------------------------------------------
+    if unit in ("month", "months"):
+        dates = _num2date_months(values, origin_str, calendar)
+        return _dates_to_asi8_seconds(dates, calendar)
+
+    # ------------------------------------------------------
+    # SAFE GENERAL PATH for everything else
+    # ------------------------------------------------------
+    dates = num2date(
+        values,
+        units=units,
+        calendar=calendar
+    )
+    return _dates_to_asi8_seconds(dates, calendar)
