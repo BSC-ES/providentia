@@ -377,7 +377,7 @@ class ModelInterpolation(object):
                     self.x_varname = mod_speci_obj.dimensions[2]
                     self.y_varname = mod_speci_obj.dimensions[1]
                 # mapped size distribution variable, with bin dimension
-                elif (len(mod_speci_obj.shape) == 4) & ('vconcaerobin' in self.original_speci_to_process):
+                elif (len(mod_speci_obj.shape) == 4) and ('vconcaerobin' in self.original_speci_to_process):
                     self.have_bin_dimension = True
                     self.x_varname = mod_speci_obj.dimensions[3]
                     self.y_varname = mod_speci_obj.dimensions[2]
@@ -413,17 +413,17 @@ class ModelInterpolation(object):
                 # if not terminate process
                 # this is done by checking the variable names of the x, y (and z if required) dimensions
                 # X dimension is valid if 'lon' is contained within name, or is == 'x'
-                if ('lon' not in self.x_varname) & (self.x_varname != 'x'):
-                    self.log_file_str += 'X dimension incorrectly named. Terminating process.'
-                    create_output_logfile(1, self.log_file_str)
+                if ('lon' not in self.x_varname) and (self.x_varname != 'x'):
+                        self.log_file_str += 'X dimension incorrectly named. Terminating process.'
+                        create_output_logfile(1, self.log_file_str)
                 # Y dimension is valid if 'lat' is contained within name, or is == 'y'
-                if ('lat' not in self.y_varname) & (self.y_varname != 'y'):
+                if ('lat' not in self.y_varname) and (self.y_varname != 'y'):
                     self.log_file_str += 'Y dimension incorrectly named. Terminating process.'
                     create_output_logfile(1, self.log_file_str)
                 # Z dimension is valid if == 'z' or 'lev' or 'alt' or 'height'
                 if self.have_vertical_dimension:
-                    if ((self.z_varname != 'lev') & (self.z_varname != 'z') & (self.z_varname != 'alt')
-                        & (self.z_varname != 'height')  & (self.z_varname != 'level')):
+                    if ((self.z_varname != 'lev') and (self.z_varname != 'z') and (self.z_varname != 'alt')
+                        and (self.z_varname != 'height') and (self.z_varname != 'level')):
                         self.log_file_str += 'Z dimension incorrectly named. Terminating process.'
                         create_output_logfile(1, self.log_file_str)
 
@@ -464,12 +464,18 @@ class ModelInterpolation(object):
                 self.mod_lons_centre = np.float32(mod_nc_root[lon_centre_varname][:])
                 self.mod_lats_centre = np.float32(mod_nc_root[lat_centre_varname][:])
 
-                # Check for monotonicity before any shifts
-                if not (np.all(np.diff(self.mod_lons_centre) > 0) or np.all(np.diff(self.mod_lons_centre) < 0)):
+                # Check for monotonicity before any shifts (with tolerance for small numerical issues)
+                tol = 1e-10
+                x_diff = np.diff(self.x)
+                y_diff = np.diff(self.y)
+                increasing_x = np.all(x_diff > tol)
+                decreasing_x = np.all(x_diff < -tol)
+                increasing_y = np.all(y_diff > tol)
+                decreasing_y = np.all(y_diff < -tol)
+                if not (increasing_x or decreasing_x):
                     self.log_file_str += "Longitude is not monotonic. Terminating process."
                     create_output_logfile(1, self.log_file_str)
-
-                if not (np.all(np.diff(self.mod_lats_centre) > 0) or np.all(np.diff(self.mod_lats_centre) < 0)):
+                if not (increasing_y or decreasing_y):
                     self.log_file_str += "Latitude is not monotonic. Terminating process."
                     create_output_logfile(1, self.log_file_str)
 
@@ -478,14 +484,14 @@ class ModelInterpolation(object):
                 lon_max = float(self.mod_lons_centre.max())
                 lat_min = float(self.mod_lats_centre.min())
                 lat_max = float(self.mod_lats_centre.max())
-                if (lon_min < 0) or (lon_max > 360):
-                    self.log_file_str += "Longitude range is unusual - needs manual inspection. Terminating process."
+                if (lon_min < -180) or (lon_max > 360):
+                    self.log_file_str += "Longitude range is unusual ({}, {}) - needs manual inspection. Terminating process.".format(lon_min, lon_max)
                     create_output_logfile(1, self.log_file_str)
                 if (lat_min < -90) or (lat_max > 180):
-                    self.log_file_str += "Latitude range is unusual - needs manual inspection. Terminating process."
+                    self.log_file_str += "Latitude range is unusual ({}, {}) - needs manual inspection. Terminating process.".format(lat_min, lat_max)
                     create_output_logfile(1, self.log_file_str)
 
-                # check if need to order or shift coordinates, only do if regular grid type
+                # check if need to order or shift coordinates
 
                 # need to shift coordinates
                 # longitudes are 0-360? (0 centred over Greenwich)
@@ -494,30 +500,66 @@ class ModelInterpolation(object):
                 self.shift_lat = (lat_min >= 0) and (lat_max > 90)
 
                 # shift coordinates
-                if (self.shift_lon) or (self.shift_lat):
+                if self.shift_lon:
+                    self.log_file_str += "Shifting longitudes from 0-360 to -180-180. \n"
+                    self.mod_lons_centre = ((self.mod_lons_centre  + 180) % 360) - 180
                     if self.mod_grid_type == 'crs':
-                        if self.shift_lon:
-                            self.mod_lons_centre = ((self.mod_lons_centre  + 180) % 360) - 180
-                        if self.shift_lat:
-                            self.mod_lats_centre = self.mod_lats_centre - 90
-                    else:
-                        self.log_file_str += 'Cannot handle grid of type: {} with shifted coordinates. Terminating process.'.format(self.mod_grid_type)
-                        create_output_logfile(1, self.log_file_str)
+                        self.x = ((self.x + 180) % 360) - 180
+                if self.shift_lat:
+                    self.log_file_str += "Shifting latitudes from 0-180 to -90-90. \n"
+                    self.mod_lats_centre = self.mod_lats_centre - 90
+                    if self.mod_grid_type == 'crs':
+                        self.y = self.y - 90
 
                 # need to order coordinates?
-                self.order_lon = not np.all(np.diff(self.mod_lons_centre) > 0)
-                self.order_lat = not np.all(np.diff(self.mod_lats_centre) > 0)
+                # geographic grid?
+                if self.mod_grid_type == 'crs':
+                    x_diff = np.diff(self.x)
+                    y_diff = np.diff(self.y)
+                    increasing_x = np.all(x_diff > tol)
+                    increasing_y = np.all(y_diff > tol)
+                    self.order_lon = not increasing_x
+                    self.order_lat = not increasing_y
+                # projected grid?
+                else:
+                    lon_test = self.mod_lons_centre[0, :]
+                    lat_test = self.mod_lats_centre[:, 0]
+                    lon_diff = np.diff(lon_test)
+                    lat_diff = np.diff(lat_test)
+                    increasing_lon = np.all(lon_diff > tol)
+                    increasing_lat = np.all(lat_diff > tol)
+                    self.order_lon = not increasing_lon
+                    self.order_lat = not increasing_lat
 
-                # order coordinates
-                if (self.order_lon) or (self.order_lat):
+                # order longitude
+                if self.order_lon:
+                    self.log_file_str += "Ordering longitudes. \n"
+                    # geographic grid?
                     if self.mod_grid_type == 'crs':
-                        if self.order_lon:
-                            self.mod_lons_centre = np.sort(self.mod_lons_centre)
-                        if self.order_lat:
-                            self.mod_lats_centre = np.sort(self.mod_lats_centre)
+                        self.x_idx = np.argsort(self.x)
+                        self.x = self.x[self.x_idx]
+                        self.mod_lons_centre = self.mod_lons_centre[self.x_idx]
+                    # projected grid?
                     else:
-                        self.log_file_str += 'Cannot handle grid of type: {} with unordered coordinates. Terminating process.'.format(self.mod_grid_type)
-                        create_output_logfile(1, self.log_file_str)
+                        self.x_idx = np.argsort(self.mod_lons_centre[0, :])
+                        self.mod_lons_centre = self.mod_lons_centre[:, self.x_idx]
+                        self.mod_lats_centre = self.mod_lats_centre[:, self.x_idx]
+                        self.x = self.x[self.x_idx]
+                        
+                # order latitude
+                if self.order_lat:
+                    self.log_file_str += "Ordering latitudes. \n"
+                    # geographic grid?
+                    if self.mod_grid_type == 'crs':
+                        self.y_idx = np.argsort(self.y)
+                        self.y = self.y[self.y_idx]
+                        self.mod_lats_centre = self.mod_lats_centre[self.y_idx]
+                    # projected grid?
+                    else:
+                        self.y_idx = np.argsort(self.mod_lats_centre[:, 0])
+                        self.mod_lons_centre = self.mod_lons_centre[self.y_idx, :]
+                        self.mod_lats_centre = self.mod_lats_centre[self.y_idx, :]
+                        self.y = self.y[self.y_idx]
                 
                 # close model netCDF root
                 mod_nc_root.close()
@@ -1002,20 +1044,16 @@ class ModelInterpolation(object):
                     # set any model values outside GHOST extreme limits for variable to be NaN
                     read_data[(read_data < self.GHOST_speci_lower_limit) | (read_data > self.GHOST_speci_upper_limit)] = np.nan 
 
+                    # reorder data coordinates if needed
+                    if self.order_lon:
+                        read_data = np.take(read_data, self.x_idx, axis=-1)
+                    if self.order_lat:
+                        read_data = np.take(read_data, self.y_idx, axis=-2)
+
                     # create xarray for resampling
                     xr_data = xr.DataArray(dims=("time","latitude","longitude"),
                                            data=read_data,
                                            coords=dict(time=valid_file_time_dt, latitude=self.y, longitude=self.x))
-                    
-                    # shift or order coordinates if needed (only in the case of regular grids)
-                    if self.shift_lon:
-                        self.x = ((self.x + 180) % 360) - 180
-                    if self.shift_lat:
-                        self.y = self.y - 90
-                    if (self.shift_lon) or (self.shift_lat):
-                        xr_data = xr_data.assign_coords(longitude=self.x, latitude=self.y)
-                    if (self.order_lon) or (self.order_lat):
-                        xr_data = xr_data.sortby(['latitude', 'longitude'])
                     
                     # do resampling
                     if resampling_direction:
@@ -1460,6 +1498,7 @@ if __name__ == "__main__":
 
         # get unit conversion factor between observations and model data
         EI.conversion_factor = get_conversion_factor(EI.mod_speci_units, EI.obs_units, EI.standard_parameter_speci)
+        EI.log_file_str += EI.mod_speci_units + ' to ' + EI.obs_units + ' conversion factor is: ' + str(EI.conversion_factor) + '\n'
         if isinstance(EI.conversion_factor, str):
             EI.log_file_str += EI.conversion_factor
             create_output_logfile(1, EI.log_file_str)
