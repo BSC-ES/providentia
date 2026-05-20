@@ -62,11 +62,26 @@ fi
 set -eo pipefail
 IFS=$'\n\t'
 
+sanitise_python_environment() {
+    echo "INFO: Sanitising Python environment..."
+
+    unset PYTHONPATH || true
+    unset PYTHONHOME || true
+    unset PYTHONSTARTUP || true
+    unset PYTHONUSERBASE || true
+
+    export PYTHONNOUSERSITE=1
+    export PIP_NO_USER=1
+}
+
+# sanitise python environment to avoid conflicts
+sanitise_python_environment
+
 # An option followed by a single colon ':' means that it *needs* an argument.
 # An option followed by double colons '::' means that its argument is optional.
 # See `man getopt'.
 SHORT=uc:t:J:q:m:V
-LONG=usage,cores:,time:,jobname:,queue:,mem:,constraint:,help,version,debug,clean,section:,ghost_version:,conf:,config:,config_dir:,cartopy_data_dir:,ghost_root:,nonghost_root:,exp_root:,exp_to_interp_root:,generate_file_tree,gft,disable_file_tree,dft,report,reports,offline,download,dl,interpolation,interp,interpolate,notebook,nb,jupyter,dir_merge,slurm_job_id:,network:,framework:,observation:,species:,resolution:,model_resolution:,start_date:,end_date:,observations_data_label:,experiments:,experiment:,model:,models:,domain:,ensemble:,forecast:,qa:,flags:,add_qa:,subtract_qa:,add_flags:,subtract_flags:,temporal_colocation:,spatial_colocation:,spatial_colocation_tolerance:,spatial_colocation_station_reference:,spatial_colocation_station_name:,spatial_colocation_longitude_latitude:,spatial_colocation_measurement_altitude:,spatial_colocation_validation:,spatial_colocation_validation_tolerance:,map_extent:,filter_species:,calibration_factor:,lower_bound:,upper_bound:,remove_extreme_stations:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,harmonise_summary:,harmonise_stations:,active_dashboard_plots:,resampling_resolution:,statistic_mode:,statistic_aggregation:,periodic_statistic_mode:,periodic_statistic_aggregation:,timeseries_statistic_aggregation:,plot_characteristics_filename:,dl_overwrite:,dl_ghost_source:,dl_interpolated:,dl_mode:,dl_timeout:,dl_thredds_update:,interp_multiprocessing:,interp_n_neighbours:,interp_reverse_vertical_orientation:,interp_chunk_size:,interp_job_array_limit:,interp_spinup_timesteps:,z:,interp_model_downsampling:,interp_model_upsampling:,logfile::,multispecies_units:
+LONG=usage,cores:,time:,jobname:,queue:,mem:,constraint:,help,version,debug,clean,section:,ghost_version:,ghost_features:,conf:,config:,config_dir:,cartopy_data_dir:,ghost_root:,nonghost_root:,exp_root:,exp_to_interp_root:,generate_file_tree,gft,disable_file_tree,dft,report,reports,offline,download,dl,interpolation,interp,interpolate,notebook,nb,jupyter,dir_merge,slurm_job_id:,network:,framework:,observation:,species:,resolution:,model_resolution:,start_date:,end_date:,observations_data_label:,experiments:,experiment:,model:,models:,domain:,ensemble:,forecast:,qa:,flags:,add_qa:,subtract_qa:,add_flags:,subtract_flags:,temporal_colocation:,spatial_colocation:,spatial_colocation_tolerance:,spatial_colocation_station_reference:,spatial_colocation_station_name:,spatial_colocation_longitude_latitude:,spatial_colocation_measurement_altitude:,spatial_colocation_validation:,spatial_colocation_validation_tolerance:,map_extent:,filter_species:,calibration_factor:,lower_bound:,upper_bound:,remove_extreme_stations:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,harmonise_summary:,harmonise_stations:,active_dashboard_plots:,resampling_resolution:,statistic_mode:,statistic_aggregation:,periodic_statistic_mode:,periodic_statistic_aggregation:,timeseries_statistic_aggregation:,plot_characteristics_filename:,dl_overwrite:,dl_ghost_source:,dl_interpolated:,dl_mode:,dl_timeout:,dl_thredds_update:,interp_multiprocessing:,interp_n_neighbours:,interp_reverse_vertical_orientation:,interp_chunk_size:,interp_job_array_limit:,interp_spinup_timesteps:,z:,interp_model_downsampling:,interp_model_upsampling:,logfile::,multispecies_units:
 
 # parse arguments
 PARSED=$(getopt --options ${SHORT} \
@@ -164,9 +179,9 @@ fi
 
 # if using Mac, then use Providentia executable (in order to rename application name)
 if [[ "${OS}" == "Mac" ]] ; then
-    python_command="./bin/Mac/Providentia -u -Wi -c 'from providentia import main;main.main()' $OTHEROPTS"
+    python_command="./bin/Mac/Providentia -E -s -u -Wi -c 'from providentia import main;main.main()' $OTHEROPTS"
 else
-    python_command="python$python_ver -u -Wi -c 'from providentia import main;main.main()' $OTHEROPTS"
+    python_command="python$python_ver -E -s -u -Wi -c 'from providentia import main;main.main()' $OTHEROPTS"
 fi
 
 # use clean mode and exit
@@ -250,17 +265,14 @@ else
     debugexec=true
 fi
 
-# load modules from conda environment
-# EXPORTPATH="/gpfs/home/bsc32/bsc32781/.conda/envs/myenv/lib/python3.9/site-packages"
-# export PYTHONPATH=${EXPORTPATH}:${PYTHONPATH}
 
 # get IP (different method for each OS)
 if [ "${OS}" == "Mac" ]; then
-    ip=${LOCAL_IP:-`ipconfig getifaddr en0`}
+    ip=${LOCAL_IP:-$(ipconfig getifaddr en0 2>/dev/null || echo "")}
 elif [ "${OS}" == "Linux" ]; then
     ip=$(hostname --ip-address)
 elif [ "${OS}" == "Windows" ]; then
-    ip=${LOCAL_IP:-`ipconfig.exe | grep -im1 'IPv4 Address' | cut -d ':' -f2`}
+    ip=${LOCAL_IP:-$(ipconfig.exe | grep -im1 'IPv4 Address' | cut -d ':' -f2)}
 fi
 
 # if download mode is executed from the remote machines, exit
@@ -314,6 +326,7 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
         echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
         echo "Loading dependencies..."
         eval "${load_command}"
+        sanitise_python_environment
         jobid=$(eval "sbatch ${cores_option} ${account_option} ${queue_option} bin/submit_interpolation_${BSC_MACHINE}.sh $OTHEROPTS | awk '{print \$4}'")
         echo "Check submission info in 'logs/interpolation/management_logs/$jobid.out'"
 
@@ -321,6 +334,7 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
         # load modules from conda environment
         active_env=false
         module load anaconda
+        sanitise_python_environment
         eval "$(conda shell.bash hook)"
         conda config --set env_prompt '($(basename {default_env})) '
         if ! { conda config --show-sources | grep '/gpfs/projects/bsc32/repository/apps/conda_envs/'; } >/dev/null 2>&1; then
@@ -400,6 +414,7 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
         echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
         echo "Loading dependencies..."
         eval "${load_command}"
+        sanitise_python_environment
         jobid=$(eval "sbatch ${cores_option} ${account_option} ${queue_option} bin/submit_interpolation_${BSC_MACHINE}.sh $OTHEROPTS | awk '{print \$4}'")
         echo "Check submission info in 'logs/interpolation/management_logs/$jobid.out'"
 
@@ -407,6 +422,7 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
         # load modules from conda environment
         active_env=false
         module load Miniconda3/24.7.1-0
+        sanitise_python_environment
         eval "$(conda shell.bash hook)"
         conda config --set env_prompt '($(basename {default_env})) '
         if ! { conda config --show-sources | grep '/gpfs/projects/bsc32/repository/apps/conda_envs/'; } >/dev/null 2>&1; then
@@ -462,11 +478,12 @@ elif [ "${ip}" == "84.88.185.205" ]; then
     
     # load modules from conda environment
     module load Miniconda3/24.7.1-0
+    sanitise_python_environment
     setup_providentia_env
 
     if $notebook; then
         echo "Starting Jupyter session."
-        export PYTHONPATH=$(pwd):${PYTHONPATH}
+        export PYTHONPATH="$(pwd)"
         jupyter-lab --port 8888 --ip 0.0.0.0 --allow-root
     elif $interpolation; then
         unique_id=$(printf "%06d\n" $((RANDOM % 1000000)))
@@ -513,7 +530,7 @@ else
 
     if $notebook; then
         echo "Starting Jupyter session."
-        export PYTHONPATH=$(pwd):${PYTHONPATH}
+        export PYTHONPATH="$(pwd)"
         jupyter-lab --port 8888 --ip 0.0.0.0 --allow-root
     elif $interpolation; then
         unique_id=$(printf "%06d\n" $((RANDOM % 1000000)))
