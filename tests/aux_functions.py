@@ -1,7 +1,10 @@
+import hashlib
 import matplotlib
 import numpy as np
 import pandas as pd
 import xarray as xr
+from pathlib import Path
+from pypdf import PdfReader
 
 from providentia.statistics import get_z_statistic_info
 
@@ -111,3 +114,58 @@ def check_unit_conversion(conv_obj, new_val, orig_val, orig_unit, new_unit, atol
     else:
         print('{} {} to {} {} correctly converted'.format(orig_val, orig_unit, new_val, new_unit))
     assert np.isclose(conv_obj.converted_value, new_val, atol=atol)
+
+
+def extract_pdf_info(pdf_path):
+    """Extract text and number of pages from a PDF file, and return a hash of the text for comparison.
+
+    Parameters
+    ----------
+    pdf_path : str
+        Path to file
+
+    Returns
+    -------
+    dict
+        Dictionary with information
+    """
+
+    reader = PdfReader(str(pdf_path))
+    text = ""
+
+    for page in reader.pages:
+        extracted = page.extract_text()
+        if extracted:
+            text += extracted
+
+    return {
+        "pages": len(reader.pages),
+        "text_hash": hashlib.md5(text.encode("utf-8")).hexdigest(),
+        "text": text,
+    }
+
+def check_report(network_type):
+    """Check if report is the same as reference
+
+    Parameters
+    ----------
+    network_type : str
+        Network type
+    """
+
+    # Read PDFs
+    generated_report_info = extract_pdf_info(f'reports/tests_{network_type}.pdf')
+    expected_report_info = extract_pdf_info(f'tests/reference/{network_type}/tests_{network_type}.pdf')
+
+    if generated_report_info["text_hash"] != expected_report_info["text_hash"]:
+       print("Different content detected") 
+
+    if generated_report_info["pages"] != expected_report_info["pages"]:
+        print("Different number of pages detected")
+
+    print(f"Generated PDF pages: {generated_report_info['pages']}")
+    print(f"Expected PDF pages: {expected_report_info['pages']}")
+
+    # Compare
+    assert generated_report_info["pages"] == expected_report_info["pages"]
+    assert generated_report_info["text_hash"] == expected_report_info["text_hash"]
