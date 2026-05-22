@@ -39,8 +39,13 @@ def set_equal_axes(ax, plot_options, plot_characteristics, base_plot_type):
         Base plot type (without statistical overlays).
     """
 
-    # set equal aspect
-    ax.set_aspect(aspect='equal', adjustable='box')
+    # if only one axis is on a log scale, then set box aspect to 1 to get square shape
+    if ((('logx' in plot_options) and ('logy' not in plot_options)) 
+        or (('logx' not in plot_options) and ('logy' in plot_options))):
+        ax.set_box_aspect(1)
+    else:
+        # set equal aspect
+        ax.set_aspect(aspect='equal', adjustable='box')
 
     if len(ax.lines) == 0 and base_plot_type == 'scatter':
         return None
@@ -173,7 +178,6 @@ def harmonise_xy_lims_paradigm(read_instance, canvas_instance, relevant_axs, bas
         if 'equal_aspect' in plot_characteristics:
             if plot_characteristics['equal_aspect']:
                 set_equal_axes(ax, plot_options, plot_characteristics, base_plot_type)
-                continue
         else:
             ax.set_aspect('auto')
 
@@ -189,7 +193,7 @@ def harmonise_xy_lims_paradigm(read_instance, canvas_instance, relevant_axs, bas
         if (xlim is None) and ('xlim' not in plot_characteristics):
             if base_plot_type not in ['timeseries', 'boxplot', 'periodic', 'periodic-violin']:
                 xlim_lower, xlim_upper = ax.get_xlim()
-            elif base_plot_type == 'timeseries':
+            elif base_plot_type in ['timeseries', 'scatter']:
                 xlim_lower, xlim_upper = get_no_margin_lim(ax, 'xlim')
                 try:
                     xlim_lower = num2date(xlim_lower).replace(tzinfo=None)
@@ -225,8 +229,7 @@ def harmonise_xy_lims_paradigm(read_instance, canvas_instance, relevant_axs, bas
                 set_xlim = True
 
         # set xlim
-        if ((set_xlim) and ('equal_aspect' not in plot_characteristics) and
-           (base_plot_type not in ['timeseries', 'boxplot', 'periodic', 'periodic-violin'])):
+        if (set_xlim and (base_plot_type not in ['timeseries', 'boxplot', 'periodic', 'periodic-violin'])):
             if isinstance(xlim, dict):
                 ax.set_xlim(**xlim)
             else:
@@ -255,7 +258,7 @@ def harmonise_xy_lims_paradigm(read_instance, canvas_instance, relevant_axs, bas
                 set_ylim = True
 
         # set ylim
-        if (set_ylim) and ('equal_aspect' not in plot_characteristics):
+        if set_ylim:
             if isinstance(ylim, dict):
                 ax.set_ylim(**ylim)
             else:
