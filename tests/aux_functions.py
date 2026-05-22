@@ -130,7 +130,7 @@ def extract_pdf_info(pdf_path):
         Dictionary with information
     """
 
-    reader = PdfReader(str(pdf_path))
+    reader = PdfReader(pdf_path)
     text = ""
 
     for page in reader.pages:

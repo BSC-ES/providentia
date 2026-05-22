@@ -1,0 +1,78 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "providentia"
+version = "3.0.1"
+description = "Providentia is designed to allow on-the-fly, offline and interactive analysis of model outputs, with respect to processed observational data."
+requires-python = ">=3.11"
+license = { text = "GNU GPL v3" }
+dynamic = ["readme"]
+
+authors = [
+    { name = "Dene Bowdalo", email = "dene.bowdalo@bsc.es" },
+    { name = "Alba Vilanova Cortezón", email = "alba.vilanova@bsc.es" },
+    { name = "Paula Serrano Sierra", email = "paula.serrano@bsc.es" },
+    { name = "Francesco Benincasa", email = "francesco.benincasa@bsc.es" },
+    { name = "Amalia Vradi", email = "amalia.vradi@bsc.es" }
+]
+
+keywords = [
+    "earth sciences",
+    "atmospheric composition",
+    "evaluation",
+    "verification",
+    "observations",
+    "air quality"
+]
+
+classifiers = [
+    "Programming Language :: Python :: 3.11",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Topic :: Scientific/Engineering :: Atmospheric Science",
+    "Intended Audience :: Science/Research",
+    "Natural Language :: English"
+]
+
+dependencies = [
+    "matplotlib==3.10.7",
+    "netCDF4==1.7.2",
+    "numpy==2.3.5",
+    "pandas==2.3.3",
+    "PyQt5==5.15.11",
+    "seaborn==0.13.2",
+    "scipy==1.16.3",
+    "ConfigArgParse==1.7.1",
+    "cftime==1.6.5",
+    "xarray==2025.11.0",
+    "Sphinx==8.2.3",
+    "Sphinx-rtd-theme==3.0.2",
+    "coverage==7.12.0",
+    "pytest==9.0.1",
+    "pypdf==6.4.0",
+    "bottleneck==1.6.0",
+    "tqdm==4.67.1",
+    "remotezip==0.12.3",
+    "myst-parser==4.0.1",
+    "PyYAML==6.0.1",
+    "python-dotenv==1.2.1",
+    "paramiko==4.0.0",
+    "coverage-badge==1.1.2",
+    "cdsapi==0.7.7",
+    "pycountry==24.6.1",
+    "xskillscore==0.0.28"
+]
+
+[project.urls]
+Homepage = "https://github.com/BSC-ES/providentia"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.setuptools.dynamic]
+readme = {file = ["README.md"]}
