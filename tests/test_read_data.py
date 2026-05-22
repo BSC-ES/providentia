@@ -30,6 +30,7 @@ possibilities = [
                      tests=True),
      "temporal_spatial", "nonghost")
 ]
+
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
 def test_statistics(inst, statistic_mode, network_type):
     path = f'tests/reference/{network_type}/{statistic_mode}/data/data.npy'
