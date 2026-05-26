@@ -1,4 +1,15 @@
 {
+    "nasa-aeronet/oneill_v3-lev15": {
+        "3hourly": {
+            "aod": {
+                "od500aerocoarse": [
+                    "202506",
+                    "202507",
+                    "202508"
+                ]
+            }
+        }
+    },
     "eea/eionet": {
         "hourly": {
             "gas": {

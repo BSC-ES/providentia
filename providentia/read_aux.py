@@ -5,13 +5,11 @@ from glob import glob
 import json
 import os
 import sys
-import time
 
 import bisect
 import cftime
 from netCDF4 import Dataset, num2date, chartostring
 import numpy as np
-from packaging.version import Version
 import pandas as pd
 
 from providentia.auxiliar import CURRENT_PATH, join
@@ -74,7 +72,6 @@ def init_shared_vars_read_netcdf_data(data_in_memory, data_in_memory_shape, ghos
         Shared memory buffer for data quality flags.
     """
 
-    start = time.time()
     shared_memory_vars['data_in_memory'] = data_in_memory
     shared_memory_vars['data_in_memory_shape'] = data_in_memory_shape
     shared_memory_vars['ghost_data_in_memory'] = ghost_data_in_memory
@@ -82,7 +79,6 @@ def init_shared_vars_read_netcdf_data(data_in_memory, data_in_memory_shape, ghos
     shared_memory_vars['timestamp_array'] = timestamp_array
     shared_memory_vars['qa'] = qa
     shared_memory_vars['flag'] = flags
-    #print('(0) Shared memory passing: {}'.format(time.time()-start))
 
 def read_netcdf_data(tuple_arguments):
     """
@@ -101,18 +97,10 @@ def read_netcdf_data(tuple_arguments):
         stations are found; or None for model data or missing files.
     """
 
-    prints = False
-
-    start = time.time()
-
     # assign arguments from tuple to variables
     relevant_file, station_references, station_names, speci,\
     observations_data_label, data_label, data_labels, reading_ghost, ghost_data_vars_to_read,\
     metadata_dtype, metadata_vars_to_read, logger, default_qa, filter_read, network, forecast_indices = tuple_arguments
-
-    if prints:
-        print('(1) Passed arguments: {}'.format(time.time()-start))
-        last = time.time()
 
     # wrap shared arrays as numpy arrays to more easily manipulate the data
     data_in_memory = np.frombuffer(shared_memory_vars['data_in_memory'], dtype=np.float32).reshape(shared_memory_vars['data_in_memory_shape'][:])
@@ -125,59 +113,12 @@ def read_netcdf_data(tuple_arguments):
                                                     dtype=np.float32).reshape(shared_memory_vars['ghost_data_in_memory_shape'][:])
     timestamp_array = np.frombuffer(shared_memory_vars['timestamp_array'], dtype=np.int64)
 
-    if prints:
-        print('(2) Wrap arrays: {}'.format(time.time()-last))
-        last = time.time()
-
     # read netCDF frame
-    ncdf_root = Dataset(relevant_file, mode="r", swmr=True)
-
-    # get file time (handle monthly resolution data differently to hourly/daily
-    # as num2date does not support 'months since' units)
-    file_time = ncdf_root['time'][:] 
-    time_units = ncdf_root['time'].units
-    
-    if 'months' in time_units:
-         monthly_start_date = time_units.split(' ')[2]
-         file_time_dt = pd.date_range(start=monthly_start_date, periods=1, freq='MS')
-    else:
-         file_time_dt = num2date(file_time, units=time_units)
-        
-         # convert to pandas datetime
-         if Version(cftime.__version__) <= Version("1.0.3.4"):
-             # remove microseconds
-             file_time_dt = pd.to_datetime([t.replace(microsecond=0) for t in file_time_dt])
-         else:
-             # bug fix for newer versions of cftime
-             file_time_dt = file_time_dt.astype('datetime64[s]')
-             file_time_dt = pd.to_datetime([t for t in file_time_dt])
+    ncdf_root = Dataset(relevant_file, mode="r")
 
     # get file time as integer timestamp
-    file_timestamp = file_time_dt.asi8
-
-    # ---- FAST & EXACT asi8 TIME BLOCK ----
-
-    #time_var = ncdf_root.variables["time"]
-
-    # numeric time values (hours)
-    #file_time = time_var[:].astype("int64")
-
-    # origin: "2018-12-01 00:00:00"
-    #origin_str = time_var.units.split("since")[1].strip()
-
-    # convert to NumPy datetime64[ns]
-    # Replace " " with "T" to satisfy ISO-8601
-    #origin_ns = np.datetime64(origin_str.replace(" ", "T"), "ns")
-
-    # vectorized computation: origin + N hours
-    #file_timestamp = origin_ns + file_time * np.timedelta64(1, "h")
-
-    # convert to asi8 int64 nanoseconds
-    #file_timestamp = file_timestamp.astype("int64")
-
-    if prints:
-        print('(3) Get time: {}'.format(time.time()-last))
-        last = time.time()
+    time_var = ncdf_root.variables["time"]
+    file_timestamp = time_var_to_asi8(time_var)
 
     # get valid file time indices (i.e. those times in active full time array)
     valid_file_time_indices = np.where(np.logical_and(file_timestamp>=timestamp_array[0], 
@@ -185,10 +126,6 @@ def read_netcdf_data(tuple_arguments):
 
     # get indices relative to active full timestamp array
     full_array_time_indices = np.searchsorted(timestamp_array, file_timestamp[valid_file_time_indices])
-
-    if prints:
-        print('(4) Get time indices: {}'.format(time.time()-last))
-        last = time.time()
 
     # get all station references in file (do little extra work to get non-GHOST observational station references)
     if (not reading_ghost) & (data_label == observations_data_label):
@@ -216,48 +153,28 @@ def read_netcdf_data(tuple_arguments):
     # GHOST and interpolated model data
     else:
         file_station_references = ncdf_root['station_reference'][:]
-
+    
     # get indices of all non-NaN stations (can be NaN for some non-GHOST files)
-    #non_nan_station_indices = np.array([ref_ii for ref_ii, ref in enumerate(file_station_references) if ref.lower() != 'nan'])
-    #file_station_references = file_station_references[non_nan_station_indices]
+    refs = np.asarray(file_station_references).astype(str)
+    original_indices = np.arange(refs.size, dtype=np.int32)
+    mask_not_nan = np.char.lower(refs) != "nan"
+    refs_non_nan = refs[mask_not_nan]
+    non_nan_original_indices = original_indices[mask_not_nan]
 
     # get indices of file station station references that are contained in all unique station references array
-    #current_file_station_indices = np.where(np.in1d(file_station_references, station_references))[0]
+    station_ref_set = set(station_references)
+    mask_present = np.fromiter((r in station_ref_set for r in refs_non_nan),
+                                dtype=bool,count=len(refs_non_nan))
+    matched_filtered_indices = np.where(mask_present)[0]
+    current_file_station_indices = non_nan_original_indices[matched_filtered_indices]
+
 
     # for all unique station references that are contained within file station references array
     # get the index of the station reference in the unique station references array 
-    #index = np.argsort(station_references)
-    #sorted_station_references = station_references[index]
-    #sorted_index = np.searchsorted(sorted_station_references, file_station_references[current_file_station_indices])
-    #full_array_station_indices = np.take(index, sorted_index, mode="clip")
-
-    # --- FAST station reference extraction inside worker ---
-
-    # 1. Ensure numpy array of strings
-    refs = np.asarray(file_station_references).astype(str)
-
-    # 2. Remove 'nan' (vectorized)
-    mask_not_nan = np.char.lower(refs) != "nan"
-    refs = refs[mask_not_nan]
-
-    # 3. Membership test via set (much faster than np.in1d)
-    station_ref_set = set(station_references)
-    mask_present = np.fromiter((r in station_ref_set for r in refs), dtype=bool, count=len(refs))
-    current_file_station_indices = np.where(mask_present)[0]
-
-    if len(current_file_station_indices) == 0:
-        return [] if (data_label == observations_data_label and not filter_read) else None
-
-    # 4. Fast mapping to full array indices
     station_to_index = {ref: i for i, ref in enumerate(station_references)}
-
-    valid_refs = refs[current_file_station_indices]
-
-    full_array_station_indices = np.fromiter(
-        (station_to_index[r] for r in valid_refs),
-        dtype=np.int32,
-        count=len(valid_refs)
-    )
+    valid_refs = refs_non_nan[matched_filtered_indices]
+    full_array_station_indices = np.fromiter((station_to_index[r] for r in valid_refs),
+                                                dtype=np.int32,count=len(valid_refs))
 
     # if have zero current_file_station_indices in all unique station references, 
     # then check if it is because of old-style of Providentia-interpolation output, 
@@ -282,10 +199,12 @@ def read_netcdf_data(tuple_arguments):
             return []
         else:
             return 
-
-    if prints:
-        print('(5) Get station indices: {}'.format(time.time()-last))
-        last = time.time()
+        
+    # get first and last station index for current file to read only relevant subset of data, 
+    # and adjust current_file_station_indices to be relative to subset of data to read
+    fsi = current_file_station_indices[0]
+    lsi = current_file_station_indices[-1] + 1
+    current_file_station_indices_adjusted = current_file_station_indices - fsi
 
     # read observations
     if data_label == observations_data_label:
@@ -295,64 +214,59 @@ def read_netcdf_data(tuple_arguments):
         if reading_ghost:
             # if need to filter by qa load non-filtered array, otherwise load prefiltered array (if available)
             if (default_qa) & ('{}_prefiltered_defaultqa'.format(speci) in list(ncdf_root.variables.keys())):
-                species_data = ncdf_root['{}_prefiltered_defaultqa'.format(speci)][current_file_station_indices, 
-                                                                                valid_file_time_indices]
-                # set qa to None as not filtering by them
-                qa = None
+                species_data = ncdf_root['{}_prefiltered_defaultqa'.format(speci)][fsi:lsi, valid_file_time_indices]
+                species_data = species_data[current_file_station_indices_adjusted]
+                # set read_qa to False to not filter by them
+                read_qa = False
             else:
-                species_data = ncdf_root[speci][current_file_station_indices, valid_file_time_indices]
+                species_data = ncdf_root[speci][fsi:lsi, valid_file_time_indices]
+                species_data = species_data[current_file_station_indices_adjusted]
+                read_qa = True
         # non-GHOST
         else:
             # transpose array to swap station and time dimensions
             if ncdf_root[speci].dimensions == ('time', 'station'):
-                species_data = ncdf_root[speci][valid_file_time_indices, current_file_station_indices].T
+                species_data = ncdf_root[speci][valid_file_time_indices, fsi:lsi].T
+                species_data = species_data[current_file_station_indices_adjusted]
             # do not transpose
             else:
-                species_data = ncdf_root[speci][current_file_station_indices, valid_file_time_indices]
-        
-        if prints:
-            print('(6) Read species data: {}'.format(time.time()-last))
-            last = time.time()
+                species_data = ncdf_root[speci][fsi:lsi, valid_file_time_indices]
+                species_data = species_data[current_file_station_indices_adjusted]
 
+            # if network is actris then read qa
+            if network == 'actris/actris':
+                read_qa = True
+        
         # reading GHOST data?
         if reading_ghost:
 
             # read GHOST data variables
             if not filter_read:
                 for ghost_data_var_ii, ghost_data_var in enumerate(ghost_data_vars_to_read):
+                    ghost_data = ncdf_root[ghost_data_var][fsi:lsi, valid_file_time_indices]
+                    ghost_data = ghost_data[current_file_station_indices_adjusted]
                     ghost_data_in_memory[ghost_data_var_ii, full_array_station_indices[:, np.newaxis], 
-                                        full_array_time_indices[np.newaxis, :]] = \
-                        ncdf_root[ghost_data_var][current_file_station_indices, valid_file_time_indices]
-
-        if prints:
-            print('(7) Read GHOST variables: {}'.format(time.time()-last))
-            last = time.time()
+                                         full_array_time_indices[np.newaxis, :]] = ghost_data
 
         if (reading_ghost) or (network == 'actris/actris'):
             # if some qa flags selected then screen observations
-            if qa is not None:
+            if read_qa:
                 if len(qa) > 0:
                     # screen out observations which are associated with any of the selected qa flags
-                    species_data[np.isin(ncdf_root['qa'][current_file_station_indices, valid_file_time_indices, :], 
-                                        qa).any(axis=2)] = np.nan
+                    qa_data = ncdf_root['qa'][fsi:lsi, valid_file_time_indices, :]
+                    qa_data = qa_data[current_file_station_indices_adjusted]
+                    species_data[np.isin(qa_data, qa).any(axis=2)] = np.nan
                 
             # if some data provider flags selected then screen observations
             if len(flags) > 0:
                 # screen out observations which are associated with any of the selected data provider flags
-                species_data[np.isin(ncdf_root['flag'][current_file_station_indices, valid_file_time_indices, :], 
-                                    flags).any(axis=2)] = np.nan
+                flag_data = ncdf_root['flag'][fsi:lsi, valid_file_time_indices, :]
+                flag_data = flag_data[current_file_station_indices_adjusted]
+                species_data[np.isin(flag_data, flags).any(axis=2)] = np.nan
                 
-        if prints:
-            print('(8) Read QA: {}'.format(time.time()-last))
-            last = time.time()
-
         # write filtered species data to shared file data
         data_in_memory[data_labels.index(observations_data_label), full_array_station_indices[:, np.newaxis], 
                     full_array_time_indices[np.newaxis, :]] = species_data
-
-        if prints:
-            print('(9) Wrote species data: {}'.format(time.time()-last))
-            last = time.time()
 
         # get file metadata
         if not filter_read:
@@ -400,8 +314,10 @@ def read_netcdf_data(tuple_arguments):
                     if meta_var_nc not in ncdf_root.variables:
                         continue
 
+                    # get metadata
                     meta_shape = ncdf_root[meta_var_nc].shape
-                    meta_val = ncdf_root[meta_var_nc][current_file_station_indices]
+                    meta_val = ncdf_root[meta_var_nc][fsi:lsi]
+                    meta_val = meta_val[current_file_station_indices_adjusted]
                     meta_val_dtype = np.array([meta_val[0]]).dtype
 
                     # do str formatting where neccessary
@@ -415,7 +331,7 @@ def read_netcdf_data(tuple_arguments):
                             else:
                                 meta_val = chartostring(meta_val)
                     
-                    # do str formatting (capitalization) to the metadata
+                    # do str formatting (capitalisation) to the metadata
                     if isinstance(meta_val,str):
                         meta_val = np.char.capitalize(meta_val)
 
@@ -427,14 +343,12 @@ def read_netcdf_data(tuple_arguments):
                     if meta_var_nc not in ncdf_root.variables:
                         continue
                     
-                    meta_val = ncdf_root[meta_var_nc][current_file_station_indices]
+                    # get metadata
+                    meta_val = ncdf_root[meta_var_nc][fsi:lsi]
+                    meta_val = meta_val[current_file_station_indices_adjusted]
 
                 # put metadata in array
                 file_metadata[meta_var][full_array_station_indices, 0] = meta_val
-
-        if prints:
-            print('(10) Read metadata: {}'.format(time.time()-last))
-            last = time.time()
 
     # model data
     else:
@@ -473,10 +387,13 @@ def read_netcdf_data(tuple_arguments):
                     data_label_forecast = '{}-day{}'.format(data_label, forecast_index+1)
                 else:
                     data_label_forecast = data_label
-                relevant_data = ncdf_root[speci][current_file_station_indices, valid_file_time_indices, forecast_index]
+                relevant_data = ncdf_root[speci][fsi:lsi, valid_file_time_indices, forecast_index]
+                relevant_data = relevant_data[current_file_station_indices_adjusted]
+
             # else if forecast day not available in the netCDF, then just take the data as it is
             else:
-                relevant_data = ncdf_root[speci][current_file_station_indices, valid_file_time_indices]
+                relevant_data = ncdf_root[speci][fsi:lsi, valid_file_time_indices]
+                relevant_data = relevant_data[current_file_station_indices_adjusted]
                 data_label_forecast = data_label
 
             # mask out fill values for parameter field
@@ -489,418 +406,9 @@ def read_netcdf_data(tuple_arguments):
     # close netCDF
     ncdf_root.close()
 
-    if prints:
-        print('Total: {}'.format(time.time()-start))
     # return metadata if reading observations
     if (data_label == observations_data_label) & (not filter_read):
         return file_metadata
-
-def read_netcdf_data_new(read_instance, tuple_arguments):
-    """
-    Handles the reading and filtering of observational or model netCDF data.
-
-    Parameters
-    ----------
-    tuple_arguments : tuple
-        A collection of arguments including file paths, station references, species names, 
-        shared memory handles, and quality control settings.
-
-    Returns
-    -------
-    numpy.ndarray or list or None
-        Returns a structured metadata array if reading observations; an empty list if no 
-        stations are found; or None for model data or missing files.
-    """
-
-    #time.sleep(0.02)
-    #gc.collect()
-    prints = False
-
-    start = time.time()
-
-    # assign arguments from tuple to variables
-    relevant_file, station_references, station_names, speci,\
-    observations_data_label, data_label, data_labels, reading_ghost, ghost_data_vars_to_read,\
-    metadata_dtype, metadata_vars_to_read, logger, default_qa, filter_read, network, forecast_indices = tuple_arguments
-
-    networkspeci = '{}|{}'.format(network,speci)
-
-    if prints:
-        print('(1) Passed arguments: {}'.format(time.time()-start))
-        last = time.time()
-
-    if prints:
-        print('(2) Wrap arrays: {}'.format(time.time()-last))
-        last = time.time()
-
-    # read netCDF frame
-    ncdf_root = Dataset(relevant_file, mode="r", swmr=True)
-
-    # get file time (handle monthly resolution data differently to hourly/daily
-    # as num2date does not support 'months since' units)
-    # file_time = ncdf_root['time'][:] 
-    # time_units = ncdf_root['time'].units
-    
-    # if 'months' in time_units:
-    #     monthly_start_date = time_units.split(' ')[2]
-    #     file_time_dt = pd.date_range(start=monthly_start_date, periods=1, freq='MS')
-    # else:
-    #     file_time_dt = num2date(file_time, units=time_units)
-        
-    #     # convert to pandas datetime
-    #     if Version(cftime.__version__) <= Version("1.0.3.4"):
-    #         # remove microseconds
-    #         file_time_dt = pd.to_datetime([t.replace(microsecond=0) for t in file_time_dt])
-    #     else:
-    #         # bug fix for newer versions of cftime
-    #         file_time_dt = file_time_dt.astype('datetime64[s]')
-    #         file_time_dt = pd.to_datetime([t for t in file_time_dt])
-
-    # # get file time as integer timestamp
-    # file_timestamp = file_time_dt.asi8
-
-    # ---- FAST & EXACT asi8 TIME BLOCK ----
-
-    time_var = ncdf_root.variables["time"]
-
-    # numeric time values (hours)
-    file_time = time_var[:].astype("int64")
-
-    # origin: "2018-12-01 00:00:00"
-    origin_str = time_var.units.split("since")[1].strip()
-
-    # convert to NumPy datetime64[ns]
-    # Replace " " with "T" to satisfy ISO-8601
-    origin_ns = np.datetime64(origin_str.replace(" ", "T"), "ns")
-
-    # vectorized computation: origin + N hours
-    file_timestamp = origin_ns + file_time * np.timedelta64(1, "h")
-
-    # convert to asi8 int64 nanoseconds
-    file_timestamp = file_timestamp.astype("int64")
-
-    if prints:
-        print('(3) Get time: {}'.format(time.time()-last))
-        last = time.time()
-
-    # get valid file time indices (i.e. those times in active full time array)
-    valid_file_time_indices = np.where(np.logical_and(file_timestamp>=read_instance.timestamp_array[0], 
-                                                      file_timestamp<=read_instance.timestamp_array[-1]))[0]
-
-    # get indices relative to active full timestamp array
-    full_array_time_indices = np.searchsorted(read_instance.timestamp_array, file_timestamp[valid_file_time_indices])
-
-    if prints:
-        print('(4) Get time indices: {}'.format(time.time()-last))
-        last = time.time()
-
-    # get all station references in file (do little extra work to get non-GHOST observational station references)
-    if (not reading_ghost) & (data_label == observations_data_label):
-        if 'station_reference' in ncdf_root.variables:
-            station_reference_var = 'station_reference'
-        elif 'station_code' in ncdf_root.variables:
-            station_reference_var = 'station_code'
-        elif 'station_name' in ncdf_root.variables:
-            station_reference_var = 'station_name'
-        else: 
-            error = 'Error: {} cannot be read because it has no station_name.'.format(relevant_file)
-            logger.error(error)
-            sys.exit(1)
-
-        meta_shape = ncdf_root[station_reference_var].shape
-        file_station_references = ncdf_root[station_reference_var][:]
-        meta_val_dtype = np.array([file_station_references[0]]).dtype
-
-        if len(meta_shape) == 2:
-            if meta_val_dtype == np.dtype(object):
-                file_station_references = np.array([''.join(val) for val in file_station_references])
-            else:
-                file_station_references = chartostring(file_station_references)
-
-    # GHOST and interpolated model data
-    else:
-        file_station_references = ncdf_root['station_reference'][:]
-
-    # get indices of all non-NaN stations (can be NaN for some non-GHOST files)
-    #non_nan_station_indices = np.array([ref_ii for ref_ii, ref in enumerate(file_station_references) if ref.lower() != 'nan'])
-    #file_station_references = file_station_references[non_nan_station_indices]
-
-    # get indices of file station station references that are contained in all unique station references array
-    #current_file_station_indices = np.where(np.in1d(file_station_references, station_references))[0]
-
-    # for all unique station references that are contained within file station references array
-    # get the index of the station reference in the unique station references array 
-    #index = np.argsort(station_references)
-    #sorted_station_references = station_references[index]
-    #sorted_index = np.searchsorted(sorted_station_references, file_station_references[current_file_station_indices])
-    #full_array_station_indices = np.take(index, sorted_index, mode="clip")
-
-    # --- FAST station reference extraction inside worker ---
-
-    # 1. Ensure numpy array of strings
-    refs = np.asarray(file_station_references).astype(str)
-
-    # 2. Remove 'nan' (vectorized)
-    mask_not_nan = np.char.lower(refs) != "nan"
-    refs = refs[mask_not_nan]
-
-    # 3. Membership test via set (much faster than np.in1d)
-    station_ref_set = set(station_references)
-    mask_present = np.fromiter((r in station_ref_set for r in refs), dtype=bool, count=len(refs))
-    current_file_station_indices = np.where(mask_present)[0]
-
-    if len(current_file_station_indices) == 0:
-        return [] if (data_label == observations_data_label and not filter_read) else None
-
-    # 4. Fast mapping to full array indices
-    station_to_index = {ref: i for i, ref in enumerate(station_references)}
-
-    valid_refs = refs[current_file_station_indices]
-
-    full_array_station_indices = np.fromiter(
-        (station_to_index[r] for r in valid_refs),
-        dtype=np.int32,
-        count=len(valid_refs)
-    )
-
-    # if have zero current_file_station_indices in all unique station references, 
-    # then check if it is because of old-style of Providentia-interpolation output, 
-    # where all station_references were for 'station_name'  
-    if (data_label != observations_data_label) & (len(current_file_station_indices) == 0):
-
-        # get indices of file station station references that are contained in all unique station references array
-        current_file_station_indices = np.where(np.in1d(file_station_references, station_names))[0]
-
-        # for all unique station references that are contained within file station references array
-        # get the index of the station reference in the unique station references array 
-        index = np.argsort(station_names)
-        sorted_station_names = station_names[index]
-        sorted_index = np.searchsorted(sorted_station_names, file_station_references[current_file_station_indices])
-        full_array_station_indices = np.take(index, sorted_index, mode="clip")
-
-    # if still have zero current_file_station_indices in all unique station references (can happen due to station colocation)
-    # then return from function without reading
-    if len(current_file_station_indices) == 0:
-        # return empty metadata list if reading observations
-        if (data_label == observations_data_label) & (not filter_read):
-            return []
-        else:
-            return 
-
-    if prints:
-        print('(5) Get station indices: {}'.format(time.time()-last))
-        last = time.time()
-
-    # read observations
-    if data_label == observations_data_label:
-
-        # read species variable
-        # GHOST
-        if reading_ghost:
-            # if need to filter by qa load non-filtered array, otherwise load prefiltered array (if available)
-            if (default_qa) & ('{}_prefiltered_defaultqa'.format(speci) in list(ncdf_root.variables.keys())):
-                species_data = ncdf_root['{}_prefiltered_defaultqa'.format(speci)][current_file_station_indices, 
-                                                                                valid_file_time_indices]
-                # set read_qa to False to not filter by them
-                read_qa = False
-            else:
-                species_data = ncdf_root[speci][current_file_station_indices, valid_file_time_indices]
-                read_qa = True
-        # non-GHOST
-        else:
-            # transpose array to swap station and time dimensions
-            if ncdf_root[speci].dimensions == ('time', 'station'):
-                species_data = ncdf_root[speci][valid_file_time_indices, current_file_station_indices].T
-            # do not transpose
-            else:
-                species_data = ncdf_root[speci][current_file_station_indices, valid_file_time_indices]
-
-            # if network is actris then read qa
-            if network == 'actris/actris':
-                read_qa = True
-        
-        if prints:
-            print('(6) Read species data: {}'.format(time.time()-last))
-            last = time.time()
-
-        # reading GHOST data?
-        if reading_ghost:
-
-            # read GHOST data variables
-            if not filter_read:
-                for ghost_data_var_ii, ghost_data_var in enumerate(ghost_data_vars_to_read):
-                    read_instance.ghost_data_in_memory[networkspeci][ghost_data_var_ii, full_array_station_indices[:, np.newaxis], 
-                                                       full_array_time_indices[np.newaxis, :]] = \
-                                                       ncdf_root[ghost_data_var][current_file_station_indices, valid_file_time_indices]
-
-        if prints:
-            print('(7) Read GHOST variables: {}'.format(time.time()-last))
-            last = time.time()
-
-        if (reading_ghost) or (network == 'actris/actris'):
-            # if some qa flags selected then screen observations
-            if read_qa:
-                if len(read_instance.qa_per_species[speci]) > 0:
-                    # screen out observations which are associated with any of the selected qa flags
-                    species_data[np.isin(ncdf_root['qa'][current_file_station_indices, valid_file_time_indices, :], 
-                                        read_instance.qa_per_species[speci]).any(axis=2)] = np.nan
-                
-            # if some data provider flags selected then screen observations
-            if len(read_instance.flags) > 0:
-                # screen out observations which are associated with any of the selected data provider flags
-                species_data[np.isin(ncdf_root['flag'][current_file_station_indices, valid_file_time_indices, :], 
-                                    read_instance.flags).any(axis=2)] = np.nan
-                
-        if prints:
-            print('(8) Read QA: {}'.format(time.time()-last))
-            last = time.time()
-
-        # write filtered species data to shared file data
-        read_instance.data_in_memory[networkspeci][data_labels.index(observations_data_label), full_array_station_indices[:, np.newaxis], 
-                                     full_array_time_indices[np.newaxis, :]] = species_data
-
-        if prints:
-            print('(9) Wrote species data: {}'.format(time.time()-last))
-            last = time.time()
-
-        # get file metadata
-        if not filter_read:
-            for meta_var in metadata_vars_to_read:
-                # do extra work for non-GHOST data 
-                if not reading_ghost:
-                    # get correct variable name for .nc
-                    if meta_var == 'longitude':
-                        if "longitude" in ncdf_root.variables:
-                            meta_var_nc = 'longitude'
-                        else:
-                            meta_var_nc = 'lon'
-                    elif meta_var == 'latitude':
-                        if "latitude" in ncdf_root.variables:
-                            meta_var_nc = 'latitude'
-                        else:
-                            meta_var_nc = 'lat'
-                    elif meta_var == 'altitude':
-                        if "altitude" in ncdf_root.variables:
-                            meta_var_nc = 'altitude'
-                        else:
-                            meta_var_nc = 'alt'
-                    elif meta_var == 'station_reference':
-                        if 'station_reference' in ncdf_root.variables:
-                            meta_var_nc = 'station_reference'
-                        elif 'station_code' in ncdf_root.variables:
-                            meta_var_nc = 'station_code'
-                        elif 'station_name' in ncdf_root.variables:
-                            meta_var_nc = 'station_name'
-                    elif meta_var == 'area_classification':
-                        if 'area_classification' in ncdf_root.variables:
-                            meta_var_nc = 'area_classification'
-                        else:
-                            meta_var_nc = 'station_area'
-                    elif meta_var == 'station_classification':
-                        if 'station_classification' in ncdf_root.variables:
-                            meta_var_nc = 'station_classification'
-                        else:
-                            meta_var_nc = 'station_type'
-                    else:
-                        meta_var_nc = meta_var
-        
-                    # check meta variable is in netCDF
-                    if meta_var_nc not in ncdf_root.variables:
-                        continue
-
-                    meta_shape = ncdf_root[meta_var_nc].shape
-                    meta_val = ncdf_root[meta_var_nc][current_file_station_indices]
-                    meta_val_dtype = np.array([meta_val[0]]).dtype
-
-                    # do str formatting where neccessary
-                    if meta_val_dtype not in [np.int8, np.int16, np.int32, np.int64, 
-                                            np.uint8, np.uint16, np.uint32, np.uint64,
-                                            np.float16, np.float32, np.float64]:
-
-                        if len(meta_shape) == 2:
-                            if meta_val_dtype == np.dtype(object):
-                                meta_val = np.array([''.join(val) for val in meta_val])
-                            else:
-                                meta_val = chartostring(meta_val)
-                    
-                    # do str formatting (capitalization) to the metadata
-                    if isinstance(meta_val,str):
-                        meta_val = np.char.capitalize(meta_val)
-
-                # GHOST metadata
-                else:
-                    meta_var_nc = meta_var
-
-                    # check meta variable is in netCDF
-                    if meta_var_nc not in ncdf_root.variables:
-                        continue
-                    
-                    meta_val = ncdf_root[meta_var_nc][current_file_station_indices]
-
-                # put metadata in array
-                read_instance.metadata_in_memory[networkspeci][meta_var][full_array_station_indices, 0] = meta_val
-
-        if prints:
-            print('(10) Read metadata: {}'.format(time.time()-last))
-            last = time.time()
-
-    # model data
-    else:
-
-        # determine if data is structured as forecast data or not
-        if 'forecast_day' in ncdf_root[speci].dimensions:
-            have_forecast = True
-            #if so, check what type of forecast data
-            # check if have daily forecast set
-            daily_forecast = np.any([True for data_label in data_labels if '-daily' in data_label])    
-            # check if have combined forecast set
-            combined_forecast = np.any([True for data_label in data_labels if '-combined' in data_label]) 
-            # check if have day forecast set
-            day_forecast = np.any([True for data_label in data_labels if '-day' in data_label])
-        # data is not structured as forecast
-        else:
-            have_forecast = False
-        
-        # if have no passed forecast indices, then take first day preferentially (if data is structured as forecast data)
-        if len(forecast_indices) == 0:
-            forecast_indices = np.array([0], dtype=np.int32)
-
-        # iterate through forecast indices
-        for forecast_index in forecast_indices:
-
-            # if want a specific forecast day, and it is available in the netCDF, then take it 
-            if have_forecast:
-                # daily forecast
-                if daily_forecast:
-                    data_label_forecast = '{}-daily{}'.format(data_label, forecast_index+1)
-                # combined forecast
-                elif combined_forecast:
-                    data_label_forecast = '{}-combined{}'.format(data_label, forecast_index+1)
-                # N day forecast
-                elif day_forecast:
-                    data_label_forecast = '{}-day{}'.format(data_label, forecast_index+1)
-                else:
-                    data_label_forecast = data_label
-                relevant_data = ncdf_root[speci][current_file_station_indices, valid_file_time_indices, forecast_index]
-            # else if forecast day not available in the netCDF, then just take the data as it is
-            else:
-                relevant_data = ncdf_root[speci][current_file_station_indices, valid_file_time_indices]
-                data_label_forecast = data_label
-
-            # mask out fill values for parameter field
-            relevant_data[relevant_data.mask] = np.nan
-
-            # put data in array
-            read_instance.data_in_memory[networkspeci][data_labels.index(data_label_forecast), full_array_station_indices[:, np.newaxis], 
-                                         full_array_time_indices[np.newaxis, :]] = relevant_data
-
-    # close netCDF
-    ncdf_root.close()
-
-    if prints:
-        print('Total: {}'.format(time.time()-start))
-
-    return True
 
 def read_netcdf_metadata(tuple_arguments):
     """

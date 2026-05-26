@@ -6,13 +6,10 @@ import datetime
 import multiprocessing
 import os
 import sys
-import time
 
-import cftime
 from dateutil.relativedelta import relativedelta
-from netCDF4 import Dataset, num2date, chartostring
+from netCDF4 import Dataset, chartostring
 import numpy as np
-from packaging.version import Version
 import pandas as pd
 import yaml
 
@@ -22,7 +19,7 @@ from .fields_menus import (init_coverage, init_period, init_metadata,
                            coverage_conf, period_conf, metadata_conf)
 from .plot_aux import update_plotting_parameters
 from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, get_yearmonths_to_read, 
-                       init_shared_vars_read_netcdf_data, read_netcdf_data_new, read_netcdf_metadata, 
+                       init_shared_vars_read_netcdf_data, read_netcdf_data, read_netcdf_metadata, 
                        check_forecast_dimension, time_var_to_asi8)
 from .spatial_colocation import SpatialColocation
 from .warnings_prv import show_message
@@ -58,12 +55,6 @@ class DataReader:
         models_to_read : list, optional
             A list of models to add to arrays.
         """
-
-        prints = False
-
-        if prints:
-            print('----------------------START READ--------------------------')
-            start = time.time()
 
         # changing time dimension ?
         if ('reset' in operations) or ('read_left' in operations) or ('read_right' in operations) or ('cut_left' in operations) or ('cut_right' in operations):
@@ -157,17 +148,9 @@ class DataReader:
                     self.read_instance.time_array < datetime.datetime.strptime(str(year+1)+'0101','%Y%m%d')], axis=0)) 
                     for year in np.unique([int(str(yyyymm)[:4]) for yyyymm in self.read_instance.yearmonths])])
 
-                if prints:
-                    print('Time to reset arrays: {}'.format(time.time()-start))
-                    last = time.time()
-
                 # get unique basic metadata across networkspecies
                 # for this step include filter networkspecies
                 self.read_basic_metadata()
-
-                if prints:
-                    print('Time to read basic metadata: {}'.format(time.time()-last))
-                    last = time.time()
 
                 # iterate through station_references per networkspecies
                 # if have 0 valid stations then drop  
@@ -192,10 +175,6 @@ class DataReader:
                 # set invalid_read to be False if have data to read
                 self.read_instance.invalid_read = False
 
-                if prints:
-                    print('Time to check invaid read: {}'.format(time.time()-last))
-                    last = time.time()
-
         # need to reset all data structures 
         if 'reset' in operations:  
 
@@ -206,10 +185,6 @@ class DataReader:
             # get list of yearmonths to read
             yearmonths_to_read = get_yearmonths_to_read(self.read_instance.yearmonths, self.read_instance.start_date,
                                                         self.read_instance.end_date, self.read_instance.resolution)
-
-            if prints:
-                print('Time to check yearmonths to read: {}'.format(time.time()-last))
-                last = time.time()
 
             # check if any of the model data has a forecast dimension to handle 
             # only for report / library modes as dashboard handled previously
@@ -235,8 +210,7 @@ class DataReader:
                                                             np.full((len(self.read_instance.station_references[networkspeci]),
                                                                      len(self.read_instance.time_array)),
                                                                      np.nan, dtype=np.float32) for networkspeci in self.read_instance.filter_networkspecies}
-
-
+            
             else:
                 self.read_instance.filter_data_in_memory = {}
 
@@ -316,13 +290,17 @@ class DataReader:
                     coverage_valid_vars = self.read_instance.coverage_info['nonghost'][resolution]['map_vars']
 
                 # set metadata to read 
-                self.read_instance.metadata_dtype = [(nonghost_var, self.read_instance.standard_metadata[nonghost_var]['data_type'])
-                                                      for nonghost_var in self.read_instance.nonghost_metadata_vars_to_read]
-                self.read_instance.metadata_vars_to_read = self.read_instance.nonghost_metadata_vars_to_read
-
-            if prints:
-                print('Setting arrays: {}'.format(time.time()-last))
-                last = time.time()  
+                self.read_instance.metadata_vars_to_read = [key for key in self.read_instance.nonghost_metadata_vars_to_read if 
+                                                            pd.isnull(self.read_instance.standard_metadata[key]['metadata_type']) == False]
+                self.read_instance.metadata_dtype = [(key, self.read_instance.standard_metadata[key]['data_type'])
+                                                      for key in self.read_instance.nonghost_metadata_vars_to_read]
+                
+            # set metadata in memory
+            self.read_instance.metadata_in_memory = {networkspeci: 
+                                                     np.full((len(self.read_instance.station_references['{}'.format(networkspeci)]),
+                                                              len(self.read_instance.yearmonths)),
+                                                              np.nan, dtype=self.read_instance.metadata_dtype) 
+                                                              for networkspeci in self.read_instance.networkspecies}
 
             # show warning when there is a non-defined field if launching from a config file
             if hasattr(self.read_instance, "non_default_fields_per_section"):
@@ -350,41 +328,8 @@ class DataReader:
                             if hasattr(self.read_instance, k):
                                 delattr(self.read_instance, k)  
 
-            if prints:
-                print('Warnings: {}'.format(time.time()-last))
-                last = time.time()              
-
-            #self.read_instance.metadata_in_memory = {networkspeci: 
-            #                                         np.full((len(self.read_instance.station_references['{}'.format(networkspeci)]),
-            #                                                  len(self.read_instance.yearmonths)),
-            #                                                  np.nan, dtype=self.read_instance.metadata_dtype) 
-            #                                                  for networkspeci in self.read_instance.networkspecies}
-
-            metadata_dtype = self.read_instance.metadata_dtype
-            station_refs = self.read_instance.station_references
-            yearmonths_len = len(self.read_instance.yearmonths)
-
-            metadata_in_memory = {}
-
-            for netspec in self.read_instance.networkspecies:
-                n_stations = len(station_refs[netspec])
-                # fastest initialization: empty + fill
-                arr = np.empty((n_stations, yearmonths_len), dtype=metadata_dtype)
-                arr[:] = np.nan
-                metadata_in_memory[netspec] = arr
-
-            self.read_instance.metadata_in_memory = metadata_in_memory
-
-            if prints:
-                print('Set metadata in memory: {}'.format(time.time()-last))
-                last = time.time()
-
             # read data 
             self.read_data(yearmonths_to_read, self.read_instance.data_labels)
-
-            if prints:
-                print('Time to read: {}'.format(time.time()-last))
-                last = time.time()
 
             # update measurement units for all species (take standard units for each speci from parameter dictionary)
             # non-GHOST
@@ -409,10 +354,6 @@ class DataReader:
 
             # update plotting parameters colours, zorder and model grid edges
             update_plotting_parameters(self.read_instance) 
-
-            if prints:
-                print('Update plotting params: {}'.format(time.time()-last))
-                last = time.time()
 
         # need to read on left / read on right / cut on left / cut on right (for dashboard)
         if ('read_left' in operations) or ('read_right' in operations) or ('cut_left' in operations) or ('cut_right' in operations):  
@@ -671,30 +612,13 @@ class DataReader:
             delattr(self.read_instance, 'valid_station_inds')
             delattr(self.read_instance, 'valid_station_inds_temporal_colocation')
 
-        if prints:
-            print('Deleting station inds: {}'.format(time.time()-last))
-            last = time.time()
-
         # re-initialise and update metadata fields for read metadata
         init_metadata(self.read_instance)
-
-        if prints:
-            print('init metadata: {}'.format(time.time()-last))
-            last = time.time()
-
         update_metadata_fields(self.read_instance)
-
-        if prints:
-            print('Updating metadata: {}'.format(time.time()-last))
-            last = time.time()
 
         # if loading from a conf file then load metadata fields
         if self.read_instance.from_conf:
             metadata_conf(self.read_instance)
-
-        if prints:
-            print('Updating metadata conf: {}'.format(time.time()-last))
-            last = time.time()
 
         # determine if have daily forecast active or not
         self.read_instance.daily_forecast = np.any([True for data_label in self.read_instance.data_labels if '-daily' in data_label])
@@ -735,12 +659,6 @@ class DataReader:
                         str_model += f" ({alias})"
                     self.read_instance.logger.info(str_model)
                     mods_printed.append(model)
-
-        if prints:
-            print('Ending read func: {}'.format(time.time()-last))
-            last = time.time()       
-            print('TOTAL READ TIME: {}'.format(time.time()-start))
-            print('----------------------END READ--------------------------')
 
     def read_basic_metadata(self):     
         """
@@ -929,7 +847,8 @@ class DataReader:
                     if ns in self.read_instance.station_names:
                         self.read_instance.station_names[ns] = self.read_instance.station_names[ns][ns_intersects]
 
-    def check_forecast(self, yearmonths_to_read=None, data_labels=None, data_labels_raw=None, networkspecies=None):
+    def check_forecast(self, yearmonths_to_read=None, data_labels=None, data_labels_raw=None, networkspecies=None, 
+                       resolution=None, ghost_version=None):
         """
         Identifies the available forecast days for model data by inspecting NetCDF dimensions.
 
@@ -943,6 +862,10 @@ class DataReader:
             Raw identifiers for the data; defaults to instance raw data labels.
         networkspecies : list, optional
             List of networkspecies pairs; defaults to instance networkspecies.
+        resolution : str, optional
+            The resolution for the forecast data; defaults to instance resolution.
+        ghost_version : str, optional
+            The GHOST version for the forecast data; defaults to instance GHOST version.
         """
 
         # set data labels if not defined
@@ -956,6 +879,14 @@ class DataReader:
         # set networkspecies if not defined
         if networkspecies is None:
             networkspecies = copy.deepcopy(self.read_instance.networkspecies)
+
+        # set resolution if not defined        
+        if resolution is None:
+            resolution = copy.deepcopy(self.read_instance.resolution)
+
+        # set ghost version if not defined
+        if ghost_version is None:
+            ghost_version = copy.deepcopy(self.read_instance.ghost_version)
 
         # set forecast_days_per_data_label to be empty dictionary
         self.read_instance.forecast_days_per_data_label = {}
@@ -1004,17 +935,18 @@ class DataReader:
 
                     if '/' in network:
                         file_root = \
-                            '%s/%s/%s/%s/%s/%s/%s_' % (self.read_instance.mod_root, self.read_instance.ghost_version, 
-                                                        data_label_raw, self.read_instance.resolution, speci, 
+                            '%s/%s/%s/%s/%s/%s/%s_' % (self.read_instance.mod_root, ghost_version, 
+                                                        data_label_raw, resolution, speci, 
                                                         network.replace('/', '-'), speci)
                     else:
                         file_root = \
-                            '%s/%s/%s/%s/%s/%s/%s_' % (self.read_instance.mod_root, self.read_instance.ghost_version, 
-                                                        data_label_raw, self.read_instance.resolution, speci, network, speci)
+                            '%s/%s/%s/%s/%s/%s/%s_' % (self.read_instance.mod_root, ghost_version, 
+                                                        data_label_raw, resolution, speci, network, speci)
 
                     try:
-                        available_yearmonths = self.read_instance.available_model_data[network][self.read_instance.resolution][speci][data_label_raw]
+                        available_yearmonths = self.read_instance.available_model_data[network][resolution][speci][data_label_raw]
                     except KeyError:
+                        print(file_root, self.read_instance.available_model_data[network])
                         continue
 
                     # get intersection of yearmonths_to_read and available_yearmonths
@@ -1022,21 +954,10 @@ class DataReader:
                     files_to_read[data_label] = sorted([file_root+str(yyyymm)+'.nc' for yyyymm in yearmonths_to_read_intersect])[0]
 
             # read forecast dimension for each model
-            # if only one data label, then read forecast dimension directly
             if len(files_to_read) == 0:
                 continue
-            elif len(files_to_read) == 1:
-                returned_data = check_forecast_dimension(files_to_read[list(files_to_read.keys())[0]])
-                returned_data = [returned_data]
-            # if more than one data label, then read forecast dimension in parallel
-            elif len(files_to_read) > 1:
-                tuple_arguments = []
-                for data_label in files_to_read:
-                    tuple_arguments.append((files_to_read[data_label]))
-                pool = multiprocessing.Pool(self.read_instance.n_cpus)
-                returned_data = pool.map(check_forecast_dimension, tuple_arguments)
-                pool.close()
-                pool.join()
+            else:
+                returned_data = [check_forecast_dimension(files) for files in files_to_read.values()]
 
             # unzip returned data
             n_forecast_days = np.array(returned_data, dtype=np.int32)
@@ -1374,28 +1295,17 @@ class DataReader:
             List of data labels representing the datasets to be loaded into memory.
         """
 
-        prints = False
-        if prints:
-            last = time.time()
-
-        # create arrays to share across processes (for parallel multiprocessing use)
-        # this only works for numerical dtypes, i.e. not strings
-        #timestamp_array_shared = multiprocessing.RawArray(ctypes.c_int64, len(self.read_instance.timestamp_array))
-        #if (self.read_instance.reading_ghost or self.read_instance.network[0] == 'actris/actris') & (self.read_instance.observations_data_label in data_labels):
-        #    flags_shared = multiprocessing.RawArray(ctypes.c_uint8, len(self.read_instance.flags))
-        #else:
-        #    flags_shared = None
-        # fill arrays
-        #timestamp_array_shared[:] = self.read_instance.timestamp_array
-        #if (self.read_instance.reading_ghost or self.read_instance.network[0] == 'actris/actris') & (self.read_instance.observations_data_label in data_labels):
-        #    flags_shared[:] = self.read_instance.flags
-
-        if prints:
-            print('-----Time to setup shared time memory: {}'.format(time.time()-last))
-            last = time.time()
-
         # create dictionary for saving files to read
         self.read_instance.files_to_read = {}
+
+        # set argument fields to pass to read function
+        tuple_argument_fields = ['filename', 'station_references', 'station_names', 'speci', 
+                                    'observations_data_label', 'data_label', 'data_labels', 
+                                    'reading_ghost', 'ghost_data_vars_to_read', 
+                                    'metadata_dtype', 'metadata_vars_to_read', 'logger', 
+                                    'default_qa_active', 'filter_read', 
+                                    'network', 'forecast_indices']
+        tuple_arguments = []
 
         # iterate through networkspecies + filter_networkspecies
         for networkspeci in (self.read_instance.networkspecies + self.read_instance.filter_networkspecies):
@@ -1477,10 +1387,6 @@ class DataReader:
                 yearmonths_to_read_intersect = list(set(yearmonths_to_read) & set(available_yearmonths))
                 self.read_instance.files_to_read[networkspeci][base_data_label] = sorted([file_root+str(yyyymm)+'.nc' for yyyymm in yearmonths_to_read_intersect])
                 
-            if prints:
-                print('-----Time to get relevant file start dates: {}'.format(time.time()-last))
-                last = time.time()
-
             # if active qa == default qa, no need to screen by QA, so inform reading function of this
             default_qa = get_default_qa(self.read_instance, speci)
             if self.read_instance.qa_per_species[speci] == default_qa:
@@ -1488,72 +1394,7 @@ class DataReader:
             else:
                 default_qa_active = False
 
-            if prints:
-                print('-----Time to get default QA: {}'.format(time.time()-last))
-                last = time.time()
-
-            # create network/speci specific arrays to share across processes (for parallel multiprocessing use)
-            # this only works for numerical dtypes, i.e. not strings
-            #if not filter_read:
-            #    data_in_memory_shared_shape = (len(data_labels), len(self.read_instance.station_references[networkspeci]), len(self.read_instance.time_array))
-            #else:
-            #    data_in_memory_shared_shape = (1, len(self.read_instance.station_references[networkspeci]), len(self.read_instance.time_array))
-            #data_in_memory_shared = multiprocessing.RawArray(ctypes.c_float, data_in_memory_shared_shape[0] * data_in_memory_shared_shape[1] * data_in_memory_shared_shape[2])  
-            #if (self.read_instance.reading_ghost or self.read_instance.network[0] == 'actris/actris') & (self.read_instance.observations_data_label in data_labels):
-            #    qa_shared = multiprocessing.RawArray(ctypes.c_uint8, len(self.read_instance.qa_per_species[speci]))
-            #    if not filter_read:
-            #        ghost_data_in_memory_shared_shape = (len(self.read_instance.ghost_data_vars_to_read), len(self.read_instance.station_references[networkspeci]), len(self.read_instance.time_array))
-            #        ghost_data_in_memory_shared = multiprocessing.RawArray(ctypes.c_float, ghost_data_in_memory_shared_shape[0] * ghost_data_in_memory_shared_shape[1] * ghost_data_in_memory_shared_shape[2])  
-            #    else:
-            #        ghost_data_in_memory_shared_shape = None
-            #        ghost_data_in_memory_shared = None
-            #else:
-            #    qa_shared = None
-            #    ghost_data_in_memory_shared_shape = None
-            #    ghost_data_in_memory_shared = None
-
-            # wrap data_in_memory_shared and ghost_data_in_memory_shared as numpy arrays so we can easily manipulate the data.
-            #data_in_memory_shared_np = np.frombuffer(data_in_memory_shared, dtype=np.float32).reshape(data_in_memory_shared_shape)
-            #if (self.read_instance.reading_ghost) & (self.read_instance.observations_data_label in data_labels) & (not filter_read):
-            #    ghost_data_in_memory_shared_np = np.frombuffer(ghost_data_in_memory_shared, dtype=np.float32).reshape(ghost_data_in_memory_shared_shape)
-
-            # fill arrays
-            #if not filter_read:
-            #    data_label_indices = [self.read_instance.data_labels.index(data_label) for data_label in data_labels]
-            #    np.copyto(data_in_memory_shared_np, self.read_instance.data_in_memory[networkspeci][data_label_indices, :, :])
-            #else:
-            #    np.copyto(data_in_memory_shared_np, self.read_instance.filter_data_in_memory[networkspeci][:, :])
-            
-            #if (self.read_instance.reading_ghost or self.read_instance.network[0] == 'actris/actris') & (self.read_instance.observations_data_label in data_labels):      
-            #    qa_shared[:] = self.read_instance.qa_per_species[speci]
-            #    if (self.read_instance.reading_ghost):      
-            #        if not filter_read:
-            #            np.copyto(ghost_data_in_memory_shared_np, self.read_instance.ghost_data_in_memory[networkspeci])  
-            
-            if prints:
-                print('-----Time to setup shared memory: {}'.format(time.time()-last))
-                last = time.time()
-
             # iterate and read species data in all relevant netCDF files (either in serial/parallel)
-
-            # read data in parallel
-            # setup pool of N workers on N CPUs
-            #pool = multiprocessing.Pool(self.read_instance.n_cpus, initializer=init_shared_vars_read_netcdf_data, 
-            #                            initargs=(data_in_memory_shared, data_in_memory_shared_shape, 
-            #                                      ghost_data_in_memory_shared, ghost_data_in_memory_shared_shape, 
-            #                                      timestamp_array_shared, qa_shared, flags_shared))
-            #pool = multiprocessing.Pool(4, initializer=init_shared_vars_read_netcdf_data, 
-            #                            initargs=(data_in_memory_shared, data_in_memory_shared_shape, 
-            #                                      ghost_data_in_memory_shared, ghost_data_in_memory_shared_shape, 
-            #                                      timestamp_array_shared, qa_shared, flags_shared))
-
-            # read netCDF files in parallel
-            tuple_argument_fields = ['filename', 'station_references', 'station_names', 'speci', 
-                                     'observations_data_label', 'data_label', 'data_labels', 
-                                     'reading_ghost', 'ghost_data_vars_to_read', 
-                                     'metadata_dtype', 'metadata_vars_to_read', 'default_qa_active', 'filter_read', 
-                                     'network', 'forecast_indices']
-            tuple_arguments = []
 
             # iterate through base data labels
             for base_data_label in self.read_instance.files_to_read[networkspeci]:
@@ -1568,7 +1409,7 @@ class DataReader:
                 else:
                     forecast_indices = np.array([self.read_instance.forecast_indices_per_data_label[networkspeci][base_data_label][data_label] 
                                                  for data_label in data_labels if data_label in self.read_instance.forecast_indices_per_data_label[networkspeci][base_data_label]], dtype=np.int32)
-                    
+                
                 for fname in self.read_instance.files_to_read[networkspeci][base_data_label]:
                     tuple_arguments.append((fname, self.read_instance.station_references[networkspeci], 
                                             self.read_instance.station_names[networkspeci], speci, 
@@ -1582,74 +1423,28 @@ class DataReader:
                                             default_qa_active, filter_read, 
                                             network, forecast_indices))
 
-            if prints:
-                print('-----Time to setup arguments: {}'.format(time.time()-last))
-                last = time.time()
+        # get n read workers
+        n_workers = self.choose_n_read_workers(tuple_arguments)
 
-            # Manually initialize shared memory for the current process
-            #init_shared_vars_read_netcdf_data(
-            #    data_in_memory_shared,
-            #    data_in_memory_shared_shape,
-            #    ghost_data_in_memory_shared,
-            #    ghost_data_in_memory_shared_shape,
-            #    timestamp_array_shared,
-            #    qa_shared,
-            #    flags_shared
-            #)
+        # read data
+        if n_workers > 1:
+            self.read_parallel(tuple_arguments, tuple_argument_fields, data_labels, n_workers)
+        else:
+            self.read_serial(tuple_arguments)
+        
+        # get data arrays for final validation checks
+        for networkspeci in (self.read_instance.networkspecies + self.read_instance.filter_networkspecies):
 
-            if prints:
-                print('-----Time to initialise: {}'.format(time.time()-last))
-                last = time.time()
-
-            #returned_data = pool.map(read_netcdf_data, tuple_arguments)
-            #returned_data = pool.imap_unordered(read_netcdf_data, tuple_arguments)
-            returned_data = [self.read_netcdf_data_newer(args) for args in tuple_arguments]
-
-            #returned_data = [read_netcdf_data_new(self.read_instance, args) for args in tuple_arguments]
-
-            #pool.close()
-            # wait for worker processes to terminate before continuing
-            #pool.join()
-            
-            # do not read data if there are not enough datasets (less than 2 timesteps)
-            if not returned_data:
-                continue
-            
-            if prints:
-                print('-----Time to read all files: {}'.format(time.time()-last))
-                last = time.time()
-
-            # finalise assignment of non-filter species
-            if not filter_read:
-                # iterate through read file data and place metadata into full array as appropriate
-            #    for returned_data_ii, returned_data_per_month in enumerate(returned_data):
-            #        returned_filename = tuple_arguments[returned_data_ii][tuple_argument_fields.index('filename')]
-            #        returned_data_label = tuple_arguments[returned_data_ii][tuple_argument_fields.index('data_label')]
-            #        returned_yearmonth = returned_filename.split('_')[-1][:6]
-            #        if returned_data_label == self.read_instance.observations_data_label:
-                        # if returned_data_per_month is empty list, do not add
-            #            if len(returned_data_per_month) > 0:
-            #                self.read_instance.metadata_in_memory[networkspeci][:, self.read_instance.yearmonths.index(returned_yearmonth)] = returned_data_per_month[:, 0]
-
-                # save to data in memory
-                #self.read_instance.data_in_memory[networkspeci][data_label_indices, :, :] = data_in_memory_shared_np
-                #if (self.read_instance.reading_ghost) & (self.read_instance.observations_data_label in data_labels):
-                #    self.read_instance.ghost_data_in_memory[networkspeci] = ghost_data_in_memory_shared_np
-
-                # set data array for final validation checks
-                data_array = self.read_instance.data_in_memory[networkspeci]
-
-            # finalise assignment of filter species
+            # determine if filter networkspecies or not
+            if networkspeci in self.read_instance.filter_networkspecies:
+                filter_read = True
             else:
-                # save to filter data in memory
-                #self.read_instance.filter_data_in_memory[networkspeci][:, :] = data_in_memory_shared_np
+                filter_read = False
 
-                # set data array for final validation checks
+            if not filter_read:
+                data_array = self.read_instance.data_in_memory[networkspeci]
+            else:
                 data_array = self.read_instance.filter_data_in_memory[networkspeci]
-
-            if prints:
-                print('-----Time to finalise arrays: {}'.format(time.time()-last))
-                last = time.time()
 
             # check if read data array consist of arrays full of -9999.0 or nan values or if they are empty
             if (data_array.size == 0) or \
@@ -1664,10 +1459,211 @@ class DataReader:
                 self.read_instance.logger.error(error)
                 sys.exit(1) 
 
-            if prints:
-                print('-----Time to validate arrays: {}'.format(time.time()-last))
+    def choose_n_read_workers(self, tuple_arguments):
+        """
+        Choose the number of workers to use for NetCDF reading.
 
-    def read_netcdf_data_newer(self, tuple_arguments):
+        Based on empirical timing results, the current multiprocessing read path is
+        slower than serial reading for short, medium, and longer monthly reads.
+        The function therefore defaults to serial reading. This avoids process
+        startup, object serialization, memory duplication, and NetCDF/HDF5 I/O
+        contention overhead.
+
+        Parameters
+        ----------
+        tuple_arguments : list
+            List of per-file read argument tuples that would be passed to the
+            NetCDF read function.
+
+        Returns
+        -------
+        n_workers : int
+            Number of read workers to use. A value of 1 means serial reading.
+        """
+
+        return 1
+
+    def read_serial(self, tuple_arguments):
+        """
+        Reads observational and/or model NetCDF data sequentially.
+
+        This method iterates through the provided list of per-file argument tuples
+        and calls the NetCDF read function for each file in serial (single-process)
+        mode. It is typically used for smaller workloads where the overhead of
+        multiprocessing outweighs any potential performance benefit.
+
+        Each tuple in ``tuple_arguments`` contains all required inputs for reading
+        a single NetCDF file, and is passed directly to
+        ``self.read_netcdf_data``. The returned results for each file are collected
+        into a list, preserving the original order of the input arguments.
+
+        Compared to ``read_parallel``, this method avoids process creation,
+        inter-process communication, and shared-memory overhead, which can lead to
+        better performance for small to medium-sized reads.
+
+        Parameters
+        ----------
+        tuple_arguments : list
+            List of argument tuples passed to the NetCDF read function. Each tuple
+            contains the information required to read one file, such as filename,
+            station references, species name, data label, and other read options.
+        """
+
+        returned_data = [self.read_netcdf_data(args) for args in tuple_arguments]
+
+    def read_parallel(self, tuple_arguments, tuple_argument_fields, data_labels, n_workers):
+        """
+        Reads observational and/or model NetCDF data in parallel using shared memory arrays.
+
+        This method coordinates multiprocessing-based reading for each active
+        network/species pair. For every network/species combination, it creates
+        shared memory arrays for the main data, optional GHOST auxiliary variables,
+        timestamps, QA flags, and data-provider flags. Worker processes read the
+        relevant NetCDF files into these shared arrays, after which the parent
+        process copies the completed shared arrays back into the main
+        ``read_instance`` memory structures.
+
+        Filter species are handled separately from normal read species. For filter
+        species, only the filter-data array is shared and updated. For non-filter
+        species, the method updates the main data array, monthly metadata array,
+        and, when applicable, GHOST auxiliary data arrays.
+
+        Parameters
+        ----------
+        tuple_arguments : list
+            List of argument tuples passed to the NetCDF worker read function.
+            Each tuple contains the information needed to read one file, including
+            filename, station metadata, species name, data label, forecast indices,
+            and other read options. The position of each value in the tuple is
+            described by ``tuple_argument_fields``.
+
+        tuple_argument_fields : list
+            List of field names describing the order of values in each tuple in
+            ``tuple_arguments``. This is used to extract fields such as
+            ``'filename'``, ``'network'``, ``'speci'``, and ``'data_label'`` when
+            filtering arguments by network/species and when assigning returned
+            metadata to the correct year-month slot.
+
+        data_labels : list
+            List of active data labels to read. For non-filter species, the shared
+            data array is created with one leading dimension per data label. For
+            filter species, only a single data layer is used because filter species
+            are read only as observational filter arrays.
+
+        n_workers : int
+            Number of worker processes to use in the multiprocessing pool. Each
+            worker reads one or more NetCDF files and writes numerical data into
+            shared memory arrays initialised by this method.
+        """
+
+
+        # create arrays to share across processes (for parallel multiprocessing use)
+        # this only works for numerical dtypes, i.e. not strings
+        timestamp_array_shared = multiprocessing.RawArray(ctypes.c_int64, len(self.read_instance.timestamp_array))
+        if (self.read_instance.reading_ghost or self.read_instance.network[0] == 'actris/actris') & (self.read_instance.observations_data_label in data_labels):
+            flags_shared = multiprocessing.RawArray(ctypes.c_uint8, len(self.read_instance.flags))
+        else:
+            flags_shared = None
+        # fill arrays
+        timestamp_array_shared[:] = self.read_instance.timestamp_array
+        if (self.read_instance.reading_ghost or self.read_instance.network[0] == 'actris/actris') & (self.read_instance.observations_data_label in data_labels):
+            flags_shared[:] = self.read_instance.flags
+
+        # iterate through networkspecies + filter_networkspecies
+        for networkspeci in (self.read_instance.networkspecies + self.read_instance.filter_networkspecies):
+
+            # determine if filter networkspecies or not
+            if networkspeci in self.read_instance.filter_networkspecies:
+                filter_read = True
+            else:
+                filter_read = False
+
+            # get indivudual network and species strings
+            network = networkspeci.split('|')[0]
+            speci = networkspeci.split('|')[1]
+
+            # get tuple arguments specific for networkspeci
+            network_index = tuple_argument_fields.index('network')
+            speci_index = tuple_argument_fields.index('speci')
+            specific_tuple_arguments = [arg for arg in tuple_arguments if "{}|{}".format(arg[network_index],arg[speci_index]) == networkspeci]
+
+            # create network/speci specific arrays to share across processes (for parallel multiprocessing use)
+            # this only works for numerical dtypes, i.e. not strings
+            if not filter_read:
+                data_in_memory_shared_shape = (len(data_labels), len(self.read_instance.station_references[networkspeci]), len(self.read_instance.time_array))
+            else:
+                data_in_memory_shared_shape = (1, len(self.read_instance.station_references[networkspeci]), len(self.read_instance.time_array))
+            data_in_memory_shared = multiprocessing.RawArray(ctypes.c_float, data_in_memory_shared_shape[0] * data_in_memory_shared_shape[1] * data_in_memory_shared_shape[2])  
+            if (self.read_instance.reading_ghost or self.read_instance.network[0] == 'actris/actris') & (self.read_instance.observations_data_label in data_labels):
+                qa_shared = multiprocessing.RawArray(ctypes.c_uint8, len(self.read_instance.qa_per_species[speci]))
+                if not filter_read:
+                    ghost_data_in_memory_shared_shape = (len(self.read_instance.ghost_data_vars_to_read), len(self.read_instance.station_references[networkspeci]), len(self.read_instance.time_array))
+                    ghost_data_in_memory_shared = multiprocessing.RawArray(ctypes.c_float, ghost_data_in_memory_shared_shape[0] * ghost_data_in_memory_shared_shape[1] * ghost_data_in_memory_shared_shape[2])  
+                else:
+                    ghost_data_in_memory_shared_shape = None
+                    ghost_data_in_memory_shared = None
+            else:
+                qa_shared = None
+                ghost_data_in_memory_shared_shape = None
+                ghost_data_in_memory_shared = None
+
+            # wrap data_in_memory_shared and ghost_data_in_memory_shared as numpy arrays so we can easily manipulate the data.
+            data_in_memory_shared_np = np.frombuffer(data_in_memory_shared, dtype=np.float32).reshape(data_in_memory_shared_shape)
+            if (self.read_instance.reading_ghost) & (self.read_instance.observations_data_label in data_labels) & (not filter_read):
+                ghost_data_in_memory_shared_np = np.frombuffer(ghost_data_in_memory_shared, dtype=np.float32).reshape(ghost_data_in_memory_shared_shape)
+
+            # fill arrays
+            if not filter_read:
+                data_label_indices = [self.read_instance.data_labels.index(data_label) for data_label in data_labels]
+                np.copyto(data_in_memory_shared_np, self.read_instance.data_in_memory[networkspeci][data_label_indices, :, :])
+            else:
+                np.copyto(data_in_memory_shared_np, self.read_instance.filter_data_in_memory[networkspeci][:, :])
+            
+            if (self.read_instance.reading_ghost or self.read_instance.network[0] == 'actris/actris') & (self.read_instance.observations_data_label in data_labels):      
+                qa_shared[:] = self.read_instance.qa_per_species[speci]
+                if (self.read_instance.reading_ghost):      
+                    if not filter_read:
+                        np.copyto(ghost_data_in_memory_shared_np, self.read_instance.ghost_data_in_memory[networkspeci])
+
+            # iterate and read species data in all relevant netCDF files (either in serial/parallel)
+
+            # read data in parallel
+            # setup pool of N workers on N CPUs
+            pool = multiprocessing.Pool(n_workers, initializer=init_shared_vars_read_netcdf_data, 
+                                        initargs=(data_in_memory_shared, data_in_memory_shared_shape, 
+                                                    ghost_data_in_memory_shared, ghost_data_in_memory_shared_shape, 
+                                                    timestamp_array_shared, qa_shared, flags_shared))
+            returned_data = pool.map(read_netcdf_data, specific_tuple_arguments)
+
+            # wait for worker processes to terminate before continuing
+            pool.close()
+            pool.join()
+
+            # finalise assignment of data
+            # non-filter data
+            if not filter_read:
+
+                # iterate through read file data and place metadata into full array as appropriate
+                for returned_data_ii, returned_data_per_month in enumerate(returned_data):
+                    returned_filename = specific_tuple_arguments[returned_data_ii][tuple_argument_fields.index('filename')]
+                    returned_data_label = specific_tuple_arguments[returned_data_ii][tuple_argument_fields.index('data_label')]
+                    returned_yearmonth = returned_filename.split('_')[-1][:6]
+                    if returned_data_label == self.read_instance.observations_data_label:
+                        # if returned_data_per_month is empty list, do not add
+                        if len(returned_data_per_month) > 0:
+                            self.read_instance.metadata_in_memory[networkspeci][:, self.read_instance.yearmonths.index(returned_yearmonth)] = returned_data_per_month[:, 0]
+
+                # save to data in memory
+                self.read_instance.data_in_memory[networkspeci][data_label_indices, :, :] = data_in_memory_shared_np
+                if (self.read_instance.reading_ghost) & (self.read_instance.observations_data_label in data_labels):
+                    self.read_instance.ghost_data_in_memory[networkspeci] = ghost_data_in_memory_shared_np
+
+            # filter data
+            else:
+                # save to filter data in memory
+                self.read_instance.filter_data_in_memory[networkspeci][:, :] = data_in_memory_shared_np
+
+    def read_netcdf_data(self, tuple_arguments):
             """
             Handles the reading and filtering of observational or model netCDF data.
 
@@ -1679,14 +1675,9 @@ class DataReader:
 
             Returns
             -------
-            numpy.ndarray or list or None
-                Returns a structured metadata array if reading observations; an empty list if no 
-                stations are found; or None for model data or missing files.
+            boolean
+                Returns boolean indicating if read was successful.
             """
-
-            prints = False
-
-            start = time.time()
 
             # assign arguments from tuple to variables
             relevant_file, station_references, station_names, speci,\
@@ -1707,48 +1698,12 @@ class DataReader:
             else:
                 data_in_memory = self.read_instance.data_in_memory[networkspeci]
 
-            if prints:
-                print('(1) Passed arguments: {}'.format(time.time()-start))
-                last = time.time()
-
-            if prints:
-                print('(2) Wrap arrays: {}'.format(time.time()-last))
-                last = time.time()
-
             # read netCDF frame
             ncdf_root = Dataset(relevant_file, mode="r")
-
-            # get file time (handle monthly resolution data differently to hourly/daily
-            # as num2date does not support 'months since' units)
-            #file_time = ncdf_root['time'][:] 
-            #time_units = ncdf_root['time'].units
-            
-            #if 'months' in time_units:
-            #    monthly_start_date = time_units.split(' ')[2]
-            #    file_time_dt = pd.date_range(start=monthly_start_date, periods=1, freq='MS')
-            #else:
-            #    file_time_dt = num2date(file_time, units=time_units)
-                
-            #    # convert to pandas datetime
-            #    if Version(cftime.__version__) <= Version("1.0.3.4"):
-            #        # remove microseconds
-            #        file_time_dt = pd.to_datetime([t.replace(microsecond=0) for t in file_time_dt])
-            #    else:
-            #        # bug fix for newer versions of cftime
-            #        file_time_dt = file_time_dt.astype('datetime64[s]')
-            #        file_time_dt = pd.to_datetime([t for t in file_time_dt])
-
-            # get file time as integer timestamp
-            #file_timestamp = file_time_dt.asi8
-
 
             # get file time as integer timestamp
             time_var = ncdf_root.variables["time"]
             file_timestamp = time_var_to_asi8(time_var)
-
-            if prints:
-                print('(3) Get time: {}'.format(time.time()-last))
-                last = time.time()
 
             # get valid file time indices (i.e. those times in active full time array)
             valid_file_time_indices = np.where(np.logical_and(file_timestamp>=self.read_instance.timestamp_array[0], 
@@ -1756,10 +1711,6 @@ class DataReader:
 
             # get indices relative to active full timestamp array
             full_array_time_indices = np.searchsorted(self.read_instance.timestamp_array, file_timestamp[valid_file_time_indices])
-
-            if prints:
-                print('(4) Get time indices: {}'.format(time.time()-last))
-                last = time.time()
 
             # get all station references in file (do little extra work to get non-GHOST observational station references)
             if (not reading_ghost) & (data_label == observations_data_label):
@@ -1789,46 +1740,26 @@ class DataReader:
                 file_station_references = ncdf_root['station_reference'][:]
 
             # get indices of all non-NaN stations (can be NaN for some non-GHOST files)
-            #non_nan_station_indices = np.array([ref_ii for ref_ii, ref in enumerate(file_station_references) if ref.lower() != 'nan'])
-            #file_station_references = file_station_references[non_nan_station_indices]
+            refs = np.asarray(file_station_references).astype(str)
+            original_indices = np.arange(refs.size, dtype=np.int32)
+            mask_not_nan = np.char.lower(refs) != "nan"
+            refs_non_nan = refs[mask_not_nan]
+            non_nan_original_indices = original_indices[mask_not_nan]
 
             # get indices of file station station references that are contained in all unique station references array
-            #current_file_station_indices = np.where(np.in1d(file_station_references, station_references))[0]
+            station_ref_set = set(station_references)
+            mask_present = np.fromiter((r in station_ref_set for r in refs_non_nan),
+                                        dtype=bool,count=len(refs_non_nan))
+            matched_filtered_indices = np.where(mask_present)[0]
+            current_file_station_indices = non_nan_original_indices[matched_filtered_indices]
+
 
             # for all unique station references that are contained within file station references array
             # get the index of the station reference in the unique station references array 
-            #index = np.argsort(station_references)
-            #sorted_station_references = station_references[index]
-            #sorted_index = np.searchsorted(sorted_station_references, file_station_references[current_file_station_indices])
-            #full_array_station_indices = np.take(index, sorted_index, mode="clip")
-
-            # --- FAST station reference extraction inside worker ---
-
-            # 1. Ensure numpy array of strings
-            refs = np.asarray(file_station_references).astype(str)
-
-            # 2. Remove 'nan' (vectorized)
-            mask_not_nan = np.char.lower(refs) != "nan"
-            refs = refs[mask_not_nan]
-
-            # 3. Membership test via set (much faster than np.in1d)
-            station_ref_set = set(station_references)
-            mask_present = np.fromiter((r in station_ref_set for r in refs), dtype=bool, count=len(refs))
-            current_file_station_indices = np.where(mask_present)[0]
-
-            if len(current_file_station_indices) == 0:
-                return [] if (data_label == observations_data_label and not filter_read) else None
-
-            # 4. Fast mapping to full array indices
             station_to_index = {ref: i for i, ref in enumerate(station_references)}
-
-            valid_refs = refs[current_file_station_indices]
-
-            full_array_station_indices = np.fromiter(
-                (station_to_index[r] for r in valid_refs),
-                dtype=np.int32,
-                count=len(valid_refs)
-            )
+            valid_refs = refs_non_nan[matched_filtered_indices]
+            full_array_station_indices = np.fromiter((station_to_index[r] for r in valid_refs),
+                                                      dtype=np.int32,count=len(valid_refs))
 
             # if have zero current_file_station_indices in all unique station references, 
             # then check if it is because of old-style of Providentia-interpolation output, 
@@ -1848,21 +1779,13 @@ class DataReader:
             # if still have zero current_file_station_indices in all unique station references (can happen due to station colocation)
             # then return from function without reading
             if len(current_file_station_indices) == 0:
-                # return empty metadata list if reading observations
-                if (data_label == observations_data_label) & (not filter_read):
-                    return []
-                else:
-                    return 
+                return False 
 
             # get first and last station index for current file to read only relevant subset of data, 
             # and adjust current_file_station_indices to be relative to subset of data to read
             fsi = current_file_station_indices[0]
             lsi = current_file_station_indices[-1] + 1
             current_file_station_indices_adjusted = current_file_station_indices - fsi
-
-            if prints:
-                print('(5) Get station indices: {}'.format(time.time()-last))
-                last = time.time()
 
             # read observations
             if data_label == observations_data_label:
@@ -1895,10 +1818,6 @@ class DataReader:
                     if network == 'actris/actris':
                         read_qa = True
                 
-                if prints:
-                    print('(6) Read species data: {}'.format(time.time()-last))
-                    last = time.time()
-
                 # reading GHOST data?
                 if reading_ghost:
 
@@ -1909,10 +1828,6 @@ class DataReader:
                             ghost_data = ghost_data[current_file_station_indices_adjusted]
                             self.read_instance.ghost_data_in_memory[networkspeci][ghost_data_var_ii, 
                                 full_array_station_indices[:, np.newaxis], full_array_time_indices[np.newaxis, :]] = ghost_data
-
-                if prints:
-                    print('(7) Read GHOST variables: {}'.format(time.time()-last))
-                    last = time.time()
 
                 if (reading_ghost) or (network == 'actris/actris'):
                     # if some qa flags selected then screen observations
@@ -1930,17 +1845,9 @@ class DataReader:
                         flag_data = flag_data[current_file_station_indices_adjusted]
                         species_data[np.isin(flag_data, self.read_instance.flags).any(axis=2)] = np.nan
                         
-                if prints:
-                    print('(8) Read QA: {}'.format(time.time()-last))
-                    last = time.time()
-
                 # write filtered species data to shared file data
                 data_in_memory[data_labels.index(observations_data_label), full_array_station_indices[:, np.newaxis], 
                             full_array_time_indices[np.newaxis, :]] = species_data
-
-                if prints:
-                    print('(9) Wrote species data: {}'.format(time.time()-last))
-                    last = time.time()
 
                 # get file metadata
                 if not filter_read:
@@ -1987,6 +1894,7 @@ class DataReader:
                             if meta_var_nc not in ncdf_root.variables:
                                 continue
 
+                            # get metadata
                             meta_shape = ncdf_root[meta_var_nc].shape
                             meta_val = ncdf_root[meta_var_nc][fsi:lsi]
                             meta_val = meta_val[current_file_station_indices_adjusted]
@@ -2003,7 +1911,7 @@ class DataReader:
                                     else:
                                         meta_val = chartostring(meta_val)
                             
-                            # do str formatting (capitalization) to the metadata
+                            # do str formatting (capitalisation) to the metadata
                             if isinstance(meta_val,str):
                                 meta_val = np.char.capitalize(meta_val)
 
@@ -2021,10 +1929,6 @@ class DataReader:
 
                         # put metadata in array
                         self.read_instance.metadata_in_memory[networkspeci][meta_var][full_array_station_indices, yearmonth_index] = meta_val
-
-                if prints:
-                    print('(10) Read metadata: {}'.format(time.time()-last))
-                    last = time.time()
 
             # model data
             else:
@@ -2081,8 +1985,5 @@ class DataReader:
 
             # close netCDF
             ncdf_root.close()
-
-            if prints:
-                print('Total: {}'.format(time.time()-start))
 
             return True

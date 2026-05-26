@@ -1072,6 +1072,10 @@ class Actris:
             Temporally averaged data with flags, QA and metadata
         """
 
+        import time
+
+        start = time.time()
+
         # get EBAS component
         ebas_component = variable_mapping[actris_parameter]['var']
 
@@ -1256,6 +1260,8 @@ class Actris:
         combined_ds.attrs['application_area'] = 'Monitoring atmospheric composition'
         combined_ds.attrs['domain'] = 'Atmosphere'
         combined_ds.attrs['observed_layer'] = 'Land surface'
+
+        print('{} seconds'.format(time.time()-start))
 
         return combined_ds
 

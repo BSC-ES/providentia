@@ -269,6 +269,11 @@ class ProvConfiguration:
                 from GHOST_standards import EBAS_network_priorities
                 self.read_instance.ghost_available_networks += EBAS_network_priorities
 
+            # add regional ISD networks
+            if 'NOAA_ISD' in self.read_instance.ghost_available_networks:
+                ISD_regional_networks = ['NOAA_ISD_EU', 'NOAA_ISD_IP', 'NOAA_ISD_NA']
+                self.read_instance.ghost_available_networks += ISD_regional_networks
+
             # get GHOST resolutions
             self.read_instance.ghost_available_resolutions = [resolution_dict['temporal_resolution_path'] for resolution_dict in standard_temporal_resolutions.values()]
 
@@ -2050,7 +2055,7 @@ def split_options(read_instance, conf_string, separator="||"):
     """
     
     keeps, removes = [], []
-
+    
     if separator not in conf_string:
         if ("keep:" in conf_string) and ("remove:" not in conf_string):
             keep_start = conf_string.find("keep:")

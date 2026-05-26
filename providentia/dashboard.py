@@ -1023,12 +1023,13 @@ class Dashboard(QtWidgets.QWidget):
 
         # check N available forecast days for model
         self.datareader.check_forecast(data_labels=all_data_labels, data_labels_raw=all_data_labels_raw,
-                                       networkspecies=[self.selected_networkspeci])
+                                       networkspecies=[self.selected_networkspeci], resolution=self.selected_resolution,
+                                       ghost_version=self.ghost_version)
 
         # update forecast indices and data labels based on selected forecast data 
         selected_data_labels, selected_data_labels_raw, selected_models = self.datareader.update_forecast_indices(data_labels=all_data_labels, data_labels_raw=all_data_labels_raw,
-                                                                                                                       selected_data_labels=selected_data_labels, selected_data_labels_raw=selected_data_labels_raw,
-                                                                                                                       networkspecies=[self.selected_networkspeci], init=True)
+                                                                                                                  selected_data_labels=selected_data_labels, selected_data_labels_raw=selected_data_labels_raw,
+                                                                                                                  networkspecies=[self.selected_networkspeci], init=True)
     
         # if are loading from a .conf file then set data labels and models
         if self.from_conf:

@@ -243,6 +243,7 @@ def init_metadata(instance):
 
         # reset checkboxes
         for metadata_var in instance.metadata_menu[metadata_type]['navigation_buttons']['labels']:
+
             # metadata variable already in dict?
             # then just reset lists
             if metadata_var in instance.metadata_menu[metadata_type]:
@@ -399,19 +400,32 @@ def update_period_fields(instance):
 
 def update_metadata_fields(instance):
     """
-    Update the metadata menu with unique categorical fields or numeric boundaries 
-    derived from newly read data.
-    
-    Non-numeric metadata gets all the unique fields per metadata variable.
-    Numeric metadata gets the minimum and maximum boundaries per metadata variable.
-    If previously metadata settings for a field deviate from the default,
-    then if the same field still exists then the settings (i.e. bounds or
-    checkbox selection) are copied across, rather than setting to the default.
+    Update metadata menu fields using metadata values currently loaded in memory.
+
+    Non-numeric metadata variables are updated with the sorted unique categorical
+    fields found across all active network/species combinations. Numeric metadata
+    variables are updated with the minimum and maximum valid bounds found across
+    all active network/species combinations.
+
+    Existing user selections are preserved where possible. For categorical
+    metadata, previously selected keep/remove checkbox selections are copied
+    across if the corresponding fields still exist after the metadata update.
+    For numeric metadata, previous lower/upper bounds are retained if they are
+    stricter than the previous defaults, matching the existing behaviour.
 
     Parameters
     ----------
     instance : object
-        An object instance to be updated with metadata menu configurations.
+        Object instance containing metadata arrays, metadata menu definitions,
+        active network/species configuration, station-validity information, and
+        standard metadata definitions. The function updates
+        ``instance.metadata_menu`` in place.
+
+    Returns
+    -------
+    None
+        The function modifies ``instance.metadata_menu`` in place and does not
+        return a value.
     """
 
     metadata_menu = instance.metadata_menu
@@ -420,138 +434,307 @@ def update_metadata_fields(instance):
     metadata_in_memory = instance.metadata_in_memory
     networkspecies = instance.networkspecies
 
-    # before doing anything check if have all current metadata variables in menu
-    # if not, this is either because it is initialised empty, 
-    # or because of changing between GHOST and non-GHOST data
-    # if there is a difference, fill metadata menu with empty values
+    # ------------------------------------------------------------------
+    # Local helper: clean object metadata values.
+    # ------------------------------------------------------------------
+    def _clean_object_unique_values(values):
+        """
+        Remove invalid categorical metadata values from an already reduced array.
+
+        Values equal to the string ``'nan'``, empty strings, and pandas-style
+        missing values are removed. This preserves the behaviour of the current
+        implementation for object metadata, but is intended to operate on a
+        reduced unique-value array rather than the full station/month metadata
+        array.
+
+        Parameters
+        ----------
+        values : numpy.ndarray
+            One-dimensional array of object/categorical metadata values. This
+            array is usually already reduced by ``pd.unique``.
+
+        Returns
+        -------
+        clean_values : numpy.ndarray
+            One-dimensional array containing only valid categorical metadata
+            values.
+        """
+        values = np.asarray(values, dtype=object).ravel()
+
+        if values.size == 0:
+            return values
+
+        return values[
+            (values != 'nan')
+            & (values != "")
+            & (~pd.isna(values))
+        ]
+
+    # ------------------------------------------------------------------
+    # Local helper: get values for one metadata variable/networkspecies.
+    # ------------------------------------------------------------------
+    def _get_metadata_values(arr, inds=None):
+        """
+        Return flattened metadata values, optionally restricted to valid stations.
+
+        Parameters
+        ----------
+        arr : numpy.ndarray
+            Metadata array for one network/species and one metadata variable.
+        inds : numpy.ndarray or None, optional
+            Optional valid-station indices. If provided, only those stations are
+            selected before flattening.
+
+        Returns
+        -------
+        values : numpy.ndarray
+            One-dimensional metadata value array.
+        """
+        if inds is None:
+            return arr.ravel()
+
+        return arr[inds].ravel()
+
+    # ------------------------------------------------------------------
+    # 1) Check whether metadata menu needs reset.
+    # ------------------------------------------------------------------
     reset_meta = False
     nav_labels = metadata_menu['navigation_buttons']['labels']
 
     for metadata_type in nav_labels:
-        required_vars = [
-            mv for mv in metadata_vars
-            if standard_metadata[mv]['metadata_type'] == metadata_type
-            and standard_metadata[mv]['data_type'] != object
-        ]
-        if len(required_vars) != len(metadata_menu[metadata_type]['rangeboxes']['labels']):
+        required_count = 0
+
+        for meta_var in metadata_vars:
+            meta_info = standard_metadata[meta_var]
+
+            if (
+                meta_info['metadata_type'] == metadata_type
+                and meta_info['data_type'] != object
+            ):
+                required_count += 1
+
+        if required_count != len(metadata_menu[metadata_type]['rangeboxes']['labels']):
             reset_meta = True
             break
 
-    # reinitialise metadata menu
     if reset_meta:
         init_metadata(instance)
         metadata_menu = instance.metadata_menu
 
-    # normalise network/species to lists (avoid conversion inside loop)
+    # ------------------------------------------------------------------
+    # 2) Normalize network/species to lists once.
+    # ------------------------------------------------------------------
     if isinstance(instance.network, str):
         instance.network = [instance.network]
+
     if isinstance(instance.species, str):
         instance.species = [instance.species]
 
-    # main metadata update loop
-    for meta_var in metadata_vars:
-        md_info = standard_metadata[meta_var]
-        metadata_type = md_info['metadata_type']
-        dtype = md_info['data_type']
+    # ------------------------------------------------------------------
+    # 3) Precompute valid station indices once.
+    # ------------------------------------------------------------------
+    use_valid_station_inds = (
+        hasattr(instance, "valid_station_inds")
+        and not instance.reading_ghost
+    )
 
-        # gather metadata across all networks/species
-        chunks = []
+    valid_indices_by_netspec = {}
+
+    if use_valid_station_inds:
+        obs_label = instance.observations_data_label
+
+        if instance.temporal_colocation:
+            valid_source = instance.valid_station_inds_temporal_colocation
+        else:
+            valid_source = instance.valid_station_inds
+
+        for netspec in networkspecies:
+            valid_indices_by_netspec[netspec] = valid_source[netspec][obs_label]
+
+    # ------------------------------------------------------------------
+    # 4) Precompute numeric rangebox label indices.
+    # ------------------------------------------------------------------
+    rangebox_index_by_type = {}
+
+    for metadata_type in nav_labels:
+        if 'rangeboxes' in metadata_menu[metadata_type]:
+            labels = metadata_menu[metadata_type]['rangeboxes']['labels']
+            rangebox_index_by_type[metadata_type] = {
+                label: ii for ii, label in enumerate(labels)
+            }
+
+    # ------------------------------------------------------------------
+    # 5) Main metadata update loop.
+    # ------------------------------------------------------------------
+    for meta_var in metadata_vars:
+
+        meta_info = standard_metadata[meta_var]
+        metadata_type = meta_info['metadata_type']
+        metadata_data_type = meta_info['data_type']
+
+        # ==============================================================
+        # OBJECT / CATEGORICAL METADATA
+        # ==============================================================
+        if metadata_data_type == object:
+
+            # ----------------------------------------------------------
+            # Fast categorical path:
+            #
+            # Use pd.unique on each flattened chunk first. For repeated
+            # station/month metadata this can reduce thousands of values
+            # down to a handful before missing-value checks and final sort.
+            # ----------------------------------------------------------
+            unique_chunks = []
+
+            for netspec in networkspecies:
+                arr = metadata_in_memory[netspec][meta_var]
+
+                if use_valid_station_inds:
+                    vals = _get_metadata_values(
+                        arr,
+                        valid_indices_by_netspec[netspec]
+                    )
+                else:
+                    vals = _get_metadata_values(arr)
+
+                if vals.size == 0:
+                    continue
+
+                # Hash-based unique is usually faster than np.unique on
+                # large repeated object arrays.
+                vals_unique = pd.unique(vals)
+                vals_unique = _clean_object_unique_values(vals_unique)
+
+                if vals_unique.size > 0:
+                    unique_chunks.append(vals_unique)
+
+            if len(unique_chunks) == 0:
+                new_fields = np.array([], dtype=object)
+            elif len(unique_chunks) == 1:
+                # Final np.unique preserves the sorted output behaviour of
+                # the current implementation.
+                new_fields = np.unique(unique_chunks[0])
+            else:
+                new_fields = np.unique(np.concatenate(unique_chunks))
+
+            checkbox_menu = metadata_menu[metadata_type][meta_var]['checkboxes']
+
+            previous_fields = checkbox_menu['labels']
+            previous_keep = checkbox_menu['keep_selected']
+            previous_remove = checkbox_menu['remove_selected']
+
+            previous_field_set = set(previous_fields)
+            previous_keep_set = set(previous_keep)
+            previous_remove_set = set(previous_remove)
+
+            checkbox_menu['labels'] = new_fields
+
+            keep_selected = []
+            remove_selected = []
+
+            for field in new_fields:
+                if field in previous_field_set:
+                    if field in previous_keep_set:
+                        keep_selected.append(field)
+                    if field in previous_remove_set:
+                        remove_selected.append(field)
+
+            checkbox_menu['keep_selected'] = keep_selected
+            checkbox_menu['remove_selected'] = remove_selected
+            checkbox_menu['keep_default'] = []
+            checkbox_menu['remove_default'] = []
+
+            continue
+
+        # ==============================================================
+        # NUMERIC METADATA
+        # ==============================================================
+
+        current_min = None
+        current_max = None
 
         for netspec in networkspecies:
             arr = metadata_in_memory[netspec][meta_var]
 
-            # apply valid station mask (non-GHOST only)
-            if hasattr(instance, "valid_station_inds") and not instance.reading_ghost:
-                if instance.temporal_colocation:
-                    inds = instance.valid_station_inds_temporal_colocation[netspec][instance.observations_data_label]
-                else:
-                    inds = instance.valid_station_inds[netspec][instance.observations_data_label]
-                chunks.append(arr[inds].ravel())
+            if use_valid_station_inds:
+                vals = _get_metadata_values(
+                    arr,
+                    valid_indices_by_netspec[netspec]
+                )
             else:
-                chunks.append(arr.ravel())
+                vals = _get_metadata_values(arr)
 
-        # one fast concatenate
-        meta_vals = np.concatenate(chunks)
+            if vals.size == 0:
+                continue
 
-        # remove NaNs / "nan"
-        if dtype == object:
-            # object/string metadata
-            mask = (meta_vals != 'nan') & (meta_vals != "") & (~pd.isna(meta_vals))
-        else:
-            # numeric metadata
-            mask = ~np.isnan(meta_vals)
+            # Same validity rule as current function for numeric metadata:
+            # ignore NaNs only.
+            #
+            # Avoid np.nanmin / np.nanmax warnings for all-NaN chunks.
+            nan_vals = np.isnan(vals)
 
-        meta_vals_clean = meta_vals[mask]
+            if nan_vals.all():
+                continue
 
-        # update metadata menu for categorical (object) fields
-        if dtype == object:
-            mm = metadata_menu[metadata_type][meta_var]['checkboxes']
+            chunk_min = np.nanmin(vals)
+            chunk_max = np.nanmax(vals)
 
-            # get previous settings
-            prev_fields = mm['labels']
-            prev_set = set(prev_fields)
-            prev_keep = set(mm['keep_selected'])
-            prev_remove = set(mm['remove_selected'])
+            if current_min is None:
+                current_min = chunk_min
+                current_max = chunk_max
+            else:
+                if chunk_min < current_min:
+                    current_min = chunk_min
+                if chunk_max > current_max:
+                    current_max = chunk_max
 
-            # new unique sorted values
-            new_fields = np.unique(meta_vals_clean)
-            mm['labels'] = new_fields
+        rangeboxes = metadata_menu[metadata_type]['rangeboxes']
+        meta_var_index = rangebox_index_by_type[metadata_type][meta_var]
 
-            # rebuild keep/remove efficiently
-            keep = []
-            remove = []
-            for f in new_fields:
-                if f in prev_set:
-                    if f in prev_keep:
-                        keep.append(f)
-                    if f in prev_remove:
-                        remove.append(f)
+        previous_lower_default = rangeboxes['lower_default'][meta_var_index]
+        previous_upper_default = rangeboxes['upper_default'][meta_var_index]
+        previous_lower = rangeboxes['current_lower'][meta_var_index]
+        previous_upper = rangeboxes['current_upper'][meta_var_index]
 
-            mm['keep_selected'] = keep
-            mm['remove_selected'] = remove
-            mm['keep_default'] = []
-            mm['remove_default'] = []
-            continue
+        if current_min is not None:
+            min_val = str(current_min)
+            max_val = str(current_max)
 
-        # update numeric metadata fields (rangeboxes)
-        mm = metadata_menu[metadata_type]['rangeboxes']
-        idx = mm['labels'].index(meta_var)
+            # Preserve current behaviour:
+            # previous bounds are compared as strings, not numerically.
+            new_lower = min_val
 
-        prev_lower_def = mm['lower_default'][idx]
-        prev_upper_def = mm['upper_default'][idx]
-        prev_lower = mm['current_lower'][idx]
-        prev_upper = mm['current_upper'][idx]
+            if (
+                previous_lower not in ("nan", None)
+                and previous_lower_default not in ("nan", None)
+            ):
+                if previous_lower > previous_lower_default:
+                    new_lower = previous_lower
 
-        if len(meta_vals_clean) > 0:
-            mn = str(np.min(meta_vals_clean))
-            mx = str(np.max(meta_vals_clean))
+            new_upper = max_val
 
-            # apply previous settings if stricter
-            new_lower = mn
-            if prev_lower not in ("nan", None) and prev_lower_def not in ("nan", None):
-                if prev_lower > prev_lower_def:
-                    new_lower = prev_lower
+            if (
+                previous_upper not in ("nan", None)
+                and previous_upper_default not in ("nan", None)
+            ):
+                if previous_upper < previous_upper_default:
+                    new_upper = previous_upper
 
-            new_upper = mx
-            if prev_upper not in ("nan", None) and prev_upper_def not in ("nan", None):
-                if prev_upper < prev_upper_def:
-                    new_upper = prev_upper
-
-            mm['current_lower'][idx] = new_lower
-            mm['current_upper'][idx] = new_upper
-            mm['lower_default'][idx] = mn
-            mm['upper_default'][idx] = mx
+            rangeboxes['current_lower'][meta_var_index] = new_lower
+            rangeboxes['current_upper'][meta_var_index] = new_upper
+            rangeboxes['lower_default'][meta_var_index] = min_val
+            rangeboxes['upper_default'][meta_var_index] = max_val
 
         else:
-            # No numeric metadata → set NAN
-            mm['current_lower'][idx] = 'nan'
-            mm['lower_default'][idx] = 'nan'
-            mm['current_upper'][idx] = 'nan'
-            mm['upper_default'][idx] = 'nan'
+            rangeboxes['current_lower'][meta_var_index] = 'nan'
+            rangeboxes['lower_default'][meta_var_index] = 'nan'
+            rangeboxes['current_upper'][meta_var_index] = 'nan'
+            rangeboxes['upper_default'][meta_var_index] = 'nan'
 
-            # remove "apply selected" if invalid
-            if meta_var in mm['apply_selected']:
-                mm['apply_selected'].remove(meta_var)
+            if meta_var in rangeboxes['apply_selected']:
+                rangeboxes['apply_selected'].remove(meta_var)
+
+    return None
 
 def multispecies_conf(instance):
     """
