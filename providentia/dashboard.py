@@ -812,7 +812,7 @@ class Dashboard(QtWidgets.QWidget):
         if self.selected_network in available_networks:
             self.cb_network.setCurrentText(self.selected_network)
         else:
-            if self.config_bar_initialisation:
+            if self.from_conf:
                 msg = f'Network {self.selected_network} is not available.'
                 self.logger.error(msg)
                 sys.exit(1)
@@ -832,7 +832,7 @@ class Dashboard(QtWidgets.QWidget):
         if self.selected_resolution in available_resolutions:
             self.cb_resolution.setCurrentText(self.selected_resolution)
         else:
-            if self.config_bar_initialisation:
+            if self.from_conf:
                 msg = f'Resolution {self.selected_resolution} is not available.'
                 self.logger.error(msg)
                 sys.exit(1)
@@ -855,7 +855,7 @@ class Dashboard(QtWidgets.QWidget):
         if self.selected_species in available_species:
             self.cb_species.setCurrentText(self.selected_species)
         else:
-            if self.config_bar_initialisation:
+            if self.from_conf:
                 msg = f'Species {self.selected_species} is not available.'
                 self.logger.error(msg)
                 sys.exit(1)
@@ -897,7 +897,7 @@ class Dashboard(QtWidgets.QWidget):
         if self.selected_statistic_mode in available_statistic_modes:
             self.cb_statistic_mode.setCurrentText(self.selected_statistic_mode)
         else:
-            if self.config_bar_initialisation:
+            if self.from_conf:
                 msg = f'Statistic mode {self.selected_statistic_mode} is not available.'
                 self.logger.error(msg)
                 sys.exit(1)
@@ -917,7 +917,7 @@ class Dashboard(QtWidgets.QWidget):
         if self.selected_statistic_aggregation in available_aggregation_statistics:
             self.cb_statistic_aggregation.setCurrentText(self.selected_statistic_aggregation)
         else:
-            if self.config_bar_initialisation:
+            if self.from_conf:
                 msg = f'Statistic aggregation {self.selected_statistic_aggregation} is not available.'
                 self.logger.error(msg)
                 sys.exit(1)
@@ -932,7 +932,7 @@ class Dashboard(QtWidgets.QWidget):
         if self.selected_periodic_statistic_aggregation in available_periodic_statistics:
             self.mpl_canvas.statsummary_periodic_aggregation.setCurrentText(self.selected_periodic_statistic_aggregation)
         else:
-            if self.config_bar_initialisation:
+            if self.from_conf:
                 msg = f'Periodic statistic aggregation {self.selected_periodic_statistic_aggregation} is not available.'
                 self.logger.error(msg)
                 sys.exit(1)
@@ -947,7 +947,7 @@ class Dashboard(QtWidgets.QWidget):
         if self.selected_periodic_statistic_mode in available_periodic_modes:
             self.mpl_canvas.statsummary_periodic_mode.setCurrentText(self.selected_periodic_statistic_mode)
         else:
-            if self.config_bar_initialisation:
+            if self.from_conf:
                 msg = f'Periodic statistic mode {self.selected_periodic_statistic_mode} is not available.'
                 self.logger.error(msg)
                 sys.exit(1)
@@ -967,7 +967,7 @@ class Dashboard(QtWidgets.QWidget):
         if self.selected_timeseries_statistic_aggregation in available_timeseries_statistics:
             self.mpl_canvas.timeseries_stat.setCurrentText(self.selected_timeseries_statistic_aggregation)
         else:
-            if self.config_bar_initialisation:
+            if self.from_conf:
                 msg = f'Timeseries statistic aggregation {self.selected_timeseries_statistic_aggregation} is not available.'
                 self.logger.error(msg)
                 sys.exit(1)
