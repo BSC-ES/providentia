@@ -19,21 +19,21 @@ cams_analysis:
     variable:
       - ammonia
       - carbon_monoxide
+      - dust
       - formaldehyde
       - glyoxal
       - nitrogen_dioxide
       - nitrogen_monoxide
       - non_methane_vocs
       - ozone
+      - particulate_matter_10um
       - particulate_matter_2.5um
+      - pm10_sea_salt_dry
       - pm2.5_ammonium
       - pm2.5_nitrate
       - pm2.5_sulphate
-      - total_elementary_carbon
-      - particulate_matter_10um
-      - dust
-      - pm10_sea_salt_dry
       - sulphur_dioxide
+      - total_elementary_carbon
     leadtime_hour: 
       multi: '0'
     forecast: false
@@ -70,21 +70,21 @@ cams_forecast:
     variable:
       - ammonia
       - carbon_monoxide
+      - dust
       - formaldehyde
       - glyoxal
       - nitrogen_dioxide
       - nitrogen_monoxide
       - non_methane_vocs
       - ozone
+      - particulate_matter_10um
       - particulate_matter_2.5um
+      - pm10_sea_salt_dry
       - pm2.5_ammonium
       - pm2.5_nitrate
       - pm2.5_sulphate
-      - total_elementary_carbon
-      - particulate_matter_10um
-      - dust
-      - pm10_sea_salt_dry
       - sulphur_dioxide
+      - total_elementary_carbon
     leadtime_hour:  
       multi: [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19',
             '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38', '39',
@@ -311,13 +311,14 @@ era5_reanalysis:
       - cloud_base_height
       - high_cloud_cover
       - instantaneous_10m_wind_gust
+      - low_cloud_cover
       - mean_sea_level_pressure
       - sea_surface_temperature
       - snow_depth
       - snowfall
       - surface_pressure
-      - surface_solar_radiation_downwards
       - surface_solar_radiation_downward_clear_sky
+      - surface_solar_radiation_downwards
       - toa_incident_solar_radiation
       - total_cloud_cover
       - total_precipitation

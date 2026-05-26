@@ -31,6 +31,9 @@ https://ads.atmosphere.copernicus.eu/datasets/cams-europe-air-quality-reanalyses
   - particulate_matter_10um
   - particulate_matter_2.5um
   - pm10_sea_salt_dry
+  - pm2.5_ammonium
+  - pm2.5_nitrate
+  - pm2.5_sulphate
   - sulphur_dioxide
   - total_elementary_carbon
 https://ads.atmosphere.copernicus.eu/datasets/cams-global-atmospheric-composition-forecasts?tab=download:
@@ -62,12 +65,16 @@ https://ads.atmosphere.copernicus.eu/datasets/cams-global-atmospheric-compositio
   - sulphate_aerosol_mixing_ratio
   - sulphur_dioxide
   single:
+  - 10m_u_component_of_wind
+  - 10m_v_component_of_wind
   - 2m_dewpoint_temperature
   - 2m_temperature
   - asymmetry_factor_1020nm
   - asymmetry_factor_440nm
+  - boundary_layer_height
   - cloud_base_height
   - dust_aerosol_optical_depth_550nm
+  - high_cloud_cover
   - mean_sea_level_pressure
   - particulate_matter_10um
   - particulate_matter_1um
@@ -87,6 +94,7 @@ https://ads.atmosphere.copernicus.eu/datasets/cams-global-atmospheric-compositio
   - total_aerosol_optical_depth_440nm
   - total_aerosol_optical_depth_500nm
   - total_aerosol_optical_depth_550nm
+  - total_cloud_cover
   - total_fine_mode_aerosol_optical_depth_500nm
   - total_precipitation
   - visibility
@@ -114,9 +122,12 @@ https://ads.atmosphere.copernicus.eu/datasets/cams-global-reanalysis-eac4?tab=do
   - sulphate_aerosol_mixing_ratio
   - sulphur_dioxide
   single:
+  - 10m_u_component_of_wind
+  - 10m_v_component_of_wind
   - 2m_dewpoint_temperature
   - 2m_temperature
   - dust_aerosol_optical_depth_550nm
+  - high_cloud_cover
   - mean_sea_level_pressure
   - particulate_matter_10um
   - particulate_matter_1um
@@ -126,6 +137,7 @@ https://ads.atmosphere.copernicus.eu/datasets/cams-global-reanalysis-eac4?tab=do
   - snow_depth
   - surface_pressure
   - total_aerosol_optical_depth_550nm
+  - total_cloud_cover
 https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels?tab=download:
   single:
   - 10m_u_component_of_wind
@@ -133,6 +145,7 @@ https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels?tab=dow
   - 2m_dewpoint_temperature
   - 2m_temperature
   - boundary_layer_height
+  - clear_sky_direct_solar_radiation_at_surface
   - cloud_base_height
   - high_cloud_cover
   - instantaneous_10m_wind_gust
@@ -142,5 +155,9 @@ https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels?tab=dow
   - snow_depth
   - snowfall
   - surface_pressure
+  - surface_solar_radiation_downward_clear_sky
+  - surface_solar_radiation_downwards
+  - toa_incident_solar_radiation
   - total_cloud_cover
   - total_precipitation
+  - total_sky_direct_solar_radiation_at_surface
