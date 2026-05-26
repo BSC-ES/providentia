@@ -437,16 +437,38 @@ class DataFilter:
                             np.isin(self.read_instance.metadata_in_memory[networkspeci][meta_var][:, :], current_keep, invert=True), 
                                     self.read_instance.N_inds_per_yearmonth, axis=1)
                         self.read_instance.data_in_memory_filtered[networkspeci][:,invalid_keep] = np.nan
-                
+                        for current_keep_value in current_keep: 
+                            invalid_keep_value = np.repeat(
+                                np.isin(self.read_instance.metadata_in_memory[networkspeci][meta_var][:, :], current_keep_value, invert=True), 
+                                        self.read_instance.N_inds_per_yearmonth, axis=1)
+                            if np.all(invalid_keep_value):
+                                available_values = np.unique(
+                                    self.read_instance.metadata_in_memory[networkspeci][meta_var].astype(str)
+                                )
+                                msg = f"Cannot filter by {meta_var}: {current_keep_value} in {networkspeci} data, ignoring filter value. "
+                                msg += f"Available filters: {available_values.tolist()}\n"
+                                self.read_instance.logger.info(msg)
+
                     # if any of the remove checkboxes have been selected, filter out data by these selected fields
                     current_remove = self.read_instance.metadata_menu[metadata_type][meta_var]['checkboxes'][
                         'remove_selected']
                     if len(current_remove) > 0:
                         invalid_remove = np.repeat(
-                            np.isin(self.read_instance.metadata_in_memory[networkspeci][meta_var][:, :], current_remove),
-                                    self.read_instance.N_inds_per_yearmonth, axis=1)
+                                np.isin(self.read_instance.metadata_in_memory[networkspeci][meta_var][:, :], current_remove),
+                                        self.read_instance.N_inds_per_yearmonth, axis=1)
                         self.read_instance.data_in_memory_filtered[networkspeci][:,invalid_remove] = np.nan
-            
+                        for current_remove_value in current_remove:
+                            invalid_remove_value = np.repeat(
+                                np.isin(self.read_instance.metadata_in_memory[networkspeci][meta_var][:, :], current_remove_value),
+                                        self.read_instance.N_inds_per_yearmonth, axis=1)
+                            if not np.any(invalid_remove_value):
+                                available_values = np.unique(
+                                    self.read_instance.metadata_in_memory[networkspeci][meta_var].astype(str)
+                                )
+                                msg = f"Cannot filter by {meta_var}: {current_remove_value} in {networkspeci} data, ignoring filter value. "
+                                msg += f"Available filters: {available_values.tolist()}\n"
+                                self.read_instance.logger.info(msg)
+
             # handle numeric metadata
             else:
                 meta_var_index = self.read_instance.metadata_menu[metadata_type]['rangeboxes']['labels'].index(meta_var)
