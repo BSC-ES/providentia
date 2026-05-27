@@ -1041,7 +1041,8 @@ def save_df(read_instance, df, filename, path, msgs, na_rep=''):
     """
 
     fname = join(PROVIDENTIA_ROOT, f'{path}/{filename}.csv')
-    if os.path.exists(fname):
+    # in tests do not ask
+    if os.path.exists(fname) and not read_instance.tests:
         overwrite_question = f"File already exists in {fname}. Do you want to overwrite it?"
         if read_instance.mode == 'library':
             # ask the user whether they want to overwrite the file
@@ -1105,15 +1106,18 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
     })
     element_types_to_save = []
     if read_instance.mode == 'library':
-        # in library always save plot
-        for element_type in element_types:
-            # ask the user whether they want to save specific element_types
-            while True:
-                create_file = input(f"\nDo you want to save {element_type} data? ([y]/n) ")
-                if create_file in ['','y','n']:
-                    if create_file in ['','y']:
-                        element_types_to_save.append(element_type)
-                    break
+        # in tests do not ask
+        if read_instance.tests:
+            element_types_to_save = element_types
+        # ask the user whether they want to save specific element_types
+        else:
+            for element_type in element_types:
+                while True:
+                    create_file = input(f"\nDo you want to save {element_type} data? ([y]/n) ")
+                    if create_file in ['','y','n']:
+                        if create_file in ['','y']:
+                            element_types_to_save.append(element_type)
+                        break
     elif read_instance.mode == 'dashboard':
         # in dashboard open dialog to ask the user which element types they want to save 
         # if there are more than 1 element types
