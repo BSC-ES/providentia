@@ -96,5 +96,5 @@ Please see the [colocation](Colocation) page for more information on how to appl
 
 ## Filtering
 
-In both subsections and subsections, there are a vast number of options that can be applied to filter data from the configuration file, based on metadata, lower/upper bounds, representativity, QA etc. Please see the [filtering](Filtering) page for the full guide on how to do so.
+In both subsections and subsections, there are a vast number of options that can be applied to filter data from the configuration file, based on metadata, lower/upper bounds, data coverage, QA etc. Please see the [filtering](Filtering) page for the full guide on how to do so.
 

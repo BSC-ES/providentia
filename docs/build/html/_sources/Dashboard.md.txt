@@ -49,8 +49,8 @@ Once the time period had been updated the drop-down menus will update to show th
 Next, there are four pop-up menus:
 * **QA** contains the GHOST quality assurance flags to filter observations by, as explained in [QA](QA-filtering.md).
 * **FLAGS** contain standardised data reporter provided flags to filter observations by, as explained in [Flags](QA-filtering.md).
-* **MODS** contains a list of models that are available to load for the current data selection.
-* **MULTI** can be used to filter your current network-species by the values of other network-species, as explained in [Multispecies filtering](Multispecies-filtering).
+* **MODELS** contains a list of models that are available to load for the current data selection.
+* **SPECIES** can be used to filter your current network-species by the values of other network-species, as explained in [Multispecies filtering](Multispecies-filtering).
 
 After having set all the fields that the user wants, then the last step is to click the **READ** button. After reading the data, a map plot appears showing the available stations that correspond to the data selection. 
 
@@ -68,13 +68,13 @@ After having selected or modified any filters in this section, simply click the 
 
 Often it is desired to remove values which exceed certain extreme bounds, as it is known that data should appear at such extremes. These bounds will be by default set on the dashboard, taken from definitions per species in GHOST. These can be revised up or down as the user sees fit.
 
-##### % REP
+##### COVERAGE
 
-![representativity](uploads/representativity.png)
+![coverage](uploads/coverage.png)
 
-One major limitation often associated with observations is the amount of gaps between measurements. If these observations are directly compared with typically complete model data, this would impose a significant bias upon the comparison. Filtering by representativity filters provides a way to control the temporal robustness of the observations for evaluation. Providentia has multiple such filters available in the pop-up menu opened via the **% REP** button.
+One major limitation often associated with observations is the amount of gaps between measurements. If these observations are directly compared with typically complete model data, this would impose a significant bias upon the comparison. Filtering by data coverage provides a way to control the temporal robustness of the observations for evaluation. Providentia has multiple such filters available in the pop-up menu opened via the **COVERAGE** button.
 
-See here for more information about representativity filters: [Representativity filtering](representativity)
+See here for more information about data coverage filters: [Data coverage filtering](coverage)
 
 ##### PERIOD
 
@@ -84,11 +84,11 @@ The **PERIOD** button opens a pop-up menu that allows for the selection or remov
 
 See here for more detailed information: [Period filtering](periods)
 
-##### META
+##### METADATA
 
 ![meta](uploads/meta.png)
 
-The **META** button opens a pop-up menu allows the user to filter stations on the map by a variety of metadata variables. See here for more detailed information: [Metadata filtering](filtering_metadata)
+The **METADATA** button opens a pop-up menu allows the user to filter stations on the map by a variety of metadata variables. See here for more detailed information: [Metadata filtering](filtering_metadata)
 
 ### Statistics
 

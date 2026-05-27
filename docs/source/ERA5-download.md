@@ -1,6 +1,6 @@
 # ERA5
 
-Providentia's download mode supports downloading model output data provided by **ERA5** from the **Climate Data Store** (CDL):
+Providentia's download mode supports downloading model output data provided by **ERA5** from the **Climate Data Store** (CDS):
 
 [https://ads.atmosphere.copernicus.eu/datasets](https://ads.atmosphere.copernicus.eu/datasets)
 
@@ -8,15 +8,15 @@ and the **Simulation and Data Laboratory 'Climate Science'** (SDL) at the Jülic
 
 [https://datapub.fz-juelich.de/slcs/](https://datapub.fz-juelich.de/slcs/)
 
-An ECMWF account is required to download the files. For a tutorial on how to create and set up your account, see the [ECMWF Account setup](#ADS) page.
+An ECMWF account is required to download the files. For a tutorial on how to create and set up your account, see the [Start downloading ECMWF data](#Start-downloading-ECMWF-data) page.
 
-Data requests may take some time to complete. After starting a request from Providentia, you can monitor its progress by following the steps described in the [Check ECMWF download](Check-CAMS-download) page.
+Data requests may take some time to complete. After starting a request from Providentia, you can monitor its progress by following the steps described in the [Check ECMWF download](#Check-ECMWF-download) page.
 
 ## Available ERA5 datasets
 
 Currently, two ERA5 datasets are available for download:
 
-1. [**ERA5 hourly data on single levels from 1940 to present**](#1-era5-hourly-data-on-single-levels-from-1940-to-present) (CDL)
+1. [**ERA5 hourly data on single levels from 1940 to present**](#1-era5-hourly-data-on-single-levels-from-1940-to-present) (CDS)
 2. [**Reanalysis Tropopause Data Repository**](#2-reanalysis-tropopause-data-repository) (SDL)
 
 (how-to-enable-era5-download)=

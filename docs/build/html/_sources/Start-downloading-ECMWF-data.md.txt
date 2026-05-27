@@ -1,15 +1,13 @@
 
-# Account setup in Atmosphere Data Store
+# Start downloading ECMWF data
 
 ## 1. Create an ECMWF Account
 
-> If you already have an ECMWF account, you can skip this subsection and go to [Prepare the Configuration File](#3-prepare-the-configuration-file).  
+> If you already have an ECMWF account, you can skip this subsection and go directly to [Prepare the Configuration File](#3-prepare-the-configuration-file).
 
-Go to the [Atmosphere Data Store page](https://ads.atmosphere.copernicus.eu/) and click **Login / Register** at the top right corner.
+Once this process is completed, you will be able to download both CAMS and ERA5 data.
 
-![Atmosphere Data Store Page](uploads/CAMS_Atmospher_Data_Store_Page.png "Atmosphere Data Store Page")
-
-Then, click **Register new user** and create a new account.  
+Go to the [ECMWF login page](https://www.ecmwf.int/user/login) and click on **Register new user** to create an account.
 
 ![ECMWF Registration Page](uploads/CAMS_ECMWF_Registration_Page.png "ECMWF Registration Page")
 
@@ -60,4 +58,4 @@ Paste your API key on the prompt. Providentia will automatically create the `~/.
 
 > If the API key is incorrect, Providentia will remove the file. You can then run Providentia again and enter the correct API key.
 
-**Congratulations! You are now ready to start downloading CAMS data from the Atmosphere Data Store using Providentia.**
+**Congratulations! You are now ready to start downloading CAMS and ERA5 data from the Atmosphere Data Store using Providentia.**

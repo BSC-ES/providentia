@@ -210,7 +210,7 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">field</span></code> is the field to filter by. The fields to filter by can be representativity fields, period fields or metadata fields.</p>
+<p>where <code class="docutils literal notranslate"><span class="pre">field</span></code> is the field to filter by. The fields to filter by can be coverage fields, period fields or metadata fields.</p>
 <p>If the field is numeric, lower and upper limits to retain data between can be set as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="mi">28</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="mi">31</span><span class="p">)</span>
 </pre></div>
@@ -225,7 +225,7 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">remove</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Spain&#39;</span><span class="p">,</span><span class="s1">&#39;France&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
-<p>For the specific case of representativity fields, the argument passed should be <code class="docutils literal notranslate"><span class="pre">limit</span></code>:</p>
+<p>For the specific case of coverage fields, the argument passed should be <code class="docutils literal notranslate"><span class="pre">limit</span></code>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">rep_field</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 </pre></div>
 </div>

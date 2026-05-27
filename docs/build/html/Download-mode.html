@@ -146,23 +146,30 @@ or set <code class="docutils literal notranslate"><span class="pre">dl_ghost_sou
 </li>
 <li><p><strong>Download of GHOST network data from Zenodo</strong></p>
 <ul class="simple">
-<li><p>Downloads GHOST networks from the <a class="reference external" href="https://zenodo.org/search?q=parent.id%3A10637449&amp;amp;f=allversions%3Atrue&amp;amp;l=list&amp;amp;p=1&amp;amp;s=10&amp;amp;sort=version">GHOST Zenodo webpage</a>.</p></li>
+<li><p>Downloads observational data from GHOST networks from the <a class="reference external" href="https://zenodo.org/search?q=parent.id%3A10637449&amp;amp;f=allversions%3Atrue&amp;amp;l=list&amp;amp;p=1&amp;amp;s=10&amp;amp;sort=version">GHOST Zenodo webpage</a>.</p></li>
 <li><p>How to get this type of download: answer <code class="docutils literal notranslate"><span class="pre">n</span></code> to the HPC prompt: <em>Do you want to download observational data from the BSC remote machine? (Otherwise, GHOST observational data will be retrieved from Zenodo)</em> or set <code class="docutils literal notranslate"><span class="pre">dl_ghost_source</span></code> to <code class="docutils literal notranslate"><span class="pre">zenodo</span></code>.</p></li>
 <li><p>To see more information, check the <a class="reference internal" href="Zenodo-download.html"><span class="doc std std-doc">Zenodo download page</span></a>.</p></li>
 </ul>
 </li>
 <li><p><strong>Download of ACTRIS network data from Thredds</strong></p>
 <ul class="simple">
-<li><p>Downloads observational networks from <a class="reference external" href="https://thredds.nilu.no/thredds/catalog.html">ACTRIS Thredds</a>.</p></li>
+<li><p>Downloads observational data from ACTRIS through <a class="reference external" href="https://thredds.nilu.no/thredds/catalog.html">ACTRIS Thredds</a>.</p></li>
 <li><p>How to get this type of download: write <code class="docutils literal notranslate"><span class="pre">actris/actris</span></code> on the <code class="docutils literal notranslate"><span class="pre">network</span></code> field in your configuration file.</p></li>
 <li><p>To see more information, check the <a class="reference internal" href="ACTRIS-download.html"><span class="doc std std-doc">ACTRIS download page</span></a>.</p></li>
 </ul>
 </li>
-<li><p><strong>Download of non-interpolated model data from the Atmosphere Data Store (ADS)</strong></p>
+<li><p><strong>Download of CAMS non-interpolated model data from the Atmosphere Data Store (ADS)</strong></p>
 <ul class="simple">
-<li><p>Downloads model outputs from the <a class="reference external" href="https://ads.atmosphere.copernicus.eu/datasets">Atmosphere Data Store</a>. You must have an ECMWF account to access this feature.</p></li>
+<li><p>Downloads CAMS model output from the <a class="reference external" href="https://ads.atmosphere.copernicus.eu/datasets">Atmosphere Data Store</a>. You must have an ECMWF account to access this feature.</p></li>
 <li><p>How to get this type of download: specify the model as <code class="docutils literal notranslate"><span class="pre">cams_analysis</span></code>, <code class="docutils literal notranslate"><span class="pre">cams_forecast</span></code> or <code class="docutils literal notranslate"><span class="pre">cams_reanalysis</span></code> in your configuration, and set <code class="docutils literal notranslate"><span class="pre">dl_interpolated</span></code> to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
 <li><p>To see more information, check the <a class="reference internal" href="CAMS-download.html"><span class="doc std std-doc">CAMS download page</span></a>.</p></li>
+</ul>
+</li>
+<li><p><strong>Download of ERA5 non-interpolated model data from the Climate Data Store (CDS) or the Simulation and Data Laboratory ‘Climate Science’ (SDL)</strong></p>
+<ul class="simple">
+<li><p>Downloads ERA5 model output from the <a class="reference external" href="https://cds.climate.copernicus.eu/datasets">Climate Data Store</a>. An ECMWF account is required to access this feature. Alternatively, data can be downloaded from the <a class="reference external" href="https://datapub.fz-juelich.de/slcs/">Simulation and Data Laboratory ‘Climate Science’</a>, which does not require an account.</p></li>
+<li><p>How to get this type of download: specify the model as <code class="docutils literal notranslate"><span class="pre">era5_reanalysis</span></code> or <code class="docutils literal notranslate"><span class="pre">era5_tropopause</span></code> in your configuration, and set <code class="docutils literal notranslate"><span class="pre">dl_interpolated</span></code> to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+<li><p>To see more information, check the <a class="reference internal" href="ERA5-download.html"><span class="doc std std-doc">ERA5 download page</span></a>.</p></li>
 </ul>
 </li>
 </ol>

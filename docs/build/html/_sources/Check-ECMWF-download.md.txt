@@ -1,16 +1,17 @@
-# Check CAMS Download Status
+# Check ECMWF Download Status
 
-To check the status of a CAMS data download, you need to access the Copernicus Atmosphere Data Store (ADS) website.
+To check the status of a CAMS or ERA5 data download, access the Copernicus Atmosphere Data Store (ADS) or Copernicus Climate Data Store (CDS) website.
 
-## 1. Access the ADS Website
+## 1. Access the ADS or CDS Website
 
-Go to the following URL:
+Depending on the source of your download, go to one of the following websites:
 
-[https://ads.atmosphere.copernicus.eu/](https://ads.atmosphere.copernicus.eu/)
+- [ADS](https://ads.atmosphere.copernicus.eu/)
+- [CDS](https://cds.climate.copernicus.eu/)
 
 ## 2. Log In
 
-Log in using the account you previously created  (see: [Account setup in Atmosphere Data Store](#ADS)).
+Log in using the account you previously created (see: [Start downloading ECMWF data](#Start-downloading-ECMWF-data)).
 
 ![ADS login page](uploads/login_image.png)
 
