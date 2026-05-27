@@ -29,6 +29,7 @@ from .warnings_prv import show_message
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 
+
 def get_AERONET_sizedist_bin_radius(species):
     """
     Get AERONET size distribution bin radius for a given species.
@@ -67,13 +68,14 @@ def get_AERONET_sizedist_bin_radius(species):
                           'vconcaerobin21': '11.432',
                           'vconcaerobin22': '15.00'
                           }
-    
-    return radius_per_species[species] 
+
+    return radius_per_species[species]
+
 
 def get_multispecies_aliases(networkspecies):
     """
     Map networkspecies to networkspecies aliases. Also get label for alias.
-    
+
     Parameters
     ----------
     networkspecies : list of str
@@ -87,35 +89,35 @@ def get_multispecies_aliases(networkspecies):
         Unique label corresponding to the mapped species.
     """
 
-    multispecies_labels =  {'vconcaerobin1': 'Radius [µm]',
-                            'vconcaerobin2': 'Radius [µm]',
-                            'vconcaerobin3': 'Radius [µm]',
-                            'vconcaerobin4': 'Radius [µm]',
-                            'vconcaerobin5': 'Radius [µm]',
-                            'vconcaerobin6': 'Radius [µm]',
-                            'vconcaerobin7': 'Radius [µm]',
-                            'vconcaerobin8': 'Radius [µm]',
-                            'vconcaerobin9': 'Radius [µm]',
-                            'vconcaerobin10': 'Radius [µm]',
-                            'vconcaerobin11': 'Radius [µm]',
-                            'vconcaerobin12': 'Radius [µm]',
-                            'vconcaerobin13': 'Radius [µm]',
-                            'vconcaerobin14': 'Radius [µm]',
-                            'vconcaerobin15': 'Radius [µm]',
-                            'vconcaerobin16': 'Radius [µm]',
-                            'vconcaerobin17': 'Radius [µm]',
-                            'vconcaerobin18': 'Radius [µm]',
-                            'vconcaerobin19': 'Radius [µm]',
-                            'vconcaerobin20': 'Radius [µm]',
-                            'vconcaerobin21': 'Radius [µm]',
-                            'vconcaerobin22': 'Radius [µm]'
-                            }
-    
-    networkspecies_aliases = [get_AERONET_sizedist_bin_radius(networkspeci) 
-                              if networkspeci in multispecies_labels else networkspeci 
+    multispecies_labels = {'vconcaerobin1': 'Radius [µm]',
+                           'vconcaerobin2': 'Radius [µm]',
+                           'vconcaerobin3': 'Radius [µm]',
+                           'vconcaerobin4': 'Radius [µm]',
+                           'vconcaerobin5': 'Radius [µm]',
+                           'vconcaerobin6': 'Radius [µm]',
+                           'vconcaerobin7': 'Radius [µm]',
+                           'vconcaerobin8': 'Radius [µm]',
+                           'vconcaerobin9': 'Radius [µm]',
+                           'vconcaerobin10': 'Radius [µm]',
+                           'vconcaerobin11': 'Radius [µm]',
+                           'vconcaerobin12': 'Radius [µm]',
+                           'vconcaerobin13': 'Radius [µm]',
+                           'vconcaerobin14': 'Radius [µm]',
+                           'vconcaerobin15': 'Radius [µm]',
+                           'vconcaerobin16': 'Radius [µm]',
+                           'vconcaerobin17': 'Radius [µm]',
+                           'vconcaerobin18': 'Radius [µm]',
+                           'vconcaerobin19': 'Radius [µm]',
+                           'vconcaerobin20': 'Radius [µm]',
+                           'vconcaerobin21': 'Radius [µm]',
+                           'vconcaerobin22': 'Radius [µm]'
+                           }
+
+    networkspecies_aliases = [get_AERONET_sizedist_bin_radius(networkspeci)
+                              if networkspeci in multispecies_labels else networkspeci
                               for networkspeci in networkspecies]
 
-    labels = np.unique([multispecies_labels[networkspeci] 
+    labels = np.unique([multispecies_labels[networkspeci]
                         for networkspeci in networkspecies if networkspeci in multispecies_labels])
     if len(labels) == 1:
         unique_label = labels[0]
@@ -124,10 +126,11 @@ def get_multispecies_aliases(networkspecies):
 
     return networkspecies_aliases, unique_label
 
+
 def temp_axis_dict():
     """ 
     Return temporal mapping as a dictionary used for the plots.
-        
+
     Returns
     -------
     map_dict : dict
@@ -137,14 +140,15 @@ def temp_axis_dict():
     map_dict = {'short': {'dayofweek': {0: 'M', 1: 'T', 2: 'W', 3: 'T', 4: 'F', 5: 'S', 6: 'S'},
                           'month': {1: 'J', 2: 'F', 3: 'M', 4: 'A', 5: 'M', 6: 'J',
                                     7: 'J', 8: 'A', 9: 'S', 10: 'O', 11: 'N', 12: 'D'}},
-                'long': {'dayofweek': {0: 'Monday', 1: 'Tuesday', 2: 'Wednesday', 3: 'Thursday', 
+                'long': {'dayofweek': {0: 'Monday', 1: 'Tuesday', 2: 'Wednesday', 3: 'Thursday',
                                        4: 'Friday', 5: 'Saturday', 6: 'Sunday'},
                          'month': {1: 'January', 2: 'February', 3: 'March', 4: 'April', 5: 'May', 6: 'June',
-                                   7: 'July', 8: 'August', 9: 'September', 10: 'October', 11: 'November', 
+                                   7: 'July', 8: 'August', 9: 'September', 10: 'October', 11: 'November',
                                    12: 'December'}}
                 }
 
     return map_dict
+
 
 def periodic_xticks():
     """
@@ -155,10 +159,10 @@ def periodic_xticks():
     xticks : dict
         Dictionary of xticks per temporal resolution
     """
-    
-    xticks = {'hour': np.arange(24, dtype=np.int8), 
-            'dayofweek': np.arange(7, dtype=np.int8), 
-            'month': np.arange(1, 13, dtype=np.int8)}
+
+    xticks = {'hour': np.arange(24, dtype=np.int8),
+              'dayofweek': np.arange(7, dtype=np.int8),
+              'month': np.arange(1, 13, dtype=np.int8)}
 
     return xticks
 
@@ -173,7 +177,7 @@ def periodic_labels():
         Axes labels per temporal resolution.
     """
 
-    axes_labels = {'hour':'H', 'dayofweek':'DoW', 'month':'M'}
+    axes_labels = {'hour': 'H', 'dayofweek': 'DoW', 'month': 'M'}
 
     return axes_labels
 
@@ -192,11 +196,12 @@ def get_land_polygon_resolution(selection):
     resolution : str
         Selected land polygon resolution.
     """
-    
-    land_polygon_resolutions = {'low': '110m','medium': '50m','high': '10m'}
+
+    land_polygon_resolutions = {'low': '110m', 'medium': '50m', 'high': '10m'}
     resolution = land_polygon_resolutions[selection]
-    
+
     return resolution
+
 
 def update_plotting_parameters(instance, data_labels_to_remove=None, data_labels_to_add=None, daily_forecast=False):
     """
@@ -217,14 +222,15 @@ def update_plotting_parameters(instance, data_labels_to_remove=None, data_labels
 
     # Reset plotting parameters if no labels to add or remove are specified
     if (data_labels_to_add is None) & (data_labels_to_remove is None):
-        instance.plotting_params = {}        
+        instance.plotting_params = {}
         data_labels_to_add = instance.data_labels  # Add all current data_labels
 
     # Add grid edge plotting parameters for data labels to add
     if data_labels_to_add is not None:
         # Extract unique base labels, stripping '-day', '-daily', '-combined' suffixes
         unique_base_data_labels = np.unique(
-            [data_label.split('-day')[0].split('-daily')[0].split('-combined')[0] for data_label in data_labels_to_add]
+            [data_label.split('-day')[0].split('-daily')[0].split('-combined')[0]
+             for data_label in data_labels_to_add]
         )
         processed_data_labels = []  # Track labels that have already been processed
 
@@ -239,20 +245,22 @@ def update_plotting_parameters(instance, data_labels_to_remove=None, data_labels
                 for valid_networkspeci in instance.networkspecies:
                     if len(processed_data_labels) == len(data_labels_to_add):
                         break
-                    
+
                     # read grid edge longitudes and latitudes if needed
                     if (not daily_forecast) & (unique_base_data_label in instance.files_to_read[valid_networkspeci]):
                         # Open netCDF file to extract grid edges
-                        mod_nc_root = Dataset(instance.files_to_read[valid_networkspeci][unique_base_data_label][0])
+                        mod_nc_root = Dataset(
+                            instance.files_to_read[valid_networkspeci][unique_base_data_label][0])
                         grid_edge_longitude = mod_nc_root['grid_edge_longitude'][:]
                         grid_edge_latitude = mod_nc_root['grid_edge_latitude'][:]
                         # Close netCDF file
-                        mod_nc_root.close() 
+                        mod_nc_root.close()
 
                     # iterate through data labels to add
                     for data_label in data_labels_to_add:
 
-                        base_data_label = data_label.split('-day')[0].split('-daily')[0].split('-combined')[0]
+                        base_data_label = data_label.split(
+                            '-day')[0].split('-daily')[0].split('-combined')[0]
 
                         if (base_data_label == unique_base_data_label) & (data_label not in processed_data_labels):
 
@@ -261,15 +269,18 @@ def update_plotting_parameters(instance, data_labels_to_remove=None, data_labels
 
                             # For daily forecast, copy grid edge info from removed labels
                             if daily_forecast:
-                                
-                                relevant_inds = [ii for ii, data_label_to_remove in enumerate(data_labels_to_remove) if data_label in data_label_to_remove]
-                                instance.plotting_params[data_label]['grid_edge_longitude'] = instance.plotting_params[data_labels_to_remove[relevant_inds[0]]]['grid_edge_longitude'] 
-                                instance.plotting_params[data_label]['grid_edge_latitude'] = instance.plotting_params[data_labels_to_remove[relevant_inds[0]]]['grid_edge_latitude'] 
+
+                                relevant_inds = [ii for ii, data_label_to_remove in enumerate(
+                                    data_labels_to_remove) if data_label in data_label_to_remove]
+                                instance.plotting_params[data_label]['grid_edge_longitude'] = instance.plotting_params[
+                                    data_labels_to_remove[relevant_inds[0]]]['grid_edge_longitude']
+                                instance.plotting_params[data_label]['grid_edge_latitude'] = instance.plotting_params[
+                                    data_labels_to_remove[relevant_inds[0]]]['grid_edge_latitude']
                                 processed_data_labels.append(data_label)
-                            
+
                             # otherwise open netCDF file to extract grid edges
                             elif unique_base_data_label in instance.files_to_read[valid_networkspeci]:
-                                
+
                                 instance.plotting_params[data_label]['grid_edge_longitude'] = grid_edge_longitude
                                 instance.plotting_params[data_label]['grid_edge_latitude'] = grid_edge_latitude
                                 processed_data_labels.append(data_label)
@@ -280,13 +291,16 @@ def update_plotting_parameters(instance, data_labels_to_remove=None, data_labels
             del instance.plotting_params[data_label]
 
     # Add colour and zorder for observations
-    instance.plotting_params[instance.observations_data_label]['colour'] = instance.plot_characteristics_templates['general']['obs_markerfacecolor']
-    instance.plotting_params[instance.observations_data_label]['zorder'] = instance.plot_characteristics_templates['general']['obs_zorder']
+    instance.plotting_params[instance.observations_data_label][
+        'colour'] = instance.plot_characteristics_templates['general']['obs_markerfacecolor']
+    instance.plotting_params[instance.observations_data_label][
+        'zorder'] = instance.plot_characteristics_templates['general']['obs_zorder']
 
     # Generate a list of RGB tuples for the number of models
     sns.reset_orig()  # Reset seaborn to default
     color_palette = instance.plot_characteristics_templates['general']['legend_color_palette']
-    color_palettes = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/color_palettes.yaml')))
+    color_palettes = yaml.safe_load(
+        open(join(PROVIDENTIA_ROOT, 'settings/color_palettes.yaml')))
 
     if color_palette in color_palettes.keys():
         # Check that the number of colors matches the number of models
@@ -300,7 +314,8 @@ def update_plotting_parameters(instance, data_labels_to_remove=None, data_labels
             clrs = sns.color_palette(color_palettes[color_palette])
     else:
         # If palette not in YAML, generate colors automatically
-        clrs = sns.color_palette(color_palette, n_colors=len(instance.data_labels)-1)
+        clrs = sns.color_palette(
+            color_palette, n_colors=len(instance.data_labels)-1)
 
     # Add colours and zorder for each model (non-observations)
     model_ind = 1
@@ -313,6 +328,7 @@ def update_plotting_parameters(instance, data_labels_to_remove=None, data_labels
                 instance.plotting_params[instance.observations_data_label]['zorder'] + model_ind
             # Update count of models
             model_ind += 1
+
 
 def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott', xgrid=None):
     """
@@ -349,16 +365,16 @@ def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott
     """
     # variable check
     x = np.squeeze(np.asarray(xin))
-    
+
     # default extents are the extent of the data
     if xgrid is not None:
         xmin, xmax = xgrid.min(), xgrid.max()
-        x = x[ (x <= xmax) & (x >= xmin) ]
+        x = x[(x <= xmax) & (x >= xmin)]
     elif extents is None:
         xmin, xmax = x.min(), x.max()
     else:
         xmin, xmax = map(float, extents)
-        x = x[ (x <= xmax) & (x >= xmin) ]
+        x = x[(x <= xmax) & (x >= xmin)]
 
     n = x.size
 
@@ -401,14 +417,14 @@ def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott
         error = 'Too many zeros. '
         return error
 
-    # Kernel Preliminary Calculations 
+    # Kernel Preliminary Calculations
     std_x = np.std(xyi[0])
 
     # Scaling factor for bandwidth
-    if bw == 'scott': 
+    if bw == 'scott':
         bw_factor = (n ** (-1. / 5.)) * adjust
     elif bw == 'silverman':
-        bw_factor =  ((n * 3 / 4.)**(-1. / 5)) * adjust 
+        bw_factor = ((n * 3 / 4.)**(-1. / 5)) * adjust
 
     # make the gaussian kernel
     # first, determine the bandwidth using defined bandwidth estimator rule
@@ -420,14 +436,14 @@ def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott
         error += 'To change the bandwith, we recommend increasing the number of '
         error += 'pdf_min_samples in the plot characteristics settings files. '
         return error
-    
+
     # Then evaluate the gaussian function on the kernel grid
     kernel = np.reshape(gaussian(kern_nx, bw_factor * std_x), (kern_nx, 1))
 
     # convolve the histogram with the gaussian kernel
     # use symmetric padding to correct for data boundaries in the kde
     npad = np.min((nx, 2 * kern_nx))
-    grid = np.vstack( [grid[npad: 0: -1], grid, grid[nx: nx - npad: -1]] )
+    grid = np.vstack([grid[npad: 0: -1], grid, grid[nx: nx - npad: -1]])
     grid = convolve(grid, kernel, mode='same')[npad: npad + nx]
 
     # normalization factor to divide result by so that units are in the same
@@ -438,11 +454,12 @@ def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott
     # normalize the result
     grid /= norm_factor
 
-    # return grid points and estimated densities 
+    # return grid points and estimated densities
     if xgrid is None:
-        return np.linspace(xmin,xmax,nx), np.squeeze(grid)
+        return np.linspace(xmin, xmax, nx), np.squeeze(grid)
     else:
         return np.squeeze(grid)
+
 
 def round_decimal_places(x, decimal_places):
     """
@@ -469,13 +486,14 @@ def round_decimal_places(x, decimal_places):
             return '0'
         # if number of zeros is more than decimal places set by user, use scientific notation
         elif ((-math.floor(math.log10(abs(x))) - 1) > decimal_places):
-            return '{:0.{}e}'.format(x, decimal_places) 
+            return '{:0.{}e}'.format(x, decimal_places)
         # if not, use float
         else:
             return '{:0.{}f}'.format(x, decimal_places)
     # if cell value is nan, do nothing
     else:
         return 'nan'
+
 
 def merge_cells(table, cells, visibility=False):
     """
@@ -493,8 +511,10 @@ def merge_cells(table, cells, visibility=False):
     """
 
     cells_array = [np.asarray(c) for c in cells]
-    h = np.array([cells_array[i+1][0] - cells_array[i][0] for i in range(len(cells_array) - 1)])
-    v = np.array([cells_array[i+1][1] - cells_array[i][1] for i in range(len(cells_array) - 1)])
+    h = np.array([cells_array[i+1][0] - cells_array[i][0]
+                 for i in range(len(cells_array) - 1)])
+    v = np.array([cells_array[i+1][1] - cells_array[i][1]
+                 for i in range(len(cells_array) - 1)])
 
     # if it's a horizontal merge, all values for `h` are 0
     if not np.any(h):
@@ -509,7 +529,7 @@ def merge_cells(table, cells, visibility=False):
 
     for cell, e in zip(cells, edges):
         table[cell[0], cell[1]].visible_edges = e
-        
+
     txts = [table[cell[0], cell[1]].get_text() for cell in cells]
     tpos = [np.array(t.get_position()) for t in txts]
 
@@ -521,6 +541,7 @@ def merge_cells(table, cells, visibility=False):
     if not visibility:
         for txt in txts[1:]:
             txt.set_visible(False)
+
 
 def get_taylor_diagram_ghelper_info(reference_stddev, plot_characteristics, extend=False):
     """
@@ -579,6 +600,7 @@ def get_taylor_diagram_ghelper_info(reference_stddev, plot_characteristics, exte
 
     return tmin, tmax, smin, smax, gl1, tf1
 
+
 def get_taylor_diagram_ghelper(reference_stddev, plot_characteristics, extend=False):
     """
     Create a Taylor diagram grid helper.
@@ -600,8 +622,8 @@ def get_taylor_diagram_ghelper(reference_stddev, plot_characteristics, extend=Fa
     """
 
     # get axis extremes
-    tmin, tmax, smin, smax, gl1, tf1 = get_taylor_diagram_ghelper_info(reference_stddev, 
-                                                                       plot_characteristics, 
+    tmin, tmax, smin, smax, gl1, tf1 = get_taylor_diagram_ghelper_info(reference_stddev,
+                                                                       plot_characteristics,
                                                                        extend)
 
     # get grid helper
@@ -610,6 +632,7 @@ def get_taylor_diagram_ghelper(reference_stddev, plot_characteristics, extend=Fa
                                        grid_locator1=gl1, tick_formatter1=tf1,)
 
     return ghelper
+
 
 def set_map_extent(canvas_instance, ax, map_extent):
     """
@@ -628,12 +651,13 @@ def set_map_extent(canvas_instance, ax, map_extent):
 
     mlon = np.mean(map_extent[:2])
     mlat = np.mean(map_extent[2:])
-    xtrm_data = np.array([[map_extent[0], mlat], [mlon, map_extent[2]], 
+    xtrm_data = np.array([[map_extent[0], mlat], [mlon, map_extent[2]],
                           [map_extent[1], mlat], [mlon, map_extent[3]]])
     proj_to_data = canvas_instance.datacrs._as_mpl_transform(ax) - ax.transData
     xtrm = proj_to_data.transform(xtrm_data)
-    ax.set_xlim(xtrm[:,0].min(), xtrm[:,0].max())
-    ax.set_ylim(xtrm[:,1].min(), xtrm[:,1].max())
+    ax.set_xlim(xtrm[:, 0].min(), xtrm[:, 0].max())
+    ax.set_ylim(xtrm[:, 1].min(), xtrm[:, 1].max())
+
 
 def get_map_extent(canvas_instance):
     """
@@ -665,7 +689,7 @@ def get_map_extent(canvas_instance):
     ycoords = np.array([mlat, current_ylim[0], mlat, current_ylim[1]])
 
     # transform coordinates to projected data
-    transformed_coords = canvas_instance.datacrs.transform_points(canvas_instance.plotcrs, 
+    transformed_coords = canvas_instance.datacrs.transform_points(canvas_instance.plotcrs,
                                                                   xcoords, ycoords)[:, :2]
 
     # keep longitudes between -180 and 180
@@ -674,37 +698,40 @@ def get_map_extent(canvas_instance):
         transformed_coords[0, 0] = -180
         lon_change = True
     if (np.isnan(transformed_coords[2, 0])) or (transformed_coords[2, 0] == 179.99999999999932):
-        transformed_coords[2, 0] = 180  
-        lon_change = True 
+        transformed_coords[2, 0] = 180
+        lon_change = True
 
     # keep latitudes between -90 and 90
     lat_change = False
     if (np.isnan(transformed_coords[1, 1])) or (transformed_coords[1, 1] == -89.99999999999966):
         transformed_coords[1, 1] = -90
-        lat_change = True  
+        lat_change = True
     if (np.isnan(transformed_coords[3, 1])) or (transformed_coords[3, 1] == 89.99999999999966):
         transformed_coords[3, 1] = 90
-        lat_change = True  
+        lat_change = True
 
     # recalculate means
     if lon_change or lat_change:
         # recalculate longitude means
-        mlon = np.mean(np.array([transformed_coords[0, 0], transformed_coords[2, 0]]))
+        mlon = np.mean(
+            np.array([transformed_coords[0, 0], transformed_coords[2, 0]]))
         transformed_coords[1, 0] = mlon
         transformed_coords[3, 0] = mlon
 
         # recalculate latitude means
-        mlat = np.mean(np.array([transformed_coords[1, 1], transformed_coords[3, 1]]))
+        mlat = np.mean(
+            np.array([transformed_coords[1, 1], transformed_coords[3, 1]]))
         transformed_coords[0, 1] = mlat
         transformed_coords[2, 1] = mlat
 
     # get map extent
-    map_extent = [transformed_coords[:,0].min(), transformed_coords[:,0].max(),
-                  transformed_coords[:,1].min(), transformed_coords[:,1].max()]
+    map_extent = [transformed_coords[:, 0].min(), transformed_coords[:, 0].max(),
+                  transformed_coords[:, 1].min(), transformed_coords[:, 1].max()]
 
     return map_extent
 
-def create_statistical_timeseries(read_instance, canvas_instance, chunk_stat, chunk_resolution, 
+
+def create_statistical_timeseries(read_instance, canvas_instance, chunk_stat, chunk_resolution,
                                   networkspeci, cut_data_labels, bias):
     """
     Create statistical timeseries data by chunk resolution.
@@ -731,7 +758,7 @@ def create_statistical_timeseries(read_instance, canvas_instance, chunk_stat, ch
     timeseries_data : pandas.DataFrame
         DataFrame containing the calculated statistics for each chunk and data label.
     """
-    
+
     z_statistic_sign = get_z_statistic_sign(chunk_stat)
 
     # if have forecast data in memory, set the forecast type
@@ -744,16 +771,17 @@ def create_statistical_timeseries(read_instance, canvas_instance, chunk_stat, ch
     if (z_statistic_sign == 'bias') or (bias):
         if read_instance.observations_data_label in cut_data_labels:
             cut_data_labels.remove(read_instance.observations_data_label)
-        stats_calc = calculate_statistic(read_instance, canvas_instance, networkspeci, chunk_stat, 
-                                         [read_instance.observations_data_label]*len(cut_data_labels), 
-                                         cut_data_labels, chunk_resolution=chunk_resolution, 
+        stats_calc = calculate_statistic(read_instance, canvas_instance, networkspeci, chunk_stat,
+                                         [read_instance.observations_data_label] *
+                                         len(cut_data_labels),
+                                         cut_data_labels, chunk_resolution=chunk_resolution,
                                          statistic_aggregation=read_instance.timeseries_statistic_aggregation,
                                          forecast_type=forecast_type)
     else:
-        stats_calc = calculate_statistic(read_instance, canvas_instance, networkspeci, 
+        stats_calc = calculate_statistic(read_instance, canvas_instance, networkspeci,
                                          chunk_stat, cut_data_labels, [], chunk_resolution=chunk_resolution,
                                          statistic_aggregation=read_instance.timeseries_statistic_aggregation,
-                                         forecast_type=forecast_type) 
+                                         forecast_type=forecast_type)
 
     if (chunk_resolution == read_instance.active_resolution) & (forecast_type == 'combined'):
         chunk_dates = read_instance.time_index_ts
@@ -762,7 +790,8 @@ def create_statistical_timeseries(read_instance, canvas_instance, chunk_stat, ch
     else:
         chunk_dates = canvas_instance.grouped_ts_index
 
-    timeseries_data = pd.DataFrame(index=chunk_dates, columns=cut_data_labels, dtype=np.float32)
+    timeseries_data = pd.DataFrame(
+        index=chunk_dates, columns=cut_data_labels, dtype=np.float32)
 
     # if shape of stats_calc is not correct return error
     if (stats_calc.shape[0] != len(chunk_dates)) or (stats_calc.shape[1] != len(cut_data_labels)):
@@ -772,9 +801,11 @@ def create_statistical_timeseries(read_instance, canvas_instance, chunk_stat, ch
 
     for chunk_date_idx, chunk_date in enumerate(chunk_dates):
         for label_idx, data_label in enumerate(cut_data_labels):
-            timeseries_data.loc[chunk_date, data_label] = np.float32(stats_calc[chunk_date_idx,label_idx])
-    
+            timeseries_data.loc[chunk_date, data_label] = np.float32(
+                stats_calc[chunk_date_idx, label_idx])
+
     return timeseries_data
+
 
 def get_hex_code(colour):
     """
@@ -791,7 +822,7 @@ def get_hex_code(colour):
     hex_colour : str
         Hexadecimal colour code.
     """
-    
+
     # convert from colour name to hex code
     if type(colour) == str:
         if colour[0] != '#':
@@ -802,6 +833,7 @@ def get_hex_code(colour):
         hex_colour = f'#{int(round(rgb_colour[0])):02x}{int(round(rgb_colour[1])):02x}{int(round(rgb_colour[2])):02x}'
 
     return hex_colour
+
 
 def get_fairmode_RV_exceendance(read_instance, speci, RV, exc_threshold, units):
     """ 
@@ -829,22 +861,25 @@ def get_fairmode_RV_exceendance(read_instance, speci, RV, exc_threshold, units):
     """
 
     # get input and output units
-    standard_parameter_speci = get_standard_parameters_by_speci(speci, read_instance.ghost_version)
+    standard_parameter_speci = get_standard_parameters_by_speci(
+        speci, read_instance.ghost_version)
     initial_units = units
     final_units = read_instance.measurement_units[speci]
 
     # convert units using conversion factor
-    conversion_factor = get_conversion_factor(initial_units, final_units, standard_parameter_speci) 
+    conversion_factor = get_conversion_factor(
+        initial_units, final_units, standard_parameter_speci)
     if isinstance(conversion_factor, str):
         read_instance.logger.error(conversion_factor)
         sys.exit(1)
     RV *= conversion_factor
-    
+
     # threshold can be None, as in the case of pm2p5
     if exc_threshold is not None:
         exc_threshold *= conversion_factor
-        
+
     return RV, exc_threshold
+
 
 def get_multispecies_conversion_factor(read_instance, speci):
     """
@@ -865,7 +900,8 @@ def get_multispecies_conversion_factor(read_instance, speci):
     """
 
     # get input and output units
-    standard_parameter_speci = get_standard_parameters_by_speci(speci, read_instance.ghost_version)
+    standard_parameter_speci = get_standard_parameters_by_speci(
+        speci, read_instance.ghost_version)
     initial_units = read_instance.measurement_units[speci]
     final_units = read_instance.multispecies_units
 
@@ -874,7 +910,8 @@ def get_multispecies_conversion_factor(read_instance, speci):
         return None
 
     # convert units using conversion factor
-    conversion_factor = get_conversion_factor(initial_units, final_units, standard_parameter_speci) 
+    conversion_factor = get_conversion_factor(
+        initial_units, final_units, standard_parameter_speci)
     if isinstance(conversion_factor, str):
         read_instance.logger.error(conversion_factor)
         sys.exit(1)
@@ -885,8 +922,9 @@ def get_multispecies_conversion_factor(read_instance, speci):
         msg += 'multispecies plot will show data in different units.'
         show_message(read_instance, msg)
         return None
-    
+
     return conversion_factor
+
 
 def convert_multispecies_df_units(read_instance, stats_df, zstats, base_plot_type):
     """
@@ -904,15 +942,17 @@ def convert_multispecies_df_units(read_instance, stats_df, zstats, base_plot_typ
     pandas.Dataframe
         Multispecies statistics dataframe with converted units
     """
-    
+
     for networkspeci in read_instance.networkspecies:
 
         speci = networkspeci.split('|')[1]
-        conversion_factor = get_multispecies_conversion_factor(read_instance, speci)
+        conversion_factor = get_multispecies_conversion_factor(
+            read_instance, speci)
         if conversion_factor is not None:
 
-            mask = stats_df.index.get_level_values('networkspecies') == networkspeci
-            
+            mask = stats_df.index.get_level_values(
+                'networkspecies') == networkspeci
+
             if base_plot_type in ['statsummary']:
 
                 # get stats that are in measurement units
@@ -962,6 +1002,7 @@ def convert_multispecies_df_units(read_instance, stats_df, zstats, base_plot_typ
 
     return stats_df
 
+
 def handle_test_or_save_df(read_instance, df, filename, path, tests_generate_output, msgs):
     """
     Save dataframe or assert if dataframe generates the same outputs as the dataframes saved in tests folder
@@ -988,12 +1029,13 @@ def handle_test_or_save_df(read_instance, df, filename, path, tests_generate_out
         print('Generated_output')
         print(generated_output)
         if tests_generate_output:
-            # during tests save empty spaces in dataframe as 'nan' because pd.read_csv creates nans on indices 
+            # during tests save empty spaces in dataframe as 'nan' because pd.read_csv creates nans on indices
             # and it is not possible to compare the dataframes
             # it is also possible to modify the behaviour of pd.read_csv to avoid reading nans defining keep_default_na=False
             # but in that way we hide the nans in the data and not only in the indices
-            msgs = save_df(read_instance, df, filename, path, msgs, na_rep=np.nan)   
-            
+            msgs = save_df(read_instance, df, filename,
+                           path, msgs, na_rep=np.nan)
+
         # read expected output
         parse_dates = []
         if "time" in generated_output.columns:
@@ -1008,11 +1050,12 @@ def handle_test_or_save_df(read_instance, df, filename, path, tests_generate_out
             expected_output["value"] = expected_output["value"].astype(str)
         assert assert_frame_equal(
             generated_output, expected_output, atol=1e-5) is None
-            
+
     else:
-        msgs = save_df(read_instance, df, filename, path, msgs)   
-    
+        msgs = save_df(read_instance, df, filename, path, msgs)
+
     return msgs
+
 
 def save_df(read_instance, df, filename, path, msgs, na_rep=''):
     """
@@ -1048,7 +1091,7 @@ def save_df(read_instance, df, filename, path, msgs, na_rep=''):
             # ask the user whether they want to overwrite the file
             while True:
                 overwrite_file = input(f"\n{overwrite_question} ([y]/n) ")
-                if overwrite_file in ['','y','n']:
+                if overwrite_file in ['', 'y', 'n']:
                     if overwrite_file in ['n']:
                         return msgs
                     break
@@ -1059,14 +1102,15 @@ def save_df(read_instance, df, filename, path, msgs, na_rep=''):
             )
             if not popup.result:
                 return msgs
-        
+
     df.to_csv(fname, index=False, na_rep=na_rep)
     msg = f'\n- File {fname}'
     msgs.append(msg)
 
     return msgs
-    
-def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, plot_type, plot_options, 
+
+
+def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, plot_type, plot_options,
                               path, networkspeci, tests_generate_output=False, labela='', labelb=''):
     """
     Extract data into dataframe and save to to CSV file
@@ -1113,13 +1157,14 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
         else:
             for element_type in element_types:
                 while True:
-                    create_file = input(f"\nDo you want to save {element_type} data? ([y]/n) ")
-                    if create_file in ['','y','n']:
-                        if create_file in ['','y']:
+                    create_file = input(
+                        f"\nDo you want to save {element_type} data? ([y]/n) ")
+                    if create_file in ['', 'y', 'n']:
+                        if create_file in ['', 'y']:
                             element_types_to_save.append(element_type)
                         break
     elif read_instance.mode == 'dashboard':
-        # in dashboard open dialog to ask the user which element types they want to save 
+        # in dashboard open dialog to ask the user which element types they want to save
         # if there are more than 1 element types
         if len(element_types) > 1:
             dialog = CheckDialog(element_types)
@@ -1134,92 +1179,186 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
 
     # if no element types to save, do not continue
     if len(element_types_to_save) == 0:
-        return 
-    
+        return
+
+    x_column = (
+        "time" if base_plot_type == "timeseries"
+        else read_instance.observations_data_label if base_plot_type == "scatter"
+        else "concentration" if base_plot_type == "distribution"
+        else "x"
+    )
+
     msgs = []
+    combined_dfs = {}
+
     for data_label in canvas_instance.plot_elements[base_plot_type][plot_element_varname]:
         for element_type in canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label]:
             # ignore element types that user does not want to save
             if element_type not in element_types_to_save:
                 continue
-            plot_elements = canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type]
-            
+
+            plot_elements = canvas_instance.plot_elements[base_plot_type][
+                plot_element_varname][data_label][element_type]
+
             # for FAIRMODE target plot combine all dots (saved individually so that they can have different colors) in one Line2D
             if base_plot_type == 'fairmode-target':
                 x_array = []
                 y_array = []
+
                 for dot in plot_elements:
                     x_array.append(dot.get_xdata().tolist()[0])
                     y_array.append(dot.get_ydata().tolist()[0])
-                plot_elements = [matplotlib.lines.Line2D(xdata=x_array, ydata=y_array)]
-                        
+
+                plot_elements = [matplotlib.lines.Line2D(
+                    xdata=x_array, ydata=y_array)]
+
             for plot_element_i, plot_element in enumerate(plot_elements):
 
                 if base_plot_type in ['statsummary', 'heatmap', 'table', 'contingencytable']:
+
                     data = []
+
                     if base_plot_type in ['statsummary', 'table', 'contingencytable']:
                         items = plot_element.get_celld().items()
+
                     elif base_plot_type == 'heatmap':
-                        items = np.ndenumerate(plot_element.get_children()[0].get_array())
+                        items = np.ndenumerate(
+                            plot_element.get_children()[0].get_array())
+
                     for (x, y), value in items:
                         data.append({
                             "x": x,
                             "y": y,
                             "z": value.get_text().get_text() if base_plot_type != 'heatmap' else value
                         })
-                    df = pd.DataFrame(data, columns=["x", "y", "z"])
-                    df = df.pivot(index="x", columns="y", values="z").sort_index().rename_axis(index=None, columns=None)
+
+                    df = (
+                        pd.DataFrame(data, columns=["x", "y", "z"])
+                        .pivot(index="x", columns="y", values="z")
+                        .sort_index()
+                        .rename_axis(index=None, columns=None)
+                    )
+
                     df.columns = df.columns.astype(str)
+
                     # contingency plots have an index that starts at -1, reindex to start from 0
                     if base_plot_type == 'contingencytable':
                         df.index = range(len(df))
+
                     filename = f"{plot_type}_{element_type}"
-                    msgs = handle_test_or_save_df(read_instance, df, filename, path, tests_generate_output, msgs)
+
+                    msgs = handle_test_or_save_df(
+                        read_instance,
+                        df,
+                        filename,
+                        path,
+                        tests_generate_output,
+                        msgs
+                    )
 
                 elif base_plot_type in ['timeseries', 'distribution', 'scatter', 'fairmode-target',
-                                        'fairmode-statsummary', 'taylor', 'boxplot', 'periodic', 'periodic-violin']:
-                    
+                                        'fairmode-statsummary', 'taylor', 'boxplot', 'periodic',
+                                        'periodic-violin']:
+
                     # skip periodic violin shapes
                     if isinstance(plot_element, matplotlib.collections.FillBetweenPolyCollection):
                         continue
 
                     # extract annotations
                     if isinstance(plot_element, matplotlib.offsetbox.AnchoredOffsetbox):
+
                         data = []
+
                         for annotation in plot_element.get_child().get_children():
                             data.append({
                                 "dataset": annotation.get_text().split('|')[0].strip(),
                                 "annotation": annotation.get_text().split('|')[1].strip()
                             })
+
                         df = pd.DataFrame(data)
+
                         filename = f"{plot_type}_{data_label}_{element_type}" + (
-                            f"_{plot_element_i}" if len(plot_elements) > 1 else ""
+                            f"_{plot_element_i}" if len(
+                                plot_elements) > 1 else ""
                         )
+
+                        msgs = handle_test_or_save_df(
+                            read_instance,
+                            df,
+                            filename,
+                            path,
+                            tests_generate_output,
+                            msgs
+                        )
+
                     # extract plot data
                     else:
+
                         data = []
+
                         # extract patches in boxplot
                         if isinstance(plot_element, matplotlib.patches.PathPatch):
                             xy = plot_element.get_path().vertices
                         else:
                             xy = plot_element.get_xydata()
+
                         for x, y in xy:
                             data.append({
                                 # convert time from unix to actual
-                                "time" if base_plot_type == "timeseries" \
-                                else read_instance.observations_data_label if base_plot_type == "scatter" \
-                                else "concentration" if base_plot_type == "distribution"
-                                else "x": 
-                                    pd.to_datetime(x, unit="D", utc=True).round("s") 
-                                    if base_plot_type == "timeseries" else x, 
-                                "y" if base_plot_type in ["boxplot",  "fairmode-target"] \
+                                x_column:
+                                    pd.to_datetime(
+                                        x, unit="D", utc=True).round("s")
+                                    if base_plot_type == "timeseries" else x,
+
+                                "y" if base_plot_type in ["boxplot", "fairmode-target"]
                                 else data_label: y,
                             })
+
                         df = pd.DataFrame(data)
+
                         filename = f"{plot_type}_{data_label}_{element_type}" + (
-                            f"_{plot_element_i}" if len(plot_elements) > 1 else ""
+                            f"_{plot_element_i}" if len(
+                                plot_elements) > 1 else ""
                         )
-                    msgs = handle_test_or_save_df(read_instance, df, filename, path, tests_generate_output, msgs)
+
+                        # combine dataframes for some plots
+                        if base_plot_type in [
+                            "timeseries",
+                            "scatter",
+                            "distribution",
+                            "periodic",
+                            "periodic-violin",
+                            "taylor"
+                        ]:
+                            # one dataframe per plot element
+                            key = (element_type, plot_element_i)
+                            df = df.set_index(x_column)
+                            value_column = df.columns[0]
+
+                            # column becomes the data label
+                            df = df.rename(columns={
+                                value_column: data_label
+                            })
+
+                            if key not in combined_dfs:
+                                combined_dfs[key] = df
+
+                            else:
+                                combined_dfs[key] = pd.concat(
+                                    [combined_dfs[key], df],
+                                    axis=1
+                                )
+
+                        else:
+
+                            msgs = handle_test_or_save_df(
+                                read_instance,
+                                df,
+                                filename,
+                                path,
+                                tests_generate_output,
+                                msgs
+                            )
 
                 elif base_plot_type == 'metadata':
                     text = plot_element.get_text().split('\n')
@@ -1238,11 +1377,13 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                     df = pd.DataFrame(columns=column_names)
                     df.loc[0] = values
                     df.columns = [str(col) for col in df.columns]
-                    df = df.T.reset_index().rename(columns={"index": "key", 0: "value"})
+                    df = df.T.reset_index().rename(
+                        columns={"index": "key", 0: "value"})
                     filename = f"{plot_type}_{data_label}_{element_type}" + (
                         f"_{plot_element_i}" if len(plot_elements) > 1 else ""
                     )
-                    msgs = handle_test_or_save_df(read_instance, df, filename, path, tests_generate_output, msgs)
+                    msgs = handle_test_or_save_df(
+                        read_instance, df, filename, path, tests_generate_output, msgs)
 
                 elif base_plot_type == 'map':
 
@@ -1255,7 +1396,8 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                                 "annotation": annotation.get_text().split('|')[1].strip()
                             })
                         filename = f"{plot_type}_{data_label}_{element_type}" + (
-                            f"_{plot_element_i}" if len(plot_elements) > 1 else ""
+                            f"_{plot_element_i}" if len(
+                                plot_elements) > 1 else ""
                         )
                     # extract plot data
                     else:
@@ -1266,8 +1408,10 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                         # extract data
                         data = []
                         for (lon, lat), val in zip(coordinates, values):
-                            lon_ind = np.where(read_instance.station_longitudes[networkspeci]==lon)
-                            lat_ind = np.where(read_instance.station_latitudes[networkspeci]==lat)
+                            lon_ind = np.where(
+                                read_instance.station_longitudes[networkspeci] == lon)
+                            lat_ind = np.where(
+                                read_instance.station_latitudes[networkspeci] == lat)
                             intersect_ind = np.intersect1d(lon_ind, lat_ind)
 
                             # if there is only one common lon and lat pair
@@ -1276,10 +1420,11 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                                 station_ind = intersect_ind[0]
                             else:
                                 station_ind = None
-                            
+
                             if station_ind is not None:
                                 station_name = read_instance.station_names[networkspeci][station_ind]
-                                station_reference = read_instance.station_references[networkspeci][station_ind]
+                                station_reference = read_instance.station_references[
+                                    networkspeci][station_ind]
                             else:
                                 station_name = np.nan
                                 station_reference = np.nan
@@ -1294,14 +1439,45 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                         label = ''
                         if (labela != '') and (labelb == ''):
                             label = labela
-                        elif (labelb != '')  and (labela == ''):
+                        elif (labelb != '') and (labela == ''):
                             label = labelb
                         elif (labela != '') and (labelb != ''):
                             label = f'{labela}-{labelb}'
                         filename = f"{plot_type}_{element_type}_{label}"
                     df = pd.DataFrame(data)
-                    msgs = handle_test_or_save_df(read_instance, df, filename, path, tests_generate_output, msgs)
-    
+                    msgs = handle_test_or_save_df(
+                        read_instance, df, filename, path, tests_generate_output, msgs)
+
+    # save combined dataframes into one file per plot element
+    if base_plot_type in [
+        "timeseries",
+        "scatter",
+        "distribution",
+        "periodic",
+        "periodic-violin",
+        "taylor"
+    ]:
+        for (element_type, plot_element_i), df in combined_dfs.items():
+
+            df = df.reset_index()
+            filename = (
+                f"{plot_type}_{element_type}"
+                + (
+                    f"_{plot_element_i}"
+                    if len(plot_elements) > 1
+                    else ""
+                )
+            )
+
+            msgs = handle_test_or_save_df(
+                read_instance,
+                df,
+                filename,
+                path,
+                tests_generate_output,
+                msgs
+            )
+
     if msgs:
         msg = f'Saving {plot_type} figure data to CSV:'
         msg += ''.join(msgs)
