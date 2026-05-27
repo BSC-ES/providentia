@@ -17,7 +17,7 @@ The most common type of data filtering is by metadata, e.g. for country, longitu
 
 Metadata can either by numerical or text and the method for filtering for these slightly varies, as will be described. There will be substantially more metadata fields available when using GHOST data compared to when not.  
 
-One common question is what metadata available variables exist for the loaded data that can be filtered by. These can be seen empirically by looking through the sub-menus under the **META** button on the dashboard, with all available variables are organised into 5 categories: `station position`, `station classifications`, `station miscellaneous`, `globally gridded classifications`, and `measurement process information`. These are also defined for GHOST data in this [publication](https://doi.org/10.5194/essd-16-4417-2024).
+One common question is what metadata available variables exist for the loaded data that can be filtered by. These can be seen empirically by looking through the sub-menus under the **METADATA** button on the dashboard, with all available variables are organised into 5 categories: `station position`, `station classifications`, `station miscellaneous`, `globally gridded classifications`, and `measurement process information`. These are also defined for GHOST data in this [publication](https://doi.org/10.5194/essd-16-4417-2024).
 
 The subsequent question is what fields are then available for each metadata variable, specifically for text metadata. The best solution for this is to empirically check by opening the dashboard and navigating to the variable you are interested in and viewing the available fields.
 
@@ -33,9 +33,10 @@ By default on the dashboard metadata menu, the variables will display the full a
 
 ### Text metadata
 
-Text metadata is filtered by either setting to **keep** or **remove** specific fields for a variable, for example keeping Spanish and French stations or removing just UK stations: 
+Text metadata is filtered by either setting to **keep** or **remove** specific fields for a variable. For the keep case it is not mandatory to write the **keep** string. Here is an example keeping Spanish and French stations, and removing just UK stations: 
 
 ```
+country = Spain, France
 country = keep: Spain, France
 country = remove: United Kingdom
 ```
@@ -89,50 +90,50 @@ filter_species = AERONET_v3_lev1.5:ae440-870aero (>0.6, :, nan)
 spatial_colocation = True
 ```
 
-On the dashboard this can be replicated under the **MULTI** button on the menu bar. The apply (A) checkbox must be checked to apply the filter, and then data re-read by hitting the **READ** button on the main menu bar.
+On the dashboard this can be replicated under the **SPECIES** button on the menu bar. The apply (A) checkbox must be checked to apply the filter, and then data re-read by hitting the **READ** button on the main menu bar.
 
 See [here](Multispecies-filtering) for more in-depth information on multspecies filtering.
 
-(representativity)= 
-## Representativity
+(coverage)= 
+## Data coverage
 
-One major limitation often associated with observations is the amount of gaps between measurements. If these observations are directly compared with typically complete model data, this would impose a significant bias upon the comparison. Filtering by representativity filters provides a way to control the temporal robustness of the observations for evaluation. 
+One major limitation often associated with observations is the amount of gaps between measurements. If these observations are directly compared with typically complete model data, this would impose a significant bias upon the comparison. Filtering by data coverage provides a way to control the temporal robustness of the observations for evaluation. 
 
 Providentia has multiple such filters available.
 
 ### Native vs averaged filters 
 
-Providentia has two types of representativity filters, those which calculate the representativity percent of observations at the **native** measured resolution (which can be variable), and those which calculate it at an **averaged** resolution, i.e. the data resolution being used in Providentia such as hourly, 3hourly etc. 
+Providentia has two types of data coverage filters, those which calculate the percent coverage of observations at the **native** measured resolution (which can be variable), and those which calculate it at an **averaged** resolution, i.e. the data resolution being used in Providentia such as hourly, 3hourly etc. 
 
 The **native** filters are only available when using GHOST data, and will always return a lower value than the **averaged** ones, as an hourly period with just 30 minutes being represented with measurements would be classed as being 100% represented in the average sense, whereas it would be 50% in the native sense.
 
 ### Available filters
 
-For both **native** and **averaged** filters, it is possible to filter by the representativity across different periods. For example, data for each day with representativity less than a certain amount can be screened out (i.e. set as nan).
+For both **native** and **averaged** filters, it is possible to filter by the data coverage across different periods. For example, data for each day with coverage less than a certain amount can be screened out (i.e. set as nan).
 
-The periods that representativity can be filtered by are: **hour**, **day**, **month**, and **year**. The hourly case only applies for **native** data (when the data resolution is hourly).
+The periods that coverage can be filtered by are: **hour**, **day**, **month**, and **year**. The hourly case only applies for **native** data (when the data resolution is hourly).
 
-There is an additional filter for the **averaged** case, where the representativity of data across across the entire time range can be filtered by, thus removing entire stations when the representativity is less than a certain percent. This is set by the `all_representativity_percent` variable in the configuration file, and the `All` line under the **% REP** button on the dashboard.
+There is an additional filter for the **averaged** case, where the coverage of data across across the entire time range can be filtered by, thus removing entire stations when the coverage is less than a certain percent. This is set by the `total_coverage` variable in the configuration file, and the `Total` line under the **COVERAGE** button on the dashboard.
 
-The **native** and **averaged** representativity filters can be set in the configuration file as follows, with the difference in the naming convention being that the native fields contain the `native` string. By default all fields are set to be 0% (i.e. the filters are not active).
+The **native** and **averaged** data coverage filters can be set in the configuration file as follows, with the difference in the naming convention being that the native fields contain the `native` string. By default all fields are set to be 0% (i.e. the filters are not active).
 
 ```
-# Native representativity filters
-hourly_native_representativity_percent = 0
-daily_native_representativity_percent = 0
-monthly_native_representativity_percent = 0
-annual_native_representativity_percent = 0
+# Native data coverage filters
+native_hourly_coverage = 0
+native_daily_coverage = 0
+native_monthly_coverage = 0
+native_annual_coverage = 0
 
-# Averaged representativity filters
-daily_representativity_percent = 0
-monthly_representativity_percent = 0
-annual_representativity_percent = 0
-all_representativity_percent = 0
+# Averaged data coverage filters
+daily_coverage = 0
+monthly_coverage = 0
+annual_coverage = 0
+total_coverage = 0
 ```
 
-As you change the temporal resolution of the data to be coarser, some of these fields will become unavailable. For example when using monthly data, you can not filter by daily representativity.
+As you change the temporal resolution of the data to be coarser, some of these fields will become unavailable. For example when using monthly data, you can not filter by daily coverage.
 
-On the dashboard the filters can be set under the **% REP** button on the menu bar.
+On the dashboard the filters can be set under the **COVERAGE** button on the menu bar.
 
 (periods)= 
 ## Periods
@@ -144,6 +145,7 @@ The available period fields that that can be selected are: `Daytime`, `Nighttime
 When wanting to apply these via configuration file the syntax is the same as the text metadata filtering with a small caveat, that you can both keep and remove fields at the same time by using a **double pipe "||"** between the keep and remove definitions to distinguish between them, for example:
 
 ```
+period = Winter
 period = keep: Winter
 period = remove: Daytime
 period = keep: Spring, Summer || remove: Weekday

@@ -102,9 +102,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">providentia.auxiliar</span><span class="w"> </span><span class="kn">import</span> <span class="n">CURRENT_PATH</span><span class="p">,</span> <span class="n">join</span><span class="p">,</span> <span class="n">expand_plot_characteristics</span><span class="p">,</span> <span class="n">Tee</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.configuration</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_conf</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.configuration</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProvConfiguration</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.fields_menus</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">init_metadata</span><span class="p">,</span> <span class="n">init_period</span><span class="p">,</span> <span class="n">init_representativity</span><span class="p">,</span> <span class="n">metadata_conf</span><span class="p">,</span>
-                           <span class="n">update_metadata_fields</span><span class="p">,</span> <span class="n">update_period_fields</span><span class="p">,</span> <span class="n">update_representativity_fields</span><span class="p">,</span>
-                           <span class="n">period_conf</span><span class="p">,</span> <span class="n">representativity_conf</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.fields_menus</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">init_metadata</span><span class="p">,</span> <span class="n">init_period</span><span class="p">,</span> <span class="n">init_coverage</span><span class="p">,</span> <span class="n">metadata_conf</span><span class="p">,</span>
+                           <span class="n">update_metadata_fields</span><span class="p">,</span> <span class="n">update_period_fields</span><span class="p">,</span> <span class="n">update_coverage_fields</span><span class="p">,</span>
+                           <span class="n">period_conf</span><span class="p">,</span> <span class="n">coverage_conf</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.filter</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFilter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.plotting</span><span class="w"> </span><span class="kn">import</span> <span class="n">Plotting</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.plot_aux</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_taylor_diagram_ghelper</span><span class="p">,</span> <span class="n">download_plot_data_to_csv</span>
@@ -167,8 +167,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">basic_stats</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="s1">&#39;settings/basic_stats.yaml&#39;</span><span class="p">)))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">modbias_stats</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="s1">&#39;settings/model_bias_stats.yaml&#39;</span><span class="p">)))</span>
 
-        <span class="c1"># load representativity information</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">representativity_info</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="s1">&#39;settings/internal/representativity.yaml&#39;</span><span class="p">)))</span>
+        <span class="c1"># load coverage information</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coverage_info</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="s1">&#39;settings/internal/coverage.yaml&#39;</span><span class="p">)))</span>
 
         <span class="c1"># set configuration variables, as well as any other defined variables</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">valid_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_config</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
@@ -242,7 +242,7 @@
 <span class="sd">        field : str</span>
 <span class="sd">            Field to filter by.</span>
 <span class="sd">        limit : str, optional</span>
-<span class="sd">            Limit for filtering representativity fields.</span>
+<span class="sd">            Limit for filtering coverage fields.</span>
 <span class="sd">        keep : str or list of str, optional</span>
 <span class="sd">            Data to keep.</span>
 <span class="sd">        remove : str or list of str, optional</span>
@@ -272,16 +272,20 @@
             <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">remove</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
                 <span class="n">remove</span> <span class="o">=</span> <span class="p">[</span><span class="n">remove</span><span class="p">]</span>
 
-        <span class="c1"># field is a represenativity field?</span>
-        <span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">representativity_menu</span><span class="p">[</span><span class="s1">&#39;rangeboxes&#39;</span><span class="p">][</span><span class="s1">&#39;map_vars&#39;</span><span class="p">]:</span>
+        <span class="c1"># field is a coverage field?</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">coverage_menu</span><span class="p">[</span><span class="s1">&#39;rangeboxes&#39;</span><span class="p">][</span><span class="s1">&#39;map_vars&#39;</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">coverage_menu</span><span class="p">[</span><span class="s1">&#39;rangeboxes&#39;</span><span class="p">][</span><span class="s1">&#39;map_vars_old&#39;</span><span class="p">]):</span>
             <span class="n">do_filter</span> <span class="o">=</span> <span class="kc">True</span>
 
-            <span class="n">field_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">representativity_menu</span><span class="p">[</span><span class="s1">&#39;rangeboxes&#39;</span><span class="p">][</span><span class="s1">&#39;map_vars&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">coverage_menu</span><span class="p">[</span><span class="s1">&#39;rangeboxes&#39;</span><span class="p">][</span><span class="s1">&#39;map_vars&#39;</span><span class="p">]:</span>
+                <span class="n">field_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coverage_menu</span><span class="p">[</span><span class="s1">&#39;rangeboxes&#39;</span><span class="p">][</span><span class="s1">&#39;map_vars&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">coverage_menu</span><span class="p">[</span><span class="s1">&#39;rangeboxes&#39;</span><span class="p">][</span><span class="s1">&#39;map_vars_old&#39;</span><span class="p">]:</span>
+                <span class="n">field_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coverage_menu</span><span class="p">[</span><span class="s1">&#39;rangeboxes&#39;</span><span class="p">][</span><span class="s1">&#39;map_vars_old&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+                
             <span class="c1"># ensure limit is set for field</span>
             <span class="k">if</span> <span class="n">limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">representativity_menu</span><span class="p">[</span><span class="s1">&#39;rangeboxes&#39;</span><span class="p">][</span><span class="s1">&#39;current_lower&#39;</span><span class="p">][</span><span class="n">field_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">limit</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">coverage_menu</span><span class="p">[</span><span class="s1">&#39;rangeboxes&#39;</span><span class="p">][</span><span class="s1">&#39;current_lower&#39;</span><span class="p">][</span><span class="n">field_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">limit</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;When filtering by representativity field: </span><span class="si">{}</span><span class="s2">, &#39;limit&#39; must be passed as an argument.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;When filtering by coverage field: </span><span class="si">{}</span><span class="s2">, &#39;limit&#39; must be passed as an argument.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
                 <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
                 <span class="k">return</span>
 
@@ -416,12 +420,12 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Resetting all data filters.&#39;</span><span class="p">)</span>
 
         <span class="c1"># initialise structures to store fields</span>
-        <span class="n">init_representativity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">init_coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">init_period</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">init_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="c1"># update available fields</span>
-        <span class="n">update_representativity_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">update_coverage_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">update_period_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="c1"># for non-GHOST delete valid station indices variables because we do not want to </span>
@@ -435,7 +439,7 @@
         
         <span class="c1"># apply set fields at initalisation for filtering</span>
         <span class="k">if</span> <span class="n">initialise</span><span class="p">:</span>
-            <span class="n">representativity_conf</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="n">coverage_conf</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
             <span class="n">period_conf</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
             <span class="n">metadata_conf</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
@@ -1163,7 +1167,7 @@
                                 <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">map_title</span><span class="p">,</span> <span class="n">title</span><span class="p">)</span>
 
                         <span class="k">else</span><span class="p">:</span>
-                            <span class="k">if</span> <span class="n">zstat</span> <span class="o">==</span> <span class="s1">&#39;NStations&#39;</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">zstat</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;NStations&#39;</span><span class="p">,</span> <span class="s1">&#39;NUniqueStations&#39;</span><span class="p">]:</span>
                                 <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">stat_label</span><span class="p">)</span>
                             <span class="k">else</span><span class="p">:</span>
                                 <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> at </span><span class="si">{}</span><span class="s1"> stations&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">stat_label</span><span class="p">,</span> <span class="n">n_stations</span><span class="p">)</span>
@@ -1242,9 +1246,10 @@
 
         <span class="c1"># download data to CSV file</span>
         <span class="k">if</span> <span class="n">save_data</span><span class="p">:</span>
-            <span class="n">download_plot_data_to_csv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">base_plot_type</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">,</span> <span class="n">zstat</span><span class="p">,</span> 
-                                      <span class="n">labela</span><span class="p">,</span> <span class="n">labelb</span><span class="p">,</span> <span class="n">plot_options</span><span class="p">,</span> <span class="n">save_data_path</span><span class="p">,</span> 
-                                      <span class="n">tests_generate_output</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Downloading data...&#39;</span><span class="p">)</span>
+            <span class="n">download_plot_data_to_csv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">base_plot_type</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">,</span> <span class="n">plot_options</span><span class="p">,</span> 
+                                      <span class="n">save_data_path</span><span class="p">,</span> <span class="n">networkspeci</span><span class="p">,</span> <span class="n">tests_generate_output</span><span class="p">,</span>
+                                      <span class="n">labela</span><span class="p">,</span> <span class="n">labelb</span><span class="p">)</span>
 
         <span class="c1"># if save is passed then save plot and return</span>
         <span class="k">if</span> <span class="n">save</span><span class="p">:</span>

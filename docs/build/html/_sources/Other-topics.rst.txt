@@ -5,8 +5,8 @@ Other topics
 .. toctree::
    :maxdepth: 2
 
-   ADS.md
-   Check-CAMS-download.md
+   Start-downloading-ECMWF-data.md
+   Check-ECMWF-download.md
    Create-your-own-data-network.md
    Available-species.md
    Multispecies-filtering.md

@@ -58,7 +58,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#qa-flags">QA flags</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#multispecies-filtering">Multispecies filtering</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#representativity">Representativity</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#data-coverage">Data coverage</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#native-vs-averaged-filters">Native vs averaged filters</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#available-filters">Available filters</a></li>
 </ul>
@@ -116,7 +116,7 @@
 <span id="filtering-metadata"></span><h2>Metadata<a class="headerlink" href="#metadata" title="Link to this heading"></a></h2>
 <p>The most common type of data filtering is by metadata, e.g. for country, longitude, altitude etc.</p>
 <p>Metadata can either by numerical or text and the method for filtering for these slightly varies, as will be described. There will be substantially more metadata fields available when using GHOST data compared to when not.</p>
-<p>One common question is what metadata available variables exist for the loaded data that can be filtered by. These can be seen empirically by looking through the sub-menus under the <strong>META</strong> button on the dashboard, with all available variables are organised into 5 categories: <code class="docutils literal notranslate"><span class="pre">station</span> <span class="pre">position</span></code>, <code class="docutils literal notranslate"><span class="pre">station</span> <span class="pre">classifications</span></code>, <code class="docutils literal notranslate"><span class="pre">station</span> <span class="pre">miscellaneous</span></code>, <code class="docutils literal notranslate"><span class="pre">globally</span> <span class="pre">gridded</span> <span class="pre">classifications</span></code>, and <code class="docutils literal notranslate"><span class="pre">measurement</span> <span class="pre">process</span> <span class="pre">information</span></code>. These are also defined for GHOST data in this <a class="reference external" href="https://doi.org/10.5194/essd-16-4417-2024">publication</a>.</p>
+<p>One common question is what metadata available variables exist for the loaded data that can be filtered by. These can be seen empirically by looking through the sub-menus under the <strong>METADATA</strong> button on the dashboard, with all available variables are organised into 5 categories: <code class="docutils literal notranslate"><span class="pre">station</span> <span class="pre">position</span></code>, <code class="docutils literal notranslate"><span class="pre">station</span> <span class="pre">classifications</span></code>, <code class="docutils literal notranslate"><span class="pre">station</span> <span class="pre">miscellaneous</span></code>, <code class="docutils literal notranslate"><span class="pre">globally</span> <span class="pre">gridded</span> <span class="pre">classifications</span></code>, and <code class="docutils literal notranslate"><span class="pre">measurement</span> <span class="pre">process</span> <span class="pre">information</span></code>. These are also defined for GHOST data in this <a class="reference external" href="https://doi.org/10.5194/essd-16-4417-2024">publication</a>.</p>
 <p>The subsequent question is what fields are then available for each metadata variable, specifically for text metadata. The best solution for this is to empirically check by opening the dashboard and navigating to the variable you are interested in and viewing the available fields.</p>
 <section id="numerical-metadata">
 <h3>Numerical metadata<a class="headerlink" href="#numerical-metadata" title="Link to this heading"></a></h3>
@@ -128,8 +128,9 @@
 </section>
 <section id="text-metadata">
 <h3>Text metadata<a class="headerlink" href="#text-metadata" title="Link to this heading"></a></h3>
-<p>Text metadata is filtered by either setting to <strong>keep</strong> or <strong>remove</strong> specific fields for a variable, for example keeping Spanish and French stations or removing just UK stations:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">country</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">Spain</span><span class="p">,</span> <span class="n">France</span>
+<p>Text metadata is filtered by either setting to <strong>keep</strong> or <strong>remove</strong> specific fields for a variable. For the keep case it is not mandatory to write the <strong>keep</strong> string. Here is an example keeping Spanish and French stations, and removing just UK stations:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">country</span> <span class="o">=</span> <span class="n">Spain</span><span class="p">,</span> <span class="n">France</span>
+<span class="n">country</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">Spain</span><span class="p">,</span> <span class="n">France</span>
 <span class="n">country</span> <span class="o">=</span> <span class="n">remove</span><span class="p">:</span> <span class="n">United</span> <span class="n">Kingdom</span>
 </pre></div>
 </div>
@@ -175,47 +176,48 @@
 <span class="n">spatial_colocation</span> <span class="o">=</span> <span class="kc">True</span>
 </pre></div>
 </div>
-<p>On the dashboard this can be replicated under the <strong>MULTI</strong> button on the menu bar. The apply (A) checkbox must be checked to apply the filter, and then data re-read by hitting the <strong>READ</strong> button on the main menu bar.</p>
+<p>On the dashboard this can be replicated under the <strong>SPECIES</strong> button on the menu bar. The apply (A) checkbox must be checked to apply the filter, and then data re-read by hitting the <strong>READ</strong> button on the main menu bar.</p>
 <p>See <a class="reference internal" href="Multispecies-filtering.html"><span class="doc std std-doc">here</span></a> for more in-depth information on multspecies filtering.</p>
 </section>
-<section id="representativity">
-<span id="id1"></span><h2>Representativity<a class="headerlink" href="#representativity" title="Link to this heading"></a></h2>
-<p>One major limitation often associated with observations is the amount of gaps between measurements. If these observations are directly compared with typically complete model data, this would impose a significant bias upon the comparison. Filtering by representativity filters provides a way to control the temporal robustness of the observations for evaluation.</p>
+<section id="data-coverage">
+<span id="coverage"></span><h2>Data coverage<a class="headerlink" href="#data-coverage" title="Link to this heading"></a></h2>
+<p>One major limitation often associated with observations is the amount of gaps between measurements. If these observations are directly compared with typically complete model data, this would impose a significant bias upon the comparison. Filtering by data coverage provides a way to control the temporal robustness of the observations for evaluation.</p>
 <p>Providentia has multiple such filters available.</p>
 <section id="native-vs-averaged-filters">
 <h3>Native vs averaged filters<a class="headerlink" href="#native-vs-averaged-filters" title="Link to this heading"></a></h3>
-<p>Providentia has two types of representativity filters, those which calculate the representativity percent of observations at the <strong>native</strong> measured resolution (which can be variable), and those which calculate it at an <strong>averaged</strong> resolution, i.e. the data resolution being used in Providentia such as hourly, 3hourly etc.</p>
+<p>Providentia has two types of data coverage filters, those which calculate the percent coverage of observations at the <strong>native</strong> measured resolution (which can be variable), and those which calculate it at an <strong>averaged</strong> resolution, i.e. the data resolution being used in Providentia such as hourly, 3hourly etc.</p>
 <p>The <strong>native</strong> filters are only available when using GHOST data, and will always return a lower value than the <strong>averaged</strong> ones, as an hourly period with just 30 minutes being represented with measurements would be classed as being 100% represented in the average sense, whereas it would be 50% in the native sense.</p>
 </section>
 <section id="available-filters">
 <h3>Available filters<a class="headerlink" href="#available-filters" title="Link to this heading"></a></h3>
-<p>For both <strong>native</strong> and <strong>averaged</strong> filters, it is possible to filter by the representativity across different periods. For example, data for each day with representativity less than a certain amount can be screened out (i.e. set as nan).</p>
-<p>The periods that representativity can be filtered by are: <strong>hour</strong>, <strong>day</strong>, <strong>month</strong>, and <strong>year</strong>. The hourly case only applies for <strong>native</strong> data (when the data resolution is hourly).</p>
-<p>There is an additional filter for the <strong>averaged</strong> case, where the representativity of data across across the entire time range can be filtered by, thus removing entire stations when the representativity is less than a certain percent. This is set by the <code class="docutils literal notranslate"><span class="pre">all_representativity_percent</span></code> variable in the configuration file, and the <code class="docutils literal notranslate"><span class="pre">All</span></code> line under the <strong>% REP</strong> button on the dashboard.</p>
-<p>The <strong>native</strong> and <strong>averaged</strong> representativity filters can be set in the configuration file as follows, with the difference in the naming convention being that the native fields contain the <code class="docutils literal notranslate"><span class="pre">native</span></code> string. By default all fields are set to be 0% (i.e. the filters are not active).</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Native representativity filters</span>
-<span class="n">hourly_native_representativity_percent</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="n">daily_native_representativity_percent</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="n">monthly_native_representativity_percent</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="n">annual_native_representativity_percent</span> <span class="o">=</span> <span class="mi">0</span>
+<p>For both <strong>native</strong> and <strong>averaged</strong> filters, it is possible to filter by the data coverage across different periods. For example, data for each day with coverage less than a certain amount can be screened out (i.e. set as nan).</p>
+<p>The periods that coverage can be filtered by are: <strong>hour</strong>, <strong>day</strong>, <strong>month</strong>, and <strong>year</strong>. The hourly case only applies for <strong>native</strong> data (when the data resolution is hourly).</p>
+<p>There is an additional filter for the <strong>averaged</strong> case, where the coverage of data across across the entire time range can be filtered by, thus removing entire stations when the coverage is less than a certain percent. This is set by the <code class="docutils literal notranslate"><span class="pre">total_coverage</span></code> variable in the configuration file, and the <code class="docutils literal notranslate"><span class="pre">Total</span></code> line under the <strong>COVERAGE</strong> button on the dashboard.</p>
+<p>The <strong>native</strong> and <strong>averaged</strong> data coverage filters can be set in the configuration file as follows, with the difference in the naming convention being that the native fields contain the <code class="docutils literal notranslate"><span class="pre">native</span></code> string. By default all fields are set to be 0% (i.e. the filters are not active).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Native data coverage filters</span>
+<span class="n">native_hourly_coverage</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">native_daily_coverage</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">native_monthly_coverage</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">native_annual_coverage</span> <span class="o">=</span> <span class="mi">0</span>
 
-<span class="c1"># Averaged representativity filters</span>
-<span class="n">daily_representativity_percent</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="n">monthly_representativity_percent</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="n">annual_representativity_percent</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="n">all_representativity_percent</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="c1"># Averaged data coverage filters</span>
+<span class="n">daily_coverage</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">monthly_coverage</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">annual_coverage</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">total_coverage</span> <span class="o">=</span> <span class="mi">0</span>
 </pre></div>
 </div>
-<p>As you change the temporal resolution of the data to be coarser, some of these fields will become unavailable. For example when using monthly data, you can not filter by daily representativity.</p>
-<p>On the dashboard the filters can be set under the <strong>% REP</strong> button on the menu bar.</p>
+<p>As you change the temporal resolution of the data to be coarser, some of these fields will become unavailable. For example when using monthly data, you can not filter by daily coverage.</p>
+<p>On the dashboard the filters can be set under the <strong>COVERAGE</strong> button on the menu bar.</p>
 </section>
 </section>
 <section id="periods">
-<span id="id2"></span><h2>Periods<a class="headerlink" href="#periods" title="Link to this heading"></a></h2>
+<span id="id1"></span><h2>Periods<a class="headerlink" href="#periods" title="Link to this heading"></a></h2>
 <p>It is often desired to select or remove certain periods over a time range, for example just keep daytime data or remove summertime data. Providentia gives an easy way to filter in such a way using the <code class="docutils literal notranslate"><span class="pre">period</span></code> variable when using GHOST data.</p>
 <p>The available period fields that that can be selected are: <code class="docutils literal notranslate"><span class="pre">Daytime</span></code>, <code class="docutils literal notranslate"><span class="pre">Nighttime</span></code>, <code class="docutils literal notranslate"><span class="pre">Weekday</span></code>, <code class="docutils literal notranslate"><span class="pre">Weekend</span></code>, <code class="docutils literal notranslate"><span class="pre">Spring</span></code>, <code class="docutils literal notranslate"><span class="pre">Summer</span></code>, <code class="docutils literal notranslate"><span class="pre">Autumn</span></code>, <code class="docutils literal notranslate"><span class="pre">Winter</span></code>. The availability of some of these fields is contingent on the active temporal resolution of data, for example <strong>Daytime</strong> values cannot be selected when monthly data is loaded.</p>
 <p>When wanting to apply these via configuration file the syntax is the same as the text metadata filtering with a small caveat, that you can both keep and remove fields at the same time by using a <strong>double pipe “||”</strong> between the keep and remove definitions to distinguish between them, for example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">period</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">Winter</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">period</span> <span class="o">=</span> <span class="n">Winter</span>
+<span class="n">period</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">Winter</span>
 <span class="n">period</span> <span class="o">=</span> <span class="n">remove</span><span class="p">:</span> <span class="n">Daytime</span>
 <span class="n">period</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">Spring</span><span class="p">,</span> <span class="n">Summer</span> <span class="o">||</span> <span class="n">remove</span><span class="p">:</span> <span class="n">Weekday</span>
 </pre></div>

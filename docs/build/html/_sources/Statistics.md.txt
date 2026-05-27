@@ -88,6 +88,7 @@ Basic statistics are calculated independently for observational and model datase
 | Exceedances                               | Number of exceedances over the values defined in settings/exceedances.yaml |
 | p1, p5, p10, p25, p50, p75, p90, p95, p99 | Percentiles |
 | NStations                                 | Number of stations |
+| NUnique Stations                          | Number of unique stations |
 | MDA8                                      | Daily maximum 8 hour average |
 
 When not using the dashbaord, to get the bias between the calculated observational statistic and model statistics, the plot option **bias** can be added to the statistic name, e.g. **Mean_bias**. On the dashboard, the bias is set by using the **bias** plot option on the relevant plots.
@@ -334,6 +335,26 @@ S &= \text{total number of stations} \\
 \end{aligned}
 $$
 
+### NUniqueStations (Number of Unique Stations)
+
+Computes the number of unique stations with at least one valid (non-missing) data value across the time domain.
+
+$$
+N_{\text{unique stations}} = \sum_{s=1}^{S} \mathbb{I}\!\left( \sum_{u \in \mathcal{D}} \mathbb{I}\!\left( x_{s,u}\ \text{is valid} \right) > 0 \right)
+,
+$$
+
+where:
+
+$$
+\begin{aligned}
+N_{\text{unique stations}} &= \text{number of stations with at least one valid data value} \\
+x &= \text{data} \\
+S &= \text{total number of stations} \\
+\mathcal{D} &= \text{full analysis domain (all times and groups, if applicable)} \\
+\mathbb{I}(\cdot) &= \text{indicator function (1 if condition is true, 0 otherwise)}
+\end{aligned}
+$$
 
 ### Exceedances
 

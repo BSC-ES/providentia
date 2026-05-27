@@ -155,8 +155,8 @@ If more than one section is defined, a pop-up will appear asking you to select t
 <ul class="simple">
 <li><p><strong>QA</strong> contains the GHOST quality assurance flags to filter observations by, as explained in <a class="reference internal" href="QA-filtering.html"><span class="std std-doc">QA</span></a>.</p></li>
 <li><p><strong>FLAGS</strong> contain standardised data reporter provided flags to filter observations by, as explained in <a class="reference internal" href="QA-filtering.html"><span class="std std-doc">Flags</span></a>.</p></li>
-<li><p><strong>MODS</strong> contains a list of models that are available to load for the current data selection.</p></li>
-<li><p><strong>MULTI</strong> can be used to filter your current network-species by the values of other network-species, as explained in <a class="reference internal" href="Multispecies-filtering.html"><span class="doc std std-doc">Multispecies filtering</span></a>.</p></li>
+<li><p><strong>MODELS</strong> contains a list of models that are available to load for the current data selection.</p></li>
+<li><p><strong>SPECIES</strong> can be used to filter your current network-species by the values of other network-species, as explained in <a class="reference internal" href="Multispecies-filtering.html"><span class="doc std std-doc">Multispecies filtering</span></a>.</p></li>
 </ul>
 <p>After having set all the fields that the user wants, then the last step is to click the <strong>READ</strong> button. After reading the data, a map plot appears showing the available stations that correspond to the data selection.</p>
 <p>If the user makes changes to any of the fields in this section, it is needed to reclick on <strong>READ</strong> in order to apply the changes.</p>
@@ -169,11 +169,11 @@ If more than one section is defined, a pop-up will appear asking you to select t
 <section id="bounds">
 <h4>Bounds<a class="headerlink" href="#bounds" title="Link to this heading"></a></h4>
 <p>Often it is desired to remove values which exceed certain extreme bounds, as it is known that data should appear at such extremes. These bounds will be by default set on the dashboard, taken from definitions per species in GHOST. These can be revised up or down as the user sees fit.</p>
-<section id="rep">
-<h5>% REP<a class="headerlink" href="#rep" title="Link to this heading"></a></h5>
-<p><img alt="representativity" src="_images/representativity.png" /></p>
-<p>One major limitation often associated with observations is the amount of gaps between measurements. If these observations are directly compared with typically complete model data, this would impose a significant bias upon the comparison. Filtering by representativity filters provides a way to control the temporal robustness of the observations for evaluation. Providentia has multiple such filters available in the pop-up menu opened via the <strong>% REP</strong> button.</p>
-<p>See here for more information about representativity filters: <a class="reference internal" href="Filtering.html#representativity"><span class="std std-ref">Representativity filtering</span></a></p>
+<section id="coverage">
+<h5>COVERAGE<a class="headerlink" href="#coverage" title="Link to this heading"></a></h5>
+<p><img alt="coverage" src="_images/coverage.png" /></p>
+<p>One major limitation often associated with observations is the amount of gaps between measurements. If these observations are directly compared with typically complete model data, this would impose a significant bias upon the comparison. Filtering by data coverage provides a way to control the temporal robustness of the observations for evaluation. Providentia has multiple such filters available in the pop-up menu opened via the <strong>COVERAGE</strong> button.</p>
+<p>See here for more information about data coverage filters: <a class="reference internal" href="Filtering.html#coverage"><span class="std std-ref">Data coverage filtering</span></a></p>
 </section>
 <section id="period">
 <h5>PERIOD<a class="headerlink" href="#period" title="Link to this heading"></a></h5>
@@ -181,10 +181,10 @@ If more than one section is defined, a pop-up will appear asking you to select t
 <p>The <strong>PERIOD</strong> button opens a pop-up menu that allows for the selection or removal of specific data periods, for example keep daytime data or remove summertime data.</p>
 <p>See here for more detailed information: <a class="reference internal" href="Filtering.html#periods"><span class="std std-ref">Period filtering</span></a></p>
 </section>
-<section id="meta">
-<h5>META<a class="headerlink" href="#meta" title="Link to this heading"></a></h5>
+<section id="metadata">
+<h5>METADATA<a class="headerlink" href="#metadata" title="Link to this heading"></a></h5>
 <p><img alt="meta" src="_images/meta.png" /></p>
-<p>The <strong>META</strong> button opens a pop-up menu allows the user to filter stations on the map by a variety of metadata variables. See here for more detailed information: <a class="reference internal" href="Filtering.html#filtering-metadata"><span class="std std-ref">Metadata filtering</span></a></p>
+<p>The <strong>METADATA</strong> button opens a pop-up menu allows the user to filter stations on the map by a variety of metadata variables. See here for more detailed information: <a class="reference internal" href="Filtering.html#filtering-metadata"><span class="std std-ref">Metadata filtering</span></a></p>
 </section>
 </section>
 </section>

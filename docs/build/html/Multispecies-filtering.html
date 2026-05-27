@@ -54,8 +54,8 @@
 <li class="toctree-l1"><a class="reference internal" href="Plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Statistics.html">Statistics</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="Other-topics.html">Other topics</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="ADS.html">Account setup in Atmosphere Data Store</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Check-CAMS-download.html">Check CAMS Download Status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Start-downloading-ECMWF-data.html">Start downloading ECMWF data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Check-ECMWF-download.html">Check ECMWF Download Status</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Create-your-own-data-network.html">Create your own data network</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Available-species.html">Available Species</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Multispecies filtering</a></li>
@@ -105,7 +105,7 @@
 <p>If we take a look at the timeseries for one station, we can see what this actually means:</p>
 <p><img alt="multispecies-filtering" src="_images/multispecies-filtering.jpg" /></p>
 <p>It can be observed that there are less data points for AOD after the filtering is applied, with the removal of the data points happening when the Angstrom exponent is above 0.6.</p>
-<p>Multispecies filtering can be set in the configuration files using the <code class="docutils literal notranslate"><span class="pre">filter_species</span></code> variable, where we define the network and species to filter by, the lower range to filter associated data by, the upper range to filter associated data by, and the value to set associated data to (default is nan). If you want to leave one of the filter ranges open-ended, then use a colon (:). Spatial colocation must be active in order to apply multispecies filtering (it is active by default).</p>
+<p>Multispecies filtering can be set in the configuration files using the <code class="docutils literal notranslate"><span class="pre">filter_species</span></code> variable, where we define the network and species to filter by, data bounds to filter by, and an optional fill value. The first value set is the lower bound to filter by, and the second value the upper bound. Place a sign before each bound value to inform if the filter should be inclusive or exclusive of the bound, (e.g. <code class="docutils literal notranslate"><span class="pre">&gt;</span></code> or <code class="docutils literal notranslate"><span class="pre">&gt;=</span></code>). If no sign is set then it is assumed the bound is inclusive, i.e. <code class="docutils literal notranslate"><span class="pre">&gt;=</span></code>. If not wishing to set either the lower or upper bounds, a <code class="docutils literal notranslate"><span class="pre">:</span></code> can be used. Optionally, a fill value can also be given as a third value to impose what the filtered data is set to, by default this is <code class="docutils literal notranslate"><span class="pre">NaN</span></code>. Spatial colocation must be active in order to apply multispecies filtering (it is active by default).</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">All</span><span class="p">]</span>
 <span class="n">network</span> <span class="o">=</span> <span class="n">AERONET_v3_lev1</span><span class="mf">.5</span>
 <span class="n">species</span> <span class="o">=</span> <span class="n">od550aero</span>
@@ -113,7 +113,7 @@
 <span class="n">spatial_colocation</span> <span class="o">=</span> <span class="kc">True</span>
 </pre></div>
 </div>
-<p>On the dashboard this can be replicated under the <strong>MULTI</strong> button on the menu bar. The apply (A) checkbox must be checked to apply the filter, and then data re-read by hitting the <strong>READ</strong> button on the main menu bar.</p>
+<p>On the dashboard this can be replicated under the <strong>SPECIES</strong> button on the menu bar. The apply (A) checkbox must be checked to apply the filter, and then data re-read by hitting the <strong>READ</strong> button on the main menu bar.</p>
 <p><img alt="multi" src="_images/multi.png" /></p>
 <p>It is also possible to filter data by more than one species at a time, for example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span> <span class="o">=</span> <span class="n">nasa</span><span class="o">-</span><span class="n">aeronet</span><span class="o">/</span><span class="n">directsun_v3</span><span class="o">-</span><span class="n">lev15</span>

@@ -71,6 +71,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#ndata">NData</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#data">Data%</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#nstations-number-of-stations">NStations (Number of Stations)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nuniquestations-number-of-unique-stations">NUniqueStations (Number of Unique Stations)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#exceedances">Exceedances</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mda8-daily-maximum-8-hour-average">MDA8 (Daily Maximum 8 Hour Average)</a></li>
 </ul>
@@ -216,7 +217,10 @@
 <tr class="row-even"><td><p>NStations</p></td>
 <td><p>Number of stations</p></td>
 </tr>
-<tr class="row-odd"><td><p>MDA8</p></td>
+<tr class="row-odd"><td><p>NUnique Stations</p></td>
+<td><p>Number of unique stations</p></td>
+</tr>
+<tr class="row-even"><td><p>MDA8</p></td>
 <td><p>Daily maximum 8 hour average</p></td>
 </tr>
 </tbody>
@@ -484,6 +488,26 @@ N_{\text{stations}} = \sum_{s=1}^{S} \mathbb{I}\!\left( \sum x_s &gt; 0 \right)
 N_{\text{stations}} &amp;= \text{number of stations with valid data} \\
 x &amp;= \text{data} \\
 S &amp;= \text{total number of stations} \\
+\mathbb{I}(\cdot) &amp;= \text{indicator function (1 if condition is true, 0 otherwise)}
+\end{aligned}
+\end{split}\]</div>
+</section>
+<section id="nuniquestations-number-of-unique-stations">
+<h3>NUniqueStations (Number of Unique Stations)<a class="headerlink" href="#nuniquestations-number-of-unique-stations" title="Link to this heading"></a></h3>
+<p>Computes the number of unique stations with at least one valid (non-missing) data value across the time domain.</p>
+<div class="math notranslate nohighlight">
+\[
+N_{\text{unique stations}} = \sum_{s=1}^{S} \mathbb{I}\!\left( \sum_{u \in \mathcal{D}} \mathbb{I}\!\left( x_{s,u}\ \text{is valid} \right) &gt; 0 \right)
+,
+\]</div>
+<p>where:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{aligned}
+N_{\text{unique stations}} &amp;= \text{number of stations with at least one valid data value} \\
+x &amp;= \text{data} \\
+S &amp;= \text{total number of stations} \\
+\mathcal{D} &amp;= \text{full analysis domain (all times and groups, if applicable)} \\
 \mathbb{I}(\cdot) &amp;= \text{indicator function (1 if condition is true, 0 otherwise)}
 \end{aligned}
 \end{split}\]</div>
