@@ -23,6 +23,7 @@ import seaborn as sns
 import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join, get_conversion_factor, get_standard_parameters_by_speci
+from .dashboard_elements import CheckDialog, MessageBox
 from .statistics import calculate_statistic, get_z_statistic_sign, get_z_statistic_type, exceedance_lim
 from .warnings_prv import show_message
 
@@ -961,7 +962,7 @@ def convert_multispecies_df_units(read_instance, stats_df, zstats, base_plot_typ
 
     return stats_df
 
-def handle_test_or_save_df(read_instance, df, filename, path, tests_generate_output):
+def handle_test_or_save_df(read_instance, df, filename, path, tests_generate_output, msgs):
     """
     Save dataframe or assert if dataframe generates the same outputs as the dataframes saved in tests folder
 
@@ -977,6 +978,8 @@ def handle_test_or_save_df(read_instance, df, filename, path, tests_generate_out
         Path to save file
     tests_generate_output : bool
         Indicates if we want to regenerate dataframes saved in tests folder
+    msgs : list
+        Text to show after downloading file
     """
 
     if read_instance.tests:
@@ -989,7 +992,7 @@ def handle_test_or_save_df(read_instance, df, filename, path, tests_generate_out
             # and it is not possible to compare the dataframes
             # it is also possible to modify the behaviour of pd.read_csv to avoid reading nans defining keep_default_na=False
             # but in that way we hide the nans in the data and not only in the indices
-            save_df(df, filename, path, na_rep=np.nan)   
+            msgs = save_df(read_instance, df, filename, path, msgs, na_rep=np.nan)   
             
         # read expected output
         parse_dates = []
@@ -1007,9 +1010,11 @@ def handle_test_or_save_df(read_instance, df, filename, path, tests_generate_out
             generated_output, expected_output, atol=1e-5) is None
             
     else:
-        save_df(df, filename, path)   
+        msgs = save_df(read_instance, df, filename, path, msgs)   
+    
+    return msgs
 
-def save_df(df, filename, path, na_rep=''):
+def save_df(read_instance, df, filename, path, msgs, na_rep=''):
     """
     Save dataframe to CSV file
 
@@ -1029,13 +1034,37 @@ def save_df(df, filename, path, na_rep=''):
         Element type.
     path : str
         Path to save file
+    msgs : list
+        Text to show after downloading file
     na_rep : str, np.nan, optional
         Representation of nans in saved dataframe
     """
 
     fname = join(PROVIDENTIA_ROOT, f'{path}/{filename}.csv')
+    if os.path.exists(fname):
+        overwrite_question = f"File already exists in {fname}. Do you want to overwrite it?"
+        if read_instance.mode == 'library':
+            # ask the user whether they want to overwrite the file
+            while True:
+                overwrite_file = input(f"\n{overwrite_question} ([y]/n) ")
+                if overwrite_file in ['','y','n']:
+                    if overwrite_file in ['n']:
+                        return msgs
+                    break
+        elif read_instance.mode == 'dashboard':
+            popup = MessageBox(
+                overwrite_question,
+                confirmation=True
+            )
+            if not popup.result:
+                return msgs
+        
     df.to_csv(fname, index=False, na_rep=na_rep)
+    msg = f'\n- File {fname}'
+    msgs.append(msg)
 
+    return msgs
+    
 def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, plot_type, plot_options, 
                               path, networkspeci, tests_generate_output=False, labela='', labelb=''):
     """
@@ -1068,9 +1097,47 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
     if plot_element_varname not in canvas_instance.plot_elements[base_plot_type]:
         return
 
+    # ask user which element types they want to download
+    element_types = list({
+        key
+        for data_label in canvas_instance.plot_elements[base_plot_type][plot_element_varname]
+        for key in canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label].keys()
+    })
+    element_types_to_save = []
+    if read_instance.mode == 'library':
+        # in library always save plot
+        for element_type in element_types:
+            # ask the user whether they want to save specific element_types
+            while True:
+                create_file = input(f"\nDo you want to save {element_type} data? ([y]/n) ")
+                if create_file in ['','y','n']:
+                    if create_file in ['','y']:
+                        element_types_to_save.append(element_type)
+                    break
+    elif read_instance.mode == 'dashboard':
+        # in dashboard open dialog to ask the user which element types they want to save 
+        # if there are more than 1 element types
+        if len(element_types) > 1:
+            dialog = CheckDialog(element_types)
+            if dialog.exec_():
+                element_types_to_save = dialog.get_checked_items()
+        # do not open dialog if there is only one plot element
+        elif len(element_types) == 1:
+            element_types_to_save = element_types
+        # do not continue if user selected no elements
+        else:
+            return
+
+    # if no element types to save, do not continue
+    if len(element_types_to_save) == 0:
+        return 
+    
     msgs = []
     for data_label in canvas_instance.plot_elements[base_plot_type][plot_element_varname]:
         for element_type in canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label]:
+            # ignore element types that user does not want to save
+            if element_type not in element_types_to_save:
+                continue
             plot_elements = canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type]
             
             # for FAIRMODE target plot combine all dots (saved individually so that they can have different colors) in one Line2D
@@ -1102,10 +1169,8 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                     # contingency plots have an index that starts at -1, reindex to start from 0
                     if base_plot_type == 'contingencytable':
                         df.index = range(len(df))
-                    filename = f"{plot_type}_{element_type}"   
-                    handle_test_or_save_df(read_instance, df, filename, path, tests_generate_output)
-                    msg = f'\n- Data label: {data_label}, element type: {element_type}, file {path}/{filename}.csv'
-                    msgs.append(msg)
+                    filename = f"{plot_type}_{element_type}"
+                    msgs = handle_test_or_save_df(read_instance, df, filename, path, tests_generate_output, msgs)
 
                 elif base_plot_type in ['timeseries', 'distribution', 'scatter', 'fairmode-target',
                                         'fairmode-statsummary', 'taylor', 'boxplot', 'periodic', 'periodic-violin']:
@@ -1123,7 +1188,9 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                                 "annotation": annotation.get_text().split('|')[1].strip()
                             })
                         df = pd.DataFrame(data)
-                        filename = f"{plot_type}_{data_label}_{element_type}_{plot_element_i}"
+                        filename = f"{plot_type}_{data_label}_{element_type}" + (
+                            f"_{plot_element_i}" if len(plot_elements) > 1 else ""
+                        )
                     # extract plot data
                     else:
                         data = []
@@ -1145,10 +1212,10 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                                 else data_label: y,
                             })
                         df = pd.DataFrame(data)
-                        filename = f"{plot_type}_{data_label}_{element_type}_{plot_element_i}"
-                    handle_test_or_save_df(read_instance, df, filename, path, tests_generate_output)
-                    msg = f'\n- Data label: {data_label}, element type: {element_type}, file {path}/{filename}.csv'
-                    msgs.append(msg)
+                        filename = f"{plot_type}_{data_label}_{element_type}" + (
+                            f"_{plot_element_i}" if len(plot_elements) > 1 else ""
+                        )
+                    msgs = handle_test_or_save_df(read_instance, df, filename, path, tests_generate_output, msgs)
 
                 elif base_plot_type == 'metadata':
                     text = plot_element.get_text().split('\n')
@@ -1168,10 +1235,10 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                     df.loc[0] = values
                     df.columns = [str(col) for col in df.columns]
                     df = df.T.reset_index().rename(columns={"index": "key", 0: "value"})
-                    filename = f"{plot_type}_{data_label}_{element_type}_{plot_element_i}"
-                    handle_test_or_save_df(read_instance, df, filename, path, tests_generate_output)
-                    msg = f'\n- Data label: {data_label}, element type: {element_type}, file {path}/{filename}.csv'
-                    msgs.append(msg)
+                    filename = f"{plot_type}_{data_label}_{element_type}" + (
+                        f"_{plot_element_i}" if len(plot_elements) > 1 else ""
+                    )
+                    msgs = handle_test_or_save_df(read_instance, df, filename, path, tests_generate_output, msgs)
 
                 elif base_plot_type == 'map':
 
@@ -1183,7 +1250,9 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                                 "dataset": annotation.get_text().split('|')[0].strip(),
                                 "annotation": annotation.get_text().split('|')[1].strip()
                             })
-                        filename = f"{plot_type}_{data_label}_{element_type}_{plot_element_i}"
+                        filename = f"{plot_type}_{data_label}_{element_type}" + (
+                            f"_{plot_element_i}" if len(plot_elements) > 1 else ""
+                        )
                     # extract plot data
                     else:
 
@@ -1227,10 +1296,9 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                             label = f'{labela}-{labelb}'
                         filename = f"{plot_type}_{element_type}_{label}"
                     df = pd.DataFrame(data)
-                    handle_test_or_save_df(read_instance, df, filename, path, tests_generate_output)
-                    msg = f'\n- Data label: {data_label}, element type: {element_type}, file {path}/{filename}.csv'
-                    msgs.append(msg)
-                    
-    msg = f'Saving {plot_type} figure data to CSV:'
-    msg += ''.join(msgs)
-    show_message(read_instance, msg)
+                    msgs = handle_test_or_save_df(read_instance, df, filename, path, tests_generate_output, msgs)
+    
+    if msgs:
+        msg = f'Saving {plot_type} figure data to CSV:'
+        msg += ''.join(msgs)
+        show_message(read_instance, msg)
