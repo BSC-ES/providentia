@@ -1003,7 +1003,7 @@ def convert_multispecies_df_units(read_instance, stats_df, zstats, base_plot_typ
     return stats_df
 
 
-def handle_test_or_save_df(read_instance, df, filename, path, tests_generate_output, msgs):
+def handle_test_or_save_df(read_instance, df, filename, path, tests_generate_output, msgs, decimal_places):
     """
     Save dataframe or assert if dataframe generates the same outputs as the dataframes saved in tests folder
 
@@ -1021,8 +1021,11 @@ def handle_test_or_save_df(read_instance, df, filename, path, tests_generate_out
         Indicates if we want to regenerate dataframes saved in tests folder
     msgs : list
         Text to show after downloading file
+    decimal_places : int
+        Decimal places to round the data to when saving dataframe
     """
 
+    df = df.round(decimal_places)
     if read_instance.tests:
         generated_output = df
         generated_output = generated_output.replace('', np.nan)
@@ -1044,7 +1047,7 @@ def handle_test_or_save_df(read_instance, df, filename, path, tests_generate_out
             f"{path}/{filename}.csv",
             parse_dates=parse_dates
         )
-        print('Expected_output')
+        print(f'Expected_output ({f"{path}/{filename}.csv"})')
         print(expected_output)
         if 'metadata' in filename:
             expected_output["value"] = expected_output["value"].astype(str)
@@ -1148,6 +1151,7 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
         for data_label in canvas_instance.plot_elements[base_plot_type][plot_element_varname]
         for key in canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label].keys()
     })
+
     element_types_to_save = []
     if read_instance.mode == 'library':
         # in tests do not ask
@@ -1187,9 +1191,11 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
         else "concentration" if base_plot_type == "distribution"
         else "x"
     )
+    decimal_places = canvas_instance.plot_characteristics[plot_type]['round_decimal_places']['csv']
 
     msgs = []
     combined_dfs = {}
+    boxplot_accumulator = {}
 
     for data_label in canvas_instance.plot_elements[base_plot_type][plot_element_varname]:
         for element_type in canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label]:
@@ -1253,7 +1259,8 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                         filename,
                         path,
                         tests_generate_output,
-                        msgs
+                        msgs,
+                        decimal_places
                     )
 
                 elif base_plot_type in ['timeseries', 'distribution', 'scatter', 'fairmode-target',
@@ -1274,7 +1281,6 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                                 "dataset": annotation.get_text().split('|')[0].strip(),
                                 "annotation": annotation.get_text().split('|')[1].strip()
                             })
-
                         df = pd.DataFrame(data)
 
                         filename = f"{plot_type}_{data_label}_{element_type}" + (
@@ -1288,77 +1294,81 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                             filename,
                             path,
                             tests_generate_output,
-                            msgs
+                            msgs,
+                            decimal_places
                         )
 
-                    # extract plot data
                     else:
+                        if base_plot_type == "boxplot":
+                            
+                            # skip patch
+                            if isinstance(plot_element, matplotlib.patches.PathPatch):
+                                continue
 
-                        data = []
+                            elif isinstance(plot_element, matplotlib.lines.Line2D):
+                                y_value = plot_element.get_ydata()[0]
 
-                        # extract patches in boxplot
-                        if isinstance(plot_element, matplotlib.patches.PathPatch):
-                            xy = plot_element.get_path().vertices
+                            if data_label not in boxplot_accumulator:
+                                boxplot_accumulator[data_label] = []
+                            boxplot_accumulator[data_label].append(y_value)
                         else:
+                            data = []
                             xy = plot_element.get_xydata()
+                            for x, y in xy:
+                                data.append({
+                                    # convert time from unix to actual
+                                    x_column:
+                                        pd.to_datetime(x, unit="D", utc=True).round("s")
+                                        if base_plot_type == "timeseries" else x,
 
-                        for x, y in xy:
-                            data.append({
-                                # convert time from unix to actual
-                                x_column:
-                                    pd.to_datetime(
-                                        x, unit="D", utc=True).round("s")
-                                    if base_plot_type == "timeseries" else x,
+                                    "y" if base_plot_type in ["fairmode-target"]
+                                    else data_label: y,
+                                })
+                            df = pd.DataFrame(data)
 
-                                "y" if base_plot_type in ["boxplot", "fairmode-target"]
-                                else data_label: y,
-                            })
+                            # combine dataframes for some plots
+                            if base_plot_type in [
+                                "timeseries",
+                                "scatter",
+                                "distribution",
+                                "periodic",
+                                "periodic-violin",
+                                "taylor"
+                            ]:
+                                # one dataframe per plot element
+                                key = (element_type, plot_element_i)
+                                df = df.set_index(x_column)
+                                value_column = df.columns[0]
 
-                        df = pd.DataFrame(data)
+                                # column becomes the data label
+                                df = df.rename(columns={
+                                    value_column: data_label
+                                })
 
-                        filename = f"{plot_type}_{data_label}_{element_type}" + (
-                            f"_{plot_element_i}" if len(
-                                plot_elements) > 1 else ""
-                        )
+                                if key not in combined_dfs:
+                                    combined_dfs[key] = df
 
-                        # combine dataframes for some plots
-                        if base_plot_type in [
-                            "timeseries",
-                            "scatter",
-                            "distribution",
-                            "periodic",
-                            "periodic-violin",
-                            "taylor"
-                        ]:
-                            # one dataframe per plot element
-                            key = (element_type, plot_element_i)
-                            df = df.set_index(x_column)
-                            value_column = df.columns[0]
+                                else:
+                                    combined_dfs[key] = pd.concat(
+                                        [combined_dfs[key], df],
+                                        axis=1
+                                    )
 
-                            # column becomes the data label
-                            df = df.rename(columns={
-                                value_column: data_label
-                            })
-
-                            if key not in combined_dfs:
-                                combined_dfs[key] = df
-
+                            # for other plot types save data per data label
                             else:
-                                combined_dfs[key] = pd.concat(
-                                    [combined_dfs[key], df],
-                                    axis=1
+                                filename = f"{plot_type}_{data_label}_{element_type}" + (
+                                    f"_{plot_element_i}" if len(
+                                        plot_elements) > 1 else ""
                                 )
-
-                        else:
-
-                            msgs = handle_test_or_save_df(
-                                read_instance,
-                                df,
-                                filename,
-                                path,
-                                tests_generate_output,
-                                msgs
-                            )
+                                msgs = handle_test_or_save_df(
+                                    read_instance,
+                                    df,
+                                    filename,
+                                    path,
+                                    tests_generate_output,
+                                    msgs,
+                                    decimal_places
+                                )
 
                 elif base_plot_type == 'metadata':
                     text = plot_element.get_text().split('\n')
@@ -1383,7 +1393,7 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                         f"_{plot_element_i}" if len(plot_elements) > 1 else ""
                     )
                     msgs = handle_test_or_save_df(
-                        read_instance, df, filename, path, tests_generate_output, msgs)
+                        read_instance, df, filename, path, tests_generate_output, msgs, decimal_places)
 
                 elif base_plot_type == 'map':
 
@@ -1446,7 +1456,7 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                         filename = f"{plot_type}_{element_type}_{label}"
                     df = pd.DataFrame(data)
                     msgs = handle_test_or_save_df(
-                        read_instance, df, filename, path, tests_generate_output, msgs)
+                        read_instance, df, filename, path, tests_generate_output, msgs, decimal_places)
 
     # save combined dataframes into one file per plot element
     if base_plot_type in [
@@ -1455,19 +1465,22 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
         "distribution",
         "periodic",
         "periodic-violin",
-        "taylor"
+        "taylor",
+        "boxplot"
     ]:
-        for (element_type, plot_element_i), df in combined_dfs.items():
 
+        if base_plot_type == "boxplot":
+
+            stats = ["whisker_low", "q1", "median", "q3", "whisker_high"]
+            data = {}
+
+            for label, stats_list in boxplot_accumulator.items():
+                stats_list_sorted = sorted(stats_list)
+                data[label] = dict(zip(stats, stats_list_sorted))
+            
+            df = pd.DataFrame(data)
             df = df.reset_index()
-            filename = (
-                f"{plot_type}_{element_type}"
-                + (
-                    f"_{plot_element_i}"
-                    if len(plot_elements) > 1
-                    else ""
-                )
-            )
+            filename = "boxplot"
 
             msgs = handle_test_or_save_df(
                 read_instance,
@@ -1475,8 +1488,31 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                 filename,
                 path,
                 tests_generate_output,
-                msgs
+                msgs,
+                decimal_places
             )
+            
+        else:
+            for (element_type, plot_element_i), df in combined_dfs.items():
+                df = df.reset_index()
+                filename = (
+                    f"{plot_type}_{element_type}"
+                    + (
+                        f"_{plot_element_i}"
+                        if len(plot_elements) > 1
+                        else ""
+                    )
+                )
+
+                msgs = handle_test_or_save_df(
+                    read_instance,
+                    df,
+                    filename,
+                    path,
+                    tests_generate_output,
+                    msgs,
+                    decimal_places
+                )
 
     if msgs:
         msg = f'Saving {plot_type} figure data to CSV:'
