@@ -291,7 +291,7 @@
       "max_vars_per_row": 1,
       "max_uniques": 3,
       "remove_spines": ["top", "right", "left", "bottom"],
-      "round_decimal_places": { "title": 2 },
+      "round_decimal_places": { "title": 2, "csv": 2 },
       "xtick_params":
         {
           "which": "both",
@@ -384,7 +384,7 @@
       "background": "providentia",
       "map_coastline_resolution": "medium",
       "projection": "Robinson",
-      "round_decimal_places": { "title": 2 },
+      "round_decimal_places": { "title": 2, "csv": 2  },
       "annotate_stats": ["Mean"],
       "annotate_offset": { "loc": "upper left" },
       "annotate_bbox":
@@ -566,7 +566,7 @@
           "round_decimal_places": 2,
           "sep": 1,
         },
-      "round_decimal_places": { "title": 2 },
+      "round_decimal_places": { "title": 2, "csv": 2 },
       "axis_title": { "label": "" },
       "xlabel": { "xlabel": "Time" },
       "ylabel": { "ylabel": "[measurement_units]" },
@@ -756,7 +756,7 @@
     },
   "periodic":
     {
-      "round_decimal_places": { "title": 2 },
+      "round_decimal_places": { "title": 2, "csv": 2 },
       "bias_line":
         { "linestyle": "--", "linewidth": 1.0, "color": "black", "zorder": 2 },
       "threshold_line":
@@ -916,7 +916,7 @@
       "violin_widths": 0.85,
       "threshold_line":
         { "linestyle": "--", "linewidth": 1.0, "color": "red", "zorder": 0 },
-      "round_decimal_places": { "title": 2 },
+      "round_decimal_places": { "title": 2, "csv": 2 },
       "annotate_stats": ["Min", "Max"],
       "annotate_offset": { "loc": "upper left" },
       "annotate_bbox":
@@ -1101,7 +1101,7 @@
     },
   "distribution":
     {
-      "round_decimal_places": { "title": 2 },
+      "round_decimal_places": { "title": 2, "csv": 2 },
       "grid": { "axis": "both", "color": "lightgrey", "alpha": 0.8 },
       "annotate_stats": ["Min", "Max"],
       "annotate_offset": { "loc": "upper left" },
@@ -1292,7 +1292,7 @@
       "equal_aspect": true,
       "threshold_line":
         { "linestyle": "--", "linewidth": 1.0, "color": "red", "zorder": 0 },
-      "round_decimal_places": { "title": 2 },
+      "round_decimal_places": { "title": 2, "csv": 2 },
       "axis_title": { "label": "" },
       "xlabel": { "xlabel": "Observations [measurement_units]" },
       "ylabel": { "ylabel": "Model [measurement_units]" },
@@ -1453,7 +1453,7 @@
   "boxplot":
     {
       "ygrid": { "color": "lightgrey", "alpha": 0.8, "zorder": 1 },
-      "round_decimal_places": { "title": 2 },
+      "round_decimal_places": { "title": 2, "csv": 2 },
       "annotate_stats": ["Min", "Max"],
       "annotate_offset": { "loc": "upper left" },
       "annotate_bbox":
@@ -1582,7 +1582,7 @@
           "network_names": false,
           "hlines": { "color": "grey", "linewidth": 0.5 },
         },
-      "round_decimal_places": { "title": 2, "table": 2 },
+      "round_decimal_places": { "title": 2, "table": 2, "csv": 2 },
       "axis_title": { "label": "" },
       "xtick_params":
         {
@@ -1738,7 +1738,7 @@
   "table":
     {
       "remove_spines": ["top", "right", "left", "bottom"],
-      "round_decimal_places": { "title": 2, "table": 2 },
+      "round_decimal_places": { "title": 2, "table": 2, "csv": 2 },
       "cell_pad_rowlabel": 0.03,
       "col_colours": true,
       "parent_section_names": false,
@@ -1877,7 +1877,7 @@
   "statsummary":
     {
       "remove_spines": ["top", "right", "left", "bottom"],
-      "round_decimal_places": { "title": 2, "table": 2 },
+      "round_decimal_places": { "title": 2, "table": 2, "csv": 2 },
       "cell_pad_rowlabel": 0.03,
       "cell_colours": true,
       "parent_section_names": false,
@@ -2083,7 +2083,7 @@
                 { "colors": "grey", "linestyles": "solid", "linewidths": 0.9 },
             },
         },
-      "round_decimal_places": { "title": 2 },
+      "round_decimal_places": { "title": 2, "csv": 2 },
       "annotate_stats": ["r", "StdDev"],
       "annotate_offset": { "loc": "upper left" },
       "annotate_bbox":
@@ -2219,7 +2219,7 @@
       "grid": { "axis": "both", "color": "lightgrey", "alpha": 0.8 },
       "xlim": [-2, 2],
       "ylim": [-2, 2],
-      "round_decimal_places": { "title": 2, "x": 2, "y": 2 },
+      "round_decimal_places": { "title": 2, "x": 2, "y": 2, "csv": 2 },
       "equal_aspect": true,
       "markers": {
           "type": "area", # area, station
@@ -2507,7 +2507,7 @@
           "labelright": false,
           "labelleft": true,
         },
-      "round_decimal_places": { "title": 2, "x": 2, "y": 2 },
+      "round_decimal_places": { "title": 2, "x": 2, "y": 2, "csv": 2 },
       "plot":
         { "markersize": 5, "markerfacecolor": "None", "linestyle": "None" },
       "annotate_text": { "fontsize": 8, "round_decimal_places": 2, "sep": -5 },
@@ -2734,7 +2734,7 @@
     "contingencytable":
       {
         "remove_spines": ["top", "right", "left", "bottom"],
-        "round_decimal_places": { "title": 2, "table": 2 },
+        "round_decimal_places": { "title": 2, "table": 2, "csv": 2 },
         "cell_pad_rowlabel": 0.03,
         "index_levels": [1, 2, 3, 4, 5, 6],
         "edges": [1, 2, 3, 4, 5, 6, 7],

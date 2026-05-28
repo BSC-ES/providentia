@@ -570,10 +570,9 @@ class Switch(QtWidgets.QPushButton):
         painter.setPen(QtGui.QPen(text_colour))
         painter.drawText(sw_rect, QtCore.Qt.AlignCenter, label)
 
-
 class MessageBox(QtWidgets.QWidget):
 
-    def __init__(self, msg, parent=None):
+    def __init__(self, msg, parent=None, confirmation=False):
         """
         Initialise class
 
@@ -583,16 +582,20 @@ class MessageBox(QtWidgets.QWidget):
             Text on message box
         parent : object
             Dashboard instance
+        confirmation : bool
+            Indicates whether we want to ask a question with Yes or No as an answer
         """
 
         super().__init__(parent)
-        msg_box = self.create_msg_box(msg)
+
+        self.result = False
+        msg_box = self.create_msg_box(msg, confirmation)
         if msg_box is not None:
             layout = QtWidgets.QVBoxLayout(self)
             layout.addWidget(msg_box)
             center(self)
 
-    def create_msg_box(self, msg):
+    def create_msg_box(self, msg, confirmation=False):
         """
         Create message box
 
@@ -600,20 +603,48 @@ class MessageBox(QtWidgets.QWidget):
         ----------
         msg : str
             Text on message box
+        confirmation : bool
+            Indicates whether we want to ask a question with Yes or No as an answer
         """
+        
         # add warning box
         msg_box = QtWidgets.QMessageBox()
         msg_box.setWindowTitle("Warning")
         msg_box.setText(msg)
 
-        # add ok button
-        ok_button = set_formatting(QtWidgets.QPushButton("OK"), formatting_dict['popup_button'])
-        msg_box.addButton(ok_button, QtWidgets.QMessageBox.AcceptRole)
+        if confirmation:
+            # add yes button
+            yes_button = set_formatting(
+                QtWidgets.QPushButton("Yes"),
+                formatting_dict['popup_button']
+            )
+
+            # add no button
+            no_button = set_formatting(
+                QtWidgets.QPushButton("No"),
+                formatting_dict['popup_button']
+            )
+
+            msg_box.addButton(yes_button, QtWidgets.QMessageBox.AcceptRole)
+            msg_box.addButton(no_button, QtWidgets.QMessageBox.RejectRole)
+
+        else:
+            # add ok button
+            ok_button = set_formatting(
+                QtWidgets.QPushButton("OK"),
+                formatting_dict['popup_button']
+            )
+
+            msg_box.addButton(ok_button, QtWidgets.QMessageBox.AcceptRole)
 
         # create wrapper to center
         wrapper = partial(center, msg_box)
         QtCore.QTimer.singleShot(0, wrapper)
-        msg_box.exec_()
+
+        result = msg_box.exec_()
+
+        if confirmation:
+            self.result = (result == QtWidgets.QMessageBox.AcceptRole)
 
 
 class InputDialog(QtWidgets.QWidget):
@@ -649,6 +680,54 @@ class InputDialog(QtWidgets.QWidget):
         self.selected_option, self.okpressed = dialog.getItem(read_instance, title, msg, options, 0, False)
         if not self.okpressed:
             return
+
+class CheckDialog(QtWidgets.QDialog):
+    def __init__(self, items):
+        super().__init__()
+
+        self.setWindowTitle("Select Items")
+
+        layout = QtWidgets.QVBoxLayout(self)
+
+        self.list_widget = QtWidgets.QListWidget()
+
+        # remove focus
+        self.list_widget.setFocusPolicy(QtCore.Qt.NoFocus)
+
+        for item_text in items:
+            item = QtWidgets.QListWidgetItem(item_text)
+
+            item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
+            item.setCheckState(QtCore.Qt.Unchecked)
+
+            self.list_widget.addItem(item)
+
+        self.list_widget.itemClicked.connect(self.toggle_item)
+
+        layout.addWidget(self.list_widget)
+
+        button = QtWidgets.QPushButton("OK")
+        button.clicked.connect(self.accept)
+        layout.addWidget(button)
+
+    def toggle_item(self, item):
+        item.setCheckState(
+            QtCore.Qt.Unchecked
+            if item.checkState() == QtCore.Qt.Checked
+            else QtCore.Qt.Checked
+        )
+
+    def get_checked_items(self):
+        checked = []
+
+        for i in range(self.list_widget.count()):
+            item = self.list_widget.item(i)
+
+            if item.checkState() == QtCore.Qt.Checked:
+                checked.append(item.text())
+
+        return checked
+    
 
 def create_custom_cursor(size=24):
     """ 
