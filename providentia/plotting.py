@@ -2671,8 +2671,12 @@ class Plotting:
         # cut data_labels for those in valid data labels
         cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
 
+        self.fairmode_statsummary_row_titles = {}
+
         # iterate through data labels
         for data_label in cut_data_labels:
+            
+            self.fairmode_statsummary_row_titles[data_label] = []
 
             # get model data
             model_data = data[valid_data_labels.index(data_label), :, :]
@@ -2812,6 +2816,7 @@ class Plotting:
                     
                     # add the dots to the track plot elements list
                     self.fairmode_statsummary_plot.append(stations_dots[0])
+                    self.fairmode_statsummary_row_titles[data_label].append(f"{row}_right")
                     
                     # remove it from the data plotted in the middle zone
                     fairmode_data = fairmode_data[~right_zone_mask] if isinstance(fairmode_data,np.ndarray) else np.array([])
@@ -2857,6 +2862,7 @@ class Plotting:
                         
                         # add the dot to the track plot elements list
                         self.fairmode_statsummary_plot.append(stations_dots[0])
+                        self.fairmode_statsummary_row_titles[data_label].append(f"{row}_left")
                         
                         # remove it from the data plotted in the middle zone
                         fairmode_data = fairmode_data[~left_zone_mask] if isinstance(fairmode_data,np.ndarray) else np.array([])
@@ -2873,6 +2879,7 @@ class Plotting:
                 
                 # add the dots to the track plot elements list
                 self.fairmode_statsummary_plot.append(stations_dots[0])
+                self.fairmode_statsummary_row_titles[data_label].append(f"{row}")
                 
             # track plot elements
             if self.read_instance.mode not in ['report']:

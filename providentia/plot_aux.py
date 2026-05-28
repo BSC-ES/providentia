@@ -1146,10 +1146,12 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
         return
 
     # ask user which element types they want to download
+    # keep only median for periodic violin plots
     element_types = list({
         key
         for data_label in canvas_instance.plot_elements[base_plot_type][plot_element_varname]
         for key in canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label].keys()
+        if not ((key.startswith('violin_plot')) and (base_plot_type == 'periodic-violin'))
     })
 
     element_types_to_save = []
@@ -1189,6 +1191,7 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
         "time" if base_plot_type == "timeseries"
         else read_instance.observations_data_label if base_plot_type == "scatter"
         else "concentration" if base_plot_type == "distribution"
+        else canvas_instance.plot_characteristics[plot_type]['xlabel']['xlabel'] if base_plot_type == 'fairmode-target'
         else "x"
     )
     decimal_places = canvas_instance.plot_characteristics[plot_type]['round_decimal_places']['csv']
@@ -1300,7 +1303,7 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
 
                     else:
                         if base_plot_type == "boxplot":
-                            
+
                             # skip patch
                             if isinstance(plot_element, matplotlib.patches.PathPatch):
                                 continue
@@ -1315,15 +1318,22 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                             data = []
                             xy = plot_element.get_xydata()
                             for x, y in xy:
-                                data.append({
-                                    # convert time from unix to actual
-                                    x_column:
-                                        pd.to_datetime(x, unit="D", utc=True).round("s")
-                                        if base_plot_type == "timeseries" else x,
+                                # no y axis on FAIRMODE statsummary
+                                if base_plot_type == 'fairmode-statsummary':
+                                    data.append({
+                                        "value": x,
+                                    })
+                                else:
+                                    data.append({
+                                        # convert time from unix to actual for timeseries
+                                        x_column:
+                                            pd.to_datetime(
+                                                x, unit="D", utc=True).round("s")
+                                            if base_plot_type == "timeseries" else x,
 
-                                    "y" if base_plot_type in ["fairmode-target"]
-                                    else data_label: y,
-                                })
+                                        canvas_instance.plot_characteristics[plot_type]['ylabel']['ylabel'] if base_plot_type == "fairmode-target"
+                                        else data_label: y,
+                                    })
                             df = pd.DataFrame(data)
 
                             # combine dataframes for some plots
@@ -1356,10 +1366,16 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
 
                             # for other plot types save data per data label
                             else:
-                                filename = f"{plot_type}_{data_label}_{element_type}" + (
-                                    f"_{plot_element_i}" if len(
-                                        plot_elements) > 1 else ""
-                                )
+
+                                if base_plot_type == 'fairmode-statsummary':
+                                    plot_element_str = canvas_instance.plotting.fairmode_statsummary_row_titles[
+                                        data_label][plot_element_i]
+                                else:
+                                    plot_element_str = (
+                                        f"{plot_element_i}" if len(
+                                            plot_elements) > 1 else ""
+                                    )
+                                filename = f"{plot_type}_{data_label}_{element_type}_{plot_element_str}"
                                 msgs = handle_test_or_save_df(
                                     read_instance,
                                     df,
@@ -1477,7 +1493,7 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
             for label, stats_list in boxplot_accumulator.items():
                 stats_list_sorted = sorted(stats_list)
                 data[label] = dict(zip(stats, stats_list_sorted))
-            
+
             df = pd.DataFrame(data)
             df = df.reset_index()
             filename = "boxplot"
@@ -1491,7 +1507,7 @@ def download_plot_data_to_csv(read_instance, canvas_instance, base_plot_type, pl
                 msgs,
                 decimal_places
             )
-            
+
         else:
             for (element_type, plot_element_i), df in combined_dfs.items():
                 df = df.reset_index()
