@@ -102,7 +102,7 @@ To be detected by Providentia, interpolated model data must follow this folder s
 
 - Standard non-interpolated models: `{model_id}/{domain}/{resolution}/{species}/{species_YYYYMM[DD].nc}`
 
-- Ensemble-stats species non-interpolated models: `{model_id}/{domain}/{resolution}/ensemble-stats/{species}_{ensemble_stat}_an/{species_YYYYMM[DD]_{ensemble_stat}_an.nc}`
+- Ensemble non-interpolated models: `{model_id}/{domain}/{resolution}/ensemble-stats/{species}_{ensemble_stat}/{species_YYYYMM[DD]_{ensemble_stat}.nc}`
 
 ### HPC non-interpolated downloads
 In some cases, model data exists in `esarchive`, but not all HPC machines have direct access to it. When interpolation needs to be performed on a machine without `esarchive` access, the model data must first be copied from `esarchive` to `gpfs`.
