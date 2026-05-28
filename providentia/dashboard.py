@@ -917,7 +917,9 @@ class Dashboard(QtWidgets.QWidget):
         if self.selected_statistic_aggregation in available_aggregation_statistics:
             self.cb_statistic_aggregation.setCurrentText(self.selected_statistic_aggregation)
         else:
-            if self.from_conf:
+            if self.selected_statistic_mode == 'Flattened':
+                self.selected_statistic_aggregation = self.cb_statistic_aggregation.currentText()
+            elif self.from_conf:
                 msg = f'Statistic aggregation {self.selected_statistic_aggregation} is not available.'
                 self.logger.error(msg)
                 sys.exit(1)
@@ -967,7 +969,9 @@ class Dashboard(QtWidgets.QWidget):
         if self.selected_timeseries_statistic_aggregation in available_timeseries_statistics:
             self.mpl_canvas.timeseries_stat.setCurrentText(self.selected_timeseries_statistic_aggregation)
         else:
-            if self.from_conf:
+            if self.selected_statistic_mode == 'Flattened':
+                self.selected_timeseries_statistic_aggregation = self.mpl_canvas.timeseries_stat.currentText()
+            elif self.from_conf:
                 msg = f'Timeseries statistic aggregation {self.selected_timeseries_statistic_aggregation} is not available.'
                 self.logger.error(msg)
                 sys.exit(1)

@@ -977,7 +977,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
             # check arrays needed for all statistics - if have a statistic that requires grouping, then need per_station array, 
             # if have a statistic that requires MDA8 or NStations then need per_station array, otherwise can just use active mode array
-            check_arrays = [('NStations' in zstat) or ('MDA8' in zstat) or (z_statistic_periods[ii] is not None) 
+            check_arrays = [('NStations' in zstat) or ('NUniqueStations' in zstat) or ('MDA8' in zstat) or (z_statistic_periods[ii] is not None) 
                             for ii, zstat in enumerate(zstats)]
 
             # need to load per station array?
