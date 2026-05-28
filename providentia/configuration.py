@@ -1311,11 +1311,12 @@ class ProvConfiguration:
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                 for inv_network in invalid_networks:
                     self.read_instance.network.remove(inv_network)
-            # exit if there are no valid networks left            
-            if not self.read_instance.network:
-                error = f"Error: No valid network for the current GHOST version ({self.read_instance.ghost_version})"
-                self.read_instance.logger.error(error)
-                sys.exit(1)
+            # exit if there are no valid networks left (not for download as having no networks is valid)            
+            if self.read_instance.mode != 'download':
+                if not self.read_instance.network:
+                    error = f"Error: No valid network for the current GHOST version ({self.read_instance.ghost_version})"
+                    self.read_instance.logger.error(error)
+                    sys.exit(1)
 
         # if number of networks and species is not the same,
         # and len of one of network or species == 1,

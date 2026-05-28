@@ -64,7 +64,8 @@
         "models": ["osuite", "osuite_24_48", "osuite_48_72", "osuite_72_96", "osuite_96_120",
                         "cntrl", "cntrl_24_48", "cntrl_48_72", "cntrl_72_96", "cntrl_96_120",
                         "sdswas", "sdswas_24_48", "sdswas_48_72",
-                        "icap", "icap_24_48", "icap_48_72", "icap_72_96", "icap_96_120"],
+                        "icap", "icap_24_48", "icap_48_72", "icap_72_96", "icap_96_120", 
+                        "osuite_du_ss"],
         "paths": [
             "/esarchive/exp/CAMS2_82/"
         ]

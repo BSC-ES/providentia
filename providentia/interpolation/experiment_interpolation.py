@@ -1415,27 +1415,30 @@ class ModelInterpolation(object):
         if MACHINE != 'local':
             set_file_permissions_ownership(netCDF_fname)
 
-        # copy file to esarchive (if have access)
+        # copy file to esarchive (if have access and is being written to exp_interp on gpfs)
         if MACHINE == 'nord4':
             
-            # set esarchive output dir
-            esarchive_output_dir = '/esarchive/recon/prov_interp/{}'.format('/'.join(netCDF_fname.split('/exp_interp/')[1].split('/')[:-1]))
+            # only do copy if file has being written to exp_interp default gpfs directory
+            if 'exp_interp' in netCDF_fname:
 
-            # check if need to create any directories in path
-            check_directory_existence(esarchive_output_dir, '/esarchive/recon/prov_interp')
+                # set esarchive output dir
+                esarchive_output_dir = '/esarchive/recon/prov_interp/{}'.format('/'.join(netCDF_fname.split('/exp_interp/')[1].split('/')[:-1]))
 
-            # set esarchive fname
-            esarchive_netCDF_fname = '{}/{}'.format(esarchive_output_dir, netCDF_fname.split('/')[-1])
-            
-            try:
-                # copy file (without permissions)
-                shutil.copyfile(netCDF_fname, esarchive_netCDF_fname)
+                # check if need to create any directories in path
+                check_directory_existence(esarchive_output_dir, '/esarchive/recon/prov_interp')
 
-                # give 770 permissions for file and make owner bsc32
-                set_file_permissions_ownership(esarchive_netCDF_fname)
-            except (PermissionError, FileNotFoundError) as e:
-                self.log_file_str += 'Interpolated file/s could not be copied to esarchive. Error: {}'.format(e)
-                create_output_logfile(1, self.log_file_str)
+                # set esarchive fname
+                esarchive_netCDF_fname = '{}/{}'.format(esarchive_output_dir, netCDF_fname.split('/')[-1])
+                
+                try:
+                    # copy file (without permissions)
+                    shutil.copyfile(netCDF_fname, esarchive_netCDF_fname)
+
+                    # give 770 permissions for file and make owner bsc32
+                    set_file_permissions_ownership(esarchive_netCDF_fname)
+                except (PermissionError, FileNotFoundError) as e:
+                    self.log_file_str += 'Interpolated file/s could not be copied to esarchive. Error: {}'.format(e)
+                    create_output_logfile(1, self.log_file_str)
 
 def create_output_logfile(process_code, log_file_str):
     """

@@ -288,11 +288,10 @@ class Download(object):
                     # BSC machines
                     else:
                         # iterate the models download
-                        for model in self.experiments.keys():
-                            initial_check_nc_files = download_model_fun(model, initial_check=True)
-                            files_to_download = self.select_files_to_download(initial_check_nc_files)
-                            if not initial_check_nc_files or files_to_download:
-                                download_model_fun(model, initial_check=False, files_to_download=files_to_download)
+                        initial_check_nc_files = download_model_fun(model, initial_check=True)
+                        files_to_download = self.select_files_to_download(initial_check_nc_files)
+                        if not initial_check_nc_files or files_to_download:
+                            download_model_fun(model, initial_check=False, files_to_download=files_to_download)
 
             # remove section variables from memory
             for k in self.section_opts:
