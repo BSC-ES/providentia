@@ -958,20 +958,13 @@ class Dashboard(QtWidgets.QWidget):
                 show_message(self, msg)
                 self.selected_periodic_statistic_mode = self.mpl_canvas.statsummary_periodic_mode.currentText()
 
-        # update timeseries statistic field
-        if self.selected_statistic_mode == 'Flattened':
-            available_timeseries_statistics = []
-        else:    
-            available_timeseries_statistics = ['Mean', 'Median', 'p1', 'p5', 'p10', 'p25', 'p75', 'p90', 'p95', 'p99']
-            if self.selected_timeseries_statistic_aggregation == '':
-                self.selected_timeseries_statistic_aggregation = available_timeseries_statistics[1]
+        # update timeseries statistic aggregation field  
+        available_timeseries_statistics = ['Mean', 'Median', 'p1', 'p5', 'p10', 'p25', 'p75', 'p90', 'p95', 'p99']
         self.mpl_canvas.timeseries_stat.addItems(available_timeseries_statistics)
         if self.selected_timeseries_statistic_aggregation in available_timeseries_statistics:
             self.mpl_canvas.timeseries_stat.setCurrentText(self.selected_timeseries_statistic_aggregation)
         else:
-            if self.selected_statistic_mode == 'Flattened':
-                self.selected_timeseries_statistic_aggregation = self.mpl_canvas.timeseries_stat.currentText()
-            elif self.from_conf:
+            if self.from_conf:
                 msg = f'Timeseries statistic aggregation {self.selected_timeseries_statistic_aggregation} is not available.'
                 self.logger.error(msg)
                 sys.exit(1)
