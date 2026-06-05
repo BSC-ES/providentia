@@ -650,7 +650,8 @@ standard_networks = {
 'WMO_WDCGG':        {'file_storage_type':'site_per_multiyear', 'external_metadata_files':[''],                                                          'metadata_data_join_variable_name':'',          'data_level_hierarchy':{'none':1}},
 'WMO_WDCPC':        {'file_storage_type':'site_per_multiyear', 'external_metadata_files':['WMO_WDCPC_META.json'],                                       'metadata_data_join_variable_name':'',          'data_level_hierarchy':{'none':1}},
 'GHOST':            {},
-'GHOST-PUBLIC':     {}
+'GHOST-PUBLIC':     {},
+'XVPCA':     {}
 }
 
 ###--------------------------------------------------------------------------------------------------###
