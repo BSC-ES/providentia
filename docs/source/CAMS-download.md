@@ -112,7 +112,7 @@ These are the available species:
 
 > Providentia can only read species in GHOST format. If you want to know the mapping from CAMS variables to GHOST species, please refer to the [CAMS-GHOST species mapping](#cams-ghost-species-mapping) section.
 
-### Assumptions
+### Fixed Download Settings
 
 Providentia assumes the following fixed values when downloading data:
 
@@ -280,7 +280,7 @@ Whether the data is single or multi depends on the selected species. These are t
 
 > Providentia can only read species in GHOST format. If you want to know the mapping from CAMS variables to GHOST species, please refer to the [CAMS-GHOST species mapping](#cams-ghost-species-mapping) section.
 
-### Assumptions
+### Fixed Download Settings
 
 Providentia assumes the following fixed values when downloading data:
 
@@ -360,9 +360,9 @@ Using this dataset you can download **Regional Reanalysis data**.
 
 This dataset contains multi-level data.
 
-Only hourly data is available in this dataset. You must set `resolution = hourly` in your configuration file; otherwise, the download will not work.
+### Mandatory fields
 
-### Mandatory fields for regional reanalysis data
+Only hourly regional data is available in this dataset. You must set `resolution = hourly` and `domain = regional` in your configuration file; otherwise, the download will not work.
 
 ```ini
 model = cams_reanalysis_<model>_<stream>
@@ -417,7 +417,7 @@ These are the available species:
 
 > Providentia can only read species in GHOST format. If you want to know the mapping from CAMS variables to GHOST species, please refer to the [CAMS-GHOST species mapping](#cams-ghost-species-mapping) section.
 
-### Assumptions
+### Fixed Download Settings
 
 Providentia assumes the following fixed values when downloading data:
 
@@ -485,9 +485,9 @@ Using this dataset you can download **Global Reanalysis data**.
 
 This dataset contains both single-level and multi-level data.
 
-Only 3hourly data is available in this dataset. You must set `resolution = 3hourly` in your configuration file; otherwise, the download will not work.
+### Mandatory fields
 
-### Mandatory fields for regional reanalysis data
+Only 3hourly global data is available in this dataset. You must set `resolution = 3hourly` and `domain = global` in your configuration file; otherwise, the download will not work.
 
 ```ini
 model = cams_reanalysis
@@ -540,7 +540,7 @@ Whether the data is single or multi depends on the selected species. These are t
 
 > Providentia can only read species in GHOST format. If you want to know the mapping from CAMS variables to GHOST species, please refer to the [CAMS-GHOST species mapping](#cams-ghost-species-mapping) section.
 
-### Assumptions
+### Fixed Download Settings
 
 Providentia assumes the following fixed values when downloading data:
 

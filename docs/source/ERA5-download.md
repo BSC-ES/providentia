@@ -8,7 +8,7 @@ and the **Simulation and Data Laboratory 'Climate Science'** (SDL) at the Jülic
 
 [https://datapub.fz-juelich.de/slcs/](https://datapub.fz-juelich.de/slcs/)
 
-An ECMWF account is required to download the files. For a tutorial on how to create and set up your account, see the [Start downloading ECMWF data](#Start-downloading-ECMWF-data) page.
+An ECMWF account is required when downloading ERA5 data from the CDS. For a tutorial on how to create and set up your account, see the [Start downloading ECMWF data](#Start-downloading-ECMWF-data) page.
 
 Data requests may take some time to complete. After starting a request from Providentia, you can monitor its progress by following the steps described in the [Check ECMWF download](#Check-ECMWF-download) page.
 
@@ -39,7 +39,6 @@ Answer `n` to the prompt:
 
 _"Model data was detected in the configuration file. Do you want to download the interpolated version? (Otherwise, the non-interpolated model data will be downloaded)"_
 
-
 ## 1. ERA5 hourly data on single levels from 1940 to present
 
 [Dataset Link](https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels?tab=overview)
@@ -48,9 +47,9 @@ Using this dataset you can download **Global Reanalysis data**.
 
 This dataset contains single-level data.
 
-Only hourly data is available in this dataset. You must set `resolution = hourly` in your configuration file; otherwise, the download will not work.
+### Mandatory fields
 
-### Mandatory fields for regional reanalysis data
+Only hourly global data is available in this dataset. You must set `resolution = hourly` and `domain = global` in your configuration file; otherwise, the download will not work.
 
 ```ini
 model = era5_reanalysis
@@ -89,9 +88,11 @@ These are the available species:
 
 > Providentia can only read species in GHOST format. If you want to know the mapping from CDS ERA5 variables to GHOST species, please refer to the [CDS ERA5-GHOST species mapping](#cds-era5-ghost-species-mapping) section.
 
-### Product Species
+### Fixed Download Settings
 
-There are five derived variables computed from two ERA5 variables. When downloading one of these, the two original variables are also downloaded, formatted and saved together with the final result.
+Providentia assumes the following fixed values when downloading data:
+
+* `product_type = reanalysis`
 
 ### Product Species
 
@@ -197,9 +198,9 @@ Using this dataset you can download **Global Tropopause Reanalysis data**.
 
 This dataset contains single-level data.
 
-Only hourly data is available in this dataset. You must set `resolution = hourly` in your configuration file; otherwise, the download will not work.
+### Mandatory fields
 
-### Mandatory fields for regional reanalysis data
+Only hourly global data is available in this dataset. You must set `resolution = hourly` and `domain = global` in your configuration file; otherwise, the download will not work.
 
 ```ini
 model = era5_tropopause
@@ -217,6 +218,10 @@ These are the available species:
 * `tphwmo2`
 
 > Providentia can only read species in GHOST format. If you want to know the mapping from SDL ERA5 variables to GHOST species, please refer to the [SDL ERA5-GHOST species mapping](#sdl-era5-ghost-species-mapping) section.
+
+### Fixed Download Settings
+
+Providentia downloads tropopause data from the `v2/` directory.
 
 ## CDS ERA5-GHOST species mapping
 
