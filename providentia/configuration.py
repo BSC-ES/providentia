@@ -1312,7 +1312,7 @@ class ProvConfiguration:
                 for inv_network in invalid_networks:
                     self.read_instance.network.remove(inv_network)
             # exit if there are no valid networks left (not for download as having no networks is valid)            
-            if self.read_instance.mode != 'download':
+            if self.read_instance.mode not in ['download', 'library']:
                 if not self.read_instance.network:
                     error = f"Error: No valid network for the current GHOST version ({self.read_instance.ghost_version})"
                     self.read_instance.logger.error(error)
@@ -1649,7 +1649,8 @@ class ProvConfiguration:
                 self.read_instance.qa_per_species = {speci:get_default_qa(self.read_instance, speci) 
                                                     for speci in species_plus_filter_species}
                 # set qa to be first of qa per species pairs
-                self.read_instance.qa = self.read_instance.qa_per_species[list(self.read_instance.qa_per_species.keys())[0]]
+                if len(self.read_instance.qa_per_species) > 0:
+                    self.read_instance.qa = self.read_instance.qa_per_species[list(self.read_instance.qa_per_species.keys())[0]]
             else:
                 self.read_instance.qa_per_species = {speci:self.read_instance.qa for speci in species_plus_filter_species}
 
