@@ -143,6 +143,14 @@ class Cams(object):
         # convert the selected dates to datetetime
         cams_start_date = datetime.strptime(self.download_instance.start_date, "%Y%m%d")
         cams_end_date = datetime.strptime(self.download_instance.end_date, "%Y%m%d") - timedelta(days=1)
+
+        # download N days ahead for forecast
+        cams_start_date = cams_start_date - timedelta(days=cams_dict['lookahead_days'])
+        
+        # warn the user that download is going to be for N days before
+        if cams_dict['lookahead_days'] > 0:
+            msg = f"Model data will be downloaded {cams_dict['lookahead_days']} day(s) in advance relative to the configured date."
+            show_message(self.download_instance, msg, deactivate=initial_check)
         
         # normalize all to UTC
         min_start_date = min_start_date.astimezone(timezone.utc) if min_start_date.tzinfo else min_start_date.replace(tzinfo=timezone.utc)
@@ -885,19 +893,11 @@ class Cams(object):
             return
     
         # make the necessary checks to the dates
-        original_cams_start_date, cams_end_date = self.control_dates(url, cams_dict, initial_check)
+        cams_start_date, cams_end_date = self.control_dates(url, cams_dict, initial_check)
 
         # stop download if the dates are not correct
-        if original_cams_start_date is None and cams_end_date is None:
+        if cams_start_date is None and cams_end_date is None:
             return
-        
-        # download N days ahead for forecast
-        cams_start_date = original_cams_start_date - timedelta(days=cams_dict['lookahead_days'])
-        
-        # warn the user that download is going to be for N days before
-        if cams_dict['lookahead_days'] > 0:
-            msg = f"Model data will be downloaded {cams_dict['lookahead_days']} day(s) in advance relative to the configured date."
-            show_message(self.download_instance, msg, deactivate=initial_check)
         
         # initialise list with all the nc files to be downloaded
         initial_check_nc_files = []
@@ -971,7 +971,7 @@ class Cams(object):
 
                     # initialize iterators controlers
                     current_cams_date = cams_start_date
-                    next_cams_date = original_cams_start_date.replace(day=1) + relativedelta(months=1) - timedelta(days=1)
+                    next_cams_date = cams_start_date.replace(day=1) + relativedelta(months=1) - timedelta(days=1)
 
                     while current_cams_date <= cams_end_date:
 
