@@ -1,210 +1,202 @@
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/24/YQ/Y5/24YQ-Y5MZ.nc:
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/69/SU/45/69SU-45MX.nc:
   ebas_data_level: '2'
-  ebas_instrument_name: tekran_59
-  ebas_method_ref: NO01L_cvafs
-  ebas_revision_date: '20240419113335'
-  ebas_station_altitude: 1553.0 m
-  ebas_station_code: NO0059G
-  ebas_station_latitude: '-72.0117'
-  ebas_station_longitude: '2.5351'
+  ebas_instrument_name: Tekran1
+  ebas_method_ref: DK01L_Tekran
+  ebas_revision_date: '2025-01-16T11:50:11.137257Z'
+  ebas_station_altitude: 20.0 m
+  ebas_station_code: DK0010G
+  ebas_station_latitude: 81.6
+  ebas_station_longitude: -16.67
   ebas_statistics: arithmetic mean
   resolution: hourly
-  time_coverage_end: 2024-01-01T00:00:00 UTC
-  time_coverage_start: 2017-01-01T00:00:00 UTC
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2000-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
-  - mercury_GEM
-  - mercury_GEM_qc
-  - mercury_GEM_ebasmetadata
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/5W/EA/JE/5WEA-JE2K.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: tekran_73
-  ebas_method_ref: NO01L_cvafs
-  ebas_revision_date: '20240419113340'
-  ebas_station_altitude: 24.0 m
-  ebas_station_code: NO0073U
-  ebas_station_latitude: '59.923051'
-  ebas_station_longitude: '10.765743'
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: 2024-01-01T00:00:00 UTC
-  time_coverage_start: 2022-02-08T16:00:00 UTC
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - mercury_GEM
-  - mercury_GEM_qc
-  - mercury_GEM_ebasmetadata
+  - v_mercury_GEM
+  - qc_mercury_GEM
+  - meta_mercury_GEM
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/6X/E8/9M/6XE8-9MMD.nc:
   ebas_data_level: '2'
   ebas_instrument_name: tekran_01
   ebas_method_ref: NO01L_cvafs
-  ebas_revision_date: '20140501000000'
+  ebas_revision_date: '2022-11-16T13:45:59.117153Z'
   ebas_station_altitude: 190.0 m
   ebas_station_code: NO0001R
-  ebas_station_latitude: '58.383333'
-  ebas_station_longitude: '8.25'
+  ebas_station_latitude: 58.383333
+  ebas_station_longitude: 8.25
   ebas_statistics: arithmetic mean
   resolution: hourly
-  time_coverage_end: 2011-01-01T00:00:00 UTC
-  time_coverage_start: 2006-01-01T00:00:00 UTC
+  time_coverage_end: '2011-01-01T00:00:00Z'
+  time_coverage_start: '2006-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
-  - mercury_GEM
-  - mercury_GEM_qc
-  - mercury_GEM_ebasmetadata
+  - v_mercury_GEM
+  - qc_mercury_GEM
+  - meta_mercury_GEM
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/72/QH/ZV/72QH-ZV2T.nc:
   ebas_data_level: '2'
   ebas_instrument_name: tekran_58
   ebas_method_ref: NO01L_cvafs
-  ebas_revision_date: '20221122111742'
+  ebas_revision_date: '2022-11-22T11:17:42.470338Z'
   ebas_station_altitude: 1309.0 m
   ebas_station_code: NO0058G
-  ebas_station_latitude: '-72.016667'
-  ebas_station_longitude: '2.533333'
+  ebas_station_latitude: -72.016667
+  ebas_station_longitude: 2.533333
   ebas_statistics: arithmetic mean
   resolution: hourly
-  time_coverage_end: 2017-01-01T00:00:00 UTC
-  time_coverage_start: 2007-02-11T19:00:00 UTC
+  time_coverage_end: '2017-01-01T00:00:00Z'
+  time_coverage_start: '2007-02-11T19:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
-  - mercury_GEM
-  - mercury_GEM_qc
-  - mercury_GEM_ebasmetadata
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/AU/8P/46/AU8P-462A.nc:
+  - v_mercury_GEM
+  - qc_mercury_GEM
+  - meta_mercury_GEM
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AY/GU/QG/AYGU-QGNM.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Hg01
   ebas_method_ref: GB03L_Hg_online_1
-  ebas_revision_date: '20241007094554'
+  ebas_revision_date: '2025-09-29T11:52:26.555862Z'
   ebas_station_altitude: 260.0 m
   ebas_station_code: GB0048R
-  ebas_station_latitude: '55.79216'
-  ebas_station_longitude: '-3.2429'
+  ebas_station_latitude: 55.79216
+  ebas_station_longitude: -3.2429
   ebas_statistics: arithmetic mean
   resolution: 3hourly
-  time_coverage_end: 2023-12-31T21:00:00 UTC
-  time_coverage_start: 2012-01-01T00:10:00 UTC
+  time_coverage_end: '2025-01-01T01:00:00Z'
+  time_coverage_start: '2015-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
-  - mercury_GEM
-  - mercury_GEM_qc
-  - mercury_GEM_ebasmetadata
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/G3/PF/54/G3PF-542S.nc:
+  - v_mercury_GEM
+  - qc_mercury_GEM
+  - meta_mercury_GEM
+  - v_mercury_GOM
+  - qc_mercury_GOM
+  - meta_mercury_GOM
+  - v_mercury_PBM
+  - qc_mercury_PBM
+  - meta_mercury_PBM
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FK/NQ/PR/FKNQ-PRXE.nc:
   ebas_data_level: '2'
-  ebas_instrument_name: tekran_01
-  ebas_method_ref: NO01L_cvafs
-  ebas_revision_date: '20240419113313'
-  ebas_station_altitude: 219.0 m
-  ebas_station_code: NO0002R
-  ebas_station_latitude: '58.38853'
-  ebas_station_longitude: '8.252'
+  ebas_instrument_name: Hg01
+  ebas_method_ref: GB03L_Hg_online_1
+  ebas_revision_date: '2024-10-07T09:45:27.091811Z'
+  ebas_station_altitude: 260.0 m
+  ebas_station_code: GB0048R
+  ebas_station_latitude: 55.79216
+  ebas_station_longitude: -3.2429
+  ebas_statistics: arithmetic mean
+  resolution: 3hourly
+  time_coverage_end: '2014-12-31T23:00:00Z'
+  time_coverage_start: '2012-01-01T00:10:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_mercury_GEM
+  - qc_mercury_GEM
+  - meta_mercury_GEM
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/M9/2G/R9/M92G-R9QQ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Tekran_Rao
+  ebas_method_ref: SE01L_AH
+  ebas_revision_date: '2025-11-04T14:14:11.018547Z'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: SE0014R
+  ebas_station_latitude: 57.394
+  ebas_station_longitude: 11.914
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-00T04:00:00)
+  time_coverage_end: '2024-12-31T23:40:00Z'
+  time_coverage_start: '2021-01-01T01:40:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_mercury_GEM
+  - qc_mercury_GEM
+  - meta_mercury_GEM
+  - v_mercury_GOM
+  - qc_mercury_GOM
+  - meta_mercury_GOM
+  - v_mercury_PBM
+  - qc_mercury_PBM
+  - meta_mercury_PBM
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VH/F8/CW/VHF8-CWDM.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: LEGMC_Lumex_RA915_145
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: LV33L_chem_analyzer
+  ebas_revision_date: '2024-07-26T00:00:00.000000Z'
+  ebas_station_altitude: 18.0 m
+  ebas_station_code: LV0010R
+  ebas_station_latitude: 56.161944
+  ebas_station_longitude: 21.173056
   ebas_statistics: arithmetic mean
   resolution: hourly
-  time_coverage_end: 2024-01-01T00:00:00 UTC
-  time_coverage_start: 2011-01-01T00:00:00 UTC
+  time_coverage_end: '2023-12-31T23:51:35Z'
+  time_coverage_start: '2023-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
-  - mercury_GEM
-  - mercury_GEM_qc
-  - mercury_GEM_ebasmetadata
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/GT/KB/VA/GTKB-VAUN.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: Tekran1
-  ebas_method_ref: DK01L_Tekran
-  ebas_revision_date: '20250116114913'
-  ebas_station_altitude: 20.0 m
-  ebas_station_code: DK0010G
-  ebas_station_latitude: '81.6'
-  ebas_station_longitude: '-16.67'
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: 2023-07-01T00:00:00 UTC
-  time_coverage_start: 2000-01-01T00:00:00 UTC
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - mercury_GEM
-  - mercury_GEM_qc
-  - mercury_GEM_ebasmetadata
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/SC/JY/28/SCJY-286S.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: tekran_42
-  ebas_method_ref: NO01L_cvafs
-  ebas_revision_date: '20240419113321'
-  ebas_station_altitude: 474.0 m
-  ebas_station_code: NO0042G
-  ebas_station_latitude: '78.90715'
-  ebas_station_longitude: '11.88668'
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: 2024-01-01T00:00:00 UTC
-  time_coverage_start: 2000-02-08T09:00:00 UTC
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - mercury_GEM
-  - mercury_GEM_qc
-  - mercury_GEM_ebasmetadata
+  - v_mercury_GEM
+  - qc_mercury_GEM
+  - meta_mercury_GEM
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/WM/KP/PH/WMKP-PHHQ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: tekran_382
   ebas_method_ref: NO01L_cvafs
-  ebas_revision_date: '20100120000000'
+  ebas_revision_date: '2022-11-22T11:36:19.436125Z'
   ebas_station_altitude: 128.0 m
   ebas_station_code: NO0382R
-  ebas_station_latitude: '60.766667'
-  ebas_station_longitude: '10.816667'
+  ebas_station_latitude: 60.766667
+  ebas_station_longitude: 10.816667
   ebas_statistics: arithmetic mean
   resolution: hourly
-  time_coverage_end: 2009-07-01T08:00:00 UTC
-  time_coverage_start: 2007-03-23T16:00:00 UTC
+  time_coverage_end: '2009-07-01T08:00:00Z'
+  time_coverage_start: '2007-03-23T16:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
-  - mercury_GEM
-  - mercury_GEM_qc
-  - mercury_GEM_ebasmetadata
+  - v_mercury_GEM
+  - qc_mercury_GEM
+  - meta_mercury_GEM
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/Z7/FD/ZY/Z7FD-ZYWM.nc:
   ebas_data_level: '2'
   ebas_instrument_name: tekran_90
   ebas_method_ref: NO01L_cvafs
-  ebas_revision_date: '20221122103858'
+  ebas_revision_date: '2022-11-22T10:38:58.920501Z'
   ebas_station_altitude: 380.0 m
   ebas_station_code: NO0090R
-  ebas_station_latitude: '69.278333'
-  ebas_station_longitude: '16.011666'
+  ebas_station_latitude: 69.278333
+  ebas_station_longitude: 16.011666
   ebas_statistics: arithmetic mean
   resolution: hourly
-  time_coverage_end: 2022-01-01T00:00:00 UTC
-  time_coverage_start: 2004-03-08T16:00:00 UTC
+  time_coverage_end: '2022-01-01T00:00:00Z'
+  time_coverage_start: '2004-03-08T16:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
-  - mercury_GEM
-  - mercury_GEM_qc
-  - mercury_GEM_ebasmetadata
+  - v_mercury_GEM
+  - qc_mercury_GEM
+  - meta_mercury_GEM

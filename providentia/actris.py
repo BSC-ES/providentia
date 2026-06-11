@@ -541,7 +541,8 @@ class Actris:
             # open file
             try:
                 ds = Dataset(file)
-            except:
+            except Exception as error:
+                print('There was an error opening the file {}: {}. Ignoring file.'.format(file, error))
                 continue
 
             # get resolution
@@ -561,12 +562,23 @@ class Actris:
                         'ebas_instrument_name', 'ebas_method_ref', 'ebas_revision_date',
                         'ebas_station_code']:
                 if var in ds.ncattrs():
-                    files_info[file][var] = ds.getncattr(var)
-
-            if "Wavelength" in files_info[file]['variables']:
-                wavelengths = ds.variables["Wavelength"][:]
-                wavelengths = [float(w) for w in wavelengths]
-                files_info[file]['wavelengths'] = wavelengths
+                    value = ds.getncattr(var)
+                    # convert numpy scalars to Python scalars
+                    if hasattr(value, "item"):
+                        value = value.item()
+                    files_info[file][var] = value
+            
+            wavelength_vars = ["Wavelength", "Wavelengthx", "d_Wavelength", "d_Wavelengthx"]
+            available_vars = files_info[file]["variables"]
+            var_name = next((v for v in wavelength_vars if v in available_vars), None)
+            if var_name:
+                try:
+                    wavelengths = ds.variables[var_name][:]
+                    wavelengths = [wl.item() if hasattr(wl, "item") else wl for wl in wavelengths]
+                    files_info[file]['wavelengths'] = wavelengths
+                except Exception as error:
+                    print('There was an error reading wavelengths from variable {} in file {}: {}. Ignoring file.'.format(var_name, file, error))
+                    continue
 
         # create file
         datasets = {
@@ -586,7 +598,7 @@ class Actris:
         return files_info
 
 
-    def get_var_in_file(self, ds, var, actris_parameter, ebas_component):
+    def get_var_in_file(self, ds, possible_vars):
         """
         Get variable name from dataset
 
@@ -594,12 +606,8 @@ class Actris:
         ----------
         ds : xarray.Dataset
             Dataset
-        var : str
-            GHOST variable name
-        actris_parameter : str
-            ACTRIS vocabulary name
-        ebas_component : str
-            EBAS vocabulary name
+        possible_vars : list
+            Accepted variable names
 
         Returns
         -------
@@ -609,15 +617,6 @@ class Actris:
             Actual variable name found in dataset
         """
 
-        unformatted_units = variable_mapping[actris_parameter]['units']
-        units = unformatted_units.replace('/', '_per_').replace(' ', '_')
-        units_var = f'{ebas_component}_{units}'
-        possible_vars = [ebas_component,
-                        f'{ebas_component}_amean',
-                        units_var,
-                        f'{units_var}_amean']
-        if var in ['sconcso4', 'precso4']:
-            possible_vars.append(f'sulphate_corrected_{units}')
         da_var_exists = False
         for possible_var in possible_vars:
             if possible_var in ds:
@@ -628,7 +627,7 @@ class Actris:
         if not da_var_exists:
             return None
 
-        return possible_vars, possible_var
+        return possible_var
 
     def select_station_file(self, urls, files_info):
         """
@@ -699,7 +698,16 @@ class Actris:
             urls_revision_dates = np.unique(attrs_dict['ebas_revision_date'])
             # if we have different revision dates
             if len(urls_revision_dates) > 1:
-                is_most_recent = attrs_dict['ebas_revision_date'] == attrs_dict['ebas_revision_date'][np.argmax(np.float32(attrs_dict['ebas_revision_date']))]
+                revision_dates = np.array([
+                    datetime.datetime.fromisoformat(
+                        d.replace(' UTC', '').replace('Z', '')
+                    )
+                    for d in attrs_dict['ebas_revision_date']
+                ])
+                is_most_recent = (
+                    attrs_dict['ebas_revision_date']
+                    == attrs_dict['ebas_revision_date'][np.argmax(revision_dates)]
+                )   
                 
                 # remove urls if they aren't the most recent
                 for attr in ['ebas_statistics', 'ebas_data_level', 'ebas_revision_date']:
@@ -755,10 +763,10 @@ class Actris:
         """
 
         (i, station, urls, data_shape, flag_shape, qa_shape,
-        metadata_shape, files_info, var, actris_parameter, ebas_component,
+        metadata_shape, files_info, var, actris_parameter,
         target_start_date, target_end_date,
         variable_mapping, metadata_dict, standard_time_pairs,
-        vfunc, ghost_version) = args
+        vfunc, ghost_version, possible_vars) = args
 
         local_errors = ""
         local_warnings = ""
@@ -783,7 +791,7 @@ class Actris:
             local_errors = f'Opening file: {error}.'
             return url, station, local_errors, local_warnings
         
-        possible_vars, possible_var = self.get_var_in_file(ds, var, actris_parameter, ebas_component)
+        possible_var = self.get_var_in_file(ds, possible_vars)
         if possible_var is None:
             local_errors = f'No variable name matches for {possible_vars}. Existing keys: {list(ds.data_vars)}.'
             return url, station, local_errors, local_warnings
@@ -798,38 +806,52 @@ class Actris:
             return url, station, local_errors, local_warnings
 
         # rename qc dimension
-        ds = ds.rename_dims({f'{possible_var}_qc_flags': 'N_flag_codes'})
+        possible_qc_flags_names = [
+            f"{possible_var}_qc_flags",      # example: v_ozone_ug_per_m3_qc_flags
+            f"qc_{possible_var[2:]}_flags",  # example: qc_ozone_ug_per_m3_flags (if possible_var starts with "v_")
+        ]
+        for original_qc_flag_name in possible_qc_flags_names:
+            if original_qc_flag_name in ds.dims:
+                ds = ds.rename_dims({original_qc_flag_name: "N_flag_codes"})
+                break
 
         # get lowest level if tower height is in coordinates
         if 'Tower_inlet_height' in list(ds.coords):
             local_warnings += f'Taking data from first height (Tower_inlet_height={min(ds.Tower_inlet_height.values)}). '
             ds = ds.sel(Tower_inlet_height=min(
                 ds.Tower_inlet_height.values), drop=True)
+            
+        # possible wavelength coordinate names in priority order
+        wavelength_coords = [
+            "Wavelength",
+            "Wavelengthx",
+            "d_Wavelength",
+            "d_Wavelengthx",
+        ]
 
-        # get data at desired wavelength if wavelength is in coordinates
-        if 'Wavelength' in list(ds[possible_var].coords) or 'Wavelengthx' in list(ds[possible_var].coords):
-            # Select most common wavelength for black carbon (name does not provide it)
-            if var == 'sconcbc':
+        coords = ds[possible_var].coords
+
+        # detect which wavelength coordinate exists
+        coord_name = next((c for c in wavelength_coords if c in coords), None)
+
+        if coord_name:
+            # select most common wavelength for black carbon as variable has no wavelength in name
+            if var == "sconcbc":
                 wavelength = 880
-                local_warnings += f'Wavelength appears in dimensions. Selected wavelength: {wavelength}. '
-            # Get wavelength from variable name for other variables
+                local_warnings += (
+                    f"Wavelength appears in dimensions. Selected wavelength: {wavelength}. "
+                )
+            # for the rest, get wavelength from variable name
             else:
-                wavelength = float(re.findall(r'\d+', var)[0])
+                wavelength = float(re.findall(r"\d+", var)[0])
 
-            # Select data for wavelength
-            found_wavelength = False
-            if 'Wavelengthx' in list(ds[possible_var].coords):
-                if wavelength in ds.Wavelengthx.values:
-                    ds = ds.sel(Wavelengthx=wavelength, drop=True)
-                    found_wavelength = True
-                else:
-                    existing_wavelengths = ds.Wavelengthx.values
-            elif 'Wavelength' in list(ds[possible_var].coords):
-                if wavelength in ds.Wavelength.values:
-                    ds = ds.sel(Wavelength=wavelength, drop=True)
-                    found_wavelength = True
-                else:
-                    existing_wavelengths = ds.Wavelength.values
+            coord = ds[coord_name]
+
+            if wavelength in coord.values:
+                ds = ds.sel({coord_name: wavelength}, drop=True)
+                found_wavelength = True
+            else:
+                existing_wavelengths = coord.values
 
             if not found_wavelength:
                 local_warnings += f'Data at {wavelength}nm could not be found. Existing wavelengths: {existing_wavelengths}. '
@@ -854,12 +876,21 @@ class Actris:
         da_var.attrs = {key: value for key,
                         value in da_var.attrs.items() if key in ['ebas_unit', 'ebas_station_code']}
         
-        # read quality control data
-        try:
-            flag_data = ds[f'{possible_var}_qc'].transpose(
-                "time", "N_flag_codes")
-        except:
-            local_errors = "Flag data could not be transposed."
+        # get quality control data
+        flag_data = None
+        possible_qc_names = [
+            f'{possible_var}_qc',            # example: ozone_ug_per_m3_qc
+            f"qc_{possible_var[2:]}",        # example: qc_ozone_ug_per_m3 (if possible_var starts with "v_")
+        ]
+        for original_qc_name in possible_qc_names:
+            if original_qc_name in ds.data_vars:
+                # read quality control data and transpose
+                flag_data = ds[original_qc_name].transpose(
+                    "time", "N_flag_codes")
+                break
+
+        if flag_data is None:
+            local_errors = "Flag data could not be extracted."
             return url, station, local_errors, local_warnings
 
         # rename variable to BSC standards
@@ -1076,9 +1107,6 @@ class Actris:
 
         start = time.time()
 
-        # get EBAS component
-        ebas_component = variable_mapping[actris_parameter]['var']
-
         # get valid dates frequency
         if self.resolution == 'hourly':
             frequency = 'h'
@@ -1121,16 +1149,29 @@ class Actris:
             shared_metadata[ghost_key] = multiprocessing.RawArray(ctypes.c_char, int(np.prod(
                 metadata_shape)*75))
 
+        # get possible variable names
+        unformatted_units = variable_mapping[actris_parameter]['units']
+        units = unformatted_units.replace('/', '_per_').replace(' ', '_')
+        ebas_component = variable_mapping[actris_parameter]['var']
+        units_var = f'{ebas_component}_{units}'
+        possible_vars = [ebas_component,
+                        f'{ebas_component}_amean',
+                        units_var,
+                        f'{units_var}_amean']
+        if var in ['sconcso4', 'precso4']:
+            possible_vars.append(f'sulphate_corrected_{units}')
+        possible_vars += [f'v_{possible_var}' for possible_var in possible_vars]
+        
         # read data and metadata in parallel
         errors = []
         warnings = []
         args_list = [
             (
                 i, station, urls, data_shape, flag_shape, qa_shape, metadata_shape,
-                files_info, var, actris_parameter, ebas_component,
+                files_info, var, actris_parameter, 
                 target_start_date, target_end_date,
                 variable_mapping, metadata_dict, standard_time_pairs,
-                vfunc, self.download_instance.ghost_version
+                vfunc, self.download_instance.ghost_version, possible_vars
             )
             for i, (station, urls) in enumerate(files.items())
         ]
@@ -1261,7 +1302,7 @@ class Actris:
         combined_ds.attrs['domain'] = 'Atmosphere'
         combined_ds.attrs['observed_layer'] = 'Land surface'
 
-        print('{} seconds'.format(time.time()-start))
+        # print('{} seconds'.format(time.time()-start))
 
         return combined_ds
 
@@ -1304,6 +1345,26 @@ class Actris:
 
         return paths
 
+    def get_date_as_datetime(self, date):
+        """Get string date as datetime
+
+        Parameters
+        ----------
+        date : str
+            Date
+
+        Returns
+        -------
+        datetime.datetime
+            Date
+        """
+        for fmt in ("%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%dT%H:%M:%S UTC"):
+            try:
+                return datetime.datetime.strptime(date, fmt)
+            except ValueError:
+                pass
+        return None 
+    
     def download_actris_data(self):
         """
         Download ACTRIS data
@@ -1401,8 +1462,19 @@ class Actris:
             files = {}
             for file, attributes in files_info.items():
                 if attributes["resolution"] == self.resolution:
-                    start_date = datetime.datetime.strptime(attributes["time_coverage_start"], "%Y-%m-%dT%H:%M:%S UTC")
-                    end_date = datetime.datetime.strptime(attributes["time_coverage_end"], "%Y-%m-%dT%H:%M:%S UTC")
+                    
+                    # read start date
+                    start_date = self.get_date_as_datetime(attributes["time_coverage_start"])
+                    if start_date is None:
+                        self.download_instance.logger.error(f'Unsupported start date format: {attributes["time_coverage_start"]} for file {file}.')
+                        continue
+                
+                    # read end date
+                    end_date =  self.get_date_as_datetime(attributes["time_coverage_end"])  
+                    if end_date is None:
+                        self.download_instance.logger.error(f'Unsupported end date format: {attributes["time_coverage_end"]} for file {file}.')
+                        continue
+
                     for file_to_download in files_to_download:
                         file_to_download_yearmonth = file_to_download.split(f'{var}_')[1].split('.nc')[0]
                         file_to_download_start_date = datetime.datetime.strptime(file_to_download_yearmonth, "%Y%m")

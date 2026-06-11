@@ -100,13 +100,13 @@ species_list=(
     # "wetmn" # Review station selection -> Same station with different months, but one gets selected
     # "wetpb" 
     # "wetv" 
-    # "wetzn",
+    # "wetzn"
     # "sconcald2" # GHOST version >= 1.6
     # "sconcetoh" # GHOST version >= 1.6
     # "sconcglyox" # GHOST version >= 1.6
     # "sconchggem" # GHOST version >= 1.6
     # "sconchggom" # GHOST version >= 1.6
-     "sconchgtgm" # GHOST version >= 1.6
+    "sconchgtgm" # GHOST version >= 1.6
 )
 
 cd /home/avilanov/software/providentia
@@ -114,6 +114,15 @@ cd /home/avilanov/software/providentia
 # Run for each species
 for species in "${species_list[@]}"; do
     echo "Running for species: $species"
-    ./bin/providentia --conf=tests_actris.conf --species="\"$species\"" --dl
-    ./bin/providentia --conf=tests_actris.conf --species="\"$species\"" --report
+    case "$species" in
+        sconcald2|sconcetoh|sconcglyox|sconchggem|sconchggom|sconchgtgm)
+            extra_args="--ghost_version=1.6"
+            ;;
+        *)
+            extra_args=""
+            ;;
+    esac
+    ./bin/providentia --conf=tests_actris.conf --species="\"$species\"" --dl $extra_args
+    # ./bin/providentia --conf=tests_actris.conf --species="\"$species\"" --report $extra_args
+
 done
