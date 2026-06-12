@@ -268,8 +268,16 @@ class DataFilter:
             keeps = self.read_instance.period_menu['checkboxes']['keep_selected']
             removes = self.read_instance.period_menu['checkboxes']['remove_selected']
         
+        available_values = ['Daytime', 'Nighttime', 'Weekday', 'Weekend', 'Spring', 'Summer', 'Autumn', 'Winter']
+
         # filter/limit data for periods selected
         if len(keeps) > 0:
+            for keep in keeps:
+                if keep not in available_values:
+                    msg = f"\nCannot filter data by period: {keep}, ignoring filter value. "
+                    msg += f"Available filters: {available_values}"
+                    self.read_instance.logger.info(msg)
+            
             day_night_codes_to_keep = []
             if 'Daytime' in keeps:
                 day_night_codes_to_keep.append(0)
@@ -314,6 +322,12 @@ class DataFilter:
                         self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.nan
 
         if len(removes) > 0:
+            for remove in removes:
+                if remove not in available_values:
+                    msg = f"\nCannot filter data by period: {remove}, ignoring filter value. "
+                    msg += f"Available filters: {available_values}"
+                    self.read_instance.logger.info(msg)
+
             day_night_codes_to_remove = []
             if 'Daytime' in removes:
                 day_night_codes_to_remove.append(0)
