@@ -246,7 +246,7 @@ def legend_picker_func(canvas_instance, event):
         Pick event providing the clicked legend artist
     """
 
-    if canvas_instance.lock_legend_pick == False:
+    if not canvas_instance.lock_legend_pick:
         if canvas_instance.plot_elements:
             # lock legend pick
             canvas_instance.lock_legend_pick = True

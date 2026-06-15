@@ -1310,9 +1310,7 @@ class Actris:
             Temporally averaged data with flags, QA and metadata
         """
 
-        import time
-
-        start = time.time()
+        # start = time.time()
 
         # get valid dates frequency
         if self.resolution == "hourly":

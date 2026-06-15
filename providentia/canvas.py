@@ -1,7 +1,9 @@
 """ Class for Dashboard matplotlib canvas """
 
 import copy
+import datetime
 import sys
+import yaml
 from weakref import WeakKeyDictionary
 
 import matplotlib
@@ -40,7 +42,13 @@ from .plot_formatting import (
 )
 from .plot_options import annotation, linear_regression, log_axes, smooth, threshold
 from .read_aux import get_possible_resampling_resolutions, get_frequency_code
-from .statistics import *
+from .statistics import (
+    get_z_statistic_comboboxes,
+    generate_colourbar,
+    get_selected_station_data,
+    get_z_statistic_type,
+    get_z_statistic_info,
+)
 from .warnings_prv import show_message
 
 # make sure that we are using Qt5 backend with matplotlib

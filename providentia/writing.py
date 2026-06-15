@@ -630,7 +630,7 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
                 var.axis = "X"
             elif metadata_var == "latitude":
                 var.axis = "Y"
-            if current_data_type == str:
+            if current_data_type is str:
                 var[:] = metadata_arr[metadata_var].astype(str)
             else:
                 var[:] = metadata_arr[metadata_var]

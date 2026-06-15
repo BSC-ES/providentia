@@ -348,11 +348,9 @@ class Dashboard(QtWidgets.QWidget):
         """
 
         # get dashboard and canvas pixels
-        full_window_width = self.full_window_geometry.width()
         full_window_height = self.full_window_geometry.height()
         canvas_width = self.mpl_canvas.frameGeometry().width()
         canvas_height = self.mpl_canvas.frameGeometry().height()
-        header_height = full_window_height - canvas_height
 
         if plot_types == "ALL":
             plot_types = [
@@ -2168,9 +2166,6 @@ class Dashboard(QtWidgets.QWidget):
             self.forecast = []
             for model_raw, model in models.items():
                 # get available and selected forecast options
-                available_forecast_options = self.models_menu["models"]["forecast"][
-                    model
-                ][0]
                 selected_forecast_options = self.models_menu["models"]["forecast"][
                     model
                 ][1]
@@ -2257,8 +2252,8 @@ class Dashboard(QtWidgets.QWidget):
             (self.network[0] != self.previous_network[0])
             or (self.resolution != self.previous_resolution)
             or (self.species[0] != self.previous_species[0])
-            or (np.array_equal(self.qa, self.previous_qa) == False)
-            or (np.array_equal(self.flags, self.previous_flags) == False)
+            or (not np.array_equal(self.qa, self.previous_qa))
+            or (not np.array_equal(self.flags, self.previous_flags))
             or (
                 str(dict(sorted(self.filter_species.items())))
                 != str(dict(sorted(self.previous_filter_species.items())))

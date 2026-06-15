@@ -16,19 +16,18 @@ import psutil
 import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join
-
-# get current path and providentia root path
-PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
-
-sys.path.append(join(PROVIDENTIA_ROOT, "providentia", "interpolation"))
-sys.path.append(join(PROVIDENTIA_ROOT, "providentia"))
-
 from interpolation.aux_interp import (
     get_aeronet_bin_radius_from_bin_variable,
     get_model_bin_radii,
     check_for_ghost,
 )
 from configuration import ProvConfiguration, load_conf
+
+# get current path and providentia root path
+PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
+
+sys.path.append(join(PROVIDENTIA_ROOT, "providentia", "interpolation"))
+sys.path.append(join(PROVIDENTIA_ROOT, "providentia"))
 
 # load the defined models and species yamls
 interp_models = yaml.safe_load(
@@ -656,8 +655,8 @@ class SubmitInterpolation(object):
                                     # (where neccessary)
                                     mod_file_speci = copy.deepcopy(speci_to_process)
                                     mod_files = copy.deepcopy(mod_files_all)
-                                    if ensemble_stat == False:
-                                        if have_ensemble_members == True:
+                                    if not ensemble_stat:
+                                        if have_ensemble_members:
                                             mod_file_speci = "{}-{}".format(
                                                 speci_to_process, available_ens
                                             )
@@ -1119,7 +1118,7 @@ class SubmitInterpolation(object):
 
         # submit slurm script
         submit_complete = False
-        while submit_complete == False:
+        while not submit_complete:
             if self.machine == "nord3":
                 submit_process = subprocess.Popen(
                     ["bsub"],
@@ -1132,7 +1131,6 @@ class SubmitInterpolation(object):
                     cwd=self.submit_dir,
                     stdout=subprocess.PIPE,
                 )
-            submit_status = submit_process.communicate()[0]
             submit_return_code = submit_process.returncode
 
             # if sbatch fails, time out for 60 seconds and then try again
@@ -1150,7 +1148,7 @@ class SubmitInterpolation(object):
         # flag for monitoring jobs that were submitted in n3
         job_entered = False
 
-        while all_tasks_finished == False:
+        while not all_tasks_finished:
             if self.machine == "nord3":
                 # cmd = ['bjobs', '-noheader', '-J', 'PRVI_{}[1]'.format(self.slurm_job_id)]
                 cmd = ["bjobs", "-noheader"]

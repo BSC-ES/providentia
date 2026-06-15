@@ -972,11 +972,11 @@ def get_hex_code(colour):
     """
 
     # convert from colour name to hex code
-    if type(colour) == str:
+    if type(colour) is str:
         if colour[0] != "#":
             hex_colour = cnames[colour]
     # convert from rgb colour (as decimal) to hex code
-    elif type(colour) == tuple:
+    elif type(colour) is tuple:
         rgb_colour = tuple(round(255 * x) for x in colour)
         hex_colour = f"#{int(round(rgb_colour[0])):02x}{int(round(rgb_colour[1])):02x}{int(round(rgb_colour[2])):02x}"
 

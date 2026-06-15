@@ -61,7 +61,7 @@ def plot(inst, statistic_mode, network_type, plot_type, plot_options=[], load=Tr
     )
 
     # check that a figure has been returned
-    assert type(fig) == matplotlib.figure.Figure
+    assert isinstance(fig, matplotlib.figure.Figure)
 
 
 def check_filter_data(inst, statistic_mode, network_type, filter):
@@ -118,7 +118,7 @@ def save_data(inst, format, fname, network_type, statistic_mode):
 
 
 def check_unit_conversion(conv_obj, new_val, orig_val, orig_unit, new_unit, atol=1e-08):
-    if np.isclose(conv_obj.converted_value, new_val, atol=atol) == False:
+    if not np.isclose(conv_obj.converted_value, new_val, atol=atol):
         print(
             "{} {} to {} should be {}, is {}".format(
                 orig_val, orig_unit, new_unit, new_val, conv_obj.converted_value

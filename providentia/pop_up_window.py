@@ -171,7 +171,8 @@ class PopUpWindow(QtWidgets.QWidget):
             # create "ADD ROW" button
             element_label = "ADD ROW"
             add_row_button = set_formatting(
-                QtWidgets.QPushButton("ADD ROW"), formatting_dict["popup_button_select"]
+                QtWidgets.QPushButton(element_label),
+                formatting_dict["popup_button_select"],
             )
             button_row.addWidget(add_row_button)
 
@@ -556,7 +557,7 @@ class PopUpWindow(QtWidgets.QWidget):
                     self.page_memory[menu_type]["widget"],
                 ):
                     # get appropriate formatting for element
-                    if type(format_type) == list:
+                    if type(format_type) is list:
                         element_format = formatting_dict[format_type[element_ii]]
                     else:
                         element_format = formatting_dict[format_type]
@@ -1340,7 +1341,7 @@ class PopUpWindow(QtWidgets.QWidget):
             )
 
         # update apply
-        if self.read_instance.selected_widget_apply[label_ii] == True:
+        if self.read_instance.selected_widget_apply[label_ii]:
             self.page_memory["multispecies"]["apply_selected"][label_ii].setCheckState(
                 QtCore.Qt.Checked
             )
@@ -1561,7 +1562,7 @@ class PopUpWindow(QtWidgets.QWidget):
                 return
 
             # do not add to filter_species if lower and upper bounds are nan
-            if current_lower == str(np.nan) or current_upper == str(np.nan):
+            if current_lower is str(np.nan) or current_upper is str(np.nan):
                 msg = "filter_species data bounds cannot be empty."
                 show_message(self.read_instance, msg)
                 self.page_memory["multispecies"]["apply_selected"][

@@ -1182,7 +1182,7 @@ class ModBias(object):
                 # calculate exceedance
                 exc = (
                     Stats.calculate_exceedances(obs, exc_threshold)
-                    if exc_threshold != None
+                    if exc_threshold is not None
                     else None
                 )
 

@@ -710,10 +710,10 @@ def get_yearmonths_to_read(
     # read only complete months
     if resolution == "monthly":
         if str(end_date_to_read)[6:8] != "01":
-            if str(end_date_to_read)[0:6] == str(available_yearmonths[-1]):
+            if str(end_date_to_read)[0:6] is str(available_yearmonths[-1]):
                 last_valid_file_ind -= 1
         if str(start_date_to_read)[6:8] != "01":
-            if str(start_date_to_read)[0:6] == str(available_yearmonths[0]):
+            if str(start_date_to_read)[0:6] is str(available_yearmonths[0]):
                 first_valid_file_ind += 1
 
     if first_valid_file_ind == last_valid_file_ind:

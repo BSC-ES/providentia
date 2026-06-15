@@ -612,7 +612,7 @@ class DataFilter:
             ]
 
             # handle non-numeric metadata
-            if metadata_data_type == object:
+            if metadata_data_type is object:
                 # iterate through networkspecies
                 for networkspeci in self.read_instance.networkspecies:
                     # if any of the keep checkboxes are selected, filter out data by fields that have not been selected
@@ -799,7 +799,7 @@ class DataFilter:
         metadata_type = self.read_instance.standard_metadata[meta_var]["metadata_type"]
         metadata_data_type = self.read_instance.standard_metadata[meta_var]["data_type"]
 
-        if metadata_data_type != object:
+        if metadata_data_type is not object:
             meta_var_index = self.read_instance.metadata_menu[metadata_type][
                 "rangeboxes"
             ]["labels"].index(meta_var)
@@ -872,7 +872,7 @@ class DataFilter:
 
                 # if have a dict, the limits are specific per species, so limit for species
                 speci_specific_limits = False
-                if type(stat_arguments) == dict:
+                if type(stat_arguments) is dict:
                     speci_specific_limits = True
 
                 # determine if station is absolute or bias statistic
@@ -937,7 +937,7 @@ class DataFilter:
                                 networkspeci,
                                 self.read_instance.remove_extreme_stations,
                                 remove_extreme_stations_fname,
-                                speci,
+                                networkspeci,
                             )
                             show_message(
                                 self.read_instance,

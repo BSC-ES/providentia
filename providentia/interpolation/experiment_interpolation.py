@@ -486,9 +486,6 @@ class ModelInterpolation(object):
                 # load instance of model file netCDF
                 mod_nc_root = Dataset(model_file)
 
-                # get all variable names in file
-                mod_nc_varnames = list(mod_nc_root.variables.keys())
-
                 # get instance of species variable
                 mod_speci_obj = mod_nc_root[self.speci_to_process]
 
@@ -505,9 +502,6 @@ class ModelInterpolation(object):
                 else:
                     self.log_file_str += f"Missing 'grid_mapping' attribute for variable '{self.speci_to_process}' in file {model_file}\n"
                     create_output_logfile(1, self.log_file_str)
-
-                # get x/y grid dimension variable names
-                grid_dimensions = mod_speci_obj.dimensions
 
                 # get indivudual dimension variable names
                 # standard (no vertical dimension)
@@ -1263,8 +1257,8 @@ class ModelInterpolation(object):
                         file_time_dt = pd.to_datetime([t for t in file_time_dt])
 
                 # get file start and end datetime
+                # monthly file
                 if len(file_date) == 6:
-                    chunk_type = "monthly"
                     start_file_dt = datetime.datetime(
                         year=int(file_date[:4]),
                         month=int(file_date[4:6]),
@@ -1272,9 +1266,8 @@ class ModelInterpolation(object):
                         hour=0,
                         minute=0,
                     )
-                    end_file_dt = start_file_dt + relativedelta.relativedelta(months=1)
+                # daily file
                 elif len(file_date) == 8:
-                    chunk_type = "daily"
                     start_file_dt = datetime.datetime(
                         year=int(file_date[:4]),
                         month=int(file_date[4:6]),
@@ -1282,9 +1275,8 @@ class ModelInterpolation(object):
                         hour=0,
                         minute=0,
                     )
-                    end_file_dt = start_file_dt + datetime.timedelta(days=1)
+                # daily file
                 elif len(file_date) == 10:
-                    chunk_type = "daily"
                     start_file_dt = datetime.datetime(
                         year=int(file_date[:4]),
                         month=int(file_date[4:6]),
@@ -1292,7 +1284,6 @@ class ModelInterpolation(object):
                         hour=int(file_date[8:10]),
                         minute=0,
                     )
-                    end_file_dt = start_file_dt + datetime.timedelta(days=1)
                 else:
                     mod_nc_root.close()
                     self.log_file_str += 'Resolution could not be detected in {}, check the date in the filename as now it shows as "{}".\n'.format(
@@ -1865,12 +1856,10 @@ class ModelInterpolation(object):
 
         # compress netCDF file
         try:
-            compress_process = subprocess.Popen(
+            subprocess.Popen(
                 ["ncks", "-O", "--dfl_lvl", "1", netCDF_fname, netCDF_fname],
                 stdout=subprocess.PIPE,
             )
-            compress_status = compress_process.communicate()[0]
-            compress_return_code = compress_process.returncode
         except:
             self.log_file_str += (
                 "NCO could not be found, please install it in your system "

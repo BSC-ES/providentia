@@ -1,5 +1,9 @@
 """ Auxiliary interpolation functions """
 
+import copy
+import os
+import numpy as np
+
 
 def get_aeronet_bin_radius_from_bin_variable(binvar):
     """
@@ -94,8 +98,6 @@ def get_aeronet_model_bin(model_name, aeronet_bin_radius):
         The particle density (kg/m^3) associated with the identified model bin.
     """
 
-    import numpy as np
-
     # get model bin raddi and bin rh
     r_edges, rho_bins = get_model_bin_radii(model_name)
 
@@ -126,8 +128,6 @@ def get_model_to_aeronet_bin_transform_factor(model_name, rmin, rmax):
     -------
     bin_transform_factor : float
     """
-
-    import numpy as np
 
     # get bin integral (per model)
     if model_name == "monarch":
@@ -169,9 +169,6 @@ def check_directory_existence(directory_tree_str, directories_not_to_test=None):
         A prefix of the directory tree that should be excluded from existence and permission checks.
     """
 
-    import copy
-    import os
-
     # define special characters that will need to be escaped for execution of commands
     special_characters = ["(", ")"]
 
@@ -196,7 +193,7 @@ def check_directory_existence(directory_tree_str, directories_not_to_test=None):
             directory_str_to_test = directory_str_to_test + "/" + current_directory
 
             # does directory_str_to_test exist?
-            if os.path.isdir(directory_str_to_test) == False:
+            if not os.path.isdir(directory_str_to_test):
                 # escape certain special characters in directory_str_to_test
                 alt_directory_str_to_test = copy.deepcopy(directory_str_to_test)
                 for ch in special_characters:
@@ -223,8 +220,6 @@ def set_file_permissions_ownership(file_str):
     file_str : str
         The path of the file to be updated with new permissions and ownership.
     """
-
-    import os
 
     # define special characters that will need to be escaped for execution of commands
     special_characters = ["(", ")"]

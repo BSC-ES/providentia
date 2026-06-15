@@ -9,7 +9,6 @@ import numpy as np
 import shutil
 
 
-
 from .warnings_prv import show_message
 
 from providentia.auxiliar import CURRENT_PATH, join

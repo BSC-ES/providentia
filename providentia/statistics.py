@@ -1090,7 +1090,7 @@ def calculate_statistic(
     """
 
     # if zstats is str then make it a list
-    if type(zstats) != list:
+    if type(zstats) is not list:
         zstats = [zstats]
 
     # check if have statistics to calculate
@@ -1120,9 +1120,9 @@ def calculate_statistic(
         periodic_statistic_aggregation = read_instance.periodic_statistic_aggregation
 
     # if data_labels_a, data_labels_b are strings then convert to lists
-    if type(data_labels_a) != list:
+    if type(data_labels_a) is not list:
         data_labels_a = [data_labels_a]
-    if type(data_labels_b) != list:
+    if type(data_labels_b) is not list:
         data_labels_b = [data_labels_b]
 
     # if have empty strings in lists then remove them

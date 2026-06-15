@@ -12,6 +12,7 @@ import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
 import pandas as pd
 import yaml
+import warnings
 
 from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics, Tee
 from .configuration import load_conf
@@ -64,8 +65,6 @@ fairmode_settings = yaml.safe_load(
 )
 
 # do not print deprecated warnings
-import warnings
-
 warnings.filterwarnings("ignore")
 
 # determine if using jupyter notebook or not
@@ -226,10 +225,10 @@ class Providentia:
 
         # make sure keep and remove arguments are lists
         if keep is not None:
-            if type(keep) == str:
+            if type(keep) is str:
                 keep = [keep]
         if remove is not None:
-            if type(remove) == str:
+            if type(remove) is str:
                 remove = [remove]
 
         # field is a coverage field?
@@ -380,7 +379,7 @@ class Providentia:
         if not loaded_data:
             return
 
-        if type(station) == "str":
+        if type(station) is str:
             stations_to_keep = [station]
         else:
             stations_to_keep = station
@@ -590,7 +589,7 @@ class Providentia:
             if "annotate" not in plot_options:
                 plot_options.append("annotate")
             # if passed argument is a list, then use that for stat list (if valid)
-            if type(annotate) == list:
+            if type(annotate) is list:
                 annotation_stats = copy.deepcopy(annotate)
         if bias:
             if "bias" not in plot_options:
@@ -617,12 +616,12 @@ class Providentia:
             if "smooth" not in plot_options:
                 plot_options.append("smooth")
             # if passed argument is a str/int/float, then use that for smoothing window
-            if type(smooth) == str:
+            if type(smooth) is str:
                 try:
                     smooth = int(smooth)
                 except:
                     pass
-            if (type(smooth) == int) or (type(smooth) == float):
+            if (type(smooth) is int) or (type(smooth) is float):
                 smooth_window = int(smooth)
         if threshold:
             if "threshold" not in plot_options:
@@ -1555,7 +1554,7 @@ class Providentia:
         # if save is passed then save plot and return
         if save:
             # if save is boolean then auto generate fname
-            if type(save) == bool:
+            if type(save) is bool:
                 figure_fname = join(PROVIDENTIA_ROOT, "plots/{}.png".format(plot_type))
             else:
                 figure_fname = copy.deepcopy(save)
@@ -1717,9 +1716,7 @@ class Providentia:
 
         # throw error if both period and chunk are given
         elif (period is not None) & (chunk is not None):
-            msg = (
-                "Cannot calculate statistic when both 'period' and 'chunk' are given."
-            )
+            msg = "Cannot calculate statistic when both 'period' and 'chunk' are given."
             show_message(self, msg)
             return
 

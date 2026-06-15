@@ -384,7 +384,7 @@ class Download(object):
                 self.logger.info("\n" + "=" * 70)
 
         # show message in case models or observations were ignored
-        if self.overwritten_files_flag == True:
+        if self.overwritten_files_flag:
             self.logger.info(
                 "\nSome models/observations were found but were not downloaded because the user chose not to overwrite or because 'dl_overwrite' is set to False."
             )
@@ -437,7 +437,7 @@ class Download(object):
                 sys.exit(1)
 
         self.ssh = paramiko.SSHClient()
-        hostkeys = self.ssh.get_host_keys().add(self.remote_hostname, "ed25519", key)
+        self.ssh.get_host_keys().add(self.remote_hostname, "ed25519", key)
 
         # initialise temporal variables
         prv_user, prv_password = None, None
@@ -542,7 +542,7 @@ class Download(object):
 
         if nc_filepaths_to_download:
             # TODO clean when the dictionary is implemented in all modes
-            if type(nc_filepaths_to_download) == dict:
+            if type(nc_filepaths_to_download) is dict:
                 for dir, dir_dict in nc_filepaths_to_download.items():
                     downloaded_files = list(
                         filter(

@@ -252,7 +252,7 @@ def init_metadata(instance):
                 instance.standard_metadata[metadata_var]["metadata_type"]
                 == metadata_type
             )
-            & (instance.standard_metadata[metadata_var]["data_type"] != object)
+            & (instance.standard_metadata[metadata_var]["data_type"] is not object)
         ]
 
         # reset rangebox tooltips
@@ -286,7 +286,7 @@ def init_metadata(instance):
                 instance.standard_metadata[metadata_var]["metadata_type"]
                 == metadata_type
             )
-            & (instance.standard_metadata[metadata_var]["data_type"] == object)
+            & (instance.standard_metadata[metadata_var]["data_type"] is object)
         ]
 
         # reset checkbox tooltips
@@ -646,8 +646,8 @@ def update_metadata_fields(instance):
             meta_info = standard_metadata[meta_var]
 
             if (
-                meta_info["metadata_type"] == metadata_type
-                and meta_info["data_type"] != object
+                meta_info["metadata_type"] is metadata_type
+                and meta_info["data_type"] is not object
             ):
                 required_count += 1
 
@@ -711,7 +711,7 @@ def update_metadata_fields(instance):
         # ==============================================================
         # OBJECT / CATEGORICAL METADATA
         # ==============================================================
-        if metadata_data_type == object:
+        if metadata_data_type is object:
             # ----------------------------------------------------------
             # Fast categorical path:
             #

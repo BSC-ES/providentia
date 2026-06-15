@@ -623,16 +623,6 @@ class Report:
                         if len(relevant_axs) == 0:
                             continue
 
-                        # get data ranges for plotting paradigm
-                        if plotting_paradigm == "summary":
-                            data_range_min = self.data_range_min_summary[networkspeci]
-                            data_range_max = self.data_range_max_summary[networkspeci]
-                            stddev_max = self.stddev_max_summary[networkspeci]
-                        elif plotting_paradigm == "station":
-                            data_range_min = self.data_range_min_station[networkspeci]
-                            data_range_max = self.data_range_max_station[networkspeci]
-                            stddev_max = self.stddev_max_station[networkspeci]
-
                         # generate colourbars for required plots in paradigm on each relevant page
                         if "cb" in list(self.plot_characteristics[plot_type].keys()):
                             # get all cb_axs for plot_type across relevant pages
@@ -985,7 +975,7 @@ class Report:
 
                 # make page title?
                 if "page_title" in plot_characteristics_vars:
-                    st = fig.suptitle(**plot_characteristics["page_title"])
+                    fig.suptitle(**plot_characteristics["page_title"])
 
                 # iterate through axes (by row, then column)
                 row_ii = -1
@@ -1051,6 +1041,8 @@ class Report:
                                 grid_dict,
                                 base_plot_type,
                                 plot_characteristics,
+                                last_valid_row=last_valid_row,
+                                last_row_on_page=last_row_on_page,
                                 relevant_temporal_resolutions=self.periodic_relevant_temporal_resolutions,
                             )
 
@@ -1100,6 +1092,8 @@ class Report:
                                 grid_list,
                                 base_plot_type,
                                 plot_characteristics,
+                                last_valid_row=last_valid_row,
+                                last_row_on_page=last_row_on_page,
                             )
 
                         # rest of plot types
@@ -1111,7 +1105,13 @@ class Report:
 
                             # format axis
                             format_axis(
-                                self, self, ax, base_plot_type, plot_characteristics
+                                self,
+                                self,
+                                ax,
+                                base_plot_type,
+                                plot_characteristics,
+                                last_valid_row=last_valid_row,
+                                last_row_on_page=last_row_on_page,
                             )
 
                     # turn off axes until some data is plottted
@@ -1260,8 +1260,8 @@ class Report:
 
             # determine if need to re-read data (qa, flags, filter_species or calibration factor have changed)
             if (
-                (np.array_equal(self.qa, self.previous_qa) == False)
-                or (np.array_equal(self.flags, self.previous_flags) == False)
+                (not np.array_equal(self.qa, self.previous_qa))
+                or (not np.array_equal(self.flags, self.previous_flags))
                 or (
                     str(dict(sorted(self.filter_species.items())))
                     != str(dict(sorted(self.previous_filter_species.items())))
@@ -2575,7 +2575,7 @@ class Report:
                         show_message(self, msg)
                         return plot_indices
 
-                if type(data_labels) != list:
+                if type(data_labels) is not list:
                     data_labels = [data_labels]
 
                 # get relevant axis to plot on

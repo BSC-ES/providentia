@@ -2739,9 +2739,8 @@ class Plotting:
             columns[column] = new_colum_name
         stats_df = stats_df.rename(columns=columns)
 
-        # get column and row labels
+        # get column labels
         col_labels = stats_df.columns.tolist()
-        row_labels = stats_df.index.tolist()
 
         # reports
         if self.read_instance.mode in ["report", "library"]:
@@ -3082,7 +3081,6 @@ class Plotting:
 
             # changing the extend reduces the size of the plot and changes its start position
             if extend:
-                old_position = relevant_axis.get_position().bounds
                 if plot_position == 2:
                     new_position = (0.60, 0.42, 0.288, 0.594)
                 elif plot_position == 3:
@@ -3671,7 +3669,7 @@ class Plotting:
             subplots = dict(plot_characteristics["auxiliar"]["subplots"])
 
             # get the variable that tells you if there are exceedances in this species
-            has_exceedances = exc_threshold != None
+            has_exceedances = exc_threshold is not None
 
             # if there is no threshold don't create the exceedances row
             if not has_exceedances:

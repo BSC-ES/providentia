@@ -95,7 +95,7 @@ class Cams(object):
         self.download_instance.logger.info(f"dataset = '{dataset}'")
         self.download_instance.logger.info("request = {")
         for k, v in request.items():
-            if type(v) == str:
+            if type(v) is str:
                 v = f"'{v}'"
             self.download_instance.logger.info(f"'{k}' : {v},")
         self.download_instance.logger.info("}\n")
@@ -1069,7 +1069,7 @@ class Cams(object):
                 mapped_cams_species = ghost_cams_variables[species]
 
                 # get the CAMS and GHOST list in [[cams_species, ghost_species]] format
-                if type(mapped_cams_species) == list:
+                if type(mapped_cams_species) is list:
                     cams_ghost_species_list = [
                         [ghost_cams_variables[ghost_species], ghost_species]
                         for ghost_species in mapped_cams_species
@@ -1099,7 +1099,7 @@ class Cams(object):
                         # get the resolution for the cams dataset
                         correct_resolution = (
                             cams_dict["resolution"][level]
-                            if type(cams_dict["resolution"]) == dict
+                            if type(cams_dict["resolution"]) is dict
                             else cams_dict["resolution"]
                         )
 

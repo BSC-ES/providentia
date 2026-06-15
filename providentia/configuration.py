@@ -1581,7 +1581,9 @@ class ProvConfiguration:
         # then duplicate respestive network/species
         # in download mode is allowed to not have a different number, so continue
         # TODO in download mode and interpolation separate this somehow.
-        if len(self.read_instance.network) != len(self.read_instance.species) and self.read_instance.mode not in ["download", "interpolation"]:
+        if len(self.read_instance.network) != len(
+            self.read_instance.species
+        ) and self.read_instance.mode not in ["download", "interpolation"]:
             # 1 network?
             if len(self.read_instance.network) == 1:
                 # duplicate network to match species len
@@ -2178,7 +2180,7 @@ class ProvConfiguration:
             and self.read_instance.mode != "interpolation"
         ):
             # default path, default name
-            if self.read_instance.logfile == True:
+            if self.read_instance.logfile:
                 # get log filename and filepath
                 timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
                 filename = f"{timestamp}.log"
@@ -2188,7 +2190,7 @@ class ProvConfiguration:
 
             # custom path, custom name (no need of creating the file path)
             if (
-                type(self.read_instance.logfile) == str
+                type(self.read_instance.logfile) is str
                 and os.sep in self.read_instance.logfile
             ):
                 file_path = self.read_instance.logfile

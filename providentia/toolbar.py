@@ -105,7 +105,6 @@ class NavigationToolbar(NavigationToolbar2QT):
         super(NavigationToolbar, self).__init__(canvas_instance, read_instance)
 
         # set toolbar icons
-        actions = self.findChildren(QtWidgets.QAction)
         self._actions["save_data"].setIcon(
             QtGui.QIcon(join(CURRENT_PATH, "resources/save_icon.png"))
         )

@@ -390,10 +390,9 @@ class DataReader:
                 self.read_instance.metadata_vars_to_read = [
                     key
                     for key in ghost_metadata_vars_to_read
-                    if pd.isnull(
+                    if not pd.isnull(
                         self.read_instance.standard_metadata[key]["metadata_type"]
                     )
-                    == False
                 ]
                 self.read_instance.metadata_dtype = [
                     (key, self.read_instance.standard_metadata[key]["data_type"])
@@ -491,10 +490,9 @@ class DataReader:
                 self.read_instance.metadata_vars_to_read = [
                     key
                     for key in self.read_instance.nonghost_metadata_vars_to_read
-                    if pd.isnull(
+                    if not pd.isnull(
                         self.read_instance.standard_metadata[key]["metadata_type"]
                     )
-                    == False
                 ]
                 self.read_instance.metadata_dtype = [
                     (key, self.read_instance.standard_metadata[key]["data_type"])
@@ -1311,12 +1309,9 @@ class DataReader:
         for networkspeci in (
             self.read_instance.networkspecies + self.read_instance.filter_networkspecies
         ):
-            # get indivudual network and species strings
+            # get individual network and species strings
             network = networkspeci.split("|")[0]
             speci = networkspeci.split("|")[1]
-
-            # get species matrix
-            matrix = self.read_instance.parameter_dictionary[speci]["matrix"]
 
             # get file root
             # GHOST
@@ -1670,7 +1665,7 @@ class DataReader:
 
         # iterate through network, speci pairs
         for networkspeci in networkspecies:
-            # get indivudual network and species strings
+            # get individual network and species strings
             network = networkspeci.split("|")[0]
             speci = networkspeci.split("|")[1]
 
@@ -2191,7 +2186,7 @@ class DataReader:
             else:
                 filter_read = False
 
-            # get indivudual network and species strings
+            # get individual network and species strings
             network = networkspeci.split("|")[0]
             speci = networkspeci.split("|")[1]
 
@@ -2466,7 +2461,7 @@ class DataReader:
             station references, species name, data label, and other read options.
         """
 
-        returned_data = [self.read_netcdf_data(args) for args in tuple_arguments]
+        [self.read_netcdf_data(args) for args in tuple_arguments]
 
     def read_parallel(
         self, tuple_arguments, tuple_argument_fields, data_labels, n_workers
@@ -2547,8 +2542,7 @@ class DataReader:
             else:
                 filter_read = False
 
-            # get indivudual network and species strings
-            network = networkspeci.split("|")[0]
+            # get individual network and species strings
             speci = networkspeci.split("|")[1]
 
             # get tuple arguments specific for networkspeci
