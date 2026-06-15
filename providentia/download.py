@@ -1775,7 +1775,7 @@ class Download(object):
                                         stderr=subprocess.STDOUT,
                                     )
                             except subprocess.CalledProcessError:
-                                error = f"Failed to copy the files. Try later."
+                                error = "Failed to copy the files. Try later."
                                 self.logger.error(error)
                                 sys.exit(1)
 

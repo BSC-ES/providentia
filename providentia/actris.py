@@ -650,7 +650,7 @@ class Actris:
         tqdm_iter = tqdm(
             files,
             bar_format="{l_bar}{bar}|{n_fmt}/{total_fmt}",
-            desc=f"Creating information file",
+            desc="Creating information file",
         )
         for file in tqdm_iter:
             # open file
@@ -952,7 +952,7 @@ class Actris:
             try:
                 url = self.select_station_file(urls, files_info)
                 if url is None:
-                    local_warnings = f"No station file is valid."
+                    local_warnings = "No station file is valid."
                     return urls, station, local_errors, local_warnings
             except Exception as error:
                 local_errors = f"Selecting station file: {error}."
@@ -978,7 +978,7 @@ class Actris:
         # select data in period range
         ds = ds.sel(time=slice(target_start_date, target_end_date))
         if ds.time.size == 0:
-            local_warnings += f"No data available after filtering by time."
+            local_warnings += "No data available after filtering by time."
             return url, station, local_errors, local_warnings
 
         # rename qc dimension
@@ -1035,7 +1035,7 @@ class Actris:
 
         # avoid datasets that do not have defined units
         if "ebas_unit" not in da_var.attrs:
-            local_errors = f"No units were defined."
+            local_errors = "No units were defined."
             return url, station, local_errors, local_warnings
 
         # avoid datasets that do not have the same units as in variable mapping
@@ -1735,7 +1735,7 @@ class Actris:
             # filter files by resolution and dates
             self.download_instance.logger.info("\n" + "-" * 40)
             self.download_instance.logger.info(
-                f"\nDownloading ACTRIS framework data from EBAS DOI..."
+                "\nDownloading ACTRIS framework data from EBAS DOI..."
             )
             path = join(
                 self.download_instance.nonghost_root,

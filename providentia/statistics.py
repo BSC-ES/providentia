@@ -4,7 +4,6 @@ from calendar import monthrange
 import copy
 import datetime
 import sys
-import time
 
 import matplotlib
 from matplotlib import colors

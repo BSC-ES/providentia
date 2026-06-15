@@ -268,7 +268,6 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
     from GHOST_standards import (
         standard_parameters,
         get_standard_data,
-        get_standard_metadata,
         standard_QA_name_to_QA_code,
         standard_data_flag_name_to_data_flag_code,
     )

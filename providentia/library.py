@@ -8,7 +8,6 @@ import sys
 
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
-import matplotlib.pyplot as plt
 import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
 import pandas as pd
@@ -415,7 +414,7 @@ class Providentia:
                 f"Resetting data filters to when class was initialised, loading {self.subsection} subsection filters."
             )
         else:
-            self.logger.info(f"Resetting all data filters.")
+            self.logger.info("Resetting all data filters.")
 
         # initialise structures to store fields
         init_coverage(self)
@@ -675,7 +674,7 @@ class Providentia:
             msg = f"Units in the multispecies plots will be converted to 'multispecies_units' ({self.multispecies_units}) for consistency. "
             show_message(self, msg)
             if self.multispecies_units in [None, ""]:
-                msg = f"Please specify the units in your configuration file by adding 'multispecies_units'. "
+                msg = "Please specify the units in your configuration file by adding 'multispecies_units'. "
                 msg += f"Units for each species are: {self.measurement_units}."
                 show_message(self, msg)
                 return
@@ -1719,7 +1718,7 @@ class Providentia:
         # throw error if both period and chunk are given
         elif (period is not None) & (chunk is not None):
             msg = (
-                f"Cannot calculate statistic when both 'period' and 'chunk' are given."
+                "Cannot calculate statistic when both 'period' and 'chunk' are given."
             )
             show_message(self, msg)
             return

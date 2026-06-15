@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import requests
-import re
 import os
 from tqdm import tqdm
 import yaml
@@ -9,14 +8,11 @@ from netCDF4 import Dataset
 import numpy as np
 import shutil
 
-import requests
 
-from urllib.parse import urljoin
 
 from .warnings_prv import show_message
 
 from providentia.auxiliar import CURRENT_PATH, join
-from .warnings_prv import show_message
 
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 

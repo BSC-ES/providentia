@@ -1478,7 +1478,7 @@ class ModelInterpolation(object):
                 # close model netCDF root
                 mod_nc_root.close()
 
-            except Exception as e:
+            except Exception:
                 mod_nc_root.close()
                 self.log_file_str += "File {} is corrupt. Skipping.\n{}".format(
                     model_file, traceback.format_exc()
@@ -2011,7 +2011,7 @@ if __name__ == "__main__":
         create_output_logfile(0, EI.log_file_str)
 
     # write error log file if have uncaught internal error
-    except Exception as e:
+    except Exception:
         log_file_str = "STARTING INTERPOLATION\n"
         log_file_str += str(traceback.format_exc())
         create_output_logfile(2, log_file_str)

@@ -12,7 +12,6 @@ import platform
 import sys
 
 import numpy as np
-import pandas as pd
 import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join, get_machine
@@ -1278,7 +1277,7 @@ class ProvConfiguration:
         if model_exists is False:
             msg = (
                 f"Model ID '{modid}' not found. Checked in:\n{msg}"
-                + f"Please, add the model ID to the file or ensure it exists on the HPC path.\n"
+                + "Please, add the model ID to the file or ensure it exists on the HPC path.\n"
             )
             show_message(
                 self.read_instance, msg, from_conf=self.read_instance.from_conf
@@ -1582,9 +1581,7 @@ class ProvConfiguration:
         # then duplicate respestive network/species
         # in download mode is allowed to not have a different number, so continue
         # TODO in download mode and interpolation separate this somehow.
-        if len(self.read_instance.network) != len(self.read_instance.species) and not (
-            self.read_instance.mode in ["download", "interpolation"]
-        ):
+        if len(self.read_instance.network) != len(self.read_instance.species) and self.read_instance.mode not in ["download", "interpolation"]:
             # 1 network?
             if len(self.read_instance.network) == 1:
                 # duplicate network to match species len
@@ -2071,9 +2068,9 @@ class ProvConfiguration:
             # check calibration factor
             if self.read_instance.calibration_factor:
                 # detect if calibration factor is passed by model
-                calibration_by_model = not self.read_instance.calibration_factor[0][
+                calibration_by_model = self.read_instance.calibration_factor[0][
                     0
-                ] in ["+", "-", "*", "/"]
+                ] not in ["+", "-", "*", "/"]
 
                 # control that calibration factor not by model can only be one element
                 if (

@@ -23,8 +23,6 @@ from PIL import Image
 import pyproj
 import seaborn as sns
 import yaml
-import xarray as xr
-import xskillscore as xs
 
 from providentia.auxiliar import (
     CURRENT_PATH,

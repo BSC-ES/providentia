@@ -345,7 +345,7 @@ class Report:
                 msg = f"Units in the multispecies plots will be converted to 'multispecies_units' ({self.multispecies_units}) for consistency. "
                 show_message(self, msg)
                 if self.multispecies_units in [None, ""]:
-                    error = f"Please specify the units in your configuration file by adding 'multispecies_units'. "
+                    error = "Please specify the units in your configuration file by adding 'multispecies_units'. "
                     error += f"Units for each species are: {self.measurement_units}."
                     sys.exit(error)
 

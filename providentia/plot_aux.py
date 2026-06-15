@@ -1,11 +1,9 @@
 """ Auxiliary plotting functions """
 
-import copy
 import math
 import os
 import sys
 
-from itertools import product
 import matplotlib
 from matplotlib import transforms
 from matplotlib.colors import cnames
@@ -33,7 +31,6 @@ from .statistics import (
     calculate_statistic,
     get_z_statistic_sign,
     get_z_statistic_type,
-    exceedance_lim,
 )
 from .warnings_prv import show_message
 

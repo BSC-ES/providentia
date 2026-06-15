@@ -1,9 +1,7 @@
 import hashlib
 import matplotlib
 import numpy as np
-import pandas as pd
 import xarray as xr
-from pathlib import Path
 from pypdf import PdfReader
 
 from providentia.statistics import get_z_statistic_info
@@ -83,7 +81,7 @@ def check_filter_data(inst, statistic_mode, network_type, filter):
     filter_output = np.load(filter_path, allow_pickle=True)
     try:
         assert not np.allclose(orig_output, filter_output, equal_nan=True)
-    except ValueError as e:
+    except ValueError:
         assert True
 
 

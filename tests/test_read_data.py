@@ -61,13 +61,13 @@ def test_statistics(inst, statistic_mode, network_type):
 
 def test_calibration():
     inst = prv.Providentia("tests_calibration.conf")
-    path = f"tests/reference/nonghost/calibration/data/data_calibration.npy"
+    path = "tests/reference/nonghost/calibration/data/data_calibration.npy"
     inst.load()
     read_data(inst, path)
 
 
 def test_forecast():
     inst = prv.Providentia("tests_forecast.conf")
-    path = f"tests/reference/nonghost/forecast/data/data_forecast.npy"
+    path = "tests/reference/nonghost/forecast/data/data_forecast.npy"
     inst.load()
     read_data(inst, path)

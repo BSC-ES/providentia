@@ -3,7 +3,6 @@
 import ast
 import copy
 import sys
-import time
 
 import numpy as np
 import pandas as pd
@@ -816,7 +815,7 @@ class DataFilter:
                     ][meta_var_index]
                 )
                 return True
-            except ValueError as e:
+            except ValueError:
                 msg = "Error in metadata fields. The field of '{}' should be numeric.".format(
                     meta_var
                 )

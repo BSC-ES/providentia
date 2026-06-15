@@ -1687,7 +1687,7 @@ class Canvas(FigureCanvas):
             if chunk_stat == "MDA8":
                 chunk_stat = "None"
                 chunk_resolution = "None"
-                msg = f"The timeseries chunk statistic and chunk resolution will be set to 'None' as MDA8 can only be calculated when the active resolution is hourly."
+                msg = "The timeseries chunk statistic and chunk resolution will be set to 'None' as MDA8 can only be calculated when the active resolution is hourly."
                 show_message(self.read_instance, msg)
 
         # if chunk stat is MDA8, the chunk resolution has to be None or daily (if available)
@@ -1695,7 +1695,7 @@ class Canvas(FigureCanvas):
             available_timeseries_chunk_resolutions = ["None", "daily"]
             if chunk_resolution not in available_timeseries_chunk_resolutions:
                 chunk_resolution = "None"
-                msg = f"The timeseries chunk resolution will be set to 'None' as MDA8 can only be calculated for a daily chunk resolution."
+                msg = "The timeseries chunk resolution will be set to 'None' as MDA8 can only be calculated for a daily chunk resolution."
                 show_message(self.read_instance, msg)
 
         # if zstat is empty string, it is because fields are being initialised for the first time
@@ -2053,7 +2053,7 @@ class Canvas(FigureCanvas):
                                     resolution
                                 ].remove(stat)
 
-                    msg = f"Removing all MDA8 statistics from statsummary plot as active resolution is not hourly."
+                    msg = "Removing all MDA8 statistics from statsummary plot as active resolution is not hourly."
                     show_message(self.read_instance, msg)
 
             # allow handling updates to the configuration bar again

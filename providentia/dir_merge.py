@@ -71,7 +71,7 @@ def dir_handler(mod_dir, exp_dir):
             )
     else:
         print(
-            f"\nOld 'data_paths.yaml'. Execute this again after running 'git pull'. Exiting..."
+            "\nOld 'data_paths.yaml'. Execute this again after running 'git pull'. Exiting..."
         )
 
 

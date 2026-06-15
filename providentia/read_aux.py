@@ -1169,7 +1169,7 @@ def get_valid_models(instance, start_date, end_date, resolution, networks, speci
                 # get all available netCDF files (handling potential permissions issues)
                 try:
                     available_files = os.listdir(files_directory)
-                except PermissionError as error:
+                except PermissionError:
                     continue
 
             # get monthly start date (YYYYMM) of all files
@@ -1382,7 +1382,7 @@ def valid_date(date_text):
     try:
         datetime.datetime.strptime(str(date_text), "%Y%m%d")
         return True
-    except Exception as e:
+    except Exception:
         return False
 
 
@@ -1441,7 +1441,7 @@ def generate_file_trees(instance):
                     )
                 )
             )
-        except FileNotFoundError as file_error:
+        except FileNotFoundError:
             error = "Error: Trying to load 'settings/internal/ghost_filetree_{}.json' but file does not exist. Run with the flag '--gft' to generate this file.".format(
                 instance.ghost_version
             )
@@ -1469,7 +1469,7 @@ def generate_file_trees(instance):
                         )
                     )
                 )
-            except FileNotFoundError as file_error:
+            except FileNotFoundError:
                 error = "Error: Trying to load 'settings/internal/nonghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
                 instance.logger.error(error)
                 sys.exit(1)
