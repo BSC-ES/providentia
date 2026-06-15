@@ -26,7 +26,7 @@ class _Mode(str, Enum):
     """
     Defines the interactive tool modes available for the user interface.
     """
-    
+
     NONE = ""
     PAN = "pan/zoom"
     ZOOM = "zoom rect"
@@ -55,13 +55,14 @@ class _Mode(str, Enum):
         """
         return self.name if self is not _Mode.NONE else None
 
+
 class NavigationToolbar(NavigationToolbar2QT):
-    """ Class that customises the Matplotlib navigation toolbar with specific buttons and bespoke functionality. """
-    
+    """Class that customises the Matplotlib navigation toolbar with specific buttons and bespoke functionality."""
+
     def __init__(self, read_instance=None, canvas_instance=None):
         """
         Initialises the toolbar, defines the toolitems, and sets custom icons.
-        
+
         Parameters
         ----------
         read_instance : object, optional
@@ -75,85 +76,119 @@ class NavigationToolbar(NavigationToolbar2QT):
 
         # only display wanted buttons
         NavigationToolbar2QT.toolitems = (
-            ('Save data', 'Save current instance of data and metadata', '', 'save_data'),
-            ('Load data', 'Load toolbar selections from configuration file', '', 'conf_dialogs'),
+            (
+                "Save data",
+                "Save current instance of data and metadata",
+                "",
+                "save_data",
+            ),
+            (
+                "Load data",
+                "Load toolbar selections from configuration file",
+                "",
+                "conf_dialogs",
+            ),
             (None, None, None, None),
-            ('World', 'Set world view', 'world', 'world'),
-            ('Home', 'Set to original view', 'home', 'home'),
-            ('Back', 'Back to previous view', 'back', 'back'),
-            ('Forward', 'Forward to next view', 'forward', 'forward'),
+            ("World", "Set world view", "world", "world"),
+            ("Home", "Set to original view", "home", "home"),
+            ("Back", "Back to previous view", "back", "back"),
+            ("Forward", "Forward to next view", "forward", "forward"),
             (None, None, None, None),
-            ('Zoom', 'Zoom to rectangle', 'zoom_to_rect', 'zoom'),
-            ('Pan', 'Pan axes with left mouse, zoom with right', 'move', 'pan'),
-            ('Lasso', 'Select stations with lasso', '', 'connect_lasso'),
+            ("Zoom", "Zoom to rectangle", "zoom_to_rect", "zoom"),
+            ("Pan", "Pan axes with left mouse, zoom with right", "move", "pan"),
+            ("Lasso", "Select stations with lasso", "", "connect_lasso"),
             (None, None, None, None),
-            ('Save figure', 'Save the figure', 'filesave', 'save_figure'),
+            ("Save figure", "Save the figure", "filesave", "save_figure"),
         )
 
         # allow access to methods of parent class NavigationToolbar2QT
         super(NavigationToolbar, self).__init__(canvas_instance, read_instance)
 
         # set toolbar icons
-        actions = self.findChildren(QtWidgets.QAction)
-        self._actions['save_data'].setIcon(QtGui.QIcon(join(CURRENT_PATH, "resources/save_icon.png")))
-        self._actions['conf_dialogs'].setIcon(QtGui.QIcon(join(CURRENT_PATH, "resources/conf_icon.png")))
-        self._actions['world'].setIcon(QtGui.QIcon(join(CURRENT_PATH, "resources/world_icon.png")))
-        self._actions['home'].setIcon(QtGui.QIcon(join(CURRENT_PATH, "resources/original_view_icon.png")))
-        self._actions['zoom'].setIcon(QtGui.QIcon(join(CURRENT_PATH, "resources/zoom_icon.png")))
-        self._actions['connect_lasso'].setIcon(QtGui.QIcon(join(CURRENT_PATH, "resources/lasso_icon.png")))
-        self._actions['save_figure'].setIcon(QtGui.QIcon(join(CURRENT_PATH, "resources/save_fig_icon.png")))
-        
-        # allow lasso button to be checked        
-        self._actions['connect_lasso'].setCheckable(True)
+        self._actions["save_data"].setIcon(
+            QtGui.QIcon(join(CURRENT_PATH, "resources/save_icon.png"))
+        )
+        self._actions["conf_dialogs"].setIcon(
+            QtGui.QIcon(join(CURRENT_PATH, "resources/conf_icon.png"))
+        )
+        self._actions["world"].setIcon(
+            QtGui.QIcon(join(CURRENT_PATH, "resources/world_icon.png"))
+        )
+        self._actions["home"].setIcon(
+            QtGui.QIcon(join(CURRENT_PATH, "resources/original_view_icon.png"))
+        )
+        self._actions["zoom"].setIcon(
+            QtGui.QIcon(join(CURRENT_PATH, "resources/zoom_icon.png"))
+        )
+        self._actions["connect_lasso"].setIcon(
+            QtGui.QIcon(join(CURRENT_PATH, "resources/lasso_icon.png"))
+        )
+        self._actions["save_figure"].setIcon(
+            QtGui.QIcon(join(CURRENT_PATH, "resources/save_fig_icon.png"))
+        )
+
+        # allow lasso button to be checked
+        self._actions["connect_lasso"].setCheckable(True)
 
     def _update_buttons_checked(self):
         """
         Synchronises the visual check states of toolbar buttons with the current interaction mode.
         """
 
-        if 'pan' in self._actions:
-            self._actions['pan'].setChecked(self.mode == 'pan/zoom')
-        if 'zoom' in self._actions:
-            self._actions['zoom'].setChecked(self.mode == 'zoom rect')
-        if 'connect_lasso' in self._actions:
-            self._actions['connect_lasso'].setChecked(self.mode == 'lasso')
+        if "pan" in self._actions:
+            self._actions["pan"].setChecked(self.mode == "pan/zoom")
+        if "zoom" in self._actions:
+            self._actions["zoom"].setChecked(self.mode == "zoom rect")
+        if "connect_lasso" in self._actions:
+            self._actions["connect_lasso"].setChecked(self.mode == "lasso")
 
     def save_data(self):
         """
         Triggers a file dialogue to export data or configuration settings to various formats.
         """
 
-        filetypes = {'NetCDF': 'nc', 'Numpy file': 'npz', 'Configuration': 'conf'}
+        filetypes = {"NetCDF": "nc", "Numpy file": "npz", "Configuration": "conf"}
         sorted_filetypes = sorted(filetypes.items())
-        startpath = os.path.expanduser(matplotlib.rcParams['savefig.directory'])
-        daterange = self.read_instance.le_start_date.text() + "_" \
-                    + self.read_instance.le_end_date.text()
+        startpath = os.path.expanduser(matplotlib.rcParams["savefig.directory"])
+        daterange = (
+            self.read_instance.le_start_date.text()
+            + "_"
+            + self.read_instance.le_end_date.text()
+        )
         default_name = "PRV_" + str(self.read_instance.species[0]) + "_" + daterange
         start = join(startpath, default_name)
 
-        filter_ext = ['%s (%s)' % (name, '*.%s' % ext) for name, ext in sorted_filetypes]
-        filter_ext = ';;'.join(filter_ext)
-        
+        filter_ext = [
+            "%s (%s)" % (name, "*.%s" % ext) for name, ext in sorted_filetypes
+        ]
+        filter_ext = ";;".join(filter_ext)
+
         # prompt with file name and extension
-        fname, fext = QtWidgets.QFileDialog.getSaveFileName(None, "Choose a filename to save to", start, filter_ext)
+        fname, fext = QtWidgets.QFileDialog.getSaveFileName(
+            None, "Choose a filename to save to", start, filter_ext
+        )
         chose_npz = "npz" in fext
         chose_conf = "conf" in fext
         if fname:
             # save dir for next time, unless empty str (i.e., use cwd).
             if startpath != "":
-                matplotlib.rcParams['savefig.directory'] = (os.path.dirname(fname))
+                matplotlib.rcParams["savefig.directory"] = os.path.dirname(fname)
                 try:
                     if chose_npz:
-                        output = export_data_npz(self.read_instance, fname, input_dialogue=True)
+                        output = export_data_npz(
+                            self.read_instance, fname, input_dialogue=True
+                        )
                     elif chose_conf:
                         output = export_configuration(self.read_instance, fname)
                     else:
-                        output = export_netcdf(self.read_instance, fname, input_dialogue=True)
+                        output = export_netcdf(
+                            self.read_instance, fname, input_dialogue=True
+                        )
                     if output is True:
-                        msg = 'The data was successfully saved in {}.'.format(fname)
+                        msg = "The data was successfully saved in {}.".format(fname)
                         show_message(self.read_instance, msg)
                 except Exception as e:
-                    msg = 'There was an error saving the file.'
+                    msg = "There was an error saving the file."
                     self.read_instance.logger.error(e)
                     show_message(self.read_instance, msg)
 
@@ -176,7 +211,7 @@ class NavigationToolbar(NavigationToolbar2QT):
             # find the different limit
             if prev_xlim != new_xlim or prev_ylim != new_ylim:
                 self.harmonise_changed_axis(axis)
-    
+
     def harmonise_changed_axis(self, axis):
         """
         Identifies the context of a modified axis and propagates limit changes to related plots.
@@ -200,17 +235,27 @@ class NavigationToolbar(NavigationToolbar2QT):
 
         # apply harmonise to the plots with time
         if plot_type in ["periodic", "periodic-violin", "timeseries"]:
-            plot_options = copy.deepcopy(self.canvas_instance.current_plot_options[plot_type])
-            harmonise_xy_lims_paradigm(self.read_instance, self.canvas_instance, self.canvas_instance.plot_axes[plot_type], plot_type, 
-                                       self.canvas_instance.plot_characteristics[plot_type], plot_options, relim=True, autoscale=False)
-                
+            plot_options = copy.deepcopy(
+                self.canvas_instance.current_plot_options[plot_type]
+            )
+            harmonise_xy_lims_paradigm(
+                self.read_instance,
+                self.canvas_instance,
+                self.canvas_instance.plot_axes[plot_type],
+                plot_type,
+                self.canvas_instance.plot_characteristics[plot_type],
+                plot_options,
+                relim=True,
+                autoscale=False,
+            )
+
     def world(self):
         """
         Resets the map view to global coordinates and updates the navigation history.
         """
 
         self.set_history_buttons()
-        ax = self.canvas_instance.plot_axes['map']
+        ax = self.canvas_instance.plot_axes["map"]
         ax.set_extent([-180, 180, -90, 90])
         self.push_current()
         self.canvas.draw_idle()
@@ -222,14 +267,20 @@ class NavigationToolbar(NavigationToolbar2QT):
         """
         Restores the original view of all plots and synchronises limits across linked axes.
         """
-        
+
         # get all the limits before doing clicking on home
-        previous_state = {axis: (axis.get_xlim(), axis.get_ylim()) for axis in self.canvas_instance.figure.axes}
+        previous_state = {
+            axis: (axis.get_xlim(), axis.get_ylim())
+            for axis in self.canvas_instance.figure.axes
+        }
 
         super().home()
 
         # get all the limits after doing clicking on home
-        current_state = {axis: (axis.get_xlim(), axis.get_ylim()) for axis in self.canvas_instance.figure.axes}
+        current_state = {
+            axis: (axis.get_xlim(), axis.get_ylim())
+            for axis in self.canvas_instance.figure.axes
+        }
 
         # harmonise axis if needed
         self.check_for_axis_limit_changes(previous_state, current_state)
@@ -241,14 +292,20 @@ class NavigationToolbar(NavigationToolbar2QT):
         """
         Reverts to the previous view in the navigation stack and synchronises all linked axes.
         """
-        
+
         # get all the limits before doing clicking on back
-        previous_state = {axis: (axis.get_xlim(), axis.get_ylim()) for axis in self.canvas_instance.figure.axes}
+        previous_state = {
+            axis: (axis.get_xlim(), axis.get_ylim())
+            for axis in self.canvas_instance.figure.axes
+        }
 
         super().back()
 
         # get all the limits after doing clicking on back
-        current_state = {axis: (axis.get_xlim(), axis.get_ylim()) for axis in self.canvas_instance.figure.axes}
+        current_state = {
+            axis: (axis.get_xlim(), axis.get_ylim())
+            for axis in self.canvas_instance.figure.axes
+        }
 
         # harmonise axis if needed
         self.check_for_axis_limit_changes(previous_state, current_state)
@@ -260,14 +317,20 @@ class NavigationToolbar(NavigationToolbar2QT):
         """
         Moves to the next view in the navigation stack and synchronises all linked axes.
         """
-        
+
         # get all the limits before doing clicking on forward
-        previous_state = {axis: (axis.get_xlim(), axis.get_ylim()) for axis in self.canvas_instance.figure.axes}
+        previous_state = {
+            axis: (axis.get_xlim(), axis.get_ylim())
+            for axis in self.canvas_instance.figure.axes
+        }
 
         super().forward()
 
         # get all the limits after doing clicking on forward
-        current_state = {axis: (axis.get_xlim(), axis.get_ylim()) for axis in self.canvas_instance.figure.axes}
+        current_state = {
+            axis: (axis.get_xlim(), axis.get_ylim())
+            for axis in self.canvas_instance.figure.axes
+        }
 
         # harmonise axis if needed
         self.check_for_axis_limit_changes(previous_state, current_state)
@@ -284,7 +347,7 @@ class NavigationToolbar(NavigationToolbar2QT):
         event : matplotlib.backend_bases.MouseEvent
             The mouse event triggered by dragging the plot surface.
         """
-    
+
         super().drag_pan(event)
 
         # harmonise axis if needed
@@ -316,12 +379,15 @@ class NavigationToolbar(NavigationToolbar2QT):
         Validates data presence before triggering the standard dialogue to save the current plot as an image.
         """
 
-        if self.read_instance.le_minimum_value.text() == '' and self.read_instance.le_minimum_value.text() == '':
+        if (
+            self.read_instance.le_minimum_value.text() == ""
+            and self.read_instance.le_minimum_value.text() == ""
+        ):
             # control that data was read
-            msg = 'The figure could not be created. Read the data first.'
+            msg = "The figure could not be created. Read the data first."
             show_message(self.read_instance, msg)
             return
-        
+
         # inherit from qt
         super().save_figure(self)
 
@@ -331,7 +397,7 @@ class NavigationToolbar(NavigationToolbar2QT):
         """
 
         conf_to_load = self.filename_dialog()
-        
+
         # is user pressed cancel
         if conf_to_load is None:
             return
@@ -339,21 +405,21 @@ class NavigationToolbar(NavigationToolbar2QT):
         try:
             load_conf(self.read_instance, fpath=conf_to_load)
             all_sections = self.read_instance.sub_opts.keys()
-            
+
             if len(all_sections) == 1:
                 okpressed = False
                 selected_section = list(all_sections)[0]
             else:
-                title = 'Sections'
-                msg = 'Select section to load'
+                title = "Sections"
+                msg = "Select section to load"
                 dialog = InputDialog(self, title, msg, all_sections)
                 selected_section, okpressed = dialog.selected_option, dialog.okpressed
-            
+
             if okpressed or len(all_sections) == 1:
                 self.reload_conf(selected_section, conf_to_load)
-        
+
         except Exception as e:
-            msg = 'There was an error loading the configuration file.'
+            msg = "There was an error loading the configuration file."
             show_message(self.read_instance, msg)
             self.read_instance.logger.error(e)
 
@@ -370,21 +436,25 @@ class NavigationToolbar(NavigationToolbar2QT):
             return
 
         # if lasso button is pressed then activate lasso event
-        if self._actions['connect_lasso'].isChecked():
-
+        if self._actions["connect_lasso"].isChecked():
             # update mode
             self.mode = _Mode.LASSO
             self.canvas_instance.lasso_active = True
 
             # connect lasso event
-            if ((Version(matplotlib.__version__) < Version("3.2")) or
-               (self.read_instance.machine in ['mn5', 'nord4'])):
+            if (Version(matplotlib.__version__) < Version("3.2")) or (
+                self.read_instance.machine in ["mn5", "nord4"]
+            ):
                 blit = False
             else:
                 blit = True
-            self.canvas_instance.lasso_event = LassoSelector(self.canvas_instance.plot_axes['map'], 
-                                                             onselect=self.canvas_instance.onlassoselect, 
-                                                             useblit=blit, props=self.canvas_instance.lasso, button=[1])
+            self.canvas_instance.lasso_event = LassoSelector(
+                self.canvas_instance.plot_axes["map"],
+                onselect=self.canvas_instance.onlassoselect,
+                useblit=blit,
+                props=self.canvas_instance.lasso,
+                button=[1],
+            )
 
             # release canvas drawing (from self if owned by other toolbar buttons)
             if self.canvas_instance.figure.canvas.widgetlock.isowner(self):
@@ -395,14 +465,13 @@ class NavigationToolbar(NavigationToolbar2QT):
 
         # otherwise, deactivate lasso event
         else:
-
             # update mode
             self.mode = _Mode.NONE
             self.canvas_instance.lasso_active = False
 
             # disconnect lasso event
             self.canvas_instance.lasso_event.disconnect_events()
-            
+
         # update checked buttons
         self._update_buttons_checked()
 
@@ -416,10 +485,15 @@ class NavigationToolbar(NavigationToolbar2QT):
             The absolute path to the selected file, or None if the dialogue was cancelled.
         """
 
-        options =  QtWidgets.QFileDialog.Options()
-        options |=  QtWidgets.QFileDialog.DontUseNativeDialog
-        filename, _ =  QtWidgets.QFileDialog.getOpenFileName(self.read_instance, "Choose configuration file to load", "",
-                                                             "All Files (*);;Python Files (*.py", options=options)
+        options = QtWidgets.QFileDialog.Options()
+        options |= QtWidgets.QFileDialog.DontUseNativeDialog
+        filename, _ = QtWidgets.QFileDialog.getOpenFileName(
+            self.read_instance,
+            "Choose configuration file to load",
+            "",
+            "All Files (*);;Python Files (*.py",
+            options=options,
+        )
         if filename:
             return filename
 
@@ -436,7 +510,9 @@ class NavigationToolbar(NavigationToolbar2QT):
         """
 
         # save current active_dashboard_plots
-        previous_active_dashboard_plots = copy.deepcopy(self.read_instance.active_dashboard_plots)
+        previous_active_dashboard_plots = copy.deepcopy(
+            self.read_instance.active_dashboard_plots
+        )
 
         # delete current active config attributes
         for k in self.read_instance.current_config:
@@ -447,7 +523,7 @@ class NavigationToolbar(NavigationToolbar2QT):
 
         # reinitialise default configuration variables
         # no commandline arguments considered as reloading config
-        provconf = ProvConfiguration(self.read_instance, **{'dashboard': True})
+        provconf = ProvConfiguration(self.read_instance, **{"dashboard": True})
 
         # get current GHOST version
         current_ghost_version = self.read_instance.ghost_version
@@ -458,24 +534,26 @@ class NavigationToolbar(NavigationToolbar2QT):
         self.read_instance.from_conf = True
         self.read_instance.current_config = self.read_instance.sub_opts[section]
         for k, val in self.read_instance.current_config.items():
-            setattr(self.read_instance, k, provconf.parse_parameter(k, val))            
+            setattr(self.read_instance, k, provconf.parse_parameter(k, val))
 
         # now all variables have been parsed, check validity of those, throwing errors where necessary
         provconf.check_validity()
 
         # get new active_dashboard_plots and set it in memory to be the previous variable
-        new_active_dashboard_plots = copy.deepcopy(self.read_instance.active_dashboard_plots)
+        new_active_dashboard_plots = copy.deepcopy(
+            self.read_instance.active_dashboard_plots
+        )
         self.read_instance.active_dashboard_plots = previous_active_dashboard_plots
 
         # generate file trees if GHOST version has changed
         if current_ghost_version != self.read_instance.ghost_version:
             generate_file_trees(self.read_instance)
-        
+
         # update species, models, qa & flags
         self.read_instance.config_bar_initialisation = True
         self.read_instance.update_configuration_bar_fields()
         self.read_instance.config_bar_initialisation = False
-        
+
         # read and filter
         self.read_instance.handle_data_selection_update()
 
@@ -483,9 +561,13 @@ class NavigationToolbar(NavigationToolbar2QT):
         multispecies_conf(self.read_instance)
 
         # update active dashboard plots
-        for position, (previous_plot_type, new_plot_type) in enumerate(zip(previous_active_dashboard_plots, new_active_dashboard_plots)):
+        for position, (previous_plot_type, new_plot_type) in enumerate(
+            zip(previous_active_dashboard_plots, new_active_dashboard_plots)
+        ):
             if previous_plot_type != new_plot_type:
-                self.read_instance.handle_layout_update(new_plot_type, sender=position+2)
+                self.read_instance.handle_layout_update(
+                    new_plot_type, sender=position + 2
+                )
 
         # reset from_conf variable to False after reading and filtering is complete
         self.read_instance.from_conf = False

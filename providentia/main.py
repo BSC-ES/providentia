@@ -9,9 +9,10 @@ from .argument_parser import ProvArgumentParser
 logging.basicConfig(level=logging.WARNING)
 LOG = logging.getLogger(__name__)
 
+
 class Providentia(object):
     """
-    Class that handles parsing command-line arguments, 
+    Class that handles parsing command-line arguments,
     selecting the appropriate mode.
     """
 
@@ -48,7 +49,7 @@ class Providentia(object):
             self.parser.parser.print_help()
             return False
         # pass only valid values and cast boolean strings to boolean
-        res = {k: bool(v) if v in ('True', 'False') else v for k, v in req.items() if v}
+        res = {k: bool(v) if v in ("True", "False") else v for k, v in req.items() if v}
         return res
 
     def main(self):
@@ -60,7 +61,7 @@ class Providentia(object):
         bool
             The return value of the executed mode's main function.
         """
-        
+
         try:
             args = self.parser.parse_args()
 
@@ -91,18 +92,18 @@ class Providentia(object):
             main(**res)
 
         except Exception as err:
-            LOG.error('Unhandled exception on Providentia: %s' % err, exc_info=True)
+            LOG.error("Unhandled exception on Providentia: %s" % err, exc_info=True)
             return False
+
 
 def main():
     """
-    Create a Providentia instance with the argument parser 
+    Create a Providentia instance with the argument parser
     and execute the main workflow.
-    
-    This function is called by the Providentia binary.    
+
+    This function is called by the Providentia binary.
     """
 
     if Providentia(ProvArgumentParser()).main() is False:
         sys.exit(1)
     sys.exit(0)
-

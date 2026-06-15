@@ -22,15 +22,32 @@ from .configuration import load_conf
 from .configuration import ProvConfiguration
 from .dashboard_elements import ComboBox, QVLine, InputDialog, set_cursor, unset_cursor
 from .dashboard_elements import set_formatting
-from .fields_menus import (init_models, init_flags, init_qa, update_qa, init_metadata, init_multispecies, init_period, init_coverage,
-                           multispecies_conf, update_coverage_fields, update_period_fields, update_metadata_fields)
+from .fields_menus import (
+    init_models,
+    init_flags,
+    init_qa,
+    update_qa,
+    init_metadata,
+    init_multispecies,
+    init_period,
+    init_coverage,
+    multispecies_conf,
+    update_coverage_fields,
+    update_period_fields,
+    update_metadata_fields,
+)
 from .plot_aux import get_taylor_diagram_ghelper
 from .plot_formatting import format_axis
 from .pop_up_window import PopUpWindow
 from .read import DataReader
-from .read_aux import (check_for_ghost, get_default_qa, generate_file_trees, 
-                       get_valid_models, get_valid_obs_files_in_date_range,
-                       get_temporal_resolution_order)
+from .read_aux import (
+    check_for_ghost,
+    get_default_qa,
+    generate_file_trees,
+    get_valid_models,
+    get_valid_obs_files_in_date_range,
+    get_temporal_resolution_order,
+)
 from .toolbar import NavigationToolbar
 from .warnings_prv import show_message
 
@@ -39,7 +56,8 @@ os.environ["QT_FONT_DPI"] = "96"
 # enable high DPI pixmaps
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
-PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
+PROVIDENTIA_ROOT = "/".join(CURRENT_PATH.split("/")[:-1])
+
 
 class Dashboard(QtWidgets.QWidget):
     """Class that generates Providentia dashboard interface."""
@@ -55,7 +73,7 @@ class Dashboard(QtWidgets.QWidget):
         Parameters
         ----------
         **kwargs : dict
-            Arbitrary keyword arguments used to configure the dashboard 
+            Arbitrary keyword arguments used to configure the dashboard
             settings and override default configuration values.
         """
 
@@ -64,14 +82,20 @@ class Dashboard(QtWidgets.QWidget):
 
         # update self with command line arguments
         self.commandline_arguments = copy.deepcopy(kwargs)
-        self.commandline_arguments['dashboard'] = True
+        self.commandline_arguments["dashboard"] = True
 
         # load statistical yamls
-        self.basic_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
-        self.modbias_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/model_bias_stats.yaml')))
+        self.basic_stats = yaml.safe_load(
+            open(join(PROVIDENTIA_ROOT, "settings/basic_stats.yaml"))
+        )
+        self.modbias_stats = yaml.safe_load(
+            open(join(PROVIDENTIA_ROOT, "settings/model_bias_stats.yaml"))
+        )
 
         # load coverage information
-        self.coverage_info = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/coverage.yaml')))
+        self.coverage_info = yaml.safe_load(
+            open(join(PROVIDENTIA_ROOT, "settings/internal/coverage.yaml"))
+        )
 
         # save warnings that appear next in to show them after the UI is initialised
         self.delay = True
@@ -87,7 +111,7 @@ class Dashboard(QtWidgets.QWidget):
         self.from_conf = False
         self.current_config = {}
 
-        if self.config != '': 
+        if self.config != "":
             read_conf = False
             if os.path.exists(self.config):
                 read_conf = True
@@ -97,22 +121,28 @@ class Dashboard(QtWidgets.QWidget):
                     read_conf = True
 
             if read_conf:
-                if 'section' in self.commandline_arguments:
-                    # config and section defined 
+                if "section" in self.commandline_arguments:
+                    # config and section defined
                     load_conf(self, fpath=self.config)
-                    if self.commandline_arguments['section'] in self.all_sections:
+                    if self.commandline_arguments["section"] in self.all_sections:
                         self.from_conf = True
-                        self.current_config = self.sub_opts[self.commandline_arguments['section']]
-                        self.section = self.commandline_arguments['section']
+                        self.current_config = self.sub_opts[
+                            self.commandline_arguments["section"]
+                        ]
+                        self.section = self.commandline_arguments["section"]
                     else:
-                        msg = 'Error: The section specified in the command line ({0}) does not exist.'.format(self.commandline_arguments['section'])
-                        msg += '\nTip: For subsections, add the name of the parent section followed by an interpunct (·) '
-                        msg += 'before the subsection name (e.g. SECTIONA·Spain). Available: {0}'.format(self.all_sections)
+                        msg = "Error: The section specified in the command line ({0}) does not exist.".format(
+                            self.commandline_arguments["section"]
+                        )
+                        msg += "\nTip: For subsections, add the name of the parent section followed by an interpunct (·) "
+                        msg += "before the subsection name (e.g. SECTIONA·Spain). Available: {0}".format(
+                            self.all_sections
+                        )
                         self.logger.error(msg)
                         sys.exit(1)
                 else:
                     # config defined, section undefined
-                    load_conf(self, fpath=self.config)    
+                    load_conf(self, fpath=self.config)
                     all_sections = self.sub_opts.keys()
 
                     # if no parent section names are found throw an error
@@ -120,17 +150,20 @@ class Dashboard(QtWidgets.QWidget):
                         error = "Error: No sections were found in the configuration file, make sure to name them using square brackets."
                         self.logger.error(error)
                         sys.exit(1)
-                    # if there is only one section, do not ask the user    
+                    # if there is only one section, do not ask the user
                     elif len(all_sections) == 1:
                         okpressed = False
                         self.section = list(all_sections)[0]
                     # ask the user for the section
                     else:
-                        title = 'Sections'
-                        msg = 'Select section to load'
+                        title = "Sections"
+                        msg = "Select section to load"
                         dialog = InputDialog(self, title, msg, all_sections)
-                        self.section, okpressed = dialog.selected_option, dialog.okpressed
-                        
+                        self.section, okpressed = (
+                            dialog.selected_option,
+                            dialog.okpressed,
+                        )
+
                         # exit if section is not selected
                         if not okpressed:
                             sys.exit(1)
@@ -138,10 +171,10 @@ class Dashboard(QtWidgets.QWidget):
                     if okpressed or (len(all_sections) == 1):
                         self.from_conf = True
                         self.current_config = self.sub_opts[self.section]
-            
+
             else:
                 # have config, but path does not exist
-                error = 'Error: The path to the configuration file specified in the command line does not exist.'
+                error = "Error: The path to the configuration file specified in the command line does not exist."
                 self.logger.error(error)
                 sys.exit(1)
 
@@ -163,20 +196,31 @@ class Dashboard(QtWidgets.QWidget):
         self.provconf.check_validity()
 
         # get operating system specific formatting
-        if self.operating_system == 'Mac':
-            self.formatting_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_mac.yaml')))
-        elif self.operating_system == 'Linux':
-            self.formatting_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_linux.yaml')))
-        elif self.operating_system == 'Windows':
-            self.formatting_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_windows.yaml')))
+        if self.operating_system == "Mac":
+            self.formatting_dict = yaml.safe_load(
+                open(join(PROVIDENTIA_ROOT, "settings/internal/stylesheet_mac.yaml"))
+            )
+        elif self.operating_system == "Linux":
+            self.formatting_dict = yaml.safe_load(
+                open(join(PROVIDENTIA_ROOT, "settings/internal/stylesheet_linux.yaml"))
+            )
+        elif self.operating_system == "Windows":
+            self.formatting_dict = yaml.safe_load(
+                open(
+                    join(PROVIDENTIA_ROOT, "settings/internal/stylesheet_windows.yaml")
+                )
+            )
 
         # load characteristics per plot type
         # check for self defined plot characteristics file
-        if self.plot_characteristics_filename == '':
+        if self.plot_characteristics_filename == "":
             self.plot_characteristics_filename = join(
-                PROVIDENTIA_ROOT, 'settings/plot_characteristics.yaml')
+                PROVIDENTIA_ROOT, "settings/plot_characteristics.yaml"
+            )
         plot_characteristics = yaml.safe_load(open(self.plot_characteristics_filename))
-        self.plot_characteristics_templates = expand_plot_characteristics(plot_characteristics, 'dashboard')
+        self.plot_characteristics_templates = expand_plot_characteristics(
+            plot_characteristics, "dashboard"
+        )
 
         # arguments are only local
         self.full_window_geometry = None
@@ -189,12 +233,23 @@ class Dashboard(QtWidgets.QWidget):
 
         # update map z combobox fields based on data in memory
         # generate lists of basic and basis+bias statistics for using in the z statistic combobox
-        if not hasattr(self, 'basic_z_stats'):
-            self.basic_z_stats = np.array(list(
-                OrderedDict(sorted(self.basic_stats.items(), key=lambda x: x[1]['order'])).keys()))
-        if not hasattr(self, 'basic_and_bias_z_stats'):
-            self.basic_and_bias_z_stats = np.append(self.basic_z_stats, list(
-                OrderedDict(sorted(self.modbias_stats.items(), key=lambda x: x[1]['order'])).keys()))
+        if not hasattr(self, "basic_z_stats"):
+            self.basic_z_stats = np.array(
+                list(
+                    OrderedDict(
+                        sorted(self.basic_stats.items(), key=lambda x: x[1]["order"])
+                    ).keys()
+                )
+            )
+        if not hasattr(self, "basic_and_bias_z_stats"):
+            self.basic_and_bias_z_stats = np.append(
+                self.basic_z_stats,
+                list(
+                    OrderedDict(
+                        sorted(self.modbias_stats.items(), key=lambda x: x[1]["order"])
+                    ).keys()
+                ),
+            )
 
         # initialise UI
         self.init_ui()
@@ -202,7 +257,7 @@ class Dashboard(QtWidgets.QWidget):
         # setup callback events upon resizing/moving of Providentia window
         self.resized.connect(self.get_geometry)
         self.move.connect(self.get_geometry)
-        
+
         # show delayed warnings
         time.sleep(0.1)
         self.delay = False
@@ -213,16 +268,16 @@ class Dashboard(QtWidgets.QWidget):
         """
         Handle window resize events and emit the resized signal.
 
-        This method overrides the default PyQt5 `resizeEvent` function to 
-        trigger custom logic, such as calling `get_geometry`. By emitting 
-        the `resized` signal before passing the event to the superclass, 
-        it ensures all connected components are notified of the change 
+        This method overrides the default PyQt5 `resizeEvent` function to
+        trigger custom logic, such as calling `get_geometry`. By emitting
+        the `resized` signal before passing the event to the superclass,
+        it ensures all connected components are notified of the change
         during the resize operation.
 
         Parameters
         ----------
         event : QResizeEvent
-            The resize event object containing the old and new sizes 
+            The resize event object containing the old and new sizes
             of the widget.
 
         Returns
@@ -239,16 +294,16 @@ class Dashboard(QtWidgets.QWidget):
         """
         Handle window move events and emit the move signal.
 
-        This method overrides the default PyQt5 `moveEvent` function to 
-        trigger custom logic, such as updating geometry tracking via 
-        `get_geometry`. It emits the custom `move` signal before passing 
-        the event to the superclass to ensure the application state 
+        This method overrides the default PyQt5 `moveEvent` function to
+        trigger custom logic, such as updating geometry tracking via
+        `get_geometry`. It emits the custom `move` signal before passing
+        the event to the superclass to ensure the application state
         remains synchronised with the window's screen position.
 
         Parameters
         ----------
         event : QMoveEvent
-            The move event object containing the old and new positions 
+            The move event object containing the old and new positions
             of the widget.
 
         Returns
@@ -256,9 +311,9 @@ class Dashboard(QtWidgets.QWidget):
         None
             The result of the parent class `moveEvent` implementation.
         """
-        
+
         self.move.emit()
-        
+
         return super(Dashboard, self).moveEvent(event)
 
     def get_geometry(self):
@@ -272,79 +327,105 @@ class Dashboard(QtWidgets.QWidget):
         # update geometry of qt elements
         self.update_qt_elements_geometry(resize=True)
 
-    def update_qt_elements_geometry(self, plot_types='ALL', positions = [1,2,3,4,5], resize=False):
+    def update_qt_elements_geometry(
+        self, plot_types="ALL", positions=[1, 2, 3, 4, 5], resize=False
+    ):
         """
         Update the proportional geometry of canvas Qt elements based on window size.
 
         Parameters
         ----------
         plot_types : str or list, optional
-            A list of active plot types to update, or 'ALL' to target all 
+            A list of active plot types to update, or 'ALL' to target all
             predefined dashboard positions. Defaults to 'ALL'.
         positions : list, optional
-            The numerical dashboard positions to be updated. 
+            The numerical dashboard positions to be updated.
             Defaults to [1, 2, 3, 4, 5].
         resize : bool, optional
-            If True, the geometry for full and partial canvas covers and 
-            layout selector buttons will also be recalculated. 
+            If True, the geometry for full and partial canvas covers and
+            layout selector buttons will also be recalculated.
             Defaults to False.
         """
 
         # get dashboard and canvas pixels
-        full_window_width = self.full_window_geometry.width()
         full_window_height = self.full_window_geometry.height()
         canvas_width = self.mpl_canvas.frameGeometry().width()
         canvas_height = self.mpl_canvas.frameGeometry().height()
-        header_height = full_window_height - canvas_height
 
-        if plot_types == 'ALL':
-            plot_types = [self.position_1, self.position_2, self.position_3, self.position_4, self.position_5]
+        if plot_types == "ALL":
+            plot_types = [
+                self.position_1,
+                self.position_2,
+                self.position_3,
+                self.position_4,
+                self.position_5,
+            ]
             show_buttons = False
         else:
             show_buttons = True
 
         # iterate through active dashboard plots
         for position, plot_type in zip(positions, plot_types):
-
-            # gather menu, save buttons and elements for plot type 
+            # gather menu, save buttons and elements for plot type
             for menu_button, save_button, save_data_button, element in zip(
-                self.mpl_canvas.menu_buttons, self.mpl_canvas.save_buttons, 
-                self.mpl_canvas.save_data_buttons, self.mpl_canvas.elements):
-
-                menu_plot_type = menu_button.objectName().split('_menu')[0]
-                if plot_type in ['periodic-violin','fairmode-target','fairmode-statsummary']:
-                    plot_type = plot_type.replace('-','_')
+                self.mpl_canvas.menu_buttons,
+                self.mpl_canvas.save_buttons,
+                self.mpl_canvas.save_data_buttons,
+                self.mpl_canvas.elements,
+            ):
+                menu_plot_type = menu_button.objectName().split("_menu")[0]
+                if plot_type in [
+                    "periodic-violin",
+                    "fairmode-target",
+                    "fairmode-statsummary",
+                ]:
+                    plot_type = plot_type.replace("-", "_")
 
                 # proceed once have objects for plot type
                 # if plot type is None the axes and are initalising the qt element geometry
                 # then as there are no menu buttons for these cases, there are axes formatting issues.
                 # as a workaround set the plot type to be timeseries
-                if (plot_type == menu_plot_type) or ((plot_type in ['None']) & (menu_plot_type == 'timeseries')):
-                    
+                if (plot_type == menu_plot_type) or (
+                    (plot_type in ["None"]) & (menu_plot_type == "timeseries")
+                ):
                     # get position of menu button (set in 1848 x 1016 resolution)
-                    x = self.mpl_canvas.plot_characteristics_templates['general']['settings_menu']['position_'
-                        + str(position)]['x']
-                    y = self.mpl_canvas.plot_characteristics_templates['general']['settings_menu']['position_'
-                        + str(position)]['y']
+                    x = self.mpl_canvas.plot_characteristics_templates["general"][
+                        "settings_menu"
+                    ]["position_" + str(position)]["x"]
+                    y = self.mpl_canvas.plot_characteristics_templates["general"][
+                        "settings_menu"
+                    ]["position_" + str(position)]["y"]
 
                     # calculate proportional position for different screen resolution
                     x = int((x * canvas_width) / 1848)
                     y = int((y * canvas_height) / 1016)
 
                     # get button geometries (old and new)
-                    old_button_geometry = QtCore.QRect(menu_button.x(), menu_button.y(), 18, 18)
+                    old_button_geometry = QtCore.QRect(
+                        menu_button.x(), menu_button.y(), 18, 18
+                    )
                     new_button_geometry = QtCore.QRect(x, y, 18, 18)
-                    
+
                     # set menu and save button geometry
-                    if plot_type not in ['None']:
+                    if plot_type not in ["None"]:
                         # apply new geometry to menu and save buttons
                         menu_button.setGeometry(new_button_geometry)
-                        save_button.setGeometry(int(menu_button.x() - ((30 * canvas_width) / 1848)), int(menu_button.y()), 20, 20)
-                        save_data_button.setGeometry(int(menu_button.x() - ((60 * canvas_width) / 1848)), int(menu_button.y()), 20, 20)
+                        save_button.setGeometry(
+                            int(menu_button.x() - ((30 * canvas_width) / 1848)),
+                            int(menu_button.y()),
+                            20,
+                            20,
+                        )
+                        save_data_button.setGeometry(
+                            int(menu_button.x() - ((60 * canvas_width) / 1848)),
+                            int(menu_button.y()),
+                            20,
+                            20,
+                        )
 
                         # show buttons if active
                         if show_buttons:
-                            if plot_type != 'metadata':
+                            if plot_type != "metadata":
                                 menu_button.show()
                                 save_button.show()
                             save_data_button.show()
@@ -353,48 +434,72 @@ class Dashboard(QtWidgets.QWidget):
                         for sub_element in element:
                             if isinstance(sub_element, dict):
                                 for sub_sub_element in sub_element.values():
-                                    sub_sub_element.setGeometry(sub_sub_element.x() - old_button_geometry.x() + 
-                                                                new_button_geometry.x(), 
-                                                                sub_sub_element.y() - old_button_geometry.y() + 
-                                                                new_button_geometry.y(),
-                                                                sub_sub_element.width(), sub_sub_element.height())
+                                    sub_sub_element.setGeometry(
+                                        sub_sub_element.x()
+                                        - old_button_geometry.x()
+                                        + new_button_geometry.x(),
+                                        sub_sub_element.y()
+                                        - old_button_geometry.y()
+                                        + new_button_geometry.y(),
+                                        sub_sub_element.width(),
+                                        sub_sub_element.height(),
+                                    )
                             else:
-                                sub_element.setGeometry(sub_element.x() - old_button_geometry.x() + new_button_geometry.x(), 
-                                                        sub_element.y() - old_button_geometry.y() + new_button_geometry.y(),
-                                                        sub_element.width(), sub_element.height())
+                                sub_element.setGeometry(
+                                    sub_element.x()
+                                    - old_button_geometry.x()
+                                    + new_button_geometry.x(),
+                                    sub_element.y()
+                                    - old_button_geometry.y()
+                                    + new_button_geometry.y(),
+                                    sub_element.width(),
+                                    sub_element.height(),
+                                )
 
                     # apply new geometry to layout button and canvas covers (if are resizing)
                     if resize:
-
                         # apply new geometry to full canvas covers
                         if position == 1:
-                            self.mpl_canvas.canvas_cover.setGeometry(0, 0, canvas_width, canvas_height)
+                            self.mpl_canvas.canvas_cover.setGeometry(
+                                0, 0, canvas_width, canvas_height
+                            )
 
                         else:
                             # apply new geometry to layout button
-                            cb_position = getattr(self, 'cb_position_{}'.format(position))
+                            cb_position = getattr(
+                                self, "cb_position_{}".format(position)
+                            )
                             # layout selector at position 2 needs to be further from menu
                             if position == 2:
                                 width_diff = 910
                             else:
                                 width_diff = 560
                             height_diff = 1
-                            new_x = int(new_button_geometry.x() - ((width_diff * canvas_width) / 1848))
-                            new_y = int(new_button_geometry.y() + ((height_diff * canvas_height) / 1016))
+                            new_x = int(
+                                new_button_geometry.x()
+                                - ((width_diff * canvas_width) / 1848)
+                            )
+                            new_y = int(
+                                new_button_geometry.y()
+                                + ((height_diff * canvas_height) / 1016)
+                            )
 
                             cb_position.move(new_x, new_y)
 
                             # apply new geometry to partial canvas covers
                             if position == 2:
                                 canvas_x = int(new_x - ((75 * canvas_width) / 1848))
-                                self.mpl_canvas.top_right_canvas_cover.setGeometry(canvas_x, new_y,
-                                                                                   canvas_width-canvas_x, 
-                                                                                   canvas_height-new_y)
+                                self.mpl_canvas.top_right_canvas_cover.setGeometry(
+                                    canvas_x,
+                                    new_y,
+                                    canvas_width - canvas_x,
+                                    canvas_height - new_y,
+                                )
                             elif position == 3:
-                                self.mpl_canvas.lower_canvas_cover.setGeometry(0, new_y, 
-                                                                               canvas_width, 
-                                                                               canvas_height-new_y)
-              
+                                self.mpl_canvas.lower_canvas_cover.setGeometry(
+                                    0, new_y, canvas_width, canvas_height - new_y
+                                )
+
                     break
 
     def init_ui(self):
@@ -405,7 +510,7 @@ class Dashboard(QtWidgets.QWidget):
         self.setWindowTitle(self.window_title)
 
         # add logo as icon
-        self.setWindowIcon(QtGui.QIcon(join(PROVIDENTIA_ROOT, 'assets/logo.png')))
+        self.setWindowIcon(QtGui.QIcon(join(PROVIDENTIA_ROOT, "assets/logo.png")))
 
         # create parent layout to pull together a configuration bar,
         # a MPL navigation toolbar, and a MPL canvas of plots
@@ -430,101 +535,191 @@ class Dashboard(QtWidgets.QWidget):
 
         # define all configuration box objects (labels, comboboxes etc.)
         # data selection section
-        self.lb_data_selection = set_formatting(QtWidgets.QLabel(self, text="Data Selection"),
-                                                self.formatting_dict['menu_title'])
-        self.lb_data_selection.setToolTip('Setup configuration of data to read into memory')
-        self.cb_network = set_formatting(ComboBox(self), self.formatting_dict['menu_combobox'])
-        self.cb_network.setToolTip('Select providing observational data network. '
-                                   'Names starting with * indicate non-GHOST datasets')
-        self.cb_resolution = set_formatting(ComboBox(self), self.formatting_dict['menu_combobox'])
-        self.cb_resolution.setToolTip('Select temporal resolution of data')
-        self.cb_matrix = set_formatting(ComboBox(self), self.formatting_dict['menu_combobox'])
-        self.cb_matrix.setToolTip('Select data matrix')
-        self.cb_species = set_formatting(ComboBox(self), self.formatting_dict['menu_combobox'])
-        self.cb_species.setToolTip('Select species')
-        self.le_start_date = set_formatting(QtWidgets.QLineEdit(self), self.formatting_dict['menu_lineedit'])
-        self.le_start_date.setToolTip('Set data start date: YYYYMMDD')
-        self.le_end_date = set_formatting(QtWidgets.QLineEdit(self), self.formatting_dict['menu_lineedit'])
-        self.le_end_date.setToolTip('Set data end date: YYYYMMDD')
-        self.bu_QA = set_formatting(QtWidgets.QPushButton('QA', self), self.formatting_dict['menu_button'])
-        self.bu_QA.setToolTip('Select standardised quality assurance flags to filter by')
-        self.bu_flags = set_formatting(QtWidgets.QPushButton('FLAGS', self), self.formatting_dict['menu_button'])
-        self.bu_flags.setToolTip('Select standardised data reporter provided flags to filter by')
-        self.bu_models = set_formatting(QtWidgets.QPushButton('MODELS', self), self.formatting_dict['menu_button'])
-        self.bu_models.setToolTip('Select model/s data to read')
-        self.bu_multispecies = set_formatting(QtWidgets.QPushButton('SPECIES', self), self.formatting_dict['menu_button'])
-        self.bu_multispecies.setToolTip('Select species data to filter by')
-        self.bu_read = set_formatting(QtWidgets.QPushButton('READ', self), self.formatting_dict['menu_button'],
-                                      extra_arguments={'color': 'green'})
-        self.bu_read.setToolTip('Read selected configuration of data into memory')
+        self.lb_data_selection = set_formatting(
+            QtWidgets.QLabel(self, text="Data Selection"),
+            self.formatting_dict["menu_title"],
+        )
+        self.lb_data_selection.setToolTip(
+            "Setup configuration of data to read into memory"
+        )
+        self.cb_network = set_formatting(
+            ComboBox(self), self.formatting_dict["menu_combobox"]
+        )
+        self.cb_network.setToolTip(
+            "Select providing observational data network. "
+            "Names starting with * indicate non-GHOST datasets"
+        )
+        self.cb_resolution = set_formatting(
+            ComboBox(self), self.formatting_dict["menu_combobox"]
+        )
+        self.cb_resolution.setToolTip("Select temporal resolution of data")
+        self.cb_matrix = set_formatting(
+            ComboBox(self), self.formatting_dict["menu_combobox"]
+        )
+        self.cb_matrix.setToolTip("Select data matrix")
+        self.cb_species = set_formatting(
+            ComboBox(self), self.formatting_dict["menu_combobox"]
+        )
+        self.cb_species.setToolTip("Select species")
+        self.le_start_date = set_formatting(
+            QtWidgets.QLineEdit(self), self.formatting_dict["menu_lineedit"]
+        )
+        self.le_start_date.setToolTip("Set data start date: YYYYMMDD")
+        self.le_end_date = set_formatting(
+            QtWidgets.QLineEdit(self), self.formatting_dict["menu_lineedit"]
+        )
+        self.le_end_date.setToolTip("Set data end date: YYYYMMDD")
+        self.bu_QA = set_formatting(
+            QtWidgets.QPushButton("QA", self), self.formatting_dict["menu_button"]
+        )
+        self.bu_QA.setToolTip(
+            "Select standardised quality assurance flags to filter by"
+        )
+        self.bu_flags = set_formatting(
+            QtWidgets.QPushButton("FLAGS", self), self.formatting_dict["menu_button"]
+        )
+        self.bu_flags.setToolTip(
+            "Select standardised data reporter provided flags to filter by"
+        )
+        self.bu_models = set_formatting(
+            QtWidgets.QPushButton("MODELS", self), self.formatting_dict["menu_button"]
+        )
+        self.bu_models.setToolTip("Select model/s data to read")
+        self.bu_multispecies = set_formatting(
+            QtWidgets.QPushButton("SPECIES", self), self.formatting_dict["menu_button"]
+        )
+        self.bu_multispecies.setToolTip("Select species data to filter by")
+        self.bu_read = set_formatting(
+            QtWidgets.QPushButton("READ", self),
+            self.formatting_dict["menu_button"],
+            extra_arguments={"color": "green"},
+        )
+        self.bu_read.setToolTip("Read selected configuration of data into memory")
         self.vertical_splitter_1 = QVLine()
         self.vertical_splitter_1.setMaximumWidth(20)
 
         # filters section
-        self.lb_data_filter = set_formatting(QtWidgets.QLabel(self, text="Filters"), self.formatting_dict['menu_title'])
-        self.lb_data_filter.setToolTip('Select criteria to filter data by')
-        self.bu_rep = set_formatting(QtWidgets.QPushButton('COVERAGE', self), self.formatting_dict['menu_button'])
-        self.bu_rep.setToolTip('Select data coverage to apply')
-        self.bu_meta = set_formatting(QtWidgets.QPushButton('METADATA', self), self.formatting_dict['menu_button'])
-        self.bu_meta.setToolTip('Select metadata to filter by')
-        self.bu_reset = set_formatting(QtWidgets.QPushButton('RESET', self), self.formatting_dict['menu_button'],
-                                       extra_arguments={'color': 'red'})
-        self.bu_reset.setToolTip('Reset filter fields to initial values')
-        self.bu_period = set_formatting(QtWidgets.QPushButton('PERIOD', self), self.formatting_dict['menu_button'])
-        self.bu_period.setToolTip('Select data in specific periods')
-        self.bu_filter = set_formatting(QtWidgets.QPushButton('FILTER', self), self.formatting_dict['menu_button'],
-                                        extra_arguments={'color': 'blue'})
-        self.bu_filter.setToolTip('Filter data')
-        self.lb_data_bounds = set_formatting(QtWidgets.QLabel(self, text="Bounds"), self.formatting_dict['menu_label'])
-        self.lb_data_bounds.setToolTip('Set lower/upper bounds of data')
-        self.le_minimum_value = set_formatting(QtWidgets.QLineEdit(self), self.formatting_dict['menu_lineedit'])
-        self.le_minimum_value.setToolTip('Set lower bound of data')
-        self.le_maximum_value = set_formatting(QtWidgets.QLineEdit(self), self.formatting_dict['menu_lineedit'])
-        self.le_maximum_value.setToolTip('Set upper bound of data')
+        self.lb_data_filter = set_formatting(
+            QtWidgets.QLabel(self, text="Filters"), self.formatting_dict["menu_title"]
+        )
+        self.lb_data_filter.setToolTip("Select criteria to filter data by")
+        self.bu_rep = set_formatting(
+            QtWidgets.QPushButton("COVERAGE", self), self.formatting_dict["menu_button"]
+        )
+        self.bu_rep.setToolTip("Select data coverage to apply")
+        self.bu_meta = set_formatting(
+            QtWidgets.QPushButton("METADATA", self), self.formatting_dict["menu_button"]
+        )
+        self.bu_meta.setToolTip("Select metadata to filter by")
+        self.bu_reset = set_formatting(
+            QtWidgets.QPushButton("RESET", self),
+            self.formatting_dict["menu_button"],
+            extra_arguments={"color": "red"},
+        )
+        self.bu_reset.setToolTip("Reset filter fields to initial values")
+        self.bu_period = set_formatting(
+            QtWidgets.QPushButton("PERIOD", self), self.formatting_dict["menu_button"]
+        )
+        self.bu_period.setToolTip("Select data in specific periods")
+        self.bu_filter = set_formatting(
+            QtWidgets.QPushButton("FILTER", self),
+            self.formatting_dict["menu_button"],
+            extra_arguments={"color": "blue"},
+        )
+        self.bu_filter.setToolTip("Filter data")
+        self.lb_data_bounds = set_formatting(
+            QtWidgets.QLabel(self, text="Bounds"), self.formatting_dict["menu_label"]
+        )
+        self.lb_data_bounds.setToolTip("Set lower/upper bounds of data")
+        self.le_minimum_value = set_formatting(
+            QtWidgets.QLineEdit(self), self.formatting_dict["menu_lineedit"]
+        )
+        self.le_minimum_value.setToolTip("Set lower bound of data")
+        self.le_maximum_value = set_formatting(
+            QtWidgets.QLineEdit(self), self.formatting_dict["menu_lineedit"]
+        )
+        self.le_maximum_value.setToolTip("Set upper bound of data")
         self.vertical_splitter_2 = QVLine()
         self.vertical_splitter_2.setMaximumWidth(20)
 
         # statistical calculation section
-        self.lb_statistic = set_formatting(QtWidgets.QLabel(self, text="Statistics"),
-                                             self.formatting_dict['menu_title'])
-        self.lb_statistic.setToolTip('Select the type of statistical calculation')
-        self.lb_statistic_mode = set_formatting(QtWidgets.QLabel(self, text="Mode"), self.formatting_dict['menu_label'])
-        self.lb_statistic_mode.setToolTip('Select statistical calculation mode')
-        self.cb_statistic_mode = set_formatting(ComboBox(self), self.formatting_dict['menu_combobox'])
-        self.cb_statistic_mode.setToolTip('Select statistical calculation mode')
-        self.lb_statistic_aggregation = set_formatting(QtWidgets.QLabel(self, text="Aggregation"), self.formatting_dict['menu_label'])
-        self.lb_statistic_aggregation.setToolTip('Select statistic for spatial aggregation')
-        self.cb_statistic_aggregation = set_formatting(ComboBox(self), self.formatting_dict['menu_combobox'])
-        self.cb_statistic_aggregation.setToolTip('Select statistic for spatial aggregation')
+        self.lb_statistic = set_formatting(
+            QtWidgets.QLabel(self, text="Statistics"),
+            self.formatting_dict["menu_title"],
+        )
+        self.lb_statistic.setToolTip("Select the type of statistical calculation")
+        self.lb_statistic_mode = set_formatting(
+            QtWidgets.QLabel(self, text="Mode"), self.formatting_dict["menu_label"]
+        )
+        self.lb_statistic_mode.setToolTip("Select statistical calculation mode")
+        self.cb_statistic_mode = set_formatting(
+            ComboBox(self), self.formatting_dict["menu_combobox"]
+        )
+        self.cb_statistic_mode.setToolTip("Select statistical calculation mode")
+        self.lb_statistic_aggregation = set_formatting(
+            QtWidgets.QLabel(self, text="Aggregation"),
+            self.formatting_dict["menu_label"],
+        )
+        self.lb_statistic_aggregation.setToolTip(
+            "Select statistic for spatial aggregation"
+        )
+        self.cb_statistic_aggregation = set_formatting(
+            ComboBox(self), self.formatting_dict["menu_combobox"]
+        )
+        self.cb_statistic_aggregation.setToolTip(
+            "Select statistic for spatial aggregation"
+        )
         self.vertical_splitter_3 = QVLine()
         self.vertical_splitter_3.setMaximumWidth(20)
-        
+
         # colocation section
-        self.lb_colocate = set_formatting(QtWidgets.QLabel(self, text="Colocation"), self.formatting_dict['menu_title'])
-        self.lb_colocate.setToolTip('Set colocation')
-        self.ch_colocate = set_formatting(QtWidgets.QCheckBox("Temporal"), self.formatting_dict['menu_checkbox'])
-        self.ch_colocate.setToolTip('Temporally colocate observational/model data')
+        self.lb_colocate = set_formatting(
+            QtWidgets.QLabel(self, text="Colocation"),
+            self.formatting_dict["menu_title"],
+        )
+        self.lb_colocate.setToolTip("Set colocation")
+        self.ch_colocate = set_formatting(
+            QtWidgets.QCheckBox("Temporal"), self.formatting_dict["menu_checkbox"]
+        )
+        self.ch_colocate.setToolTip("Temporally colocate observational/model data")
         self.vertical_splitter_4 = QVLine()
         self.vertical_splitter_4.setMaximumWidth(20)
 
         # resampling section
-        self.lb_resampling = set_formatting(QtWidgets.QLabel(self, text="Resampling"), self.formatting_dict['menu_title'])
-        self.lb_resampling.setToolTip('Set resampling options')
-        self.cb_resampling_resolution = set_formatting(ComboBox(self), self.formatting_dict['menu_combobox'])
-        self.cb_resampling_resolution.setToolTip('Select temporal resolution to resample the data to')
+        self.lb_resampling = set_formatting(
+            QtWidgets.QLabel(self, text="Resampling"),
+            self.formatting_dict["menu_title"],
+        )
+        self.lb_resampling.setToolTip("Set resampling options")
+        self.cb_resampling_resolution = set_formatting(
+            ComboBox(self), self.formatting_dict["menu_combobox"]
+        )
+        self.cb_resampling_resolution.setToolTip(
+            "Select temporal resolution to resample the data to"
+        )
         self.vertical_splitter_5 = QVLine()
         self.vertical_splitter_5.setMaximumWidth(20)
 
         # station selection section
-        self.lb_station_selection = set_formatting(QtWidgets.QLabel(self, text="Site Selection"),
-                                                   self.formatting_dict['menu_title'])
-        self.lb_station_selection.setToolTip('Select stations')
-        self.ch_select_all = set_formatting(QtWidgets.QCheckBox("All"), self.formatting_dict['menu_checkbox'])
-        self.ch_select_all.setToolTip('Select all stations')
-        self.ch_intersect = set_formatting(QtWidgets.QCheckBox("Intersect"), self.formatting_dict['menu_checkbox'])
-        self.ch_intersect.setToolTip('Select stations that intersect with all loaded model domains')
-        self.ch_extent = set_formatting(QtWidgets.QCheckBox("Extent"), self.formatting_dict['menu_checkbox'])
-        self.ch_extent.setToolTip('Select stations that are within the map extent')
+        self.lb_station_selection = set_formatting(
+            QtWidgets.QLabel(self, text="Site Selection"),
+            self.formatting_dict["menu_title"],
+        )
+        self.lb_station_selection.setToolTip("Select stations")
+        self.ch_select_all = set_formatting(
+            QtWidgets.QCheckBox("All"), self.formatting_dict["menu_checkbox"]
+        )
+        self.ch_select_all.setToolTip("Select all stations")
+        self.ch_intersect = set_formatting(
+            QtWidgets.QCheckBox("Intersect"), self.formatting_dict["menu_checkbox"]
+        )
+        self.ch_intersect.setToolTip(
+            "Select stations that intersect with all loaded model domains"
+        )
+        self.ch_extent = set_formatting(
+            QtWidgets.QCheckBox("Extent"), self.formatting_dict["menu_checkbox"]
+        )
+        self.ch_extent.setToolTip("Select stations that are within the map extent")
 
         # position objects on gridded configuration bar
         # data selection section
@@ -569,7 +764,9 @@ class Dashboard(QtWidgets.QWidget):
 
         # resampling section
         config_bar.addWidget(self.lb_resampling, 0, 15, 1, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_resampling_resolution, 1, 15, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(
+            self.cb_resampling_resolution, 1, 15, 1, 1, QtCore.Qt.AlignLeft
+        )
         config_bar.addWidget(self.vertical_splitter_5, 0, 16, 4, 1, QtCore.Qt.AlignLeft)
 
         # station selection section
@@ -578,16 +775,20 @@ class Dashboard(QtWidgets.QWidget):
         config_bar.addWidget(self.ch_intersect, 2, 17, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.ch_extent, 3, 17, QtCore.Qt.AlignLeft)
 
-        # enable dynamic updating of specific configuration bar fields 
+        # enable dynamic updating of specific configuration bar fields
         self.cb_network.currentTextChanged.connect(self.handle_config_bar_params_change)
-        self.cb_resolution.currentTextChanged.connect(self.handle_config_bar_params_change)
+        self.cb_resolution.currentTextChanged.connect(
+            self.handle_config_bar_params_change
+        )
         self.cb_matrix.currentTextChanged.connect(self.handle_config_bar_params_change)
         self.cb_species.currentTextChanged.connect(self.handle_config_bar_params_change)
         self.le_start_date.textChanged.connect(self.handle_config_bar_params_change)
         self.le_end_date.textChanged.connect(self.handle_config_bar_params_change)
-        self.cb_statistic_mode.currentTextChanged.connect(self.handle_config_bar_params_change)
+        self.cb_statistic_mode.currentTextChanged.connect(
+            self.handle_config_bar_params_change
+        )
 
-        # setup pop-up window menu tree for flags, qa, models, 
+        # setup pop-up window menu tree for flags, qa, models,
         # % data coverage, data periods and metadata
         init_flags(self)
         init_qa(self)
@@ -612,8 +813,7 @@ class Dashboard(QtWidgets.QWidget):
         self.multispecies_initialisation = True
 
         # launch with configuration file?
-        if self.from_conf: 
-            
+        if self.from_conf:
             # read and filter
             self.handle_data_selection_update()
 
@@ -624,13 +824,25 @@ class Dashboard(QtWidgets.QWidget):
             self.from_conf = False
 
         # enable pop up configuration windows
-        self.bu_flags.clicked.connect(partial(self.generate_pop_up_window, self.flag_menu))
+        self.bu_flags.clicked.connect(
+            partial(self.generate_pop_up_window, self.flag_menu)
+        )
         self.bu_QA.clicked.connect(partial(self.generate_pop_up_window, self.qa_menu))
-        self.bu_models.clicked.connect(partial(self.generate_pop_up_window, self.models_menu))
-        self.bu_multispecies.clicked.connect(partial(self.generate_pop_up_window, self.multispecies_menu))
-        self.bu_meta.clicked.connect(partial(self.generate_pop_up_window, self.metadata_menu))
-        self.bu_rep.clicked.connect(partial(self.generate_pop_up_window, self.coverage_menu))
-        self.bu_period.clicked.connect(partial(self.generate_pop_up_window, self.period_menu))
+        self.bu_models.clicked.connect(
+            partial(self.generate_pop_up_window, self.models_menu)
+        )
+        self.bu_multispecies.clicked.connect(
+            partial(self.generate_pop_up_window, self.multispecies_menu)
+        )
+        self.bu_meta.clicked.connect(
+            partial(self.generate_pop_up_window, self.metadata_menu)
+        )
+        self.bu_rep.clicked.connect(
+            partial(self.generate_pop_up_window, self.coverage_menu)
+        )
+        self.bu_period.clicked.connect(
+            partial(self.generate_pop_up_window, self.period_menu)
+        )
 
         # Enable interactivity of functions which update MPL canvas
         # enable READ button
@@ -643,28 +855,51 @@ class Dashboard(QtWidgets.QWidget):
         self.bu_filter.clicked.connect(self.mpl_canvas.handle_data_filter_update)
 
         # enable statistical calculation mode changing
-        self.cb_statistic_mode.currentTextChanged.connect(self.mpl_canvas.handle_statistic_mode_update)
+        self.cb_statistic_mode.currentTextChanged.connect(
+            self.mpl_canvas.handle_statistic_mode_update
+        )
 
-        # enable statistical aggregation update 
-        self.cb_statistic_aggregation.currentTextChanged.connect(self.mpl_canvas.handle_statistic_aggregation_update)
+        # enable statistical aggregation update
+        self.cb_statistic_aggregation.currentTextChanged.connect(
+            self.mpl_canvas.handle_statistic_aggregation_update
+        )
 
         # enable interactivity of temporal colocation checkbox
-        self.ch_colocate.stateChanged.connect(self.mpl_canvas.handle_temporal_colocate_update)
+        self.ch_colocate.stateChanged.connect(
+            self.mpl_canvas.handle_temporal_colocate_update
+        )
 
         # enable resampling by changing the temporal resolution
-        self.cb_resampling_resolution.currentTextChanged.connect(self.mpl_canvas.handle_resampling_update)
+        self.cb_resampling_resolution.currentTextChanged.connect(
+            self.mpl_canvas.handle_resampling_update
+        )
 
         # enable interactivity of station selection checkboxes
         self.ch_select_all.stateChanged.connect(self.mpl_canvas.select_all_stations)
-        self.ch_intersect.stateChanged.connect(self.mpl_canvas.select_intersect_stations)
+        self.ch_intersect.stateChanged.connect(
+            self.mpl_canvas.select_intersect_stations
+        )
         self.ch_extent.stateChanged.connect(self.mpl_canvas.select_extent_stations)
 
         # Generate MPL navigation toolbar
-        self.navi_toolbar = NavigationToolbar(read_instance=self, canvas_instance=self.mpl_canvas)
+        self.navi_toolbar = NavigationToolbar(
+            read_instance=self, canvas_instance=self.mpl_canvas
+        )
         self.navi_toolbar._nav_stack.push(
-            WeakKeyDictionary({self.mpl_canvas.plot_axes['map']: (self.mpl_canvas.plot_axes['map']._get_view(), 
-                                                                  (self.mpl_canvas.plot_axes['map'].get_position(True).frozen(), 
-                                                                   self.mpl_canvas.plot_axes['map'].get_position().frozen()))}))
+            WeakKeyDictionary(
+                {
+                    self.mpl_canvas.plot_axes["map"]: (
+                        self.mpl_canvas.plot_axes["map"]._get_view(),
+                        (
+                            self.mpl_canvas.plot_axes["map"]
+                            .get_position(True)
+                            .frozen(),
+                            self.mpl_canvas.plot_axes["map"].get_position().frozen(),
+                        ),
+                    )
+                }
+            )
+        )
 
         # position navigation toolbar in parent layout
         hbox.addWidget(self.navi_toolbar)
@@ -682,14 +917,14 @@ class Dashboard(QtWidgets.QWidget):
         # set minimum height to avoid error 'box_aspect' and 'fig_aspect' must be positive
         self.setMinimumHeight(650)
 
-        # show dashboard. How to do this is different per system 
-        if self.operating_system == 'Mac':
+        # show dashboard. How to do this is different per system
+        if self.operating_system == "Mac":
             self.showMaximized()
             self.get_geometry()
-        elif self.operating_system == 'Linux':
+        elif self.operating_system == "Linux":
             self.show()
             self.showMaximized()
-        elif self.operating_system == 'Windows':
+        elif self.operating_system == "Windows":
             self.show()
             self.showMaximized()
 
@@ -700,10 +935,10 @@ class Dashboard(QtWidgets.QWidget):
         Parameters
         ----------
         menu_root : QWidget
-            The root menu object or identifier used to populate the 
+            The root menu object or identifier used to populate the
             pop-up window content.
         """
-        
+
         self.pop_up_window = PopUpWindow(self, menu_root, [], self.full_window_geometry)
 
     def update_configuration_bar_fields(self):
@@ -717,13 +952,12 @@ class Dashboard(QtWidgets.QWidget):
 
         # set some default configuration values when initialising config bar
         if self.config_bar_initialisation:
-
             # set initial selected start-end date
             self.le_start_date.setText(str(self.start_date))
             self.le_end_date.setText(str(self.end_date))
             self.date_range_has_changed = False
 
-            #initialise resampling resolution combobox
+            # initialise resampling resolution combobox
             self.cb_resampling_resolution.addItems([self.resampling_resolution])
 
             # set temporal colocation tickbox
@@ -732,14 +966,14 @@ class Dashboard(QtWidgets.QWidget):
             else:
                 self.ch_colocate.setCheckState(QtCore.Qt.Unchecked)
 
-            # set some intital variables to be None 
+            # set some intital variables to be None
             self.time_array = None
             self.yearmonths = None
             self.daily_forecast = None
             self.data_labels = []
             self.data_labels_raw = []
-            self.previous_chunk_stat = 'None'
-            self.previous_chunk_resolution = 'None'
+            self.previous_chunk_stat = "None"
+            self.previous_chunk_resolution = "None"
             self.init_models = []
             self.cursor_function = None
 
@@ -751,15 +985,25 @@ class Dashboard(QtWidgets.QWidget):
             # set initial selected config variables as set .conf files or defaults
             self.selected_network = copy.deepcopy(self.network[0])
             self.selected_resolution = copy.deepcopy(self.resolution)
-            self.selected_matrix = self.parameter_dictionary[self.species[0]]['matrix']
+            self.selected_matrix = self.parameter_dictionary[self.species[0]]["matrix"]
             self.selected_species = copy.deepcopy(self.species[0])
             self.selected_statistic_mode = copy.deepcopy(self.statistic_mode)
-            self.selected_statistic_aggregation = copy.deepcopy(self.statistic_aggregation)
-            self.selected_periodic_statistic_aggregation = copy.deepcopy(self.periodic_statistic_aggregation)
-            self.selected_periodic_statistic_mode = copy.deepcopy(self.periodic_statistic_mode)
-            self.selected_timeseries_statistic_aggregation = copy.deepcopy(self.timeseries_statistic_aggregation)
+            self.selected_statistic_aggregation = copy.deepcopy(
+                self.statistic_aggregation
+            )
+            self.selected_periodic_statistic_aggregation = copy.deepcopy(
+                self.periodic_statistic_aggregation
+            )
+            self.selected_periodic_statistic_mode = copy.deepcopy(
+                self.periodic_statistic_mode
+            )
+            self.selected_timeseries_statistic_aggregation = copy.deepcopy(
+                self.timeseries_statistic_aggregation
+            )
             self.selected_filter_species = copy.deepcopy(self.filter_species)
-            self.selected_networkspeci = '{}|{}'.format(self.selected_network, self.selected_species)
+            self.selected_networkspeci = "{}|{}".format(
+                self.selected_network, self.selected_species
+            )
 
             # set initial filter species in widgets as empty dictionaries
             self.selected_widget_network = dict()
@@ -770,20 +1014,26 @@ class Dashboard(QtWidgets.QWidget):
             self.selected_widget_filter_species_fill_value = dict()
             self.selected_widget_apply = dict()
             self.multispecies_active_line_inds = dict()
-            
+
             # set variable stating first read
             self.first_read = True
 
             # create dictionary of available observational data inside date range
-            get_valid_obs_files_in_date_range(self, self.le_start_date.text(), self.le_end_date.text())
+            get_valid_obs_files_in_date_range(
+                self, self.le_start_date.text(), self.le_end_date.text()
+            )
 
-            # update qa / flags checkboxes 
-            self.flag_menu['checkboxes']['remove_selected'] = copy.deepcopy(self.flags)
-            self.qa_menu['checkboxes']['remove_selected'] = copy.deepcopy(self.qa_per_species[self.selected_species])
-            
+            # update qa / flags checkboxes
+            self.flag_menu["checkboxes"]["remove_selected"] = copy.deepcopy(self.flags)
+            self.qa_menu["checkboxes"]["remove_selected"] = copy.deepcopy(
+                self.qa_per_species[self.selected_species]
+            )
+
         # if date range has changed then update available observational data dictionary
         if self.date_range_has_changed:
-            get_valid_obs_files_in_date_range(self, self.le_start_date.text(), self.le_end_date.text())
+            get_valid_obs_files_in_date_range(
+                self, self.le_start_date.text(), self.le_end_date.text()
+            )
 
         # initialise/update fields - maintain previously selected values wherever possible
         # clear fields
@@ -813,36 +1063,44 @@ class Dashboard(QtWidgets.QWidget):
             self.cb_network.setCurrentText(self.selected_network)
         else:
             if self.from_conf:
-                msg = f'Network {self.selected_network} is not available.'
+                msg = f"Network {self.selected_network} is not available."
                 self.logger.error(msg)
                 sys.exit(1)
             else:
-                msg = f'Network {self.selected_network} is not available. Choosing {self.cb_network.currentText()} as it is the first option in the dropdown.'
+                msg = f"Network {self.selected_network} is not available. Choosing {self.cb_network.currentText()} as it is the first option in the dropdown."
                 show_message(self, msg)
                 self.selected_network = self.cb_network.currentText()
 
         # update buttons
-        self.update_ghost_buttons('update_configuration_bar_fields')
-        
+        self.update_ghost_buttons("update_configuration_bar_fields")
+
         # update resolution field
-        available_resolutions = list(self.available_observation_data[self.selected_network].keys())
+        available_resolutions = list(
+            self.available_observation_data[self.selected_network].keys()
+        )
         # set order of available resolutions
-        available_resolutions = sorted(available_resolutions, key=get_temporal_resolution_order().__getitem__)
+        available_resolutions = sorted(
+            available_resolutions, key=get_temporal_resolution_order().__getitem__
+        )
         self.cb_resolution.addItems(available_resolutions)
         if self.selected_resolution in available_resolutions:
             self.cb_resolution.setCurrentText(self.selected_resolution)
         else:
             if self.from_conf:
-                msg = f'Resolution {self.selected_resolution} is not available.'
+                msg = f"Resolution {self.selected_resolution} is not available."
                 self.logger.error(msg)
                 sys.exit(1)
             else:
-                msg = f'Resolution {self.selected_resolution} is not available. Choosing {self.cb_resolution.currentText()} as it is the first option in the dropdown.'
+                msg = f"Resolution {self.selected_resolution} is not available. Choosing {self.cb_resolution.currentText()} as it is the first option in the dropdown."
                 show_message(self, msg)
                 self.selected_resolution = self.cb_resolution.currentText()
 
         # update matrix field
-        available_matrices = sorted(self.available_observation_data[self.selected_network][self.selected_resolution])
+        available_matrices = sorted(
+            self.available_observation_data[self.selected_network][
+                self.selected_resolution
+            ]
+        )
         self.cb_matrix.addItems(available_matrices)
         if self.selected_matrix in available_matrices:
             self.cb_matrix.setCurrentText(self.selected_matrix)
@@ -850,148 +1108,235 @@ class Dashboard(QtWidgets.QWidget):
             self.selected_matrix = self.cb_matrix.currentText()
 
         # update species field
-        available_species = sorted(self.available_observation_data[self.selected_network][self.selected_resolution][self.selected_matrix])
+        available_species = sorted(
+            self.available_observation_data[self.selected_network][
+                self.selected_resolution
+            ][self.selected_matrix]
+        )
         self.cb_species.addItems(available_species)
         if self.selected_species in available_species:
             self.cb_species.setCurrentText(self.selected_species)
         else:
             if self.from_conf:
-                msg = f'Species {self.selected_species} is not available.'
+                msg = f"Species {self.selected_species} is not available."
                 self.logger.error(msg)
                 sys.exit(1)
             else:
-                msg = f'Species {self.selected_species} is not available. Choosing {self.cb_species.currentText()} as it is the first option in the dropdown.'
+                msg = f"Species {self.selected_species} is not available. Choosing {self.cb_species.currentText()} as it is the first option in the dropdown."
                 show_message(self, msg)
                 self.selected_species = self.cb_species.currentText()
 
-        #update networkspecies field
-        self.selected_networkspeci = '{}|{}'.format(self.selected_network, self.selected_species)
+        # update networkspecies field
+        self.selected_networkspeci = "{}|{}".format(
+            self.selected_network, self.selected_species
+        )
 
         # check if have filter species data
         for filter_networkspeci in copy.deepcopy(self.selected_filter_species).keys():
-            filter_networkspeci_split = filter_networkspeci.split('|')
+            filter_networkspeci_split = filter_networkspeci.split("|")
             filter_network = filter_networkspeci_split[0]
             filter_speci = filter_networkspeci_split[1]
-            filter_matrix = self.parameter_dictionary[filter_speci]['matrix']
+            filter_matrix = self.parameter_dictionary[filter_speci]["matrix"]
             if filter_network not in available_networks:
                 del self.selected_filter_species[filter_networkspeci]
-                msg = f'Filter species {filter_networkspeci} is not available. Dropping it.'
+                msg = f"Filter species {filter_networkspeci} is not available. Dropping it."
                 show_message(self, msg)
                 continue
-            available_filter_matrices = sorted(self.available_observation_data[filter_network][self.selected_resolution])
+            available_filter_matrices = sorted(
+                self.available_observation_data[filter_network][
+                    self.selected_resolution
+                ]
+            )
             if filter_matrix not in available_filter_matrices:
                 del self.selected_filter_species[filter_networkspeci]
-                msg = f'Filter species {filter_networkspeci} is not available. Dropping it.'
+                msg = f"Filter species {filter_networkspeci} is not available. Dropping it."
                 show_message(self, msg)
                 continue
-            available_filter_species = sorted(self.available_observation_data[filter_network][self.selected_resolution][filter_matrix])
+            available_filter_species = sorted(
+                self.available_observation_data[filter_network][
+                    self.selected_resolution
+                ][filter_matrix]
+            )
             if filter_speci not in available_filter_species:
                 del self.selected_filter_species[filter_networkspeci]
-                msg = f'Filter species {filter_networkspeci} is not available. Dropping it.'
+                msg = f"Filter species {filter_networkspeci} is not available. Dropping it."
                 show_message(self, msg)
                 continue
 
         # update statistic mode field
-        available_statistic_modes = ['Flattened', 'Spatial|Temporal', 'Temporal|Spatial']
+        available_statistic_modes = [
+            "Flattened",
+            "Spatial|Temporal",
+            "Temporal|Spatial",
+        ]
         self.cb_statistic_mode.addItems(available_statistic_modes)
         if self.selected_statistic_mode in available_statistic_modes:
             self.cb_statistic_mode.setCurrentText(self.selected_statistic_mode)
         else:
             if self.from_conf:
-                msg = f'Statistic mode {self.selected_statistic_mode} is not available.'
+                msg = f"Statistic mode {self.selected_statistic_mode} is not available."
                 self.logger.error(msg)
                 sys.exit(1)
             else:
-                msg = f'Statistic mode {self.selected_statistic_mode} is not available. Choosing {self.cb_statistic_mode.currentText()} as it is the first option in the dropdown.'
+                msg = f"Statistic mode {self.selected_statistic_mode} is not available. Choosing {self.cb_statistic_mode.currentText()} as it is the first option in the dropdown."
                 show_message(self, msg)
                 self.selected_statistic_mode = self.cb_statistic_mode.currentText()
 
         # update statistic aggregation field
-        if self.selected_statistic_mode == 'Flattened':
+        if self.selected_statistic_mode == "Flattened":
             available_aggregation_statistics = []
-        else:    
-            available_aggregation_statistics = ['Mean', 'Median', 'p1', 'p5', 'p10', 'p25', 'p75', 'p90', 'p95', 'p99']
-            if self.selected_statistic_aggregation == '':
-                self.selected_statistic_aggregation = available_aggregation_statistics[1]
+        else:
+            available_aggregation_statistics = [
+                "Mean",
+                "Median",
+                "p1",
+                "p5",
+                "p10",
+                "p25",
+                "p75",
+                "p90",
+                "p95",
+                "p99",
+            ]
+            if self.selected_statistic_aggregation == "":
+                self.selected_statistic_aggregation = available_aggregation_statistics[
+                    1
+                ]
         self.cb_statistic_aggregation.addItems(available_aggregation_statistics)
         if self.selected_statistic_aggregation in available_aggregation_statistics:
-            self.cb_statistic_aggregation.setCurrentText(self.selected_statistic_aggregation)
+            self.cb_statistic_aggregation.setCurrentText(
+                self.selected_statistic_aggregation
+            )
         else:
-            if self.selected_statistic_mode == 'Flattened':
-                self.selected_statistic_aggregation = self.cb_statistic_aggregation.currentText()
+            if self.selected_statistic_mode == "Flattened":
+                self.selected_statistic_aggregation = (
+                    self.cb_statistic_aggregation.currentText()
+                )
             elif self.from_conf:
-                msg = f'Statistic aggregation {self.selected_statistic_aggregation} is not available.'
+                msg = f"Statistic aggregation {self.selected_statistic_aggregation} is not available."
                 self.logger.error(msg)
                 sys.exit(1)
             else:
-                msg = f'Statistic aggregation {self.selected_statistic_aggregation} is not available. Choosing {self.cb_statistic_aggregation.currentText()} as it is the first option in the dropdown.'
+                msg = f"Statistic aggregation {self.selected_statistic_aggregation} is not available. Choosing {self.cb_statistic_aggregation.currentText()} as it is the first option in the dropdown."
                 show_message(self, msg)
-                self.selected_statistic_aggregation = self.cb_statistic_aggregation.currentText()
+                self.selected_statistic_aggregation = (
+                    self.cb_statistic_aggregation.currentText()
+                )
 
         # update statsummary periodic statistic aggregation field
-        available_periodic_statistics = ['Mean', 'Median', 'p1', 'p5', 'p10', 'p25', 'p75', 'p90', 'p95', 'p99']
-        self.mpl_canvas.statsummary_periodic_aggregation.addItems(available_periodic_statistics)
-        if self.selected_periodic_statistic_aggregation in available_periodic_statistics:
-            self.mpl_canvas.statsummary_periodic_aggregation.setCurrentText(self.selected_periodic_statistic_aggregation)
+        available_periodic_statistics = [
+            "Mean",
+            "Median",
+            "p1",
+            "p5",
+            "p10",
+            "p25",
+            "p75",
+            "p90",
+            "p95",
+            "p99",
+        ]
+        self.mpl_canvas.statsummary_periodic_aggregation.addItems(
+            available_periodic_statistics
+        )
+        if (
+            self.selected_periodic_statistic_aggregation
+            in available_periodic_statistics
+        ):
+            self.mpl_canvas.statsummary_periodic_aggregation.setCurrentText(
+                self.selected_periodic_statistic_aggregation
+            )
         else:
             if self.from_conf:
-                msg = f'Periodic statistic aggregation {self.selected_periodic_statistic_aggregation} is not available.'
+                msg = f"Periodic statistic aggregation {self.selected_periodic_statistic_aggregation} is not available."
                 self.logger.error(msg)
                 sys.exit(1)
             else:
-                msg = f'Periodic statistic aggregation {self.selected_periodic_statistic_aggregation} is not available. Choosing {self.mpl_canvas.statsummary_periodic_aggregation.currentText()} as it is the first option in the dropdown.'
-                show_message(self, msg) 
-                self.selected_periodic_statistic_aggregation = self.mpl_canvas.statsummary_periodic_aggregation.currentText()
-        
+                msg = f"Periodic statistic aggregation {self.selected_periodic_statistic_aggregation} is not available. Choosing {self.mpl_canvas.statsummary_periodic_aggregation.currentText()} as it is the first option in the dropdown."
+                show_message(self, msg)
+                self.selected_periodic_statistic_aggregation = (
+                    self.mpl_canvas.statsummary_periodic_aggregation.currentText()
+                )
+
         # update statsummary periodic statistic mode field
-        available_periodic_modes = ['Independent', 'Cycle']
+        available_periodic_modes = ["Independent", "Cycle"]
         self.mpl_canvas.statsummary_periodic_mode.addItems(available_periodic_modes)
         if self.selected_periodic_statistic_mode in available_periodic_modes:
-            self.mpl_canvas.statsummary_periodic_mode.setCurrentText(self.selected_periodic_statistic_mode)
+            self.mpl_canvas.statsummary_periodic_mode.setCurrentText(
+                self.selected_periodic_statistic_mode
+            )
         else:
             if self.from_conf:
-                msg = f'Periodic statistic mode {self.selected_periodic_statistic_mode} is not available.'
+                msg = f"Periodic statistic mode {self.selected_periodic_statistic_mode} is not available."
                 self.logger.error(msg)
                 sys.exit(1)
             else:
-                msg = f'Periodic statistic mode {self.selected_periodic_statistic_mode} is not available. Choosing {self.mpl_canvas.statsummary_periodic_mode.currentText()} as it is the first option in the dropdown.'
+                msg = f"Periodic statistic mode {self.selected_periodic_statistic_mode} is not available. Choosing {self.mpl_canvas.statsummary_periodic_mode.currentText()} as it is the first option in the dropdown."
                 show_message(self, msg)
-                self.selected_periodic_statistic_mode = self.mpl_canvas.statsummary_periodic_mode.currentText()
+                self.selected_periodic_statistic_mode = (
+                    self.mpl_canvas.statsummary_periodic_mode.currentText()
+                )
 
-        # update timeseries statistic aggregation field  
-        available_timeseries_statistics = ['Mean', 'Median', 'p1', 'p5', 'p10', 'p25', 'p75', 'p90', 'p95', 'p99']
+        # update timeseries statistic aggregation field
+        available_timeseries_statistics = [
+            "Mean",
+            "Median",
+            "p1",
+            "p5",
+            "p10",
+            "p25",
+            "p75",
+            "p90",
+            "p95",
+            "p99",
+        ]
         self.mpl_canvas.timeseries_stat.addItems(available_timeseries_statistics)
-        if self.selected_timeseries_statistic_aggregation in available_timeseries_statistics:
-            self.mpl_canvas.timeseries_stat.setCurrentText(self.selected_timeseries_statistic_aggregation)
+        if (
+            self.selected_timeseries_statistic_aggregation
+            in available_timeseries_statistics
+        ):
+            self.mpl_canvas.timeseries_stat.setCurrentText(
+                self.selected_timeseries_statistic_aggregation
+            )
         else:
             if self.from_conf:
-                msg = f'Timeseries statistic aggregation {self.selected_timeseries_statistic_aggregation} is not available.'
+                msg = f"Timeseries statistic aggregation {self.selected_timeseries_statistic_aggregation} is not available."
                 self.logger.error(msg)
                 sys.exit(1)
             else:
-                msg = f'Timeseries statistic aggregation {self.selected_timeseries_statistic_aggregation} is not available. Choosing {self.mpl_canvas.timeseries_stat.currentText()} as it is the first option in the dropdown.'
+                msg = f"Timeseries statistic aggregation {self.selected_timeseries_statistic_aggregation} is not available. Choosing {self.mpl_canvas.timeseries_stat.currentText()} as it is the first option in the dropdown."
                 show_message(self, msg)
-                self.selected_timeseries_statistic_aggregation = self.mpl_canvas.timeseries_stat.currentText()
+                self.selected_timeseries_statistic_aggregation = (
+                    self.mpl_canvas.timeseries_stat.currentText()
+                )
 
         # update available models for selected fields
-        get_valid_models(self, self.le_start_date.text(), self.le_end_date.text(), self.selected_resolution,
-                            [self.selected_network], [self.selected_species])
+        get_valid_models(
+            self,
+            self.le_start_date.text(),
+            self.le_end_date.text(),
+            self.selected_resolution,
+            [self.selected_network],
+            [self.selected_species],
+        )
 
         # update models -- keeping previously selected models if available
-        if self.config_bar_initialisation:   
-            self.models_menu['models']['keep_selected'] = [model for model in self.experiments
-                                                                    if model in 
-                                                                    self.models_menu['models']['map_vars']]
+        if self.config_bar_initialisation:
+            self.models_menu["models"]["keep_selected"] = [
+                model
+                for model in self.experiments
+                if model in self.models_menu["models"]["map_vars"]
+            ]
 
-        self.models_menu['models']['keep_selected'] = [previous_selected_model for
-                                                                previous_selected_model in
-                                                                self.models_menu['models']['keep_selected']
-                                                                if previous_selected_model in
-                                                                self.models_menu['models']['map_vars']]
+        self.models_menu["models"]["keep_selected"] = [
+            previous_selected_model
+            for previous_selected_model in self.models_menu["models"]["keep_selected"]
+            if previous_selected_model in self.models_menu["models"]["map_vars"]
+        ]
 
         # set all and selected models
         all_models = {}
-        for mod in self.models_menu['models']['map_vars']:
+        for mod in self.models_menu["models"]["map_vars"]:
             if mod in self.experiments:
                 all_models[mod] = self.experiments[mod]
             elif mod in self.init_models:
@@ -1000,7 +1345,7 @@ class Dashboard(QtWidgets.QWidget):
                 all_models[mod] = mod
 
         selected_models = {}
-        for mod in self.models_menu['models']['keep_selected']:
+        for mod in self.models_menu["models"]["keep_selected"]:
             if mod in self.experiments:
                 selected_models[mod] = self.experiments[mod]
             elif mod in self.init_models:
@@ -1011,37 +1356,58 @@ class Dashboard(QtWidgets.QWidget):
         # set selected data labels
         all_data_labels = [self.observations_data_label] + list(all_models.values())
         all_data_labels_raw = [self.observations_data_label] + list(all_models.keys())
-        selected_data_labels = [self.observations_data_label] + list(selected_models.values())
-        selected_data_labels_raw = [self.observations_data_label] + list(selected_models.keys())
+        selected_data_labels = [self.observations_data_label] + list(
+            selected_models.values()
+        )
+        selected_data_labels_raw = [self.observations_data_label] + list(
+            selected_models.keys()
+        )
 
         # save intial models if loading from .conf file to keep alias
         if self.from_conf:
             self.init_models = copy.deepcopy(selected_models)
 
         # check N available forecast days for model
-        self.datareader.check_forecast(data_labels=all_data_labels, data_labels_raw=all_data_labels_raw,
-                                       networkspecies=[self.selected_networkspeci], resolution=self.selected_resolution,
-                                       ghost_version=self.ghost_version)
+        self.datareader.check_forecast(
+            data_labels=all_data_labels,
+            data_labels_raw=all_data_labels_raw,
+            networkspecies=[self.selected_networkspeci],
+            resolution=self.selected_resolution,
+            ghost_version=self.ghost_version,
+        )
 
-        # update forecast indices and data labels based on selected forecast data 
-        selected_data_labels, selected_data_labels_raw, selected_models = self.datareader.update_forecast_indices(data_labels=all_data_labels, data_labels_raw=all_data_labels_raw,
-                                                                                                                  selected_data_labels=selected_data_labels, selected_data_labels_raw=selected_data_labels_raw,
-                                                                                                                  networkspecies=[self.selected_networkspeci], init=True)
-    
+        # update forecast indices and data labels based on selected forecast data
+        (
+            selected_data_labels,
+            selected_data_labels_raw,
+            selected_models,
+        ) = self.datareader.update_forecast_indices(
+            data_labels=all_data_labels,
+            data_labels_raw=all_data_labels_raw,
+            selected_data_labels=selected_data_labels,
+            selected_data_labels_raw=selected_data_labels_raw,
+            networkspecies=[self.selected_networkspeci],
+            init=True,
+        )
+
         # if are loading from a .conf file then set data labels and models
         if self.from_conf:
             self.data_labels = copy.deepcopy(selected_data_labels)
             self.data_labels_raw = copy.deepcopy(selected_data_labels_raw)
             self.experiments = copy.deepcopy(selected_models)
-            
+
         # update default qa
         default_qa = get_default_qa(self, self.selected_species)
-        previous_default_qa = copy.deepcopy(self.qa_menu['checkboxes']['remove_default']) 
-        self.qa_menu['checkboxes']['remove_default'] = default_qa
+        previous_default_qa = copy.deepcopy(
+            self.qa_menu["checkboxes"]["remove_default"]
+        )
+        self.qa_menu["checkboxes"]["remove_default"] = default_qa
 
         # update selected qa if previous selected qa was default (to new default)
-        if set(self.qa_menu['checkboxes']['remove_selected']) == set(previous_default_qa):
-            self.qa_menu['checkboxes']['remove_selected'] = default_qa
+        if set(self.qa_menu["checkboxes"]["remove_selected"]) == set(
+            previous_default_qa
+        ):
+            self.qa_menu["checkboxes"]["remove_selected"] = default_qa
 
         # update layout fields
         self.update_layout_fields(self.mpl_canvas)
@@ -1059,56 +1425,73 @@ class Dashboard(QtWidgets.QWidget):
         Parameters
         ----------
         canvas_instance : Canvas
-            The Matplotlib canvas instance containing the layout options to be 
+            The Matplotlib canvas instance containing the layout options to be
             filtered and updated.
         """
 
         # set variable to block interactive handling while updating config bar parameters
         self.block_config_bar_handling_updates = True
-    
+
         # remove plot types that need active temporal colocation and model
         if Version(matplotlib.__version__) < Version("3.8"):
-            available_plots = ['scatter', 'fairmode-target', 'fairmode-statsummary', 'contingencytable']
+            available_plots = [
+                "scatter",
+                "fairmode-target",
+                "fairmode-statsummary",
+                "contingencytable",
+            ]
         else:
-            available_plots = ['scatter', 'taylor', 'fairmode-target', 'fairmode-statsummary', 'contingencytable']      
+            available_plots = [
+                "scatter",
+                "taylor",
+                "fairmode-target",
+                "fairmode-statsummary",
+                "contingencytable",
+            ]
         for plot_type in available_plots:
-            if ((not self.temporal_colocation) 
-                or ((self.temporal_colocation) and (len(self.experiments) == 0))): 
+            if (not self.temporal_colocation) or (
+                (self.temporal_colocation) and (len(self.experiments) == 0)
+            ):
                 if plot_type in canvas_instance.layout_options:
                     canvas_instance.layout_options.remove(plot_type)
             else:
                 if plot_type not in canvas_instance.layout_options:
-                    canvas_instance.layout_options.append(plot_type)       
+                    canvas_instance.layout_options.append(plot_type)
 
             # remove fairmode plot types if do not have correct species / resolution
-            speci = self.networkspeci.split('|')[1]
-            if plot_type in ['fairmode-target', 'fairmode-statsummary']:
-                if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
+            speci = self.networkspeci.split("|")[1]
+            if plot_type in ["fairmode-target", "fairmode-statsummary"]:
+                if speci not in ["sconco3", "sconcno2", "pm10", "pm2p5"]:
                     if plot_type in canvas_instance.layout_options:
                         canvas_instance.layout_options.remove(plot_type)
-                if ((speci in ['sconco3', 'sconcno2'] and self.active_resolution != 'hourly') or
-                (speci in ['pm10', 'pm2p5'] and (self.active_resolution not in ['hourly', 'daily']))):
+                if (
+                    speci in ["sconco3", "sconcno2"]
+                    and self.active_resolution != "hourly"
+                ) or (
+                    speci in ["pm10", "pm2p5"]
+                    and (self.active_resolution not in ["hourly", "daily"])
+                ):
                     if plot_type in canvas_instance.layout_options:
                         canvas_instance.layout_options.remove(plot_type)
 
             # remove contingency table if do not have correct species / resolution
-            elif plot_type == 'contingencytable':
-                if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5', 'sconcso2']:
+            elif plot_type == "contingencytable":
+                if speci not in ["sconco3", "sconcno2", "pm10", "pm2p5", "sconcso2"]:
                     if plot_type in canvas_instance.layout_options:
                         canvas_instance.layout_options.remove(plot_type)
-                if self.active_resolution != 'hourly':
+                if self.active_resolution != "hourly":
                     if plot_type in canvas_instance.layout_options:
                         canvas_instance.layout_options.remove(plot_type)
-                
+
         # if there are no temporal resolutions (only yearly), skip periodic plots
-        for plot_type in ['periodic', 'periodic-violin']: 
-            if self.active_resolution == 'annual':            
+        for plot_type in ["periodic", "periodic-violin"]:
+            if self.active_resolution == "annual":
                 if plot_type in canvas_instance.layout_options:
                     canvas_instance.layout_options.remove(plot_type)
             else:
                 if plot_type not in canvas_instance.layout_options:
-                    canvas_instance.layout_options.append(plot_type) 
-            
+                    canvas_instance.layout_options.append(plot_type)
+
         # order alphabetically
         layout_options = sorted(canvas_instance.layout_options)
 
@@ -1119,7 +1502,7 @@ class Dashboard(QtWidgets.QWidget):
             self.cb_position_2.setCurrentText(self.position_2)
         else:
             self.block_config_bar_handling_updates = False
-            self.cb_position_2.setCurrentText('None')
+            self.cb_position_2.setCurrentText("None")
             self.block_config_bar_handling_updates = True
 
         # update position 3 in layout
@@ -1129,7 +1512,7 @@ class Dashboard(QtWidgets.QWidget):
             self.cb_position_3.setCurrentText(self.position_3)
         else:
             self.block_config_bar_handling_updates = False
-            self.cb_position_3.setCurrentText('None')
+            self.cb_position_3.setCurrentText("None")
             self.block_config_bar_handling_updates = True
 
         # update position 4 in layout
@@ -1139,7 +1522,7 @@ class Dashboard(QtWidgets.QWidget):
             self.cb_position_4.setCurrentText(self.position_4)
         else:
             self.block_config_bar_handling_updates = False
-            self.cb_position_4.setCurrentText('None')
+            self.cb_position_4.setCurrentText("None")
             self.block_config_bar_handling_updates = True
 
         # update position 5 in layout
@@ -1149,7 +1532,7 @@ class Dashboard(QtWidgets.QWidget):
             self.cb_position_5.setCurrentText(self.position_5)
         else:
             self.block_config_bar_handling_updates = False
-            self.cb_position_5.setCurrentText('None')
+            self.cb_position_5.setCurrentText("None")
             self.block_config_bar_handling_updates = True
 
         # unset variable to allow interactive handling from now
@@ -1162,16 +1545,15 @@ class Dashboard(QtWidgets.QWidget):
         Parameters
         ----------
         changed_param : str
-            The new value of the parameter that was modified in the 
+            The new value of the parameter that was modified in the
             configuration bar.
         """
 
-        if (changed_param != '') & (not self.block_config_bar_handling_updates):
-
+        if (changed_param != "") & (not self.block_config_bar_handling_updates):
             # get event origin source
             event_source = self.sender()
 
-            # if network, resolution, matrix, species, aggregation mode or resampling resolution have changed 
+            # if network, resolution, matrix, species, aggregation mode or resampling resolution have changed
             # then alter respective current selection for the changed param
             if event_source == self.cb_network:
                 self.selected_network = changed_param
@@ -1183,9 +1565,14 @@ class Dashboard(QtWidgets.QWidget):
 
             elif event_source == self.cb_matrix:
                 self.selected_matrix = changed_param
-                self.selected_species = sorted(list(
-                    self.available_observation_data[self.selected_network][self.selected_resolution][self.selected_matrix].keys()))[0]
-            
+                self.selected_species = sorted(
+                    list(
+                        self.available_observation_data[self.selected_network][
+                            self.selected_resolution
+                        ][self.selected_matrix].keys()
+                    )
+                )[0]
+
             elif event_source == self.cb_species:
                 self.selected_species = changed_param
 
@@ -1196,11 +1583,18 @@ class Dashboard(QtWidgets.QWidget):
             self.date_range_has_changed = False
 
             # check if start date/end date have changed
-            if (event_source == self.le_start_date) or (event_source == self.le_end_date):
+            if (event_source == self.le_start_date) or (
+                event_source == self.le_end_date
+            ):
                 self.date_range_has_changed = True
 
             # reinitalise multispecies tab if network, resolution, matrix or species change
-            if event_source in [self.cb_network, self.cb_resolution, self.cb_matrix, self.cb_species]:
+            if event_source in [
+                self.cb_network,
+                self.cb_resolution,
+                self.cb_matrix,
+                self.cb_species,
+            ]:
                 init_multispecies(self)
 
             # update configuration bar fields
@@ -1215,18 +1609,17 @@ class Dashboard(QtWidgets.QWidget):
         changed_plot_type : str
             The name of the new plot type selected for a specific position.
         sender : int, optional
-            The numerical identifier for the position (2-5) that triggered the 
+            The numerical identifier for the position (2-5) that triggered the
             update, if not determined by the event source. Defaults to None.
         """
 
-        if (changed_plot_type != '') & (not self.block_config_bar_handling_updates):
-
+        if (changed_plot_type != "") & (not self.block_config_bar_handling_updates):
             # get event origin source if not given
             if sender is not None:
                 if sender == 2:
                     event_source = self.cb_position_2
                 elif sender == 3:
-                    event_source = self.cb_position_3    
+                    event_source = self.cb_position_3
                 elif sender == 4:
                     event_source = self.cb_position_4
                 elif sender == 5:
@@ -1239,7 +1632,7 @@ class Dashboard(QtWidgets.QWidget):
                 previous_plot_type = copy.deepcopy(self.position_2)
                 self.position_2 = copy.deepcopy(changed_plot_type)
                 changed_position = 2
-                
+
             elif event_source == self.cb_position_3:
                 previous_plot_type = copy.deepcopy(self.position_3)
                 self.position_3 = copy.deepcopy(changed_plot_type)
@@ -1256,20 +1649,30 @@ class Dashboard(QtWidgets.QWidget):
                 changed_position = 5
 
             # if changed plot type is selected elsewhere, then set that field to None
-            if (changed_plot_type == self.position_2) & (event_source != self.cb_position_2):
-                self.position_2 = 'None'
+            if (changed_plot_type == self.position_2) & (
+                event_source != self.cb_position_2
+            ):
+                self.position_2 = "None"
 
-            elif (changed_plot_type == self.position_3) & (event_source != self.cb_position_3):
-                self.position_3 = 'None'
+            elif (changed_plot_type == self.position_3) & (
+                event_source != self.cb_position_3
+            ):
+                self.position_3 = "None"
 
-            if (changed_plot_type == self.position_4) & (event_source != self.cb_position_4):
-                self.position_4 = 'None'
+            if (changed_plot_type == self.position_4) & (
+                event_source != self.cb_position_4
+            ):
+                self.position_4 = "None"
 
-            elif (changed_plot_type == self.position_5) & (event_source != self.cb_position_5):
-                self.position_5 = 'None'
+            elif (changed_plot_type == self.position_5) & (
+                event_source != self.cb_position_5
+            ):
+                self.position_5 = "None"
 
             # remove axis elements for previous plot type, and from active_dashboard_plots
-            if (previous_plot_type in self.active_dashboard_plots) & (previous_plot_type in self.mpl_canvas.plot_axes):
+            if (previous_plot_type in self.active_dashboard_plots) & (
+                previous_plot_type in self.mpl_canvas.plot_axes
+            ):
                 ax = self.mpl_canvas.plot_axes[previous_plot_type]
                 self.mpl_canvas.remove_axis_elements(ax, previous_plot_type)
                 if isinstance(ax, dict):
@@ -1283,20 +1686,32 @@ class Dashboard(QtWidgets.QWidget):
 
                 # hide qt elements for previous plot type
                 for menu_button, save_button, save_data_button, element in zip(
-                    self.mpl_canvas.menu_buttons, self.mpl_canvas.save_buttons, 
-                    self.mpl_canvas.save_data_buttons, self.mpl_canvas.elements):
-
-                    menu_plot_type = menu_button.objectName().split('_menu')[0]
-                    if menu_plot_type in ['periodic_violin','fairmode_target','fairmode_statsummary']:
-                        menu_plot_type = menu_plot_type.replace('_','-')
+                    self.mpl_canvas.menu_buttons,
+                    self.mpl_canvas.save_buttons,
+                    self.mpl_canvas.save_data_buttons,
+                    self.mpl_canvas.elements,
+                ):
+                    menu_plot_type = menu_button.objectName().split("_menu")[0]
+                    if menu_plot_type in [
+                        "periodic_violin",
+                        "fairmode_target",
+                        "fairmode_statsummary",
+                    ]:
+                        menu_plot_type = menu_plot_type.replace("_", "-")
 
                     if previous_plot_type == menu_plot_type:
                         menu_button.hide()
                         save_button.hide()
                         save_data_button.hide()
-                        if previous_plot_type in ['periodic-violin','fairmode-target','fairmode-statsummary']:
-                            previous_plot_type = previous_plot_type.replace('-','_')
-                        for element in getattr(self.mpl_canvas, previous_plot_type + '_elements'):
+                        if previous_plot_type in [
+                            "periodic-violin",
+                            "fairmode-target",
+                            "fairmode-statsummary",
+                        ]:
+                            previous_plot_type = previous_plot_type.replace("-", "_")
+                        for element in getattr(
+                            self.mpl_canvas, previous_plot_type + "_elements"
+                        ):
                             if isinstance(element, dict):
                                 for sub_element in element.values():
                                     sub_element.hide()
@@ -1305,7 +1720,9 @@ class Dashboard(QtWidgets.QWidget):
                         break
 
             # if changed_plot_type already axis on another axis then remove those axis elements
-            if (changed_plot_type in self.active_dashboard_plots) & (changed_plot_type in self.mpl_canvas.plot_axes):
+            if (changed_plot_type in self.active_dashboard_plots) & (
+                changed_plot_type in self.mpl_canvas.plot_axes
+            ):
                 ax = self.mpl_canvas.plot_axes[changed_plot_type]
                 self.mpl_canvas.remove_axis_elements(ax, changed_plot_type)
                 if isinstance(ax, dict):
@@ -1316,29 +1733,38 @@ class Dashboard(QtWidgets.QWidget):
                         sub_ax.remove()
                 else:
                     ax.remove()
-                self.active_dashboard_plots[self.active_dashboard_plots.index(changed_plot_type)] = 'None'
-            
+                self.active_dashboard_plots[
+                    self.active_dashboard_plots.index(changed_plot_type)
+                ] = "None"
+
             # update active dashboard plots
-            del self.active_dashboard_plots[changed_position-2]
-            self.active_dashboard_plots.insert(changed_position-2, changed_plot_type)
+            del self.active_dashboard_plots[changed_position - 2]
+            self.active_dashboard_plots.insert(changed_position - 2, changed_plot_type)
 
             # update plot axis for new plot type
             self.update_plot_axis(self.mpl_canvas, event_source, changed_plot_type)
 
             # update plot if changed_plot_type != 'None'
-            if changed_plot_type != 'None':
+            if changed_plot_type != "None":
+                # format axis
+                format_axis(
+                    self.mpl_canvas.read_instance,
+                    self.mpl_canvas,
+                    self.mpl_canvas.plot_axes[changed_plot_type],
+                    changed_plot_type,
+                    self.mpl_canvas.plot_characteristics[changed_plot_type],
+                    map_extent=self.map_extent,
+                )
 
-                # format axis                
-                format_axis(self.mpl_canvas.read_instance, self.mpl_canvas, 
-                            self.mpl_canvas.plot_axes[changed_plot_type], 
-                            changed_plot_type, self.mpl_canvas.plot_characteristics[changed_plot_type],
-                            map_extent=self.map_extent)
-                
                 # make plot
-                self.mpl_canvas.update_associated_active_dashboard_plot(changed_plot_type)
+                self.mpl_canvas.update_associated_active_dashboard_plot(
+                    changed_plot_type
+                )
 
                 # update qt elements geometry for changed plot type
-                self.update_qt_elements_geometry(plot_types=[changed_plot_type], positions=[changed_position])
+                self.update_qt_elements_geometry(
+                    plot_types=[changed_plot_type], positions=[changed_position]
+                )
 
             # update layout fields
             self.update_layout_fields(self.mpl_canvas)
@@ -1364,9 +1790,9 @@ class Dashboard(QtWidgets.QWidget):
 
         # since we have no data, we need to use a random reference to initialize the polar axes
         # the axis will be updated when we create the taylor diagram
-        if changed_plot_type == 'taylor':
+        if changed_plot_type == "taylor":
             reference_stddev = 7.5
-            plot_characteristics = canvas_instance.plot_characteristics['taylor']
+            plot_characteristics = canvas_instance.plot_characteristics["taylor"]
             ghelper = get_taylor_diagram_ghelper(reference_stddev, plot_characteristics)
         elif changed_plot_type == "fairmode-statsummary":
             # get number of rows and columns
@@ -1375,79 +1801,267 @@ class Dashboard(QtWidgets.QWidget):
 
         # position 2 (top right)
         if changed_position == self.cb_position_2 or changed_position == 2:
-            if changed_plot_type in ['periodic', 'periodic-violin']:
+            if changed_plot_type in ["periodic", "periodic-violin"]:
                 canvas_instance.plot_axes[changed_plot_type] = {}
-                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((15, 53), rowspan=15, colspan=49))
-                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((34, 83), rowspan=15, colspan=19))
-                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((34, 53), rowspan=15, colspan=28))
-            elif changed_plot_type == 'taylor':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((9, 65), rowspan=36, colspan=18),
-                                                                                                  axes_class=fa.FloatingAxes, grid_helper=ghelper)
-            elif changed_plot_type in ['statsummary', 'metadata']:
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((15, 50), rowspan=36, colspan=50))
-            elif changed_plot_type == 'fairmode-statsummary':
-                inner_gs = canvas_instance.gridspec.new_subplotspec((14, 63), rowspan=36, colspan=36).subgridspec(nrows, ncols,**canvas_instance.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
-            elif changed_plot_type != 'None':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((15, 53), rowspan=34, colspan=51))
-            
+                canvas_instance.plot_axes[changed_plot_type][
+                    "hour"
+                ] = canvas_instance.figure.add_subplot(
+                    canvas_instance.gridspec.new_subplotspec(
+                        (15, 53), rowspan=15, colspan=49
+                    )
+                )
+                canvas_instance.plot_axes[changed_plot_type][
+                    "dayofweek"
+                ] = canvas_instance.figure.add_subplot(
+                    canvas_instance.gridspec.new_subplotspec(
+                        (34, 83), rowspan=15, colspan=19
+                    )
+                )
+                canvas_instance.plot_axes[changed_plot_type][
+                    "month"
+                ] = canvas_instance.figure.add_subplot(
+                    canvas_instance.gridspec.new_subplotspec(
+                        (34, 53), rowspan=15, colspan=28
+                    )
+                )
+            elif changed_plot_type == "taylor":
+                canvas_instance.plot_axes[
+                    changed_plot_type
+                ] = canvas_instance.figure.add_subplot(
+                    canvas_instance.gridspec.new_subplotspec(
+                        (9, 65), rowspan=36, colspan=18
+                    ),
+                    axes_class=fa.FloatingAxes,
+                    grid_helper=ghelper,
+                )
+            elif changed_plot_type in ["statsummary", "metadata"]:
+                canvas_instance.plot_axes[
+                    changed_plot_type
+                ] = canvas_instance.figure.add_subplot(
+                    canvas_instance.gridspec.new_subplotspec(
+                        (15, 50), rowspan=36, colspan=50
+                    )
+                )
+            elif changed_plot_type == "fairmode-statsummary":
+                inner_gs = canvas_instance.gridspec.new_subplotspec(
+                    (14, 63), rowspan=36, colspan=36
+                ).subgridspec(
+                    nrows,
+                    ncols,
+                    **canvas_instance.plot_characteristics["fairmode-statsummary"][
+                        "gridspec_kw"
+                    ],
+                )
+            elif changed_plot_type != "None":
+                canvas_instance.plot_axes[
+                    changed_plot_type
+                ] = canvas_instance.figure.add_subplot(
+                    canvas_instance.gridspec.new_subplotspec(
+                        (15, 53), rowspan=34, colspan=51
+                    )
+                )
+
         # position 3 (bottom left)
         if changed_position == self.cb_position_3 or changed_position == 3:
-            if changed_plot_type in ['periodic', 'periodic-violin']:
+            if changed_plot_type in ["periodic", "periodic-violin"]:
                 canvas_instance.plot_axes[changed_plot_type] = {}
-                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 4), rowspan=18, colspan=28))
-                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 22), rowspan=18, colspan=10))
-                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 4), rowspan=18, colspan=17))
-            elif changed_plot_type == 'taylor':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 5), rowspan=38, colspan=18),
-                                                                                                  axes_class=fa.FloatingAxes, grid_helper=ghelper)
-            elif changed_plot_type in ['statsummary', 'metadata']:
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 1), rowspan=38, colspan=28))
-            elif changed_plot_type == 'fairmode-statsummary':
-                inner_gs = canvas_instance.gridspec.new_subplotspec((61, 8), rowspan=38, colspan=24).subgridspec(nrows, ncols,**canvas_instance.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
-            elif changed_plot_type != 'None':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 4), rowspan=38, colspan=28))
-        
+                canvas_instance.plot_axes[changed_plot_type][
+                    "hour"
+                ] = canvas_instance.figure.add_subplot(
+                    canvas_instance.gridspec.new_subplotspec(
+                        (60, 4), rowspan=18, colspan=28
+                    )
+                )
+                canvas_instance.plot_axes[changed_plot_type][
+                    "dayofweek"
+                ] = canvas_instance.figure.add_subplot(
+                    canvas_instance.gridspec.new_subplotspec(
+                        (82, 22), rowspan=18, colspan=10
+                    )
+                )
+                canvas_instance.plot_axes[changed_plot_type][
+                    "month"
+                ] = canvas_instance.figure.add_subplot(
+                    canvas_instance.gridspec.new_subplotspec(
+                        (82, 4), rowspan=18, colspan=17
+                    )
+                )
+            elif changed_plot_type == "taylor":
+                canvas_instance.plot_axes[
+                    changed_plot_type
+                ] = canvas_instance.figure.add_subplot(
+                    canvas_instance.gridspec.new_subplotspec(
+                        (60, 5), rowspan=38, colspan=18
+                    ),
+                    axes_class=fa.FloatingAxes,
+                    grid_helper=ghelper,
+                )
+            elif changed_plot_type in ["statsummary", "metadata"]:
+                canvas_instance.plot_axes[
+                    changed_plot_type
+                ] = canvas_instance.figure.add_subplot(
+                    canvas_instance.gridspec.new_subplotspec(
+                        (60, 1), rowspan=38, colspan=28
+                    )
+                )
+            elif changed_plot_type == "fairmode-statsummary":
+                inner_gs = canvas_instance.gridspec.new_subplotspec(
+                    (61, 8), rowspan=38, colspan=24
+                ).subgridspec(
+                    nrows,
+                    ncols,
+                    **canvas_instance.plot_characteristics["fairmode-statsummary"][
+                        "gridspec_kw"
+                    ],
+                )
+            elif changed_plot_type != "None":
+                canvas_instance.plot_axes[
+                    changed_plot_type
+                ] = canvas_instance.figure.add_subplot(
+                    canvas_instance.gridspec.new_subplotspec(
+                        (60, 4), rowspan=38, colspan=28
+                    )
+                )
+
         # position 4 (bottom centre)
         if changed_position == self.cb_position_4 or changed_position == 4:
-            if changed_plot_type in ['periodic', 'periodic-violin']:
+            if changed_plot_type in ["periodic", "periodic-violin"]:
                 canvas_instance.plot_axes[changed_plot_type] = {}
-                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 38), rowspan=18, colspan=28))
-                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 56), rowspan=18, colspan=10))
-                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 38), rowspan=18, colspan=17))
-            elif changed_plot_type == 'taylor':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 40), rowspan=38, colspan=18),
-                                                                                                  axes_class=fa.FloatingAxes, grid_helper=ghelper)
-            elif changed_plot_type in ['statsummary', 'metadata']:
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 35), rowspan=38, colspan=28))
-            elif changed_plot_type == 'fairmode-statsummary':
-                inner_gs = canvas_instance.gridspec.new_subplotspec((61, 41), rowspan=38, colspan=25).subgridspec(nrows, ncols,**canvas_instance.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
-            elif changed_plot_type != 'None':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 38), rowspan=38, colspan=28))
-            
+                canvas_instance.plot_axes[changed_plot_type][
+                    "hour"
+                ] = canvas_instance.figure.add_subplot(
+                    canvas_instance.gridspec.new_subplotspec(
+                        (60, 38), rowspan=18, colspan=28
+                    )
+                )
+                canvas_instance.plot_axes[changed_plot_type][
+                    "dayofweek"
+                ] = canvas_instance.figure.add_subplot(
+                    canvas_instance.gridspec.new_subplotspec(
+                        (82, 56), rowspan=18, colspan=10
+                    )
+                )
+                canvas_instance.plot_axes[changed_plot_type][
+                    "month"
+                ] = canvas_instance.figure.add_subplot(
+                    canvas_instance.gridspec.new_subplotspec(
+                        (82, 38), rowspan=18, colspan=17
+                    )
+                )
+            elif changed_plot_type == "taylor":
+                canvas_instance.plot_axes[
+                    changed_plot_type
+                ] = canvas_instance.figure.add_subplot(
+                    canvas_instance.gridspec.new_subplotspec(
+                        (60, 40), rowspan=38, colspan=18
+                    ),
+                    axes_class=fa.FloatingAxes,
+                    grid_helper=ghelper,
+                )
+            elif changed_plot_type in ["statsummary", "metadata"]:
+                canvas_instance.plot_axes[
+                    changed_plot_type
+                ] = canvas_instance.figure.add_subplot(
+                    canvas_instance.gridspec.new_subplotspec(
+                        (60, 35), rowspan=38, colspan=28
+                    )
+                )
+            elif changed_plot_type == "fairmode-statsummary":
+                inner_gs = canvas_instance.gridspec.new_subplotspec(
+                    (61, 41), rowspan=38, colspan=25
+                ).subgridspec(
+                    nrows,
+                    ncols,
+                    **canvas_instance.plot_characteristics["fairmode-statsummary"][
+                        "gridspec_kw"
+                    ],
+                )
+            elif changed_plot_type != "None":
+                canvas_instance.plot_axes[
+                    changed_plot_type
+                ] = canvas_instance.figure.add_subplot(
+                    canvas_instance.gridspec.new_subplotspec(
+                        (60, 38), rowspan=38, colspan=28
+                    )
+                )
+
         # position 5 (bottom right)
         if changed_position == self.cb_position_5 or changed_position == 5:
-            if changed_plot_type in ['periodic', 'periodic-violin']:
+            if changed_plot_type in ["periodic", "periodic-violin"]:
                 canvas_instance.plot_axes[changed_plot_type] = {}
-                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 72), rowspan=18, colspan=28))
-                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 90), rowspan=18, colspan=10))
-                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 72), rowspan=18, colspan=17))
-            elif changed_plot_type == 'taylor':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 72), rowspan=38, colspan=18),
-                                                                                                  axes_class=fa.FloatingAxes, grid_helper=ghelper)
-            elif changed_plot_type in ['statsummary', 'metadata']:
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 69), rowspan=38, colspan=28))
-            elif changed_plot_type == 'fairmode-statsummary':
-                inner_gs = canvas_instance.gridspec.new_subplotspec((61, 75), rowspan=38, colspan=25).subgridspec(nrows, ncols,**canvas_instance.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
-            elif changed_plot_type != 'None':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 72), rowspan=38, colspan=28))
+                canvas_instance.plot_axes[changed_plot_type][
+                    "hour"
+                ] = canvas_instance.figure.add_subplot(
+                    canvas_instance.gridspec.new_subplotspec(
+                        (60, 72), rowspan=18, colspan=28
+                    )
+                )
+                canvas_instance.plot_axes[changed_plot_type][
+                    "dayofweek"
+                ] = canvas_instance.figure.add_subplot(
+                    canvas_instance.gridspec.new_subplotspec(
+                        (82, 90), rowspan=18, colspan=10
+                    )
+                )
+                canvas_instance.plot_axes[changed_plot_type][
+                    "month"
+                ] = canvas_instance.figure.add_subplot(
+                    canvas_instance.gridspec.new_subplotspec(
+                        (82, 72), rowspan=18, colspan=17
+                    )
+                )
+            elif changed_plot_type == "taylor":
+                canvas_instance.plot_axes[
+                    changed_plot_type
+                ] = canvas_instance.figure.add_subplot(
+                    canvas_instance.gridspec.new_subplotspec(
+                        (60, 72), rowspan=38, colspan=18
+                    ),
+                    axes_class=fa.FloatingAxes,
+                    grid_helper=ghelper,
+                )
+            elif changed_plot_type in ["statsummary", "metadata"]:
+                canvas_instance.plot_axes[
+                    changed_plot_type
+                ] = canvas_instance.figure.add_subplot(
+                    canvas_instance.gridspec.new_subplotspec(
+                        (60, 69), rowspan=38, colspan=28
+                    )
+                )
+            elif changed_plot_type == "fairmode-statsummary":
+                inner_gs = canvas_instance.gridspec.new_subplotspec(
+                    (61, 75), rowspan=38, colspan=25
+                ).subgridspec(
+                    nrows,
+                    ncols,
+                    **canvas_instance.plot_characteristics["fairmode-statsummary"][
+                        "gridspec_kw"
+                    ],
+                )
+            elif changed_plot_type != "None":
+                canvas_instance.plot_axes[
+                    changed_plot_type
+                ] = canvas_instance.figure.add_subplot(
+                    canvas_instance.gridspec.new_subplotspec(
+                        (60, 72), rowspan=38, colspan=28
+                    )
+                )
 
         # initialise polar axis for Taylor plots
-        if changed_plot_type == 'taylor':
-            canvas_instance.plotting.taylor_polar_relevant_axis = canvas_instance.plot_axes[changed_plot_type].get_aux_axes(PolarAxes.PolarTransform())
-        
+        if changed_plot_type == "taylor":
+            canvas_instance.plotting.taylor_polar_relevant_axis = (
+                canvas_instance.plot_axes[changed_plot_type].get_aux_axes(
+                    PolarAxes.PolarTransform()
+                )
+            )
+
         elif changed_plot_type == "fairmode-statsummary":
             # create gridspec and add it to a list
-            canvas_instance.plot_axes[changed_plot_type] = [canvas_instance.figure.add_subplot(inner_gs[i, j]) for i in range(nrows) for j in range(ncols)]
+            canvas_instance.plot_axes[changed_plot_type] = [
+                canvas_instance.figure.add_subplot(inner_gs[i, j])
+                for i in range(nrows)
+                for j in range(ncols)
+            ]
 
     def handle_data_selection_update(self):
         """Execute the data reading process and synchronise the interface and canvas based on current selections."""
@@ -1457,12 +2071,16 @@ class Dashboard(QtWidgets.QWidget):
             return
 
         # update mouse cursor to a waiting cursor
-        self.cursor_function = set_cursor(self.cursor_function, 'handle_data_selection_update')
+        self.cursor_function = set_cursor(
+            self.cursor_function, "handle_data_selection_update"
+        )
 
         # clear previously selected relative/absolute station indices
         self.mpl_canvas.relative_selected_station_inds = np.array([], dtype=np.int32)
         self.mpl_canvas.absolute_selected_station_inds = np.array([], dtype=np.int32)
-        self.mpl_canvas.absolute_non_selected_station_inds = np.array([], dtype=np.int32)
+        self.mpl_canvas.absolute_non_selected_station_inds = np.array(
+            [], dtype=np.int32
+        )
 
         # set variable that blocks updating of MPL canvas until all data has been updated
         self.block_MPL_canvas_updates = True
@@ -1477,10 +2095,27 @@ class Dashboard(QtWidgets.QWidget):
         self.previous_qa = self.qa
         self.previous_flags = self.flags
         self.previous_filter_species = self.filter_species
-        self.mpl_canvas.previous_plot_options = copy.deepcopy(self.mpl_canvas.current_plot_options) 
+        self.mpl_canvas.previous_plot_options = copy.deepcopy(
+            self.mpl_canvas.current_plot_options
+        )
         # if previous data labels contain daily or combined forecast data, then ensure data labels, models and plotting params
         # refer to the data labels per day, not the summary label
-        if ((np.any([True for data_label in self.data_labels if '-daily' in data_label])) or (np.any([True for data_label in self.data_labels if '-combined' in data_label]))) & (not self.from_conf):
+        if (
+            (
+                np.any(
+                    [True for data_label in self.data_labels if "-daily" in data_label]
+                )
+            )
+            or (
+                np.any(
+                    [
+                        True
+                        for data_label in self.data_labels
+                        if "-combined" in data_label
+                    ]
+                )
+            )
+        ) & (not self.from_conf):
             self.previous_models_summary = self.experiments
             self.previous_data_labels_summary = self.data_labels
             self.previous_data_labels_raw_summary = self.data_labels_raw
@@ -1493,7 +2128,7 @@ class Dashboard(QtWidgets.QWidget):
             self.previous_models = self.experiments
             self.previous_data_labels = self.data_labels
             self.previous_data_labels_raw = self.data_labels_raw
-        
+
         # set new active variables as selected variables from menu
         self.start_date = int(self.le_start_date.text())
         self.end_date = int(self.le_end_date.text())
@@ -1501,21 +2136,24 @@ class Dashboard(QtWidgets.QWidget):
         self.resolution = self.selected_resolution
         self.resampling_resolution = self.cb_resampling_resolution.currentText()
         # set active resolution, resampling_resolution when set, otherwise resolution
-        if self.resampling_resolution != 'None':
+        if self.resampling_resolution != "None":
             self.active_resolution = self.resampling_resolution
         else:
             self.active_resolution = self.resolution
-        self.species = [self.selected_species]  
-        self.qa = copy.deepcopy(self.qa_menu['checkboxes']['remove_selected'])
+        self.species = [self.selected_species]
+        self.qa = copy.deepcopy(self.qa_menu["checkboxes"]["remove_selected"])
         self.qa_per_species[self.selected_species] = copy.deepcopy(self.qa)
-        self.flags = copy.deepcopy(self.flag_menu['checkboxes']['remove_selected'])
-        self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
+        self.flags = copy.deepcopy(self.flag_menu["checkboxes"]["remove_selected"])
+        self.networkspecies = [
+            "{}|{}".format(network, speci)
+            for network, speci in zip(self.network, self.species)
+        ]
         self.networkspeci = self.networkspecies[0]
         self.filter_species = copy.deepcopy(self.selected_filter_species)
         # if are not loading from conf then get data labels, models and forecast indices
         if not self.from_conf:
             models = {}
-            for mod in self.models_menu['models']['keep_selected']:
+            for mod in self.models_menu["models"]["keep_selected"]:
                 if mod in self.previous_models:
                     models[mod] = self.previous_models[mod]
                 elif mod in self.init_models:
@@ -1527,18 +2165,24 @@ class Dashboard(QtWidgets.QWidget):
             data_labels_raw = [self.observations_data_label] + list(models.keys())
             self.forecast = []
             for model_raw, model in models.items():
-
                 # get available and selected forecast options
-                available_forecast_options = self.models_menu['models']['forecast'][model][0]
-                selected_forecast_options = self.models_menu['models']['forecast'][model][1]
-                available_forecast_days = [day.split('day')[-1].strip() for day in self.models_menu['models']['forecast_days'][model][0]]
-                selected_forecast_days = [day.split('day')[-1].strip() for day in self.models_menu['models']['forecast_days'][model][1]]
+                selected_forecast_options = self.models_menu["models"]["forecast"][
+                    model
+                ][1]
+                available_forecast_days = [
+                    day.split("day")[-1].strip()
+                    for day in self.models_menu["models"]["forecast_days"][model][0]
+                ]
+                selected_forecast_days = [
+                    day.split("day")[-1].strip()
+                    for day in self.models_menu["models"]["forecast_days"][model][1]
+                ]
                 # set boolean if no forecast days are selected then by default take all
                 if len(selected_forecast_days) == 0:
                     take_all_forecast_days = True
                 else:
                     take_all_forecast_days = False
-            
+
                 # otherwise modify model to combine with forecast option
                 if len(selected_forecast_options) > 0:
                     # iterate through selected forecast options for model
@@ -1546,28 +2190,43 @@ class Dashboard(QtWidgets.QWidget):
                         # zip through available forecast indices and days for model
                         for forecast_day in available_forecast_days:
                             # if the forecast day has been selected or want to take all forecast day, the proceed
-                            if (forecast_day in selected_forecast_days) or (take_all_forecast_days):
-
+                            if (forecast_day in selected_forecast_days) or (
+                                take_all_forecast_days
+                            ):
                                 # are taking all forecast days, if so do not attach day to forecast var
-                                if (take_all_forecast_days) or (len(selected_forecast_days) == self.forecast_days_per_data_label[self.networkspeci][model]):
-                                    forecast_var = '{}'.format(selected_forecast_option)
+                                if (take_all_forecast_days) or (
+                                    len(selected_forecast_days)
+                                    == self.forecast_days_per_data_label[
+                                        self.networkspeci
+                                    ][model]
+                                ):
+                                    forecast_var = "{}".format(selected_forecast_option)
                                 # otherwise attach forecast day
                                 else:
-                                    forecast_var = '{}{}'.format(selected_forecast_option, forecast_day)
+                                    forecast_var = "{}{}".format(
+                                        selected_forecast_option, forecast_day
+                                    )
                                 if forecast_var not in self.forecast:
                                     self.forecast.append(forecast_var)
 
-            # update forecast indices and data labels based on selected forecast data 
-            self.data_labels, self.data_labels_raw, self.experiments = self.datareader.update_forecast_indices(data_labels=data_labels, data_labels_raw=data_labels_raw,
-                                                                                                               networkspecies=[self.networkspeci])
-            
+            # update forecast indices and data labels based on selected forecast data
+            (
+                self.data_labels,
+                self.data_labels_raw,
+                self.experiments,
+            ) = self.datareader.update_forecast_indices(
+                data_labels=data_labels,
+                data_labels_raw=data_labels_raw,
+                networkspecies=[self.networkspeci],
+            )
+
         # remove bias plot options if have no models loaded
         if len(self.data_labels) == 1:
             for plot_type in self.mpl_canvas.all_plots:
-                if 'bias' in self.mpl_canvas.current_plot_options[plot_type]:
-                    self.mpl_canvas.current_plot_options[plot_type].remove('bias')
+                if "bias" in self.mpl_canvas.current_plot_options[plot_type]:
+                    self.mpl_canvas.current_plot_options[plot_type].remove("bias")
                     self.mpl_canvas.update_plot_options(plot_type)
-                    if plot_type == 'statsummary':
+                    if plot_type == "statsummary":
                         self.block_config_bar_handling_updates = True
                         self.mpl_canvas.check_statsummary_stats()
                         self.block_config_bar_handling_updates = False
@@ -1575,7 +2234,7 @@ class Dashboard(QtWidgets.QWidget):
         # if spatial_colocation is not active, force filter_species to be empty dict if it is not already
         # inform user of this
         if (self.filter_species) and (not self.spatial_colocation):
-            self.filter_species = {} 
+            self.filter_species = {}
             msg = '"spatial_colocation" must be set to True if wanting to use "filter_species" option.'
             show_message(self.read_instance, msg)
 
@@ -1584,77 +2243,117 @@ class Dashboard(QtWidgets.QWidget):
 
         # if first read then need to read all data
         if self.first_read:
-            read_operations = ['reset']
+            read_operations = ["reset"]
 
-        # determine if any of the key variables have changed 
+        # determine if any of the key variables have changed
         # (network, resolution, species, qa, flags, filter_species)
         # if any have changed, observations and any selected models have to be re-read entirely
-        elif (self.network[0] != self.previous_network[0]) or (
-                self.resolution != self.previous_resolution) or (
-                self.species[0] != self.previous_species[0]) or (
-                np.array_equal(self.qa, self.previous_qa) == False) or (
-                np.array_equal(self.flags, self.previous_flags) == False) or (
-                str(dict(sorted(self.filter_species.items()))) != str(dict(sorted(self.previous_filter_species.items())))) or (
-                str(dict(sorted(self.calibration_factor.items()))) != str(dict(sorted(self.previous_calibration_factor.items())))):
-            read_operations = ['reset']
+        elif (
+            (self.network[0] != self.previous_network[0])
+            or (self.resolution != self.previous_resolution)
+            or (self.species[0] != self.previous_species[0])
+            or (not np.array_equal(self.qa, self.previous_qa))
+            or (not np.array_equal(self.flags, self.previous_flags))
+            or (
+                str(dict(sorted(self.filter_species.items())))
+                != str(dict(sorted(self.previous_filter_species.items())))
+            )
+            or (
+                str(dict(sorted(self.calibration_factor.items())))
+                != str(dict(sorted(self.previous_calibration_factor.items())))
+            )
+        ):
+            read_operations = ["reset"]
 
         # key variables have not changed, has start/end date?
         else:
             # determine if start date/end date have changed
             if (self.start_date != self.previous_start_date) or (
-                    self.end_date != self.previous_end_date):
+                self.end_date != self.previous_end_date
+            ):
                 # if date range has changed then determine type of overlap with previous date range
                 # no overlap (i.e. start date >= than previous end date, or end date <= than previous start date)?
                 if (self.start_date >= self.previous_end_date) or (
-                        self.end_date <= self.previous_start_date):
-                    read_operations = ['reset']
+                    self.end_date <= self.previous_start_date
+                ):
+                    read_operations = ["reset"]
                 # data range fully inside previous data range (i.e. start date later and end date earlier)?
                 elif (self.start_date > self.previous_start_date) & (
-                        self.end_date < self.previous_end_date):
-                    read_operations = ['cut_left','cut_right']
+                    self.end_date < self.previous_end_date
+                ):
+                    read_operations = ["cut_left", "cut_right"]
                 # need to read data on left edge and right edge of previous date range
                 # (i.e. start date earlier and end date later)?
                 elif (self.start_date < self.previous_start_date) & (
-                        self.end_date > self.previous_end_date):
-                    read_operations = ['read_left','read_right']
+                    self.end_date > self.previous_end_date
+                ):
+                    read_operations = ["read_left", "read_right"]
                 # need to read data on left edge and cut on right edge of previous date range
                 # (i.e. start date earlier and end date earlier)?
                 elif (self.start_date < self.previous_start_date) & (
-                        self.end_date < self.previous_end_date):
-                    read_operations = ['read_left','cut_right']
+                    self.end_date < self.previous_end_date
+                ):
+                    read_operations = ["read_left", "cut_right"]
                 # need to cut data on left edge and read data on right edge of previous date range
                 # (i.e. start date later and end date later)?
                 elif (self.start_date > self.previous_start_date) & (
-                        self.end_date > self.previous_end_date):
-                    read_operations = ['cut_left','read_right']
+                    self.end_date > self.previous_end_date
+                ):
+                    read_operations = ["cut_left", "read_right"]
                 # need to read data on left edge of previous date range (i.e. start date earlier)?
                 elif self.start_date < self.previous_start_date:
-                    read_operations = ['read_left']
+                    read_operations = ["read_left"]
                 # need to read data on right edge of previous date range (i.e. end date later)?
                 elif self.end_date > self.previous_end_date:
-                    read_operations = ['read_right']
+                    read_operations = ["read_right"]
                 # need to cut data on left edge of previous date range (i.e. start date later)?
                 elif self.start_date > self.previous_start_date:
-                    read_operations = ['cut_left']
+                    read_operations = ["cut_left"]
                 # need to cut data on right edge of previous date range (i.e. end date earlier)?
                 elif self.end_date < self.previous_end_date:
-                    read_operations = ['cut_right']
+                    read_operations = ["cut_right"]
 
-        # determine if any models need removing or reading 
-        models_to_remove = [model for model in self.previous_models.values() if model not in list(self.experiments.values())]
-        models_to_read = [model for model in self.experiments.values() if model not in list(self.previous_models.values())]
-        if 'reset' not in read_operations:
+        # determine if any models need removing or reading
+        models_to_remove = [
+            model
+            for model in self.previous_models.values()
+            if model not in list(self.experiments.values())
+        ]
+        models_to_read = [
+            model
+            for model in self.experiments.values()
+            if model not in list(self.previous_models.values())
+        ]
+        if "reset" not in read_operations:
             if len(models_to_remove) > 0:
-                read_operations.append('remove_mod')
+                read_operations.append("remove_mod")
             if len(models_to_read) > 0:
-                read_operations.append('read_mod')
+                read_operations.append("read_mod")
 
         # have no read operations?
         if len(read_operations) == 0:
-
-            # if have daily or combined forecast active and have no read operations, 
-            # then revert data labels, models and plotting params to how they were before as will not entering filter  
-            if ((np.any([True for data_label in self.data_labels if '-daily' in data_label])) or (np.any([True for data_label in self.data_labels if '-combined' in data_label]))) & (not self.from_conf):
+            # if have daily or combined forecast active and have no read operations,
+            # then revert data labels, models and plotting params to how they were before as will not entering filter
+            if (
+                (
+                    np.any(
+                        [
+                            True
+                            for data_label in self.data_labels
+                            if "-daily" in data_label
+                        ]
+                    )
+                )
+                or (
+                    np.any(
+                        [
+                            True
+                            for data_label in self.data_labels
+                            if "-combined" in data_label
+                        ]
+                    )
+                )
+            ) & (not self.from_conf):
                 self.experiments = self.previous_models_summary
                 self.data_labels = self.previous_data_labels_summary
                 self.data_labels_raw = self.previous_data_labels_raw_summary
@@ -1662,20 +2361,24 @@ class Dashboard(QtWidgets.QWidget):
 
         # have read operations?
         elif len(read_operations) > 0:
-
             # if reading/cutting observations then cover canvas to do updates gracefully
-            if ('reset' in read_operations) or ('cut_left' in read_operations) or ('cut_right' in read_operations) or\
-               ('read_left' in read_operations) or ('read_right' in read_operations):
+            if (
+                ("reset" in read_operations)
+                or ("cut_left" in read_operations)
+                or ("cut_right" in read_operations)
+                or ("read_left" in read_operations)
+                or ("read_right" in read_operations)
+            ):
                 self.mpl_canvas.canvas_cover.show()
             # otherwise, just cover plotting axes as are adding/removing models
             else:
-                self.mpl_canvas.top_right_canvas_cover.show() 
+                self.mpl_canvas.top_right_canvas_cover.show()
                 self.mpl_canvas.lower_canvas_cover.show()
-            #update to show covers immediately
-            self.mpl_canvas.figure.canvas.draw_idle()  
+            # update to show covers immediately
+            self.mpl_canvas.figure.canvas.draw_idle()
             self.mpl_canvas.figure.canvas.flush_events()
 
-            # clear all axes elements 
+            # clear all axes elements
             for plot_type, ax in self.mpl_canvas.plot_axes.items():
                 self.mpl_canvas.remove_axis_elements(ax, plot_type)
 
@@ -1684,24 +2387,31 @@ class Dashboard(QtWidgets.QWidget):
 
             # set current station references, as previous station references
             self.previous_station_references = self.station_references
-            
+
             # set current relevant yearmonths, as previous relevant yearmonths
             self.previous_yearmonths = self.yearmonths
 
             # read data
-            self.datareader.read_setup(read_operations, models_to_remove=models_to_remove, 
-                                       models_to_read=models_to_read)
+            self.datareader.read_setup(
+                read_operations,
+                models_to_remove=models_to_remove,
+                models_to_read=models_to_read,
+            )
 
             # restore mouse cursor to normal if have no valid data after read
             if self.invalid_read:
-                unset_cursor(self.cursor_function, 'handle_data_selection_update')
+                unset_cursor(self.cursor_function, "handle_data_selection_update")
                 return
 
             # if species has changed, or first read, update species specific lower/upper limits
             if (self.first_read) or (self.species[0] != self.previous_species[0]):
                 # get default GHOST limits
-                self.lower_bound[self.species[0]] = np.float32(self.parameter_dictionary[self.species[0]]['extreme_lower_limit']) 
-                self.upper_bound[self.species[0]] = np.float32(self.parameter_dictionary[self.species[0]]['extreme_upper_limit']) 
+                self.lower_bound[self.species[0]] = np.float32(
+                    self.parameter_dictionary[self.species[0]]["extreme_lower_limit"]
+                )
+                self.upper_bound[self.species[0]] = np.float32(
+                    self.parameter_dictionary[self.species[0]]["extreme_upper_limit"]
+                )
                 self.le_minimum_value.setText(str(self.lower_bound[self.species[0]]))
                 self.le_maximum_value.setText(str(self.upper_bound[self.species[0]]))
 
@@ -1712,7 +2422,7 @@ class Dashboard(QtWidgets.QWidget):
             self.mpl_canvas.handle_data_filter_update()
 
             # for non-GHOST, we call update_metadata_fields after filtering to remove the stations that have
-            # 0 valid measurements, to do this we need to have valid_station_inds, which is obtained 
+            # 0 valid measurements, to do this we need to have valid_station_inds, which is obtained
             # after filtering
             if not self.reading_ghost:
                 update_metadata_fields(self)
@@ -1720,11 +2430,11 @@ class Dashboard(QtWidgets.QWidget):
             # generate list of sorted z1/z2 data arrays names in memory, putting observations
             # before models, and empty string item as first element in z2 array list
             # (for changing from 'difference' statistics to 'absolute')
-            if len(self.data_labels) == 1:  
+            if len(self.data_labels) == 1:
                 self.z1_arrays = np.array([self.observations_data_label])
             else:
                 self.z1_arrays = np.array(self.data_labels)
-            self.z2_arrays = np.append([''], self.z1_arrays)
+            self.z2_arrays = np.append([""], self.z1_arrays)
 
             # update temporal colocation
             self.mpl_canvas.handle_temporal_colocate_update()
@@ -1736,7 +2446,7 @@ class Dashboard(QtWidgets.QWidget):
             self.block_MPL_canvas_updates = False
 
             # update GHOST buttons
-            self.update_ghost_buttons('handle_data_selection_update')
+            self.update_ghost_buttons("handle_data_selection_update")
 
             # update MPL canvas
             self.mpl_canvas.update_MPL_canvas()
@@ -1746,9 +2456,9 @@ class Dashboard(QtWidgets.QWidget):
                 self.first_read = False
 
         # restore mouse cursor to normal
-        unset_cursor(self.cursor_function, 'handle_data_selection_update')
+        unset_cursor(self.cursor_function, "handle_data_selection_update")
 
-        # update performing read variable to false 
+        # update performing read variable to false
         self.performing_read = False
 
         # unset variable to allow updating of MPL canvas
@@ -1758,58 +2468,62 @@ class Dashboard(QtWidgets.QWidget):
         """Restore all filter fields, metadata, and coverage settings to their initial values."""
 
         # return if canvas updates blocked or not yet read data
-        if (self.block_MPL_canvas_updates) or (not hasattr(self, 'reading_ghost')):
+        if (self.block_MPL_canvas_updates) or (not hasattr(self, "reading_ghost")):
             return
 
         # set mouse cursor
-        self.cursor_function = set_cursor(self.cursor_function, 'reset_options')
+        self.cursor_function = set_cursor(self.cursor_function, "reset_options")
 
-        # reset coverage fields        
+        # reset coverage fields
         init_coverage(self)
         update_coverage_fields(self)
 
-        # reset period fields 
+        # reset period fields
         init_period(self)
         update_period_fields(self)
 
         # reset metadata
         init_metadata(self)
 
-        # for non-GHOST delete valid station indices variables because we do not want to 
-        # remove the stations with 0 valid measurements before the filter has been updated, 
+        # for non-GHOST delete valid station indices variables because we do not want to
+        # remove the stations with 0 valid measurements before the filter has been updated,
         # this will happen later
-        if hasattr(self, 'valid_station_inds') and (not self.reading_ghost):
-            delattr(self, 'valid_station_inds')
-            delattr(self, 'valid_station_inds_temporal_colocation')
+        if hasattr(self, "valid_station_inds") and (not self.reading_ghost):
+            delattr(self, "valid_station_inds")
+            delattr(self, "valid_station_inds_temporal_colocation")
 
         update_metadata_fields(self)
 
         # reset bounds
-        species_lower_limit = np.float32(self.parameter_dictionary[self.species[0]]['extreme_lower_limit'])
-        species_upper_limit = np.float32(self.parameter_dictionary[self.species[0]]['extreme_upper_limit'])
-        
+        species_lower_limit = np.float32(
+            self.parameter_dictionary[self.species[0]]["extreme_lower_limit"]
+        )
+        species_upper_limit = np.float32(
+            self.parameter_dictionary[self.species[0]]["extreme_upper_limit"]
+        )
+
         # set default limits
         self.le_minimum_value.setText(str(species_lower_limit))
         self.le_maximum_value.setText(str(species_upper_limit))
-        
+
         # unfilter data
         self.mpl_canvas.handle_data_filter_update()
-        
+
         # for non-GHOST, we call update_metadata_fields after filtering to remove the stations that have
-        # 0 valid measurements, to do this we need to have valid_station_inds, which is obtained 
+        # 0 valid measurements, to do this we need to have valid_station_inds, which is obtained
         # after filtering
         if not self.reading_ghost:
             update_metadata_fields(self)
 
         # Restore mouse cursor to normal
-        unset_cursor(self.cursor_function, 'reset_options')
+        unset_cursor(self.cursor_function, "reset_options")
 
     def update_ghost_buttons(self, event_source):
         """Update the state of GHOST-exclusive buttons based on the current data selection."""
-        
+
         # initalise all buttons as being inactive
         qa_active = False
-        flags_active = False    
+        flags_active = False
         period_active = False
 
         # if have a GHOST network then QA and flags are active
@@ -1817,34 +2531,53 @@ class Dashboard(QtWidgets.QWidget):
         if check_for_ghost(self.selected_network):
             qa_active = True
             flags_active = True
-            if self.ghost_features != 'min': 
+            if self.ghost_features != "min":
                 period_active = True
-        # if are reading ACTRIS network then QA and flags are active     
-        elif self.selected_network == 'actris/actris':
+        # if are reading ACTRIS network then QA and flags are active
+        elif self.selected_network == "actris/actris":
             qa_active = True
             flags_active = True
 
         # update buttons
-        if event_source == 'update_configuration_bar_fields':
+        if event_source == "update_configuration_bar_fields":
             if qa_active:
-                self.bu_QA = set_formatting(self.bu_QA, self.formatting_dict['menu_button'])
+                self.bu_QA = set_formatting(
+                    self.bu_QA, self.formatting_dict["menu_button"]
+                )
                 self.bu_QA.setEnabled(True)
             else:
-                self.bu_QA = set_formatting(self.bu_QA, self.formatting_dict['menu_button_disabled'], disabled=True)
+                self.bu_QA = set_formatting(
+                    self.bu_QA,
+                    self.formatting_dict["menu_button_disabled"],
+                    disabled=True,
+                )
                 self.bu_QA.setEnabled(False)
             if flags_active:
-                self.bu_flags = set_formatting(self.bu_flags, self.formatting_dict['menu_button'])
+                self.bu_flags = set_formatting(
+                    self.bu_flags, self.formatting_dict["menu_button"]
+                )
                 self.bu_flags.setEnabled(True)
             else:
-                self.bu_flags = set_formatting(self.bu_flags, self.formatting_dict['menu_button_disabled'], disabled=True)
+                self.bu_flags = set_formatting(
+                    self.bu_flags,
+                    self.formatting_dict["menu_button_disabled"],
+                    disabled=True,
+                )
                 self.bu_flags.setEnabled(False)
-        elif event_source == 'handle_data_selection_update':
+        elif event_source == "handle_data_selection_update":
             if period_active:
-                self.bu_period = set_formatting(self.bu_period, self.formatting_dict['menu_button'])
+                self.bu_period = set_formatting(
+                    self.bu_period, self.formatting_dict["menu_button"]
+                )
                 self.bu_period.setEnabled(True)
             else:
-                self.bu_period = set_formatting(self.bu_period, self.formatting_dict['menu_button_disabled'], disabled=True)
+                self.bu_period = set_formatting(
+                    self.bu_period,
+                    self.formatting_dict["menu_button_disabled"],
+                    disabled=True,
+                )
                 self.bu_period.setEnabled(False)
+
 
 # generate Providentia dashboard
 def main(**kwargs):
@@ -1856,7 +2589,7 @@ def main(**kwargs):
     **kwargs : dict
         Arbitrary keyword arguments passed to the Dashboard class constructor.
     """
-    
+
     # pause briefly to allow QT modules time to correctly initilise
     time.sleep(0.1)
 
@@ -1868,31 +2601,33 @@ def main(**kwargs):
 
     # explicitely set colour palette to avoid issues with dark modes (e.g. on Mac)
     p = q_app.palette()
-    dcp = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/dashboard_colour_palette.yaml')))
-    p.setColor(QtGui.QPalette.Dark, QtGui.QColor(*dcp['Dark']))
-    p.setColor(QtGui.QPalette.Light, QtGui.QColor(*dcp['Light']))
-    p.setColor(QtGui.QPalette.Window, QtGui.QColor(*dcp['Window']))
-    p.setColor(QtGui.QPalette.WindowText, QtGui.QColor(*dcp['WindowText']))
-    p.setColor(QtGui.QPalette.Base, QtGui.QColor(*dcp['Base']))
-    p.setColor(QtGui.QPalette.AlternateBase, QtGui.QColor(*dcp['AlternateBase']))
-    p.setColor(QtGui.QPalette.ToolTipBase, QtGui.QColor(*dcp['ToolTipBase']))
-    p.setColor(QtGui.QPalette.ToolTipText, QtGui.QColor(*dcp['ToolTipText']))
-    p.setColor(QtGui.QPalette.Button, QtGui.QColor(*dcp['Button']))
-    p.setColor(QtGui.QPalette.ButtonText, QtGui.QColor(*dcp['ButtonText']))
-    p.setColor(QtGui.QPalette.BrightText, QtGui.QColor(*dcp['BrightText']))
-    p.setColor(QtGui.QPalette.Highlight, QtGui.QColor(*dcp['Highlight']))
-    p.setColor(QtGui.QPalette.HighlightedText, QtGui.QColor(*dcp['HighlightedText']))
-    p.setColor(QtGui.QPalette.Link, QtGui.QColor(*dcp['Link']))
-    p.setColor(QtGui.QPalette.LinkVisited, QtGui.QColor(*dcp['LinkVisited']))
-    p.setColor(QtGui.QPalette.Mid, QtGui.QColor(*dcp['Mid']))
-    p.setColor(QtGui.QPalette.Midlight, QtGui.QColor(*dcp['Midlight']))
-    p.setColor(QtGui.QPalette.PlaceholderText, QtGui.QColor(*dcp['PlaceholderText']))
-    p.setColor(QtGui.QPalette.Shadow, QtGui.QColor(*dcp['Shadow']))
-    p.setColor(QtGui.QPalette.Text, QtGui.QColor(*dcp['Text']))
+    dcp = yaml.safe_load(
+        open(join(PROVIDENTIA_ROOT, "settings/internal/dashboard_colour_palette.yaml"))
+    )
+    p.setColor(QtGui.QPalette.Dark, QtGui.QColor(*dcp["Dark"]))
+    p.setColor(QtGui.QPalette.Light, QtGui.QColor(*dcp["Light"]))
+    p.setColor(QtGui.QPalette.Window, QtGui.QColor(*dcp["Window"]))
+    p.setColor(QtGui.QPalette.WindowText, QtGui.QColor(*dcp["WindowText"]))
+    p.setColor(QtGui.QPalette.Base, QtGui.QColor(*dcp["Base"]))
+    p.setColor(QtGui.QPalette.AlternateBase, QtGui.QColor(*dcp["AlternateBase"]))
+    p.setColor(QtGui.QPalette.ToolTipBase, QtGui.QColor(*dcp["ToolTipBase"]))
+    p.setColor(QtGui.QPalette.ToolTipText, QtGui.QColor(*dcp["ToolTipText"]))
+    p.setColor(QtGui.QPalette.Button, QtGui.QColor(*dcp["Button"]))
+    p.setColor(QtGui.QPalette.ButtonText, QtGui.QColor(*dcp["ButtonText"]))
+    p.setColor(QtGui.QPalette.BrightText, QtGui.QColor(*dcp["BrightText"]))
+    p.setColor(QtGui.QPalette.Highlight, QtGui.QColor(*dcp["Highlight"]))
+    p.setColor(QtGui.QPalette.HighlightedText, QtGui.QColor(*dcp["HighlightedText"]))
+    p.setColor(QtGui.QPalette.Link, QtGui.QColor(*dcp["Link"]))
+    p.setColor(QtGui.QPalette.LinkVisited, QtGui.QColor(*dcp["LinkVisited"]))
+    p.setColor(QtGui.QPalette.Mid, QtGui.QColor(*dcp["Mid"]))
+    p.setColor(QtGui.QPalette.Midlight, QtGui.QColor(*dcp["Midlight"]))
+    p.setColor(QtGui.QPalette.PlaceholderText, QtGui.QColor(*dcp["PlaceholderText"]))
+    p.setColor(QtGui.QPalette.Shadow, QtGui.QColor(*dcp["Shadow"]))
+    p.setColor(QtGui.QPalette.Text, QtGui.QColor(*dcp["Text"]))
     q_app.setPalette(p)
-    
+
     # set application name and icon
-    q_app.setWindowIcon(QtGui.QIcon(join(PROVIDENTIA_ROOT, 'assets/logo.icns')))
+    q_app.setWindowIcon(QtGui.QIcon(join(PROVIDENTIA_ROOT, "assets/logo.icns")))
     q_app.setApplicationName("Providentia")
     q_app.setApplicationDisplayName("Providentia")
     q_app.setDesktopFileName("Providentia")

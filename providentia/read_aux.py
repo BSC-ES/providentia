@@ -27,10 +27,11 @@ _CFTIME_CLASS = {
     "360_day": cftime.Datetime360Day,
 }
 
-# initialise dictionary for storing pointers to shared memory variables in read step 
+# initialise dictionary for storing pointers to shared memory variables in read step
 shared_memory_vars = {}
 
-PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
+PROVIDENTIA_ROOT = "/".join(CURRENT_PATH.split("/")[:-1])
+
 
 def drop_nans(data):
     """
@@ -49,8 +50,15 @@ def drop_nans(data):
     return data[~pd.isnull(data)]
 
 
-def init_shared_vars_read_netcdf_data(data_in_memory, data_in_memory_shape, ghost_data_in_memory, 
-                                      ghost_data_in_memory_shape, timestamp_array, qa, flags):
+def init_shared_vars_read_netcdf_data(
+    data_in_memory,
+    data_in_memory_shape,
+    ghost_data_in_memory,
+    ghost_data_in_memory_shape,
+    timestamp_array,
+    qa,
+    flags,
+):
     """
     Initialises worker processes by granting access to shared memory variables before parallel NetCDF reading.
 
@@ -72,13 +80,14 @@ def init_shared_vars_read_netcdf_data(data_in_memory, data_in_memory_shape, ghos
         Shared memory buffer for data quality flags.
     """
 
-    shared_memory_vars['data_in_memory'] = data_in_memory
-    shared_memory_vars['data_in_memory_shape'] = data_in_memory_shape
-    shared_memory_vars['ghost_data_in_memory'] = ghost_data_in_memory
-    shared_memory_vars['ghost_data_in_memory_shape'] = ghost_data_in_memory_shape
-    shared_memory_vars['timestamp_array'] = timestamp_array
-    shared_memory_vars['qa'] = qa
-    shared_memory_vars['flag'] = flags
+    shared_memory_vars["data_in_memory"] = data_in_memory
+    shared_memory_vars["data_in_memory_shape"] = data_in_memory_shape
+    shared_memory_vars["ghost_data_in_memory"] = ghost_data_in_memory
+    shared_memory_vars["ghost_data_in_memory_shape"] = ghost_data_in_memory_shape
+    shared_memory_vars["timestamp_array"] = timestamp_array
+    shared_memory_vars["qa"] = qa
+    shared_memory_vars["flag"] = flags
+
 
 def read_netcdf_data(tuple_arguments):
     """
@@ -87,31 +96,53 @@ def read_netcdf_data(tuple_arguments):
     Parameters
     ----------
     tuple_arguments : tuple
-        A collection of arguments including file paths, station references, species names, 
+        A collection of arguments including file paths, station references, species names,
         shared memory handles, and quality control settings.
 
     Returns
     -------
     numpy.ndarray or list or None
-        Returns a structured metadata array if reading observations; an empty list if no 
+        Returns a structured metadata array if reading observations; an empty list if no
         stations are found; or None for model data or missing files.
     """
 
     # assign arguments from tuple to variables
-    relevant_file, station_references, station_names, speci,\
-    observations_data_label, data_label, data_labels, reading_ghost, ghost_data_vars_to_read,\
-    metadata_dtype, metadata_vars_to_read, logger, default_qa, filter_read, network, forecast_indices = tuple_arguments
+    (
+        relevant_file,
+        station_references,
+        station_names,
+        speci,
+        observations_data_label,
+        data_label,
+        data_labels,
+        reading_ghost,
+        ghost_data_vars_to_read,
+        metadata_dtype,
+        metadata_vars_to_read,
+        logger,
+        default_qa,
+        filter_read,
+        network,
+        forecast_indices,
+    ) = tuple_arguments
 
     # wrap shared arrays as numpy arrays to more easily manipulate the data
-    data_in_memory = np.frombuffer(shared_memory_vars['data_in_memory'], dtype=np.float32).reshape(shared_memory_vars['data_in_memory_shape'][:])
-    if (reading_ghost or network == 'actris/actris') & (data_label == observations_data_label): 
-        qa = np.frombuffer(shared_memory_vars['qa'], dtype=np.uint8)
-        flags = np.frombuffer(shared_memory_vars['flag'], dtype=np.uint8)
+    data_in_memory = np.frombuffer(
+        shared_memory_vars["data_in_memory"], dtype=np.float32
+    ).reshape(shared_memory_vars["data_in_memory_shape"][:])
+    if (reading_ghost or network == "actris/actris") & (
+        data_label == observations_data_label
+    ):
+        qa = np.frombuffer(shared_memory_vars["qa"], dtype=np.uint8)
+        flags = np.frombuffer(shared_memory_vars["flag"], dtype=np.uint8)
         if reading_ghost:
             if not filter_read:
-                ghost_data_in_memory = np.frombuffer(shared_memory_vars['ghost_data_in_memory'], 
-                                                    dtype=np.float32).reshape(shared_memory_vars['ghost_data_in_memory_shape'][:])
-    timestamp_array = np.frombuffer(shared_memory_vars['timestamp_array'], dtype=np.int64)
+                ghost_data_in_memory = np.frombuffer(
+                    shared_memory_vars["ghost_data_in_memory"], dtype=np.float32
+                ).reshape(shared_memory_vars["ghost_data_in_memory_shape"][:])
+    timestamp_array = np.frombuffer(
+        shared_memory_vars["timestamp_array"], dtype=np.int64
+    )
 
     # read netCDF frame
     ncdf_root = Dataset(relevant_file, mode="r")
@@ -121,22 +152,29 @@ def read_netcdf_data(tuple_arguments):
     file_timestamp = time_var_to_asi8(time_var)
 
     # get valid file time indices (i.e. those times in active full time array)
-    valid_file_time_indices = np.where(np.logical_and(file_timestamp>=timestamp_array[0], 
-                                                      file_timestamp<=timestamp_array[-1]))[0]
+    valid_file_time_indices = np.where(
+        np.logical_and(
+            file_timestamp >= timestamp_array[0], file_timestamp <= timestamp_array[-1]
+        )
+    )[0]
 
     # get indices relative to active full timestamp array
-    full_array_time_indices = np.searchsorted(timestamp_array, file_timestamp[valid_file_time_indices])
+    full_array_time_indices = np.searchsorted(
+        timestamp_array, file_timestamp[valid_file_time_indices]
+    )
 
     # get all station references in file (do little extra work to get non-GHOST observational station references)
     if (not reading_ghost) & (data_label == observations_data_label):
-        if 'station_reference' in ncdf_root.variables:
-            station_reference_var = 'station_reference'
-        elif 'station_code' in ncdf_root.variables:
-            station_reference_var = 'station_code'
-        elif 'station_name' in ncdf_root.variables:
-            station_reference_var = 'station_name'
-        else: 
-            error = 'Error: {} cannot be read because it has no station_name.'.format(relevant_file)
+        if "station_reference" in ncdf_root.variables:
+            station_reference_var = "station_reference"
+        elif "station_code" in ncdf_root.variables:
+            station_reference_var = "station_code"
+        elif "station_name" in ncdf_root.variables:
+            station_reference_var = "station_name"
+        else:
+            error = "Error: {} cannot be read because it has no station_name.".format(
+                relevant_file
+            )
             logger.error(error)
             sys.exit(1)
 
@@ -146,14 +184,16 @@ def read_netcdf_data(tuple_arguments):
 
         if len(meta_shape) == 2:
             if meta_val_dtype == np.dtype(object):
-                file_station_references = np.array([''.join(val) for val in file_station_references])
+                file_station_references = np.array(
+                    ["".join(val) for val in file_station_references]
+                )
             else:
                 file_station_references = chartostring(file_station_references)
 
     # GHOST and interpolated model data
     else:
-        file_station_references = ncdf_root['station_reference'][:]
-    
+        file_station_references = ncdf_root["station_reference"][:]
+
     # get indices of all non-NaN stations (can be NaN for some non-GHOST files)
     refs = np.asarray(file_station_references).astype(str)
     original_indices = np.arange(refs.size, dtype=np.int32)
@@ -163,32 +203,40 @@ def read_netcdf_data(tuple_arguments):
 
     # get indices of file station station references that are contained in all unique station references array
     station_ref_set = set(station_references)
-    mask_present = np.fromiter((r in station_ref_set for r in refs_non_nan),
-                                dtype=bool,count=len(refs_non_nan))
+    mask_present = np.fromiter(
+        (r in station_ref_set for r in refs_non_nan),
+        dtype=bool,
+        count=len(refs_non_nan),
+    )
     matched_filtered_indices = np.where(mask_present)[0]
     current_file_station_indices = non_nan_original_indices[matched_filtered_indices]
 
-
     # for all unique station references that are contained within file station references array
-    # get the index of the station reference in the unique station references array 
+    # get the index of the station reference in the unique station references array
     station_to_index = {ref: i for i, ref in enumerate(station_references)}
     valid_refs = refs_non_nan[matched_filtered_indices]
-    full_array_station_indices = np.fromiter((station_to_index[r] for r in valid_refs),
-                                                dtype=np.int32,count=len(valid_refs))
+    full_array_station_indices = np.fromiter(
+        (station_to_index[r] for r in valid_refs), dtype=np.int32, count=len(valid_refs)
+    )
 
-    # if have zero current_file_station_indices in all unique station references, 
-    # then check if it is because of old-style of Providentia-interpolation output, 
-    # where all station_references were for 'station_name'  
-    if (data_label != observations_data_label) & (len(current_file_station_indices) == 0):
-
+    # if have zero current_file_station_indices in all unique station references,
+    # then check if it is because of old-style of Providentia-interpolation output,
+    # where all station_references were for 'station_name'
+    if (data_label != observations_data_label) & (
+        len(current_file_station_indices) == 0
+    ):
         # get indices of file station station references that are contained in all unique station references array
-        current_file_station_indices = np.where(np.in1d(file_station_references, station_names))[0]
+        current_file_station_indices = np.where(
+            np.in1d(file_station_references, station_names)
+        )[0]
 
         # for all unique station references that are contained within file station references array
-        # get the index of the station reference in the unique station references array 
+        # get the index of the station reference in the unique station references array
         index = np.argsort(station_names)
         sorted_station_names = station_names[index]
-        sorted_index = np.searchsorted(sorted_station_names, file_station_references[current_file_station_indices])
+        sorted_index = np.searchsorted(
+            sorted_station_names, file_station_references[current_file_station_indices]
+        )
         full_array_station_indices = np.take(index, sorted_index, mode="clip")
 
     # if still have zero current_file_station_indices in all unique station references (can happen due to station colocation)
@@ -198,9 +246,9 @@ def read_netcdf_data(tuple_arguments):
         if (data_label == observations_data_label) & (not filter_read):
             return []
         else:
-            return 
-        
-    # get first and last station index for current file to read only relevant subset of data, 
+            return
+
+    # get first and last station index for current file to read only relevant subset of data,
     # and adjust current_file_station_indices to be relative to subset of data to read
     fsi = current_file_station_indices[0]
     lsi = current_file_station_indices[-1] + 1
@@ -208,13 +256,17 @@ def read_netcdf_data(tuple_arguments):
 
     # read observations
     if data_label == observations_data_label:
-
         # read species variable
         # GHOST
         if reading_ghost:
             # if need to filter by qa load non-filtered array, otherwise load prefiltered array (if available)
-            if (default_qa) & ('{}_prefiltered_defaultqa'.format(speci) in list(ncdf_root.variables.keys())):
-                species_data = ncdf_root['{}_prefiltered_defaultqa'.format(speci)][fsi:lsi, valid_file_time_indices]
+            if (default_qa) & (
+                "{}_prefiltered_defaultqa".format(speci)
+                in list(ncdf_root.variables.keys())
+            ):
+                species_data = ncdf_root["{}_prefiltered_defaultqa".format(speci)][
+                    fsi:lsi, valid_file_time_indices
+                ]
                 species_data = species_data[current_file_station_indices_adjusted]
                 # set read_qa to False to not filter by them
                 read_qa = False
@@ -225,7 +277,7 @@ def read_netcdf_data(tuple_arguments):
         # non-GHOST
         else:
             # transpose array to swap station and time dimensions
-            if ncdf_root[speci].dimensions == ('time', 'station'):
+            if ncdf_root[speci].dimensions == ("time", "station"):
                 species_data = ncdf_root[speci][valid_file_time_indices, fsi:lsi].T
                 species_data = species_data[current_file_station_indices_adjusted]
             # do not transpose
@@ -234,82 +286,93 @@ def read_netcdf_data(tuple_arguments):
                 species_data = species_data[current_file_station_indices_adjusted]
 
             # if network is actris then read qa
-            if network == 'actris/actris':
+            if network == "actris/actris":
                 read_qa = True
-        
+
         # reading GHOST data?
         if reading_ghost:
-
             # read GHOST data variables
             if not filter_read:
-                for ghost_data_var_ii, ghost_data_var in enumerate(ghost_data_vars_to_read):
-                    ghost_data = ncdf_root[ghost_data_var][fsi:lsi, valid_file_time_indices]
+                for ghost_data_var_ii, ghost_data_var in enumerate(
+                    ghost_data_vars_to_read
+                ):
+                    ghost_data = ncdf_root[ghost_data_var][
+                        fsi:lsi, valid_file_time_indices
+                    ]
                     ghost_data = ghost_data[current_file_station_indices_adjusted]
-                    ghost_data_in_memory[ghost_data_var_ii, full_array_station_indices[:, np.newaxis], 
-                                         full_array_time_indices[np.newaxis, :]] = ghost_data
+                    ghost_data_in_memory[
+                        ghost_data_var_ii,
+                        full_array_station_indices[:, np.newaxis],
+                        full_array_time_indices[np.newaxis, :],
+                    ] = ghost_data
 
-        if (reading_ghost) or (network == 'actris/actris'):
+        if (reading_ghost) or (network == "actris/actris"):
             # if some qa flags selected then screen observations
             if read_qa:
                 if len(qa) > 0:
                     # screen out observations which are associated with any of the selected qa flags
-                    qa_data = ncdf_root['qa'][fsi:lsi, valid_file_time_indices, :]
+                    qa_data = ncdf_root["qa"][fsi:lsi, valid_file_time_indices, :]
                     qa_data = qa_data[current_file_station_indices_adjusted]
                     species_data[np.isin(qa_data, qa).any(axis=2)] = np.nan
-                
+
             # if some data provider flags selected then screen observations
             if len(flags) > 0:
                 # screen out observations which are associated with any of the selected data provider flags
-                flag_data = ncdf_root['flag'][fsi:lsi, valid_file_time_indices, :]
+                flag_data = ncdf_root["flag"][fsi:lsi, valid_file_time_indices, :]
                 flag_data = flag_data[current_file_station_indices_adjusted]
                 species_data[np.isin(flag_data, flags).any(axis=2)] = np.nan
-                
+
         # write filtered species data to shared file data
-        data_in_memory[data_labels.index(observations_data_label), full_array_station_indices[:, np.newaxis], 
-                    full_array_time_indices[np.newaxis, :]] = species_data
+        data_in_memory[
+            data_labels.index(observations_data_label),
+            full_array_station_indices[:, np.newaxis],
+            full_array_time_indices[np.newaxis, :],
+        ] = species_data
 
         # get file metadata
         if not filter_read:
-            file_metadata = np.full((len(station_references), 1), np.nan, dtype=metadata_dtype)
+            file_metadata = np.full(
+                (len(station_references), 1), np.nan, dtype=metadata_dtype
+            )
             for meta_var in metadata_vars_to_read:
-                # do extra work for non-GHOST data 
+                # do extra work for non-GHOST data
                 if not reading_ghost:
                     # get correct variable name for .nc
-                    if meta_var == 'longitude':
+                    if meta_var == "longitude":
                         if "longitude" in ncdf_root.variables:
-                            meta_var_nc = 'longitude'
+                            meta_var_nc = "longitude"
                         else:
-                            meta_var_nc = 'lon'
-                    elif meta_var == 'latitude':
+                            meta_var_nc = "lon"
+                    elif meta_var == "latitude":
                         if "latitude" in ncdf_root.variables:
-                            meta_var_nc = 'latitude'
+                            meta_var_nc = "latitude"
                         else:
-                            meta_var_nc = 'lat'
-                    elif meta_var == 'altitude':
+                            meta_var_nc = "lat"
+                    elif meta_var == "altitude":
                         if "altitude" in ncdf_root.variables:
-                            meta_var_nc = 'altitude'
+                            meta_var_nc = "altitude"
                         else:
-                            meta_var_nc = 'alt'
-                    elif meta_var == 'station_reference':
-                        if 'station_reference' in ncdf_root.variables:
-                            meta_var_nc = 'station_reference'
-                        elif 'station_code' in ncdf_root.variables:
-                            meta_var_nc = 'station_code'
-                        elif 'station_name' in ncdf_root.variables:
-                            meta_var_nc = 'station_name'
-                    elif meta_var == 'area_classification':
-                        if 'area_classification' in ncdf_root.variables:
-                            meta_var_nc = 'area_classification'
+                            meta_var_nc = "alt"
+                    elif meta_var == "station_reference":
+                        if "station_reference" in ncdf_root.variables:
+                            meta_var_nc = "station_reference"
+                        elif "station_code" in ncdf_root.variables:
+                            meta_var_nc = "station_code"
+                        elif "station_name" in ncdf_root.variables:
+                            meta_var_nc = "station_name"
+                    elif meta_var == "area_classification":
+                        if "area_classification" in ncdf_root.variables:
+                            meta_var_nc = "area_classification"
                         else:
-                            meta_var_nc = 'station_area'
-                    elif meta_var == 'station_classification':
-                        if 'station_classification' in ncdf_root.variables:
-                            meta_var_nc = 'station_classification'
+                            meta_var_nc = "station_area"
+                    elif meta_var == "station_classification":
+                        if "station_classification" in ncdf_root.variables:
+                            meta_var_nc = "station_classification"
                         else:
-                            meta_var_nc = 'station_type'
+                            meta_var_nc = "station_type"
                     else:
                         meta_var_nc = meta_var
-        
+
                     # check meta variable is in netCDF
                     if meta_var_nc not in ncdf_root.variables:
                         continue
@@ -321,18 +384,27 @@ def read_netcdf_data(tuple_arguments):
                     meta_val_dtype = np.array([meta_val[0]]).dtype
 
                     # do str formatting where neccessary
-                    if meta_val_dtype not in [np.int8, np.int16, np.int32, np.int64, 
-                                            np.uint8, np.uint16, np.uint32, np.uint64,
-                                            np.float16, np.float32, np.float64]:
-
+                    if meta_val_dtype not in [
+                        np.int8,
+                        np.int16,
+                        np.int32,
+                        np.int64,
+                        np.uint8,
+                        np.uint16,
+                        np.uint32,
+                        np.uint64,
+                        np.float16,
+                        np.float32,
+                        np.float64,
+                    ]:
                         if len(meta_shape) == 2:
                             if meta_val_dtype == np.dtype(object):
-                                meta_val = np.array([''.join(val) for val in meta_val])
+                                meta_val = np.array(["".join(val) for val in meta_val])
                             else:
                                 meta_val = chartostring(meta_val)
-                    
+
                     # do str formatting (capitalisation) to the metadata
-                    if isinstance(meta_val,str):
+                    if isinstance(meta_val, str):
                         meta_val = np.char.capitalize(meta_val)
 
                 # GHOST metadata
@@ -342,7 +414,7 @@ def read_netcdf_data(tuple_arguments):
                     # check meta variable is in netCDF
                     if meta_var_nc not in ncdf_root.variables:
                         continue
-                    
+
                     # get metadata
                     meta_val = ncdf_root[meta_var_nc][fsi:lsi]
                     meta_val = meta_val[current_file_station_indices_adjusted]
@@ -352,42 +424,54 @@ def read_netcdf_data(tuple_arguments):
 
     # model data
     else:
-
         # determine if data is structured as forecast data or not
-        if 'forecast_day' in ncdf_root[speci].dimensions:
+        if "forecast_day" in ncdf_root[speci].dimensions:
             have_forecast = True
-            #if so, check what type of forecast data
+            # if so, check what type of forecast data
             # check if have daily forecast set
-            daily_forecast = np.any([True for data_label in data_labels if '-daily' in data_label])    
+            daily_forecast = np.any(
+                [True for data_label in data_labels if "-daily" in data_label]
+            )
             # check if have combined forecast set
-            combined_forecast = np.any([True for data_label in data_labels if '-combined' in data_label]) 
+            combined_forecast = np.any(
+                [True for data_label in data_labels if "-combined" in data_label]
+            )
             # check if have day forecast set
-            day_forecast = np.any([True for data_label in data_labels if '-day' in data_label])
+            day_forecast = np.any(
+                [True for data_label in data_labels if "-day" in data_label]
+            )
         # data is not structured as forecast
         else:
             have_forecast = False
-        
+
         # if have no passed forecast indices, then take first day preferentially (if data is structured as forecast data)
         if len(forecast_indices) == 0:
             forecast_indices = np.array([0], dtype=np.int32)
 
         # iterate through forecast indices
         for forecast_index in forecast_indices:
-
-            # if want a specific forecast day, and it is available in the netCDF, then take it 
+            # if want a specific forecast day, and it is available in the netCDF, then take it
             if have_forecast:
                 # daily forecast
                 if daily_forecast:
-                    data_label_forecast = '{}-daily{}'.format(data_label, forecast_index+1)
+                    data_label_forecast = "{}-daily{}".format(
+                        data_label, forecast_index + 1
+                    )
                 # combined forecast
                 elif combined_forecast:
-                    data_label_forecast = '{}-combined{}'.format(data_label, forecast_index+1)
+                    data_label_forecast = "{}-combined{}".format(
+                        data_label, forecast_index + 1
+                    )
                 # N day forecast
                 elif day_forecast:
-                    data_label_forecast = '{}-day{}'.format(data_label, forecast_index+1)
+                    data_label_forecast = "{}-day{}".format(
+                        data_label, forecast_index + 1
+                    )
                 else:
                     data_label_forecast = data_label
-                relevant_data = ncdf_root[speci][fsi:lsi, valid_file_time_indices, forecast_index]
+                relevant_data = ncdf_root[speci][
+                    fsi:lsi, valid_file_time_indices, forecast_index
+                ]
                 relevant_data = relevant_data[current_file_station_indices_adjusted]
 
             # else if forecast day not available in the netCDF, then just take the data as it is
@@ -400,8 +484,11 @@ def read_netcdf_data(tuple_arguments):
             relevant_data[relevant_data.mask] = np.nan
 
             # put data in array
-            data_in_memory[data_labels.index(data_label_forecast), full_array_station_indices[:, np.newaxis], 
-                           full_array_time_indices[np.newaxis, :]] = relevant_data
+            data_in_memory[
+                data_labels.index(data_label_forecast),
+                full_array_station_indices[:, np.newaxis],
+                full_array_time_indices[np.newaxis, :],
+            ] = relevant_data
 
     # close netCDF
     ncdf_root.close()
@@ -410,6 +497,7 @@ def read_netcdf_data(tuple_arguments):
     if (data_label == observations_data_label) & (not filter_read):
         return file_metadata
 
+
 def read_netcdf_metadata(tuple_arguments):
     """
     Extracts basic metadata from an observational NetCDF file.
@@ -417,13 +505,13 @@ def read_netcdf_metadata(tuple_arguments):
     Parameters
     ----------
     tuple_arguments : tuple
-        A collection containing the file path to be read, a boolean indicating if it is a GHOST 
+        A collection containing the file path to be read, a boolean indicating if it is a GHOST
         format file, and a logger instance for error reporting.
 
     Returns
     -------
     list
-        A list of NumPy arrays or lists containing the extracted metadata for 
+        A list of NumPy arrays or lists containing the extracted metadata for
         'station_reference', 'longitude', 'latitude', 'station_name', and 'measurement_altitude'.
     """
 
@@ -434,25 +522,31 @@ def read_netcdf_metadata(tuple_arguments):
     ncdf_root = Dataset(relevant_file)
 
     # set metadata variables to read
-    metadata_vars_to_read = ['station_reference', 'longitude', 'latitude', 'station_name', 'measurement_altitude']
+    metadata_vars_to_read = [
+        "station_reference",
+        "longitude",
+        "latitude",
+        "station_name",
+        "measurement_altitude",
+    ]
     metadata_read = []
-
+    print(relevant_file)
     # iterate though metadata variables to read
     for meta_var in metadata_vars_to_read:
-
-        # do extra work for non-GHOST data 
+        # do extra work for non-GHOST data
         if not reading_ghost:
-        
             # station reference
-            if meta_var == 'station_reference':
-                if 'station_reference' in ncdf_root.variables:
-                    station_reference_var = 'station_reference'
-                elif 'station_code' in ncdf_root.variables:
-                    station_reference_var = 'station_code'
-                elif 'station_name' in ncdf_root.variables:
-                    station_reference_var = 'station_name'
-                else: 
-                    error = 'Error: {} cannot be read because it has no station_name.'.format(relevant_file)
+            if meta_var == "station_reference":
+                if "station_reference" in ncdf_root.variables:
+                    station_reference_var = "station_reference"
+                elif "station_code" in ncdf_root.variables:
+                    station_reference_var = "station_code"
+                elif "station_name" in ncdf_root.variables:
+                    station_reference_var = "station_name"
+                else:
+                    error = "Error: {} cannot be read because it has no station_name.".format(
+                        relevant_file
+                    )
                     logger.error(error)
                     sys.exit(1)
 
@@ -461,13 +555,19 @@ def read_netcdf_metadata(tuple_arguments):
                 meta_val_dtype = np.array([meta_val[0]]).dtype
                 if len(meta_shape) == 2:
                     if meta_val_dtype == np.dtype(object):
-                        meta_val = np.array([''.join(val) for val in meta_val])
+                        meta_val = np.array(["".join(val) for val in meta_val])
                     else:
                         meta_val = chartostring(meta_val)
 
                 # get indices of all non-NaN stations (can be NaN for some non-GHOST files)
-                non_nan_station_indices = np.array([ref_ii for ref_ii, ref in enumerate(meta_val) if ref.lower() != 'nan'])
-                
+                non_nan_station_indices = np.array(
+                    [
+                        ref_ii
+                        for ref_ii, ref in enumerate(meta_val)
+                        if ref.lower() != "nan"
+                    ]
+                )
+
                 # if have zero non-NaN station indices, then return from function without reading
                 if len(non_nan_station_indices) == 0:
                     metadata_read = [np.array([]), np.array([]), np.array([]), [], []]
@@ -483,40 +583,41 @@ def read_netcdf_metadata(tuple_arguments):
                 non_nan_station_indices_adjusted = non_nan_station_indices - fi
 
             # longitude
-            elif meta_var == 'longitude':
+            elif meta_var == "longitude":
+                print(ncdf_root.variables.keys())
                 if "longitude" in ncdf_root.variables:
-                    meta_val = ncdf_root['longitude'][fi:li]
+                    meta_val = ncdf_root["longitude"][fi:li]
                     meta_val = meta_val[non_nan_station_indices_adjusted]
-                else:            
-                    meta_val = ncdf_root['lon'][fi:li]
+                else:
+                    meta_val = ncdf_root["lon"][fi:li]
                     meta_val = meta_val[non_nan_station_indices_adjusted]
 
             # latitude
-            elif meta_var == 'latitude':
+            elif meta_var == "latitude":
                 if "latitude" in ncdf_root.variables:
-                    meta_val = ncdf_root['latitude'][fi:li]
+                    meta_val = ncdf_root["latitude"][fi:li]
                     meta_val = meta_val[non_nan_station_indices_adjusted]
-                else:            
-                    meta_val = ncdf_root['lat'][fi:li]
+                else:
+                    meta_val = ncdf_root["lat"][fi:li]
                     meta_val = meta_val[non_nan_station_indices_adjusted]
 
             # station name
-            elif meta_var == 'station_name':
+            elif meta_var == "station_name":
                 if "station_name" in ncdf_root.variables:
-                    meta_shape = ncdf_root['station_name'].shape                    
-                    meta_val = ncdf_root['station_name'][fi:li]
+                    meta_shape = ncdf_root["station_name"].shape
+                    meta_val = ncdf_root["station_name"][fi:li]
                     meta_val = meta_val[non_nan_station_indices_adjusted]
                     meta_val_dtype = np.array([meta_val[0]]).dtype
                     if len(meta_shape) == 2:
                         if meta_val_dtype == np.dtype(object):
-                            meta_val = np.array([''.join(val) for val in meta_val])
+                            meta_val = np.array(["".join(val) for val in meta_val])
                         else:
                             meta_val = chartostring(meta_val)
                 else:
                     meta_val = []
 
             # measurement altitude
-            elif meta_var == 'measurement_altitude':
+            elif meta_var == "measurement_altitude":
                 if meta_var in ncdf_root.variables:
                     meta_val = ncdf_root[meta_var][fi:li]
                     meta_val = meta_val[non_nan_station_indices_adjusted]
@@ -527,7 +628,7 @@ def read_netcdf_metadata(tuple_arguments):
         else:
             meta_val = ncdf_root[meta_var][:]
 
-        # append read metadata 
+        # append read metadata
         metadata_read.append(meta_val)
 
     # close netCDF
@@ -535,6 +636,7 @@ def read_netcdf_metadata(tuple_arguments):
 
     # return read metadata
     return metadata_read
+
 
 def check_forecast_dimension(tuple_arguments):
     """
@@ -558,8 +660,8 @@ def check_forecast_dimension(tuple_arguments):
     ncdf_root = Dataset(relevant_file)
 
     # check if forecast day dimension exists
-    if 'forecast_day' in ncdf_root.dimensions:
-        n_forecast_days = ncdf_root.dimensions['forecast_day'].size
+    if "forecast_day" in ncdf_root.dimensions:
+        n_forecast_days = ncdf_root.dimensions["forecast_day"].size
     else:
         n_forecast_days = 0
 
@@ -569,7 +671,9 @@ def check_forecast_dimension(tuple_arguments):
     return n_forecast_days
 
 
-def get_yearmonths_to_read(available_yearmonths, start_date_to_read, end_date_to_read, resolution):
+def get_yearmonths_to_read(
+    available_yearmonths, start_date_to_read, end_date_to_read, resolution
+):
     """
     Determines which monthly data files fall within a specified date range based on temporal resolution.
 
@@ -589,21 +693,27 @@ def get_yearmonths_to_read(available_yearmonths, start_date_to_read, end_date_to
     list of str
         A subset of available_yearmonths representing the files required to cover the date range.
     """
-    
-    available_yearmonthdays = [int(yearmonth+'01') for yearmonth in available_yearmonths]
 
-    first_valid_file_ind = bisect.bisect_right(available_yearmonthdays, int(start_date_to_read))
+    available_yearmonthdays = [
+        int(yearmonth + "01") for yearmonth in available_yearmonths
+    ]
+
+    first_valid_file_ind = bisect.bisect_right(
+        available_yearmonthdays, int(start_date_to_read)
+    )
     if first_valid_file_ind != 0:
         first_valid_file_ind = first_valid_file_ind - 1
-    last_valid_file_ind = bisect.bisect_left(available_yearmonthdays, int(end_date_to_read))
+    last_valid_file_ind = bisect.bisect_left(
+        available_yearmonthdays, int(end_date_to_read)
+    )
 
     # read only complete months
-    if resolution == 'monthly':
-        if str(end_date_to_read)[6:8] != '01':
-            if str(end_date_to_read)[0:6] == str(available_yearmonths[-1]):
+    if resolution == "monthly":
+        if str(end_date_to_read)[6:8] != "01":
+            if str(end_date_to_read)[0:6] is str(available_yearmonths[-1]):
                 last_valid_file_ind -= 1
-        if str(start_date_to_read)[6:8] != '01':
-            if str(start_date_to_read)[0:6] == str(available_yearmonths[0]):
+        if str(start_date_to_read)[6:8] != "01":
+            if str(start_date_to_read)[0:6] is str(available_yearmonths[0]):
                 first_valid_file_ind += 1
 
     if first_valid_file_ind == last_valid_file_ind:
@@ -629,11 +739,11 @@ def get_default_qa(instance, speci):
         A sorted list of integer codes representing the default QA flags.
     """
 
-    if instance.parameter_dictionary[speci]['extreme_lower_limit'] < 0.0:
+    if instance.parameter_dictionary[speci]["extreme_lower_limit"] < 0.0:
         return sorted(instance.default_qa_non_negative)
     else:
         return sorted(instance.default_qa_standard)
-    
+
 
 def get_frequency_code(resolution):
     """
@@ -649,23 +759,23 @@ def get_frequency_code(resolution):
     active_frequency_code : str
         The corresponding Pandas frequency string used for resampling and date ranges.
     """
-    
-    if resolution in ['hourly', 'hourly_instantaneous']:
-        active_frequency_code = 'h'
-    elif resolution in ['3hourly', '3hourly_instantaneous']:
-        active_frequency_code = '3h'
-    elif resolution in ['6hourly', '6hourly_instantaneous']:
-        active_frequency_code = '6h'
-    elif resolution == 'daily':
-        active_frequency_code = 'D'
-    elif resolution == 'monthly':
-        active_frequency_code = 'MS'
-    elif resolution == 'annual':
-        active_frequency_code = 'YS'
+
+    if resolution in ["hourly", "hourly_instantaneous"]:
+        active_frequency_code = "h"
+    elif resolution in ["3hourly", "3hourly_instantaneous"]:
+        active_frequency_code = "3h"
+    elif resolution in ["6hourly", "6hourly_instantaneous"]:
+        active_frequency_code = "6h"
+    elif resolution == "daily":
+        active_frequency_code = "D"
+    elif resolution == "monthly":
+        active_frequency_code = "MS"
+    elif resolution == "annual":
+        active_frequency_code = "YS"
 
     return active_frequency_code
 
-   
+
 def get_chunk_size(active_resolution, chunk_resolution):
     """
     Calculates the number of data steps required to fill a specific temporal chunk.
@@ -712,7 +822,7 @@ def check_for_ghost(network_name):
         True if the network is a GHOST network, False otherwise.
     """
 
-    if '/' in network_name:
+    if "/" in network_name:
         return False
     else:
         return True
@@ -738,10 +848,11 @@ def get_ghost_observational_tree(instance):
 
     # iterate through available networks
     for network in instance.ghost_available_networks:
-
         # check if directory for network exists
         # if not, continue
-        if not os.path.exists('%s/%s/%s' % (instance.ghost_root, network, instance.ghost_version)):
+        if not os.path.exists(
+            "%s/%s/%s" % (instance.ghost_root, network, instance.ghost_version)
+        ):
             continue
 
         # write empty dictionary for network
@@ -749,44 +860,66 @@ def get_ghost_observational_tree(instance):
 
         # iterate through available resolutions
         for resolution in instance.ghost_available_resolutions:
-
             # check if directory for resolution exists
             # if not, continue
-            if not os.path.exists('%s/%s/%s/%s' % (instance.ghost_root, network, instance.ghost_version, resolution)):
+            if not os.path.exists(
+                "%s/%s/%s/%s"
+                % (instance.ghost_root, network, instance.ghost_version, resolution)
+            ):
                 continue
 
             # write nested empty dictionary for resolution
             ghost_observation_data[network][resolution] = {}
 
             # get available species for network/resolution
-            available_species = os.listdir('%s/%s/%s/%s' % (instance.ghost_root, network, instance.ghost_version, resolution))
+            available_species = os.listdir(
+                "%s/%s/%s/%s"
+                % (instance.ghost_root, network, instance.ghost_version, resolution)
+            )
 
             # iterate through available files per species
             for speci in available_species:
-
                 # get all available netCDF files
                 available_files = os.listdir(
-                    '%s/%s/%s/%s/%s' % (instance.ghost_root, network, instance.ghost_version, resolution, speci))
-                
+                    "%s/%s/%s/%s/%s"
+                    % (
+                        instance.ghost_root,
+                        network,
+                        instance.ghost_version,
+                        resolution,
+                        speci,
+                    )
+                )
+
                 # continue if have no files
                 if len(available_files) == 0:
                     continue
 
                 # get monthly start date (YYYYMM) of all files
-                file_yearmonths = sorted([f.split('_')[-1][:6] for f in available_files if f != 'temporary'])
-                
+                file_yearmonths = sorted(
+                    [f.split("_")[-1][:6] for f in available_files if f != "temporary"]
+                )
+
                 # get matrix for current species
                 if speci in instance.parameter_dictionary:
-                    matrix = instance.parameter_dictionary[speci]['matrix']
+                    matrix = instance.parameter_dictionary[speci]["matrix"]
                     if matrix not in ghost_observation_data[network][resolution]:
                         # write nested empty dictionary for matrix
                         ghost_observation_data[network][resolution][matrix] = {}
 
                     # write nested dictionary for species, with associated file yearmonths
-                    ghost_observation_data[network][resolution][matrix][speci] = file_yearmonths
+                    ghost_observation_data[network][resolution][matrix][
+                        speci
+                    ] = file_yearmonths
 
     # save file tree out to yaml
-    with open(join(PROVIDENTIA_ROOT, 'settings/internal/ghost_filetree_{}.json'.format(instance.ghost_version)), 'w') as json_file:
+    with open(
+        join(
+            PROVIDENTIA_ROOT,
+            "settings/internal/ghost_filetree_{}.json".format(instance.ghost_version),
+        ),
+        "w",
+    ) as json_file:
         json.dump(ghost_observation_data, json_file, indent=4)
 
     return ghost_observation_data
@@ -812,10 +945,9 @@ def get_nonghost_observational_tree(instance):
 
     # iterate through networks
     for network in instance.nonghost_available_networks:
-
         # check if directory for network exists
         # if not, continue
-        if not os.path.exists('%s/%s' % (instance.nonghost_root, network)):
+        if not os.path.exists("%s/%s" % (instance.nonghost_root, network)):
             continue
 
         # write empty dictionary for network
@@ -823,43 +955,54 @@ def get_nonghost_observational_tree(instance):
 
         # iterate through available resolutions
         for resolution in instance.nonghost_available_resolutions:
-
             # check if directory for resolution exists
             # if not, continue
-            if not os.path.exists('%s/%s/%s' % (instance.nonghost_root, network, resolution)):
+            if not os.path.exists(
+                "%s/%s/%s" % (instance.nonghost_root, network, resolution)
+            ):
                 continue
 
             # write nested empty dictionary for resolution
             nonghost_observation_data[network][resolution] = {}
 
             # get available species for network/resolution
-            available_species = os.listdir('%s/%s/%s' % (instance.nonghost_root, network, resolution))
+            available_species = os.listdir(
+                "%s/%s/%s" % (instance.nonghost_root, network, resolution)
+            )
 
             # iterate through available files per species
             for speci in available_species:
-
-                # get all available netCDF files 
-                available_files = glob('%s/%s/%s/%s/%s_??????.nc' % (instance.nonghost_root, network, resolution, speci, speci))
+                # get all available netCDF files
+                available_files = glob(
+                    "%s/%s/%s/%s/%s_??????.nc"
+                    % (instance.nonghost_root, network, resolution, speci, speci)
+                )
 
                 # continue if have no files
                 if len(available_files) == 0:
                     continue
 
                 # get monthly start date (YYYYMM) of all files
-                file_yearmonths = sorted([f.split('_')[-1][:6] for f in available_files])
+                file_yearmonths = sorted(
+                    [f.split("_")[-1][:6] for f in available_files]
+                )
 
                 # get matrix for current species
                 if speci in instance.parameter_dictionary:
-                    matrix = instance.parameter_dictionary[speci]['matrix']
+                    matrix = instance.parameter_dictionary[speci]["matrix"]
                     if matrix not in nonghost_observation_data[network][resolution]:
                         # write nested empty dictionary for matrix
                         nonghost_observation_data[network][resolution][matrix] = {}
 
                     # write nested dictionary for species, with associated file yearmonths
-                    nonghost_observation_data[network][resolution][matrix][speci] = file_yearmonths
-        
+                    nonghost_observation_data[network][resolution][matrix][
+                        speci
+                    ] = file_yearmonths
+
     # save file tree out to yaml
-    with open(join(PROVIDENTIA_ROOT, 'settings/internal/nonghost_filetree.json'), 'w') as json_file:
+    with open(
+        join(PROVIDENTIA_ROOT, "settings/internal/nonghost_filetree.json"), "w"
+    ) as json_file:
         json.dump(nonghost_observation_data, json_file, indent=4)
 
     return nonghost_observation_data
@@ -884,53 +1027,83 @@ def get_valid_obs_files_in_date_range(instance, start_date, end_date):
 
     # check if start/end date are valid values, if not, return with no valid obs. files
     if (not valid_date(start_date)) or (not valid_date(end_date)):
-        msg = f'One of start date ({start_date}) or end date ({end_date}) are not valid.'
+        msg = (
+            f"One of start date ({start_date}) or end date ({end_date}) are not valid."
+        )
         show_message(instance, msg, print=True)
         return
 
     # check end date is > start date, if not, return with no valid obs. files
     if int(start_date) >= int(end_date):
-        msg = f'Start date ({start_date}) exceeds end date ({end_date}).'
+        msg = f"Start date ({start_date}) exceeds end date ({end_date})."
         show_message(instance, msg, print=True)
         return
 
     # check start date and end date are both within if valid date range (19000101 - 20500101),
     # if not, return with no valid obs. files
-    if (int(start_date) < 19000101) or (int(end_date) < 19000101) or (int(start_date) >= 20500101) or (int(end_date) >= 20500101):
-        msg = f'One of start date ({start_date}) or end date ({end_date}) are not valid.'
+    if (
+        (int(start_date) < 19000101)
+        or (int(end_date) < 19000101)
+        or (int(start_date) >= 20500101)
+        or (int(end_date) >= 20500101)
+    ):
+        msg = (
+            f"One of start date ({start_date}) or end date ({end_date}) are not valid."
+        )
         show_message(instance, msg, print=True)
-        return 
+        return
 
     # get start date on first of month
-    start_date_firstdayofmonth = int(str(start_date)[:6] + '01')
+    start_date_firstdayofmonth = int(str(start_date)[:6] + "01")
 
     # iterate through observational dictionary
     for network in instance.all_observation_data:
         for resolution in instance.all_observation_data[network]:
             for matrix in instance.all_observation_data[network][resolution]:
                 for speci in instance.all_observation_data[network][resolution][matrix]:
-                    
                     # get available files
-                    file_yearmonths = instance.all_observation_data[network][resolution][matrix][speci]
+                    file_yearmonths = instance.all_observation_data[network][
+                        resolution
+                    ][matrix][speci]
 
                     # get file yearmonths within date range
-                    valid_file_yearmonths = sorted([ym for ym in file_yearmonths if
-                                                    (int('{}01'.format(ym)) >= start_date_firstdayofmonth) & (int('{}01'.format(ym)) < int(end_date))])
-                    
-                    # add yearmonths to available observation data dict 
+                    valid_file_yearmonths = sorted(
+                        [
+                            ym
+                            for ym in file_yearmonths
+                            if (int("{}01".format(ym)) >= start_date_firstdayofmonth)
+                            & (int("{}01".format(ym)) < int(end_date))
+                        ]
+                    )
+
+                    # add yearmonths to available observation data dict
                     if len(valid_file_yearmonths) > 0:
                         if network not in instance.available_observation_data:
                             instance.available_observation_data[network] = {}
-                        if resolution not in instance.available_observation_data[network]:
-                            instance.available_observation_data[network][resolution] = {}
-                        if matrix not in instance.available_observation_data[network][resolution]:
-                            instance.available_observation_data[network][resolution][matrix] = {}
-                        instance.available_observation_data[network][resolution][matrix][speci] = valid_file_yearmonths
+                        if (
+                            resolution
+                            not in instance.available_observation_data[network]
+                        ):
+                            instance.available_observation_data[network][
+                                resolution
+                            ] = {}
+                        if (
+                            matrix
+                            not in instance.available_observation_data[network][
+                                resolution
+                            ]
+                        ):
+                            instance.available_observation_data[network][resolution][
+                                matrix
+                            ] = {}
+                        instance.available_observation_data[network][resolution][
+                            matrix
+                        ][speci] = valid_file_yearmonths
 
 
 def get_valid_models(instance, start_date, end_date, resolution, networks, species):
     """
-    Identifies models within a given date range and chosen networks and species. 
+    Identifies models within a given date range and chosen networks and species.
 
     Parameters
     ----------
@@ -950,33 +1123,44 @@ def get_valid_models(instance, start_date, end_date, resolution, networks, speci
 
     # get all different model names (from providentia-interpolation output dir)
     available_models = []
-    if os.path.exists(join(instance.mod_root,instance.ghost_version)):
-        available_models = os.listdir('%s/%s' % (instance.mod_root, instance.ghost_version))
+    if os.path.exists(join(instance.mod_root, instance.ghost_version)):
+        available_models = os.listdir(
+            "%s/%s" % (instance.mod_root, instance.ghost_version)
+        )
 
     # create dictionary to store available model data
     instance.available_model_data = {}
 
-    #list for saving models to add to models pop-up 
+    # list for saving models to add to models pop-up
     models_to_add = []
 
     # get start date on first of month
-    start_date_firstdayofmonth = int(str(start_date)[:6] + '01')
+    start_date_firstdayofmonth = int(str(start_date)[:6] + "01")
 
     # iterate through networks and species
     for network, speci in zip(networks, species):
-
         # iterate through available models
         for model in available_models:
-
             # get folder where interpolated models are saved
-            if '/' not in network:           
-                files_directory = '%s/%s/%s/%s/%s/%s' % (instance.mod_root, instance.ghost_version, 
-                                                         model, resolution, speci, network)
+            if "/" not in network:
+                files_directory = "%s/%s/%s/%s/%s/%s" % (
+                    instance.mod_root,
+                    instance.ghost_version,
+                    model,
+                    resolution,
+                    speci,
+                    network,
+                )
             else:
-                files_directory = '%s/%s/%s/%s/%s/%s' % (instance.mod_root, instance.ghost_version, 
-                                                          model, resolution, speci,
-                                                          network.replace('/', '-'))
-                
+                files_directory = "%s/%s/%s/%s/%s/%s" % (
+                    instance.mod_root,
+                    instance.ghost_version,
+                    model,
+                    resolution,
+                    speci,
+                    network.replace("/", "-"),
+                )
+
             # test if interpolated directory exists for model
             # if it does not exit, continue
             if not os.path.exists(files_directory):
@@ -985,20 +1169,25 @@ def get_valid_models(instance, start_date, end_date, resolution, networks, speci
                 # get all available netCDF files (handling potential permissions issues)
                 try:
                     available_files = os.listdir(files_directory)
-                except PermissionError as error:
+                except PermissionError:
                     continue
 
             # get monthly start date (YYYYMM) of all files
-            file_yearmonths = sorted([f.split('_')[-1][:6] for f in available_files])
+            file_yearmonths = sorted([f.split("_")[-1][:6] for f in available_files])
 
             # write nested dictionary for model, with associated file yearmonths
             if len(file_yearmonths) > 0:
-
                 # get file yearmonths within date range
-                valid_file_yearmonths = sorted([ym for ym in file_yearmonths if 
-                                                (int('{}01'.format(ym)) >= start_date_firstdayofmonth) & (int('{}01'.format(ym)) < int(end_date))])
+                valid_file_yearmonths = sorted(
+                    [
+                        ym
+                        for ym in file_yearmonths
+                        if (int("{}01".format(ym)) >= start_date_firstdayofmonth)
+                        & (int("{}01".format(ym)) < int(end_date))
+                    ]
+                )
 
-                #if have valid files, then add model to pop-up menu, 
+                # if have valid files, then add model to pop-up menu,
                 # and add yearmonths to available model data
                 if len(valid_file_yearmonths) > 0:
                     models_to_add.append(model)
@@ -1009,14 +1198,20 @@ def get_valid_models(instance, start_date, end_date, resolution, networks, speci
                         instance.available_model_data[network][resolution] = {}
                     if speci not in instance.available_model_data[network][resolution]:
                         instance.available_model_data[network][resolution][speci] = {}
-                    if model not in instance.available_model_data[network][resolution][speci]:
-                        instance.available_model_data[network][resolution][speci][model] = valid_file_yearmonths
+                    if (
+                        model
+                        not in instance.available_model_data[network][resolution][speci]
+                    ):
+                        instance.available_model_data[network][resolution][speci][
+                            model
+                        ] = valid_file_yearmonths
 
     # set list of model names to add on models pop-up
-    if instance.mode not in ['report', 'library']:
+    if instance.mode not in ["report", "library"]:
         models_to_add = np.array(sorted(models_to_add))
-        instance.models_menu['models']['labels'] = models_to_add
-        instance.models_menu['models']['map_vars'] = models_to_add
+        instance.models_menu["models"]["labels"] = models_to_add
+        instance.models_menu["models"]["map_vars"] = models_to_add
+
 
 def get_possible_temporal_resolutions():
     """
@@ -1029,9 +1224,18 @@ def get_possible_temporal_resolutions():
     """
 
     # define possible temporal resolutions
-    possible_resolutions = ['hourly', 'hourly_instantaneous', '3hourly', '3hourly_instantaneous', 
-                            '6hourly', '6hourly_instantaneous', 'daily', 'monthly', 'annual']
-    
+    possible_resolutions = [
+        "hourly",
+        "hourly_instantaneous",
+        "3hourly",
+        "3hourly_instantaneous",
+        "6hourly",
+        "6hourly_instantaneous",
+        "daily",
+        "monthly",
+        "annual",
+    ]
+
     return possible_resolutions
 
 
@@ -1045,9 +1249,16 @@ def get_temporal_resolution_order():
         A dictionary where keys are resolution strings and values are integer ranks.
     """
 
-    resolution_order_dict = {'hourly': 1, '3hourly': 2, '6hourly': 3, 'hourly_instantaneous': 4,
-                             '3hourly_instantaneous': 5, '6hourly_instantaneous': 6,
-                             'daily': 7, 'monthly': 8}
+    resolution_order_dict = {
+        "hourly": 1,
+        "3hourly": 2,
+        "6hourly": 3,
+        "hourly_instantaneous": 4,
+        "3hourly_instantaneous": 5,
+        "6hourly_instantaneous": 6,
+        "daily": 7,
+        "monthly": 8,
+    }
 
     return resolution_order_dict
 
@@ -1068,38 +1279,38 @@ def get_possible_resampling_resolutions(resolution, daily_forecast=False):
     list of str
         A list of target resolutions that are coarser than or equal to the input resolution.
     """
-    
+
     if daily_forecast:
-        if resolution in ['hourly', 'hourly_instantaneous']:
-            resolutions = ['hourly', '3hourly', '6hourly', 'daily']
-        elif resolution in ['3hourly', '3hourly_instantaneous']:
-            resolutions = ['3hourly', '6hourly', 'daily']
-        elif resolution in ['6hourly', '6hourly_instantaneous']:
-            resolutions = ['6hourly', 'daily']
-        elif resolution == 'daily':
-            resolutions = ['daily']
-        elif resolution == 'monthly':
+        if resolution in ["hourly", "hourly_instantaneous"]:
+            resolutions = ["hourly", "3hourly", "6hourly", "daily"]
+        elif resolution in ["3hourly", "3hourly_instantaneous"]:
+            resolutions = ["3hourly", "6hourly", "daily"]
+        elif resolution in ["6hourly", "6hourly_instantaneous"]:
+            resolutions = ["6hourly", "daily"]
+        elif resolution == "daily":
+            resolutions = ["daily"]
+        elif resolution == "monthly":
             resolutions = []
-        elif resolution == 'annual':
+        elif resolution == "annual":
             resolutions = []
     else:
-        if resolution in ['hourly', 'hourly_instantaneous']:
-            resolutions = ['hourly', '3hourly', '6hourly', 'daily', 'monthly', 'annual']
-        elif resolution in ['3hourly', '3hourly_instantaneous']:
-            resolutions = ['3hourly', '6hourly', 'daily', 'monthly', 'annual']
-        elif resolution in ['6hourly', '6hourly_instantaneous']:
-            resolutions = ['6hourly', 'daily', 'monthly', 'annual']
-        elif resolution == 'daily':
-            resolutions = ['daily', 'monthly', 'annual']
-        elif resolution == 'monthly':
-            resolutions = ['monthly', 'annual']
-        elif resolution == 'annual':
-            resolutions = ['annual']
+        if resolution in ["hourly", "hourly_instantaneous"]:
+            resolutions = ["hourly", "3hourly", "6hourly", "daily", "monthly", "annual"]
+        elif resolution in ["3hourly", "3hourly_instantaneous"]:
+            resolutions = ["3hourly", "6hourly", "daily", "monthly", "annual"]
+        elif resolution in ["6hourly", "6hourly_instantaneous"]:
+            resolutions = ["6hourly", "daily", "monthly", "annual"]
+        elif resolution == "daily":
+            resolutions = ["daily", "monthly", "annual"]
+        elif resolution == "monthly":
+            resolutions = ["monthly", "annual"]
+        elif resolution == "annual":
+            resolutions = ["annual"]
 
     return resolutions
 
 
-def get_periodic_relevant_temporal_resolutions(resolution):        
+def get_periodic_relevant_temporal_resolutions(resolution):
     """
     Identifies the appropriate time cycles for periodic analysis based on a base temporal resolution.
 
@@ -1114,19 +1325,19 @@ def get_periodic_relevant_temporal_resolutions(resolution):
         A list of periodic groupings (e.g. 'hour', 'dayofweek') valid for the input resolution.
     """
 
-    if 'hourly' in resolution:
-        relevant_temporal_resolutions = ['hour', 'dayofweek', 'month']
-    elif resolution == 'daily':
-        relevant_temporal_resolutions = ['dayofweek', 'month']
-    elif resolution == 'monthly':
-        relevant_temporal_resolutions = ['month']
+    if "hourly" in resolution:
+        relevant_temporal_resolutions = ["hour", "dayofweek", "month"]
+    elif resolution == "daily":
+        relevant_temporal_resolutions = ["dayofweek", "month"]
+    elif resolution == "monthly":
+        relevant_temporal_resolutions = ["month"]
     else:
         relevant_temporal_resolutions = []
-        
+
     return relevant_temporal_resolutions
 
 
-def get_periodic_nonrelevant_temporal_resolutions(resolution):        
+def get_periodic_nonrelevant_temporal_resolutions(resolution):
     """
     Identifies time cycles that cannot be analysed based on a base temporal resolution.
 
@@ -1141,15 +1352,15 @@ def get_periodic_nonrelevant_temporal_resolutions(resolution):
         A list of periodic groupings that are scientifically invalid for the input resolution.
     """
 
-    if 'hourly' in resolution:
+    if "hourly" in resolution:
         nonrelevant_temporal_resolutions = []
-    elif resolution == 'daily':
-        nonrelevant_temporal_resolutions = ['hour']
-    elif resolution == 'monthly':
-        nonrelevant_temporal_resolutions = ['hour', 'dayofweek']
+    elif resolution == "daily":
+        nonrelevant_temporal_resolutions = ["hour"]
+    elif resolution == "monthly":
+        nonrelevant_temporal_resolutions = ["hour", "dayofweek"]
     else:
-        nonrelevant_temporal_resolutions = ['hour', 'dayofweek', 'month']
-        
+        nonrelevant_temporal_resolutions = ["hour", "dayofweek", "month"]
+
     return nonrelevant_temporal_resolutions
 
 
@@ -1169,9 +1380,9 @@ def valid_date(date_text):
     """
 
     try:
-        datetime.datetime.strptime(str(date_text), '%Y%m%d')
+        datetime.datetime.strptime(str(date_text), "%Y%m%d")
         return True
-    except Exception as e:
+    except Exception:
         return False
 
 
@@ -1184,7 +1395,7 @@ def generate_file_trees(instance):
     instance : object
         An instance of the application class containing configuration flags and versioning.
     """
-    
+
     # get dictionaries of observational GHOST and non-GHOST filetrees, either created dynamically or loaded
     # if have filetree flags, then these overwrite any defaults
     gft = False
@@ -1193,31 +1404,47 @@ def generate_file_trees(instance):
     elif instance.disable_file_tree:
         gft = False
     # by default generate filetree on MN5
-    elif instance.machine in ['mn5', 'nord4']:
+    elif instance.machine in ["mn5", "nord4"]:
         gft = True
     # by default generate filetree locally
-    elif instance.filetree_type == 'local':
+    elif instance.filetree_type == "local":
         gft = True
 
     # generate file trees
-    ghost_filetree_path = join(PROVIDENTIA_ROOT, 'settings/internal/ghost_filetree_{}.json'.format(instance.ghost_version)) 
-    nonghost_filetree_path = join(PROVIDENTIA_ROOT, 'settings/internal/nonghost_filetree.json') 
+    ghost_filetree_path = join(
+        PROVIDENTIA_ROOT,
+        "settings/internal/ghost_filetree_{}.json".format(instance.ghost_version),
+    )
+    nonghost_filetree_path = join(
+        PROVIDENTIA_ROOT, "settings/internal/nonghost_filetree.json"
+    )
 
     # generate file trees for ghost
     if gft or (not os.path.exists(ghost_filetree_path)):
-        instance.logger.info('')
+        instance.logger.info("")
         if not os.path.exists(ghost_filetree_path):
-            instance.logger.info(f'Generating file tree {ghost_filetree_path}...')
+            instance.logger.info(f"Generating file tree {ghost_filetree_path}...")
         else:
-            instance.logger.info(f'Updating file tree {ghost_filetree_path}...')
-        instance.all_observation_data = get_ghost_observational_tree(instance) 
+            instance.logger.info(f"Updating file tree {ghost_filetree_path}...")
+        instance.all_observation_data = get_ghost_observational_tree(instance)
     # load file trees
     else:
-        instance.logger.info(f'Loading file tree {ghost_filetree_path}...')
+        instance.logger.info(f"Loading file tree {ghost_filetree_path}...")
         try:
-            instance.all_observation_data = json.load(open(join(PROVIDENTIA_ROOT, 'settings/internal/ghost_filetree_{}.json'.format(instance.ghost_version)))) 
-        except FileNotFoundError as file_error:
-            error = "Error: Trying to load 'settings/internal/ghost_filetree_{}.json' but file does not exist. Run with the flag '--gft' to generate this file.".format(instance.ghost_version)
+            instance.all_observation_data = json.load(
+                open(
+                    join(
+                        PROVIDENTIA_ROOT,
+                        "settings/internal/ghost_filetree_{}.json".format(
+                            instance.ghost_version
+                        ),
+                    )
+                )
+            )
+        except FileNotFoundError:
+            error = "Error: Trying to load 'settings/internal/ghost_filetree_{}.json' but file does not exist. Run with the flag '--gft' to generate this file.".format(
+                instance.ghost_version
+            )
             instance.logger.error(error)
             sys.exit(1)
 
@@ -1225,22 +1452,33 @@ def generate_file_trees(instance):
         # generate file trees for nonghost
         if gft or (not os.path.exists(nonghost_filetree_path)):
             if not os.path.exists(nonghost_filetree_path):
-                instance.logger.info(f'Generating file tree {nonghost_filetree_path}...')
+                instance.logger.info(
+                    f"Generating file tree {nonghost_filetree_path}..."
+                )
             else:
-                instance.logger.info(f'Updating file tree {nonghost_filetree_path}...')
+                instance.logger.info(f"Updating file tree {nonghost_filetree_path}...")
             nonghost_observation_data = get_nonghost_observational_tree(instance)
         # load file trees
         else:
-            instance.logger.info(f'Loading file tree {nonghost_filetree_path}...')
+            instance.logger.info(f"Loading file tree {nonghost_filetree_path}...")
             try:
-                nonghost_observation_data = json.load(open(join(PROVIDENTIA_ROOT, 'settings/internal/nonghost_filetree.json')))
-            except FileNotFoundError as file_error:
+                nonghost_observation_data = json.load(
+                    open(
+                        join(
+                            PROVIDENTIA_ROOT, "settings/internal/nonghost_filetree.json"
+                        )
+                    )
+                )
+            except FileNotFoundError:
                 error = "Error: Trying to load 'settings/internal/nonghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
                 instance.logger.error(error)
                 sys.exit(1)
 
         # merge GHOST and non-GHOST filetrees
-        instance.all_observation_data = {**instance.all_observation_data, **nonghost_observation_data}
+        instance.all_observation_data = {
+            **instance.all_observation_data,
+            **nonghost_observation_data,
+        }
 
 
 def get_valid_metadata(read_instance, variable, valid_station_idxs, networkspeci):
@@ -1264,13 +1502,14 @@ def get_valid_metadata(read_instance, variable, valid_station_idxs, networkspeci
         A list of non-null metadata values, one per station.
     """
 
-    stations_metadata = read_instance.canvas_instance.selected_station_metadata[networkspeci][
-                            variable][valid_station_idxs, :]
+    stations_metadata = read_instance.canvas_instance.selected_station_metadata[
+        networkspeci
+    ][variable][valid_station_idxs, :]
     valid_metadata = []
-    for station_metadata in  stations_metadata:
-        first_valid_station_metadata = next((
-            value for value in station_metadata 
-            if value == value), 'nan')
+    for station_metadata in stations_metadata:
+        first_valid_station_metadata = next(
+            (value for value in station_metadata if value == value), "nan"
+        )
         # if metadata returns an array, get first
         if isinstance(first_valid_station_metadata, (np.ndarray)):
             first_valid_station_metadata = first_valid_station_metadata.item()
@@ -1440,7 +1679,9 @@ def _num2date_months(values, origin_str, calendar):
 
     offsets = np.round(values).astype(int)
 
-    year, month, day, hour, minute, second, microsecond = _parse_origin_parts(origin_str)
+    year, month, day, hour, minute, second, microsecond = _parse_origin_parts(
+        origin_str
+    )
     cls = _CFTIME_CLASS.get(calendar, cftime.DatetimeGregorian)
 
     out = []
@@ -1513,9 +1754,7 @@ def _dates_to_asi8_seconds(dates, calendar):
     # ------------------------------------------------------
     if isinstance(first, cftime.datetime):
         seconds = cftime.date2num(
-            dates.tolist(),
-            units="seconds since 1970-01-01 00:00:00",
-            calendar=calendar
+            dates.tolist(), units="seconds since 1970-01-01 00:00:00", calendar=calendar
         )
         seconds = np.floor(np.asarray(seconds, dtype=np.float64)).astype(np.int64)
         return _seconds_to_asi8(seconds)
@@ -1614,9 +1853,5 @@ def time_var_to_asi8(time_var):
     # ------------------------------------------------------
     # SAFE GENERAL PATH for everything else
     # ------------------------------------------------------
-    dates = num2date(
-        values,
-        units=units,
-        calendar=calendar
-    )
+    dates = num2date(values, units=units, calendar=calendar)
     return _dates_to_asi8_seconds(dates, calendar)

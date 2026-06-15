@@ -1,22 +1,32 @@
 # Configuration file for the Sphinx documentation builder.
-#
+
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'Providentia'
-copyright = '2019-2026, Dene Bowdalo, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa, Amalia Vradi'
-author = 'Dene Bowdalo, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa, Amalia Vradi'
-release = '3.0.1'
+import os
+import sys
+
+project = "Providentia"
+copyright = "2019-2026, Dene Bowdalo, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa, Amalia Vradi"
+author = "Dene Bowdalo, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa, Amalia Vradi"
+release = "3.0.1"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ["myst_parser", "sphinx.ext.todo", "sphinx.ext.viewcode", "sphinx.ext.autodoc", "sphinx_rtd_theme","sphinx.ext.mathjax"]
+extensions = [
+    "myst_parser",
+    "sphinx.ext.todo",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.autodoc",
+    "sphinx_rtd_theme",
+    "sphinx.ext.mathjax",
+]
 mathjax_path = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
-templates_path = ['_templates']
+templates_path = ["_templates"]
 exclude_patterns = []
 myst_heading_anchors = 2
 
@@ -28,17 +38,17 @@ source_suffix = {
 
 # Enable math parsing in MyST
 myst_enable_extensions = [
-    "dollarmath",   # for $$ ... $$ support
-    "amsmath",      # for \begin{aligned} ... \end{aligned}
+    "dollarmath",  # for $$ ... $$ support
+    "amsmath",  # for \begin{aligned} ... \end{aligned}
 ]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'sphinx_rtd_theme'
-html_static_path = ['_static']
+html_theme = "sphinx_rtd_theme"
+html_static_path = ["_static"]
 html_css_files = [
-    'css/custom.css',
+    "css/custom.css",
 ]
 
 # -- Path setup --------------------------------------------------------------
@@ -46,8 +56,6 @@ html_css_files = [
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-import os
-import sys
 
-sys.path.insert(0, os.path.abspath('../..'))
-sys.path.insert(0, os.path.abspath('../../Providentia'))
+sys.path.insert(0, os.path.abspath("../.."))
+sys.path.insert(0, os.path.abspath("../../Providentia"))

@@ -74,27 +74,29 @@ def expand_plot_characteristics(plot_characteristics, mode):
                     # if it is a dict, merge general dictionary with and mode dictionary
                     if isinstance(plot_type_characteristics[key], dict):
                         plot_type_characteristics[key] = deep_merge(
-                            plot_type_characteristics[key].copy(), value)
+                            plot_type_characteristics[key].copy(), value
+                        )
                     # if it is a list, extend list removing duplicates
                     elif isinstance(plot_type_characteristics[key], list):
                         plot_type_characteristics[key] = list(
-                            set(plot_type_characteristics[key] + value))
+                            set(plot_type_characteristics[key] + value)
+                        )
                 # if it doesn't exist, create new key
                 else:
                     plot_type_characteristics[key] = value
                 # remove options from plot options if they do not apply to active mode
-                if key == 'plot_options':
-                    if mode != 'report':
-                        if 'obs' in value:
-                            value.remove('obs')
-                        if 'individual' in value:
-                            value.remove('individual')
+                if key == "plot_options":
+                    if mode != "report":
+                        if "obs" in value:
+                            value.remove("obs")
+                        if "individual" in value:
+                            value.remove("individual")
                         # remove bias option in dashboard only for map plot type
                         # since we select the statistics from other dropdowns
-                        if ('bias' in value) and (plot_type[:4] == 'map'):
-                            value.remove('bias')
-                    if (mode == 'dashboard') and ('multispecies' in value):
-                        value.remove('multispecies')
+                        if ("bias" in value) and (plot_type[:4] == "map"):
+                            value.remove("bias")
+                    if (mode == "dashboard") and ("multispecies" in value):
+                        value.remove("multispecies")
                     plot_type_characteristics[key] = value
 
         # remove mode keys
@@ -141,18 +143,18 @@ def get_machine():
     # return github machine if tests are running in actions
     if os.getenv("GITHUB_ACTIONS") == "true":
         return "github"
-    
+
     # get BSC machine name (if have one)
-    machine = os.environ.get('BSC_MACHINE', None)
-    
+    machine = os.environ.get("BSC_MACHINE", None)
+
     # rename storage BSC machine
-    if machine == 'stg':
-        machine = 'storage5'
+    if machine == "stg":
+        machine = "storage5"
 
     # set current machine
     if machine is None:
-        hostname = os.environ.get('HOSTNAME', '')
-        
+        hostname = os.environ.get("HOSTNAME", "")
+
         # setup retrial system for getting ip address as occasionaly breaks
         retry = 0
         ip = None
@@ -164,7 +166,7 @@ def get_machine():
                 if retry == 3:
                     break
                 else:
-                    retry+=1
+                    retry += 1
                     time.sleep(1)
         if "bscearth" in hostname:
             machine = "workstation"
@@ -176,6 +178,7 @@ def get_machine():
             machine = "local"
 
     return machine
+
 
 class Tee:
     """
@@ -235,13 +238,16 @@ def get_standard_parameters_by_speci(speci, ghost_version):
         GHOST standard parameters dictionary
     """
 
-    sys.path.insert(1, join(CURRENT_PATH, 'dependencies/GHOST_standards/{}'.format(ghost_version)))
+    sys.path.insert(
+        1, join(CURRENT_PATH, "dependencies/GHOST_standards/{}".format(ghost_version))
+    )
     from GHOST_standards import standard_parameters
+
     standard_parameters = standard_parameters
-    
+
     # get cut of standard parameters for original speci to process
     for standard_parameter in standard_parameters.keys():
-        if standard_parameters[standard_parameter]['bsc_parameter_name'] == speci:
+        if standard_parameters[standard_parameter]["bsc_parameter_name"] == speci:
             return standard_parameters[standard_parameter]
 
 
@@ -264,65 +270,94 @@ def unit_conversion(initial_units, final_units, standard_parameter_speci):
         Conversion object or error
     """
 
-    # if units are unitless, then no need for conversion (i.e. conversion factor = 1.0)   
-    if (final_units == 'unitless') or (final_units == '-') or (final_units == '1'):
-        return type('UnitConverter', (object,), {'conversion_factor':1.0, 'output_standard_units':'unitless'})
-    
-    # determine chemical formula of species 
-    if 'chemical_formula_charge' in list(standard_parameter_speci.keys()):
-        speci_chemical_formula = standard_parameter_speci['chemical_formula_charge']
+    # if units are unitless, then no need for conversion (i.e. conversion factor = 1.0)
+    if (final_units == "unitless") or (final_units == "-") or (final_units == "1"):
+        return type(
+            "UnitConverter",
+            (object,),
+            {"conversion_factor": 1.0, "output_standard_units": "unitless"},
+        )
+
+    # determine chemical formula of species
+    if "chemical_formula_charge" in list(standard_parameter_speci.keys()):
+        speci_chemical_formula = standard_parameter_speci["chemical_formula_charge"]
     else:
-        speci_chemical_formula = standard_parameter_speci['chemical_formula']
+        speci_chemical_formula = standard_parameter_speci["chemical_formula"]
 
     # get input (model) quantity for conversion
-    if ('units_quantity' in list(standard_parameter_speci.keys())) and (initial_units == standard_parameter_speci['standard_units']):
-        initial_quantity = standard_parameter_speci['units_quantity']
+    if ("units_quantity" in list(standard_parameter_speci.keys())) and (
+        initial_units == standard_parameter_speci["standard_units"]
+    ):
+        initial_quantity = standard_parameter_speci["units_quantity"]
     else:
-        conv_obj = UnitConverter(initial_units, initial_units, 1, species=speci_chemical_formula)
+        conv_obj = UnitConverter(
+            initial_units, initial_units, 1, species=speci_chemical_formula
+        )
         initial_quantity = conv_obj.output_quantity
 
     # get output (observational) quantity for conversion
-    if ('units_quantity' in list(standard_parameter_speci.keys())) and (final_units == standard_parameter_speci['standard_units']):
-        final_quantity = standard_parameter_speci['units_quantity']
+    if ("units_quantity" in list(standard_parameter_speci.keys())) and (
+        final_units == standard_parameter_speci["standard_units"]
+    ):
+        final_quantity = standard_parameter_speci["units_quantity"]
     else:
-        conv_obj = UnitConverter(final_units, final_units, 1, species=speci_chemical_formula)
+        conv_obj = UnitConverter(
+            final_units, final_units, 1, species=speci_chemical_formula
+        )
         final_quantity = conv_obj.output_quantity
 
-    # unit converter module does not produce conversion factor for temperature, 
-    # but both input and output units should be Kelvin (i.e. conversion factor = 1.0) 
+    # unit converter module does not produce conversion factor for temperature,
+    # but both input and output units should be Kelvin (i.e. conversion factor = 1.0)
     # if input not in K then return error
-    if final_quantity == 'temperature': 
-        if initial_units == 'K':
-            return type('UnitConverter', (object,), {'conversion_factor':1.0, 'output_standard_units':'K'})
+    if final_quantity == "temperature":
+        if initial_units == "K":
+            return type(
+                "UnitConverter",
+                (object,),
+                {"conversion_factor": 1.0, "output_standard_units": "K"},
+            )
         else:
-            error = "Error: Model units should be 'K', but are set as '{}'".format(initial_units)
+            error = "Error: Model units should be 'K', but are set as '{}'".format(
+                initial_units
+            )
             return error
 
-    # initial and final quantities not equal (convert to observational units, 
+    # initial and final quantities not equal (convert to observational units,
     # standard_temperature=293.15, standard_pressure=1013.25)
-    if initial_quantity != final_quantity:     
-        
+    if initial_quantity != final_quantity:
         # convert units
-        input_units = {'temperature': 'K', 
-                       'pressure': 'hPa', 
-                       'molar_mass': 'kg mol-1', 
-                       initial_quantity: initial_units}
-        input_values = {'temperature': 293.15, 
-                        'pressure': 1013.25, 
-                        'molar_mass': get_molecular_mass(speci_chemical_formula), 
-                        initial_quantity: 1.0}
-        conv_obj = UnitConverter(input_units, final_units, input_values, 
-                                 species=speci_chemical_formula, 
-                                 input_quantity=initial_quantity, 
-                                 output_quantity=final_quantity)
-    
+        input_units = {
+            "temperature": "K",
+            "pressure": "hPa",
+            "molar_mass": "kg mol-1",
+            initial_quantity: initial_units,
+        }
+        input_values = {
+            "temperature": 293.15,
+            "pressure": 1013.25,
+            "molar_mass": get_molecular_mass(speci_chemical_formula),
+            initial_quantity: 1.0,
+        }
+        conv_obj = UnitConverter(
+            input_units,
+            final_units,
+            input_values,
+            species=speci_chemical_formula,
+            input_quantity=initial_quantity,
+            output_quantity=final_quantity,
+        )
+
     # same quantity conversion
     else:
-        conv_obj = UnitConverter(initial_units, final_units, 1.0, 
-                                 species=speci_chemical_formula, 
-                                 input_quantity=initial_quantity, 
-                                 output_quantity=final_quantity) 
-    
+        conv_obj = UnitConverter(
+            initial_units,
+            final_units,
+            1.0,
+            species=speci_chemical_formula,
+            input_quantity=initial_quantity,
+            output_quantity=final_quantity,
+        )
+
     # return conversion object
     return conv_obj
 
@@ -368,9 +403,10 @@ def get_standard_units(initial_units, standard_parameter_speci):
     str
         Output standard units or error
     """
-    
+
     conv_obj = unit_conversion(initial_units, initial_units, standard_parameter_speci)
     return conv_obj.output_standard_units
+
 
 def is_same_or_view(child, parent):
     """
@@ -383,10 +419,10 @@ def is_same_or_view(child, parent):
     # Case 1: same object
     if child is parent:
         return True
-    
+
     # Case 2: child is a view of parent
     if np.shares_memory(child, parent):
         return True
-    
+
     # Otherwise: independent copy
     return False

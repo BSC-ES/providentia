@@ -5,32 +5,52 @@ import pytest
 
 
 possibilities = [
-    (prv.Providentia('tests_ghost.conf',
-                     statistic_mode="Flattened",
-                     statistic_aggregation="",
-                     tests=True),
-     "flattened", "ghost"),
-    (prv.Providentia('tests_ghost.conf',
-                     statistic_mode="Spatial|Temporal",
-                     statistic_aggregation="Median",
-                     tests=True),
-     "spatial_temporal", "ghost"),
-    (prv.Providentia('tests_ghost.conf',
-                     tests=True),
-     "temporal_spatial", "ghost"),
-    (prv.Providentia('tests_nonghost.conf',
-                     statistic_mode="Flattened",
-                     statistic_aggregation="",
-                     tests=True),
-     "flattened", "nonghost"),
-    (prv.Providentia('tests_nonghost.conf',
-                     statistic_mode="Spatial|Temporal",
-                     statistic_aggregation="Median",
-                     tests=True),
-     "spatial_temporal", "nonghost"),
-    (prv.Providentia('tests_nonghost.conf',
-                     tests=True),
-     "temporal_spatial", "nonghost")
+    (
+        prv.Providentia(
+            "tests_ghost.conf",
+            statistic_mode="Flattened",
+            statistic_aggregation="",
+            tests=True,
+        ),
+        "flattened",
+        "ghost",
+    ),
+    (
+        prv.Providentia(
+            "tests_ghost.conf",
+            statistic_mode="Spatial|Temporal",
+            statistic_aggregation="Median",
+            tests=True,
+        ),
+        "spatial_temporal",
+        "ghost",
+    ),
+    (prv.Providentia("tests_ghost.conf", tests=True), "temporal_spatial", "ghost"),
+    (
+        prv.Providentia(
+            "tests_nonghost.conf",
+            statistic_mode="Flattened",
+            statistic_aggregation="",
+            tests=True,
+        ),
+        "flattened",
+        "nonghost",
+    ),
+    (
+        prv.Providentia(
+            "tests_nonghost.conf",
+            statistic_mode="Spatial|Temporal",
+            statistic_aggregation="Median",
+            tests=True,
+        ),
+        "spatial_temporal",
+        "nonghost",
+    ),
+    (
+        prv.Providentia("tests_nonghost.conf", tests=True),
+        "temporal_spatial",
+        "nonghost",
+    ),
 ]
 
 
@@ -43,91 +63,111 @@ def suppress_warnings():
         warnings.simplefilter("ignore", category=RuntimeWarning)
         yield
 
+
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
 def test_make_timeseries(inst, statistic_mode, network_type):
-    plot(inst, statistic_mode, network_type, 'timeseries', ['annotate', 'smooth'])
-    plot(inst, statistic_mode, network_type, 'timeseries-r2-monthly', ['annotate', 'smooth'])
-    plot(inst, statistic_mode, network_type, 'timeseries-r-annual', ['annotate', 'smooth'])
-    plot(inst, statistic_mode, network_type, 'timeseries-Mean-daily', ['annotate', 'smooth'])
+    plot(inst, statistic_mode, network_type, "timeseries", ["annotate", "smooth"])
+    plot(
+        inst,
+        statistic_mode,
+        network_type,
+        "timeseries-r2-monthly",
+        ["annotate", "smooth"],
+    )
+    plot(
+        inst,
+        statistic_mode,
+        network_type,
+        "timeseries-r-annual",
+        ["annotate", "smooth"],
+    )
+    plot(
+        inst,
+        statistic_mode,
+        network_type,
+        "timeseries-Mean-daily",
+        ["annotate", "smooth"],
+    )
+
 
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
 def test_make_distribution(inst, statistic_mode, network_type):
-    plot(inst, statistic_mode, network_type, 'distribution', ['annotate'])
+    plot(inst, statistic_mode, network_type, "distribution", ["annotate"])
 
 
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
 def test_make_statsummary(inst, statistic_mode, network_type):
-    plot(inst, statistic_mode, network_type, 'statsummary')
-    plot(inst, statistic_mode, network_type, 'statsummary', ['bias'])
+    plot(inst, statistic_mode, network_type, "statsummary")
+    plot(inst, statistic_mode, network_type, "statsummary", ["bias"])
 
 
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
 def test_make_map(inst, statistic_mode, network_type):
-    plot(inst, statistic_mode, network_type, 'map-Median', ['domain'])
+    plot(inst, statistic_mode, network_type, "map-Median", ["domain"])
 
 
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
 def test_make_taylor(inst, statistic_mode, network_type):
-    plot(inst, statistic_mode, network_type, 'taylor-r', ['annotate'])
-    plot(inst, statistic_mode, network_type, 'taylor-r2', ['annotate'])
+    plot(inst, statistic_mode, network_type, "taylor-r", ["annotate"])
+    plot(inst, statistic_mode, network_type, "taylor-r2", ["annotate"])
 
 
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
 def test_make_heatmap(inst, statistic_mode, network_type):
-    plot(inst, statistic_mode, network_type, 'heatmap-Median')
+    plot(inst, statistic_mode, network_type, "heatmap-Median")
 
 
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
 def test_make_table(inst, statistic_mode, network_type):
-    plot(inst, statistic_mode, network_type, 'table-RMSE')
+    plot(inst, statistic_mode, network_type, "table-RMSE")
 
 
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
 def test_make_periodic(inst, statistic_mode, network_type):
-    plot(inst, statistic_mode, network_type, 'periodic-r')
+    plot(inst, statistic_mode, network_type, "periodic-r")
 
 
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
 def test_make_periodic_violin(inst, statistic_mode, network_type):
-    plot(inst, statistic_mode, network_type, 'periodic-violin')
+    plot(inst, statistic_mode, network_type, "periodic-violin")
 
 
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
 def test_make_scatter(inst, statistic_mode, network_type):
-    plot(inst, statistic_mode, network_type, 'scatter', ['regression'])
+    plot(inst, statistic_mode, network_type, "scatter", ["regression"])
 
 
 # FAIRMODE target plot cannot be created for od550aero
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities[0:3])
 def test_make_fairmode_target(inst, statistic_mode, network_type):
-    plot(inst, statistic_mode, network_type, 'fairmode-target')
+    plot(inst, statistic_mode, network_type, "fairmode-target")
 
 
 # FAIRMODE statsummary plot cannot be created for od550aero
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities[0:3])
 def test_make_fairmode_statsummary(inst, statistic_mode, network_type):
-    plot(inst, statistic_mode, network_type, 'fairmode-statsummary')
+    plot(inst, statistic_mode, network_type, "fairmode-statsummary")
 
 
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
 def test_make_boxplot(inst, statistic_mode, network_type):
-    plot(inst, statistic_mode, network_type, 'boxplot')
+    plot(inst, statistic_mode, network_type, "boxplot")
 
 
 # Contingency table cannot be created for od550aero
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities[0:3])
 def test_make_contingencytable(inst, statistic_mode, network_type):
     inst.load()
-    inst.filter('station_reference', keep=['AT0034G_UVP'])
-    plot(inst, statistic_mode, network_type, 'contingencytable', load=False)
+    inst.filter("station_reference", keep=["AT0034G_UVP"])
+    plot(inst, statistic_mode, network_type, "contingencytable", load=False)
 
 
 # Gerrity table cannot be created for od550aero
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities[0:3])
 def test_make_gerritytable(inst, statistic_mode, network_type):
-    plot(inst, statistic_mode, network_type, 'contingencytable', ['gerrity'])
+    plot(inst, statistic_mode, network_type, "contingencytable", ["gerrity"])
 
 
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
 def test_make_metadata(inst, statistic_mode, network_type):
-    plot(inst, statistic_mode, network_type, 'metadata')
+    plot(inst, statistic_mode, network_type, "metadata")
