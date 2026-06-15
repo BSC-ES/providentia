@@ -20,17 +20,30 @@ from providentia.auxiliar import CURRENT_PATH, join
 # get current path and providentia root path
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 
-sys.path.append(join(PROVIDENTIA_ROOT, 'providentia', 'interpolation'))
-sys.path.append(join(PROVIDENTIA_ROOT, 'providentia'))
+sys.path.append(join(PROVIDENTIA_ROOT, "providentia", "interpolation"))
+sys.path.append(join(PROVIDENTIA_ROOT, "providentia"))
 
-from interpolation.aux_interp import get_aeronet_bin_radius_from_bin_variable, get_model_bin_radii, check_for_ghost
+from interpolation.aux_interp import (
+    get_aeronet_bin_radius_from_bin_variable,
+    get_model_bin_radii,
+    check_for_ghost,
+)
 from configuration import ProvConfiguration, load_conf
 
 # load the defined models and species yamls
-interp_models = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_models.yaml')))
-mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'mapping_species.yaml')))
-temporal_resolution_map = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'temporal_resolution_map.yaml')))
-interp_print_variables = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'interpolation_fields.yaml')))
+interp_models = yaml.safe_load(
+    open(join(PROVIDENTIA_ROOT, "settings", "interp_models.yaml"))
+)
+mapping_species = yaml.safe_load(
+    open(join(PROVIDENTIA_ROOT, "settings", "mapping_species.yaml"))
+)
+temporal_resolution_map = yaml.safe_load(
+    open(join(PROVIDENTIA_ROOT, "settings", "internal", "temporal_resolution_map.yaml"))
+)
+interp_print_variables = yaml.safe_load(
+    open(join(PROVIDENTIA_ROOT, "settings", "internal", "interpolation_fields.yaml"))
+)
+
 
 class SubmitInterpolation(object):
     """Class that handles the interpolation submission."""
@@ -53,10 +66,12 @@ class SubmitInterpolation(object):
 
         # define current working directory and
         # arguments/greasy/interpolation log subdirectories
-        self.working_directory = CURRENT_PATH     
-        self.arguments_dir = join(PROVIDENTIA_ROOT, 'logs/interpolation/arguments')
-        self.submit_dir = join(PROVIDENTIA_ROOT, 'logs/interpolation/greasy_logs')
-        self.interpolation_log_dir = join(PROVIDENTIA_ROOT, 'logs/interpolation/interpolation_logs')
+        self.working_directory = CURRENT_PATH
+        self.arguments_dir = join(PROVIDENTIA_ROOT, "logs/interpolation/arguments")
+        self.submit_dir = join(PROVIDENTIA_ROOT, "logs/interpolation/greasy_logs")
+        self.interpolation_log_dir = join(
+            PROVIDENTIA_ROOT, "logs/interpolation/interpolation_logs"
+        )
 
         # initialize commandline arguments, if given
         self.provconf = ProvConfiguration(self, **self.commandline_arguments)
@@ -64,11 +79,11 @@ class SubmitInterpolation(object):
         print("Starting Providentia interpolation...")
 
         # update variables from config file
-        if self.config != '':  
+        if self.config != "":
             read_conf = False
             if os.path.exists(self.config):
                 read_conf = True
-            else: 
+            else:
                 if os.path.exists(join(self.config_dir, self.config)):
                     self.config = join(self.config_dir, self.config)
                     read_conf = True
@@ -76,33 +91,37 @@ class SubmitInterpolation(object):
                 load_conf(self, self.config)
                 self.from_conf = True
             else:
-                error = 'Error: The path to the configuration file specified in the command line does not exist.'
+                error = "Error: The path to the configuration file specified in the command line does not exist."
                 sys.exit(error)
         else:
             error = "Error: No configuration file found. The path to the config file must be added as an argument."
             sys.exit(error)
 
         # update variables from config file
-        if self.config != '':  
+        if self.config != "":
             read_conf = False
             if os.path.exists(self.config):
                 read_conf = True
             elif os.path.exists(join(self.config_dir, self.config)):
-                    self.config = join(self.config_dir, self.config)
-                    read_conf = True
+                self.config = join(self.config_dir, self.config)
+                read_conf = True
 
             if read_conf:
                 load_conf(self, self.config)
                 self.from_conf = True
-                # get the section in case it was passed on the command line                
-                if 'section' in self.commandline_arguments:
-                    # config and section defined 
-                    if self.commandline_arguments['section'] in self.all_sections:
-                        self.sections = [self.commandline_arguments['section']]
+                # get the section in case it was passed on the command line
+                if "section" in self.commandline_arguments:
+                    # config and section defined
+                    if self.commandline_arguments["section"] in self.all_sections:
+                        self.sections = [self.commandline_arguments["section"]]
                     else:
-                        msg = 'Error: The section specified in the command line ({0}) does not exist.'.format(self.commandline_arguments['section'])
-                        msg += '\nTip: For subsections, add the name of the parent section followed by an interpunct (·) '
-                        msg += 'before the subsection name (e.g. SECTIONA·Spain). Available: {0}'.format(self.all_sections)
+                        msg = "Error: The section specified in the command line ({0}) does not exist.".format(
+                            self.commandline_arguments["section"]
+                        )
+                        msg += "\nTip: For subsections, add the name of the parent section followed by an interpunct (·) "
+                        msg += "before the subsection name (e.g. SECTIONA·Spain). Available: {0}".format(
+                            self.all_sections
+                        )
                         self.logger.error(msg)
                         sys.exit(1)
                 # if no section passed, then get all the parent sections
@@ -114,17 +133,17 @@ class SubmitInterpolation(object):
                         sys.exit(1)
                     self.sections = self.parent_section_names
             else:
-                error = 'Error: The path to the configuration file specified in the command line does not exist.'
+                error = "Error: The path to the configuration file specified in the command line does not exist."
                 self.logger.error(error)
                 sys.exit(1)
         else:
             error = "Error: No configuration file found. The path to the config file must be added as an argument."
             self.logger.error(error)
             sys.exit(1)
-        
+
     def run(self):
         """Execute the Providentia interpolation workflow for all configured sections."""
-        
+
         for section_ind, section in enumerate(self.sections):
             print(f"\nStarting {section} section interpolation...\n")
 
@@ -143,7 +162,7 @@ class SubmitInterpolation(object):
             # now all variables have been parsed, check validity of those, throwing errors where necessary
             self.provconf.check_validity()
 
-            # print variables used, if all species are used print "All Species"        
+            # print variables used, if all species are used print "All Species"
             print("Variables used for the interpolation:\n")
             for arg in interp_print_variables:
                 if arg != "models":
@@ -157,10 +176,10 @@ class SubmitInterpolation(object):
                             print(f" - {mod}")
 
             # define the QOS (Quality of Service) used to manage jobs on the SLURM system
-            if self.machine == 'mn5':
-                self.qos = 'gp_bsces'
+            if self.machine == "mn5":
+                self.qos = "gp_bsces"
             else:
-                self.qos = 'bsc_es'
+                self.qos = "bsc_es"
 
             # initialise current line number for printing output
             self.current_line = -1
@@ -175,22 +194,20 @@ class SubmitInterpolation(object):
             is_greasy_installed = False
             try:
                 result = subprocess.run(
-                    ['greasy', '-V'],
-                    stdout=subprocess.PIPE,
-                    text=True
+                    ["greasy", "-V"], stdout=subprocess.PIPE, text=True
                 )
-                if 'greasy' in result.stdout:
+                if "greasy" in result.stdout:
                     is_greasy_installed = True
             except:
                 pass
 
             # submit interpolation jobs
             if self.interp_multiprocessing:
-                print('\nUsing multiprocessing to manage the job submission.')
+                print("\nUsing multiprocessing to manage the job submission.")
                 self.submit_job_multiprocessing()
             else:
                 if is_greasy_installed:
-                    print('\nUsing Greasy to manage the job submission.')
+                    print("\nUsing Greasy to manage the job submission.")
                     # create submission script according to machine
                     if self.machine == "nord3":
                         self.create_lsf_submission_script()
@@ -198,7 +215,7 @@ class SubmitInterpolation(object):
                         self.create_slurm_submission_script()
                     self.submit_job_greasy()
                 else:
-                    print('Using multiprocessing to manage the job submission.')
+                    print("Using multiprocessing to manage the job submission.")
                     self.submit_job_multiprocessing()
 
             # remove section variables from memory
@@ -211,13 +228,13 @@ class SubmitInterpolation(object):
             # reset domain and ensemble for new section
             self.domain = []
             self.ensemble = []
-                    
+
             # reinitialise default configuration variables
             # modified by commandline arguments, if given
             self.provconf = ProvConfiguration(self, **self.commandline_arguments)
 
             if section_ind != len(self.sections) - 1:
-                print('\n'+'='*70)
+                print("\n" + "=" * 70)
 
     def gather_arguments(self):
         """Gather list of arguments for all unique tasks to process, as defined in the configuration file."""
@@ -226,23 +243,26 @@ class SubmitInterpolation(object):
         self.arguments = []
 
         # create list to hold root directory locations of .out log files generated for each task processed
-        self.output_log_roots = []  
-        
+        self.output_log_roots = []
+
         # create list of arguments to compare between the iterations
         last_arguments = None
 
         # get all networks in case the asterisk was used
-        networks = self.get_all_networks() if self.network == ['*'] else self.network
+        networks = self.get_all_networks() if self.network == ["*"] else self.network
 
         # get all models in case the asterisk was used
-        models = self.get_all_models() if self.experiments == {'*': '*'} else self.experiments
+        models = (
+            self.get_all_models()
+            if self.experiments == {"*": "*"}
+            else self.experiments
+        )
 
         # iterate through desired model IDs and its types
         for mod_dom_ens, alias in models.items():
+            model_to_process, grid_type, ensemble = mod_dom_ens.split("-")
 
-            model_to_process, grid_type, ensemble = mod_dom_ens.split("-") 
-
-            print('\nMODEL: {0}\n'.format(alias))
+            print("\nMODEL: {0}\n".format(alias))
 
             # initialise files lists
             obs_files = []
@@ -257,7 +277,7 @@ class SubmitInterpolation(object):
             # get model type and specific directories
             for model_type, model_dict in interp_models.items():
                 if model_to_process in model_dict["models"]:
-                    # take first functional directory 
+                    # take first functional directory
                     if self.machine != "local":
                         # for HPC machines, search in interp_models
                         for temp_mod_dir in model_dict["paths"]:
@@ -267,12 +287,11 @@ class SubmitInterpolation(object):
                                 break
                         break
                     # for local machines, break to get model_type
-                    else: 
+                    else:
                         break
-                
+
             # if local machine or if not mod_dir, get directory from data_paths
-            if self.mod_dir is None: 
-                
+            if self.mod_dir is None:
                 if self.machine != "local":
                     msg = f"The model '{model_to_process}' is in none of the model paths defined in settings/interp_models.yaml."
                     print(msg)
@@ -289,11 +308,14 @@ class SubmitInterpolation(object):
             r_edges, rho_bins = get_model_bin_radii(model_type)
 
             # get all resolutions in case the asterisk was used
-            resolutions = self.get_all_resolutions(model_to_process, grid_type) if self.resolution == ['*'] else self.resolution
+            resolutions = (
+                self.get_all_resolutions(model_to_process, grid_type)
+                if self.resolution == ["*"]
+                else self.resolution
+            )
 
             # iterate through temporal_resolutions to output
             for temporal_resolution_to_output in resolutions:
-
                 model_species_ensemblestat = []
 
                 # get priority resolutions to look for in model files based on output resolution
@@ -303,17 +325,25 @@ class SubmitInterpolation(object):
                 # if output resolution is instantaneous, prioritise instanstaneous resolutions first,
                 # then non-instanstaneous
 
-                resolutions_to_keep = self.model_resolution if self.model_resolution else temporal_resolution_map[temporal_resolution_to_output]
-                
+                resolutions_to_keep = (
+                    self.model_resolution
+                    if self.model_resolution
+                    else temporal_resolution_map[temporal_resolution_to_output]
+                )
+
                 # iterate through resolutions_to_keep until find one for which have speci_to_process (or mapped speci)
                 for model_temporal_resolution in resolutions_to_keep:
-
                     # get all species in case the asterisk was used
-                    species = self.get_all_species(model_to_process, grid_type, model_temporal_resolution) if self.species == ['*'] else self.species
+                    species = (
+                        self.get_all_species(
+                            model_to_process, grid_type, model_temporal_resolution
+                        )
+                        if self.species == ["*"]
+                        else self.species
+                    )
 
                     # iterate through species to process
                     for speci_ii, speci_to_process in enumerate(species):
-                        
                         have_valid_resolution = False
                         original_speci_to_process = copy.deepcopy(speci_to_process)
 
@@ -321,28 +351,62 @@ class SubmitInterpolation(object):
                         # if so, continue to next species
                         processed_species = False
                         for arg in self.arguments:
-                            arg_list = arg.split(' ')
-                            if (('-'.join(arg_list[0].split('-')[:2]) == "{}-{}".format(model_to_process,grid_type)) & (arg_list[2] == speci_to_process) 
-                               & (arg_list[4] == temporal_resolution_to_output) & (arg_list[6] == original_speci_to_process)):
+                            arg_list = arg.split(" ")
+                            if (
+                                (
+                                    "-".join(arg_list[0].split("-")[:2])
+                                    == "{}-{}".format(model_to_process, grid_type)
+                                )
+                                & (arg_list[2] == speci_to_process)
+                                & (arg_list[4] == temporal_resolution_to_output)
+                                & (arg_list[6] == original_speci_to_process)
+                            ):
                                 processed_species = True
                                 break
                         if processed_species:
                             continue
 
                         # test if have directory for current speci_to_process
-                        if os.path.isdir("{}/{}/{}/{}".format(self.mod_dir, grid_type, model_temporal_resolution, speci_to_process)):
+                        if os.path.isdir(
+                            "{}/{}/{}/{}".format(
+                                self.mod_dir,
+                                grid_type,
+                                model_temporal_resolution,
+                                speci_to_process,
+                            )
+                        ):
                             have_valid_resolution = True
 
                         # test if have speci directory in ensemble-stats
-                        elif os.path.isdir("{}/{}/{}/ensemble-stats".format(self.mod_dir, grid_type, model_temporal_resolution)):
-                            
+                        elif os.path.isdir(
+                            "{}/{}/{}/ensemble-stats".format(
+                                self.mod_dir, grid_type, model_temporal_resolution
+                            )
+                        ):
                             # get all ensemble-stats species
-                            model_species_ensemblestat = list(np.unique([name.split('_')[0] 
-                                                                for name in os.listdir("{}/{}/{}/ensemble-stats".format(
-                                                                    self.mod_dir,grid_type,model_temporal_resolution)) 
-                                                                    if os.path.isdir("{}/{}/{}/ensemble-stats/{}".format(
-                                                                        self.mod_dir,grid_type,model_temporal_resolution,name))]))
-                            
+                            model_species_ensemblestat = list(
+                                np.unique(
+                                    [
+                                        name.split("_")[0]
+                                        for name in os.listdir(
+                                            "{}/{}/{}/ensemble-stats".format(
+                                                self.mod_dir,
+                                                grid_type,
+                                                model_temporal_resolution,
+                                            )
+                                        )
+                                        if os.path.isdir(
+                                            "{}/{}/{}/ensemble-stats/{}".format(
+                                                self.mod_dir,
+                                                grid_type,
+                                                model_temporal_resolution,
+                                                name,
+                                            )
+                                        )
+                                    ]
+                                )
+                            )
+
                             # test if have speci_to_process in model_species_ensemblestat
                             if speci_to_process in model_species_ensemblestat:
                                 have_valid_resolution = True
@@ -352,22 +416,42 @@ class SubmitInterpolation(object):
                                     if speci_to_map in model_species_ensemblestat:
                                         # if have a binned size distribution variable to map, first check if bin radius is within model's bin extents
                                         # if not, do not process species
-                                        if ('vconcaerobin' in speci_to_process) or ('vconcaerobin' in speci_to_map):
+                                        if ("vconcaerobin" in speci_to_process) or (
+                                            "vconcaerobin" in speci_to_map
+                                        ):
                                             # check if bin radius is within model's bin extents
-                                            if 'vconcaerobin' in speci_to_process:
-                                                speci_to_check = copy.deepcopy(speci_to_process)
-                                            elif 'vconcaerobin' in speci_to_map:
-                                                speci_to_check = copy.deepcopy(speci_to_map)
-                                            bin_radius = get_aeronet_bin_radius_from_bin_variable(speci_to_check)
-                                            if (bin_radius >= r_edges[0]) & (bin_radius <= r_edges[-1]):
-                                                speci_to_process = copy.deepcopy(speci_to_map)
-                                                print('Found speci to process on mapping', speci_to_process)
+                                            if "vconcaerobin" in speci_to_process:
+                                                speci_to_check = copy.deepcopy(
+                                                    speci_to_process
+                                                )
+                                            elif "vconcaerobin" in speci_to_map:
+                                                speci_to_check = copy.deepcopy(
+                                                    speci_to_map
+                                                )
+                                            bin_radius = get_aeronet_bin_radius_from_bin_variable(
+                                                speci_to_check
+                                            )
+                                            if (bin_radius >= r_edges[0]) & (
+                                                bin_radius <= r_edges[-1]
+                                            ):
+                                                speci_to_process = copy.deepcopy(
+                                                    speci_to_map
+                                                )
+                                                print(
+                                                    "Found speci to process on mapping",
+                                                    speci_to_process,
+                                                )
                                                 have_valid_resolution = True
                                         else:
-                                            speci_to_process = copy.deepcopy(speci_to_map)
-                                            print('Found speci to process on mapping', speci_to_process)
+                                            speci_to_process = copy.deepcopy(
+                                                speci_to_map
+                                            )
+                                            print(
+                                                "Found speci to process on mapping",
+                                                speci_to_process,
+                                            )
                                             have_valid_resolution = True
-                                
+
                         # for some variables it is possible to extract the variable information by mapping to a different variable name, with a higher dimensionality
                         # this currently is implemented for 2 cases:
                         # -- 4D binned size distribution
@@ -379,60 +463,101 @@ class SubmitInterpolation(object):
                             available_species_to_map_from = list(mapping_species.keys())
                             # check if speci_to_process can be mapped
                             if speci_to_process in available_species_to_map_from:
-
-                                # if it can be then check then if the variable to map to exists for the model/grid_type/resolution 
+                                # if it can be then check then if the variable to map to exists for the model/grid_type/resolution
                                 # (these can be multiple, list order sets the priority)
                                 for speci_to_map in mapping_species[speci_to_process]:
-                                    if os.path.isdir("{}/{}/{}/{}".format(self.mod_dir, grid_type, model_temporal_resolution, speci_to_map)):
-
+                                    if os.path.isdir(
+                                        "{}/{}/{}/{}".format(
+                                            self.mod_dir,
+                                            grid_type,
+                                            model_temporal_resolution,
+                                            speci_to_map,
+                                        )
+                                    ):
                                         # if have a binned size distribution variable to map, first check if bin radius is within model's bin extents
                                         # if not, do not process species
-                                        if ('vconcaerobin' in speci_to_process) or ('vconcaerobin' in speci_to_map):
+                                        if ("vconcaerobin" in speci_to_process) or (
+                                            "vconcaerobin" in speci_to_map
+                                        ):
                                             # check if bin radius is within model's bin extents
-                                            if 'vconcaerobin' in speci_to_process:
-                                                speci_to_check = copy.deepcopy(speci_to_process)
-                                            elif 'vconcaerobin' in speci_to_map:
-                                                speci_to_check = copy.deepcopy(speci_to_map)
-                                            bin_radius = get_aeronet_bin_radius_from_bin_variable(speci_to_check)
-                                            if (bin_radius >= r_edges[0]) & (bin_radius <= r_edges[-1]):
-                                                speci_to_process = copy.deepcopy(speci_to_map)
-                                                print('Found speci to process on mapping', speci_to_process)
+                                            if "vconcaerobin" in speci_to_process:
+                                                speci_to_check = copy.deepcopy(
+                                                    speci_to_process
+                                                )
+                                            elif "vconcaerobin" in speci_to_map:
+                                                speci_to_check = copy.deepcopy(
+                                                    speci_to_map
+                                                )
+                                            bin_radius = get_aeronet_bin_radius_from_bin_variable(
+                                                speci_to_check
+                                            )
+                                            if (bin_radius >= r_edges[0]) & (
+                                                bin_radius <= r_edges[-1]
+                                            ):
+                                                speci_to_process = copy.deepcopy(
+                                                    speci_to_map
+                                                )
+                                                print(
+                                                    "Found speci to process on mapping",
+                                                    speci_to_process,
+                                                )
                                                 have_valid_resolution = True
                                         else:
-                                            speci_to_process = copy.deepcopy(speci_to_map)
-                                            print('Found speci to process on mapping', speci_to_process)
+                                            speci_to_process = copy.deepcopy(
+                                                speci_to_map
+                                            )
+                                            print(
+                                                "Found speci to process on mapping",
+                                                speci_to_process,
+                                            )
                                             have_valid_resolution = True
 
                         # only proceed if have valid resolution
                         if have_valid_resolution:
-
                             # iterate through observational networks to interpolate against
                             for network_to_interpolate_against in networks:
-
                                 # define if network is in GHOST format
-                                self.reading_ghost = check_for_ghost(network_to_interpolate_against)
+                                self.reading_ghost = check_for_ghost(
+                                    network_to_interpolate_against
+                                )
 
                                 # get all relevant observational files
                                 # GHOST
                                 if self.reading_ghost:
-                                    obs_path = self.ghost_root + '/{}/{}/{}/{}/{}*.nc'.format(
-                                            network_to_interpolate_against, self.ghost_version, 
-                                            temporal_resolution_to_output, original_speci_to_process, 
-                                            original_speci_to_process)
+                                    obs_path = (
+                                        self.ghost_root
+                                        + "/{}/{}/{}/{}/{}*.nc".format(
+                                            network_to_interpolate_against,
+                                            self.ghost_version,
+                                            temporal_resolution_to_output,
+                                            original_speci_to_process,
+                                            original_speci_to_process,
+                                        )
+                                    )
                                     obs_files = np.sort(glob.glob(obs_path))
                                 # non-GHOST
                                 else:
-                                    obs_path = self.nonghost_root + '/{}/{}/{}/{}*.nc'.format(
-                                            network_to_interpolate_against, temporal_resolution_to_output,
-                                            original_speci_to_process, original_speci_to_process)
+                                    obs_path = (
+                                        self.nonghost_root
+                                        + "/{}/{}/{}/{}*.nc".format(
+                                            network_to_interpolate_against,
+                                            temporal_resolution_to_output,
+                                            original_speci_to_process,
+                                            original_speci_to_process,
+                                        )
+                                    )
                                     obs_files = np.sort(glob.glob(obs_path))
 
                                 # if have no observational files then continue
                                 if len(obs_files) == 0:
-                                    print(f"Observation files for {network_to_interpolate_against} cannot be found for {temporal_resolution_to_output} resolution in {os.path.dirname(obs_path)}.")
+                                    print(
+                                        f"Observation files for {network_to_interpolate_against} cannot be found for {temporal_resolution_to_output} resolution in {os.path.dirname(obs_path)}."
+                                    )
                                     continue
                                 else:
-                                    print(f"{len(obs_files)} observation file(s) for {network_to_interpolate_against} and {temporal_resolution_to_output} resolution were found in {os.path.dirname(obs_path)}.")
+                                    print(
+                                        f"{len(obs_files)} observation file(s) for {network_to_interpolate_against} and {temporal_resolution_to_output} resolution were found in {os.path.dirname(obs_path)}."
+                                    )
 
                                 # determine if ensemble is member or emsemble stat
                                 ensemble_member = ensemble.isdigit()
@@ -440,46 +565,74 @@ class SubmitInterpolation(object):
                                 # check if ensemble is ensemble stat and get all relevant model files
                                 if not ensemble_member:
                                     ensemble_stat = True
-                                    mod_path = '{}/{}/{}/ensemble-stats/{}_{}/{}*{}.nc'.format(
-                                            self.mod_dir, grid_type, model_temporal_resolution, speci_to_process, 
-                                            ensemble, speci_to_process, ensemble)
+                                    mod_path = (
+                                        "{}/{}/{}/ensemble-stats/{}_{}/{}*{}.nc".format(
+                                            self.mod_dir,
+                                            grid_type,
+                                            model_temporal_resolution,
+                                            speci_to_process,
+                                            ensemble,
+                                            speci_to_process,
+                                            ensemble,
+                                        )
+                                    )
                                     mod_files_all = np.sort(glob.glob(mod_path))
                                 else:
                                     ensemble_stat = False
-                                    mod_path = '{}/{}/{}/{}/{}*.nc'.format(
-                                            self.mod_dir, grid_type, model_temporal_resolution, speci_to_process, 
-                                            speci_to_process)
-                                    mod_files_all = np.sort(glob.glob(mod_path))    
-                                    
+                                    mod_path = "{}/{}/{}/{}/{}*.nc".format(
+                                        self.mod_dir,
+                                        grid_type,
+                                        model_temporal_resolution,
+                                        speci_to_process,
+                                        speci_to_process,
+                                    )
+                                    mod_files_all = np.sort(glob.glob(mod_path))
+
                                     # drop all analysis files ending with '_an.nc' which are not in ensemble-stats
-                                    mod_files_all = np.array([f for f in mod_files_all if '_an.nc' not in f])
+                                    mod_files_all = np.array(
+                                        [f for f in mod_files_all if "_an.nc" not in f]
+                                    )
 
                                 # if have no relevant model files then continue
                                 if len(mod_files_all) == 0:
-                                    print(f"Model files cannot be found for {temporal_resolution_to_output} resolution in {os.path.dirname(mod_path)}.")
+                                    print(
+                                        f"Model files cannot be found for {temporal_resolution_to_output} resolution in {os.path.dirname(mod_path)}."
+                                    )
                                     continue
                                 else:
-                                    print(f"{len(mod_files_all)} model file(s) for {temporal_resolution_to_output} resolution were found in {os.path.dirname(mod_path)}.")
+                                    print(
+                                        f"{len(mod_files_all)} model file(s) for {temporal_resolution_to_output} resolution were found in {os.path.dirname(mod_path)}."
+                                    )
 
                                 # ensemble stat?
                                 if ensemble_stat:
-                                    available_ensemble = [ensemble]    
+                                    available_ensemble = [ensemble]
 
                                 # not ensemble stat?
-                                else:                                
-                                    
-                                    # determine if simulation generates files with ensemble member numbers or not 
+                                else:
+                                    # determine if simulation generates files with ensemble member numbers or not
                                     # (test first file)
                                     # if the ensemble number is in the nc file name next to species
-                                    if mod_files_all[0].split('/')[-1].rsplit('_', 1)[0] != speci_to_process:
+                                    if (
+                                        mod_files_all[0]
+                                        .split("/")[-1]
+                                        .rsplit("_", 1)[0]
+                                        != speci_to_process
+                                    ):
                                         have_ensemble_members = True
                                         # if have ensemble members in filename, get all unique numbers
-                                        unique_ensemble_members = np.unique([f.split('/{}-'.format(speci_to_process))[-1][:3] 
-                                                                            for f in mod_files_all])
-                                        # get intersection between desired ensemble members to process and those 
+                                        unique_ensemble_members = np.unique(
+                                            [
+                                                f.split(
+                                                    "/{}-".format(speci_to_process)
+                                                )[-1][:3]
+                                                for f in mod_files_all
+                                            ]
+                                        )
+                                        # get intersection between desired ensemble members to process and those
                                         # available in directory
-                                        # if no members defined explicitly to process, process them all 
-                                        if ensemble == 'allmembers':
+                                        # if no members defined explicitly to process, process them all
+                                        if ensemble == "allmembers":
                                             available_ensemble = unique_ensemble_members
                                         else:
                                             if ensemble in unique_ensemble_members:
@@ -489,43 +642,82 @@ class SubmitInterpolation(object):
                                     # if there's no ensemble number in the file name
                                     else:
                                         have_ensemble_members = False
-                                        # if have defined ensemble members to process, then continue as no files in this 
+                                        # if have defined ensemble members to process, then continue as no files in this
                                         # directory have ensemble member number
-                                        if ensemble not in ['allmembers', '000']:
+                                        if ensemble not in ["allmembers", "000"]:
                                             continue
                                         # otherwise, proceed (tag files as ensemble member '000' for sake of operation)
                                         else:
-                                            available_ensemble = ['000']
-                                
-                                # iterate through available ensemble to process                    
-                                for available_ens in available_ensemble:
+                                            available_ensemble = ["000"]
 
-                                    # limit model files to be just those for specific ensemble member 
-                                    # (where neccessary) 
+                                # iterate through available ensemble to process
+                                for available_ens in available_ensemble:
+                                    # limit model files to be just those for specific ensemble member
+                                    # (where neccessary)
                                     mod_file_speci = copy.deepcopy(speci_to_process)
                                     mod_files = copy.deepcopy(mod_files_all)
                                     if ensemble_stat == False:
                                         if have_ensemble_members == True:
-                                            mod_file_speci = '{}-{}'.format(speci_to_process, available_ens)
-                                            mod_files = np.sort([f for f in mod_files_all if '{}_'.format(mod_file_speci) 
-                                                                in f])                    
-                                    
+                                            mod_file_speci = "{}-{}".format(
+                                                speci_to_process, available_ens
+                                            )
+                                            mod_files = np.sort(
+                                                [
+                                                    f
+                                                    for f in mod_files_all
+                                                    if "{}_".format(mod_file_speci) in f
+                                                ]
+                                            )
+
                                     # get all observational file start dates (year and month)
                                     obs_files_dates = []
                                     for obs_file in obs_files:
-                                        obs_file_date = obs_file.split('{}_'.format(original_speci_to_process))[-1].split('_')[0].split('.nc')[0]
-                                        obs_files_dates=np.append(obs_files_dates,obs_file_date[:6])
+                                        obs_file_date = (
+                                            obs_file.split(
+                                                "{}_".format(original_speci_to_process)
+                                            )[-1]
+                                            .split("_")[0]
+                                            .split(".nc")[0]
+                                        )
+                                        obs_files_dates = np.append(
+                                            obs_files_dates, obs_file_date[:6]
+                                        )
 
                                     # get all model file start dates (year and month)
                                     mod_files_dates = []
                                     for mod_file in mod_files:
-                                        mod_file_date = mod_file.split('{}_'.format(mod_file_speci))[-1].split('_')[0].split('.nc')[0]
-                                        mod_files_dates=np.append(mod_files_dates,mod_file_date[:6])
+                                        mod_file_date = (
+                                            mod_file.split(
+                                                "{}_".format(mod_file_speci)
+                                            )[-1]
+                                            .split("_")[0]
+                                            .split(".nc")[0]
+                                        )
+                                        mod_files_dates = np.append(
+                                            mod_files_dates, mod_file_date[:6]
+                                        )
 
-                                    # remove observational files outside date ranges 
-                                    obs_files_ii = np.array([obs_files_ii for obs_files_ii, obs_files_date in enumerate(obs_files_dates) 
-                                                            if ((self.start_date == "*" or int(obs_files_date) >= int(self.start_date)) 
-                                                                and (self.end_date == "*" or int(obs_files_date) < int(self.end_date)))])
+                                    # remove observational files outside date ranges
+                                    obs_files_ii = np.array(
+                                        [
+                                            obs_files_ii
+                                            for obs_files_ii, obs_files_date in enumerate(
+                                                obs_files_dates
+                                            )
+                                            if (
+                                                (
+                                                    self.start_date == "*"
+                                                    or int(obs_files_date)
+                                                    >= int(self.start_date)
+                                                )
+                                                and (
+                                                    self.end_date == "*"
+                                                    or int(obs_files_date)
+                                                    < int(self.end_date)
+                                                )
+                                            )
+                                        ]
+                                    )
                                     if len(obs_files_ii) == 0:
                                         obs_files = []
                                         obs_files_dates = []
@@ -533,98 +725,138 @@ class SubmitInterpolation(object):
                                     obs_files = obs_files[obs_files_ii]
                                     obs_files_dates = obs_files_dates[obs_files_ii]
 
-                                    # remove model files outside date ranges 
-                                    mod_files_ii = np.array([mod_files_ii for mod_files_ii, mod_files_date in enumerate(mod_files_dates) 
-                                                            if ((self.start_date == "*" or int(mod_files_date) >= int(self.start_date)) 
-                                                                and (self.end_date == "*" or int(mod_files_date) < int(self.end_date)))])
+                                    # remove model files outside date ranges
+                                    mod_files_ii = np.array(
+                                        [
+                                            mod_files_ii
+                                            for mod_files_ii, mod_files_date in enumerate(
+                                                mod_files_dates
+                                            )
+                                            if (
+                                                (
+                                                    self.start_date == "*"
+                                                    or int(mod_files_date)
+                                                    >= int(self.start_date)
+                                                )
+                                                and (
+                                                    self.end_date == "*"
+                                                    or int(mod_files_date)
+                                                    < int(self.end_date)
+                                                )
+                                            )
+                                        ]
+                                    )
                                     if len(mod_files_ii) == 0:
                                         mod_files = []
                                         mod_files_dates = []
                                         continue
                                     mod_files = mod_files[mod_files_ii]
                                     mod_files_dates = mod_files_dates[mod_files_ii]
-                                    
+
                                     # get intersection of file yearmonths between observations and model
-                                    intersect_yearmonths = np.intersect1d(obs_files_dates, mod_files_dates)
+                                    intersect_yearmonths = np.intersect1d(
+                                        obs_files_dates, mod_files_dates
+                                    )
 
                                     # if have no intersecting months, continue
                                     if len(intersect_yearmonths) == 0:
                                         continue
 
                                     # create Providentia model code (modid-region-ensembleoption)
-                                    prov_mod_code = '{}-{}-{}'.format(model_to_process, grid_type, 
-                                                                      available_ens)
-            
-                                    # create directories to store slurm output/error logs for interpolation task of 
-                                    # specific combination of iterated variables (if does not already exist)
-                                    if not os.path.exists('{}/{}/{}/{}/{}'.format(self.interpolation_log_dir, 
-                                                                                    prov_mod_code, 
-                                                                                    original_speci_to_process, 
-                                                                                    network_to_interpolate_against, 
-                                                                                    temporal_resolution_to_output)):
-                                        os.makedirs('{}/{}/{}/{}/{}'.format(self.interpolation_log_dir, prov_mod_code, 
-                                                                            original_speci_to_process, 
-                                                                            network_to_interpolate_against, 
-                                                                            temporal_resolution_to_output))
+                                    prov_mod_code = "{}-{}-{}".format(
+                                        model_to_process, grid_type, available_ens
+                                    )
 
-                                    # iterate through intersecting yearmonths and write all current variable arguments 
+                                    # create directories to store slurm output/error logs for interpolation task of
+                                    # specific combination of iterated variables (if does not already exist)
+                                    if not os.path.exists(
+                                        "{}/{}/{}/{}/{}".format(
+                                            self.interpolation_log_dir,
+                                            prov_mod_code,
+                                            original_speci_to_process,
+                                            network_to_interpolate_against,
+                                            temporal_resolution_to_output,
+                                        )
+                                    ):
+                                        os.makedirs(
+                                            "{}/{}/{}/{}/{}".format(
+                                                self.interpolation_log_dir,
+                                                prov_mod_code,
+                                                original_speci_to_process,
+                                                network_to_interpolate_against,
+                                                temporal_resolution_to_output,
+                                            )
+                                        )
+
+                                    # iterate through intersecting yearmonths and write all current variable arguments
                                     # to arguments file
                                     for yearmonth in intersect_yearmonths:
-
-                                        # append current iterative arguments to arguments list               
-                                        self.arguments.append("{} {} {} {} {} {} {} {}".format(prov_mod_code, 
-                                                                                            model_temporal_resolution, 
-                                                                                            speci_to_process, 
-                                                                                            network_to_interpolate_against, 
-                                                                                            temporal_resolution_to_output, 
-                                                                                            yearmonth, 
-                                                                                            original_speci_to_process,
-                                                                                            self.slurm_job_id))
+                                        # append current iterative arguments to arguments list
+                                        self.arguments.append(
+                                            "{} {} {} {} {} {} {} {}".format(
+                                                prov_mod_code,
+                                                model_temporal_resolution,
+                                                speci_to_process,
+                                                network_to_interpolate_against,
+                                                temporal_resolution_to_output,
+                                                yearmonth,
+                                                original_speci_to_process,
+                                                self.slurm_job_id,
+                                            )
+                                        )
 
                                         # append root name of .out file that will be output for each processed task
-                                        self.output_log_roots.append('{}/{}/{}/{}/{}/{}'.format(self.interpolation_log_dir, 
-                                                                                                prov_mod_code, 
-                                                                                                original_speci_to_process, 
-                                                                                                network_to_interpolate_against, 
-                                                                                                temporal_resolution_to_output, 
-                                                                                                yearmonth))
+                                        self.output_log_roots.append(
+                                            "{}/{}/{}/{}/{}/{}".format(
+                                                self.interpolation_log_dir,
+                                                prov_mod_code,
+                                                original_speci_to_process,
+                                                network_to_interpolate_against,
+                                                temporal_resolution_to_output,
+                                                yearmonth,
+                                            )
+                                        )
 
                                         # remove previous output logs
-                                        previous_logs = glob.glob('{}/{}/{}/{}/{}/{}*'.format(self.interpolation_log_dir, 
-                                                                                                prov_mod_code, 
-                                                                                                original_speci_to_process, 
-                                                                                                network_to_interpolate_against, 
-                                                                                                temporal_resolution_to_output, 
-                                                                                                yearmonth))
+                                        previous_logs = glob.glob(
+                                            "{}/{}/{}/{}/{}/{}*".format(
+                                                self.interpolation_log_dir,
+                                                prov_mod_code,
+                                                original_speci_to_process,
+                                                network_to_interpolate_against,
+                                                temporal_resolution_to_output,
+                                                yearmonth,
+                                            )
+                                        )
                                         for previous_log in previous_logs:
-                                            os.remove(previous_log) 
+                                            os.remove(previous_log)
 
             # boolean that says if there was any new valid data in the iteration
             new_arguments = last_arguments != self.arguments
 
             # if list is empty or have no arguments after iteration, return message stating that
             if len(self.arguments) == 0 or not new_arguments:
-                msg = '\nNO INTERSECTING OBSERVATIONAL AND EXPERIMENT DATA FOR INTERPOLATION. \n' 
+                msg = "\nNO INTERSECTING OBSERVATIONAL AND EXPERIMENT DATA FOR INTERPOLATION. \n"
             else:
-                msg = '\n***INTERSECTING OBSERVATIONAL AND EXPERIMENTAL DATA IS AVAILABLE FOR INTERPOLATION.***'
-                
+                msg = "\n***INTERSECTING OBSERVATIONAL AND EXPERIMENTAL DATA IS AVAILABLE FOR INTERPOLATION.***"
+
                 # add a warning if nco is not installed
                 _, output = subprocess.getstatusoutput("ncks")
                 if "not found" in output:
-                    msg += '\n\nNCO could not be found, please install it in your system with sudo apt install nco (Debian/Ubuntu) or brew install nco (macOS).'
-            
+                    msg += "\n\nNCO could not be found, please install it in your system with sudo apt install nco (Debian/Ubuntu) or brew install nco (macOS)."
+
             print(msg)
 
             # get the arguments from the last iteration
             last_arguments = copy.deepcopy(self.arguments)
-        
+
         # if have no arguments for all models, return message stating that
         if len(self.arguments) == 0:
-            error = 'INTERPOLATION CANNOT BE DONE FOR ANY EXPERIMENT'
+            error = "INTERPOLATION CANNOT BE DONE FOR ANY EXPERIMENT"
             sys.exit(error)
 
         # randomise the order of the arguments list
-        random.shuffle(self.arguments)     
+        random.shuffle(self.arguments)
 
     def create_greasy_arguments_file(self):
         """Create greasy arguments text file storing all different tasks to run by greasy."""
@@ -632,88 +864,100 @@ class SubmitInterpolation(object):
         # define list to store chunked argument files (to be submitted using greasy)
         argument_files = []
 
-        # get the CPU chunk size -- set initially as miniumum number of arguments per file 
+        # get the CPU chunk size -- set initially as miniumum number of arguments per file
         n_arguments_per_file_minimum = copy.deepcopy(int(self.interp_chunk_size))
         n_arguments_per_file = copy.deepcopy(int(self.interp_chunk_size))
-        
-        # divide the number of arguments by the CPU chunk size, to determine how many argument files will be needed to 
+
+        # divide the number of arguments by the CPU chunk size, to determine how many argument files will be needed to
         # submit all jobs
-        n_submit_files = int(np.ceil(len(self.arguments)/int(self.interp_chunk_size)))
-        
+        n_submit_files = int(np.ceil(len(self.arguments) / int(self.interp_chunk_size)))
+
         # set argument remainder as 0 initially
         argument_remainder = 0
 
-        # if the number of argument files is greater than the job array limit (i.e the limit on the number of argument 
+        # if the number of argument files is greater than the job array limit (i.e the limit on the number of argument
         # files that can be processed simultaneously)
-        # then add adjust minimum N arguments per file appropriately (i.e. split extra arguments across the maximum 
-        # number of argument files evenly)        
+        # then add adjust minimum N arguments per file appropriately (i.e. split extra arguments across the maximum
+        # number of argument files evenly)
         if n_submit_files > int(self.interp_job_array_limit):
             # update the minimum number of arguments per file
-            n_arguments_per_file_minimum = int(np.floor(len(self.arguments)/int(self.interp_job_array_limit)))
+            n_arguments_per_file_minimum = int(
+                np.floor(len(self.arguments) / int(self.interp_job_array_limit))
+            )
             n_arguments_per_file = copy.deepcopy(n_arguments_per_file_minimum)
 
             # if the number of extra arguments does not divide equally between all files get the remainder
-            argument_remainder = int(len(self.arguments)%int(self.interp_job_array_limit))
-            
-            # if have argument remainder then update n_arguments_per_file variable to be 1 greater than minimum for 
+            argument_remainder = int(
+                len(self.arguments) % int(self.interp_job_array_limit)
+            )
+
+            # if have argument remainder then update n_arguments_per_file variable to be 1 greater than minimum for
             # first file written (and for all files thereafter until  remainder is accounted for)
             if argument_remainder > 0:
                 n_arguments_per_file = n_arguments_per_file_minimum + 1
                 # subtract 1 from the argument remainder
                 argument_remainder -= 1
-            
+
             # set N submit files as N of job array limit
             n_submit_files = copy.deepcopy(int(self.interp_job_array_limit))
 
         # create file which will store a list of all chunked argument filenames
-        greasy_file = open('{}/{}.grz'.format(self.arguments_dir, self.slurm_job_id), 'w')
-        
+        greasy_file = open(
+            "{}/{}.grz".format(self.arguments_dir, self.slurm_job_id), "w"
+        )
+
         # create all chunked argument filenames
         for ii in range(n_submit_files):
-            argument_fname = '{}/{}_{}.txt'.format(self.arguments_dir,self.slurm_job_id,ii)
+            argument_fname = "{}/{}_{}.txt".format(
+                self.arguments_dir, self.slurm_job_id, ii
+            )
             argument_files.append(argument_fname)
-            greasy_file.write('{}\n'.format(argument_fname))
+            greasy_file.write("{}\n".format(argument_fname))
         greasy_file.close()
 
         # initialise variables to count N argument files written and N lines written
         file_ii = 0
         n_lines_written = 0
-        
-        # define special characters that will need to be escaped in string written        
-        special_characters = ['(',')']
+
+        # define special characters that will need to be escaped in string written
+        special_characters = ["(", ")"]
 
         # open first arguments file for writing
-        arguments_file = open(argument_files[file_ii], 'w')
+        arguments_file = open(argument_files[file_ii], "w")
 
         # iterate through different arguments, writing line by line to arguments file
         for arguments_ii, str_to_write in enumerate(self.arguments):
-
             # escape certain special characters in str_to_write
             for ch in special_characters:
-                str_to_write = str_to_write.replace(ch,'\{}'.format(ch))
-        
+                str_to_write = str_to_write.replace(ch, "\{}".format(ch))
+
             # write arguments str to current file
-            command = 'python -u {}/interpolation/experiment_interpolation.py {}\n'.format(self.working_directory, 
-                                                                                           str_to_write)
-            if self.machine == 'nord4':
-                command = 'nord3_singu_es {}'.format(command)
+            command = (
+                "python -u {}/interpolation/experiment_interpolation.py {}\n".format(
+                    self.working_directory, str_to_write
+                )
+            )
+            if self.machine == "nord4":
+                command = "nord3_singu_es {}".format(command)
             arguments_file.write(command)
 
-            # iterate n lines written    
+            # iterate n lines written
             n_lines_written += 1
-    
+
             # if have written sufficient arguments to file (and not currently processing last argument)
             # then close current file and open another
-            if (n_lines_written == n_arguments_per_file) & (arguments_ii < (len(self.arguments)-1)):
+            if (n_lines_written == n_arguments_per_file) & (
+                arguments_ii < (len(self.arguments) - 1)
+            ):
                 # reset n lines written
                 n_lines_written = 0
-                
+
                 # close current arguments file
                 arguments_file.close()
-                
+
                 # iterate n arguments files written
                 file_ii += 1
-                
+
                 # if have argument remainder, write an extra argument to the next file
                 if argument_remainder > 0:
                     n_arguments_per_file = n_arguments_per_file_minimum + 1
@@ -722,10 +966,10 @@ class SubmitInterpolation(object):
                 # otherwise N arguments to write to next file should be minimum
                 else:
                     n_arguments_per_file = copy.deepcopy(n_arguments_per_file_minimum)
-                
+
                 # open new arguments file
-                arguments_file = open(argument_files[file_ii], 'w')
-                
+                arguments_file = open(argument_files[file_ii], "w")
+
         # close current arguments file
         arguments_file.close()
 
@@ -733,29 +977,31 @@ class SubmitInterpolation(object):
         """Write a slurm submission shell script that submits a greasy job."""
 
         # create job_fname (unique_ID + 'sh.')
-        self.job_fname = self.slurm_job_id+'.sh'
-    
+        self.job_fname = self.slurm_job_id + ".sh"
+
         # get all argument files
-        argument_files = sorted(glob.glob('{}/{}_*.txt'.format(self.arguments_dir,self.slurm_job_id)))
+        argument_files = sorted(
+            glob.glob("{}/{}_*.txt".format(self.arguments_dir, self.slurm_job_id))
+        )
 
         # read how many lines are in first arguments file
-        with open(argument_files[0]) as f: 
+        with open(argument_files[0]) as f:
             for ii, line in enumerate(f):
                 pass
             N_arguments = ii + 1
 
-        # cap the number of simultaneously running tasks to be the defined CPU chunk size  
+        # cap the number of simultaneously running tasks to be the defined CPU chunk size
         max_tasks = copy.deepcopy(int(self.interp_chunk_size))
 
         # if the number of arguments is > capped max tasks, then set N simultaneous tasks to be the max tasks permitted
         if N_arguments > max_tasks:
-            n_simultaneous_tasks = copy.deepcopy(max_tasks) 
+            n_simultaneous_tasks = copy.deepcopy(max_tasks)
         # else, if the number of arguments is <= capped max tasks, then set N simultaneous tasks to be N arguments
         else:
             n_simultaneous_tasks = copy.deepcopy(N_arguments)
 
         # create slurm submission script
-        submit_file = open(self.submit_dir+'/'+self.job_fname,"w")
+        submit_file = open(self.submit_dir + "/" + self.job_fname, "w")
 
         submit_file.write("#!/bin/bash\n")
         submit_file.write("\n")
@@ -768,20 +1014,34 @@ class SubmitInterpolation(object):
         submit_file.write("#SBATCH --qos={}\n".format(self.qos))
         # submit_file.write("#SBATCH --output=/dev/null\n") # decomment when debugging
         # submit_file.write("#SBATCH --error=/dev/null\n")
-        if self.machine in ['mn5', 'nord4']: # TODO when checking if debug works check this
-            submit_file.write("#SBATCH --account=bsc32\n")  
-            submit_file.write("#SBATCH --ntasks-per-node={}\n".format(n_simultaneous_tasks))
+        if self.machine in [
+            "mn5",
+            "nord4",
+        ]:  # TODO when checking if debug works check this
+            submit_file.write("#SBATCH --account=bsc32\n")
+            submit_file.write(
+                "#SBATCH --ntasks-per-node={}\n".format(n_simultaneous_tasks)
+            )
             submit_file.write("#SBATCH --cpus-per-task=1\n")
             submit_file.write("\n")
         else:
             submit_file.write("\n")
-            submit_file.write("source {}/bin/load_modules.sh\n".format(PROVIDENTIA_ROOT))
-        submit_file.write("export GREASY_NWORKERS=$SLURM_NPROCS\n") 
-        submit_file.write("export GREASY_LOGFILE={}/{}_$SLURM_ARRAY_TASK_ID.log\n".format(self.submit_dir, 
-                                                                                          self.slurm_job_id))
+            submit_file.write(
+                "source {}/bin/load_modules.sh\n".format(PROVIDENTIA_ROOT)
+            )
+        submit_file.write("export GREASY_NWORKERS=$SLURM_NPROCS\n")
+        submit_file.write(
+            "export GREASY_LOGFILE={}/{}_$SLURM_ARRAY_TASK_ID.log\n".format(
+                self.submit_dir, self.slurm_job_id
+            )
+        )
         submit_file.write("export SLURM_CPU_BIND=none\n")
-        submit_file.write("arguments_store={}/{}.grz\n".format(self.arguments_dir, self.slurm_job_id))
-        submit_file.write("argument_file=$(cat $arguments_store | awk -v var=$SLURM_ARRAY_TASK_ID 'NR==var {print $1}')\n")
+        submit_file.write(
+            "arguments_store={}/{}.grz\n".format(self.arguments_dir, self.slurm_job_id)
+        )
+        submit_file.write(
+            "argument_file=$(cat $arguments_store | awk -v var=$SLURM_ARRAY_TASK_ID 'NR==var {print $1}')\n"
+        )
         submit_file.write("\n")
         submit_file.write("greasy $argument_file")
 
@@ -792,10 +1052,12 @@ class SubmitInterpolation(object):
         """Write a lsf submission shell script that submits a greasy job."""
 
         # create job_fname (unique_ID + 'sh.')
-        self.job_fname = self.slurm_job_id + '.sh'
+        self.job_fname = self.slurm_job_id + ".sh"
 
         # get all argument files
-        argument_files = sorted(glob.glob('{}/{}_*.txt'.format(self.arguments_dir, self.slurm_job_id)))
+        argument_files = sorted(
+            glob.glob("{}/{}_*.txt".format(self.arguments_dir, self.slurm_job_id))
+        )
 
         # read how many lines are in first arguments file
         with open(argument_files[0]) as f:
@@ -816,13 +1078,15 @@ class SubmitInterpolation(object):
             n_simultaneous_tasks = copy.deepcopy(N_arguments)
 
         # create slurm submission script
-        submit_file = open(self.submit_dir + '/' + self.job_fname, "w")
+        submit_file = open(self.submit_dir + "/" + self.job_fname, "w")
 
         submit_file.write("#!/bin/bash\n")
         submit_file.write("\n")
         submit_file.write("#BSUB -n {}\n".format(n_simultaneous_tasks))
         submit_file.write("#BSUB -W 01:00\n")
-        submit_file.write("#BSUB -J PRVI_{}[1-{}]\n".format(self.slurm_job_id, len(argument_files)))
+        submit_file.write(
+            "#BSUB -J PRVI_{}[1-{}]\n".format(self.slurm_job_id, len(argument_files))
+        )
         submit_file.write("#BSUB -q {}\n".format(self.qos))
         submit_file.write("#BSUB -oo /dev/null\n")
         submit_file.write("#BSUB -eo /dev/null\n")
@@ -830,9 +1094,17 @@ class SubmitInterpolation(object):
 
         submit_file.write("source {}/bin/load_modules.sh\n".format(PROVIDENTIA_ROOT))
         submit_file.write("export GREASY_NWORKERS=$LSB_DJOB_NUMPROC\n")
-        submit_file.write("export GREASY_LOGFILE={}/{}_$LSB_JOBINDEX.log\n".format(self.submit_dir, self.slurm_job_id))
-        submit_file.write("arguments_store={}/{}.grz\n".format(self.arguments_dir, self.slurm_job_id))
-        submit_file.write("argument_file=$(cat $arguments_store | awk -v var=$LSB_JOBINDEX 'NR==var {print $1}')\n")
+        submit_file.write(
+            "export GREASY_LOGFILE={}/{}_$LSB_JOBINDEX.log\n".format(
+                self.submit_dir, self.slurm_job_id
+            )
+        )
+        submit_file.write(
+            "arguments_store={}/{}.grz\n".format(self.arguments_dir, self.slurm_job_id)
+        )
+        submit_file.write(
+            "argument_file=$(cat $arguments_store | awk -v var=$LSB_JOBINDEX 'NR==var {print $1}')\n"
+        )
         submit_file.write("\n")
         submit_file.write("greasy $argument_file")
 
@@ -848,13 +1120,18 @@ class SubmitInterpolation(object):
         # submit slurm script
         submit_complete = False
         while submit_complete == False:
-
             if self.machine == "nord3":
-                submit_process = subprocess.Popen(['bsub'], stdout=subprocess.PIPE,
-                                              stdin=open('{}/{}'.format(self.submit_dir, self.job_fname), 'r'))
+                submit_process = subprocess.Popen(
+                    ["bsub"],
+                    stdout=subprocess.PIPE,
+                    stdin=open("{}/{}".format(self.submit_dir, self.job_fname), "r"),
+                )
             else:
-                submit_process = subprocess.Popen(['sbatch', self.job_fname],
-                                              cwd=self.submit_dir, stdout=subprocess.PIPE)
+                submit_process = subprocess.Popen(
+                    ["sbatch", self.job_fname],
+                    cwd=self.submit_dir,
+                    stdout=subprocess.PIPE,
+                )
             submit_status = submit_process.communicate()[0]
             submit_return_code = submit_process.returncode
 
@@ -871,25 +1148,27 @@ class SubmitInterpolation(object):
         # monitor number of jobs in queue (every 10 seconds) until there are 0 left in the squeue
         all_tasks_finished = False
         # flag for monitoring jobs that were submitted in n3
-        job_entered = False 
+        job_entered = False
 
         while all_tasks_finished == False:
             if self.machine == "nord3":
                 # cmd = ['bjobs', '-noheader', '-J', 'PRVI_{}[1]'.format(self.slurm_job_id)]
-                cmd = ['bjobs', '-noheader']
+                cmd = ["bjobs", "-noheader"]
             else:
-                cmd = ['squeue', '-h', '-n', 'PRVI_{}'.format(self.slurm_job_id)]
-            squeue_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, encoding='utf8')
+                cmd = ["squeue", "-h", "-n", "PRVI_{}".format(self.slurm_job_id)]
+            squeue_process = subprocess.Popen(
+                cmd, stdout=subprocess.PIPE, encoding="utf8"
+            )
             squeue_status = squeue_process.communicate()[0]
-            n_jobs_in_queue = len(squeue_status.split('\n')[:-1])
+            n_jobs_in_queue = len(squeue_status.split("\n")[:-1])
             # if number of jobs in queue > 0, then sleep for 10
             # seconds and then check again how many jobs there are in queue
-            if (self.machine in ('mn5', 'nord4')) and (n_jobs_in_queue > 0):
+            if (self.machine in ("mn5", "nord4")) and (n_jobs_in_queue > 0):
                 time.sleep(10)
                 continue
-            elif self.machine == 'nord3':
+            elif self.machine == "nord3":
                 # has submitted jobs entered the queue?
-                if self.slurm_job_id[1:] in squeue_status.split('\n')[1:][0]:
+                if self.slurm_job_id[1:] in squeue_status.split("\n")[1:][0]:
                     job_entered = True
                     time.sleep(10)
                     continue
@@ -905,20 +1184,25 @@ class SubmitInterpolation(object):
 
             # if no more jobs in the squeue, then now check the outcome of all the jobs
             # if any jobs have failed/not finished, write them out to file
-            failed_tasks=[]
-            not_finished_tasks=[]
-            process_times=[]
+            failed_tasks = []
+            not_finished_tasks = []
+            process_times = []
             for output_log_root in self.output_log_roots:
-                output_log_file = glob.glob('{}_*'.format(output_log_root))
+                output_log_file = glob.glob("{}_*".format(output_log_root))
                 # have an output log file? (i.e. job has finished)
                 if len(output_log_file) > 0:
                     output_log_file = output_log_file[0]
-                    process_code = int(output_log_file.split('_')[-1].split('.out')[0])
+                    process_code = int(output_log_file.split("_")[-1].split(".out")[0])
                     # if process code == 0, job completed successfully
                     if process_code == 0:
                         # append interpolation job process time
-                        process_times.append(float(subprocess.check_output(
-                            ['tail', '-1', output_log_file], encoding='utf8').strip()))
+                        process_times.append(
+                            float(
+                                subprocess.check_output(
+                                    ["tail", "-1", output_log_file], encoding="utf8"
+                                ).strip()
+                            )
+                        )
                     # otherwise, job failed --> append failed log file
                     else:
                         failed_tasks.append(output_log_file)
@@ -930,10 +1214,10 @@ class SubmitInterpolation(object):
             all_tasks_finished = True
 
         # get interpolation time
-        interpolation_time = (time.time() - interpolation_start)/60.
+        interpolation_time = (time.time() - interpolation_start) / 60.0
 
         # stop timer
-        total_time = (time.time()-self.start)/60.
+        total_time = (time.time() - self.start) / 60.0
 
         # have 0 failed/non-finished tasks?
         if (len(failed_tasks) == 0) & (len(not_finished_tasks) == 0):
@@ -941,47 +1225,71 @@ class SubmitInterpolation(object):
             process_time = np.max(process_times)
             queue_time = interpolation_time - process_time
             overhead_time = total_time - interpolation_time
-            print('\nALL {} INTERPOLATION TASKS COMPLETED SUCCESSFULLY IN {:.2f} MINUTES'
-                  '({:.2f} MINUTES PROCESSING, {:.2f} MINUTES QUEUING, {:.2f} MINUTES ON OVERHEADS)'.
-                  format(len(self.output_log_roots), total_time, process_time, queue_time, overhead_time))
+            print(
+                "\nALL {} INTERPOLATION TASKS COMPLETED SUCCESSFULLY IN {:.2f} MINUTES"
+                "({:.2f} MINUTES PROCESSING, {:.2f} MINUTES QUEUING, {:.2f} MINUTES ON OVERHEADS)".format(
+                    len(self.output_log_roots),
+                    total_time,
+                    process_time,
+                    queue_time,
+                    overhead_time,
+                )
+            )
         else:
-            print('\n{}/{} INTERPOLATION TASKS FINISHED SUCCESSFULLY IN {:.2f} MINUTES'.format(
-                  len(self.output_log_roots)-(len(not_finished_tasks)+len(failed_tasks)), len(self.output_log_roots), 
-                  total_time))
+            print(
+                "\n{}/{} INTERPOLATION TASKS FINISHED SUCCESSFULLY IN {:.2f} MINUTES".format(
+                    len(self.output_log_roots)
+                    - (len(not_finished_tasks) + len(failed_tasks)),
+                    len(self.output_log_roots),
+                    total_time,
+                )
+            )
             if len(failed_tasks) > 0:
-                print('THE FOLLOWING INTERPOLATION TASKS FAILED: {}'.format(failed_tasks))
+                print(
+                    "THE FOLLOWING INTERPOLATION TASKS FAILED: {}".format(failed_tasks)
+                )
             if len(not_finished_tasks) > 0:
-                print('THE FOLLOWING INTERPOLATION TASKS DID NOT FINISH: {}'.format(not_finished_tasks))
+                print(
+                    "THE FOLLOWING INTERPOLATION TASKS DID NOT FINISH: {}".format(
+                        not_finished_tasks
+                    )
+                )
 
     def submit_job_multiprocessing(self):
         """Submit interpolation jobs using multiprocessing pool."""
 
-        # set resource usage parameters for estimating safe number of pool workers 
+        # set resource usage parameters for estimating safe number of pool workers
         self.per_worker_mem_gb = self.guess_peak_RSS_per_worker()
         self.cpu_fraction_limit = 0.75
         self.mem_fraction_limit = 0.75
 
         # set run commands
-        self.commands = ['python -u {}/interpolation/experiment_interpolation.py {}'.format(
-            self.working_directory, argument) for argument in self.arguments]
+        self.commands = [
+            "python -u {}/interpolation/experiment_interpolation.py {}".format(
+                self.working_directory, argument
+            )
+            for argument in self.arguments
+        ]
 
-        # if n_cpus hasn't been defined, use 1 or half of the available CPUS to 
+        # if n_cpus hasn't been defined, use 1 or half of the available CPUS to
         # avoid having to kill other processes locally
-        if self.machine == 'local':
+        if self.machine == "local":
             # use value passed through --cores in terminal
-            if (self.cores_explicit):
+            if self.cores_explicit:
                 n_cpus = self.n_cpus
-                msg = f'Using {n_cpus} CPUs.'
+                msg = f"Using {n_cpus} CPUs."
             # otherwise estimate the number of safe pool workers
             else:
                 n_cpus = self.guess_pool_workers()
-                msg = f'Using {n_cpus} out of {self.n_cpus} available CPUs to'
-                msg += ' ensure that other processes keep running. \nIf you encounter any problems'
-                msg += ' consider reducing the number of CPUS by running Providentia using'
-                msg += ' --cores (./bin/providentia --cores=2).'
+                msg = f"Using {n_cpus} out of {self.n_cpus} available CPUs to"
+                msg += " ensure that other processes keep running. \nIf you encounter any problems"
+                msg += (
+                    " consider reducing the number of CPUS by running Providentia using"
+                )
+                msg += " --cores (./bin/providentia --cores=2)."
         else:
             n_cpus = self.n_cpus
-            msg = f'Using {n_cpus} CPUs.'
+            msg = f"Using {n_cpus} CPUs."
 
         print(msg)
 
@@ -989,7 +1297,9 @@ class SubmitInterpolation(object):
         if n_cpus > len(self.commands):
             old_n_cpus = copy.deepcopy(n_cpus)
             n_cpus = len(self.commands)
-            print(f'Capping {old_n_cpus} CPUs to {n_cpus} since there are only {n_cpus} tasks to process.')
+            print(
+                f"Capping {old_n_cpus} CPUs to {n_cpus} since there are only {n_cpus} tasks to process."
+            )
 
         # add print space
         print()
@@ -1006,22 +1316,24 @@ class SubmitInterpolation(object):
         # otherwise, use multiprocessing pool
         else:
             with multiprocessing.Pool(n_cpus) as pool:
-                for i, r in enumerate(pool.imap_unordered(self.resource_safe_job, self.commands), start=1):
+                for i, r in enumerate(
+                    pool.imap_unordered(self.resource_safe_job, self.commands), start=1
+                ):
                     print(f"{i}/{self.total_jobs} jobs completed", flush=True)
 
         # stop timer
-        total_time = (time.time()-self.start)/60.
+        total_time = (time.time() - self.start) / 60.0
 
         # if no more jobs in the squeue, then now check the outcome of all the jobs
         # if any jobs have failed/not finished, write them out to file
-        failed_tasks=[]
-        not_finished_tasks=[]
+        failed_tasks = []
+        not_finished_tasks = []
         for output_log_root in self.output_log_roots:
-            output_log_file = glob.glob('{}_*'.format(output_log_root))
+            output_log_file = glob.glob("{}_*".format(output_log_root))
             # have an output log file? (i.e. job has finished)
             if len(output_log_file) > 0:
                 output_log_file = output_log_file[0]
-                process_code = int(output_log_file.split('_')[-1].split('.out')[0])
+                process_code = int(output_log_file.split("_")[-1].split(".out")[0])
                 # if process code is not 0, job failed
                 if process_code != 0:
                     failed_tasks.append(output_log_file)
@@ -1031,17 +1343,31 @@ class SubmitInterpolation(object):
 
         # have 0 failed/non-finished tasks?
         if (len(failed_tasks) == 0) & (len(not_finished_tasks) == 0):
-            print('\nALL {} INTERPOLATION TASKS COMPLETED SUCCESSFULLY IN {:.2f} MINUTES'.
-                  format(len(self.output_log_roots), total_time))
+            print(
+                "\nALL {} INTERPOLATION TASKS COMPLETED SUCCESSFULLY IN {:.2f} MINUTES".format(
+                    len(self.output_log_roots), total_time
+                )
+            )
         else:
-            print('\n{}/{} INTERPOLATION TASKS FINISHED SUCCESSFULLY IN {:.2f} MINUTES'.format(
-                  len(self.output_log_roots)-(len(not_finished_tasks)+len(failed_tasks)), len(self.output_log_roots), 
-                  total_time))
+            print(
+                "\n{}/{} INTERPOLATION TASKS FINISHED SUCCESSFULLY IN {:.2f} MINUTES".format(
+                    len(self.output_log_roots)
+                    - (len(not_finished_tasks) + len(failed_tasks)),
+                    len(self.output_log_roots),
+                    total_time,
+                )
+            )
             if len(failed_tasks) > 0:
-                print('THE FOLLOWING INTERPOLATION TASKS FAILED: {}'.format(failed_tasks))
+                print(
+                    "THE FOLLOWING INTERPOLATION TASKS FAILED: {}".format(failed_tasks)
+                )
             if len(not_finished_tasks) > 0:
-                print('THE FOLLOWING INTERPOLATION TASKS DID NOT FINISH: {}'.format(not_finished_tasks))
-                
+                print(
+                    "THE FOLLOWING INTERPOLATION TASKS DID NOT FINISH: {}".format(
+                        not_finished_tasks
+                    )
+                )
+
     def guess_peak_RSS_per_worker(self):
         """Get conservative estimate of peak RSS per worker in GB."""
 
@@ -1054,36 +1380,42 @@ class SubmitInterpolation(object):
             process_overhead_gb = 0.08
         hdf5_cache_gb = 0.1
 
-        # initialise peak RSS as 0 
+        # initialise peak RSS as 0
         max_worker_rss_gb = 0.0
 
         # iterate through all jobs to submit and get peak RSS for a job
         for argument in self.arguments:
             worker_payload_gb = 0.0
 
-            argument = argument.split(' ')
+            argument = argument.split(" ")
             prov_mod_code = argument[0]
             model_temporal_resolution = argument[1]
             speci_to_process = argument[2]
             yearmonth = argument[5]
-            model_to_process, grid_type, ensemble = prov_mod_code.split('-')
+            model_to_process, grid_type, ensemble = prov_mod_code.split("-")
             ensemble_member = ensemble.isdigit()
 
             if ensemble_member:
-                all_model_files = np.sort(glob.glob(
-                    f"{self.mod_dir}/{grid_type}/{model_temporal_resolution}/"
-                    f"{speci_to_process}/{speci_to_process}*{yearmonth}*.nc"
-                ))
+                all_model_files = np.sort(
+                    glob.glob(
+                        f"{self.mod_dir}/{grid_type}/{model_temporal_resolution}/"
+                        f"{speci_to_process}/{speci_to_process}*{yearmonth}*.nc"
+                    )
+                )
                 all_model_files = [f for f in all_model_files if "_an.nc" not in f]
-                model_files = [f for f in all_model_files if f"{speci_to_process}-{ensemble}_" in f]
+                model_files = [
+                    f for f in all_model_files if f"{speci_to_process}-{ensemble}_" in f
+                ]
                 if not model_files:
                     model_files = all_model_files
             else:
-                model_files = np.sort(glob.glob(
-                    f"{self.mod_dir}/{grid_type}/{model_temporal_resolution}/"
-                    f"ensemble-stats/{speci_to_process}_{ensemble}/"
-                    f"{speci_to_process}*{yearmonth}*{ensemble}.nc"
-                ))
+                model_files = np.sort(
+                    glob.glob(
+                        f"{self.mod_dir}/{grid_type}/{model_temporal_resolution}/"
+                        f"ensemble-stats/{speci_to_process}_{ensemble}/"
+                        f"{speci_to_process}*{yearmonth}*{ensemble}.nc"
+                    )
+                )
 
             for model_file in model_files:
                 with Dataset(model_file, "r") as nc:
@@ -1095,9 +1427,7 @@ class SubmitInterpolation(object):
 
             # Inflate to peak RSS
             peak_worker_gb = (
-                worker_payload_gb
-                * array_overhead_factor
-                * temp_array_factor
+                worker_payload_gb * array_overhead_factor * temp_array_factor
                 + process_overhead_gb
                 + hdf5_cache_gb
             )
@@ -1123,7 +1453,7 @@ class SubmitInterpolation(object):
         vm = psutil.virtual_memory()
 
         # per-worker estimates
-        per_worker_mem_gb = self.per_worker_mem_gb 
+        per_worker_mem_gb = self.per_worker_mem_gb
 
         # CPU-based limit
         cpu_capacity_workers = int(physical_cores * self.cpu_fraction_limit)
@@ -1142,15 +1472,11 @@ class SubmitInterpolation(object):
         mem_capacity_workers = max(1, mem_capacity_workers)
 
         # final worker count
-        n_workers = min(
-            cpu_capacity_workers,
-            mem_capacity_workers,
-            physical_cores
-        )
+        n_workers = min(cpu_capacity_workers, mem_capacity_workers, physical_cores)
 
         return max(1, n_workers)
 
-    def resource_safe_job(self, cmd, check_interval=1.0, stagger_range=(0.0,5.0)):
+    def resource_safe_job(self, cmd, check_interval=1.0, stagger_range=(0.0, 5.0)):
         """
         Manage multiprocessing worker submission with hysteresis.
         If system is overloaded it will wait until the system is stable before submitting more jobs.
@@ -1166,7 +1492,7 @@ class SubmitInterpolation(object):
             to avoid simultaneous spikes (default is (0.0, 5.0)).
         """
 
-        # set cpu, memory and swap limits 
+        # set cpu, memory and swap limits
         cpu_enter = self.cpu_fraction_limit
         cpu_exit = self.cpu_fraction_limit * 0.9
         mem_enter = self.mem_fraction_limit
@@ -1184,15 +1510,19 @@ class SubmitInterpolation(object):
 
         # while loop to trap jobs while there is an overload
         while True:
-
             # get current swap, cpu and memory percent
             swap_frac = psutil.swap_memory().percent / 100.0
             cpu = psutil.cpu_percent(interval=None) / 100.0
-            mem = 1.0 - (psutil.virtual_memory().available / psutil.virtual_memory().total)
+            mem = 1.0 - (
+                psutil.virtual_memory().available / psutil.virtual_memory().total
+            )
 
             # If have extremely high swap (and are not on Mac) then pause for 30 seconds
             if (self.operating_system != "Mac") and (swap_frac > swap_panic_limit):
-                print(f"Warning: Swap memory is extremely high: {swap_frac*100:.1f}% — sleeping 30s", flush=True)
+                print(
+                    f"Warning: Swap memory is extremely high: {swap_frac*100:.1f}% — sleeping 30s",
+                    flush=True,
+                )
                 time.sleep(30)
                 continue
 
@@ -1213,23 +1543,30 @@ class SubmitInterpolation(object):
             if (not paused) and (overload_count >= overload_enter_count):
                 paused = True
                 pause_start = time.time()
-                print("Warning: Sustained overload. Pausing job submissions.", flush=True)
+                print(
+                    "Warning: Sustained overload. Pausing job submissions.", flush=True
+                )
 
             # check if can resume submissions
             if paused:
                 # Force progress after max pause
                 if (pause_start) and (time.time() - pause_start > max_pause_seconds):
-                    print("Warning: Forcing job submission to avoid deadlock.", flush=True)
+                    print(
+                        "Warning: Forcing job submission to avoid deadlock.", flush=True
+                    )
                     paused = False
                     break
-                healthy = ((cpu < cpu_exit and mem < mem_exit) or (cpu < 0.25))
+                healthy = (cpu < cpu_exit and mem < mem_exit) or (cpu < 0.25)
                 if healthy:
                     recovery_count += 1
                 else:
                     recovery_count = 0
                 if recovery_count >= recovery_exit_count:
                     paused = False
-                    print("Warning: System has recovered. Resuming job submissions.", flush=True)
+                    print(
+                        "Warning: System has recovered. Resuming job submissions.",
+                        flush=True,
+                    )
 
             # break out of loop if not paused
             if not paused:
@@ -1245,7 +1582,7 @@ class SubmitInterpolation(object):
     def run_command(self, commands):
         """
         Function to submit interpolation job.
-        
+
         Parameters
         ----------
         commands : str
@@ -1253,18 +1590,30 @@ class SubmitInterpolation(object):
         """
 
         arguments_list = commands.strip().split()
-        print('Submitting job with arguments: [{} {} {} {} {}]'.format(arguments_list[3],arguments_list[5],arguments_list[6],arguments_list[7],arguments_list[8]), flush=True)
-        if self.machine == 'nord4':
-            arguments_list.insert(0, 'nord3_singu_es')
+        print(
+            "Submitting job with arguments: [{} {} {} {} {}]".format(
+                arguments_list[3],
+                arguments_list[5],
+                arguments_list[6],
+                arguments_list[7],
+                arguments_list[8],
+            ),
+            flush=True,
+        )
+        if self.machine == "nord4":
+            arguments_list.insert(0, "nord3_singu_es")
         result = subprocess.run(arguments_list, capture_output=True, text=True)
 
         if result.returncode != 0:
             error = result.stderr
-            if error == '':
-                error = 'Unknown error'
-            print(f"Error in submission using the arguments: {result.args[3:-1]}: "
-                  f"\nError: {error}" 
-                  f"\nReturn code: {result.returncode}", flush=True)
+            if error == "":
+                error = "Unknown error"
+            print(
+                f"Error in submission using the arguments: {result.args[3:-1]}: "
+                f"\nError: {error}"
+                f"\nReturn code: {result.returncode}",
+                flush=True,
+            )
 
     def get_all_models(self):
         """
@@ -1281,25 +1630,29 @@ class SubmitInterpolation(object):
         # from interp_models (remothe machine)
         if self.machine != "local":
             for model_dict in interp_models.values():
-                for mod_id in model_dict['models']:
+                for mod_id in model_dict["models"]:
                     for temp_mod_dir in model_dict["paths"]:
                         mod_to_interp_path = join(temp_mod_dir, mod_id)
                         if os.path.exists(mod_to_interp_path):
                             for dom in os.listdir(mod_to_interp_path):
-                                models.append(f"{mod_id}-{dom}-{self.default_values['ensemble'][0]}")
+                                models.append(
+                                    f"{mod_id}-{dom}-{self.default_values['ensemble'][0]}"
+                                )
 
         # from data_paths (local and remote machine)
         for mod_id in os.listdir(self.mod_to_interp_root):
             if not mod_id.startswith("."):
                 mod_to_interp_path = join(self.mod_to_interp_root, mod_id)
                 for dom in os.listdir(mod_to_interp_path):
-                    models.append(f"{mod_id}-{dom}-{self.default_values['ensemble'][0]}")
-        
+                    models.append(
+                        f"{mod_id}-{dom}-{self.default_values['ensemble'][0]}"
+                    )
+
         # create dictionary from list
         models_dict = dict(zip(models, models))
 
         return models_dict
-    
+
     def get_all_resolutions(self, mod_id, domain):
         """
         Retrieve all available resolutions.
@@ -1322,19 +1675,19 @@ class SubmitInterpolation(object):
         # from interp_models (remothe machine)
         if self.machine != "local":
             for model_dict in interp_models.values():
-                if mod_id in model_dict['models']:
+                if mod_id in model_dict["models"]:
                     for temp_mod_dir in model_dict["paths"]:
                         domain_dir = join(temp_mod_dir, mod_id, domain)
                         if os.path.exists(domain_dir):
                             resolutions += os.listdir(domain_dir)
-        
+
         # from data_paths (local and remote machine)
         domain_dir = join(self.mod_to_interp_root, mod_id, domain)
         if os.path.exists(domain_dir):
             resolutions += os.listdir(domain_dir)
 
         return resolutions
-    
+
     def get_all_species(self, mod_id, domain, resolution):
         """
         Retrieve all available species.
@@ -1359,19 +1712,19 @@ class SubmitInterpolation(object):
         # from interp_models (remothe machine)
         if self.machine != "local":
             for model_dict in interp_models.values():
-                if mod_id in model_dict['models']:
+                if mod_id in model_dict["models"]:
                     for temp_mod_dir in model_dict["paths"]:
                         resolution_dir = join(temp_mod_dir, mod_id, domain, resolution)
                         if os.path.exists(resolution_dir):
                             species += os.listdir(resolution_dir)
-        
+
         # from data_paths (local and remote machine)
         resolution_dir = join(self.mod_to_interp_root, mod_id, domain, resolution)
         if os.path.exists(resolution_dir):
             species += os.listdir(resolution_dir)
 
         return species
-    
+
     def get_all_networks(self):
         """
         Retrieve all available networks.
@@ -1385,22 +1738,24 @@ class SubmitInterpolation(object):
         if self.network_type:
             # exit if the value is neither GHOST or non-GHOST
             network_type = str(self.network_type).lower()
-            if network_type not in ['ghost', 'non-ghost']:
+            if network_type not in ["ghost", "non-ghost"]:
                 error = f"Error: Invalid 'network_type': '{self.network_type}'. Expected 'ghost' or 'non-ghost'."
                 self.logger.error(error)
                 sys.exit(1)
 
-            self.reading_ghost = network_type == 'ghost'  
+            self.reading_ghost = network_type == "ghost"
         else:
             # get user input to know which kind of network wants
             while True:
-                download_source = input("\nDo you want to interpolate all the GHOST networks? (Otherwise all the non-GHOST networks will be interpolated) ([y]/n): ").lower()
-                if download_source in ['','y','n']:
+                download_source = input(
+                    "\nDo you want to interpolate all the GHOST networks? (Otherwise all the non-GHOST networks will be interpolated) ([y]/n): "
+                ).lower()
+                if download_source in ["", "y", "n"]:
                     break
-            
+
             # get the boolean value from the answer of the user
-            self.reading_ghost = download_source in ['','y']
-        
+            self.reading_ghost = download_source in ["", "y"]
+
         networks = []
 
         if self.reading_ghost:
@@ -1415,6 +1770,7 @@ class SubmitInterpolation(object):
                         networks.append(f"{dir1}/{dir2}")
 
         return networks
+
 
 def main(**kwargs):
     """

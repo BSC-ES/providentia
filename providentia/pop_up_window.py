@@ -10,23 +10,34 @@ import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join
 from .read_aux import get_default_qa
-from .dashboard_elements import set_formatting, wrap_tooltip_text, ComboBox, CheckableComboBox
+from .dashboard_elements import (
+    set_formatting,
+    wrap_tooltip_text,
+    ComboBox,
+    CheckableComboBox,
+)
 from .warnings_prv import show_message
 
 
-PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
+PROVIDENTIA_ROOT = "/".join(CURRENT_PATH.split("/")[:-1])
 # get operating system specific formatting
 operating_system = platform.system()
-if operating_system == 'Darwin':
-    formatting_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_mac.yaml')))
-elif operating_system == 'Linux':
-    formatting_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_linux.yaml')))
-elif operating_system in ['Windows','MINGW32_NT','MINGW64_NT']:
-    formatting_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_windows.yaml')))
+if operating_system == "Darwin":
+    formatting_dict = yaml.safe_load(
+        open(join(PROVIDENTIA_ROOT, "settings/internal/stylesheet_mac.yaml"))
+    )
+elif operating_system == "Linux":
+    formatting_dict = yaml.safe_load(
+        open(join(PROVIDENTIA_ROOT, "settings/internal/stylesheet_linux.yaml"))
+    )
+elif operating_system in ["Windows", "MINGW32_NT", "MINGW64_NT"]:
+    formatting_dict = yaml.safe_load(
+        open(join(PROVIDENTIA_ROOT, "settings/internal/stylesheet_windows.yaml"))
+    )
 
 
 class PopUpWindow(QtWidgets.QWidget):
-    """ Class that generates generalised pop-up window. """
+    """Class that generates generalised pop-up window."""
 
     def __init__(self, read_instance, menu_root, menu_levels, full_window_geometry):
         """
@@ -67,7 +78,7 @@ class PopUpWindow(QtWidgets.QWidget):
         menu_current_keys = list(self.menu_current.keys())
 
         # set window title
-        self.setWindowTitle(self.menu_current['window_title'])
+        self.setWindowTitle(self.menu_current["window_title"])
 
         # create parent layout
         parent_layout = QtWidgets.QVBoxLayout()
@@ -77,10 +88,15 @@ class PopUpWindow(QtWidgets.QWidget):
         self.layout_spacing = 10
         parent_layout.setSpacing(self.layout_spacing)
         self.page_margin = 5
-        parent_layout.setContentsMargins(self.page_margin,self.page_margin,self.page_margin,self.page_margin)
+        parent_layout.setContentsMargins(
+            self.page_margin, self.page_margin, self.page_margin, self.page_margin
+        )
 
         # set page title
-        title_label = set_formatting(QtWidgets.QLabel(self, text=self.menu_current['page_title']), formatting_dict['popup_title'])
+        title_label = set_formatting(
+            QtWidgets.QLabel(self, text=self.menu_current["page_title"]),
+            formatting_dict["popup_title"],
+        )
         title_label.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignTop)
 
         # add title to parent frame
@@ -89,57 +105,74 @@ class PopUpWindow(QtWidgets.QWidget):
         # create layout for placing buttons horizontally (aligned left)
         button_row = QtWidgets.QHBoxLayout()
         button_row.setAlignment(QtCore.Qt.AlignHCenter)
-        
+
         # initialise variable to update if have any buttons in button row
         self.have_buttons = False
 
         # check if need to create home/previous button
         if len(self.menu_levels) >= 1:
             self.have_buttons = True
-            
+
             # create home button
-            root_button = set_formatting(QtWidgets.QPushButton("HOME"), formatting_dict['popup_button_navigation'],
-                                         extra_arguments={'color': 'blue'})
-            root_button.setToolTip('Return to home menu page')
+            root_button = set_formatting(
+                QtWidgets.QPushButton("HOME"),
+                formatting_dict["popup_button_navigation"],
+                extra_arguments={"color": "blue"},
+            )
+            root_button.setToolTip("Return to home menu page")
             button_row.addWidget(root_button)
             root_button.clicked.connect(self.root_page)
-            
+
             # create previous button
-            previous_button = set_formatting(QtWidgets.QPushButton("PREVIOUS"), formatting_dict['popup_button_navigation'],
-                                             extra_arguments={'color': 'green'})
-            previous_button.setToolTip('Return to previous menu page')
+            previous_button = set_formatting(
+                QtWidgets.QPushButton("PREVIOUS"),
+                formatting_dict["popup_button_navigation"],
+                extra_arguments={"color": "green"},
+            )
+            previous_button.setToolTip("Return to previous menu page")
             button_row.addWidget(previous_button)
             previous_button.clicked.connect(self.previous_page)
 
         # check if need to create checkbox selection buttons
-        if 'select_buttons' in menu_current_keys:
+        if "select_buttons" in menu_current_keys:
             self.have_buttons = True
-            
+
             # need to create "Select All" button?
-            if 'all' in self.menu_current['select_buttons']:
-                select_all_button = set_formatting(QtWidgets.QPushButton("Select All"), formatting_dict['popup_button_select'])
+            if "all" in self.menu_current["select_buttons"]:
+                select_all_button = set_formatting(
+                    QtWidgets.QPushButton("Select All"),
+                    formatting_dict["popup_button_select"],
+                )
                 button_row.addWidget(select_all_button)
                 select_all_button.clicked.connect(self.select_all)
-            
+
             # need to create "Clear All" button?
-            if 'clear' in self.menu_current['select_buttons']:
-                clear_all_button = set_formatting(QtWidgets.QPushButton("Clear All"), formatting_dict['popup_button_select'])
+            if "clear" in self.menu_current["select_buttons"]:
+                clear_all_button = set_formatting(
+                    QtWidgets.QPushButton("Clear All"),
+                    formatting_dict["popup_button_select"],
+                )
                 button_row.addWidget(clear_all_button)
                 clear_all_button.clicked.connect(self.clear_all)
-            
+
             # need to create "Select Default" button?
-            if 'default' in self.menu_current['select_buttons']:
-                select_default_button = set_formatting(QtWidgets.QPushButton("Select Default"), formatting_dict['popup_button_select'])
+            if "default" in self.menu_current["select_buttons"]:
+                select_default_button = set_formatting(
+                    QtWidgets.QPushButton("Select Default"),
+                    formatting_dict["popup_button_select"],
+                )
                 button_row.addWidget(select_default_button)
                 select_default_button.clicked.connect(self.select_all_default)
 
         # check if need add row button for multispecies window
-        if 'multispecies' in menu_current_keys:
+        if "multispecies" in menu_current_keys:
             self.have_buttons = True
 
             # create "ADD ROW" button
-            element_label = 'ADD ROW'
-            add_row_button = set_formatting(QtWidgets.QPushButton("ADD ROW"), formatting_dict['popup_button_select'])
+            element_label = "ADD ROW"
+            add_row_button = set_formatting(
+                QtWidgets.QPushButton("ADD ROW"), formatting_dict["popup_button_select"]
+            )
             button_row.addWidget(add_row_button)
 
             add_row_button.clicked.connect(lambda: self.add_multispecies_widgets())
@@ -153,26 +186,25 @@ class PopUpWindow(QtWidgets.QWidget):
 
         # gather list of all different menu types that need to be plotted
         menu_types = []
-        if 'navigation_buttons' in menu_current_keys:
-            menu_types.append('navigation_buttons')
-        if 'rangeboxes' in menu_current_keys:
-            menu_types.append('rangeboxes')
-        if 'checkboxes' in menu_current_keys:
-            menu_types.append('checkboxes')
-        if 'multispecies' in menu_current_keys:
-            menu_types.append('multispecies')
-        if 'models' in menu_current_keys:
-            menu_types.append('models')
+        if "navigation_buttons" in menu_current_keys:
+            menu_types.append("navigation_buttons")
+        if "rangeboxes" in menu_current_keys:
+            menu_types.append("rangeboxes")
+        if "checkboxes" in menu_current_keys:
+            menu_types.append("checkboxes")
+        if "multispecies" in menu_current_keys:
+            menu_types.append("multispecies")
+        if "models" in menu_current_keys:
+            menu_types.append("models")
 
         # have at least 1 menu type?
         if len(menu_types) > 0:
-
             # create grid of menu types (horizontally concatenating different menu type grids)
             horizontal_parent = self.create_grid(menu_types)
 
             # add grid to parent layout
             parent_layout.addLayout(horizontal_parent)
- 
+
         # set finalised layout
         self.setLayout(parent_layout)
 
@@ -185,7 +217,7 @@ class PopUpWindow(QtWidgets.QWidget):
         # setup event to get selected checkbox indices when closing window
         quit_event = QtWidgets.QAction("Quit", self)
         quit_event.triggered.connect(self.closeEvent)
-        
+
     def create_grid(self, menu_types):
         """
         Constructs and organises scrollable grids for different menu types like checkboxes and rangeboxes.
@@ -203,20 +235,25 @@ class PopUpWindow(QtWidgets.QWidget):
 
         # create horizontal layout to place all menu types within
         horizontal_parent = QtWidgets.QHBoxLayout()
-        
+
         # set spacing between different menu type grids
         horizontal_parent.setSpacing(25)
 
         # align grids to centre and top
         horizontal_parent.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignTop)
-        
+
         # order appearance of menu types grids in menu (from left to right)
-        menu_type_order_dict = {'navigation_buttons': 1, 'multispecies': 1, 'models':1, 'rangeboxes': 2, 'checkboxes': 3}
+        menu_type_order_dict = {
+            "navigation_buttons": 1,
+            "multispecies": 1,
+            "models": 1,
+            "rangeboxes": 2,
+            "checkboxes": 3,
+        }
         menu_types = sorted(menu_types, key=menu_type_order_dict.__getitem__)
-        
+
         # iterate through passed menu types
         for menu_type in menu_types:
-
             # create empty grid
             scroll_area_content = QtWidgets.QWidget()
             self.grid = QtWidgets.QGridLayout(scroll_area_content)
@@ -231,116 +268,163 @@ class PopUpWindow(QtWidgets.QWidget):
 
             # get dictionary nested inside current menu for menu type
             menu_current_type = self.menu_current[menu_type]
-                
+
             # if have no labels for current menu type, continue to next menu type
-            if (len(menu_current_type['labels']) == 0) & (menu_type not in ['multispecies','models']):
+            if (len(menu_current_type["labels"]) == 0) & (
+                menu_type not in ["multispecies", "models"]
+            ):
                 continue
 
             # get keys associated with current menu type in current menu level
             current_menu_keys = list(menu_current_type.keys())
-            
+
             # create dictionary to store variables that save page status per menu type (also set formatting dict for each row in grid, and vertical spacing)
-            if menu_type == 'checkboxes':
-                format_type = 'popup_checkbox'
-                obj_height = formatting_dict[format_type]['QCheckBox']['height']
+            if menu_type == "checkboxes":
+                format_type = "popup_checkbox"
+                obj_height = formatting_dict[format_type]["QCheckBox"]["height"]
                 grid_vertical_spacing = 3
-                if ('keep_selected' in current_menu_keys) & ('remove_selected' in current_menu_keys):
-                    self.page_memory['checkboxes'] = {'keep_selected':[], 'remove_selected':[], 'n_column_consumed':3, 
-                                                      'ordered_elements':['keep_selected', 'remove_selected'], 
-                                                      'widget':[QtWidgets.QCheckBox,
-                                                                QtWidgets.QCheckBox]}
-                elif 'keep_selected' in current_menu_keys:
-                    self.page_memory['checkboxes'] = {'keep_selected':[], 'n_column_consumed':2, 
-                                                      'ordered_elements':['keep_selected'], 
-                                                      'widget':[QtWidgets.QCheckBox]}
-                elif 'remove_selected' in current_menu_keys:
-                    self.page_memory['checkboxes'] = {'remove_selected':[], 'n_column_consumed':2, 
-                                                      'ordered_elements':['remove_selected'], 
-                                                      'widget':[QtWidgets.QCheckBox]}
-            elif menu_type == 'rangeboxes':
-                obj_height = formatting_dict['popup_lineedit_rangebox']['QLineEdit']['height']
+                if ("keep_selected" in current_menu_keys) & (
+                    "remove_selected" in current_menu_keys
+                ):
+                    self.page_memory["checkboxes"] = {
+                        "keep_selected": [],
+                        "remove_selected": [],
+                        "n_column_consumed": 3,
+                        "ordered_elements": ["keep_selected", "remove_selected"],
+                        "widget": [QtWidgets.QCheckBox, QtWidgets.QCheckBox],
+                    }
+                elif "keep_selected" in current_menu_keys:
+                    self.page_memory["checkboxes"] = {
+                        "keep_selected": [],
+                        "n_column_consumed": 2,
+                        "ordered_elements": ["keep_selected"],
+                        "widget": [QtWidgets.QCheckBox],
+                    }
+                elif "remove_selected" in current_menu_keys:
+                    self.page_memory["checkboxes"] = {
+                        "remove_selected": [],
+                        "n_column_consumed": 2,
+                        "ordered_elements": ["remove_selected"],
+                        "widget": [QtWidgets.QCheckBox],
+                    }
+            elif menu_type == "rangeboxes":
+                obj_height = formatting_dict["popup_lineedit_rangebox"]["QLineEdit"][
+                    "height"
+                ]
                 grid_vertical_spacing = 3
-                if ('current_lower' in current_menu_keys) & ('current_upper' in current_menu_keys):
-                    format_type = ['popup_lineedit_rangebox',
-                                   'popup_lineedit_rangebox',
-                                   'popup_checkbox']
-                    self.page_memory['rangeboxes'] = {'current_lower': [], 'current_upper': [], 'apply_selected': [],
-                                                      'n_column_consumed': 4, 
-                                                      'ordered_elements': ['current_lower', 
-                                                                           'current_upper', 
-                                                                           'apply_selected'], 
-                                                      'widget':[QtWidgets.QLineEdit, 
-                                                                QtWidgets.QLineEdit, 
-                                                                QtWidgets.QCheckBox]}
-                elif 'current_lower' in current_menu_keys:
-                    format_type = ['popup_lineedit_rangebox',
-                                   'popup_checkbox']
-                    self.page_memory['rangeboxes'] = {'current_lower': [], 'n_column_consumed': 2, 
-                                                      'ordered_elements': ['current_lower'], 
-                                                      'widget': [QtWidgets.QLineEdit,
-                                                                 QtWidgets.QCheckBox]}
-                elif 'current_upper' in current_menu_keys:
-                    format_type = ['popup_lineedit_rangebox',
-                                   'popup_checkbox']
-                    self.page_memory['rangeboxes'] = {'current_upper': [], 'n_column_consumed': 2, 
-                                                      'ordered_elements': ['current_upper'], 
-                                                      'widget': [QtWidgets.QLineEdit,
-                                                                 QtWidgets.QCheckBox]}
-            elif menu_type == 'navigation_buttons':
-                format_type = 'popup_button'
-                obj_height = formatting_dict[format_type]['QPushButton']['height']
+                if ("current_lower" in current_menu_keys) & (
+                    "current_upper" in current_menu_keys
+                ):
+                    format_type = [
+                        "popup_lineedit_rangebox",
+                        "popup_lineedit_rangebox",
+                        "popup_checkbox",
+                    ]
+                    self.page_memory["rangeboxes"] = {
+                        "current_lower": [],
+                        "current_upper": [],
+                        "apply_selected": [],
+                        "n_column_consumed": 4,
+                        "ordered_elements": [
+                            "current_lower",
+                            "current_upper",
+                            "apply_selected",
+                        ],
+                        "widget": [
+                            QtWidgets.QLineEdit,
+                            QtWidgets.QLineEdit,
+                            QtWidgets.QCheckBox,
+                        ],
+                    }
+                elif "current_lower" in current_menu_keys:
+                    format_type = ["popup_lineedit_rangebox", "popup_checkbox"]
+                    self.page_memory["rangeboxes"] = {
+                        "current_lower": [],
+                        "n_column_consumed": 2,
+                        "ordered_elements": ["current_lower"],
+                        "widget": [QtWidgets.QLineEdit, QtWidgets.QCheckBox],
+                    }
+                elif "current_upper" in current_menu_keys:
+                    format_type = ["popup_lineedit_rangebox", "popup_checkbox"]
+                    self.page_memory["rangeboxes"] = {
+                        "current_upper": [],
+                        "n_column_consumed": 2,
+                        "ordered_elements": ["current_upper"],
+                        "widget": [QtWidgets.QLineEdit, QtWidgets.QCheckBox],
+                    }
+            elif menu_type == "navigation_buttons":
+                format_type = "popup_button"
+                obj_height = formatting_dict[format_type]["QPushButton"]["height"]
                 grid_vertical_spacing = 3
-                self.page_memory['navigation_buttons'] = {'buttons': [], 'n_column_consumed': 1, 
-                                                          'ordered_elements': ['buttons'], 
-                                                          'widget': [QtWidgets.QPushButton]}
+                self.page_memory["navigation_buttons"] = {
+                    "buttons": [],
+                    "n_column_consumed": 1,
+                    "ordered_elements": ["buttons"],
+                    "widget": [QtWidgets.QPushButton],
+                }
 
-            elif menu_type == 'multispecies':
-                format_type = ['popup_combobox',
-                               'popup_combobox',
-                               'popup_combobox',
-                               'popup_lineedit_multispecies',
-                               'popup_lineedit_multispecies',
-                               'popup_lineedit_multispecies',
-                               'popup_checkbox']
-                obj_height = formatting_dict['popup_combobox']['QComboBox']['height']
+            elif menu_type == "multispecies":
+                format_type = [
+                    "popup_combobox",
+                    "popup_combobox",
+                    "popup_combobox",
+                    "popup_lineedit_multispecies",
+                    "popup_lineedit_multispecies",
+                    "popup_lineedit_multispecies",
+                    "popup_checkbox",
+                ]
+                obj_height = formatting_dict["popup_combobox"]["QComboBox"]["height"]
                 grid_vertical_spacing = 3
-                self.page_memory['multispecies'] = {'network': [], 'species': [], 'matrix': [],
-                                                    'current_lower': [], 'current_upper': [], 
-                                                    'current_filter_species_fill_value': [],
-                                                    'apply_selected': [],
-                                                    'n_column_consumed': 7, 
-                                                    'ordered_elements':['network', 
-                                                                        'matrix',
-                                                                        'species',
-                                                                        'current_lower', 
-                                                                        'current_upper',
-                                                                        'current_filter_species_fill_value', 
-                                                                        'apply_selected'], 
-                                                    'widget':[ComboBox,
-                                                              ComboBox,
-                                                              ComboBox,
-                                                              QtWidgets.QLineEdit, 
-                                                              QtWidgets.QLineEdit, 
-                                                              QtWidgets.QLineEdit, 
-                                                              QtWidgets.QCheckBox
-                                                             ]}
+                self.page_memory["multispecies"] = {
+                    "network": [],
+                    "species": [],
+                    "matrix": [],
+                    "current_lower": [],
+                    "current_upper": [],
+                    "current_filter_species_fill_value": [],
+                    "apply_selected": [],
+                    "n_column_consumed": 7,
+                    "ordered_elements": [
+                        "network",
+                        "matrix",
+                        "species",
+                        "current_lower",
+                        "current_upper",
+                        "current_filter_species_fill_value",
+                        "apply_selected",
+                    ],
+                    "widget": [
+                        ComboBox,
+                        ComboBox,
+                        ComboBox,
+                        QtWidgets.QLineEdit,
+                        QtWidgets.QLineEdit,
+                        QtWidgets.QLineEdit,
+                        QtWidgets.QCheckBox,
+                    ],
+                }
 
-            elif menu_type == 'models':
-                format_type = ['popup_checkbox',
-                               'popup_combobox',
-                               'popup_combobox']
-                obj_height = formatting_dict['popup_checkbox']['QCheckBox']['height']
+            elif menu_type == "models":
+                format_type = ["popup_checkbox", "popup_combobox", "popup_combobox"]
+                obj_height = formatting_dict["popup_checkbox"]["QCheckBox"]["height"]
                 grid_vertical_spacing = 3
-                self.page_memory['models'] = {'keep_selected':[], 'forecast': [], 'forecast_days': [], 'n_column_consumed':3, 
-                                                   'ordered_elements':['keep_selected','forecast','forecast_days'], 
-                                                   'widget':[QtWidgets.QCheckBox,
-                                                             CheckableComboBox,
-                                                             CheckableComboBox]}
+                self.page_memory["models"] = {
+                    "keep_selected": [],
+                    "forecast": [],
+                    "forecast_days": [],
+                    "n_column_consumed": 3,
+                    "ordered_elements": ["keep_selected", "forecast", "forecast_days"],
+                    "widget": [
+                        QtWidgets.QCheckBox,
+                        CheckableComboBox,
+                        CheckableComboBox,
+                    ],
+                }
 
             # if have more than 1 column per label, need column headers
-            if len(self.page_memory[menu_type]['ordered_elements']) > 1:
+            if len(self.page_memory[menu_type]["ordered_elements"]) > 1:
                 have_column_headers = True
-                if menu_type == 'multispecies':
+                if menu_type == "multispecies":
                     start_row_n = 2
                 else:
                     start_row_n = 1
@@ -352,14 +436,27 @@ class PopUpWindow(QtWidgets.QWidget):
             self.grid.setVerticalSpacing(grid_vertical_spacing)
 
             # calculate currently occupied vertical space
-            occupied_vertical_space_before_grid = self.page_margin + int(formatting_dict['popup_title']['QLabel']['height']) + self.layout_spacing + self.page_margin
+            occupied_vertical_space_before_grid = (
+                self.page_margin
+                + int(formatting_dict["popup_title"]["QLabel"]["height"])
+                + self.layout_spacing
+                + self.page_margin
+            )
             if self.have_buttons:
-                occupied_vertical_space_before_grid += (int(formatting_dict['popup_button']['QPushButton']['height']) + self.layout_spacing)
+                occupied_vertical_space_before_grid += (
+                    int(formatting_dict["popup_button"]["QPushButton"]["height"])
+                    + self.layout_spacing
+                )
             if have_column_headers:
-                occupied_vertical_space_before_grid += (int(formatting_dict['popup_label_column_header']['QLabel']['height']) + grid_vertical_spacing)
-            
+                occupied_vertical_space_before_grid += (
+                    int(
+                        formatting_dict["popup_label_column_header"]["QLabel"]["height"]
+                    )
+                    + grid_vertical_spacing
+                )
+
             # set horizontal scroll properties
-            scroll_area = QtWidgets.QScrollArea() 
+            scroll_area = QtWidgets.QScrollArea()
             scroll_area.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
             scroll_area.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
             scroll_area.setWidgetResizable(True)
@@ -370,54 +467,94 @@ class PopUpWindow(QtWidgets.QWidget):
             horizontal_parent.addWidget(scroll_area)
 
             # add horizontal scrollbar spacing to occupied vertical space
-            occupied_vertical_space_before_grid += (scroll_area.horizontalScrollBar().height() * 2.0)
+            occupied_vertical_space_before_grid += (
+                scroll_area.horizontalScrollBar().height() * 2.0
+            )
 
             # initialise variable for tracking available vertical space when appending rows of grid
-            currently_occupied_vertical_space = copy.deepcopy(occupied_vertical_space_before_grid)
+            currently_occupied_vertical_space = copy.deepcopy(
+                occupied_vertical_space_before_grid
+            )
 
             # iterate through all grid labels
-            for label_ii, label in enumerate(menu_current_type['labels']):
-                
+            for label_ii, label in enumerate(menu_current_type["labels"]):
                 # evaluate if all available vertical space has been consumed
-                row_available_space = self.full_window_geometry.height() - currently_occupied_vertical_space
-                
+                row_available_space = (
+                    self.full_window_geometry.height()
+                    - currently_occupied_vertical_space
+                )
+
                 # if available space <= than row height, force a new column to be started
                 if row_available_space <= int(obj_height):
-                    column_n+=self.page_memory[menu_type]['n_column_consumed']
+                    column_n += self.page_memory[menu_type]["n_column_consumed"]
                     row_n = 0
-                    currently_occupied_vertical_space = copy.deepcopy(occupied_vertical_space_before_grid)
+                    currently_occupied_vertical_space = copy.deepcopy(
+                        occupied_vertical_space_before_grid
+                    )
 
                 # set page subtitle (if exists)
-                if menu_type in ['checkboxes', 'rangeboxes']:
-                    if 'subtitles' in current_menu_keys:
-                        if label_ii in menu_current_type['subtitle_inds']:
-
+                if menu_type in ["checkboxes", "rangeboxes"]:
+                    if "subtitles" in current_menu_keys:
+                        if label_ii in menu_current_type["subtitle_inds"]:
                             # add subtitle to frame
-                            subtitle_label = set_formatting(QtWidgets.QLabel(self, text=menu_current_type['subtitles'][menu_current_type['subtitle_inds'].index(label_ii)]), 
-                                                            formatting_dict['popup_subtitle'])
-                            self.grid.addWidget(subtitle_label, start_row_n+row_n, column_n, QtCore.Qt.AlignLeft)
-                            
-                            # update occupied vertical space 
-                            currently_occupied_vertical_space += (int(formatting_dict['popup_subtitle']['QLabel']['height']) + grid_vertical_spacing)
-                            
+                            subtitle_label = set_formatting(
+                                QtWidgets.QLabel(
+                                    self,
+                                    text=menu_current_type["subtitles"][
+                                        menu_current_type["subtitle_inds"].index(
+                                            label_ii
+                                        )
+                                    ],
+                                ),
+                                formatting_dict["popup_subtitle"],
+                            )
+                            self.grid.addWidget(
+                                subtitle_label,
+                                start_row_n + row_n,
+                                column_n,
+                                QtCore.Qt.AlignLeft,
+                            )
+
+                            # update occupied vertical space
+                            currently_occupied_vertical_space += (
+                                int(
+                                    formatting_dict["popup_subtitle"]["QLabel"][
+                                        "height"
+                                    ]
+                                )
+                                + grid_vertical_spacing
+                            )
+
                             # iterate row_n
-                            row_n +=1
+                            row_n += 1
 
                 # add label to left of checkboxes / rangeboxes, and also add a tooltip (if exists)
-                if menu_type in ['checkboxes', 'rangeboxes', 'models']:
-                    rangebox_label = set_formatting(QtWidgets.QLabel(self, text = str(label)), 
-                                                    formatting_dict['popup_label'])
-                    if menu_type == 'rangeboxes':
-                        if len(menu_current_type['tooltips']) > 0:
-                            rangebox_label.setToolTip(wrap_tooltip_text(menu_current_type['tooltips'][label_ii], 
-                                                                        self.full_window_geometry.width(),
-                                                                        'popup_label'))
-                    self.grid.addWidget(rangebox_label, start_row_n+row_n, column_n, QtCore.Qt.AlignLeft)
+                if menu_type in ["checkboxes", "rangeboxes", "models"]:
+                    rangebox_label = set_formatting(
+                        QtWidgets.QLabel(self, text=str(label)),
+                        formatting_dict["popup_label"],
+                    )
+                    if menu_type == "rangeboxes":
+                        if len(menu_current_type["tooltips"]) > 0:
+                            rangebox_label.setToolTip(
+                                wrap_tooltip_text(
+                                    menu_current_type["tooltips"][label_ii],
+                                    self.full_window_geometry.width(),
+                                    "popup_label",
+                                )
+                            )
+                    self.grid.addWidget(
+                        rangebox_label,
+                        start_row_n + row_n,
+                        column_n,
+                        QtCore.Qt.AlignLeft,
+                    )
 
                 # create all elements in column, per row
-                for (element_ii, element), widget in zip(enumerate(self.page_memory[menu_type]['ordered_elements']),
-                                                         self.page_memory[menu_type]['widget']):
-
+                for (element_ii, element), widget in zip(
+                    enumerate(self.page_memory[menu_type]["ordered_elements"]),
+                    self.page_memory[menu_type]["widget"],
+                ):
                     # get appropriate formatting for element
                     if type(format_type) == list:
                         element_format = formatting_dict[format_type[element_ii]]
@@ -425,223 +562,360 @@ class PopUpWindow(QtWidgets.QWidget):
                         element_format = formatting_dict[format_type]
 
                     # if menu type ==  'rangeboxes' then add 1 to element ii, because placed a label in first column
-                    if menu_type in ['checkboxes', 'rangeboxes', 'models']:
-                        element_label = ''
+                    if menu_type in ["checkboxes", "rangeboxes", "models"]:
+                        element_label = ""
                         element_ii += 1
-                    elif menu_type in ['multispecies']:
-                        element_ii -= 1  
+                    elif menu_type in ["multispecies"]:
+                        element_ii -= 1
                     else:
                         element_label = label
 
                     # append widget to page memory dictionary
-                    if menu_type in ['multispecies', 'models']:
-                        self.page_memory[menu_type][element].append(set_formatting(widget(), element_format))
+                    if menu_type in ["multispecies", "models"]:
+                        self.page_memory[menu_type][element].append(
+                            set_formatting(widget(), element_format)
+                        )
                     else:
-                        self.page_memory[menu_type][element].append(set_formatting(widget(element_label), element_format))
+                        self.page_memory[menu_type][element].append(
+                            set_formatting(widget(element_label), element_format)
+                        )
 
                     # set checkboxes / rangeboxes to previous values
-                    if menu_type in ['checkboxes', 'rangeboxes']:
-                        
+                    if menu_type in ["checkboxes", "rangeboxes"]:
                         # check if checkbox is currently selected, if so select it again
                         # map checkbox value first if necessary
-                        if menu_type == 'checkboxes':
-                            if 'map_vars' in current_menu_keys:
-                                var_to_check = menu_current_type['map_vars'][label_ii]
+                        if menu_type == "checkboxes":
+                            if "map_vars" in current_menu_keys:
+                                var_to_check = menu_current_type["map_vars"][label_ii]
                             else:
                                 var_to_check = copy.deepcopy(label)
                             if var_to_check in menu_current_type[element]:
-                                self.page_memory[menu_type][element][label_ii].setCheckState(QtCore.Qt.Checked)
-                        
+                                self.page_memory[menu_type][element][
+                                    label_ii
+                                ].setCheckState(QtCore.Qt.Checked)
+
                         # set rangeboxes to previous set value (if any)
-                        elif menu_type == 'rangeboxes':
-                            if element != 'apply_selected':
-                                self.page_memory[menu_type][element][label_ii].setText(menu_current_type[element][label_ii])
+                        elif menu_type == "rangeboxes":
+                            if element != "apply_selected":
+                                self.page_memory[menu_type][element][label_ii].setText(
+                                    menu_current_type[element][label_ii]
+                                )
                             else:
-                                if 'map_vars' in current_menu_keys:
-                                    var_to_check = menu_current_type['map_vars'][label_ii]
+                                if "map_vars" in current_menu_keys:
+                                    var_to_check = menu_current_type["map_vars"][
+                                        label_ii
+                                    ]
                                 else:
                                     var_to_check = copy.deepcopy(label)
                                 if var_to_check in menu_current_type[element]:
-                                    self.page_memory[menu_type][element][label_ii].setCheckState(QtCore.Qt.Checked)
-                        
+                                    self.page_memory[menu_type][element][
+                                        label_ii
+                                    ].setCheckState(QtCore.Qt.Checked)
+
                     # if menu type == navigation_buttons
-                    elif menu_type == 'navigation_buttons':
-                        
+                    elif menu_type == "navigation_buttons":
                         # add tooltip
-                        if len(menu_current_type['tooltips']) > 0:
-                            self.page_memory[menu_type][element][label_ii].setToolTip(wrap_tooltip_text(menu_current_type['tooltips'][label_ii], 
-                                                                                                        self.full_window_geometry.width(),
-                                                                                                        'popup_button'))
+                        if len(menu_current_type["tooltips"]) > 0:
+                            self.page_memory[menu_type][element][label_ii].setToolTip(
+                                wrap_tooltip_text(
+                                    menu_current_type["tooltips"][label_ii],
+                                    self.full_window_geometry.width(),
+                                    "popup_button",
+                                )
+                            )
                         # add connectivity to buttons
-                        self.page_memory[menu_type][element][label_ii].clicked.connect(self.open_new_page)
+                        self.page_memory[menu_type][element][label_ii].clicked.connect(
+                            self.open_new_page
+                        )
 
                     # if menu type == multispecies
-                    elif menu_type == 'multispecies':
-                        
+                    elif menu_type == "multispecies":
                         # add connectivity to apply button
-                        if element == 'apply_selected':
-                            self.page_memory[menu_type][element][label_ii].setObjectName('apply_' + str(label_ii))
-                            self.page_memory[menu_type][element][label_ii].clicked.connect(self.handle_filter_species_change)
+                        if element == "apply_selected":
+                            self.page_memory[menu_type][element][
+                                label_ii
+                            ].setObjectName("apply_" + str(label_ii))
+                            self.page_memory[menu_type][element][
+                                label_ii
+                            ].clicked.connect(self.handle_filter_species_change)
 
                         # format and connect for changes
                         else:
-                            if element in ['network', 'matrix', 'species']:
+                            if element in ["network", "matrix", "species"]:
                                 # add connectivity to options
-                                self.page_memory[menu_type][element][label_ii].setObjectName('comboboxes_' + str(label_ii))
-                                self.page_memory[menu_type][element][label_ii].currentTextChanged.connect(self.handle_multispecies_params_change)
+                                self.page_memory[menu_type][element][
+                                    label_ii
+                                ].setObjectName("comboboxes_" + str(label_ii))
+                                self.page_memory[menu_type][element][
+                                    label_ii
+                                ].currentTextChanged.connect(
+                                    self.handle_multispecies_params_change
+                                )
                             else:
                                 # add connectivity to options
-                                self.page_memory[menu_type][element][label_ii].setObjectName('texts_' + str(label_ii))
-                                self.page_memory[menu_type][element][label_ii].textChanged.connect(self.handle_multispecies_params_change)
+                                self.page_memory[menu_type][element][
+                                    label_ii
+                                ].setObjectName("texts_" + str(label_ii))
+                                self.page_memory[menu_type][element][
+                                    label_ii
+                                ].textChanged.connect(
+                                    self.handle_multispecies_params_change
+                                )
 
                     # if menu type == models
-                    elif menu_type == 'models':
-
+                    elif menu_type == "models":
                         # check if model checkbox is currently selected, if so select it again
-                        if element == 'keep_selected':
-                            self.page_memory[menu_type][element][label_ii].setObjectName('expcheckboxes_' + str(label_ii))
-                            var_to_check = menu_current_type['map_vars'][label_ii]
+                        if element == "keep_selected":
+                            self.page_memory[menu_type][element][
+                                label_ii
+                            ].setObjectName("expcheckboxes_" + str(label_ii))
+                            var_to_check = menu_current_type["map_vars"][label_ii]
                             if var_to_check in menu_current_type[element]:
-                                self.page_memory[menu_type][element][label_ii].setCheckState(QtCore.Qt.Checked)
+                                self.page_memory[menu_type][element][
+                                    label_ii
+                                ].setCheckState(QtCore.Qt.Checked)
                             # connect checkbox to handle model being checked
-                            self.page_memory[menu_type][element][label_ii].stateChanged.connect(self.handle_model_checked)
+                            self.page_memory[menu_type][element][
+                                label_ii
+                            ].stateChanged.connect(self.handle_model_checked)
 
                         # update forecast options combobox back to previously available and selected values
-                        elif element == 'forecast':
-                            
-                            #gather all forecast options, selected options and disabled options
-                            var_to_check_raw = menu_current_type['map_vars'][label_ii]
+                        elif element == "forecast":
+                            # gather all forecast options, selected options and disabled options
+                            var_to_check_raw = menu_current_type["map_vars"][label_ii]
                             if var_to_check_raw in self.read_instance.init_models:
-                                var_to_check = self.read_instance.init_models[var_to_check_raw]
+                                var_to_check = self.read_instance.init_models[
+                                    var_to_check_raw
+                                ]
                             else:
                                 var_to_check = None
 
-                            if var_to_check_raw in menu_current_type['forecast']:
+                            if var_to_check_raw in menu_current_type["forecast"]:
                                 matched_var = var_to_check_raw
-                            elif var_to_check in menu_current_type['forecast']:
+                            elif var_to_check in menu_current_type["forecast"]:
                                 matched_var = var_to_check
                             else:
                                 matched_var = None
 
                             # only proceed if have previously intialised
                             if matched_var:
-                                all_forecast_vars = menu_current_type['forecast'][matched_var][0]
-                                selected_forecast_vars = menu_current_type['forecast'][matched_var][1]
-                                disabled_forecast_vars = menu_current_type['forecast'][matched_var][2]
+                                all_forecast_vars = menu_current_type["forecast"][
+                                    matched_var
+                                ][0]
+                                selected_forecast_vars = menu_current_type["forecast"][
+                                    matched_var
+                                ][1]
+                                disabled_forecast_vars = menu_current_type["forecast"][
+                                    matched_var
+                                ][2]
                                 # add available forecast options to combobox
-                                self.page_memory[menu_type]['forecast'][label_ii].addItems(all_forecast_vars)
+                                self.page_memory[menu_type]["forecast"][
+                                    label_ii
+                                ].addItems(all_forecast_vars)
                                 # if model is checked and have available forecast options, then show combobox
-                                if (self.page_memory[menu_type]['keep_selected'][label_ii].isChecked()) & (len(all_forecast_vars) > 0):
-                                    self.page_memory[menu_type]['forecast'][label_ii].show()
+                                if (
+                                    self.page_memory[menu_type]["keep_selected"][
+                                        label_ii
+                                    ].isChecked()
+                                ) & (len(all_forecast_vars) > 0):
+                                    self.page_memory[menu_type]["forecast"][
+                                        label_ii
+                                    ].show()
                                 # otherwise hide combobox
                                 else:
-                                    self.page_memory[menu_type]['forecast'][label_ii].hide()
+                                    self.page_memory[menu_type]["forecast"][
+                                        label_ii
+                                    ].hide()
                                 # iterate through forecast options and select or disable options if they were previously so
                                 for forecast_var in all_forecast_vars:
                                     item_index = all_forecast_vars.index(forecast_var)
-                                    item = self.page_memory[menu_type]['forecast'][label_ii].model().item(item_index, 0)
+                                    item = (
+                                        self.page_memory[menu_type]["forecast"][
+                                            label_ii
+                                        ]
+                                        .model()
+                                        .item(item_index, 0)
+                                    )
                                     # select option
                                     if forecast_var in selected_forecast_vars:
                                         item.setCheckState(QtCore.Qt.Checked)
                                     # disable option
                                     if forecast_var in disabled_forecast_vars:
-                                        item.setFlags(item.flags() & ~QtCore.Qt.ItemIsEnabled)
-                                        item.setData(QtGui.QBrush(QtGui.QColor(150,150,150)), QtCore.Qt.ForegroundRole)
+                                        item.setFlags(
+                                            item.flags() & ~QtCore.Qt.ItemIsEnabled
+                                        )
+                                        item.setData(
+                                            QtGui.QBrush(QtGui.QColor(150, 150, 150)),
+                                            QtCore.Qt.ForegroundRole,
+                                        )
 
                                 # setup connectivity for combobox upon selecting option
-                                self.page_memory['models']['forecast'][label_ii].model().setObjectName('forecastcheckboxes_' + str(label_ii))
-                                self.page_memory['models']['forecast'][label_ii].model().dataChanged.connect(self.forecast_option_checked)
-                            
+                                self.page_memory["models"]["forecast"][
+                                    label_ii
+                                ].model().setObjectName(
+                                    "forecastcheckboxes_" + str(label_ii)
+                                )
+                                self.page_memory["models"]["forecast"][
+                                    label_ii
+                                ].model().dataChanged.connect(
+                                    self.forecast_option_checked
+                                )
+
                             # if not yet initialised hide combobox
                             else:
-                                self.page_memory[menu_type]['forecast'][label_ii].hide()
+                                self.page_memory[menu_type]["forecast"][label_ii].hide()
 
                         # update forecast days combobox back to previously available and selected values
-                        elif element == 'forecast_days': 
-
-                            #gather all forecast options, selected forecast options, forecast days, and selected forecast days
-                            var_to_check_raw = menu_current_type['map_vars'][label_ii]
+                        elif element == "forecast_days":
+                            # gather all forecast options, selected forecast options, forecast days, and selected forecast days
+                            var_to_check_raw = menu_current_type["map_vars"][label_ii]
                             if var_to_check_raw in self.read_instance.init_models:
-                                var_to_check = self.read_instance.init_models[var_to_check_raw]
+                                var_to_check = self.read_instance.init_models[
+                                    var_to_check_raw
+                                ]
                             else:
                                 var_to_check = None
 
-                            if var_to_check_raw in menu_current_type['forecast']:
+                            if var_to_check_raw in menu_current_type["forecast"]:
                                 matched_var = var_to_check_raw
-                            elif var_to_check in menu_current_type['forecast']:
+                            elif var_to_check in menu_current_type["forecast"]:
                                 matched_var = var_to_check
                             else:
                                 matched_var = None
 
                             # only proceed if have previously intialised
                             if matched_var:
-                                selected_forecast_vars = menu_current_type['forecast'][matched_var][1]
-                                all_forecast_day_vars = menu_current_type['forecast_days'][matched_var][0]
-                                selected_forecast_day_vars = menu_current_type['forecast_days'][matched_var][1]  
+                                selected_forecast_vars = menu_current_type["forecast"][
+                                    matched_var
+                                ][1]
+                                all_forecast_day_vars = menu_current_type[
+                                    "forecast_days"
+                                ][matched_var][0]
+                                selected_forecast_day_vars = menu_current_type[
+                                    "forecast_days"
+                                ][matched_var][1]
                                 # add available forecast days to combobox
-                                self.page_memory[menu_type]['forecast_days'][label_ii].addItems(all_forecast_day_vars) 
+                                self.page_memory[menu_type]["forecast_days"][
+                                    label_ii
+                                ].addItems(all_forecast_day_vars)
                                 # if model is checked and have selected forecast options, then show combobox
-                                if (self.page_memory[menu_type]['keep_selected'][label_ii].isChecked()) & (len(selected_forecast_vars) > 0):
-                                    self.page_memory[menu_type]['forecast_days'][label_ii].show()
+                                if (
+                                    self.page_memory[menu_type]["keep_selected"][
+                                        label_ii
+                                    ].isChecked()
+                                ) & (len(selected_forecast_vars) > 0):
+                                    self.page_memory[menu_type]["forecast_days"][
+                                        label_ii
+                                    ].show()
                                 # otherwise hide combobox
                                 else:
-                                    self.page_memory[menu_type]['forecast_days'][label_ii].hide()
+                                    self.page_memory[menu_type]["forecast_days"][
+                                        label_ii
+                                    ].hide()
                                 # iterate through forecast days and select days if they were previously so
                                 for forecast_day_var in all_forecast_day_vars:
-                                    item_index = all_forecast_day_vars.index(forecast_day_var)
-                                    item = self.page_memory[menu_type]['forecast_days'][label_ii].model().item(item_index, 0)
+                                    item_index = all_forecast_day_vars.index(
+                                        forecast_day_var
+                                    )
+                                    item = (
+                                        self.page_memory[menu_type]["forecast_days"][
+                                            label_ii
+                                        ]
+                                        .model()
+                                        .item(item_index, 0)
+                                    )
                                     if forecast_day_var in selected_forecast_day_vars:
                                         item.setCheckState(QtCore.Qt.Checked)
 
                             # if not yet initialised hide combobox
                             else:
-                                self.page_memory[menu_type]['forecast_days'][label_ii].hide()
+                                self.page_memory[menu_type]["forecast_days"][
+                                    label_ii
+                                ].hide()
 
                     # add element to grid
-                    if menu_type == 'multispecies':
-                        self.grid.addWidget(self.page_memory[menu_type][element][label_ii], 
-                                       start_row_n+row_n, element_ii+1, QtCore.Qt.AlignCenter)
+                    if menu_type == "multispecies":
+                        self.grid.addWidget(
+                            self.page_memory[menu_type][element][label_ii],
+                            start_row_n + row_n,
+                            element_ii + 1,
+                            QtCore.Qt.AlignCenter,
+                        )
                     else:
-                        self.grid.addWidget(self.page_memory[menu_type][element][label_ii], 
-                                       start_row_n+row_n, column_n+element_ii, QtCore.Qt.AlignLeft)
-                
+                        self.grid.addWidget(
+                            self.page_memory[menu_type][element][label_ii],
+                            start_row_n + row_n,
+                            column_n + element_ii,
+                            QtCore.Qt.AlignLeft,
+                        )
+
                 # update multispecies filtering fields for each row
-                if menu_type == 'multispecies':
+                if menu_type == "multispecies":
                     self.update_multispecies_fields(label_ii)
                     self.read_instance.multispecies_initialisation = False
 
                 # iterate row_n
-                row_n +=1
+                row_n += 1
 
                 # add row vertical space to total occupied space
-                currently_occupied_vertical_space += (int(obj_height) + grid_vertical_spacing)
+                currently_occupied_vertical_space += (
+                    int(obj_height) + grid_vertical_spacing
+                )
 
             # get values before closing the tab
-            if menu_type == 'multispecies':
+            if menu_type == "multispecies":
                 self.set_multispecies_previous_fields()
 
             # add column headers to menu type grid if needed
             if have_column_headers:
-                for column_number in np.arange(0, column_n+1, self.page_memory[menu_type]['n_column_consumed']):
-                    if menu_type == 'checkboxes':
-                        texts = ['K', 'R']
+                for column_number in np.arange(
+                    0, column_n + 1, self.page_memory[menu_type]["n_column_consumed"]
+                ):
+                    if menu_type == "checkboxes":
+                        texts = ["K", "R"]
                         for i, text in enumerate(texts):
-                            column_label = set_formatting(QtWidgets.QLabel(self, text=text), 
-                                                          formatting_dict['popup_label_column_header'])
-                            self.grid.addWidget(column_label, 0, column_number+i+1, QtCore.Qt.AlignCenter)
-                    elif menu_type == 'rangeboxes':
-                        texts = ['Min', 'Max', 'A']
+                            column_label = set_formatting(
+                                QtWidgets.QLabel(self, text=text),
+                                formatting_dict["popup_label_column_header"],
+                            )
+                            self.grid.addWidget(
+                                column_label,
+                                0,
+                                column_number + i + 1,
+                                QtCore.Qt.AlignCenter,
+                            )
+                    elif menu_type == "rangeboxes":
+                        texts = ["Min", "Max", "A"]
                         for i, text in enumerate(texts):
-                            column_label = set_formatting(QtWidgets.QLabel(self, text=text), 
-                                                          formatting_dict['popup_label_column_header'])
-                            self.grid.addWidget(column_label, 0, column_number+i+1, QtCore.Qt.AlignCenter)
-                    elif menu_type == 'multispecies':
-                        if len(self.menu_current['multispecies']['labels']) > 0:
-                            texts = ['Network', 'Matrix', 'Species', 'Min', 'Max', 'Fill value', 'A']
+                            column_label = set_formatting(
+                                QtWidgets.QLabel(self, text=text),
+                                formatting_dict["popup_label_column_header"],
+                            )
+                            self.grid.addWidget(
+                                column_label,
+                                0,
+                                column_number + i + 1,
+                                QtCore.Qt.AlignCenter,
+                            )
+                    elif menu_type == "multispecies":
+                        if len(self.menu_current["multispecies"]["labels"]) > 0:
+                            texts = [
+                                "Network",
+                                "Matrix",
+                                "Species",
+                                "Min",
+                                "Max",
+                                "Fill value",
+                                "A",
+                            ]
                             for i, text in enumerate(texts):
-                                column_label = set_formatting(QtWidgets.QLabel(self, text=text), 
-                                                              formatting_dict['popup_label_column_header'])
-                                self.grid.addWidget(column_label, 1, i, QtCore.Qt.AlignCenter)
+                                column_label = set_formatting(
+                                    QtWidgets.QLabel(self, text=text),
+                                    formatting_dict["popup_label_column_header"],
+                                )
+                                self.grid.addWidget(
+                                    column_label, 1, i, QtCore.Qt.AlignCenter
+                                )
 
         # return horizontally concatenated menu type grids
         return horizontal_parent
@@ -653,16 +927,21 @@ class PopUpWindow(QtWidgets.QWidget):
 
         # get selected navigation button text
         selected_navigation_button = self.sender().text()
-        
+
         # add selected navigation button text to menu levels list
         self.menu_levels.append(selected_navigation_button)
-        
+
         # create new pop-up page for selected navigation button
-        self.new_window = PopUpWindow(self.read_instance, self.menu_root, self.menu_levels, self.full_window_geometry)
-        
+        self.new_window = PopUpWindow(
+            self.read_instance,
+            self.menu_root,
+            self.menu_levels,
+            self.full_window_geometry,
+        )
+
         # sleep briefly to allow new page to be generated
         time.sleep(0.1)
-        
+
         # close current pop-up page
         self.close()
 
@@ -672,11 +951,13 @@ class PopUpWindow(QtWidgets.QWidget):
         """
 
         # create new pop-up page for root menu level
-        self.new_window = PopUpWindow(self.read_instance, self.menu_root, [], self.full_window_geometry)
-        
+        self.new_window = PopUpWindow(
+            self.read_instance, self.menu_root, [], self.full_window_geometry
+        )
+
         # sleep briefly to allow new page to be generated
         time.sleep(0.1)
-        
+
         # close current pop-up page
         self.close()
 
@@ -686,12 +967,16 @@ class PopUpWindow(QtWidgets.QWidget):
         """
 
         # create new pop-up page for previous menu level
-        self.new_window = PopUpWindow(self.read_instance, self.menu_root, self.menu_levels[:-1], 
-                                      self.full_window_geometry)
-        
+        self.new_window = PopUpWindow(
+            self.read_instance,
+            self.menu_root,
+            self.menu_levels[:-1],
+            self.full_window_geometry,
+        )
+
         # sleep briefly to allow new page to be generated
         time.sleep(0.1)
-        
+
         # close current pop-up page
         self.close()
 
@@ -700,34 +985,42 @@ class PopUpWindow(QtWidgets.QWidget):
         Sets the state of all applicable checkboxes within the current menu to checked.
         """
 
-        if 'models' in self.page_memory:
-            menu_type = 'models'
-        elif 'checkboxes' in self.page_memory:
-            menu_type = 'checkboxes'
+        if "models" in self.page_memory:
+            menu_type = "models"
+        elif "checkboxes" in self.page_memory:
+            menu_type = "checkboxes"
         else:
             return
 
-        for element in self.page_memory[menu_type]['ordered_elements']:
-            if element in ['keep_selected', 'remove_selected']:
-                for checkbox_ii, checkbox in enumerate(self.page_memory[menu_type][element]):
-                    self.page_memory[menu_type][element][checkbox_ii].setCheckState(QtCore.Qt.Checked)
+        for element in self.page_memory[menu_type]["ordered_elements"]:
+            if element in ["keep_selected", "remove_selected"]:
+                for checkbox_ii, checkbox in enumerate(
+                    self.page_memory[menu_type][element]
+                ):
+                    self.page_memory[menu_type][element][checkbox_ii].setCheckState(
+                        QtCore.Qt.Checked
+                    )
 
     def clear_all(self):
         """
         Sets the state of all applicable checkboxes within the current menu to unchecked.
         """
 
-        if 'models' in self.page_memory:
-            menu_type = 'models'
-        elif 'checkboxes' in self.page_memory:
-            menu_type = 'checkboxes'
+        if "models" in self.page_memory:
+            menu_type = "models"
+        elif "checkboxes" in self.page_memory:
+            menu_type = "checkboxes"
         else:
             return
 
-        for element in self.page_memory[menu_type]['ordered_elements']:
-            if element in ['keep_selected', 'remove_selected']:
-                for checkbox_ii, checkbox in enumerate(self.page_memory[menu_type][element]):
-                    self.page_memory[menu_type][element][checkbox_ii].setCheckState(QtCore.Qt.Unchecked)
+        for element in self.page_memory[menu_type]["ordered_elements"]:
+            if element in ["keep_selected", "remove_selected"]:
+                for checkbox_ii, checkbox in enumerate(
+                    self.page_memory[menu_type][element]
+                ):
+                    self.page_memory[menu_type][element][checkbox_ii].setCheckState(
+                        QtCore.Qt.Unchecked
+                    )
 
     def select_all_default(self):
         """
@@ -735,81 +1028,128 @@ class PopUpWindow(QtWidgets.QWidget):
         """
 
         # unselect all checkboxes first
-        for element in self.page_memory['checkboxes']['ordered_elements']:
-            for checkbox_ii, checkbox in enumerate(self.page_memory['checkboxes'][element]):
-                self.page_memory['checkboxes'][element][checkbox_ii].setCheckState(QtCore.Qt.Unchecked)
+        for element in self.page_memory["checkboxes"]["ordered_elements"]:
+            for checkbox_ii, checkbox in enumerate(
+                self.page_memory["checkboxes"][element]
+            ):
+                self.page_memory["checkboxes"][element][checkbox_ii].setCheckState(
+                    QtCore.Qt.Unchecked
+                )
 
         # map default variables to positional indices
-        if 'map_vars' in list(self.menu_current['checkboxes'].keys()):
-            default_inds = [np.where(self.menu_current['checkboxes']['map_vars'] == default_var)[0][0] for default_var in self.menu_current['checkboxes']['remove_default']]
+        if "map_vars" in list(self.menu_current["checkboxes"].keys()):
+            default_inds = [
+                np.where(self.menu_current["checkboxes"]["map_vars"] == default_var)[0][
+                    0
+                ]
+                for default_var in self.menu_current["checkboxes"]["remove_default"]
+            ]
         else:
-            default_inds = [np.where(self.menu_current['checkboxes']['labels'] == default_var)[0][0] for default_var in self.menu_current['checkboxes']['remove_default']]
+            default_inds = [
+                np.where(self.menu_current["checkboxes"]["labels"] == default_var)[0][0]
+                for default_var in self.menu_current["checkboxes"]["remove_default"]
+            ]
 
         # now select only desired default checkboxes
-        for element in self.page_memory['checkboxes']['ordered_elements']:
+        for element in self.page_memory["checkboxes"]["ordered_elements"]:
             for default_ind in default_inds:
-                self.page_memory['checkboxes'][element][default_ind].setCheckState(QtCore.Qt.Checked)
+                self.page_memory["checkboxes"][element][default_ind].setCheckState(
+                    QtCore.Qt.Checked
+                )
 
     def add_multispecies_widgets(self):
         """
         Appends a new row of filtering widgets to the multispecies configuration grid and initialises their connectivity.
         """
-        
+
         # get widget line
-        label_ii = len(self.menu_current['multispecies']['labels'])
+        label_ii = len(self.menu_current["multispecies"]["labels"])
 
         # initalise labels
-        if len(self.menu_current['multispecies']['labels']) == 0:
-            texts = ['Network', 'Matrix', 'Species', 'Min', 'Max', 'Fill value', 'A']
+        if len(self.menu_current["multispecies"]["labels"]) == 0:
+            texts = ["Network", "Matrix", "Species", "Min", "Max", "Fill value", "A"]
             for i, text in enumerate(texts):
-                column_label = set_formatting(QtWidgets.QLabel(self, text=text), 
-                                              formatting_dict['popup_label_column_header'])
+                column_label = set_formatting(
+                    QtWidgets.QLabel(self, text=text),
+                    formatting_dict["popup_label_column_header"],
+                )
                 self.grid.addWidget(column_label, 1, i, QtCore.Qt.AlignCenter)
 
         # update menu_current labels
         # check if they exist since they might have been added with the function multispecies_conf
-        if 'networkspeci_' + str(label_ii) not in self.menu_current['multispecies']['labels']:
-            self.menu_current['multispecies']['labels'].append('networkspeci_' + str(label_ii))
+        if (
+            "networkspeci_" + str(label_ii)
+            not in self.menu_current["multispecies"]["labels"]
+        ):
+            self.menu_current["multispecies"]["labels"].append(
+                "networkspeci_" + str(label_ii)
+            )
 
         # add new line only when add_row button is pressed
-        for (element_ii, element), widget in zip(enumerate(self.page_memory['multispecies']['ordered_elements']),
-                                                           self.page_memory['multispecies']['widget']):
-            
-            #format widget and add element to memory
+        for (element_ii, element), widget in zip(
+            enumerate(self.page_memory["multispecies"]["ordered_elements"]),
+            self.page_memory["multispecies"]["widget"],
+        ):
+            # format widget and add element to memory
 
-            #checkbox
-            if element == 'apply_selected':
+            # checkbox
+            if element == "apply_selected":
                 # add element to memory
-                self.page_memory['multispecies'][element].append(set_formatting(widget(), 
-                                                                                formatting_dict['popup_checkbox']))
+                self.page_memory["multispecies"][element].append(
+                    set_formatting(widget(), formatting_dict["popup_checkbox"])
+                )
                 # add connectivity
-                self.page_memory['multispecies'][element][label_ii].setObjectName('apply_' + str(label_ii))
-                self.page_memory['multispecies'][element][label_ii].clicked.connect(self.handle_filter_species_change)
+                self.page_memory["multispecies"][element][label_ii].setObjectName(
+                    "apply_" + str(label_ii)
+                )
+                self.page_memory["multispecies"][element][label_ii].clicked.connect(
+                    self.handle_filter_species_change
+                )
 
-            #combobox
-            elif element in ['network', 'matrix', 'species']:
+            # combobox
+            elif element in ["network", "matrix", "species"]:
                 # add element to memory
-                self.page_memory['multispecies'][element].append(set_formatting(widget(), 
-                                                                                formatting_dict['popup_combobox']))
-
-                # add connectivity
-                self.page_memory['multispecies'][element][label_ii].setObjectName('comboboxes_' + str(label_ii))
-                self.page_memory['multispecies'][element][label_ii].currentTextChanged.connect(self.handle_multispecies_params_change)
-                
-            #lineedit
-            elif element in ['current_lower', 'current_upper', 'current_filter_species_fill_value']:
-                # add element to memory
-                self.page_memory['multispecies'][element].append(set_formatting(widget(), 
-                                                                                formatting_dict['popup_lineedit_multispecies']))
+                self.page_memory["multispecies"][element].append(
+                    set_formatting(widget(), formatting_dict["popup_combobox"])
+                )
 
                 # add connectivity
-                self.page_memory['multispecies'][element][label_ii].setObjectName('texts_' + str(label_ii))
-                self.page_memory['multispecies'][element][label_ii].textChanged.connect(self.handle_multispecies_params_change)
+                self.page_memory["multispecies"][element][label_ii].setObjectName(
+                    "comboboxes_" + str(label_ii)
+                )
+                self.page_memory["multispecies"][element][
+                    label_ii
+                ].currentTextChanged.connect(self.handle_multispecies_params_change)
+
+            # lineedit
+            elif element in [
+                "current_lower",
+                "current_upper",
+                "current_filter_species_fill_value",
+            ]:
+                # add element to memory
+                self.page_memory["multispecies"][element].append(
+                    set_formatting(
+                        widget(), formatting_dict["popup_lineedit_multispecies"]
+                    )
+                )
+
+                # add connectivity
+                self.page_memory["multispecies"][element][label_ii].setObjectName(
+                    "texts_" + str(label_ii)
+                )
+                self.page_memory["multispecies"][element][label_ii].textChanged.connect(
+                    self.handle_multispecies_params_change
+                )
 
             # add element to grid
-            self.grid.addWidget(self.page_memory['multispecies'][element][label_ii], label_ii + 2, element_ii, 
-                           QtCore.Qt.AlignCenter)
-                                    
+            self.grid.addWidget(
+                self.page_memory["multispecies"][element][label_ii],
+                label_ii + 2,
+                element_ii,
+                QtCore.Qt.AlignCenter,
+            )
+
         # update multispecies filtering fields for each row
         self.read_instance.multispecies_initialisation = True
         self.update_multispecies_fields(label_ii)
@@ -819,11 +1159,11 @@ class PopUpWindow(QtWidgets.QWidget):
         """
         Triggers the addition or removal of species filters based on the state of the row's apply checkbox.
         """
-        
+
         # get widget line
         event_source = self.sender()
-        label_ii = int(event_source.objectName().split('_')[1])
-        
+        label_ii = int(event_source.objectName().split("_")[1])
+
         if event_source.isChecked():
             self.update_filter_species(label_ii)
         else:
@@ -844,26 +1184,41 @@ class PopUpWindow(QtWidgets.QWidget):
 
         # set some default configuration values when initialising config bar
         if self.read_instance.multispecies_initialisation:
-            
             # set initial selected config variables as set .conf files or defaults
-            self.read_instance.selected_widget_network.update({label_ii: copy.deepcopy(self.read_instance.selected_network)})
-            self.read_instance.selected_widget_matrix.update({label_ii: self.read_instance.parameter_dictionary[self.read_instance.selected_species]['matrix']})
-            self.read_instance.selected_widget_species.update({label_ii: copy.deepcopy(self.read_instance.selected_species)})
-            self.read_instance.selected_widget_lower.update({label_ii: ':'})
-            self.read_instance.selected_widget_upper.update({label_ii: ':'})
-            self.read_instance.selected_widget_filter_species_fill_value.update({label_ii: str(np.nan)})
+            self.read_instance.selected_widget_network.update(
+                {label_ii: copy.deepcopy(self.read_instance.selected_network)}
+            )
+            self.read_instance.selected_widget_matrix.update(
+                {
+                    label_ii: self.read_instance.parameter_dictionary[
+                        self.read_instance.selected_species
+                    ]["matrix"]
+                }
+            )
+            self.read_instance.selected_widget_species.update(
+                {label_ii: copy.deepcopy(self.read_instance.selected_species)}
+            )
+            self.read_instance.selected_widget_lower.update({label_ii: ":"})
+            self.read_instance.selected_widget_upper.update({label_ii: ":"})
+            self.read_instance.selected_widget_filter_species_fill_value.update(
+                {label_ii: str(np.nan)}
+            )
             self.read_instance.selected_widget_apply.update({label_ii: False})
 
         # initialise/update fields - maintain previously selected values wherever possible
         # clear fields
-        if len(self.menu_current['multispecies']['labels']) > 0:
-            self.page_memory['multispecies']['network'][label_ii].clear()
-            self.page_memory['multispecies']['matrix'][label_ii].clear()
-            self.page_memory['multispecies']['species'][label_ii].clear()
-            self.page_memory['multispecies']['current_lower'][label_ii].setText(':')
-            self.page_memory['multispecies']['current_upper'][label_ii].setText(':')
-            self.page_memory['multispecies']['current_filter_species_fill_value'][label_ii].setText(str(np.nan))
-            self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
+        if len(self.menu_current["multispecies"]["labels"]) > 0:
+            self.page_memory["multispecies"]["network"][label_ii].clear()
+            self.page_memory["multispecies"]["matrix"][label_ii].clear()
+            self.page_memory["multispecies"]["species"][label_ii].clear()
+            self.page_memory["multispecies"]["current_lower"][label_ii].setText(":")
+            self.page_memory["multispecies"]["current_upper"][label_ii].setText(":")
+            self.page_memory["multispecies"]["current_filter_species_fill_value"][
+                label_ii
+            ].setText(str(np.nan))
+            self.page_memory["multispecies"]["apply_selected"][label_ii].setCheckState(
+                QtCore.Qt.Unchecked
+            )
 
         # if have no available observational data, return from function, updating variable informing that have no data
         if len(self.read_instance.available_observation_data) == 0:
@@ -873,59 +1228,122 @@ class PopUpWindow(QtWidgets.QWidget):
             return
         else:
             self.read_instance.no_data_to_read = False
-        
+
         # get available networks for selected resolution
-        available_networks = copy.deepcopy(list(self.read_instance.available_observation_data.keys()))
+        available_networks = copy.deepcopy(
+            list(self.read_instance.available_observation_data.keys())
+        )
         for network in list(self.read_instance.available_observation_data.keys()):
-            if self.read_instance.selected_resolution not in self.read_instance.available_observation_data[network].keys():
+            if (
+                self.read_instance.selected_resolution
+                not in self.read_instance.available_observation_data[network].keys()
+            ):
                 available_networks.remove(network)
-        
+
         # update network and set current text in network widget
-        self.page_memory['multispecies']['network'][label_ii].addItems(available_networks)
+        self.page_memory["multispecies"]["network"][label_ii].addItems(
+            available_networks
+        )
         if self.read_instance.selected_widget_network[label_ii] in available_networks:
-            self.page_memory['multispecies']['network'][label_ii].setCurrentText(self.read_instance.selected_widget_network[label_ii])
+            self.page_memory["multispecies"]["network"][label_ii].setCurrentText(
+                self.read_instance.selected_widget_network[label_ii]
+            )
         else:
-            self.read_instance.selected_widget_network.update({label_ii: self.page_memory['multispecies']['network'][label_ii].currentText()})
+            self.read_instance.selected_widget_network.update(
+                {
+                    label_ii: self.page_memory["multispecies"]["network"][
+                        label_ii
+                    ].currentText()
+                }
+            )
 
         # add available matrices
-        available_matrices = sorted(self.read_instance.available_observation_data[self.read_instance.selected_widget_network[label_ii]][self.read_instance.selected_resolution])
-        self.page_memory['multispecies']['matrix'][label_ii].addItems(available_matrices)
-        
+        available_matrices = sorted(
+            self.read_instance.available_observation_data[
+                self.read_instance.selected_widget_network[label_ii]
+            ][self.read_instance.selected_resolution]
+        )
+        self.page_memory["multispecies"]["matrix"][label_ii].addItems(
+            available_matrices
+        )
+
         # update matrix and set current text in matrix widget
         if self.read_instance.selected_widget_matrix[label_ii] in available_matrices:
-            self.page_memory['multispecies']['matrix'][label_ii].setCurrentText(self.read_instance.selected_widget_matrix[label_ii])
+            self.page_memory["multispecies"]["matrix"][label_ii].setCurrentText(
+                self.read_instance.selected_widget_matrix[label_ii]
+            )
         else:
-            self.read_instance.selected_widget_matrix.update({label_ii: self.page_memory['multispecies']['matrix'][label_ii].currentText()})
-                            
+            self.read_instance.selected_widget_matrix.update(
+                {
+                    label_ii: self.page_memory["multispecies"]["matrix"][
+                        label_ii
+                    ].currentText()
+                }
+            )
+
         # add available species
-        available_species = sorted(self.read_instance.available_observation_data[self.read_instance.selected_widget_network[label_ii]][self.read_instance.selected_resolution][self.read_instance.selected_widget_matrix[label_ii]])
-        # remove currently selected species 
-        if ((self.page_memory['multispecies']['network'][label_ii].currentText() == self.read_instance.selected_network)
-           & (self.read_instance.selected_species in available_species)):
+        available_species = sorted(
+            self.read_instance.available_observation_data[
+                self.read_instance.selected_widget_network[label_ii]
+            ][self.read_instance.selected_resolution][
+                self.read_instance.selected_widget_matrix[label_ii]
+            ]
+        )
+        # remove currently selected species
+        if (
+            self.page_memory["multispecies"]["network"][label_ii].currentText()
+            == self.read_instance.selected_network
+        ) & (self.read_instance.selected_species in available_species):
             available_species.remove(self.read_instance.selected_species)
-        self.page_memory['multispecies']['species'][label_ii].addItems(available_species)
-        
+        self.page_memory["multispecies"]["species"][label_ii].addItems(
+            available_species
+        )
+
         # update species and set current text in species widget
         if self.read_instance.selected_widget_species[label_ii] in available_species:
-            self.page_memory['multispecies']['species'][label_ii].setCurrentText(self.read_instance.selected_widget_species[label_ii])
+            self.page_memory["multispecies"]["species"][label_ii].setCurrentText(
+                self.read_instance.selected_widget_species[label_ii]
+            )
         else:
-            self.read_instance.selected_widget_species.update({label_ii: self.page_memory['multispecies']['species'][label_ii].currentText()})
-        
+            self.read_instance.selected_widget_species.update(
+                {
+                    label_ii: self.page_memory["multispecies"]["species"][
+                        label_ii
+                    ].currentText()
+                }
+            )
+
         # update current lower
-        if self.read_instance.selected_widget_lower[label_ii] != ':':
-            self.page_memory['multispecies']['current_lower'][label_ii].setText(str(self.read_instance.selected_widget_lower[label_ii]))
+        if self.read_instance.selected_widget_lower[label_ii] != ":":
+            self.page_memory["multispecies"]["current_lower"][label_ii].setText(
+                str(self.read_instance.selected_widget_lower[label_ii])
+            )
 
         # update current upper
-        if self.read_instance.selected_widget_upper[label_ii] != ':':
-            self.page_memory['multispecies']['current_upper'][label_ii].setText(str(self.read_instance.selected_widget_upper[label_ii]))
+        if self.read_instance.selected_widget_upper[label_ii] != ":":
+            self.page_memory["multispecies"]["current_upper"][label_ii].setText(
+                str(self.read_instance.selected_widget_upper[label_ii])
+            )
 
         # update current fill value
-        if self.read_instance.selected_widget_filter_species_fill_value[label_ii] != str(np.nan):
-            self.page_memory['multispecies']['current_filter_species_fill_value'][label_ii].setText(str(self.read_instance.selected_widget_filter_species_fill_value[label_ii]))
+        if self.read_instance.selected_widget_filter_species_fill_value[
+            label_ii
+        ] != str(np.nan):
+            self.page_memory["multispecies"]["current_filter_species_fill_value"][
+                label_ii
+            ].setText(
+                str(
+                    self.read_instance.selected_widget_filter_species_fill_value[
+                        label_ii
+                    ]
+                )
+            )
 
         # update apply
         if self.read_instance.selected_widget_apply[label_ii] == True:
-            self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Checked)
+            self.page_memory["multispecies"]["apply_selected"][label_ii].setCheckState(
+                QtCore.Qt.Checked
+            )
 
         self.read_instance.block_config_bar_handling_updates = False
 
@@ -936,22 +1354,47 @@ class PopUpWindow(QtWidgets.QWidget):
 
         # set variable to block interactive handling while updating config bar parameters
         self.read_instance.block_config_bar_handling_updates = True
-        
+
         # set previous bounds and check apply_selected
         # do this only when previous bounds exist (after tab has been closed)
-        if len(self.menu_current['multispecies']['previous_lower'].keys()) > 0:
-            for label_ii, label in enumerate(self.menu_current['multispecies']['labels']):
-                if (label_ii+1) <= len(self.menu_current['multispecies']['previous_lower'].keys()):
-                    self.page_memory['multispecies']['current_lower'][label_ii].setText(
-                        str(self.menu_current['multispecies']['previous_lower'][label_ii]))
-                    self.page_memory['multispecies']['current_upper'][label_ii].setText(
-                        str(self.menu_current['multispecies']['previous_upper'][label_ii]))
-                    self.page_memory['multispecies']['current_filter_species_fill_value'][label_ii].setText(
-                        str(self.menu_current['multispecies']['previous_filter_species_fill_value'][label_ii]))
-                    if self.menu_current['multispecies']['previous_apply'][label_ii]:
-                        self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Checked)
+        if len(self.menu_current["multispecies"]["previous_lower"].keys()) > 0:
+            for label_ii, label in enumerate(
+                self.menu_current["multispecies"]["labels"]
+            ):
+                if (label_ii + 1) <= len(
+                    self.menu_current["multispecies"]["previous_lower"].keys()
+                ):
+                    self.page_memory["multispecies"]["current_lower"][label_ii].setText(
+                        str(
+                            self.menu_current["multispecies"]["previous_lower"][
+                                label_ii
+                            ]
+                        )
+                    )
+                    self.page_memory["multispecies"]["current_upper"][label_ii].setText(
+                        str(
+                            self.menu_current["multispecies"]["previous_upper"][
+                                label_ii
+                            ]
+                        )
+                    )
+                    self.page_memory["multispecies"][
+                        "current_filter_species_fill_value"
+                    ][label_ii].setText(
+                        str(
+                            self.menu_current["multispecies"][
+                                "previous_filter_species_fill_value"
+                            ][label_ii]
+                        )
+                    )
+                    if self.menu_current["multispecies"]["previous_apply"][label_ii]:
+                        self.page_memory["multispecies"]["apply_selected"][
+                            label_ii
+                        ].setCheckState(QtCore.Qt.Checked)
                     else:
-                        self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
+                        self.page_memory["multispecies"]["apply_selected"][
+                            label_ii
+                        ].setCheckState(QtCore.Qt.Unchecked)
 
         self.read_instance.block_config_bar_handling_updates = False
 
@@ -964,48 +1407,112 @@ class PopUpWindow(QtWidgets.QWidget):
         changed_param : str
             The new value from the widget that triggered the change.
         """
-        
-        if (changed_param != '') and (not self.read_instance.block_config_bar_handling_updates):
-            
+
+        if (changed_param != "") and (
+            not self.read_instance.block_config_bar_handling_updates
+        ):
             # get event origin source
             event_source = self.sender()
 
             # get line
-            label_ii = int(event_source.objectName().split('_')[1])
+            label_ii = int(event_source.objectName().split("_")[1])
 
             # reset bounds and apply values on widgets
             self.read_instance.selected_widget_apply.update({label_ii: False})
 
             # if network, matrix or species have changed then respective
             # current selection for the changed param
-            if event_source == self.page_memory['multispecies']['network'][label_ii]:
-                self.read_instance.selected_widget_network.update({label_ii: changed_param})
-                self.read_instance.selected_widget_matrix.update({label_ii: sorted(list(
-                    self.read_instance.available_observation_data[self.read_instance.selected_widget_network[label_ii]][self.read_instance.selected_resolution].keys()))[0]})
-            elif event_source == self.page_memory['multispecies']['matrix'][label_ii]:
-                self.read_instance.selected_widget_matrix.update({label_ii: changed_param})
-                self.read_instance.selected_widget_species.update({label_ii: sorted(list(
-                    self.read_instance.available_observation_data[self.read_instance.selected_widget_network[label_ii]][self.read_instance.selected_resolution][self.read_instance.selected_widget_matrix[label_ii]].keys()))[0]})
-            elif event_source == self.page_memory['multispecies']['species'][label_ii]:
-                self.read_instance.selected_widget_species.update({label_ii: changed_param})
-            elif event_source == self.page_memory['multispecies']['current_lower'][label_ii]:
-                self.read_instance.selected_widget_lower.update({label_ii: changed_param})
-                if self.read_instance.selected_widget_lower[label_ii] != ':':
-                    self.page_memory['multispecies']['current_lower'][label_ii].setText(str(self.read_instance.selected_widget_lower[label_ii]))
-            elif event_source == self.page_memory['multispecies']['current_upper'][label_ii]:
-                self.read_instance.selected_widget_upper.update({label_ii: changed_param})
-                if self.read_instance.selected_widget_upper[label_ii] != ':':
-                    self.page_memory['multispecies']['current_upper'][label_ii].setText(str(self.read_instance.selected_widget_upper[label_ii]))
-            elif event_source == self.page_memory['multispecies']['current_filter_species_fill_value'][label_ii]:
-                self.read_instance.selected_widget_filter_species_fill_value.update({label_ii: changed_param})
-                if self.read_instance.selected_widget_filter_species_fill_value[label_ii] != str(np.nan):
-                    self.page_memory['multispecies']['current_filter_species_fill_value'][label_ii].setText(str(self.read_instance.selected_widget_filter_species_fill_value[label_ii]))
+            if event_source == self.page_memory["multispecies"]["network"][label_ii]:
+                self.read_instance.selected_widget_network.update(
+                    {label_ii: changed_param}
+                )
+                self.read_instance.selected_widget_matrix.update(
+                    {
+                        label_ii: sorted(
+                            list(
+                                self.read_instance.available_observation_data[
+                                    self.read_instance.selected_widget_network[label_ii]
+                                ][self.read_instance.selected_resolution].keys()
+                            )
+                        )[0]
+                    }
+                )
+            elif event_source == self.page_memory["multispecies"]["matrix"][label_ii]:
+                self.read_instance.selected_widget_matrix.update(
+                    {label_ii: changed_param}
+                )
+                self.read_instance.selected_widget_species.update(
+                    {
+                        label_ii: sorted(
+                            list(
+                                self.read_instance.available_observation_data[
+                                    self.read_instance.selected_widget_network[label_ii]
+                                ][self.read_instance.selected_resolution][
+                                    self.read_instance.selected_widget_matrix[label_ii]
+                                ].keys()
+                            )
+                        )[0]
+                    }
+                )
+            elif event_source == self.page_memory["multispecies"]["species"][label_ii]:
+                self.read_instance.selected_widget_species.update(
+                    {label_ii: changed_param}
+                )
+            elif (
+                event_source
+                == self.page_memory["multispecies"]["current_lower"][label_ii]
+            ):
+                self.read_instance.selected_widget_lower.update(
+                    {label_ii: changed_param}
+                )
+                if self.read_instance.selected_widget_lower[label_ii] != ":":
+                    self.page_memory["multispecies"]["current_lower"][label_ii].setText(
+                        str(self.read_instance.selected_widget_lower[label_ii])
+                    )
+            elif (
+                event_source
+                == self.page_memory["multispecies"]["current_upper"][label_ii]
+            ):
+                self.read_instance.selected_widget_upper.update(
+                    {label_ii: changed_param}
+                )
+                if self.read_instance.selected_widget_upper[label_ii] != ":":
+                    self.page_memory["multispecies"]["current_upper"][label_ii].setText(
+                        str(self.read_instance.selected_widget_upper[label_ii])
+                    )
+            elif (
+                event_source
+                == self.page_memory["multispecies"][
+                    "current_filter_species_fill_value"
+                ][label_ii]
+            ):
+                self.read_instance.selected_widget_filter_species_fill_value.update(
+                    {label_ii: changed_param}
+                )
+                if self.read_instance.selected_widget_filter_species_fill_value[
+                    label_ii
+                ] != str(np.nan):
+                    self.page_memory["multispecies"][
+                        "current_filter_species_fill_value"
+                    ][label_ii].setText(
+                        str(
+                            self.read_instance.selected_widget_filter_species_fill_value[
+                                label_ii
+                            ]
+                        )
+                    )
 
             # update multispecies filtering fields
-            if event_source in [self.page_memory['multispecies']['network'][label_ii], self.page_memory['multispecies']['matrix'][label_ii], self.page_memory['multispecies']['species'][label_ii]]:
+            if event_source in [
+                self.page_memory["multispecies"]["network"][label_ii],
+                self.page_memory["multispecies"]["matrix"][label_ii],
+                self.page_memory["multispecies"]["species"][label_ii],
+            ]:
                 self.update_multispecies_fields(label_ii)
             else:
-                self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
+                self.page_memory["multispecies"]["apply_selected"][
+                    label_ii
+                ].setCheckState(QtCore.Qt.Unchecked)
 
     def update_filter_species(self, label_ii, add_filter_species=True):
         """
@@ -1020,135 +1527,238 @@ class PopUpWindow(QtWidgets.QWidget):
         """
 
         # get selected networkspeci on menu
-        selected_networkspeci = '{}|{}'.format(self.read_instance.selected_network, self.read_instance.selected_species)
-        
+        selected_networkspeci = "{}|{}".format(
+            self.read_instance.selected_network, self.read_instance.selected_species
+        )
+
         # get selected filter network, species and bounds
         network = self.read_instance.selected_widget_network[label_ii]
         speci = self.read_instance.selected_widget_species[label_ii]
-        networkspeci = network + '|' + speci
+        networkspeci = network + "|" + speci
         current_lower = self.read_instance.selected_widget_lower[label_ii]
         current_upper = self.read_instance.selected_widget_upper[label_ii]
-        current_filter_species_fill_value = self.read_instance.selected_widget_filter_species_fill_value[label_ii]
+        current_filter_species_fill_value = (
+            self.read_instance.selected_widget_filter_species_fill_value[label_ii]
+        )
         # set current filter species bounds and fill value
-        current_filter_species = [current_lower, current_upper, current_filter_species_fill_value]
+        current_filter_species = [
+            current_lower,
+            current_upper,
+            current_filter_species_fill_value,
+        ]
 
         # if apply button is checked or filter_species in configuration file, add networkspecies in filter_species
         if add_filter_species:
-
-            # do not allow filtering by same networkspecies as that currently selected 
+            # do not allow filtering by same networkspecies as that currently selected
             if networkspeci == selected_networkspeci:
-                msg = 'filter_species cannot be the same as currently selected network-species ({}).'.format(networkspeci)
+                msg = "filter_species cannot be the same as currently selected network-species ({}).".format(
+                    networkspeci
+                )
                 show_message(self.read_instance, msg)
-                self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
+                self.page_memory["multispecies"]["apply_selected"][
+                    label_ii
+                ].setCheckState(QtCore.Qt.Unchecked)
                 return
 
             # do not add to filter_species if lower and upper bounds are nan
             if current_lower == str(np.nan) or current_upper == str(np.nan):
-                msg = 'filter_species data bounds cannot be empty.'
+                msg = "filter_species data bounds cannot be empty."
                 show_message(self.read_instance, msg)
-                self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
+                self.page_memory["multispecies"]["apply_selected"][
+                    label_ii
+                ].setCheckState(QtCore.Qt.Unchecked)
                 return
 
             # only add to filter_species when lower bound if it contains :, > or >=
-            # if lower bound has a < symbol, change it to >, and show message 
-            if ('<' in current_lower):
-                msg = 'filter_species lower bound ({}) for {} cannot contain < or <=. '.format(current_lower, networkspeci)
-                current_lower = '>=' + current_lower.replace('<', '').replace('=', '')
-                msg += 'Setting it to be {}.'.format(current_lower)
-                self.page_memory['multispecies']['current_lower'][label_ii].blockSignals(True)
-                self.page_memory['multispecies']['current_lower'][label_ii].setText(current_lower)
+            # if lower bound has a < symbol, change it to >, and show message
+            if "<" in current_lower:
+                msg = "filter_species lower bound ({}) for {} cannot contain < or <=. ".format(
+                    current_lower, networkspeci
+                )
+                current_lower = ">=" + current_lower.replace("<", "").replace("=", "")
+                msg += "Setting it to be {}.".format(current_lower)
+                self.page_memory["multispecies"]["current_lower"][
+                    label_ii
+                ].blockSignals(True)
+                self.page_memory["multispecies"]["current_lower"][label_ii].setText(
+                    current_lower
+                )
                 self.read_instance.selected_widget_lower[label_ii] = current_lower
-                self.page_memory['multispecies']['current_lower'][label_ii].blockSignals(False)
+                self.page_memory["multispecies"]["current_lower"][
+                    label_ii
+                ].blockSignals(False)
                 show_message(self.read_instance, msg)
-            # if have no symbols then change it to be >= 
-            elif (':' not in current_lower) and ('>' not in current_lower):
-                current_lower = '>=' + current_lower
-                self.page_memory['multispecies']['current_lower'][label_ii].blockSignals(True)
-                self.page_memory['multispecies']['current_lower'][label_ii].setText(current_lower)
+            # if have no symbols then change it to be >=
+            elif (":" not in current_lower) and (">" not in current_lower):
+                current_lower = ">=" + current_lower
+                self.page_memory["multispecies"]["current_lower"][
+                    label_ii
+                ].blockSignals(True)
+                self.page_memory["multispecies"]["current_lower"][label_ii].setText(
+                    current_lower
+                )
                 self.read_instance.selected_widget_lower[label_ii] = current_lower
-                self.page_memory['multispecies']['current_lower'][label_ii].blockSignals(False)
+                self.page_memory["multispecies"]["current_lower"][
+                    label_ii
+                ].blockSignals(False)
 
             # only add to filter_species when upper bound if it contains :, < or <=
-            # if upper bound has a > symbol, change it to <, and show message 
-            if ('>' in current_upper):
-                msg = 'filter_species upper bound ({}) for {} cannot contain > or >=. '.format(current_upper, networkspeci)
-                current_upper = '<=' + current_upper.replace('>', '').replace('=', '')
-                msg += 'Setting it to be {}.'.format(current_upper)
-                self.page_memory['multispecies']['current_upper'][label_ii].blockSignals(True)
-                self.page_memory['multispecies']['current_upper'][label_ii].setText(current_upper)
+            # if upper bound has a > symbol, change it to <, and show message
+            if ">" in current_upper:
+                msg = "filter_species upper bound ({}) for {} cannot contain > or >=. ".format(
+                    current_upper, networkspeci
+                )
+                current_upper = "<=" + current_upper.replace(">", "").replace("=", "")
+                msg += "Setting it to be {}.".format(current_upper)
+                self.page_memory["multispecies"]["current_upper"][
+                    label_ii
+                ].blockSignals(True)
+                self.page_memory["multispecies"]["current_upper"][label_ii].setText(
+                    current_upper
+                )
                 self.read_instance.selected_widget_upper[label_ii] = current_upper
-                self.page_memory['multispecies']['current_upper'][label_ii].blockSignals(False)
+                self.page_memory["multispecies"]["current_upper"][
+                    label_ii
+                ].blockSignals(False)
                 show_message(self.read_instance, msg)
-            # if have no symbols then change it to be <= 
-            elif (':' not in current_upper) and ('<' not in current_upper):
-                current_upper = '<=' + current_upper
-                self.page_memory['multispecies']['current_upper'][label_ii].blockSignals(True)
-                self.page_memory['multispecies']['current_upper'][label_ii].setText(current_upper)
+            # if have no symbols then change it to be <=
+            elif (":" not in current_upper) and ("<" not in current_upper):
+                current_upper = "<=" + current_upper
+                self.page_memory["multispecies"]["current_upper"][
+                    label_ii
+                ].blockSignals(True)
+                self.page_memory["multispecies"]["current_upper"][label_ii].setText(
+                    current_upper
+                )
                 self.read_instance.selected_widget_upper[label_ii] = current_upper
-                self.page_memory['multispecies']['current_upper'][label_ii].blockSignals(False)
+                self.page_memory["multispecies"]["current_upper"][
+                    label_ii
+                ].blockSignals(False)
 
             # set filter species after potential changes
-            current_filter_species = [current_lower, current_upper, current_filter_species_fill_value]
+            current_filter_species = [
+                current_lower,
+                current_upper,
+                current_filter_species_fill_value,
+            ]
 
             # add or update networkspeci
             # check selected lower and upper bounds and fill value are numbers or nan
             try:
                 if label_ii in self.read_instance.multispecies_active_line_inds.keys():
-                    previous_line_sel = self.read_instance.multispecies_active_line_inds[label_ii]
+                    previous_line_sel = (
+                        self.read_instance.multispecies_active_line_inds[label_ii]
+                    )
                     previous_networkspeci = previous_line_sel[0]
                     previous_filter_species = previous_line_sel[1]
-                    del self.read_instance.selected_filter_species[previous_networkspeci][self.read_instance.selected_filter_species[previous_networkspeci].index(previous_filter_species)]
+                    del self.read_instance.selected_filter_species[
+                        previous_networkspeci
+                    ][
+                        self.read_instance.selected_filter_species[
+                            previous_networkspeci
+                        ].index(previous_filter_species)
+                    ]
                     del self.read_instance.multispecies_active_line_inds[label_ii]
-                    if len(self.read_instance.selected_filter_species[previous_networkspeci]) == 0:
-                        del self.read_instance.selected_filter_species[previous_networkspeci]
+                    if (
+                        len(
+                            self.read_instance.selected_filter_species[
+                                previous_networkspeci
+                            ]
+                        )
+                        == 0
+                    ):
+                        del self.read_instance.selected_filter_species[
+                            previous_networkspeci
+                        ]
 
                 if networkspeci in self.read_instance.selected_filter_species.keys():
-                    if current_filter_species not in self.read_instance.selected_filter_species[networkspeci]:
-                        self.read_instance.selected_filter_species[networkspeci].append(current_filter_species)
-                        self.read_instance.multispecies_active_line_inds[label_ii] = [networkspeci, current_filter_species] 
+                    if (
+                        current_filter_species
+                        not in self.read_instance.selected_filter_species[networkspeci]
+                    ):
+                        self.read_instance.selected_filter_species[networkspeci].append(
+                            current_filter_species
+                        )
+                        self.read_instance.multispecies_active_line_inds[label_ii] = [
+                            networkspeci,
+                            current_filter_species,
+                        ]
                     else:
-                        msg = 'filter_species with same bounds already exists for {}. '.format(networkspeci)
+                        msg = "filter_species with same bounds already exists for {}. ".format(
+                            networkspeci
+                        )
                         show_message(self.read_instance, msg)
-                        self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
+                        self.page_memory["multispecies"]["apply_selected"][
+                            label_ii
+                        ].setCheckState(QtCore.Qt.Unchecked)
                 else:
-                    self.read_instance.selected_filter_species[networkspeci] = [current_filter_species]
-                    self.read_instance.multispecies_active_line_inds[label_ii] = [networkspeci, current_filter_species] 
+                    self.read_instance.selected_filter_species[networkspeci] = [
+                        current_filter_species
+                    ]
+                    self.read_instance.multispecies_active_line_inds[label_ii] = [
+                        networkspeci,
+                        current_filter_species,
+                    ]
 
             # if any of the fields are not numbers, return from function
             except ValueError:
-                msg = 'filter_species data bounds must be numeric.'
+                msg = "filter_species data bounds must be numeric."
                 show_message(self.read_instance, msg)
-                self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
+                self.page_memory["multispecies"]["apply_selected"][
+                    label_ii
+                ].setCheckState(QtCore.Qt.Unchecked)
                 return
 
             # get quality flags for species if the information is not available in qa_per_species
             if speci not in self.read_instance.qa_per_species:
-                # get species in memory 
+                # get species in memory
                 species = copy.deepcopy(self.read_instance.species)
-                filter_species = [val.split('|')[1] 
-                                  for val in list(copy.deepcopy(self.read_instance.selected_filter_species).keys())]
+                filter_species = [
+                    val.split("|")[1]
+                    for val in list(
+                        copy.deepcopy(self.read_instance.selected_filter_species).keys()
+                    )
+                ]
 
                 qa_species = species + filter_species
-                
+
                 # add qa per species
                 qa_species.append(speci)
-                self.read_instance.qa_per_species = {speci:get_default_qa(self.read_instance, speci) 
-                                                     for speci in qa_species}
+                self.read_instance.qa_per_species = {
+                    speci: get_default_qa(self.read_instance, speci)
+                    for speci in qa_species
+                }
 
         # if apply button is unchecked, remove current line from filter_species
         else:
             if label_ii in self.read_instance.multispecies_active_line_inds.keys():
-                previous_line_sel = self.read_instance.multispecies_active_line_inds[label_ii]
+                previous_line_sel = self.read_instance.multispecies_active_line_inds[
+                    label_ii
+                ]
                 previous_networkspeci = previous_line_sel[0]
                 previous_filter_species = previous_line_sel[1]
-                del self.read_instance.selected_filter_species[previous_networkspeci][self.read_instance.selected_filter_species[previous_networkspeci].index(previous_filter_species)]
+                del self.read_instance.selected_filter_species[previous_networkspeci][
+                    self.read_instance.selected_filter_species[
+                        previous_networkspeci
+                    ].index(previous_filter_species)
+                ]
                 del self.read_instance.multispecies_active_line_inds[label_ii]
-                if len(self.read_instance.selected_filter_species[previous_networkspeci]) == 0:
-                    del self.read_instance.selected_filter_species[previous_networkspeci]
+                if (
+                    len(
+                        self.read_instance.selected_filter_species[
+                            previous_networkspeci
+                        ]
+                    )
+                    == 0
+                ):
+                    del self.read_instance.selected_filter_species[
+                        previous_networkspeci
+                    ]
 
             # remove from qa_per_species
-            if ((speci in self.read_instance.qa_per_species) and 
-                (networkspeci not in self.read_instance.selected_filter_species.keys())):
+            if (speci in self.read_instance.qa_per_species) and (
+                networkspeci not in self.read_instance.selected_filter_species.keys()
+            ):
                 del self.read_instance.qa_per_species[speci]
 
     def handle_model_checked(self, event):
@@ -1165,24 +1775,26 @@ class PopUpWindow(QtWidgets.QWidget):
         event_source = self.sender()
 
         # Extract the numeric index from the checkbox object name (e.g., 'model_2' → 2)
-        label_ii = int(event_source.objectName().split('_')[1])
-        model = self.menu_current['models']['map_vars'][label_ii]
-        if model not in self.menu_current['models']['forecast']:
+        label_ii = int(event_source.objectName().split("_")[1])
+        model = self.menu_current["models"]["map_vars"][label_ii]
+        if model not in self.menu_current["models"]["forecast"]:
             if model in self.read_instance.init_models:
                 model = self.read_instance.init_models[model]
 
         # --- CASE 1: Model is checked ---
         if event_source.isChecked():
-
             # Check if this model has forecast options defined
-            if model in self.menu_current['models']['forecast']:
-
+            if model in self.menu_current["models"]["forecast"]:
                 # Get all available forecast variable options and forecast day options
-                all_forecast_vars = self.menu_current['models']['forecast'][model][0]
-                all_forecast_day_vars = self.menu_current['models']['forecast_days'][model][0]
+                all_forecast_vars = self.menu_current["models"]["forecast"][model][0]
+                all_forecast_day_vars = self.menu_current["models"]["forecast_days"][
+                    model
+                ][0]
 
                 # Retrieve the QStandardItemModel for the forecast combobox (checkbox list)
-                forecast_model = self.page_memory['models']['forecast'][label_ii].model()
+                forecast_model = self.page_memory["models"]["forecast"][
+                    label_ii
+                ].model()
 
                 # Extract the current items from the combobox model
                 forecast_vars = [
@@ -1192,16 +1804,20 @@ class PopUpWindow(QtWidgets.QWidget):
 
                 # If the combobox doesn’t already contain the correct items, populate it
                 if all_forecast_vars != forecast_vars:
-                    self.page_memory['models']['forecast'][label_ii].addItems(all_forecast_vars)
+                    self.page_memory["models"]["forecast"][label_ii].addItems(
+                        all_forecast_vars
+                    )
 
                     # Set an identifiable name for the model (useful for debugging or tracking)
-                    forecast_model.setObjectName('forecastcheckboxes_' + str(label_ii))
+                    forecast_model.setObjectName("forecastcheckboxes_" + str(label_ii))
 
                     # Connect dataChanged signal to the handler for checking/unchecking forecast options
                     forecast_model.dataChanged.connect(self.forecast_option_checked)
 
                 # --- Add available forecast days (secondary combobox) ---
-                forecast_day_model = self.page_memory['models']['forecast_days'][label_ii].model()
+                forecast_day_model = self.page_memory["models"]["forecast_days"][
+                    label_ii
+                ].model()
 
                 # Extract the current forecast day items
                 forecast_day_vars = [
@@ -1211,28 +1827,33 @@ class PopUpWindow(QtWidgets.QWidget):
 
                 # If the forecast days differ from the expected ones, populate them
                 if all_forecast_day_vars != forecast_day_vars:
-                    self.page_memory['models']['forecast_days'][label_ii].addItems(all_forecast_day_vars)
+                    self.page_memory["models"]["forecast_days"][label_ii].addItems(
+                        all_forecast_day_vars
+                    )
 
                 # --- Display the forecast option widgets ---
                 if len(all_forecast_vars) > 0:
                     # Show the forecast options combobox
-                    self.page_memory['models']['forecast'][label_ii].show()
+                    self.page_memory["models"]["forecast"][label_ii].show()
 
                     # Iterate through forecast variables and check their state
                     for forecast_ii, forecast_var in enumerate(all_forecast_vars):
-                        item = self.page_memory['models']['forecast'][label_ii].model().item(forecast_ii, 0)
+                        item = (
+                            self.page_memory["models"]["forecast"][label_ii]
+                            .model()
+                            .item(forecast_ii, 0)
+                        )
 
                         # If any forecast option is already checked, show forecast days as well
                         if item.checkState() == QtCore.Qt.Checked:
-                            self.page_memory['models']['forecast_days'][label_ii].show()
+                            self.page_memory["models"]["forecast_days"][label_ii].show()
                             break
 
         # --- CASE 2: Model is unchecked ---
         else:
             # Hide both forecast options and forecast day widgets
-            self.page_memory['models']['forecast'][label_ii].hide()
-            self.page_memory['models']['forecast_days'][label_ii].hide()
-
+            self.page_memory["models"]["forecast"][label_ii].hide()
+            self.page_memory["models"]["forecast_days"][label_ii].hide()
 
     def forecast_option_checked(self, event):
         """
@@ -1246,22 +1867,28 @@ class PopUpWindow(QtWidgets.QWidget):
 
         # get widget line
         event_source = self.sender()
-        label_ii = int(event_source.objectName().split('_')[1])
-        model = self.menu_current['models']['map_vars'][label_ii]
-        if model not in self.menu_current['models']['forecast']: 
+        label_ii = int(event_source.objectName().split("_")[1])
+        model = self.menu_current["models"]["map_vars"][label_ii]
+        if model not in self.menu_current["models"]["forecast"]:
             if model in self.read_instance.init_models:
                 model = self.read_instance.init_models[model]
 
         # disconnect the combobox event while inside event so it is not infinitely called
-        self.page_memory['models']['forecast'][label_ii].model().dataChanged.disconnect(self.forecast_option_checked)
+        self.page_memory["models"]["forecast"][label_ii].model().dataChanged.disconnect(
+            self.forecast_option_checked
+        )
 
         # get all forecast options
-        all_forecast_vars = self.menu_current['models']['forecast'][model][0]
+        all_forecast_vars = self.menu_current["models"]["forecast"][model][0]
 
         # work out which forecast option is selected currently
-        checked_var = 'None'
+        checked_var = "None"
         for forecast_ii, forecast_var in enumerate(all_forecast_vars):
-            item = self.page_memory['models']['forecast'][label_ii].model().item(forecast_ii, 0)
+            item = (
+                self.page_memory["models"]["forecast"][label_ii]
+                .model()
+                .item(forecast_ii, 0)
+            )
             if item.checkState() == QtCore.Qt.Checked:
                 checked_var = forecast_var
                 break
@@ -1269,30 +1896,38 @@ class PopUpWindow(QtWidgets.QWidget):
         # deactivate other forecast options when one is selected
         for forecast_ii, forecast_var in enumerate(all_forecast_vars):
             deactivate = False
-            if (checked_var == 'daily') & (forecast_var != 'daily'):
+            if (checked_var == "daily") & (forecast_var != "daily"):
                 deactivate = True
-            elif (checked_var == 'combined') & (forecast_var != 'combined'):
+            elif (checked_var == "combined") & (forecast_var != "combined"):
                 deactivate = True
-            elif (checked_var == 'day') & (forecast_var != 'day'):
+            elif (checked_var == "day") & (forecast_var != "day"):
                 deactivate = True
 
-            item = self.page_memory['models']['forecast'][label_ii].model().item(forecast_ii, 0)
+            item = (
+                self.page_memory["models"]["forecast"][label_ii]
+                .model()
+                .item(forecast_ii, 0)
+            )
             if deactivate:
                 item.setFlags(item.flags() & ~QtCore.Qt.ItemIsEnabled)
-                item.setData(QtGui.QBrush(QtGui.QColor(150,150,150)), QtCore.Qt.ForegroundRole)
+                item.setData(
+                    QtGui.QBrush(QtGui.QColor(150, 150, 150)), QtCore.Qt.ForegroundRole
+                )
             else:
                 item.setFlags(item.flags() | QtCore.Qt.ItemIsEnabled)
                 item.setData(None, QtCore.Qt.ForegroundRole)
 
         # hide or show the forecast days depending if have forecast option selected or not
-        if checked_var == 'None':
-            self.page_memory['models']['forecast_days'][label_ii].hide()
+        if checked_var == "None":
+            self.page_memory["models"]["forecast_days"][label_ii].hide()
         else:
-            self.page_memory['models']['forecast_days'][label_ii].show()
+            self.page_memory["models"]["forecast_days"][label_ii].show()
 
         # reconnect the combobox event
-        self.page_memory['models']['forecast'][label_ii].model().dataChanged.connect(self.forecast_option_checked)
-        
+        self.page_memory["models"]["forecast"][label_ii].model().dataChanged.connect(
+            self.forecast_option_checked
+        )
+
     def closeEvent(self, event):
         """
         Serialises and saves the current state of all GUI widgets back to the configuration model before closing the window.
@@ -1307,76 +1942,140 @@ class PopUpWindow(QtWidgets.QWidget):
 
         # iterate through menu types
         for menu_type in list(self.page_memory.keys()):
-            for element in self.page_memory[menu_type]['ordered_elements']:
-                if menu_type == 'checkboxes':
+            for element in self.page_memory[menu_type]["ordered_elements"]:
+                if menu_type == "checkboxes":
                     selected_vars = []
-                    for checkbox_ii, checkbox in enumerate(self.page_memory[menu_type][element]):
+                    for checkbox_ii, checkbox in enumerate(
+                        self.page_memory[menu_type][element]
+                    ):
                         if checkbox.checkState() == QtCore.Qt.Checked:
                             # map selected position index to variable name
-                            if 'map_vars' in list(self.menu_current[menu_type].keys()):
-                                selected_vars.append(self.menu_current[menu_type]['map_vars'][checkbox_ii])
+                            if "map_vars" in list(self.menu_current[menu_type].keys()):
+                                selected_vars.append(
+                                    self.menu_current[menu_type]["map_vars"][
+                                        checkbox_ii
+                                    ]
+                                )
                             else:
-                                selected_vars.append(self.menu_current[menu_type]['labels'][checkbox_ii])
+                                selected_vars.append(
+                                    self.menu_current[menu_type]["labels"][checkbox_ii]
+                                )
                     # update previous selected variable
-                    if element == 'keep_selected':
-                        self.menu_current[menu_type]['previous_keep_selected'] = copy.deepcopy(self.menu_current[menu_type]['keep_selected'])
-                    elif element == 'remove_selected':
-                        self.menu_current[menu_type]['previous_remove_selected'] = copy.deepcopy(self.menu_current[menu_type]['remove_selected'])
+                    if element == "keep_selected":
+                        self.menu_current[menu_type][
+                            "previous_keep_selected"
+                        ] = copy.deepcopy(self.menu_current[menu_type]["keep_selected"])
+                    elif element == "remove_selected":
+                        self.menu_current[menu_type][
+                            "previous_remove_selected"
+                        ] = copy.deepcopy(
+                            self.menu_current[menu_type]["remove_selected"]
+                        )
                     # update selected variable
                     self.menu_current[menu_type][element] = selected_vars
-                
-                elif menu_type == 'rangeboxes':
+
+                elif menu_type == "rangeboxes":
                     set_vals = []
                     selected_vars = []
-                    for rangebox_ii, rangebox in enumerate(self.page_memory[menu_type][element]):
-                        if element != 'apply_selected':
+                    for rangebox_ii, rangebox in enumerate(
+                        self.page_memory[menu_type][element]
+                    ):
+                        if element != "apply_selected":
                             set_vals.append(rangebox.text())
                         else:
                             if rangebox.checkState() == QtCore.Qt.Checked:
                                 # map selected position index to variable name
-                                if 'map_vars' in list(self.menu_current[menu_type].keys()):
-                                    selected_vars.append(self.menu_current[menu_type]['map_vars'][rangebox_ii])
+                                if "map_vars" in list(
+                                    self.menu_current[menu_type].keys()
+                                ):
+                                    selected_vars.append(
+                                        self.menu_current[menu_type]["map_vars"][
+                                            rangebox_ii
+                                        ]
+                                    )
                                 else:
-                                    selected_vars.append(self.menu_current[menu_type]['labels'][rangebox_ii])
-                               
+                                    selected_vars.append(
+                                        self.menu_current[menu_type]["labels"][
+                                            rangebox_ii
+                                        ]
+                                    )
+
                     # update previous set variable
-                    if element == 'current_lower':
-                        self.menu_current[menu_type]['previous_lower'] = copy.deepcopy(self.menu_current[menu_type]['current_lower'])
-                    elif element == 'current_upper':
-                        self.menu_current[menu_type]['previous_upper'] = copy.deepcopy(self.menu_current[menu_type]['current_upper'])
-                    elif element == 'apply_selected':
-                        self.menu_current[menu_type]['previous_apply'] = copy.deepcopy(self.menu_current[menu_type]['apply_selected'])
-                    
+                    if element == "current_lower":
+                        self.menu_current[menu_type]["previous_lower"] = copy.deepcopy(
+                            self.menu_current[menu_type]["current_lower"]
+                        )
+                    elif element == "current_upper":
+                        self.menu_current[menu_type]["previous_upper"] = copy.deepcopy(
+                            self.menu_current[menu_type]["current_upper"]
+                        )
+                    elif element == "apply_selected":
+                        self.menu_current[menu_type]["previous_apply"] = copy.deepcopy(
+                            self.menu_current[menu_type]["apply_selected"]
+                        )
+
                     # update set value
-                    if element != 'apply_selected':
+                    if element != "apply_selected":
                         self.menu_current[menu_type][element] = set_vals
                     else:
-                        self.menu_current[menu_type][element] = selected_vars       
+                        self.menu_current[menu_type][element] = selected_vars
 
-                elif menu_type == 'multispecies':
-                    for label_ii, label in enumerate(self.menu_current[menu_type]['labels']):
+                elif menu_type == "multispecies":
+                    for label_ii, label in enumerate(
+                        self.menu_current[menu_type]["labels"]
+                    ):
                         # update previous set variable
-                        if element == 'current_lower':
-                            self.menu_current[menu_type]['previous_lower'].update({label_ii: self.page_memory['multispecies']['current_lower'][label_ii].text()})
-                        elif element == 'current_upper':
-                            self.menu_current[menu_type]['previous_upper'].update({label_ii: self.page_memory['multispecies']['current_upper'][label_ii].text()})
-                        elif element == 'current_filter_species_fill_value':
-                            self.menu_current[menu_type]['previous_filter_species_fill_value'].update({label_ii: self.page_memory['multispecies']['current_filter_species_fill_value'][label_ii].text()})
-                        elif element == 'apply_selected':
-                            if self.page_memory['multispecies']['apply_selected'][label_ii].isChecked():
-                                self.menu_current[menu_type]['previous_apply'].update({label_ii: True})
+                        if element == "current_lower":
+                            self.menu_current[menu_type]["previous_lower"].update(
+                                {
+                                    label_ii: self.page_memory["multispecies"][
+                                        "current_lower"
+                                    ][label_ii].text()
+                                }
+                            )
+                        elif element == "current_upper":
+                            self.menu_current[menu_type]["previous_upper"].update(
+                                {
+                                    label_ii: self.page_memory["multispecies"][
+                                        "current_upper"
+                                    ][label_ii].text()
+                                }
+                            )
+                        elif element == "current_filter_species_fill_value":
+                            self.menu_current[menu_type][
+                                "previous_filter_species_fill_value"
+                            ].update(
+                                {
+                                    label_ii: self.page_memory["multispecies"][
+                                        "current_filter_species_fill_value"
+                                    ][label_ii].text()
+                                }
+                            )
+                        elif element == "apply_selected":
+                            if self.page_memory["multispecies"]["apply_selected"][
+                                label_ii
+                            ].isChecked():
+                                self.menu_current[menu_type]["previous_apply"].update(
+                                    {label_ii: True}
+                                )
                             else:
-                                self.menu_current[menu_type]['previous_apply'].update({label_ii: False})
+                                self.menu_current[menu_type]["previous_apply"].update(
+                                    {label_ii: False}
+                                )
 
-                elif menu_type == 'models':
-                    if element == 'keep_selected':                    
+                elif menu_type == "models":
+                    if element == "keep_selected":
                         selected_vars = []
                         # iterate through models
-                        for checkbox_ii, checkbox in enumerate(self.page_memory[menu_type][element]):
+                        for checkbox_ii, checkbox in enumerate(
+                            self.page_memory[menu_type][element]
+                        ):
                             # get model name
-                            model_raw = self.menu_current[menu_type]['map_vars'][checkbox_ii]
+                            model_raw = self.menu_current[menu_type]["map_vars"][
+                                checkbox_ii
+                            ]
                             model = copy.deepcopy(model_raw)
-                            if model not in self.menu_current[menu_type]['forecast']:
+                            if model not in self.menu_current[menu_type]["forecast"]:
                                 if model in self.read_instance.init_models:
                                     model = self.read_instance.init_models[model]
 
@@ -1385,35 +2084,67 @@ class PopUpWindow(QtWidgets.QWidget):
                                 # append checked model
                                 selected_vars.append(model_raw)
                                 # get current selected and disabled forecast variables for model
-                                if model in self.menu_current[menu_type]['forecast']:
-                                    all_forecast_vars = self.menu_current[menu_type]['forecast'][model][0]
-                                    all_forecast_day_vars = self.menu_current[menu_type]['forecast_days'][model][0]
+                                if model in self.menu_current[menu_type]["forecast"]:
+                                    all_forecast_vars = self.menu_current[menu_type][
+                                        "forecast"
+                                    ][model][0]
+                                    all_forecast_day_vars = self.menu_current[
+                                        menu_type
+                                    ]["forecast_days"][model][0]
                                     selected_forecast_vars = []
                                     disabled_forecast_vars = []
                                     selected_forecast_day_vars = []
                                     # iterate through forecast options
-                                    for forecast_ii, forecast_var in enumerate(all_forecast_vars):
-                                        item = self.page_memory[menu_type]['forecast'][checkbox_ii].model().item(forecast_ii, 0)
+                                    for forecast_ii, forecast_var in enumerate(
+                                        all_forecast_vars
+                                    ):
+                                        item = (
+                                            self.page_memory[menu_type]["forecast"][
+                                                checkbox_ii
+                                            ]
+                                            .model()
+                                            .item(forecast_ii, 0)
+                                        )
                                         # check if forecast option is checked
                                         if item.checkState() == QtCore.Qt.Checked:
                                             # append forecast option
                                             selected_forecast_vars.append(forecast_var)
                                             # iterate through forecast days
-                                            for forecast_day_ii, forecast_day_var in enumerate(all_forecast_day_vars):
-                                                item_day = self.page_memory[menu_type]['forecast_days'][checkbox_ii].model().item(forecast_day_ii, 0)
+                                            for (
+                                                forecast_day_ii,
+                                                forecast_day_var,
+                                            ) in enumerate(all_forecast_day_vars):
+                                                item_day = (
+                                                    self.page_memory[menu_type][
+                                                        "forecast_days"
+                                                    ][checkbox_ii]
+                                                    .model()
+                                                    .item(forecast_day_ii, 0)
+                                                )
                                                 # check if forecast day is checked
-                                                if item_day.checkState() == QtCore.Qt.Checked:
+                                                if (
+                                                    item_day.checkState()
+                                                    == QtCore.Qt.Checked
+                                                ):
                                                     # append forecast day
-                                                    selected_forecast_day_vars.append(forecast_day_var)
-                                            
+                                                    selected_forecast_day_vars.append(
+                                                        forecast_day_var
+                                                    )
+
                                         if not (item.flags() & QtCore.Qt.ItemIsEnabled):
                                             disabled_forecast_vars.append(forecast_var)
                                     # save selected forecast variables
-                                    self.menu_current[menu_type]['forecast'][model][1] = selected_forecast_vars
+                                    self.menu_current[menu_type]["forecast"][model][
+                                        1
+                                    ] = selected_forecast_vars
                                     # save disabled forecast variables
-                                    self.menu_current[menu_type]['forecast'][model][2] = disabled_forecast_vars
+                                    self.menu_current[menu_type]["forecast"][model][
+                                        2
+                                    ] = disabled_forecast_vars
                                     # save selected forecast day variables
-                                    self.menu_current[menu_type]['forecast_days'][model][1] = selected_forecast_day_vars
+                                    self.menu_current[menu_type]["forecast_days"][
+                                        model
+                                    ][1] = selected_forecast_day_vars
 
                         # save selected models
                         self.menu_current[menu_type][element] = selected_vars

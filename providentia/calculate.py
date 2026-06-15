@@ -13,6 +13,7 @@ import pandas as pd
 import xarray as xr
 import xskillscore as xs
 
+
 def nansumwrapper(data, **kwargs):
     """Sum array elements over a given axis treating Not a Numbers as zero, returning NaN if all elements are NaN.
 
@@ -30,9 +31,10 @@ def nansumwrapper(data, **kwargs):
     """
 
     if np.isnan(data).all():
-        return np.full(data.shape[:data.ndim-1], np.nan, dtype=np.float32)
+        return np.full(data.shape[: data.ndim - 1], np.nan, dtype=np.float32)
     else:
         return np.nansum(data, **kwargs)
+
 
 class Stats(object):
     """Class for the calculation of basic statistics."""
@@ -103,7 +105,7 @@ class Stats(object):
         if data.size == 0:
             return np.nan
         else:
-            return np.nanpercentile(data, percentile, axis=-1, method='nearest')
+            return np.nanpercentile(data, percentile, axis=-1, method="nearest")
 
     @staticmethod
     def calculate_standard_deviation(data):
@@ -166,7 +168,7 @@ class Stats(object):
         if len(data) == 0:
             return np.nan
         else:
-            return np.nanmin(data,axis=-1)
+            return np.nanmin(data, axis=-1)
 
     @staticmethod
     def calculate_maximum(data):
@@ -187,7 +189,7 @@ class Stats(object):
         if len(data) == 0:
             return np.nan
         else:
-            return np.nanmax(data,axis=-1)
+            return np.nanmax(data, axis=-1)
 
     @staticmethod
     def calculate_data_avail_fraction(data, nan_padding_counts=None):
@@ -230,10 +232,15 @@ class Stats(object):
         # return data %
         return (100.0 / denom) * valid_counts
 
-
     @staticmethod
-    def calculate_stations_number(data, statistic_mode, statistic_aggregation, per_station,
-                                  periodic_statistic_mode=None, periodic_statistic_aggregation=None):
+    def calculate_stations_number(
+        data,
+        statistic_mode,
+        statistic_aggregation,
+        per_station,
+        periodic_statistic_mode=None,
+        periodic_statistic_aggregation=None,
+    ):
         """
         Calculate number of stations
 
@@ -251,7 +258,7 @@ class Stats(object):
             Periodic statistic mode
         periodic_statistic_aggregation : str
             Periodic statistic aggregation
-            
+
         Returns
         -------
         float
@@ -261,7 +268,6 @@ class Stats(object):
         if data.size == 0:
             return np.nan
         else:
-
             # if array is 5d are reading daily forecast data, so make neccesary adjustments to calculation
             if data.ndim == 5:
                 relevant_dim = -3
@@ -271,30 +277,48 @@ class Stats(object):
             # get number of stations that do not have missing values
             # if calculating periodic statistic for cycle mode, then aggregate across first dimension
             # this due to inconsistent way Nstations is calculated with respect to other statistics
-            if periodic_statistic_mode == 'Cycle':
-                stations_number = np.count_nonzero(~np.isnan(data), axis=0).astype('float32').transpose()
+            if periodic_statistic_mode == "Cycle":
+                stations_number = (
+                    np.count_nonzero(~np.isnan(data), axis=0)
+                    .astype("float32")
+                    .transpose()
+                )
             else:
-                stations_number = np.count_nonzero(~np.isnan(data), axis=relevant_dim).astype('float32')
+                stations_number = np.count_nonzero(
+                    ~np.isnan(data), axis=relevant_dim
+                ).astype("float32")
 
             # if calculating periodic statistic for independent mode, then aggregate across last dimension
             # this due to inconsistent way Nstations is calculated with respect to other statistics
-            if periodic_statistic_mode == 'Independent':
+            if periodic_statistic_mode == "Independent":
                 from .statistics import aggregation
-                stations_number = aggregation(stations_number, periodic_statistic_aggregation, axis=-1)
+
+                stations_number = aggregation(
+                    stations_number, periodic_statistic_aggregation, axis=-1
+                )
 
             # do aggregation (if not calculating periodic statistic, or per station)
             if (not periodic_statistic_mode) & (not per_station):
                 from .statistics import aggregation
-                if statistic_mode in ['Temporal|Spatial','Spatial|Temporal']:
-                    stations_number = aggregation(stations_number, statistic_aggregation, axis=-1)
-                elif statistic_mode == 'Flattened':
-                    stations_number = aggregation(stations_number, 'Median', axis=-1)
+
+                if statistic_mode in ["Temporal|Spatial", "Spatial|Temporal"]:
+                    stations_number = aggregation(
+                        stations_number, statistic_aggregation, axis=-1
+                    )
+                elif statistic_mode == "Flattened":
+                    stations_number = aggregation(stations_number, "Median", axis=-1)
 
             return stations_number
 
     @staticmethod
-    def calculate_stations_number_unique(data, statistic_mode, statistic_aggregation, per_station,
-                                        periodic_statistic_mode=None, periodic_statistic_aggregation=None):
+    def calculate_stations_number_unique(
+        data,
+        statistic_mode,
+        statistic_aggregation,
+        per_station,
+        periodic_statistic_mode=None,
+        periodic_statistic_aggregation=None,
+    ):
         """
         Calculate number of unique stations across the full domain.
 
@@ -325,7 +349,6 @@ class Stats(object):
         if data.size == 0:
             return np.nan
         else:
-
             # ----------------------------------------------------------
             # PERIODIC CYCLE MODE
             #
@@ -339,13 +362,13 @@ class Stats(object):
             #
             # and collapse everything else.
             # ----------------------------------------------------------
-            if periodic_statistic_mode == 'Cycle':
-
+            if periodic_statistic_mode == "Cycle":
                 station_axis = 0
                 label_axis = 1
 
                 axes_to_reduce = tuple(
-                    ax for ax in range(data.ndim)
+                    ax
+                    for ax in range(data.ndim)
                     if ax not in (station_axis, label_axis)
                 )
 
@@ -355,7 +378,9 @@ class Stats(object):
                     stations_valid = ~np.isnan(data)
 
                 # stations_valid should now have shape (station, label)
-                stations_number = np.count_nonzero(stations_valid, axis=station_axis).astype('float32')
+                stations_number = np.count_nonzero(
+                    stations_valid, axis=station_axis
+                ).astype("float32")
 
             # ----------------------------------------------------------
             # ALL OTHER CASES
@@ -367,7 +392,6 @@ class Stats(object):
             # We preserve label axis and station axis, and collapse all others.
             # ----------------------------------------------------------
             else:
-
                 if data.ndim == 5:
                     station_axis = data.ndim - 3
                 else:
@@ -382,7 +406,8 @@ class Stats(object):
                     label_axis = 1
 
                 axes_to_reduce = tuple(
-                    ax for ax in range(data.ndim)
+                    ax
+                    for ax in range(data.ndim)
                     if ax not in (label_axis, station_axis)
                 )
 
@@ -392,16 +417,17 @@ class Stats(object):
                     stations_valid = ~np.isnan(data)
 
                 # After reduction, count stations along the remaining station axis
-                remaining_axes = [ax for ax in range(data.ndim) if ax not in axes_to_reduce]
+                remaining_axes = [
+                    ax for ax in range(data.ndim) if ax not in axes_to_reduce
+                ]
                 station_axis_reduced = remaining_axes.index(station_axis)
 
                 stations_number = np.count_nonzero(
-                    stations_valid,
-                    axis=station_axis_reduced
-                ).astype('float32')
+                    stations_valid, axis=station_axis_reduced
+                ).astype("float32")
 
             return stations_number
-    
+
     @staticmethod
     def calculate_data_avail_number(data):
         """
@@ -422,7 +448,7 @@ class Stats(object):
         if data.size == 0:
             return np.nan
         else:
-            return np.count_nonzero(~np.isnan(data), axis=-1).astype('float32')
+            return np.count_nonzero(~np.isnan(data), axis=-1).astype("float32")
 
     @staticmethod
     def calculate_exceedances(data, threshold=0):
@@ -444,13 +470,19 @@ class Stats(object):
         if data.size == 0:
             return np.nan
         else:
-            return nansumwrapper(data > threshold, axis=-1).astype('float32')
+            return nansumwrapper(data > threshold, axis=-1).astype("float32")
 
     @staticmethod
-    def calculate_mda8(data, statistic_mode, statistic_aggregation, per_station,
-                       periodic_statistic_mode=None, periodic_statistic_aggregation=None):
+    def calculate_mda8(
+        data,
+        statistic_mode,
+        statistic_aggregation,
+        per_station,
+        periodic_statistic_mode=None,
+        periodic_statistic_aggregation=None,
+    ):
         """
-        Calculate MDA8 (daily maximum 8 hour average) 
+        Calculate MDA8 (daily maximum 8 hour average)
 
         Parameters
         ----------
@@ -478,7 +510,6 @@ class Stats(object):
         if data.size == 0:
             return np.nan
         else:
-
             # if have periodic statistic, then cannot calculate MDA8, so return NaN
             if periodic_statistic_mode:
                 return np.nan
@@ -491,33 +522,37 @@ class Stats(object):
 
             # if last dimension is not 24, then reshape it to be so
             extra_agg = False
-            if (data.shape[-1] != 24):
+            if data.shape[-1] != 24:
                 data = data.reshape(*data.shape[:-1], -1, 24)
                 extra_agg = True
 
             # calculate MDA8
-            start_inds = np.arange(0,17)
-            end_inds = np.arange(8,25)            
+            start_inds = np.arange(0, 17)
+            end_inds = np.arange(8, 25)
             mda8_arr = np.full((*data.shape[:-1], 17), np.nan, dtype=np.float32)
 
-            for window_ind, (start_ind, end_ind) in enumerate(zip(start_inds, end_inds)):
-                mda8_arr[..., window_ind] = np.nanmean(data[..., start_ind:end_ind], axis=-1)
+            for window_ind, (start_ind, end_ind) in enumerate(
+                zip(start_inds, end_inds)
+            ):
+                mda8_arr[..., window_ind] = np.nanmean(
+                    data[..., start_ind:end_ind], axis=-1
+                )
 
             mda8 = np.nanmax(mda8_arr, axis=-1)
 
             # do aggregation (if not calculating periodic statistic, or per station)
             if (not periodic_statistic_mode) and (not per_station):
-                if statistic_mode in ['Temporal|Spatial','Spatial|Temporal']:
+                if statistic_mode in ["Temporal|Spatial", "Spatial|Temporal"]:
                     mda8 = aggregation(mda8, statistic_aggregation, axis=-1)
-                elif statistic_mode == 'Flattened':
-                    mda8 = aggregation(mda8, 'Median', axis=-1)
+                elif statistic_mode == "Flattened":
+                    mda8 = aggregation(mda8, "Median", axis=-1)
 
             # do extra aggregation for daily forecast data (if not calculating periodic statistic, or per station)
             if (extra_agg) and (not periodic_statistic_mode) and (not per_station):
-                if statistic_mode in ['Temporal|Spatial','Spatial|Temporal']:
+                if statistic_mode in ["Temporal|Spatial", "Spatial|Temporal"]:
                     mda8 = aggregation(mda8, statistic_aggregation, axis=agg_dim)
-                elif statistic_mode == 'Flattened':
-                    mda8 = aggregation(mda8, 'Median', axis=agg_dim)
+                elif statistic_mode == "Flattened":
+                    mda8 = aggregation(mda8, "Median", axis=agg_dim)
 
             return mda8
 
@@ -537,7 +572,7 @@ class Stats(object):
             Reference value
         alpha : float
             Uncertainty parameter
-            
+
         Returns
         -------
         float
@@ -548,9 +583,13 @@ class Stats(object):
             return np.nan
         else:
             rms_u = u_95r_RV * np.sqrt(
-                (1 - alpha ** 2) * (Stats.calculate_mean(data) ** 2 
-                + Stats.calculate_standard_deviation(data) ** 2) 
-                + (alpha * RV) ** 2)
+                (1 - alpha**2)
+                * (
+                    Stats.calculate_mean(data) ** 2
+                    + Stats.calculate_standard_deviation(data) ** 2
+                )
+                + (alpha * RV) ** 2
+            )
             return rms_u
 
 
@@ -582,7 +621,7 @@ class ModBias(object):
             Observations data array
         mod : numpy.array
             Model data array
-            
+
         Returns
         -------
         float
@@ -592,8 +631,9 @@ class ModBias(object):
         if obs.size == 0:
             return np.nan
         else:
-            return 1.0 - nansumwrapper(np.abs(mod - obs), axis=-1) / \
-                   nansumwrapper(np.abs(obs - np.expand_dims(np.nanmean(obs, axis=-1), axis=-1)), axis=-1) 
+            return 1.0 - nansumwrapper(np.abs(mod - obs), axis=-1) / nansumwrapper(
+                np.abs(obs - np.expand_dims(np.nanmean(obs, axis=-1), axis=-1)), axis=-1
+            )
 
     @staticmethod
     def calculate_ioa(obs, mod):
@@ -619,7 +659,7 @@ class ModBias(object):
             Observations data array
         mod : numpy.array
             Model data array
-            
+
         Returns
         -------
         float
@@ -630,15 +670,17 @@ class ModBias(object):
             return np.nan
         else:
             lhs = nansumwrapper(np.abs(mod - obs), axis=-1)
-            rhs = 2.0 * nansumwrapper(np.abs(obs - np.expand_dims(np.nanmean(obs, axis=-1), axis=-1)), axis=-1)
+            rhs = 2.0 * nansumwrapper(
+                np.abs(obs - np.expand_dims(np.nanmean(obs, axis=-1), axis=-1)), axis=-1
+            )
             output = np.copy(lhs)
             lower_check = lhs <= rhs
-            output[lower_check] = 1.0 - lhs[lower_check] / rhs[lower_check] 
+            output[lower_check] = 1.0 - lhs[lower_check] / rhs[lower_check]
             output[~lower_check] = rhs[~lower_check] / lhs[~lower_check] - 1.0
             return output
 
     @staticmethod
-    def calculate_mb(obs, mod, normalisation_type='none'):
+    def calculate_mb(obs, mod, normalisation_type="none"):
         """
         Calculate mean bias (MB), or normalised derivation (NMB).
         The difference between a modelled and an observed value,
@@ -654,7 +696,7 @@ class ModBias(object):
             Model data array
         normalisation_type : str
             Normalisation type
-            
+
         Returns
         -------
         float
@@ -667,28 +709,34 @@ class ModBias(object):
             mb = np.nanmean(mod - obs, axis=-1)
 
             # handle normalisation if desired
-            if normalisation_type == 'max_min':
+            if normalisation_type == "max_min":
                 mb = (mb / (np.nanmax(obs, axis=-1) - np.nanmin(obs, axis=-1))) * 100.0
-            elif normalisation_type == 'mean':
+            elif normalisation_type == "mean":
                 mb = (mb / np.nanmean(obs, axis=-1)) * 100.0
-            elif normalisation_type == 'sum':
+            elif normalisation_type == "sum":
                 mb = (mb / nansumwrapper(obs, axis=-1)) * 100.0
-            elif normalisation_type == 'iq':
-                mb = (mb / (np.nanpercentile(obs, 75, axis=-1, method='nearest') - np.nanpercentile(obs, 25, axis=-1, method='nearest'))) * 100.0
-            elif normalisation_type == 'stdev':
+            elif normalisation_type == "iq":
+                mb = (
+                    mb
+                    / (
+                        np.nanpercentile(obs, 75, axis=-1, method="nearest")
+                        - np.nanpercentile(obs, 25, axis=-1, method="nearest")
+                    )
+                ) * 100.0
+            elif normalisation_type == "stdev":
                 mb = (mb / np.nanstd(obs, axis=-1)) * 100.0
             return mb
 
     @staticmethod
-    def calculate_me(obs, mod, normalisation_type='none'):
+    def calculate_me(obs, mod, normalisation_type="none"):
         """
         Calculate mean error (ME), or normalised derivation (NME).
         It is calculated from the absolute of the difference between a modelled
         and an observed value,|𝑀𝑖 −𝑂𝑖|. Therefore the mean error is always positive.
         This metric can highlight reveal somes biases not seen using the MB metric, where
         postive and negative biases can average out to be zero.
-        Otherwise known as mean gross error (MGE), mean absolute error (MAE), 
-        and mean absolute gross error (MAGE); 
+        Otherwise known as mean gross error (MGE), mean absolute error (MAE),
+        and mean absolute gross error (MAGE);
         and normalised form as normalised mean gross error (NMGE) and normalised mean absolute error (NMAE).
 
         Parameters
@@ -699,7 +747,7 @@ class ModBias(object):
             Model data array
         normalisation_type : str
             Normalisation type
-            
+
         Returns
         -------
         float
@@ -712,16 +760,22 @@ class ModBias(object):
             me = np.nanmean(np.abs(mod - obs), axis=-1)
 
             # handle normalisation if desired
-            if normalisation_type == 'max_min':
-                me = (me / (np.nanmax(obs, axis=-1) - np.nanmin(obs, axis=-1))) * 100.0 
-            elif normalisation_type == 'mean':
+            if normalisation_type == "max_min":
+                me = (me / (np.nanmax(obs, axis=-1) - np.nanmin(obs, axis=-1))) * 100.0
+            elif normalisation_type == "mean":
                 me = (me / np.nanmean(obs, axis=-1)) * 100.0
-            elif normalisation_type == 'sum':
-                me = (me / nansumwrapper(obs, axis=-1)) * 100.0 
-            elif normalisation_type == 'iq':
-                me = (me / (np.nanpercentile(obs, 75, axis=-1, method='nearest') - np.nanpercentile(obs, 25, axis=-1, method='nearest'))) * 100.0 
-            elif normalisation_type == 'stdev':
-                me = (me / np.nanstd(obs, axis=-1)) * 100.0 
+            elif normalisation_type == "sum":
+                me = (me / nansumwrapper(obs, axis=-1)) * 100.0
+            elif normalisation_type == "iq":
+                me = (
+                    me
+                    / (
+                        np.nanpercentile(obs, 75, axis=-1, method="nearest")
+                        - np.nanpercentile(obs, 25, axis=-1, method="nearest")
+                    )
+                ) * 100.0
+            elif normalisation_type == "stdev":
+                me = (me / np.nanstd(obs, axis=-1)) * 100.0
             return me
 
     @staticmethod
@@ -731,7 +785,7 @@ class ModBias(object):
         The mean normalised bias (MNB) is calculated in a similar fashion to the mean bias.
         The mean normalised bias is calculated from the difference between the modelled and observed values
         (i.e. the bias, 𝑀𝑖 − 𝑂𝑖) is normalised (divided) by the observed value (𝑂𝑖).
-        
+
         Parameters
         ----------
         obs : numpy.array
@@ -784,7 +838,7 @@ class ModBias(object):
             obs_nan[obs_nan == 0.0] = np.nan
             mne = np.nanmean((np.abs(mod - obs_nan)) / obs_nan, axis=-1) * 100.0
             return mne
-    
+
     @staticmethod
     def calculate_mfb(obs, mod):
         """
@@ -827,7 +881,7 @@ class ModBias(object):
     def calculate_mfe(obs, mod):
         """
         Calculate mean fractional error (MFE).
-        Otherwise known as fractional error (FE), fractional gross error (FGE), 
+        Otherwise known as fractional error (FE), fractional gross error (FGE),
         or mean absolute fractional bias (MAFB).
 
         Parameters
@@ -854,7 +908,7 @@ class ModBias(object):
             return mfe
 
     @staticmethod
-    def calculate_rmse(obs, mod, normalisation_type='none'):
+    def calculate_rmse(obs, mod, normalisation_type="none"):
         """
         Calculate root mean squared error (RMSE) /
         normalised root mean squared error (NRMSE)
@@ -868,7 +922,7 @@ class ModBias(object):
             Model data array
         normalisation_type : str
             Normalisation type
-            
+
         Returns
         -------
         float
@@ -881,16 +935,24 @@ class ModBias(object):
             rmse = np.sqrt(np.nanmean((mod - obs) ** 2, axis=-1))
 
             # handle normalisation if desired
-            if normalisation_type == 'max_min':
-                rmse = (rmse / (np.nanmax(obs, axis=-1) - np.nanmin(obs, axis=-1))) * 100.0 
-            elif normalisation_type == 'mean':
-                rmse = (rmse / np.nanmean(obs, axis=-1)) * 100.0 
-            elif normalisation_type == 'rmse':
-                rmse = (rmse / nansumwrapper(obs, axis=-1)) * 100.0 
-            elif normalisation_type == 'iq':
-                rmse = (rmse / (np.nanpercentile(obs, 75, axis=-1, method='nearest') - np.nanpercentile(obs, 25, axis=-1, method='nearest'))) * 100.0 
-            elif normalisation_type == 'stdev':
-                rmse = (rmse / np.nanstd(obs, axis=-1)) * 100.0 
+            if normalisation_type == "max_min":
+                rmse = (
+                    rmse / (np.nanmax(obs, axis=-1) - np.nanmin(obs, axis=-1))
+                ) * 100.0
+            elif normalisation_type == "mean":
+                rmse = (rmse / np.nanmean(obs, axis=-1)) * 100.0
+            elif normalisation_type == "rmse":
+                rmse = (rmse / nansumwrapper(obs, axis=-1)) * 100.0
+            elif normalisation_type == "iq":
+                rmse = (
+                    rmse
+                    / (
+                        np.nanpercentile(obs, 75, axis=-1, method="nearest")
+                        - np.nanpercentile(obs, 25, axis=-1, method="nearest")
+                    )
+                ) * 100.0
+            elif normalisation_type == "stdev":
+                rmse = (rmse / np.nanstd(obs, axis=-1)) * 100.0
             return rmse
 
     @staticmethod
@@ -905,7 +967,7 @@ class ModBias(object):
             Observations data array
         mod : numpy.array
             Model data array
-            
+
         Returns
         -------
         float
@@ -915,11 +977,9 @@ class ModBias(object):
         if obs.size == 0:
             return np.nan
         else:
-            crmse = np.sqrt(
-                np.mean(((mod - np.mean(mod)) - (obs - np.mean(obs))) ** 2)
-            )
+            crmse = np.sqrt(np.mean(((mod - np.mean(mod)) - (obs - np.mean(obs))) ** 2))
             return crmse
-    
+
     @staticmethod
     def calculate_r(obs, mod):
         """
@@ -937,7 +997,7 @@ class ModBias(object):
             Observations data array
         mod : numpy.array
             Model data array
-            
+
         Returns
         -------
         float
@@ -957,7 +1017,9 @@ class ModBias(object):
             standard_score_obs = (obs - mean_obs) / std_obs
             standard_score_mod = (mod - mean_mod) / std_mod
             standard_score_mult = standard_score_obs * standard_score_mod
-            return nansumwrapper(standard_score_mult, axis=-1) / np.count_nonzero(~np.isnan(standard_score_mult), axis=-1)
+            return nansumwrapper(standard_score_mult, axis=-1) / np.count_nonzero(
+                ~np.isnan(standard_score_mult), axis=-1
+            )
 
     @staticmethod
     def calculate_r_squared(obs, mod):
@@ -974,7 +1036,7 @@ class ModBias(object):
             Observations data array
         mod : numpy.array
             Model data array
-            
+
         Returns
         -------
         float
@@ -998,7 +1060,7 @@ class ModBias(object):
             Observations data array
         mod : numpy.array
             Model data array
-            
+
         Returns
         -------
         float
@@ -1027,7 +1089,7 @@ class ModBias(object):
             Observations data array
         mod : numpy.array
             Model data array
-            
+
         Returns
         -------
         float
@@ -1042,8 +1104,10 @@ class ModBias(object):
             return ((mod_max - obs_max) / obs_max) * 100.0
 
     @staticmethod
-    def calculate_fairmode_stats(obs, mod, u_95r_RV, RV, alpha, beta, exc_threshold, percentile, plot):
-        """ 
+    def calculate_fairmode_stats(
+        obs, mod, u_95r_RV, RV, alpha, beta, exc_threshold, percentile, plot
+    ):
+        """
         Calculate FAIRMODE statistics
         See here: https://publications.jrc.ec.europa.eu/repository/handle/JRC129254
 
@@ -1069,10 +1133,9 @@ class ModBias(object):
             Differenciates between fairmode target and statsummary
         """
 
-        is_finite = np.isfinite(obs+mod)
+        is_finite = np.isfinite(obs + mod)
 
         if np.any(is_finite):
-
             # remove missing data
             obs, mod = obs[is_finite], mod[is_finite]
 
@@ -1081,23 +1144,28 @@ class ModBias(object):
 
             # calculate Mean Bias
             bias = ModBias.calculate_mb(obs, mod)
-            
+
             # fairmode target plot
-            if plot == 'target':
-                        
+            if plot == "target":
                 # calculate x-axis values (CRMSE/BETA*RMSu)
                 crmse = ModBias.calculate_crmse(obs, mod)
                 x = crmse / (beta * rms_u)
-                
+
                 # calculate y-axis values (Mean Bias/BETA*RMSu)
                 y = bias / (beta * rms_u)
-                
+
                 # calculate ratio
                 ratio = np.abs(
-                    (Stats.calculate_standard_deviation(mod) - Stats.calculate_standard_deviation(obs))) / (
-                        Stats.calculate_standard_deviation(obs) * np.sqrt(2 * (1 - ModBias.calculate_r(obs, mod))))
-                
-                # For ratios larger than one the σ error dominates and 
+                    (
+                        Stats.calculate_standard_deviation(mod)
+                        - Stats.calculate_standard_deviation(obs)
+                    )
+                ) / (
+                    Stats.calculate_standard_deviation(obs)
+                    * np.sqrt(2 * (1 - ModBias.calculate_r(obs, mod)))
+                )
+
+                # For ratios larger than one the σ error dominates and
                 # the station is represented on the right, whereas the reverse
                 # applies for values smaller than one
                 if ratio < 1:
@@ -1108,31 +1176,47 @@ class ModBias(object):
                 mqi = rmse / (beta * rms_u)
 
                 return x, y, mqi
-            
-            # fairmode summarystats plot
-            elif plot == 'summary':
 
+            # fairmode summarystats plot
+            elif plot == "summary":
                 # calculate exceedance
-                exc = Stats.calculate_exceedances(obs,exc_threshold) if exc_threshold != None else None
+                exc = (
+                    Stats.calculate_exceedances(obs, exc_threshold)
+                    if exc_threshold != None
+                    else None
+                )
 
                 # calculate mean
                 mean = Stats.calculate_mean(obs)
-                
+
                 # calculate Observation and Model Percentile
                 obs_perc = Stats.calculate_percentile(obs, percentile=percentile)
                 mod_perc = Stats.calculate_percentile(mod, percentile=percentile)
 
                 # calculate Temporal Statistic for Bias
                 t_bias = bias / (beta * rms_u)
-                
+
                 # calculate Temporal Statistic for Correlation
-                t_R = (1 - ModBias.calculate_r(obs, mod)) / ((0.5 * (beta ** 2) * rms_u ** 2) / (Stats.calculate_standard_deviation(obs) * Stats.calculate_standard_deviation(mod)))
-                
+                t_R = (1 - ModBias.calculate_r(obs, mod)) / (
+                    (0.5 * (beta**2) * rms_u**2)
+                    / (
+                        Stats.calculate_standard_deviation(obs)
+                        * Stats.calculate_standard_deviation(mod)
+                    )
+                )
+
                 # calculate Temporal Statistic for Standard Deviation
-                t_sd = (np.abs(Stats.calculate_standard_deviation(mod) - Stats.calculate_standard_deviation(obs))) / (beta * rms_u)
+                t_sd = (
+                    np.abs(
+                        Stats.calculate_standard_deviation(mod)
+                        - Stats.calculate_standard_deviation(obs)
+                    )
+                ) / (beta * rms_u)
 
                 # calculate Uncertainty
-                U = u_95r_RV * np.sqrt((1 - alpha ** 2) * obs_perc ** 2 + alpha ** 2 * RV ** 2)
+                U = u_95r_RV * np.sqrt(
+                    (1 - alpha**2) * obs_perc**2 + alpha**2 * RV**2
+                )
 
                 # calculate High Percentile
                 h_perc = np.abs(mod_perc - obs_perc) / (beta * U)
@@ -1140,14 +1224,14 @@ class ModBias(object):
                 return mean, exc, t_bias, t_R, t_sd, h_perc
 
         else:
-            if plot == 'target':
+            if plot == "target":
                 return np.nan, np.nan, np.nan
-            elif plot == 'summary':
+            elif plot == "summary":
                 return np.nan, np.nan, np.nan, np.nan, np.nan, np.nan
-    
+
     @staticmethod
     def calculate_contingency_table(obs, mod, limits, index_levels, time_index, edges):
-        """ 
+        """
         Calculate contingency table
 
         Parameters
@@ -1169,16 +1253,20 @@ class ModBias(object):
         cut_obs_data = pd.cut(obs, limits, labels=index_levels)
         cut_model_data = pd.cut(mod, limits, labels=index_levels)
 
-        obs_data = xr.DataArray(cut_obs_data, dims=["time"], coords={"time": time_index})
-        model_data = xr.DataArray(cut_model_data, dims=["time"], coords={"time": time_index})
+        obs_data = xr.DataArray(
+            cut_obs_data, dims=["time"], coords={"time": time_index}
+        )
+        model_data = xr.DataArray(
+            cut_model_data, dims=["time"], coords={"time": time_index}
+        )
 
         edges = np.array(edges)
 
-        return xs.Contingency(obs_data, model_data, edges, edges, dim=['time'])
+        return xs.Contingency(obs_data, model_data, edges, edges, dim=["time"])
 
     @staticmethod
     def calculate_gerrity_score(contingency_table):
-        """ 
+        """
         Calculate gerrity score from contingency table
 
         Parameters

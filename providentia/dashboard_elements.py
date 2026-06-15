@@ -11,19 +11,27 @@ import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join
 
-PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
+PROVIDENTIA_ROOT = "/".join(CURRENT_PATH.split("/")[:-1])
 # get operating system specific formatting
 operating_system = platform.system()
-if operating_system == 'Darwin':
-    formatting_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_mac.yaml')))
-elif operating_system == 'Linux':
-    formatting_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_linux.yaml')))
-elif operating_system in ['Windows','MINGW32_NT','MINGW64_NT']:
-    formatting_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_windows.yaml')))
+if operating_system == "Darwin":
+    formatting_dict = yaml.safe_load(
+        open(join(PROVIDENTIA_ROOT, "settings/internal/stylesheet_mac.yaml"))
+    )
+elif operating_system == "Linux":
+    formatting_dict = yaml.safe_load(
+        open(join(PROVIDENTIA_ROOT, "settings/internal/stylesheet_linux.yaml"))
+    )
+elif operating_system in ["Windows", "MINGW32_NT", "MINGW64_NT"]:
+    formatting_dict = yaml.safe_load(
+        open(join(PROVIDENTIA_ROOT, "settings/internal/stylesheet_windows.yaml"))
+    )
 
 
-def set_formatting(PyQt5_obj, format, valid_obj=None, disabled=False, extra_arguments={}):
-    """ 
+def set_formatting(
+    PyQt5_obj, format, valid_obj=None, disabled=False, extra_arguments={}
+):
+    """
     Function that takes a PyQt5 object and applies some defined formatting
 
     Parameters
@@ -50,7 +58,6 @@ def set_formatting(PyQt5_obj, format, valid_obj=None, disabled=False, extra_argu
 
     # iterate through formatting dictionary and apply defined font modifiers/object formatting values
     for obj_type in format:
-
         if valid_obj:
             if obj_type not in valid_obj:
                 continue
@@ -66,40 +73,39 @@ def set_formatting(PyQt5_obj, format, valid_obj=None, disabled=False, extra_argu
         defined_style = ""
 
         for format_name, format_val in format[obj_type].items():
-
             if format_name in cut_extra_arguments:
                 format_val = cut_extra_arguments[format_name]
                 del cut_extra_arguments[format_name]
 
-            if format_name == 'height':
-                 PyQt5_obj.setFixedHeight(int(format_val))
-            elif format_name == 'width':
-                 PyQt5_obj.setFixedWidth(int(format_val))
-            elif format_name == 'min-height':
-                 PyQt5_obj.setMinimumHeight(int(format_val))
-            elif format_name == 'min-width':
-                 PyQt5_obj.setMinimumWidth(int(format_val))
-            elif format_name == 'max-height':
-                 PyQt5_obj.setMaximumHeight(int(format_val))
-            elif format_name == 'max-width':
-                 PyQt5_obj.setMaximumWidth(int(format_val))
+            if format_name == "height":
+                PyQt5_obj.setFixedHeight(int(format_val))
+            elif format_name == "width":
+                PyQt5_obj.setFixedWidth(int(format_val))
+            elif format_name == "min-height":
+                PyQt5_obj.setMinimumHeight(int(format_val))
+            elif format_name == "min-width":
+                PyQt5_obj.setMinimumWidth(int(format_val))
+            elif format_name == "max-height":
+                PyQt5_obj.setMaximumHeight(int(format_val))
+            elif format_name == "max-width":
+                PyQt5_obj.setMaximumWidth(int(format_val))
             else:
                 defined_style += "{}: {};".format(format_name, format_val)
 
         # have remaining extra arguments to add?
         if len(cut_extra_arguments) > 0:
             for format_name, format_val in cut_extra_arguments.items():
-                if format_name == 'height':
+                if format_name == "height":
                     PyQt5_obj.setFixedHeight(int(format_val))
-                elif format_name == 'width':
+                elif format_name == "width":
                     PyQt5_obj.setFixedWidth(int(format_val))
-                elif format_name == 'min-height':
+                elif format_name == "min-height":
                     PyQt5_obj.setMinimumHeight(int(format_val))
-                elif format_name == 'min-width':
+                elif format_name == "min-width":
                     PyQt5_obj.setMinimumWidth(int(format_val))
-                elif format_name == 'max-height':
+                elif format_name == "max-height":
                     PyQt5_obj.setMaximumHeight(int(format_val))
-                elif format_name == 'max-width':
+                elif format_name == "max-width":
                     PyQt5_obj.setMaximumWidth(int(format_val))
                 else:
                     defined_style += "{}: {};".format(format_name, format_val)
@@ -117,7 +123,7 @@ def set_formatting(PyQt5_obj, format, valid_obj=None, disabled=False, extra_argu
 
 
 def wrap_tooltip_text(tooltip_text, max_width, format_type):
-    """ 
+    """
     Function which takes the text for a tooltip and wraps it by the screen pixel width.
     It does this by estimating the pixel width of the tooltip text (as formatted),
     and then gets the ratio exceedance over the screen pixel width.
@@ -128,7 +134,7 @@ def wrap_tooltip_text(tooltip_text, max_width, format_type):
     Parameters
     ----------
     tooltip_text : str
-        Tooltip text 
+        Tooltip text
     max_width : int
         Maximum width accepted
     format_type : str
@@ -140,12 +146,18 @@ def wrap_tooltip_text(tooltip_text, max_width, format_type):
         Updated tooltip text
     """
 
-    tooltip_label = set_formatting(QtWidgets.QLabel(text=tooltip_text), formatting_dict[format_type], valid_obj=['QToolTip'])
-    tooltip_width = tooltip_label.fontMetrics().boundingRect(tooltip_label.text()).width()
+    tooltip_label = set_formatting(
+        QtWidgets.QLabel(text=tooltip_text),
+        formatting_dict[format_type],
+        valid_obj=["QToolTip"],
+    )
+    tooltip_width = (
+        tooltip_label.fontMetrics().boundingRect(tooltip_label.text()).width()
+    )
     if tooltip_width > max_width:
-        ratio = tooltip_width/max_width
-        max_char = int(np.floor((len(tooltip_text)/ratio)*1.0))
-        tooltip_text = '\n'.join(wrap(tooltip_text, max_char))
+        ratio = tooltip_width / max_width
+        max_char = int(np.floor((len(tooltip_text) / ratio) * 1.0))
+        tooltip_text = "\n".join(wrap(tooltip_text, max_char))
 
     return tooltip_text
 
@@ -154,7 +166,7 @@ def center(window):
     """
     Center window
     Reference: https://wiki.qt.io/How_to_Center_a_Window_on_the_Screen
-    
+
     Parameters
     ----------
     window : MessageBox
@@ -170,8 +182,9 @@ def center(window):
         )
     )
 
+
 class ComboBox(QtWidgets.QComboBox):
-    """ Modify default class of PyQT5 combobox. """
+    """Modify default class of PyQT5 combobox."""
 
     def __init__(self, parent=None):
         """
@@ -188,7 +201,7 @@ class ComboBox(QtWidgets.QComboBox):
         # setMaxVisibleItems only works if the box is editable
         # this creates a line edit that we need to overwrite
         self.setEditable(True)
-        #self.AdjustToContents
+        # self.AdjustToContents
         self.setSizeAdjustPolicy(self.AdjustToMinimumContentsLengthWithIcon)
         self.setMaxVisibleItems(20)
         self.AdjustToContents
@@ -199,7 +212,7 @@ class ComboBox(QtWidgets.QComboBox):
         self.currentTextChanged.connect(self.fixCursorPosition)
 
     def fixCursorPosition(self):
-        """ 
+        """
         Move (invisible) cursor to first position to avoid cutting off the start
         """
 
@@ -207,9 +220,9 @@ class ComboBox(QtWidgets.QComboBox):
         if len(self.lineEdit().text()) >= 8:
             self.lineEdit().setCursorPosition(0)
             self.lineEdit().setFocus()
-    
+
     def showPopup(self):
-        """ 
+        """
         Show pop-up
         """
 
@@ -227,6 +240,7 @@ class ComboBox(QtWidgets.QComboBox):
         # add vertical scroll bar
         self.view().setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
 
+
 class CheckableComboBox(QtWidgets.QComboBox):
     def __init__(self, *args, **kwargs):
         """
@@ -238,7 +252,7 @@ class CheckableComboBox(QtWidgets.QComboBox):
         # make the combo editable to set a custom text, but readonly
         self.setEditable(True)
         self.lineEdit().setReadOnly(True)
-        self.lineEdit().setPlaceholderText('Select option/s:')
+        self.lineEdit().setPlaceholderText("Select option/s:")
         self.setMaxVisibleItems(20)
         self.currentTextChanged.connect(self.fixCursorPosition)
 
@@ -266,7 +280,7 @@ class CheckableComboBox(QtWidgets.QComboBox):
         if len(self.lineEdit().text()) >= 8:
             self.lineEdit().setCursorPosition(0)
             self.lineEdit().setFocus()
-    
+
     def resizeEvent(self, event):
         """
         Resize event after updating text
@@ -315,7 +329,8 @@ class CheckableComboBox(QtWidgets.QComboBox):
 
                 # Toggle check state
                 item.setCheckState(
-                    QtCore.Qt.Unchecked if item.checkState() == QtCore.Qt.Checked
+                    QtCore.Qt.Unchecked
+                    if item.checkState() == QtCore.Qt.Checked
                     else QtCore.Qt.Checked
                 )
 
@@ -360,7 +375,7 @@ class CheckableComboBox(QtWidgets.QComboBox):
         """
 
         model = self.model()
-        
+
         # Find the first enabled item
         first_enabled_index = -1
         for i in range(model.rowCount()):
@@ -375,10 +390,9 @@ class CheckableComboBox(QtWidgets.QComboBox):
         # Highlight the first enabled item in the popup view only
         if first_enabled_index != -1:
             idx = model.index(first_enabled_index, 0)
-            self.view().selectionModel().clearSelection()      # clear any existing selection
+            self.view().selectionModel().clearSelection()  # clear any existing selection
             self.view().selectionModel().setCurrentIndex(
-                idx,
-                QtCore.QItemSelectionModel.SelectCurrent
+                idx, QtCore.QItemSelectionModel.SelectCurrent
             )
             self.view().scrollTo(idx)
 
@@ -445,7 +459,9 @@ class CheckableComboBox(QtWidgets.QComboBox):
         item.setData(QtCore.Qt.Unchecked, QtCore.Qt.CheckStateRole)
 
         if not enabled:
-            item.setData(QtGui.QBrush(QtGui.QColor(150, 150, 150)), QtCore.Qt.ForegroundRole)
+            item.setData(
+                QtGui.QBrush(QtGui.QColor(150, 150, 150)), QtCore.Qt.ForegroundRole
+            )
 
         self.model().appendRow(item)
 
@@ -473,7 +489,9 @@ class CheckableComboBox(QtWidgets.QComboBox):
 
         for i, text in enumerate(texts):
             data = datalist[i] if datalist and i < len(datalist) else None
-            enabled = enabled_list[i] if enabled_list and i < len(enabled_list) else True
+            enabled = (
+                enabled_list[i] if enabled_list and i < len(enabled_list) else True
+            )
             self.addItem(text, data, enabled)
 
     def currentData(self, all=False):
@@ -498,8 +516,9 @@ class CheckableComboBox(QtWidgets.QComboBox):
             if all or self.model().item(i).checkState() == QtCore.Qt.Checked
         ]
 
+
 class QVLine(QtWidgets.QFrame):
-    """ 
+    """
     Define class that generates vertical separator line
     """
 
@@ -510,7 +529,7 @@ class QVLine(QtWidgets.QFrame):
 
 
 class Switch(QtWidgets.QPushButton):
-    """ Define class that generates switch buttons. """
+    """Define class that generates switch buttons."""
 
     def __init__(self, parent=None):
         """
@@ -547,7 +566,9 @@ class Switch(QtWidgets.QPushButton):
 
         # set white background
         painter.setBrush(QtCore.Qt.white)
-        painter.drawRoundedRect(QtCore.QRect(-width, -radius, 2*width, 2*radius), radius, radius)
+        painter.drawRoundedRect(
+            QtCore.QRect(-width, -radius, 2 * width, 2 * radius), radius, radius
+        )
 
         # set colours and labels on switch
         label = "ON" if self.isChecked() else "OFF"
@@ -561,7 +582,7 @@ class Switch(QtWidgets.QPushButton):
         painter.setPen(QtGui.QPen(QtCore.Qt.NoPen))
 
         # change position depending on check
-        sw_rect = QtCore.QRect(-radius, -radius, width + radius, 2*radius)
+        sw_rect = QtCore.QRect(-radius, -radius, width + radius, 2 * radius)
         if not self.isChecked():
             sw_rect.moveLeft(-width)
         painter.drawRoundedRect(sw_rect, radius, radius)
@@ -570,8 +591,8 @@ class Switch(QtWidgets.QPushButton):
         painter.setPen(QtGui.QPen(text_colour))
         painter.drawText(sw_rect, QtCore.Qt.AlignCenter, label)
 
-class MessageBox(QtWidgets.QWidget):
 
+class MessageBox(QtWidgets.QWidget):
     def __init__(self, msg, parent=None, confirmation=False):
         """
         Initialise class
@@ -606,7 +627,7 @@ class MessageBox(QtWidgets.QWidget):
         confirmation : bool
             Indicates whether we want to ask a question with Yes or No as an answer
         """
-        
+
         # add warning box
         msg_box = QtWidgets.QMessageBox()
         msg_box.setWindowTitle("Warning")
@@ -615,14 +636,12 @@ class MessageBox(QtWidgets.QWidget):
         if confirmation:
             # add yes button
             yes_button = set_formatting(
-                QtWidgets.QPushButton("Yes"),
-                formatting_dict['popup_button']
+                QtWidgets.QPushButton("Yes"), formatting_dict["popup_button"]
             )
 
             # add no button
             no_button = set_formatting(
-                QtWidgets.QPushButton("No"),
-                formatting_dict['popup_button']
+                QtWidgets.QPushButton("No"), formatting_dict["popup_button"]
             )
 
             msg_box.addButton(yes_button, QtWidgets.QMessageBox.AcceptRole)
@@ -631,8 +650,7 @@ class MessageBox(QtWidgets.QWidget):
         else:
             # add ok button
             ok_button = set_formatting(
-                QtWidgets.QPushButton("OK"),
-                formatting_dict['popup_button']
+                QtWidgets.QPushButton("OK"), formatting_dict["popup_button"]
             )
 
             msg_box.addButton(ok_button, QtWidgets.QMessageBox.AcceptRole)
@@ -644,11 +662,10 @@ class MessageBox(QtWidgets.QWidget):
         result = msg_box.exec_()
 
         if confirmation:
-            self.result = (result == QtWidgets.QMessageBox.AcceptRole)
+            self.result = result == QtWidgets.QMessageBox.AcceptRole
 
 
 class InputDialog(QtWidgets.QWidget):
-
     def __init__(self, read_instance, title, msg, options, parent=None):
         """
         Initialise class
@@ -668,18 +685,20 @@ class InputDialog(QtWidgets.QWidget):
         """
 
         super().__init__(parent)
-        
+
         dialog = self.create_dialog_box(read_instance, title, msg, options)
         if dialog is not None:
             layout = QtWidgets.QVBoxLayout(self)
             layout.addWidget(dialog)
 
     def create_dialog_box(self, read_instance, title, msg, options):
-
         dialog = QtWidgets.QInputDialog(self)
-        self.selected_option, self.okpressed = dialog.getItem(read_instance, title, msg, options, 0, False)
+        self.selected_option, self.okpressed = dialog.getItem(
+            read_instance, title, msg, options, 0, False
+        )
         if not self.okpressed:
             return
+
 
 class CheckDialog(QtWidgets.QDialog):
     def __init__(self, items):
@@ -727,25 +746,28 @@ class CheckDialog(QtWidgets.QDialog):
                 checked.append(item.text())
 
         return checked
-    
+
 
 def create_custom_cursor(size=24):
-    """ 
+    """
     Create custom loading cursor (Providentia logo).
 
     Parameters
     ----------
     size : int
         Size of the cursor in pixels
-    """ 
+    """
 
     pix = QtGui.QPixmap(join(PROVIDENTIA_ROOT, "assets/logo.png"))
-    pix = pix.scaled(size,size,QtCore.Qt.KeepAspectRatio,QtCore.Qt.SmoothTransformation)
+    pix = pix.scaled(
+        size, size, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation
+    )
     return QtGui.QCursor(pix)
 
+
 def set_cursor(cursor_function, function, size=24):
-    """ 
-    Set custom cursor when performing a function that takes time to execute, 
+    """
+    Set custom cursor when performing a function that takes time to execute,
     and restore it to normal when finished.
 
     Parameters
@@ -771,8 +793,9 @@ def set_cursor(cursor_function, function, size=24):
     else:
         return cursor_function
 
+
 def unset_cursor(cursor_function, function):
-    """ 
+    """
     Unset custom cursor if the function which owns the cursor is the one trying to restore it,
     to avoid restoring the cursor to normal if it is still being used by another function.
 

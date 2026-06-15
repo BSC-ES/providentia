@@ -3,14 +3,8 @@ import providentia as prv
 import pytest
 
 possibilities = [
-    (prv.Providentia('tests_ghost.conf',
-                     tests=True),
-     "ghost"
-     ),
-    (prv.Providentia('tests_nonghost.conf',
-                     tests=True),
-     "nonghost"
-     )
+    (prv.Providentia("tests_ghost.conf", tests=True), "ghost"),
+    (prv.Providentia("tests_nonghost.conf", tests=True), "nonghost"),
 ]
 
 

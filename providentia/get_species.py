@@ -1,7 +1,15 @@
 import yaml
 
-ghost_cams_variables = yaml.safe_load(open("/home/pserrano/format_bug/providentia/settings/internal/cams/ghost_cams_variables.yaml"))
-cams_dataset = yaml.safe_load(open("/home/pserrano/format_bug/providentia/settings/internal/cams/cams_dataset.yaml"))
+ghost_cams_variables = yaml.safe_load(
+    open(
+        "/home/pserrano/format_bug/providentia/settings/internal/cams/ghost_cams_variables.yaml"
+    )
+)
+cams_dataset = yaml.safe_load(
+    open(
+        "/home/pserrano/format_bug/providentia/settings/internal/cams/cams_dataset.yaml"
+    )
+)
 
 ghost_list = []
 

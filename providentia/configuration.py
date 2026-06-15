@@ -20,35 +20,55 @@ from providentia.read_aux import check_for_ghost, get_default_qa
 from providentia.warnings_prv import show_message
 
 # get current path and providentia root path
-PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
-data_paths = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'data_paths.yaml')))
-defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'defaults.yaml')))
-multispecies_map = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'multispecies_shortcuts.yaml')))
-mapping_species = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'mapping_species.yaml')))
-interp_models = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_models.yaml')))
-modes = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'modes.yaml')))
-wildcard = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'wildcard.yaml')))
-actris_standard_metadata = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'standard_metadata.yaml')))
+PROVIDENTIA_ROOT = "/".join(CURRENT_PATH.split("/")[:-1])
+data_paths = yaml.safe_load(open(join(PROVIDENTIA_ROOT, "settings", "data_paths.yaml")))
+defaults = yaml.safe_load(
+    open(join(PROVIDENTIA_ROOT, "settings", "internal", "defaults.yaml"))
+)
+multispecies_map = yaml.safe_load(
+    open(join(PROVIDENTIA_ROOT, "settings", "multispecies_shortcuts.yaml"))
+)
+mapping_species = yaml.safe_load(
+    open(join(PROVIDENTIA_ROOT, "settings", "mapping_species.yaml"))
+)
+interp_models = yaml.safe_load(
+    open(join(PROVIDENTIA_ROOT, "settings", "interp_models.yaml"))
+)
+modes = yaml.safe_load(
+    open(join(PROVIDENTIA_ROOT, "settings", "internal", "modes.yaml"))
+)
+wildcard = yaml.safe_load(
+    open(join(PROVIDENTIA_ROOT, "settings", "internal", "wildcard.yaml"))
+)
+actris_standard_metadata = yaml.safe_load(
+    open(
+        join(
+            PROVIDENTIA_ROOT, "settings", "internal", "actris", "standard_metadata.yaml"
+        )
+    )
+)
 
 # set current MACHINE
 MACHINE = get_machine()
-    
+
+
 def parse_path(dir, f):
     if os.path.isabs(f):
         return f
     else:
         return join(dir, f)
 
+
 class ProvConfiguration:
-    """ 
-    Class that handles setting of Providentia internal variables, 
+    """
+    Class that handles setting of Providentia internal variables,
     mixing defaults, command line and configuration variables.
     """
 
     def __init__(self, read_instance, **kwargs):
         """
-        Sets Providentia default variables, overrides them 
-        with command-line arguments and validates parameters. 
+        Sets Providentia default variables, overrides them
+        with command-line arguments and validates parameters.
 
         Parameters
         ----------
@@ -59,13 +79,19 @@ class ProvConfiguration:
             Additional configuration parameters, provided via
             command-line arguments.
         """
-        
-        self.read_instance = read_instance 
-        
+
+        self.read_instance = read_instance
+
         # set variable defaults
-        self.var_defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'init.yaml')))
-        self.var_defaults['config_dir'] = join(PROVIDENTIA_ROOT, self.var_defaults['config_dir'])
-        modifiable_var_defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'available_inputs.yaml')))
+        self.var_defaults = yaml.safe_load(
+            open(join(PROVIDENTIA_ROOT, "settings", "internal", "init.yaml"))
+        )
+        self.var_defaults["config_dir"] = join(
+            PROVIDENTIA_ROOT, self.var_defaults["config_dir"]
+        )
+        modifiable_var_defaults = yaml.safe_load(
+            open(join(PROVIDENTIA_ROOT, "settings", "available_inputs.yaml"))
+        )
         self.var_defaults.update(modifiable_var_defaults)
 
         # set mode
@@ -85,15 +111,22 @@ class ProvConfiguration:
 
         # direct output to filescreen
         self.switch_logging()
-        
+
         # set default values of the current mode
-        self.read_instance.default_values = defaults['dashboard_empty'] if self.read_instance.mode == 'dashboard' and self.read_instance.config == '' else defaults[self.read_instance.mode]
-        
+        self.read_instance.default_values = (
+            defaults["dashboard_empty"]
+            if self.read_instance.mode == "dashboard"
+            and self.read_instance.config == ""
+            else defaults[self.read_instance.mode]
+        )
+
         # for any passed command line arguments not in default Providentia variables, now set them to self
         for kwarg in kwargs:
-            if (kwarg not in self.var_defaults):
+            if kwarg not in self.var_defaults:
                 # do not set section or subsection arguments if not in library mode
-                if (self.read_instance.mode != 'library') & (kwarg in ['section', 'subsection']):
+                if (self.read_instance.mode != "library") & (
+                    kwarg in ["section", "subsection"]
+                ):
                     continue
                 # set argument
                 val = kwargs.get(kwarg, val)
@@ -115,247 +148,272 @@ class ProvConfiguration:
         Returns
         -------
         parsed_value : any
-            The validated and standardized parameter value, returned as a 
+            The validated and standardized parameter value, returned as a
             string, list, dict or default if unspecified.
         """
-        
+
         # make sure we don't pass strings instead of booleans for true and false
-        if str(value).lower() == 'true':
+        if str(value).lower() == "true":
             value = True
-        elif str(value).lower() == 'false':
+        elif str(value).lower() == "false":
             value = False
-        
+
         # check wildcard '*'
-        elif value == '*' and key not in wildcard[self.read_instance.mode]:
+        elif value == "*" and key not in wildcard[self.read_instance.mode]:
             error = f"Error: The wildcard ('*') in the '{key}' parameter is not allowed for the '{self.read_instance.mode}' mode."
             self.read_instance.logger.error(error)
             sys.exit(1)
-            
-        elif '*' in str(value).split(','):
+
+        elif "*" in str(value).split(","):
             error = f"Error: The wildcard ('*') in the '{key}' parameter cannot be combined with other values. Use '*' on its own or remove it from the list."
             self.read_instance.logger.error(error)
             sys.exit(1)
 
         # throw an error if default keyword is passed
-        elif value == 'default':
+        elif value == "default":
             error = f"Error: 'default' was detected in '{key}'. 'default' is no longer an allowed keyword."
             self.read_instance.logger.error(error)
             sys.exit(1)
 
         # parse config file name
-        if key == 'conf':
-            if value != '':
+        if key == "conf":
+            if value != "":
                 self.read_instance.config = value
-            return ''
+            return ""
 
-        elif key == 'config':
-            if hasattr(self.read_instance, 'config'):
-                if self.read_instance.config != '':
+        elif key == "config":
+            if hasattr(self.read_instance, "config"):
+                if self.read_instance.config != "":
                     return self.read_instance.config
                 else:
                     return value
             else:
                 return value
-    
-        elif key == 'operating_system':
+
+        elif key == "operating_system":
             # get operating system
             operating_system = platform.system()
-            if operating_system == 'Darwin':
-                operating_system = 'Mac'
-            elif operating_system == 'Linux':
-                operating_system = 'Linux'
-            elif operating_system in ['Windows','MINGW32_NT','MINGW64_NT']:
-                operating_system = 'Windows'
+            if operating_system == "Darwin":
+                operating_system = "Mac"
+            elif operating_system == "Linux":
+                operating_system = "Linux"
+            elif operating_system in ["Windows", "MINGW32_NT", "MINGW64_NT"]:
+                operating_system = "Windows"
             else:
-                error = 'Error: The OS cannot be detected.'
+                error = "Error: The OS cannot be detected."
                 self.read_instance.logger.error(error)
                 sys.exit(1)
             return operating_system
-        
-        elif key == 'machine':
+
+        elif key == "machine":
             # set filetree type
-            if MACHINE in ['mn5', 'nord4']:
-                self.read_instance.filetree_type = 'remote'
+            if MACHINE in ["mn5", "nord4"]:
+                self.read_instance.filetree_type = "remote"
             else:
-                self.read_instance.filetree_type = 'local'
+                self.read_instance.filetree_type = "local"
             return MACHINE
 
-        elif key == 'available_cpus':
+        elif key == "available_cpus":
             # get available N CPUs
-            if MACHINE in ['mn5', 'nord4']:
+            if MACHINE in ["mn5", "nord4"]:
                 # handle cases where are testing briefly on login nodes (1 cpu capped)
                 try:
-                    return int(os.getenv('SLURM_CPUS_PER_TASK'))
+                    return int(os.getenv("SLURM_CPUS_PER_TASK"))
                 except:
                     return 1
             else:
-                if self.read_instance.operating_system == 'Linux':
+                if self.read_instance.operating_system == "Linux":
                     return len(os.sched_getaffinity(0))
                 else:
                     return os.cpu_count()
 
-        elif key == 'cartopy_data_dir':
+        elif key == "cartopy_data_dir":
             # set cartopy data directory (needed on nord4/MN5 as has no external
             # internet connection)
-            if MACHINE in ['nord4', 'mn5']:
-                return '/gpfs/projects/bsc32/software/rhel/9.2/software/Cartopy/0.23.0-foss-2023b-Python-3.11.5/lib/python3.11/site-packages/cartopy/data'
+            if MACHINE in ["nord4", "mn5"]:
+                return "/gpfs/projects/bsc32/software/rhel/9.2/software/Cartopy/0.23.0-foss-2023b-Python-3.11.5/lib/python3.11/site-packages/cartopy/data"
             # on all other machines pull from internet
 
-        elif key == 'n_cpus':
+        elif key == "n_cpus":
             # define number of CPUs to process on (leave empty to automatically
             # utilise all available CPUs) NOTE: if this value is set higher than the
             # actual number of CPUs available, then the max number of CPUs is used.
 
-            if (value == '') or (int(value) > self.read_instance.available_cpus):
+            if (value == "") or (int(value) > self.read_instance.available_cpus):
                 return self.read_instance.available_cpus
 
-        elif key == 'ghost_root':
+        elif key == "ghost_root":
             # define GHOST observational root data directory (if undefined it is
             # automatically taken from the BSC machine the tool is ran on)
 
             # set default if left undefined
-            if value == '':
+            if value == "":
                 ghost_root = data_paths[MACHINE]["ghost_root"]
-                return os.path.expanduser(ghost_root[0])+ghost_root[1:]
+                return os.path.expanduser(ghost_root[0]) + ghost_root[1:]
 
-        elif key == 'nonghost_root':
+        elif key == "nonghost_root":
             # define non-GHOST observational root data directory (if undefined it is
             # automatically taken from the BSC machine the tool is ran on)
 
             # set default if left undefined
-            if value == '':
+            if value == "":
                 nonghost_root = data_paths[MACHINE]["nonghost_root"]
-                return os.path.expanduser(nonghost_root[0])+nonghost_root[1:]
+                return os.path.expanduser(nonghost_root[0]) + nonghost_root[1:]
 
-        elif key == 'mod_root':
+        elif key == "mod_root":
             # define model root data directory
             # set model root data directory if left undefined
-            if value == '':
+            if value == "":
                 mod_root = data_paths[MACHINE]["mod_root"]
-                return os.path.expanduser(mod_root[0])+mod_root[1:]
+                return os.path.expanduser(mod_root[0]) + mod_root[1:]
 
-        elif key == 'mod_to_interp_root':
+        elif key == "mod_to_interp_root":
             # define model root data directory
             # set model root data directory if left undefined
-            if value == '':
+            if value == "":
                 mod_to_interp_root = data_paths[MACHINE]["mod_to_interp_root"]
-                if mod_to_interp_root != '': 
-                    return os.path.expanduser(mod_to_interp_root[0])+mod_to_interp_root[1:]       
-        
-        elif key == 'ghost_version':
+                if mod_to_interp_root != "":
+                    return (
+                        os.path.expanduser(mod_to_interp_root[0])
+                        + mod_to_interp_root[1:]
+                    )
+
+        elif key == "ghost_version":
             # parse GHOST version
 
             # get ghost_version list
-            self.read_instance.possible_ghost_versions = os.listdir(join(CURRENT_PATH,'dependencies', 'GHOST_standards'))
+            self.read_instance.possible_ghost_versions = os.listdir(
+                join(CURRENT_PATH, "dependencies", "GHOST_standards")
+            )
 
-            # import GHOST standards 
-            sys.path = [path for path in sys.path if 'dependencies/GHOST_standards/' not in path]            
-            sys.path.insert(1, join(CURRENT_PATH, 'dependencies/GHOST_standards/{}'.format(value)))
-            if 'GHOST_standards' in sys.modules:
-                del sys.modules['GHOST_standards']
+            # import GHOST standards
+            sys.path = [
+                path for path in sys.path if "dependencies/GHOST_standards/" not in path
+            ]
+            sys.path.insert(
+                1, join(CURRENT_PATH, "dependencies/GHOST_standards/{}".format(value))
+            )
+            if "GHOST_standards" in sys.modules:
+                del sys.modules["GHOST_standards"]
             from GHOST_standards import standard_parameters
             from GHOST_standards import get_standard_metadata
             from GHOST_standards import standard_data_flag_name_to_data_flag_code
             from GHOST_standards import standard_QA_name_to_QA_code
             from GHOST_standards import standard_networks
             from GHOST_standards import standard_temporal_resolutions
-            
+
             # get GHOST networks
-            self.read_instance.ghost_available_networks = list(standard_networks.keys()) 
-            
+            self.read_instance.ghost_available_networks = list(standard_networks.keys())
+
             # get EBAS_network_priorities (v1.5 onwards)
-            if key not in ['1.2', '1.3', '1.3.1', '1.3.2', '1.3.3', '1.4']:
+            if key not in ["1.2", "1.3", "1.3.1", "1.3.2", "1.3.3", "1.4"]:
                 # EBAS network priorities
                 from GHOST_standards import EBAS_network_priorities
+
                 self.read_instance.ghost_available_networks += EBAS_network_priorities
 
             # add regional ISD networks
-            if 'NOAA_ISD' in self.read_instance.ghost_available_networks:
-                ISD_regional_networks = ['NOAA_ISD_EU', 'NOAA_ISD_IP', 'NOAA_ISD_NA']
+            if "NOAA_ISD" in self.read_instance.ghost_available_networks:
+                ISD_regional_networks = ["NOAA_ISD_EU", "NOAA_ISD_IP", "NOAA_ISD_NA"]
                 self.read_instance.ghost_available_networks += ISD_regional_networks
 
             # get GHOST resolutions
-            self.read_instance.ghost_available_resolutions = [resolution_dict['temporal_resolution_path'] for resolution_dict in standard_temporal_resolutions.values()]
+            self.read_instance.ghost_available_resolutions = [
+                resolution_dict["temporal_resolution_path"]
+                for resolution_dict in standard_temporal_resolutions.values()
+            ]
 
             # modify standard parameter dictionary to have BSC standard parameter names as keys (rather than GHOST)
             self.read_instance.parameter_dictionary = dict()
             for _, param_dict in standard_parameters.items():
-                self.read_instance.parameter_dictionary[param_dict['bsc_parameter_name']] = param_dict
+                self.read_instance.parameter_dictionary[
+                    param_dict["bsc_parameter_name"]
+                ] = param_dict
 
             # get available species
-            self.read_instance.available_species = list(self.read_instance.parameter_dictionary.keys())
-            
+            self.read_instance.available_species = list(
+                self.read_instance.parameter_dictionary.keys()
+            )
+
             # get standard metadata dictionary
-            self.read_instance.standard_metadata = get_standard_metadata({'standard_units':'', 'units_quantity':''})
+            self.read_instance.standard_metadata = get_standard_metadata(
+                {"standard_units": "", "units_quantity": ""}
+            )
 
             # add ACTRIS variables to standard metadata
             for actris_dict in actris_standard_metadata.values():
-                if actris_dict["data_type"] == 'object':
+                if actris_dict["data_type"] == "object":
                     actris_dict["data_type"] = object
             self.read_instance.standard_metadata.update(actris_standard_metadata)
 
             # set standard data flags
-            self.read_instance.standard_data_flag_name_to_data_flag_code = standard_data_flag_name_to_data_flag_code
+            self.read_instance.standard_data_flag_name_to_data_flag_code = (
+                standard_data_flag_name_to_data_flag_code
+            )
             self.read_instance.standard_QA_name_to_QA_code = standard_QA_name_to_QA_code
 
             return str(value)
 
-        elif key in ['network', 'observation', 'framework', 'species', 'domain']:
+        elif key in ["network", "observation", "framework", "species", "domain"]:
             # parse network
 
             if isinstance(value, str):
                 # treat leaving the field blank as default
-                if value == '':
+                if value == "":
                     return self.var_defaults[key]
                 # parse multiple networks
-                if ',' in value:
-                    return [network.strip() for network in value.split(',')]
+                if "," in value:
+                    return [network.strip() for network in value.split(",")]
                 else:
                     return [value.strip()]
 
-        elif key in ['resolution', 'model_resolution']:
+        elif key in ["resolution", "model_resolution"]:
             # parse resolution
-            
+
             if isinstance(value, str):
                 # treat leaving the field blank as default
-                if value == '':
+                if value == "":
                     return self.var_defaults[key]
                 # parse multiple resolutions only in interpolation and download
-                if self.read_instance.mode in ['interpolation', 'download']:
-                    return [res.strip() for res in value.split(',')]
-                else:        
+                if self.read_instance.mode in ["interpolation", "download"]:
+                    return [res.strip() for res in value.split(",")]
+                else:
                     return value.strip()
 
-        elif key in ['end_date','start_date']:
+        elif key in ["end_date", "start_date"]:
             # parse date
 
             if (isinstance(value, str)) or (isinstance(value, int)):
                 # treat leaving the field blank as default
-                if value == '':
+                if value == "":
                     return self.var_defaults[key]
                 # throw error if date is empty str
                 value = str(value)
                 return value.strip()
 
-        elif key == 'qa':
+        elif key == "qa":
             # parse qa
 
             from GHOST_standards import providentia_defaults
-            
-            if self.read_instance.network == ['actris/actris']:
+
+            if self.read_instance.network == ["actris/actris"]:
                 defaults = {
                     "flag": [],
                     "qa_standard": ["Invalid Data Provider Flags - GHOST Decreed"],
-                    "qa_non_negative": ["Invalid Data Provider Flags - GHOST Decreed"]
+                    "qa_non_negative": ["Invalid Data Provider Flags - GHOST Decreed"],
                 }
             else:
                 defaults = providentia_defaults
 
             # set default qa codes (can differ per GHOST version)
-            self.read_instance.default_qa_standard = [self.read_instance.standard_QA_name_to_QA_code[qa_name] 
-                                                      for qa_name in defaults['qa_standard']]
-            self.read_instance.default_qa_non_negative = [self.read_instance.standard_QA_name_to_QA_code[qa_name] 
-                                                          for qa_name in defaults['qa_non_negative']]
+            self.read_instance.default_qa_standard = [
+                self.read_instance.standard_QA_name_to_QA_code[qa_name]
+                for qa_name in defaults["qa_standard"]
+            ]
+            self.read_instance.default_qa_non_negative = [
+                self.read_instance.standard_QA_name_to_QA_code[qa_name]
+                for qa_name in defaults["qa_non_negative"]
+            ]
 
             # if not None then set QA by that given
             if value is not None:
@@ -367,12 +425,17 @@ class ProvConfiguration:
                     value = []
                 # if the QAs are written with their names
                 elif isinstance(value, str):
-                    value = sorted([self.read_instance.standard_QA_name_to_QA_code[q.strip()] for q in value.split(",")])
+                    value = sorted(
+                        [
+                            self.read_instance.standard_QA_name_to_QA_code[q.strip()]
+                            for q in value.split(",")
+                        ]
+                    )
                 # list of integer codes
                 else:
                     value = sorted(list(value))
                 # if we have an ACTRIS network, keep only qa that can be applied
-                if self.read_instance.network == ['actris/actris']:
+                if self.read_instance.network == ["actris/actris"]:
                     value = [val for val in value if val in [6, 7]]
                 return value
             # otherwise, set default QA per species (set later)
@@ -380,16 +443,16 @@ class ProvConfiguration:
                 # set qa to be empty dict (to be later filled)
                 return {}
 
-        elif key == 'flags':
+        elif key == "flags":
             # parse flags
 
             from GHOST_standards import providentia_defaults
 
-            if self.read_instance.network == ['actris/actris']:
+            if self.read_instance.network == ["actris/actris"]:
                 defaults = {
                     "flag": [],
                     "qa_standard": ["Invalid Data Provider Flags - GHOST Decreed"],
-                    "qa_non_negative": ["Invalid Data Provider Flags - GHOST Decreed"]
+                    "qa_non_negative": ["Invalid Data Provider Flags - GHOST Decreed"],
                 }
             else:
                 defaults = providentia_defaults
@@ -404,15 +467,29 @@ class ProvConfiguration:
                     return []
                 # if the flags are written with their names
                 elif isinstance(value, str):
-                    return sorted([self.read_instance.standard_data_flag_name_to_data_flag_code[f.strip()] for f in value.split(",")])
+                    return sorted(
+                        [
+                            self.read_instance.standard_data_flag_name_to_data_flag_code[
+                                f.strip()
+                            ]
+                            for f in value.split(",")
+                        ]
+                    )
                 # list of integer codes
                 else:
                     return sorted(list(value))
             # otherwise, set default flags
             else:
-                return sorted([self.read_instance.standard_data_flag_name_to_data_flag_code[flag_name] for flag_name in defaults['flag']])
+                return sorted(
+                    [
+                        self.read_instance.standard_data_flag_name_to_data_flag_code[
+                            flag_name
+                        ]
+                        for flag_name in defaults["flag"]
+                    ]
+                )
 
-        elif key in ['add_qa','subtract_qa']:
+        elif key in ["add_qa", "subtract_qa"]:
             # parse add/subtract qa
 
             # if not None then set QA by that given
@@ -425,7 +502,12 @@ class ProvConfiguration:
                     return []
                 # if the QAs are written with their names
                 elif isinstance(value, str):
-                    return sorted([self.read_instance.standard_QA_name_to_QA_code[q.strip()] for q in value.split(",")])
+                    return sorted(
+                        [
+                            self.read_instance.standard_QA_name_to_QA_code[q.strip()]
+                            for q in value.split(",")
+                        ]
+                    )
                 # list of integer codes
                 else:
                     return sorted(list(value))
@@ -433,7 +515,7 @@ class ProvConfiguration:
             else:
                 return []
 
-        elif key in ['add_flags','subtract_flags']:
+        elif key in ["add_flags", "subtract_flags"]:
             # parse add/subtract flags
 
             # if not None then set flags by that given
@@ -448,11 +530,21 @@ class ProvConfiguration:
                 elif isinstance(value, str):
                     # check if all the flags appear in the GHOST_standards of the current version
                     for flag in value.split(","):
-                        if flag.strip() not in self.read_instance.standard_data_flag_name_to_data_flag_code:
+                        if (
+                            flag.strip()
+                            not in self.read_instance.standard_data_flag_name_to_data_flag_code
+                        ):
                             error = f"Error: Flag '{flag}' not in this GHOST version ({self.read_instance.ghost_version})."
                             self.read_instance.logger.error(error)
                             sys.exit(1)
-                    return sorted([self.read_instance.standard_data_flag_name_to_data_flag_code[f.strip()] for f in value.split(",")])
+                    return sorted(
+                        [
+                            self.read_instance.standard_data_flag_name_to_data_flag_code[
+                                f.strip()
+                            ]
+                            for f in value.split(",")
+                        ]
+                    )
                 # list of integer codes
                 else:
                     return sorted(list(value))
@@ -460,48 +552,50 @@ class ProvConfiguration:
             else:
                 return []
 
-        elif key == 'ensemble':
+        elif key == "ensemble":
             # parse ensemble
 
             if value is not None:
                 # treat leaving the field blank as default
-                if value == '':
+                if value == "":
                     return self.var_defaults[key]
 
                 # split list, if only one ensemble, then creates list of one element
                 ensemble_opts = []
                 for opt in str(value).split(","):
-                    #strip opt
+                    # strip opt
                     opt = opt.strip()
                     # if it is a number, then make it 3 digits, if not it stays as it is
                     if opt.isdigit():
                         opt = opt.zfill(3)
                     # check that it does not start with stat
-                    elif opt.startswith('stat'):
-                        error = "Error: 'ensemble' cannot start with 'stat'.\n" \
-                        "For ensemble statistics, simply define them based on the stat name provided in the filename, such as:\n" \
-                        "   · 'av' for ensemble average\n" \
-                        "   · 'av_an' for ensemble analysis average"
+                    elif opt.startswith("stat"):
+                        error = (
+                            "Error: 'ensemble' cannot start with 'stat'.\n"
+                            "For ensemble statistics, simply define them based on the stat name provided in the filename, such as:\n"
+                            "   · 'av' for ensemble average\n"
+                            "   · 'av_an' for ensemble analysis average"
+                        )
                         self.read_instance.logger.error(error)
                         sys.exit(1)
-                    
+
                     ensemble_opts.append(opt)
 
                 return ensemble_opts
             else:
                 return []
-            
-        elif key == 'forecast':
-            # parse forecast 
+
+        elif key == "forecast":
+            # parse forecast
 
             if isinstance(value, str):
                 # parse multiple forecast variables
-                if ',' in value:
-                    return [fct.strip().lower() for fct in value.split(',')]
+                if "," in value:
+                    return [fct.strip().lower() for fct in value.split(",")]
                 else:
                     return [value.strip().lower()]
-            
-        elif key in ['experiments', 'experiment', 'model', 'models']:
+
+        elif key in ["experiments", "experiment", "model", "models"]:
             # parse models
 
             if isinstance(value, str):
@@ -511,90 +605,101 @@ class ProvConfiguration:
                 # split models
                 else:
                     # have alternative model names for the legend, then parse them?
-                    if ('(' in value) & (')' in value):
-                        mods = [mod.strip() for mod in value.split('(')[0].strip().split(",")]
-                        self.read_instance.alias = [mod_legend.strip() for mod_legend in value.split('(')[1].split(')')[0].strip().split(",")]
+                    if ("(" in value) & (")" in value):
+                        mods = [
+                            mod.strip()
+                            for mod in value.split("(")[0].strip().split(",")
+                        ]
+                        self.read_instance.alias = [
+                            mod_legend.strip()
+                            for mod_legend in value.split("(")[1]
+                            .split(")")[0]
+                            .strip()
+                            .split(",")
+                        ]
                     # otherwise set legend names as given model names in full
-                    else: 
+                    else:
                         mods = [mod.strip() for mod in value.split(",")]
                         self.read_instance.alias = []
 
                     return mods
 
-        elif key == 'map_extent':
+        elif key == "map_extent":
             # parse map extent
 
             # map_extent empty?
             if not value:
                 # if dashboard, if map extent not defined then fix to global default extent
-                if self.read_instance.mode not in ['report', 'library']:
+                if self.read_instance.mode not in ["report", "library"]:
                     return [-180, 180, -90, 90]
             # otherwise parse it
             else:
                 if isinstance(value, str):
-                    return [float(c.strip()) for c in value.split(',')]
+                    return [float(c.strip()) for c in value.split(",")]
 
-        elif key == 'filter_species':
+        elif key == "filter_species":
             # parse filter species
 
-            # per networkspecies to filter by, save in dict as networkspecies:[lower_limit, upper_limit] 
+            # per networkspecies to filter by, save in dict as networkspecies:[lower_limit, upper_limit]
             if isinstance(value, str):
-
                 # strip all whitespace
                 value_strip = "".join(value.split())
 
                 # return empty dict if empty str
-                if value_strip == '':
+                if value_strip == "":
                     return {}
                 else:
                     # split per networkspecies
-                    networkspecies_split = value_strip.split('),')
+                    networkspecies_split = value_strip.split("),")
 
                     # iterate through networkspecies, saving list of limits per networkspecies
                     filter_networkspecies_dict = {}
                     for networkspeci_split in networkspecies_split:
-                        
-                        networkspeci_split_2 = networkspeci_split.split('(')
+                        networkspeci_split_2 = networkspeci_split.split("(")
 
                         # get networkspeci
-                        networkspeci = networkspeci_split_2[0].replace(':','|')
+                        networkspeci = networkspeci_split_2[0].replace(":", "|")
 
                         # get lower and upper limits
-                        networkspeci_split_3 = networkspeci_split_2[1].split(',')
+                        networkspeci_split_3 = networkspeci_split_2[1].split(",")
                         lower_limit = networkspeci_split_3[0]
 
                         # if it has fill value
                         if len(networkspeci_split_3) > 2:
                             upper_limit = networkspeci_split_3[1]
-                            filter_species_fill_value = float(networkspeci_split_3[2].replace(')',''))
+                            filter_species_fill_value = float(
+                                networkspeci_split_3[2].replace(")", "")
+                            )
                         # only bounds, fill value will be nan
                         else:
-                            upper_limit = networkspeci_split_3[1].replace(')','')
+                            upper_limit = networkspeci_split_3[1].replace(")", "")
                             filter_species_fill_value = np.nan
 
                         # save limits per networkspecies
                         if networkspeci in filter_networkspecies_dict:
-                             filter_networkspecies_dict[networkspeci].append([lower_limit, upper_limit, 
-                                                                              filter_species_fill_value])
+                            filter_networkspecies_dict[networkspeci].append(
+                                [lower_limit, upper_limit, filter_species_fill_value]
+                            )
                         else:
-                            filter_networkspecies_dict[networkspeci] = [[lower_limit, upper_limit, 
-                                                                         filter_species_fill_value]]
-                    
+                            filter_networkspecies_dict[networkspeci] = [
+                                [lower_limit, upper_limit, filter_species_fill_value]
+                            ]
+
                     return filter_networkspecies_dict
 
-        elif key == 'lower_bound':
+        elif key == "lower_bound":
             # parse lower_bound
-            
+
             # if not None then set lower_bound by that given
             # make sure it is a list of values
             if value is not None:
                 if value == "":
                     return []
                 elif isinstance(value, str):
-                    return [np.float32(c.strip()) for c in value.split(',')]
+                    return [np.float32(c.strip()) for c in value.split(",")]
                 elif (isinstance(value, int)) or (isinstance(value, float)):
                     return [value]
-                #otherwise must be a already a list of values
+                # otherwise must be a already a list of values
                 else:
                     return value
             # lower_bound empty?
@@ -602,7 +707,7 @@ class ProvConfiguration:
             else:
                 return {}
 
-        elif key == 'upper_bound':
+        elif key == "upper_bound":
             # parse upper bound
 
             # if not None then set upper_bound by that given
@@ -611,7 +716,7 @@ class ProvConfiguration:
                 if value == "":
                     return []
                 elif isinstance(value, str):
-                    return [np.float32(c.strip()) for c in value.split(',')]
+                    return [np.float32(c.strip()) for c in value.split(",")]
                 elif (isinstance(value, int)) or (isinstance(value, float)):
                     return [value]
                 # otherwise must be a already a list of values
@@ -622,19 +727,19 @@ class ProvConfiguration:
             else:
                 return {}
 
-        elif key == 'active_dashboard_plots':
+        elif key == "active_dashboard_plots":
             # parse active_dashboard_plots
 
             if isinstance(value, str):
                 # parse multiple active_dashboard_plots
-                if ',' in value:
-                    return [plot.strip() for plot in value.split(',')]
+                if "," in value:
+                    return [plot.strip() for plot in value.split(",")]
                 else:
                     return [value.strip()]
             elif isinstance(value, tuple):
                 return [str(val) for val in value]
 
-        elif key == 'resampling_resolution':
+        elif key == "resampling_resolution":
             # parse resampling resolution
 
             if isinstance(value, str):
@@ -642,35 +747,37 @@ class ProvConfiguration:
             else:
                 return str(value)
 
-        elif key == 'calibration_factor':
+        elif key == "calibration_factor":
             # parse calibration factor
 
             if isinstance(value, (str)):
-
                 # convert to string if not
                 if np.issubdtype(type(value), np.number):
                     value = str(value)
 
                 # strip all whitespace
-                if ',' in value:
-                    return [calibration_factor.strip() for calibration_factor in value.split(',')]
+                if "," in value:
+                    return [
+                        calibration_factor.strip()
+                        for calibration_factor in value.split(",")
+                    ]
                 else:
                     return [value.strip()]
-        
-        elif key == 'cpus_per_task':
+
+        elif key == "cpus_per_task":
             if value is not None:
                 return math.ceil(float(value))
-            
-        elif key == 'dl_timeout':
+
+        elif key == "dl_timeout":
             if value is not None:
                 return float(value)
-        
+
         # if no special parsing treatment for variable, simply return value
         return value
 
     def decompose_models(self, deactivate_warning):
         """
-        Splits each model in `experiments` into components 
+        Splits each model in `experiments` into components
         (model ID, domain, ensemble, forecast) and validates consistency.
 
         Parameters
@@ -686,42 +793,59 @@ class ProvConfiguration:
         default_ensemble = self.read_instance.default_values["ensemble"]
 
         # get original domain, ensemble and forecast as passed in the configuration file
-        config_domain = copy.deepcopy(self.read_instance.domain) 
+        config_domain = copy.deepcopy(self.read_instance.domain)
         config_ensemble = copy.deepcopy(self.read_instance.ensemble)
         config_forecast = copy.deepcopy(self.read_instance.forecast)
 
         # ignore the models if user wants to download observations
-        if self.read_instance.dl_mode == 'obs' and self.read_instance.mode == 'download':
+        if (
+            self.read_instance.dl_mode == "obs"
+            and self.read_instance.mode == "download"
+        ):
             return
 
-        if self.read_instance.experiments and self.read_instance.mode == 'download':
-
+        if self.read_instance.experiments and self.read_instance.mode == "download":
             # set model to be non-interpolated if there is no network
             if not self.read_instance.network:
                 self.read_instance.dl_interpolated = False
                 msg = "Models detected but no network specified, proceeding to download non-interpolated model output."
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+                show_message(
+                    self.read_instance,
+                    msg,
+                    from_conf=self.read_instance.from_conf,
+                    deactivate=deactivate_warning,
+                )
 
             # set mod mode directly if download is done from storage5
             elif self.read_instance.machine == "storage5":
                 self.read_instance.dl_interpolated = False
                 msg = "Transfer mode detected, proceding to copy non-interpolated model output."
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+                show_message(
+                    self.read_instance,
+                    msg,
+                    from_conf=self.read_instance.from_conf,
+                    deactivate=deactivate_warning,
+                )
 
             # if there's models, ask the user whether they want interpolated or non-interpolated
             if not isinstance(self.read_instance.dl_interpolated, bool):
                 while True:
-                    interpolated = input("\nModel data was detected in the configuration file. Do you want to download the interpolated version? (Otherwise, the non-interpolated model data will be downloaded) ([y]/n): ").lower()
-                    if interpolated in ['','y','n']:
+                    interpolated = input(
+                        "\nModel data was detected in the configuration file. Do you want to download the interpolated version? (Otherwise, the non-interpolated model data will be downloaded) ([y]/n): "
+                    ).lower()
+                    if interpolated in ["", "y", "n"]:
                         break
-                # set the interpolated parameter  
-                self.read_instance.dl_interpolated = interpolated in ['','y']
+                # set the interpolated parameter
+                self.read_instance.dl_interpolated = interpolated in ["", "y"]
 
         # get function for checking formating of model for current mode
         # if the current mode is interpolation or the model wanted to be downloaded is not interpolated
-        if self.read_instance.mode == 'interpolation' or (self.read_instance.mode == 'download' and self.read_instance.dl_interpolated is False):
+        if self.read_instance.mode == "interpolation" or (
+            self.read_instance.mode == "download"
+            and self.read_instance.dl_interpolated is False
+        ):
             check_model_func = self.check_model_interpolation
-        elif self.read_instance.mode == 'download':
+        elif self.read_instance.mode == "download":
             check_model_func = self.check_model_download
         else:
             check_model_func = self.check_model
@@ -735,15 +859,14 @@ class ProvConfiguration:
 
         # iterate through each model string
         for mod_ii, split_model in enumerate(split_models):
-
             # if model is composed by more than 4 parts, exit
             if len(split_model) > 4:
-                error = 'Invalid model format, models have to consist of four elements maximum.'
+                error = "Invalid model format, models have to consist of four elements maximum."
                 self.read_instance.logger.error(error)
                 sys.exit(1)
 
             # set alias if have one
-            if mod_ii < len(self.read_instance.alias): 
+            if mod_ii < len(self.read_instance.alias):
                 alias = self.read_instance.alias[mod_ii]
             else:
                 alias = None
@@ -754,21 +877,24 @@ class ProvConfiguration:
             mod_ens = None
             mod_fct = None
 
-            # iterate through model parts and come up with list of models, 
+            # iterate through model parts and come up with list of models,
             # using information from each of domain, ensemble, forecast fields when not in models field,
             # otherwise default values are used
             for model_part_ii, model_part in enumerate(split_model):
-
                 # have modID part?
                 if model_part_ii == 0:
                     mod_id = copy.deepcopy(model_part)
 
                 # have domain part?
-                elif model_part in self.read_instance.available_domains: 
+                elif model_part in self.read_instance.available_domains:
                     mod_dom = copy.deepcopy(model_part)
-                
+
                 # have forecast part?
-                elif ('day' in model_part) or ('daily' in model_part) or ('combined' in model_part): 
+                elif (
+                    ("day" in model_part)
+                    or ("daily" in model_part)
+                    or ("combined" in model_part)
+                ):
                     mod_fct = model_part.strip().lower()
 
                 # have ensemble part?
@@ -778,13 +904,15 @@ class ProvConfiguration:
                     if mod_ens.isdigit():
                         mod_ens = mod_ens.strip().zfill(3)
                     # check that it does not start with stat
-                    elif mod_ens.startswith('stat'):
-                            error = f"Error: 'ensemble' {mod_ens} cannot start with 'stat'.\n" \
-                            "For ensemble statistics, simply define them based on the stat name provided in the filename, such as:\n" \
-                            "   · 'av' for ensemble average\n" \
+                    elif mod_ens.startswith("stat"):
+                        error = (
+                            f"Error: 'ensemble' {mod_ens} cannot start with 'stat'.\n"
+                            "For ensemble statistics, simply define them based on the stat name provided in the filename, such as:\n"
+                            "   · 'av' for ensemble average\n"
                             "   · 'av_an' for ensemble analysis average"
-                            self.read_instance.logger.error(error)
-                            sys.exit(1)
+                        )
+                        self.read_instance.logger.error(error)
+                        sys.exit(1)
 
             # throw error if domain has been defined in both domain and model fields
             if (mod_dom) and (config_domain):
@@ -801,11 +929,11 @@ class ProvConfiguration:
             # else no information for domain from domain or model fields, then set default value
             else:
                 dom = copy.deepcopy(self.read_instance.available_domains)
-                       
+
             # throw error if ensemble has been defined in both ensemble and model fields
             if (mod_ens) and (config_ensemble):
                 error = f"Error: Unable to set 'ensemble' as {', '.join(config_ensemble)} because the "
-                error += f"model {self.read_instance.experiments[mod_ii]} already contains information about the ensemble."                  
+                error += f"model {self.read_instance.experiments[mod_ii]} already contains information about the ensemble."
                 self.read_instance.logger.error(error)
                 sys.exit(1)
             # elif if have ensemble information from model field, then use that
@@ -821,7 +949,7 @@ class ProvConfiguration:
             # throw error if forecast has been defined in both forecast and model fields
             if (mod_fct) and (config_forecast):
                 error = f"Error: Unable to set 'forecast' as {', '.join(config_forecast)} because the "
-                error +=  f"model {self.read_instance.experiments[mod_ii]} already contains information about the forecast."                  
+                error += f"model {self.read_instance.experiments[mod_ii]} already contains information about the forecast."
                 self.read_instance.logger.error(error)
                 sys.exit(1)
             # elif if have forecast information from model field, then use that
@@ -839,14 +967,14 @@ class ProvConfiguration:
                 for d in dom:
                     for e in ens:
                         # set model str
-                        model = '{}-{}-{}'.format(mod_id, d, e)
+                        model = "{}-{}-{}".format(mod_id, d, e)
 
                         # check model validity
                         altered_models = check_model_func(model, deactivate_warning)
 
-                        #iterate through returned models and re-split model
+                        # iterate through returned models and re-split model
                         for altered_model in altered_models:
-                            altered_model_split = altered_model.split('-')
+                            altered_model_split = altered_model.split("-")
 
                             # determine if have just modID or also domain and ensemble
                             mod_id_alt = altered_model_split[0]
@@ -856,13 +984,15 @@ class ProvConfiguration:
                             else:
                                 d_alt = altered_model_split[1]
                                 e_alt = altered_model_split[2]
-                            
+
                             # iterate through forecast and set final model str
                             for f in fct:
                                 if d_alt is None:
-                                    final_model = '{}'.format(mod_id_alt)
+                                    final_model = "{}".format(mod_id_alt)
                                 else:
-                                    final_model = '{}-{}-{}'.format(mod_id_alt, d_alt, e_alt)
+                                    final_model = "{}-{}-{}".format(
+                                        mod_id_alt, d_alt, e_alt
+                                    )
 
                                 # append domain, ensemble, and forecast to arrays if not None, and not already set
                                 if (d_alt is not None) & (d_alt not in domains):
@@ -880,58 +1010,72 @@ class ProvConfiguration:
 
         # set models dictionary mapping models to aliases
         # it is mandatory to have the same number of models and alises, otherwise alises are dropped
-        if (len(models) == len(aliases)) & (len(models) > 0): 
+        if (len(models) == len(aliases)) & (len(models) > 0):
             self.read_instance.alias_flag = True
-            models = {mod:alias for mod, alias in zip(models, aliases)}
+            models = {mod: alias for mod, alias in zip(models, aliases)}
         else:
             self.read_instance.alias_flag = False
-            models = {mod:mod for mod in models}
+            models = {mod: mod for mod in models}
 
         # show warning if alias not possible to be set
         if (not self.read_instance.alias_flag) & (len(aliases) > 0):
             msg = "Model aliases could not be set."
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+            show_message(
+                self.read_instance,
+                msg,
+                from_conf=self.read_instance.from_conf,
+                deactivate=deactivate_warning,
+            )
 
         # if models were passed but there is no valid model, show warning or exit in interpolation case
         if (self.read_instance.experiments != []) and (models == {}):
-            msg = 'No model data available.'
-            if self.read_instance.mode == 'interpolation':
+            msg = "No model data available."
+            if self.read_instance.mode == "interpolation":
                 error = "Error: " + msg
                 self.read_instance.logger.error(error)
                 sys.exit(1)
-            elif self.read_instance.mode != 'library':
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+            elif self.read_instance.mode != "library":
+                show_message(
+                    self.read_instance,
+                    msg,
+                    from_conf=self.read_instance.from_conf,
+                    deactivate=deactivate_warning,
+                )
 
         # if there is no domain set in configuration file, set it with values derived from model field and defaults (if not empty list)
         if not config_domain:
             if len(domains) > 0:
                 self.read_instance.domain = domains
-        
+
         # if there is no ensemble set in configuration file, set it with values derived from model field and defaults (if not empty list)
         if not config_ensemble:
             if len(ensembles) > 0:
                 self.read_instance.ensemble = ensembles
-        
+
         # if there is no forecast set in configuration file, set it with values derived from model field (if not empty list)
         if not config_forecast:
             if len(forecasts) > 0:
                 self.read_instance.forecast = forecasts
 
-        # check if forecast field is set correctly, otherwise throw error 
+        # check if forecast field is set correctly, otherwise throw error
 
-        # do not allow combined, daily or day to be selected together 
-        if len(self.read_instance.forecast) > 1:  
+        # do not allow combined, daily or day to be selected together
+        if len(self.read_instance.forecast) > 1:
             combined_flag = False
             daily_flag = False
             day_flag = False
             for fct in self.read_instance.forecast:
-                if 'combined' in fct:
+                if "combined" in fct:
                     combined_flag = True
-                if 'daily' in fct:
+                if "daily" in fct:
                     daily_flag = True
-                if 'day' in fct:
+                if "day" in fct:
                     day_flag = True
-            if (combined_flag & daily_flag) or (combined_flag & day_flag) or (daily_flag & day_flag):
+            if (
+                (combined_flag & daily_flag)
+                or (combined_flag & day_flag)
+                or (daily_flag & day_flag)
+            ):
                 error = "Error: 'combined', 'daily' or 'day options cannot be simultaneously selected for 'forecast' variable."
                 self.read_instance.logger.error(error)
                 sys.exit(1)
@@ -941,7 +1085,7 @@ class ProvConfiguration:
 
     def check_model(self, model, deactivate_warning):
         """
-        Check if a model-domain-ensemble combination exists in the model 
+        Check if a model-domain-ensemble combination exists in the model
         root directory and return matching options.
 
         Parameters
@@ -958,26 +1102,42 @@ class ProvConfiguration:
         """
 
         # split model
-        modid, domain, ensemble = model.split('-')
-        
+        modid, domain, ensemble = model.split("-")
+
         # get all possible models
-        mod_path = join(self.read_instance.mod_root,self.read_instance.ghost_version)
-        self.possible_models = [] if not os.path.exists(mod_path) else os.listdir(mod_path)
+        mod_path = join(self.read_instance.mod_root, self.read_instance.ghost_version)
+        self.possible_models = (
+            [] if not os.path.exists(mod_path) else os.listdir(mod_path)
+        )
 
         # initialise list of possible ghost versions
         available_ghost_versions = []
 
         # remove possible ghost versions if they are not really in the directories
-        possible_ghost_versions = list(set(os.listdir(self.read_instance.mod_root)) & set(self.read_instance.possible_ghost_versions))
+        possible_ghost_versions = list(
+            set(os.listdir(self.read_instance.mod_root))
+            & set(self.read_instance.possible_ghost_versions)
+        )
 
         # if ensemble is allmembers, get all the possible ensemble members
         if ensemble == "allmembers":
-            mod_found = list(filter(lambda x:x.startswith(modid+'-'+domain), self.possible_models))
-           
+            mod_found = list(
+                filter(
+                    lambda x: x.startswith(modid + "-" + domain), self.possible_models
+                )
+            )
+
             # search for other ghost versions
             if not mod_found:
                 for ghost_version in possible_ghost_versions:
-                    ghost_mod_found = list(filter(lambda x:x.startswith(modid+'-'+domain), os.listdir(join(self.read_instance.mod_root,ghost_version))))
+                    ghost_mod_found = list(
+                        filter(
+                            lambda x: x.startswith(modid + "-" + domain),
+                            os.listdir(
+                                join(self.read_instance.mod_root, ghost_version)
+                            ),
+                        )
+                    )
                     if ghost_mod_found:
                         available_ghost_versions.append(ghost_version)
 
@@ -987,21 +1147,32 @@ class ProvConfiguration:
 
             # search for other ghost versions
             if not mod_found:
-                available_ghost_versions = list(filter(lambda x:model in os.listdir(join(self.read_instance.mod_root,x)), possible_ghost_versions))
-        
+                available_ghost_versions = list(
+                    filter(
+                        lambda x: model
+                        in os.listdir(join(self.read_instance.mod_root, x)),
+                        possible_ghost_versions,
+                    )
+                )
+
         # if not found because of the ghost version, tell the user
-        if available_ghost_versions and ('/' not in self.read_instance.network[0]):
+        if available_ghost_versions and ("/" not in self.read_instance.network[0]):
             msg = f"There is no data available for {model} model for the current"
             msg += f" GHOST version ({self.read_instance.ghost_version}). Please check one of the available versions:"
             msg += f" {', '.join(sorted(available_ghost_versions))}"
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+            show_message(
+                self.read_instance,
+                msg,
+                from_conf=self.read_instance.from_conf,
+                deactivate=deactivate_warning,
+            )
 
         return mod_found
-    
-    # TODO use inheritance in the future 
-    def check_model_interpolation(self, model, deactivate_warning):     
+
+    # TODO use inheritance in the future
+    def check_model_interpolation(self, model, deactivate_warning):
         """
-        Verify that a model-domain-ensemble combination is valid for interpolation 
+        Verify that a model-domain-ensemble combination is valid for interpolation
         or for downloading non-interpolated models.
 
         Parameters
@@ -1018,15 +1189,25 @@ class ProvConfiguration:
         """
 
         # get the cams possible datasets
-        model_options = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_dataset.yaml')))
-        
+        model_options = yaml.safe_load(
+            open(
+                join(
+                    PROVIDENTIA_ROOT,
+                    "settings",
+                    "internal",
+                    "cams",
+                    "cams_dataset.yaml",
+                )
+            )
+        )
+
         # split model
-        modid, domain, ensemble = model.split('-')
+        modid, domain, ensemble = model.split("-")
 
         # accept asterisk to download all models (non-interpolated)
-        if modid == '*':
+        if modid == "*":
             return [modid]
-        
+
         # search if the modid is in the interp_models file
         # initialize model search variables
         model_exists = False
@@ -1039,34 +1220,36 @@ class ProvConfiguration:
                 if modid in model_dict["models"]:
                     model_exists = True
                     break
-            
+
             msg += f"Cannot find the model ID '{modid}' in '{join('settings', 'interp_models.yaml')}'. Please add it to the file. "
 
             # HPC interpolation only
-            if model_exists is False and self.read_instance.mode == 'interpolation':
+            if model_exists is False and self.read_instance.mode == "interpolation":
                 # search in hpc mod_to_interp_path
                 mod_to_interp_path = join(self.read_instance.mod_to_interp_root, modid)
                 if os.path.exists(mod_to_interp_path):
                     model_exists = True
-                
+
                 msg += f"Cannot find the model ID {modid} in '{os.path.dirname(mod_to_interp_path)}'."
-        
+
         # local download and interpolation
         else:
             # TODO Hardcoded ERA5
             # cams model is directly valid
-            if model.startswith(tuple(model_options.keys())) or model.startswith("era5_tropopause"):
+            if model.startswith(tuple(model_options.keys())) or model.startswith(
+                "era5_tropopause"
+            ):
                 return [model]
 
             # local interpolation
-            if self.read_instance.mode == 'interpolation':
+            if self.read_instance.mode == "interpolation":
                 # search in local mod_to_interp_path
                 mod_to_interp_path = join(self.read_instance.mod_to_interp_root, modid)
                 if os.path.exists(mod_to_interp_path):
                     model_exists = True
 
                 msg += f"Cannot find the model ID {modid} in '{os.path.dirname(mod_to_interp_path)}'."
-            
+
             # local download
             else:
                 # search in interp_models
@@ -1074,13 +1257,15 @@ class ProvConfiguration:
                     if modid in model_dict["models"]:
                         model_exists = True
                         break
-                
+
                 msg += f"1. Local config: '{join('settings', 'interp_models.yaml')}'\n"
 
                 # search in hpc mod_to_interp_path
                 if model_exists is False:
-                    self.read_instance.connect() 
-                    mod_to_interp_path = join(self.read_instance.mod_to_interp_remote_path, modid, domain)
+                    self.read_instance.connect()
+                    mod_to_interp_path = join(
+                        self.read_instance.mod_to_interp_remote_path, modid, domain
+                    )
 
                     try:
                         self.read_instance.sftp.stat(mod_to_interp_path)
@@ -1091,16 +1276,20 @@ class ProvConfiguration:
         # if model does not exist, exit
         # supressed warning deactivation
         if model_exists is False:
-            msg = (f"Model ID '{modid}' not found. Checked in:\n{msg}" + 
-                   f"Please, add the model ID to the file or ensure it exists on the HPC path.\n")
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            msg = (
+                f"Model ID '{modid}' not found. Checked in:\n{msg}"
+                + f"Please, add the model ID to the file or ensure it exists on the HPC path.\n"
+            )
+            show_message(
+                self.read_instance, msg, from_conf=self.read_instance.from_conf
+            )
             return []
 
         return [model]
-    
+
     def check_model_download(self, model, deactivate_warning):
         """
-        Verify that a model-domain-ensemble combination is available for download 
+        Verify that a model-domain-ensemble combination is available for download
         from the remote machine.
 
         Parameters
@@ -1113,48 +1302,66 @@ class ProvConfiguration:
         Returns
         -------
         list of str
-            List of available models matching the input specification. 
+            List of available models matching the input specification.
             May be empty if no models are found.
         """
 
         # split model
-        modid, domain, ensemble = model.split('-')
+        modid, domain, ensemble = model.split("-")
 
         # accept asterisk to download all models
-        if modid == '*':
+        if modid == "*":
             return [modid]
-        
+
         # all models pass this check because the real one is in the remote machine
         mod_found = [model]
-        
+
         # connect to the remote machine
-        self.read_instance.connect()        
-        
+        self.read_instance.connect()
+
         # get all possible models
-        mod_path = join(self.read_instance.mod_remote_path,self.read_instance.ghost_version)
+        mod_path = join(
+            self.read_instance.mod_remote_path, self.read_instance.ghost_version
+        )
         self.possible_models = self.read_instance.sftp.listdir(mod_path)
 
         # TODO repeated code, put this into a method in the future?
         # if ensemble is allmembers, get all the possible ensemble
         if ensemble == "allmembers":
-            mod_found = list(sorted(filter(lambda x:x.startswith(modid+'-'+domain), self.possible_models)))
-           
+            mod_found = list(
+                sorted(
+                    filter(
+                        lambda x: x.startswith(modid + "-" + domain),
+                        self.possible_models,
+                    )
+                )
+            )
+
             if not mod_found:
                 # initialise list of possible ghost versions
                 available_ghost_versions = []
-                
+
                 # search for other ghost versions
                 for ghost_version in self.read_instance.possible_ghost_versions:
-                    ghost_mod_found = list(filter(lambda x:x.startswith(modid+'-'+domain), self.read_instance.sftp.listdir(join(self.read_instance.mod_remote_path,ghost_version))))
+                    ghost_mod_found = list(
+                        filter(
+                            lambda x: x.startswith(modid + "-" + domain),
+                            self.read_instance.sftp.listdir(
+                                join(self.read_instance.mod_remote_path, ghost_version)
+                            ),
+                        )
+                    )
                     if ghost_mod_found:
                         available_ghost_versions.append(ghost_version)
 
-                msg = f"There is no model {modid}-{domain} data for the current GHOST version ({self.read_instance.ghost_version})." 
+                msg = f"There is no model {modid}-{domain} data for the current GHOST version ({self.read_instance.ghost_version})."
                 if available_ghost_versions:
                     msg += f" Please, check one of the available versions: {', '.join(sorted(available_ghost_versions))}"
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                show_message(
+                    self.read_instance, msg, from_conf=self.read_instance.from_conf
+                )
 
-        return mod_found        
+        return mod_found
 
     def check_validity(self, deactivate_warning=False):
         """
@@ -1168,7 +1375,6 @@ class ProvConfiguration:
 
         # remove aliases and move the value to the destination
         for destination, option_list in self.var_defaults["aliases"].items():
-
             defined_vars = []
 
             # check destination
@@ -1185,7 +1391,7 @@ class ProvConfiguration:
                     # move value to destination
                     setattr(self.read_instance, destination, val)
 
-            # exit if more than one defined 
+            # exit if more than one defined
             if len(defined_vars) > 1:
                 error = (
                     f"Error: You cannot define {', '.join(defined_vars)} "
@@ -1197,40 +1403,53 @@ class ProvConfiguration:
             # clean aliases
             for option in option_list:
                 setattr(self.read_instance, option, None)
-                     
+
         # get non-default fields on config file if launching from a config file
         if hasattr(self.read_instance, "sub_opts"):
             self.read_instance.fields_per_section = {}
             for field_name, fields in self.read_instance.sub_opts.items():
                 if field_name in self.read_instance.subsection_names:
-                    section_field_name = field_name.split('·')[0]
-                    self.read_instance.fields_per_section[field_name] = \
-                        fields.keys() - set(self.read_instance.fields_per_section[section_field_name])
+                    section_field_name = field_name.split("·")[0]
+                    self.read_instance.fields_per_section[
+                        field_name
+                    ] = fields.keys() - set(
+                        self.read_instance.fields_per_section[section_field_name]
+                    )
                 else:
-                    self.read_instance.fields_per_section[field_name] = set(fields.keys())
+                    self.read_instance.fields_per_section[field_name] = set(
+                        fields.keys()
+                    )
 
             # get aliases list
             aliases = []
             for alias_list in self.var_defaults["aliases"].values():
                 aliases += alias_list
-            
+
             # remove init.yaml values from invalid fields
             self.read_instance.non_default_fields_per_section = {
-                field_name:fields- set(self.var_defaults) - set(aliases)
-                for field_name, fields in self.read_instance.fields_per_section.items()}
-        
+                field_name: fields - set(self.var_defaults) - set(aliases)
+                for field_name, fields in self.read_instance.fields_per_section.items()
+            }
+
         # assign defaults
         for field, default in self.read_instance.default_values.items():
             current_value = getattr(self.read_instance, field)
 
             # skip ensemble so it is done in decompose_model
-            if field == 'ensemble':
+            if field == "ensemble":
                 pass
-            
+
             # ensure that statistic aggregation matches with the statistic_mode
-            elif field == 'statistic_aggregation': 
-                if not current_value or self.read_instance.statistic_mode != 'Flattened':
-                    setattr(self.read_instance, field, default[self.read_instance.statistic_mode])
+            elif field == "statistic_aggregation":
+                if (
+                    not current_value
+                    or self.read_instance.statistic_mode != "Flattened"
+                ):
+                    setattr(
+                        self.read_instance,
+                        field,
+                        default[self.read_instance.statistic_mode],
+                    )
 
             # set the defined defaults
             elif current_value in [[], "", None]:
@@ -1242,32 +1461,40 @@ class ProvConfiguration:
                     sys.exit(1)
 
             # check downsampling and upsampling
-            elif field == 'interp_model_downsampling' and current_value not in ['mean', 'median']:
+            elif field == "interp_model_downsampling" and current_value not in [
+                "mean",
+                "median",
+            ]:
                 setattr(self.read_instance, field, default)
-                
-            elif field == 'interp_model_upsampling' and current_value not in ['fill', 'gaps']:
+
+            elif field == "interp_model_upsampling" and current_value not in [
+                "fill",
+                "gaps",
+            ]:
                 setattr(self.read_instance, field, default)
 
         # map to multiple species if have * wildcard
         # also duplicate out associated network
         # remove any species for which there exists no data
         new_species = copy.deepcopy(self.read_instance.species)
-        for speci_ii, speci in enumerate(self.read_instance.species): 
-            if speci != '*' and '*' in speci:
+        for speci_ii, speci in enumerate(self.read_instance.species):
+            if speci != "*" and "*" in speci:
                 # throw mapping error if species not able to be mapped
                 if speci not in multispecies_map:
                     error = f'Error: not able to map species "{speci}".'
                     self.read_instance.logger.error(error)
                     sys.exit(1)
-                
+
                 mapped_species = multispecies_map[speci]
                 del new_species[speci_ii]
                 new_species[speci_ii:speci_ii] = mapped_species
                 # in download mode is not necessary to duplicate the networks
-                if self.read_instance.mode != 'download':
+                if self.read_instance.mode != "download":
                     network_to_duplicate = self.read_instance.network[speci_ii]
                     del self.read_instance.network[speci_ii]
-                    self.read_instance.network[speci_ii:speci_ii] = [network_to_duplicate]*len(mapped_species)
+                    self.read_instance.network[speci_ii:speci_ii] = [
+                        network_to_duplicate
+                    ] * len(mapped_species)
         self.read_instance.species = copy.deepcopy(new_species)
 
         # check if species is valid
@@ -1275,12 +1502,25 @@ class ProvConfiguration:
             species = copy.deepcopy(self.read_instance.species)
             for speci in species:
                 # If ACTRIS in network or framework, map speci name to BSC convention
-                if 'actris/actris' in self.read_instance.network:
+                if "actris/actris" in self.read_instance.network:
                     # load ACTRIS mapping files
-                    ghost_actris_variables = yaml.safe_load(open(join(
-                        PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'ghost_actris_variables.yaml')))
+                    ghost_actris_variables = yaml.safe_load(
+                        open(
+                            join(
+                                PROVIDENTIA_ROOT,
+                                "settings",
+                                "internal",
+                                "actris",
+                                "ghost_actris_variables.yaml",
+                            )
+                        )
+                    )
                     if speci in ghost_actris_variables.values():
-                        result = [speci_bsc for speci_bsc, speci_actris in ghost_actris_variables.items() if speci_actris == speci]
+                        result = [
+                            speci_bsc
+                            for speci_bsc, speci_actris in ghost_actris_variables.items()
+                            if speci_actris == speci
+                        ]
                         if len(result) == 1:
                             idx = self.read_instance.species.index(speci)
                             self.read_instance.species[idx] = result[0]
@@ -1291,10 +1531,19 @@ class ProvConfiguration:
                             sys.exit(1)
 
         # remove species that are not in the current ghost version
-        invalid_species = set(self.read_instance.species) - set(self.read_instance.available_species) - {'*'}     
-        if invalid_species:                                                            
+        invalid_species = (
+            set(self.read_instance.species)
+            - set(self.read_instance.available_species)
+            - {"*"}
+        )
+        if invalid_species:
             msg = f'Removing invalid species {", ".join(invalid_species)} for the current GHOST version ({self.read_instance.ghost_version})'
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+            show_message(
+                self.read_instance,
+                msg,
+                from_conf=self.read_instance.from_conf,
+                deactivate=deactivate_warning,
+            )
             for inv_species in invalid_species:
                 self.read_instance.species.remove(inv_species)
             # exit if there are no valid species left
@@ -1304,15 +1553,25 @@ class ProvConfiguration:
                 sys.exit(1)
 
         # check if network is valid for non-dashboard modes (only works for GHOST networks)
-        if self.read_instance.mode != 'dashboard':
-            invalid_networks = [network for network in self.read_instance.network if '/' not in network and network not in self.read_instance.ghost_available_networks]
+        if self.read_instance.mode != "dashboard":
+            invalid_networks = [
+                network
+                for network in self.read_instance.network
+                if "/" not in network
+                and network not in self.read_instance.ghost_available_networks
+            ]
             if invalid_networks:
                 msg = f'Removing invalid network(s) {", ".join(invalid_networks)} for the current GHOST version ({self.read_instance.ghost_version})'
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+                show_message(
+                    self.read_instance,
+                    msg,
+                    from_conf=self.read_instance.from_conf,
+                    deactivate=deactivate_warning,
+                )
                 for inv_network in invalid_networks:
                     self.read_instance.network.remove(inv_network)
-            # exit if there are no valid networks left (not for download as having no networks is valid)            
-            if self.read_instance.mode not in ['download', 'library']:
+            # exit if there are no valid networks left (not for download as having no networks is valid)
+            if self.read_instance.mode not in ["download", "library"]:
                 if not self.read_instance.network:
                     error = f"Error: No valid network for the current GHOST version ({self.read_instance.ghost_version})"
                     self.read_instance.logger.error(error)
@@ -1323,17 +1582,22 @@ class ProvConfiguration:
         # then duplicate respestive network/species
         # in download mode is allowed to not have a different number, so continue
         # TODO in download mode and interpolation separate this somehow.
-        if len(self.read_instance.network) != len(self.read_instance.species) and not (self.read_instance.mode in ['download', 'interpolation']):
-
+        if len(self.read_instance.network) != len(self.read_instance.species) and not (
+            self.read_instance.mode in ["download", "interpolation"]
+        ):
             # 1 network?
             if len(self.read_instance.network) == 1:
                 # duplicate network to match species len
-                self.read_instance.network = self.read_instance.network * len(self.read_instance.species)
+                self.read_instance.network = self.read_instance.network * len(
+                    self.read_instance.species
+                )
 
             # 1 species?
             elif len(self.read_instance.species) == 1:
                 # duplicate species to match network len
-                self.read_instance.species = self.read_instance.species * len(self.read_instance.network)
+                self.read_instance.species = self.read_instance.species * len(
+                    self.read_instance.network
+                )
 
             # otherwise throw error
             else:
@@ -1345,10 +1609,10 @@ class ProvConfiguration:
         for network_ii, network in enumerate(self.read_instance.network):
             if network_ii == 0:
                 self.read_instance.reading_ghost = check_for_ghost(network)
-                self.read_instance.reading_actris = network == 'actris/actris'
+                self.read_instance.reading_actris = network == "actris/actris"
             else:
                 is_ghost = check_for_ghost(network)
-                is_actris = network == 'actris/actris'
+                is_actris = network == "actris/actris"
                 if is_ghost != self.read_instance.reading_ghost:
                     error = 'Error: "network" must be all GHOST or non-GHOST.'
                     self.read_instance.logger.error(error)
@@ -1360,82 +1624,126 @@ class ProvConfiguration:
                 self.read_instance.reading_ghost = is_ghost
 
         # if are using dashboard then just take first network/species pair, as multivar not supported yet
-        if ((len(self.read_instance.network) > 1) and (len(self.read_instance.species) > 1) and 
-            (self.read_instance.mode == 'dashboard')):
-             
-            msg = 'Multiple networks/species are not supported in the dashboard. First ones will be taken.'
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+        if (
+            (len(self.read_instance.network) > 1)
+            and (len(self.read_instance.species) > 1)
+            and (self.read_instance.mode == "dashboard")
+        ):
+            msg = "Multiple networks/species are not supported in the dashboard. First ones will be taken."
+            show_message(
+                self.read_instance,
+                msg,
+                from_conf=self.read_instance.from_conf,
+                deactivate=deactivate_warning,
+            )
 
             self.read_instance.network = [self.read_instance.network[0]]
             self.read_instance.species = [self.read_instance.species[0]]
 
         # initialise networkspeci as first network and species pair
         if self.read_instance.network and self.read_instance.species:
-            self.read_instance.networkspeci = '{}|{}'.format(self.read_instance.network[0],
-                                                             self.read_instance.species[0]) 
+            self.read_instance.networkspeci = "{}|{}".format(
+                self.read_instance.network[0], self.read_instance.species[0]
+            )
 
         # check resolution
         # if not interpolation or download, get first resolution in list
-        if (',' in self.read_instance.resolution) and (self.read_instance.mode not in ['interpolation', 'download']):
-            default = self.read_instance.resolution.split(',')[0]
-            msg = "Resolution (resolution) contains multiple values. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+        if ("," in self.read_instance.resolution) and (
+            self.read_instance.mode not in ["interpolation", "download"]
+        ):
+            default = self.read_instance.resolution.split(",")[0]
+            msg = "Resolution (resolution) contains multiple values. Using '{}' as default.".format(
+                default
+            )
+            show_message(
+                self.read_instance,
+                msg,
+                from_conf=self.read_instance.from_conf,
+                deactivate=deactivate_warning,
+            )
             self.read_instance.resolution = default
 
         # copy value of resolution into model_resolution
-        if self.read_instance.mode == 'download' and not self.read_instance.model_resolution:
-            self.read_instance.model_resolution = self.read_instance.resolution 
+        if (
+            self.read_instance.mode == "download"
+            and not self.read_instance.model_resolution
+        ):
+            self.read_instance.model_resolution = self.read_instance.resolution
 
         # set active resolution, resampling_resolution when set, otherwise resolution
-        if self.read_instance.resampling_resolution != 'None':
-            self.read_instance.active_resolution = self.read_instance.resampling_resolution
+        if self.read_instance.resampling_resolution != "None":
+            self.read_instance.active_resolution = (
+                self.read_instance.resampling_resolution
+            )
         else:
             self.read_instance.active_resolution = self.read_instance.resolution
-          
+
         # check and format start_date and end_date
-        dates = ['start_date', 'end_date']
+        dates = ["start_date", "end_date"]
         for date_var_name in dates:
             date = getattr(self.read_instance, date_var_name)
-            
+
             # minimum/maximum dates
-            if date == '*':
+            if date == "*":
                 pass
             # YYYYMMDD
             elif len(date) == 8:
-                if self.read_instance.mode == 'interpolation':
-                    setattr(self.read_instance, date_var_name, date[:-2])    
+                if self.read_instance.mode == "interpolation":
+                    setattr(self.read_instance, date_var_name, date[:-2])
             # YYYYMM
-            elif len(date) == 6:  
-                if self.read_instance.mode != 'interpolation':
-                    setattr(self.read_instance, date_var_name, date + "01")     
+            elif len(date) == 6:
+                if self.read_instance.mode != "interpolation":
+                    setattr(self.read_instance, date_var_name, date + "01")
             # throw error if format is not valid
             else:
-                error = f"Error: Invalid value or format for '{date_var_name}': '{date}'."
+                error = (
+                    f"Error: Invalid value or format for '{date_var_name}': '{date}'."
+                )
                 self.read_instance.logger.error(error)
                 sys.exit(1)
 
         # check end date is bigger than start date
-        if self.read_instance.start_date != '*' and self.read_instance.end_date != '*':
+        if self.read_instance.start_date != "*" and self.read_instance.end_date != "*":
             if self.read_instance.start_date > self.read_instance.end_date:
-                error = f'Error: Start date ({self.read_instance.start_date}) exceeds end date ({self.read_instance.end_date}).'
+                error = f"Error: Start date ({self.read_instance.start_date}) exceeds end date ({self.read_instance.end_date})."
                 self.read_instance.logger.error(error)
                 sys.exit(1)
             # in interpolation, if months are the same add a month to end date
-            elif self.read_instance.start_date == self.read_instance.end_date and self.read_instance.mode == 'interpolation':
-                self.read_instance.end_date = (datetime.strptime(self.read_instance.start_date, "%Y%m") + relativedelta(months=1)).strftime("%Y%m")
-                msg = f'Setting end date to be {self.read_instance.end_date} for interpolation.'
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-                
+            elif (
+                self.read_instance.start_date == self.read_instance.end_date
+                and self.read_instance.mode == "interpolation"
+            ):
+                self.read_instance.end_date = (
+                    datetime.strptime(self.read_instance.start_date, "%Y%m")
+                    + relativedelta(months=1)
+                ).strftime("%Y%m")
+                msg = f"Setting end date to be {self.read_instance.end_date} for interpolation."
+                show_message(
+                    self.read_instance,
+                    msg,
+                    from_conf=self.read_instance.from_conf,
+                    deactivate=deactivate_warning,
+                )
+
         # create empty directories for the observations and models
         if MACHINE == "local":
-            for path in [self.read_instance.nonghost_root, self.read_instance.ghost_root, self.read_instance.mod_root, self.read_instance.mod_to_interp_root]:
+            for path in [
+                self.read_instance.nonghost_root,
+                self.read_instance.ghost_root,
+                self.read_instance.mod_root,
+                self.read_instance.mod_to_interp_root,
+            ]:
                 if not os.path.exists(path):
                     os.makedirs(path)
-                    
+
         # check for what to download if there's both networks and model output
-        if self.read_instance.network and self.read_instance.experiments and self.read_instance.mode == 'download':
+        if (
+            self.read_instance.network
+            and self.read_instance.experiments
+            and self.read_instance.mode == "download"
+        ):
             valid_modes = ["both", "obs", "mod"]
-            
+
             # validate and format correctly dl_mode
             if self.read_instance.dl_mode:
                 mode = str(self.read_instance.dl_mode).lower()
@@ -1452,40 +1760,69 @@ class ProvConfiguration:
             # if not provided, ask user interactively
             else:
                 while True:
-                    user_input = input("\nWhich type of data do you want to download? Observational, modelled or both? ([both]/obs/mod): ").lower()
+                    user_input = input(
+                        "\nWhich type of data do you want to download? Observational, modelled or both? ([both]/obs/mod): "
+                    ).lower()
 
                     self.read_instance.dl_mode = user_input or "both"
                     if self.read_instance.dl_mode in valid_modes:
                         break
-                        
+
         # set modID, domain, ensemble, forecast from model name
         self.decompose_models(deactivate_warning)
 
         # before checking the model check that the remote download has the interpolated tag as False, if not exit
-        if self.read_instance.mode == 'download' and MACHINE in ["storage5", "nord4"] and self.read_instance.dl_interpolated is True:
-            error = F"Error: Nothing from the {self.read_instance.section} section was copied to gpfs, change the interpolated field to 'False'."
+        if (
+            self.read_instance.mode == "download"
+            and MACHINE in ["storage5", "nord4"]
+            and self.read_instance.dl_interpolated is True
+        ):
+            error = f"Error: Nothing from the {self.read_instance.section} section was copied to gpfs, change the interpolated field to 'False'."
             self.read_instance.logger.error(error)
             sys.exit(1)
 
         # check multiprocessing for interpolation in local runs, and activate if not on
-        if (MACHINE == 'local') and (not self.read_instance.interp_multiprocessing) and (self.read_instance.mode == 'interpolation'):
-            msg = 'During interpolation, multiprocessing must be turned on for local runs, activating...'
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+        if (
+            (MACHINE == "local")
+            and (not self.read_instance.interp_multiprocessing)
+            and (self.read_instance.mode == "interpolation")
+        ):
+            msg = "During interpolation, multiprocessing must be turned on for local runs, activating..."
+            show_message(
+                self.read_instance,
+                msg,
+                from_conf=self.read_instance.from_conf,
+                deactivate=deactivate_warning,
+            )
             self.read_instance.interp_multiprocessing = True
-            if 1 <= self.read_instance.cpus_per_task <= self.read_instance.available_cpus:
+            if (
+                1
+                <= self.read_instance.cpus_per_task
+                <= self.read_instance.available_cpus
+            ):
                 default = self.read_instance.cpus_per_task
             else:
                 default = self.read_instance.available_cpus
-                msg = "Number of cores ('{}') cannot be superior than number of available cpus ('{}') ".format(self.read_instance.cpus_per_task, default)
+                msg = "Number of cores ('{}') cannot be superior than number of available cpus ('{}') ".format(
+                    self.read_instance.cpus_per_task, default
+                )
                 msg += "or less than 1. Using '{}' as default.".format(default)
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+                show_message(
+                    self.read_instance,
+                    msg,
+                    from_conf=self.read_instance.from_conf,
+                    deactivate=deactivate_warning,
+                )
             self.read_instance.n_cpus = default
 
-        # visualisation only validity checks 
-        if self.read_instance.mode not in ['download', 'interpolation']: 
-
+        # visualisation only validity checks
+        if self.read_instance.mode not in ["download", "interpolation"]:
             # check have 4 active dashboard plots
-            if len(self.read_instance.active_dashboard_plots) != 4 and 'active_dashboard_plots' in self.read_instance.default_values and self.read_instance.mode == 'dashboard':
+            if (
+                len(self.read_instance.active_dashboard_plots) != 4
+                and "active_dashboard_plots" in self.read_instance.default_values
+                and self.read_instance.mode == "dashboard"
+            ):
                 error = 'Error: There must be 4 "active_dashboard_plots"'
                 self.read_instance.logger.error(error)
                 sys.exit(1)
@@ -1495,15 +1832,17 @@ class ProvConfiguration:
             invalid_filter_species = []
             for networkspeci, filter_species in filter_species_copy.items():
                 # if have a separator then perform some checks
-                if '|' in networkspeci: 
-                    networkspeci_split = networkspeci.split('|')
+                if "|" in networkspeci:
+                    networkspeci_split = networkspeci.split("|")
                     network = networkspeci_split[0]
                     speci = networkspeci_split[1]
                     # check if species is valid
                     if speci not in self.read_instance.parameter_dictionary:
                         invalid_filter_species.append(networkspeci)
                     # check if network is valid (only works for GHOST networks)
-                    elif ('/' not in network) and (network not in self.read_instance.ghost_available_networks):
+                    elif ("/" not in network) and (
+                        network not in self.read_instance.ghost_available_networks
+                    ):
                         invalid_filter_species.append(networkspeci)
                 # if do not have a separator then perform some checks
                 else:
@@ -1519,149 +1858,228 @@ class ProvConfiguration:
                         if networkspeci not in self.read_instance.parameter_dictionary:
                             invalid_filter_species.append(networkspeci)
                         # if valid, then define new networkspeci and assign it, deleting the previous entry
-                        else:                        
-                            new_networkspeci = '{}|{}'.format(self.read_instance.network[0], networkspeci)
-                            if new_networkspeci in self.read_instance.filter_species.keys():
+                        else:
+                            new_networkspeci = "{}|{}".format(
+                                self.read_instance.network[0], networkspeci
+                            )
+                            if (
+                                new_networkspeci
+                                in self.read_instance.filter_species.keys()
+                            ):
                                 for filter_speci in filter_species:
-                                    self.read_instance.filter_species[new_networkspeci].append(filter_speci)
+                                    self.read_instance.filter_species[
+                                        new_networkspeci
+                                    ].append(filter_speci)
                             else:
-                                self.read_instance.filter_species[new_networkspeci] = filter_species
+                                self.read_instance.filter_species[
+                                    new_networkspeci
+                                ] = filter_species
                             del self.read_instance.filter_species[networkspeci]
 
-            # give error if have invalid filter species, and remove them from filter_species 
+            # give error if have invalid filter species, and remove them from filter_species
             if invalid_filter_species:
                 msg = f'Removing invalid filter species {", ".join(invalid_filter_species)} for the current GHOST version ({self.read_instance.ghost_version})'
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+                show_message(
+                    self.read_instance,
+                    msg,
+                    from_conf=self.read_instance.from_conf,
+                    deactivate=deactivate_warning,
+                )
                 for invalid_filter_speci in invalid_filter_species:
                     del self.read_instance.filter_species[invalid_filter_speci]
 
             # if filter_species is active, and spatial_colocation is not active, then cannot filter by species
             # set filter_species to empty dict and advise user of this
-            if (self.read_instance.filter_species) and (not self.read_instance.spatial_colocation):
+            if (self.read_instance.filter_species) and (
+                not self.read_instance.spatial_colocation
+            ):
                 self.read_instance.filter_species = {}
-                msg = 'Spatial colocation (spatial_colocation) must be set to True if wanting to filter by species.'
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+                msg = "Spatial colocation (spatial_colocation) must be set to True if wanting to filter by species."
+                show_message(
+                    self.read_instance,
+                    msg,
+                    from_conf=self.read_instance.from_conf,
+                    deactivate=deactivate_warning,
+                )
 
             # create variable for all unique species (plus filter species)
             filter_species = []
             species_plus_filter_species = copy.deepcopy(self.read_instance.species)
             if self.read_instance.filter_species:
                 for networkspeci in self.read_instance.filter_species:
-                    speci = networkspeci.split('|')[1]
+                    speci = networkspeci.split("|")[1]
                     if speci not in self.read_instance.species:
                         filter_species.append(speci)
                         species_plus_filter_species.append(speci)
-                        
+
             # set lower_bound and upper_bound as dicts with limits per species (including filter species)
             # if type is dict then set bound using GHOST extreme limits per species
 
             # lower_bound
             # type is dict, then set as default limit per species using GHOST limits
             if isinstance(self.read_instance.lower_bound, dict):
-                self.read_instance.lower_bound = {speci:
-                                                np.float32(self.read_instance.parameter_dictionary[speci]['extreme_lower_limit']) 
-                                                for speci in species_plus_filter_species}
+                self.read_instance.lower_bound = {
+                    speci: np.float32(
+                        self.read_instance.parameter_dictionary[speci][
+                            "extreme_lower_limit"
+                        ]
+                    )
+                    for speci in species_plus_filter_species
+                }
             # otherwise set list values to dict, saving limits per species
             # if have just 1 limit apply for all read species, but if have multiple, set limits per species
-            # throw error if have multiple lower bounds, but not equal to number of species to read  
-            else:      
+            # throw error if have multiple lower bounds, but not equal to number of species to read
+            else:
                 lower_bound_dict = {}
                 if len(self.read_instance.lower_bound) == 1:
                     for speci in species_plus_filter_species:
                         lower_bound_dict[speci] = self.read_instance.lower_bound[0]
                 elif len(self.read_instance.lower_bound) > 1:
-                    if len(self.read_instance.species) != len(self.read_instance.lower_bound):
+                    if len(self.read_instance.species) != len(
+                        self.read_instance.lower_bound
+                    ):
                         error = 'Error: "lower_bound" variable must be same length as number of species read.'
                         self.read_instance.logger.error(error)
                         sys.exit(1)
                     else:
                         for speci_ii, speci in enumerate(self.read_instance.species):
-                            lower_bound_dict[speci] = self.read_instance.lower_bound[speci_ii] 
+                            lower_bound_dict[speci] = self.read_instance.lower_bound[
+                                speci_ii
+                            ]
                         # add filter_species (using GHOST limits)
                         for speci in filter_species:
-                            lower_bound_dict[speci] = np.float32(self.read_instance.parameter_dictionary[speci]['extreme_lower_limit'])
+                            lower_bound_dict[speci] = np.float32(
+                                self.read_instance.parameter_dictionary[speci][
+                                    "extreme_lower_limit"
+                                ]
+                            )
                 self.read_instance.lower_bound = lower_bound_dict
 
             # upper_bound
             # type is dict, then set as default limit per species using GHOST limits
             if isinstance(self.read_instance.upper_bound, dict):
-                self.read_instance.upper_bound = {speci:np.float32(self.read_instance.parameter_dictionary[speci]['extreme_upper_limit']) 
-                                                for speci in species_plus_filter_species}
+                self.read_instance.upper_bound = {
+                    speci: np.float32(
+                        self.read_instance.parameter_dictionary[speci][
+                            "extreme_upper_limit"
+                        ]
+                    )
+                    for speci in species_plus_filter_species
+                }
             # otherwise set list values to dict, saving limits per species
             # if have just 1 limit apply for all read species, but if have multiple, set limits per species
-            # throw error if have multiple upper bounds, but not equal to number of species to read  
-            else:      
+            # throw error if have multiple upper bounds, but not equal to number of species to read
+            else:
                 upper_bound_dict = {}
                 if len(self.read_instance.upper_bound) == 1:
                     for speci in species_plus_filter_species:
                         upper_bound_dict[speci] = self.read_instance.upper_bound[0]
                 elif len(self.read_instance.upper_bound) > 1:
-                    if len(self.read_instance.species) != len(self.read_instance.upper_bound):
+                    if len(self.read_instance.species) != len(
+                        self.read_instance.upper_bound
+                    ):
                         error = 'Error: "upper_bound" variable must be same length as number of species read.'
                         self.read_instance.logger.error(error)
                         sys.exit(1)
                     else:
                         for speci_ii, speci in enumerate(self.read_instance.species):
-                            upper_bound_dict[speci] = self.read_instance.upper_bound[speci_ii] 
+                            upper_bound_dict[speci] = self.read_instance.upper_bound[
+                                speci_ii
+                            ]
                         # add filter_species (using GHOST limits)
                         for speci in filter_species:
-                            upper_bound_dict[speci] = np.float32(self.read_instance.parameter_dictionary[speci]['extreme_upper_limit'])
+                            upper_bound_dict[speci] = np.float32(
+                                self.read_instance.parameter_dictionary[speci][
+                                    "extreme_upper_limit"
+                                ]
+                            )
                 self.read_instance.upper_bound = upper_bound_dict
 
             # check bounds inside filter_species
             if self.read_instance.filter_species:
-                for networkspeci in self.read_instance.filter_species: 
-                    for networkspeci_limit_ii, networkspeci_limit in enumerate(self.read_instance.filter_species[networkspeci]):
-                        
+                for networkspeci in self.read_instance.filter_species:
+                    for networkspeci_limit_ii, networkspeci_limit in enumerate(
+                        self.read_instance.filter_species[networkspeci]
+                    ):
                         # get bounds
                         lower_limit = networkspeci_limit[0]
                         upper_limit = networkspeci_limit[1]
                         filter_species_fill_value = networkspeci_limit[2]
-                        
+
                         # modify lower bound to be :, contain > or >=
-                        # if lower bound has a < symbol, change it to >, and show message 
-                        if ('<' in lower_limit):
-                            msg = 'filter_species lower bound ({}) for {} cannot contain < or <=. '.format(lower_limit, networkspeci)
-                            lower_limit = '>=' + lower_limit.replace('<', '').replace('=', '')
-                            msg += 'Setting it to be {}.'.format(lower_limit)
-                            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-                        # if have no symbols then change it to be >= 
-                        elif (':' not in lower_limit) and ('>' not in lower_limit):
-                            lower_limit = '>=' + lower_limit
+                        # if lower bound has a < symbol, change it to >, and show message
+                        if "<" in lower_limit:
+                            msg = "filter_species lower bound ({}) for {} cannot contain < or <=. ".format(
+                                lower_limit, networkspeci
+                            )
+                            lower_limit = ">=" + lower_limit.replace("<", "").replace(
+                                "=", ""
+                            )
+                            msg += "Setting it to be {}.".format(lower_limit)
+                            show_message(
+                                self.read_instance,
+                                msg,
+                                from_conf=self.read_instance.from_conf,
+                                deactivate=deactivate_warning,
+                            )
+                        # if have no symbols then change it to be >=
+                        elif (":" not in lower_limit) and (">" not in lower_limit):
+                            lower_limit = ">=" + lower_limit
 
                         # modify upper bound to be :, contain < or <=
-                        # if upper bound has a > symbol, change it to <, and show message 
-                        if ('>' in upper_limit):
-                            msg = 'filter_species upper bound ({}) for {} cannot contain > or >=. '.format(upper_limit, networkspeci)
-                            upper_limit = '<=' + upper_limit.replace('>', '').replace('=', '')
-                            msg += 'Setting it to be {}.'.format(upper_limit)
-                            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-                        # if have no symbols then change it to be <= 
-                        elif (':' not in upper_limit) and ('<' not in upper_limit):
-                            upper_limit = '<=' + upper_limit
-                        
+                        # if upper bound has a > symbol, change it to <, and show message
+                        if ">" in upper_limit:
+                            msg = "filter_species upper bound ({}) for {} cannot contain > or >=. ".format(
+                                upper_limit, networkspeci
+                            )
+                            upper_limit = "<=" + upper_limit.replace(">", "").replace(
+                                "=", ""
+                            )
+                            msg += "Setting it to be {}.".format(upper_limit)
+                            show_message(
+                                self.read_instance,
+                                msg,
+                                from_conf=self.read_instance.from_conf,
+                                deactivate=deactivate_warning,
+                            )
+                        # if have no symbols then change it to be <=
+                        elif (":" not in upper_limit) and ("<" not in upper_limit):
+                            upper_limit = "<=" + upper_limit
+
                         # update symbols next to values
-                        self.read_instance.filter_species[networkspeci][networkspeci_limit_ii] = [lower_limit, upper_limit, 
-                                                                                                filter_species_fill_value]
+                        self.read_instance.filter_species[networkspeci][
+                            networkspeci_limit_ii
+                        ] = [lower_limit, upper_limit, filter_species_fill_value]
 
             # create a variable to set qa per species (including filter species), setting defaults in the process
             if isinstance(self.read_instance.qa, dict):
-                self.read_instance.qa_per_species = {speci:get_default_qa(self.read_instance, speci) 
-                                                    for speci in species_plus_filter_species}
+                self.read_instance.qa_per_species = {
+                    speci: get_default_qa(self.read_instance, speci)
+                    for speci in species_plus_filter_species
+                }
                 # set qa to be first of qa per species pairs
                 if len(self.read_instance.qa_per_species) > 0:
-                    self.read_instance.qa = self.read_instance.qa_per_species[list(self.read_instance.qa_per_species.keys())[0]]
+                    self.read_instance.qa = self.read_instance.qa_per_species[
+                        list(self.read_instance.qa_per_species.keys())[0]
+                    ]
             else:
-                self.read_instance.qa_per_species = {speci:self.read_instance.qa for speci in species_plus_filter_species}
+                self.read_instance.qa_per_species = {
+                    speci: self.read_instance.qa
+                    for speci in species_plus_filter_species
+                }
 
             # check calibration factor
             if self.read_instance.calibration_factor:
-
                 # detect if calibration factor is passed by model
-                calibration_by_model = not self.read_instance.calibration_factor[0][0] in ['+', '-', '*', '/']
+                calibration_by_model = not self.read_instance.calibration_factor[0][
+                    0
+                ] in ["+", "-", "*", "/"]
 
                 # control that calibration factor not by model can only be one element
-                if not calibration_by_model and len(self.read_instance.calibration_factor) > 1:
+                if (
+                    not calibration_by_model
+                    and len(self.read_instance.calibration_factor) > 1
+                ):
                     error = "Error: When calibration factor is not provided by the model, only one value can be passed."
                     self.read_instance.logger.error(error)
                     sys.exit(1)
@@ -1674,11 +2092,16 @@ class ProvConfiguration:
                     for i, model in enumerate(self.read_instance.experiments):
                         for calibration_factor in self.read_instance.calibration_factor:
                             if model in calibration_factor:
-                                calibration_factor_mod = calibration_factor.split("(")[1][:-1]
+                                calibration_factor_mod = calibration_factor.split("(")[
+                                    1
+                                ][:-1]
                                 calibration_factor_dict[model] = calibration_factor_mod
                 # if the same calibration is applied to all models
                 else:
-                    calibration_factor_dict = {model:self.read_instance.calibration_factor[0] for model in self.read_instance.experiments}                 
+                    calibration_factor_dict = {
+                        model: self.read_instance.calibration_factor[0]
+                        for model in self.read_instance.experiments
+                    }
 
                 # replace calibration factors by new dictionary
                 self.read_instance.calibration_factor = calibration_factor_dict
@@ -1689,12 +2112,19 @@ class ProvConfiguration:
                     if qa_flag_to_add not in self.read_instance.qa:
                         self.read_instance.qa.append(qa_flag_to_add)
                     for speci in self.read_instance.qa_per_species:
-                        if qa_flag_to_add not in self.read_instance.qa_per_species[speci]:
-                            self.read_instance.qa_per_species[speci].append(qa_flag_to_add)
+                        if (
+                            qa_flag_to_add
+                            not in self.read_instance.qa_per_species[speci]
+                        ):
+                            self.read_instance.qa_per_species[speci].append(
+                                qa_flag_to_add
+                            )
 
-                self.read_instance.qa = sorted(self.read_instance.qa) 
+                self.read_instance.qa = sorted(self.read_instance.qa)
                 for speci in self.read_instance.qa_per_species:
-                    self.read_instance.qa_per_species[speci] = sorted(self.read_instance.qa_per_species[speci])
+                    self.read_instance.qa_per_species[speci] = sorted(
+                        self.read_instance.qa_per_species[speci]
+                    )
 
             # subtract from qa
             if self.read_instance.subtract_qa:
@@ -1702,12 +2132,19 @@ class ProvConfiguration:
                     if qa_flag_to_remove in self.read_instance.qa:
                         self.read_instance.qa.remove(qa_flag_to_remove)
                     for speci in self.read_instance.qa_per_species:
-                        if qa_flag_to_remove in self.read_instance.qa_per_species[speci]:
-                            self.read_instance.qa_per_species[speci].remove(qa_flag_to_remove)
+                        if (
+                            qa_flag_to_remove
+                            in self.read_instance.qa_per_species[speci]
+                        ):
+                            self.read_instance.qa_per_species[speci].remove(
+                                qa_flag_to_remove
+                            )
 
-                self.read_instance.qa = sorted(self.read_instance.qa) 
+                self.read_instance.qa = sorted(self.read_instance.qa)
                 for speci in self.read_instance.qa_per_species:
-                    self.read_instance.qa_per_species[speci] = sorted(self.read_instance.qa_per_species[speci])
+                    self.read_instance.qa_per_species[speci] = sorted(
+                        self.read_instance.qa_per_species[speci]
+                    )
 
             # add to flags
             if self.read_instance.add_flags:
@@ -1715,7 +2152,7 @@ class ProvConfiguration:
                     if flag_to_add not in self.read_instance.flags:
                         self.read_instance.flags.append(flag_to_add)
 
-                self.read_instance.flags = sorted(self.read_instance.flags) 
+                self.read_instance.flags = sorted(self.read_instance.flags)
 
             # subtract from flags
             if self.read_instance.subtract_flags:
@@ -1727,17 +2164,22 @@ class ProvConfiguration:
 
     def switch_logging(self):
         """Set up logging for the session, either to a file or to the terminal."""
-        
+
         # create logger
         self.read_instance.logger = logging.getLogger("")
-        self.read_instance.logger.setLevel(logging.INFO) 
+        self.read_instance.logger.setLevel(logging.INFO)
 
         # remove previous handlers
         while self.read_instance.logger.handlers:
-            self.read_instance.logger.removeHandler(self.read_instance.logger.handlers[0])
+            self.read_instance.logger.removeHandler(
+                self.read_instance.logger.handlers[0]
+            )
 
         # interpolation does not use this feature
-        if self.read_instance.logfile is not None and self.read_instance.mode != 'interpolation':
+        if (
+            self.read_instance.logfile is not None
+            and self.read_instance.mode != "interpolation"
+        ):
             # default path, default name
             if self.read_instance.logfile == True:
                 # get log filename and filepath
@@ -1748,18 +2190,25 @@ class ProvConfiguration:
                 filename = str(self.read_instance.logfile)
 
             # custom path, custom name (no need of creating the file path)
-            if type(self.read_instance.logfile) == str and os.sep in self.read_instance.logfile:
+            if (
+                type(self.read_instance.logfile) == str
+                and os.sep in self.read_instance.logfile
+            ):
                 file_path = self.read_instance.logfile
             # default path (the file name depends on the mode)
             else:
                 # get the mode being used right now
-                mode = self.read_instance.mode if self.read_instance.mode != "library" else "notebook"
-                file_path = join(PROVIDENTIA_ROOT, 'logs', mode, filename)
+                mode = (
+                    self.read_instance.mode
+                    if self.read_instance.mode != "library"
+                    else "notebook"
+                )
+                file_path = join(PROVIDENTIA_ROOT, "logs", mode, filename)
 
             # redirect output to a file
             handler = logging.FileHandler(file_path)
             print(f"Output redirected to {file_path}")
-        
+
         else:
             # redirect output to terminal
             handler = logging.StreamHandler(sys.stdout)
@@ -1769,8 +2218,9 @@ class ProvConfiguration:
         self.read_instance.logger.addHandler(handler)
 
         # suppress paramiko logs in download
-        if self.read_instance.mode == 'download':
+        if self.read_instance.mode == "download":
             logging.getLogger("paramiko").setLevel(logging.WARNING)
+
 
 def read_conf(self, fpath=None):
     """
@@ -1810,74 +2260,94 @@ def read_conf(self, fpath=None):
     # get section names (e.g. [SECTIONA], [[Spain]]) and modified names (e.g. SECTIONA, SECTIONA-Spain)
     with open(fpath) as file:
         for line in file:
-            if '[' in line and ']' in line and '[[' not in line and ']]' not in line:
+            if "[" in line and "]" in line and "[[" not in line and "]]" not in line:
                 section = line.strip()
-                #if first character is comment do not parse section
-                if section[0] != '#':
-                    section_modified = section.split('[')[1].split(']')[0]
+                # if first character is comment do not parse section
+                if section[0] != "#":
+                    section_modified = section.split("[")[1].split("]")[0]
                     if section_modified not in all_sections_modified:
                         parent_sections.append(section_modified)
                         all_sections_modified.append(section_modified)
                     else:
-                        error = 'Error: It is not possible to have two sections with the same name.'
+                        error = "Error: It is not possible to have two sections with the same name."
                         self.read_instance.logger.error(error)
                         sys.exit(1)
-            elif '[[' in line and ']]' in line:
+            elif "[[" in line and "]]" in line:
                 subsection = line.strip()
                 # if first character is comment do not parse subsection
-                if subsection[0] != '#':
-                    subsection_modified = section_modified + '·' + line.split('[[')[1].split(']]')[0]
+                if subsection[0] != "#":
+                    subsection_modified = (
+                        section_modified + "·" + line.split("[[")[1].split("]]")[0]
+                    )
                     subsections.append(subsection)
                     subsections_modified.append(subsection_modified)
                     all_sections_modified.append(subsection_modified)
 
-            if '[' in line and ']' in line:
+            if "[" in line and "]" in line:
                 # if first character is comment then add section to list to avoid parsing
-                if line.strip()[0] == '#':
+                if line.strip()[0] == "#":
                     all_sections_commented.append(line.strip())
                 else:
-                    line_strip = line.strip().split('#')[0]
+                    line_strip = line.strip().split("#")[0]
                     all_sections.append(line_strip.strip())
 
     # get repeated elements
-    repetition_counts = {section:subsections_modified.count(section) for section in subsections_modified}
+    repetition_counts = {
+        section: subsections_modified.count(section) for section in subsections_modified
+    }
     for section, counts in repetition_counts.items():
         if counts > 1:
             repeated_subsections.append(section)
-            repeated_subsections_modified[section] = [x for x in all_sections_modified 
-                                                        if section.split('[[')[1].split(']]')[0] in x]
+            repeated_subsections_modified[section] = [
+                x
+                for x in all_sections_modified
+                if section.split("[[")[1].split("]]")[0] in x
+            ]
 
     # get attributes for each section and store in dict
-    for (i, section), section_modified in zip(enumerate(all_sections), all_sections_modified):
+    for (i, section), section_modified in zip(
+        enumerate(all_sections), all_sections_modified
+    ):
         repetition = 0
         copy = False
-        config[section_modified] = {} 
+        config[section_modified] = {}
         with open(fpath) as file:
             for line in file:
                 # allow # after first character to partially comment lines
-                line_strip = line.split('#')[0].strip()
-                
-                # get current section                        
-                if '[' in line and ']' in line and '[[' not in line and ']]' not in line:
-                    current_section = line_strip.replace('[', '').replace(']', '')
-                
+                line_strip = line.split("#")[0].strip()
+
+                # get current section
+                if (
+                    "[" in line
+                    and "]" in line
+                    and "[[" not in line
+                    and "]]" not in line
+                ):
+                    current_section = line_strip.replace("[", "").replace("]", "")
+
                 # get current subsection
-                if ('[[' in line_strip) and (']]' in line_strip):
-                    current_modified_subsection = current_section + "·" + line_strip.replace('[[', '').replace(']]', '')
-                
-                # parsing all but last section 
+                if ("[[" in line_strip) and ("]]" in line_strip):
+                    current_modified_subsection = (
+                        current_section
+                        + "·"
+                        + line_strip.replace("[[", "").replace("]]", "")
+                    )
+
+                # parsing all but last section
                 if section_modified != all_sections_modified[-1]:
-                    # start of relevant section 
+                    # start of relevant section
                     if line_strip == all_sections[i]:
                         # if subsection, make sure its section corresponds to current section to avoid
                         # problems with repeated subsection names (SECTIONA·SUBSECTION, SECTIONB·SUBSECTION)
-                        if ('[[' in line_strip) and (']]' in line_strip):
-                            if (current_modified_subsection != section_modified):
+                        if ("[[" in line_strip) and ("]]" in line_strip):
+                            if current_modified_subsection != section_modified:
                                 copy = False
                             else:
                                 copy = True
                         elif line_strip in repeated_subsections:
-                            position = repeated_subsections_modified[section].index(section_modified)
+                            position = repeated_subsections_modified[section].index(
+                                section_modified
+                            )
                             if position == repetition:
                                 copy = True
                             else:
@@ -1887,23 +2357,27 @@ def read_conf(self, fpath=None):
                             copy = True
                         continue
                     # start of next section or commented section
-                    elif (line_strip == all_sections[i+1]) or (line_strip in all_sections_commented):
+                    elif (line_strip == all_sections[i + 1]) or (
+                        line_strip in all_sections_commented
+                    ):
                         copy = False
                         continue
-                
+
                 # parsing last section
                 else:
                     # start of relevant section ?
                     if line_strip == all_sections[-1]:
                         # if subsection, make sure its section corresponds to current section to avoid
                         # problems with repeated subsection names (SECTIONA·SUBSECTION, SECTIONB·SUBSECTION)
-                        if ('[[' in line_strip) and (']]' in line_strip):
-                            if (current_modified_subsection != section_modified):
+                        if ("[[" in line_strip) and ("]]" in line_strip):
+                            if current_modified_subsection != section_modified:
                                 copy = False
                             else:
                                 copy = True
                         elif line_strip in repeated_subsections:
-                            position = repeated_subsections_modified[section].index(section_modified)
+                            position = repeated_subsections_modified[section].index(
+                                section_modified
+                            )
                             if position == repetition:
                                 copy = True
                             else:
@@ -1917,23 +2391,27 @@ def read_conf(self, fpath=None):
                     elif line_strip in all_sections_commented:
                         copy = False
                         continue
-                
+
                 # set section attributes
                 if copy:
                     # if lines are not empty and not commented
-                    if (line_strip != '') and ('#' not in line_strip):
+                    if (line_strip != "") and ("#" not in line_strip):
                         # initial definition of parameter - value
-                        if '=' in line_strip:
-                            key = line_strip.split('=', 1)[0].strip()
-                            value = line_strip.split('=', 1)[1].strip()
+                        if "=" in line_strip:
+                            key = line_strip.split("=", 1)[0].strip()
+                            value = line_strip.split("=", 1)[1].strip()
                             config[section_modified][key] = value
-                        
+
                         # lines after adding line breaks for long values
                         # make sure it is not a section name
-                        elif ('=' not in line_strip) and (line_strip not in all_sections):
+                        elif ("=" not in line_strip) and (
+                            line_strip not in all_sections
+                        ):
                             # get last key and add current value to values from last key
                             last_key = list(config[section_modified].keys())[-1]
-                            value = config[section_modified][last_key] + line_strip.strip()
+                            value = (
+                                config[section_modified][last_key] + line_strip.strip()
+                            )
 
                             # update values for last key in dict
                             del config[section_modified][last_key]
@@ -1941,18 +2419,17 @@ def read_conf(self, fpath=None):
 
     # add section attributes to subsection if do not exist there (e.g. add SECTIONA values to SECTIONA-Spain)
     for section_modified in all_sections_modified:
-        
         # reset res variable
         res_sub = {}
 
         # determine if subsection or not
-        if '·' in section_modified:
+        if "·" in section_modified:
             is_subsection = True
-            par_section = section_modified.split('·')[0]
+            par_section = section_modified.split("·")[0]
             # add attributes from parent section
             for par_k, par_val in config[par_section].items():
                 # if first character of key is comment character (#), do not parse this attribute
-                if par_k[0] == '#':
+                if par_k[0] == "#":
                     continue
                 # transform str booleans, ints, floats etc. to their real type if possible
                 try:
@@ -1967,11 +2444,11 @@ def read_conf(self, fpath=None):
         for k, val in config[section_modified].items():
             if not is_subsection:
                 # store filename
-                if k == 'report_filename':
+                if k == "report_filename":
                     filenames.append(val)
 
             # if first character of key is comment character (#), do not parse this attribute
-            if k[0] == '#':
+            if k[0] == "#":
                 continue
             # overwrite attributes from current subsection
             # transform str booleans, ints, floats etc. to their real type if possible
@@ -1985,6 +2462,7 @@ def read_conf(self, fpath=None):
         res[section_modified] = res_sub
 
     return res, all_sections_modified, parent_sections, subsections_modified, filenames
+
 
 def write_conf(section, subsection, fpath, opts):
     """
@@ -2005,7 +2483,7 @@ def write_conf(section, subsection, fpath, opts):
     config = configparser.RawConfigParser()
 
     # update configuration
-    for section, section_name in zip(['section', 'subsection'], [section, subsection]):
+    for section, section_name in zip(["section", "subsection"], [section, subsection]):
         if opts[section]:
             config.add_section(section_name)
             for item in opts[section]:
@@ -2013,12 +2491,13 @@ def write_conf(section, subsection, fpath, opts):
                 config.set(section_name, item, val)
 
     # write configuration
-    with open(fpath, 'w') as configfile:
+    with open(fpath, "w") as configfile:
         config.write(configfile)
+
 
 def load_conf(self, fpath=None):
     """
-    Load an existing Providentia configuration file and set `read_instance` 
+    Load an existing Providentia configuration file and set `read_instance`
     attributes using using the `read_conf` function.
 
     Parameters
@@ -2038,39 +2517,46 @@ def load_conf(self, fpath=None):
         self.read_instance.logger.error(f"Error {fpath}")
         return
 
-    self.sub_opts, self.all_sections, self.parent_section_names, self.subsection_names, self.filenames = read_conf(self, fpath)
+    (
+        self.sub_opts,
+        self.all_sections,
+        self.parent_section_names,
+        self.subsection_names,
+        self.filenames,
+    ) = read_conf(self, fpath)
+
 
 def split_options(read_instance, conf_string, separator="||"):
-    """ 
+    """
     Parse a configuration string to extract "keep" and "remove" options.
 
     Parameters
     ----------
     read_instance : object
         Stores the instance of the current mode being used, such as
-        'dashboard', 'download', 'report' or 'interpolation'.    
+        'dashboard', 'download', 'report' or 'interpolation'.
     conf_string : str
-        A string containing the keep/remove definitions, 
+        A string containing the keep/remove definitions,
         e.g. "keep:option1,option2 || remove:option3,option4".
     separator : str, optional
         Separator between keep and remove sections (default is "||").
     """
-    
+
     keeps, removes = [], []
-    
+
     if separator not in conf_string:
         if ("keep:" in conf_string) and ("remove:" not in conf_string):
             keep_start = conf_string.find("keep:")
-            keeps = conf_string[keep_start+5:]
+            keeps = conf_string[keep_start + 5 :]
             keeps = keeps.split(",")
             keeps = [k.strip() for k in keeps]
         elif ("keep:" not in conf_string) and ("remove:" in conf_string):
             remove_start = conf_string.find("remove:")
-            removes = conf_string[remove_start+7:]
+            removes = conf_string[remove_start + 7 :]
             removes = removes.split(",")
             removes = [r.strip() for r in removes]
         elif ("keep:" in conf_string) and ("remove:" in conf_string):
-            msg = 'In order to define both keep and remove options, they must be separated by ||.'
+            msg = "In order to define both keep and remove options, they must be separated by ||."
             show_message(msg, from_conf=read_instance.from_conf)
         else:
             keeps = conf_string[:]
@@ -2078,14 +2564,16 @@ def split_options(read_instance, conf_string, separator="||"):
             keeps = [k.strip() for k in keeps]
     else:
         if "keep:" in conf_string:
-            keep_start, keep_end = conf_string.find("keep:"), conf_string.find(separator)
-            keeps = conf_string[keep_start+5:keep_end]
+            keep_start, keep_end = conf_string.find("keep:"), conf_string.find(
+                separator
+            )
+            keeps = conf_string[keep_start + 5 : keep_end]
             keeps = keeps.split(",")
             keeps = [k.strip() for k in keeps]
         if "remove:" in conf_string:
             remove_start = conf_string.find("remove:")
-            removes = conf_string[remove_start+7:]
+            removes = conf_string[remove_start + 7 :]
             removes = removes.split(",")
             removes = [r.strip() for r in removes]
-    
+
     return keeps, removes
