@@ -4044,40 +4044,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AB/HR/4C/ABHR-4CTK.nc:
   - 467.0
   - 528.0
   - 652.0
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/AB/UT/T4/ABUT-T4AH.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: MAAP-5012_B
-  ebas_method_ref: IT04L_MAAP
-  ebas_revision_date: '2021-06-18T12:12:50.843000Z'
-  ebas_station_altitude: 209.0 m
-  ebas_station_code: IT0004R
-  ebas_station_latitude: 45.8
-  ebas_station_longitude: 8.633333
-  resolution: hourly
-  time_coverage_end: '2020-01-01T00:00:00Z'
-  time_coverage_start: '2016-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - d_Location
-  - qc_pressure
-  - meta_pressure
-  - qc_temperature
-  - meta_temperature
-  - d_Wavelength
-  - qc_aerosol_absorption_coefficient_amean
-  - meta_aerosol_absorption_coefficient_amean
-  - qc_aerosol_absorption_coefficient_prec1587
-  - meta_aerosol_absorption_coefficient_prec1587
-  - qc_aerosol_absorption_coefficient_perc8413
-  - meta_aerosol_absorption_coefficient_perc8413
-  - v_pressure
-  - v_temperature
-  - v_aerosol_absorption_coefficient_amean
-  - v_aerosol_absorption_coefficient_prec1587
-  - v_aerosol_absorption_coefficient_perc8413
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AC/4T/5U/AC4T-5UZ5.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MageeAE33
@@ -4869,38 +4835,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/C9/A3/FJ/C9A3-FJDQ.nc:
   - 660.0
   - 880.0
   - 950.0
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/CE/KW/2R/CEKW-2RPF.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: GMD_CLAP-3W_SMR_pm1
-  ebas_measurement_height: 10.0 m
-  ebas_method_ref: FI03L_abs_coef
-  ebas_revision_date: '2022-06-27T17:33:38.553000Z'
-  ebas_station_altitude: 181.0 m
-  ebas_station_code: FI0050R
-  ebas_station_latitude: 61.85
-  ebas_station_longitude: 24.283333
-  resolution: hourly
-  time_coverage_end: '2022-01-01T00:00:00Z'
-  time_coverage_start: '2018-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - d_Location
-  - qc_temperature
-  - meta_temperature
-  - d_Wavelength
-  - qc_aerosol_absorption_coefficient_amean
-  - meta_aerosol_absorption_coefficient_amean
-  - qc_aerosol_absorption_coefficient_prec1587
-  - meta_aerosol_absorption_coefficient_prec1587
-  - qc_aerosol_absorption_coefficient_perc8413
-  - meta_aerosol_absorption_coefficient_perc8413
-  - v_temperature
-  - v_aerosol_absorption_coefficient_amean
-  - v_aerosol_absorption_coefficient_prec1587
-  - v_aerosol_absorption_coefficient_perc8413
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/CH/CY/6K/CHCY-6KPC.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_Boesel
@@ -7233,38 +7167,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/HK/YX/8X/HKYX-8XTG.nc:
   - 467.0
   - 528.0
   - 652.0
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/HY/AM/C9/HYAM-C97G.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: GMD_CLAP-3W_SMR_pm10
-  ebas_measurement_height: 10.0 m
-  ebas_method_ref: FI03L_abs_coef
-  ebas_revision_date: '2022-06-27T18:42:26.763000Z'
-  ebas_station_altitude: 181.0 m
-  ebas_station_code: FI0050R
-  ebas_station_latitude: 61.85
-  ebas_station_longitude: 24.283333
-  resolution: hourly
-  time_coverage_end: '2022-01-01T00:00:00Z'
-  time_coverage_start: '2018-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - d_Location
-  - qc_temperature
-  - meta_temperature
-  - d_Wavelength
-  - qc_aerosol_absorption_coefficient_amean
-  - meta_aerosol_absorption_coefficient_amean
-  - qc_aerosol_absorption_coefficient_prec1587
-  - meta_aerosol_absorption_coefficient_prec1587
-  - qc_aerosol_absorption_coefficient_perc8413
-  - meta_aerosol_absorption_coefficient_perc8413
-  - v_temperature
-  - v_aerosol_absorption_coefficient_amean
-  - v_aerosol_absorption_coefficient_prec1587
-  - v_aerosol_absorption_coefficient_perc8413
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HY/UX/J7/HYUX-J7ME.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_PAL
@@ -7862,6 +7764,13 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/K9/W3/BE/K9W3-BE5S.nc:
   - v_aerosol_absorption_coefficient_prec1587_1
   - v_aerosol_absorption_coefficient_perc8413_0
   - v_aerosol_absorption_coefficient_perc8413_1
+  wavelengths:
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/KA/PH/X6/KAPH-X6UJ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE31_TLL_dry
@@ -9520,6 +9429,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PY/S8/4N/PYS8-4N8W.nc:
   - v_aerosol_absorption_coefficient_amean
   - v_aerosol_absorption_coefficient_prec1587
   - v_aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q3/XK/SQ/Q3XK-SQZ4.nc:
   ebas_data_level: '2'
   ebas_instrument_name: LT0015R_AE31-HS_827

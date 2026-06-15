@@ -701,7 +701,8 @@ class Actris:
                 "Wavelength",
                 "Wavelengthx",
                 "d_Wavelength",
-                "d_Wavelengthx",
+                "d_Wavelengthx", 
+                "d_Wavelength_d0",
             ]
             available_vars = files_info[file]["variables"]
             var_name = next((v for v in wavelength_vars if v in available_vars), None)
@@ -718,6 +719,7 @@ class Actris:
                             var_name, file, error
                         )
                     )
+                    files_info.pop(file, None)
                     continue
 
         # create file
@@ -1002,6 +1004,7 @@ class Actris:
             "Wavelengthx",
             "d_Wavelength",
             "d_Wavelengthx",
+            "d_Wavelength_d0",
         ]
 
         coords = ds[possible_var].coords
