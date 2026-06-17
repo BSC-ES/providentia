@@ -693,7 +693,8 @@ def export_configuration(prv, cname, separator="||"):
     )
 
     # merge defaults
-    merged_defaults = init["required_init"].copy() + init["empty_init"].copy()
+    merged_defaults = init["required_init"].copy() 
+    merged_defaults.update(init["empty_init"].copy())
     merged_defaults.update(defaults[prv.mode])
     merged_defaults.update(available_inputs)
 
