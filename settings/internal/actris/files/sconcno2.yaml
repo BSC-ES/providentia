@@ -1,50 +1,34 @@
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/26/TA/6Z/26TA-6Z87.nc:
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/23/WV/RU/23WV-RU9V.nc:
   ebas_data_level: '2'
-  ebas_instrument_name: f3p_2
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 125.0 m
-  ebas_station_code: HU0002R
-  ebas_station_latitude: 46.966667
-  ebas_station_longitude: 19.583333
+  ebas_instrument_name: UBA_We_Mon_0501
+  ebas_measurement_height: 10.5 m
+  ebas_method_ref: DE03L_bl_cl
+  ebas_revision_date: '2025-10-07T13:00:28.330124Z'
+  ebas_station_altitude: 12.0 m
+  ebas_station_code: DE0001R
+  ebas_station_latitude: 54.925556
+  ebas_station_longitude: 8.309722
   ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '2013-01-01T07:00:00Z'
-  time_coverage_start: '2012-01-01T07:00:00Z'
+  resolution: hourly
+  time_coverage_end: '2024-12-31T23:00:00Z'
+  time_coverage_start: '2013-12-31T23:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
-  - v_ammonia
-  - qc_ammonia
-  - meta_ammonia
-  - v_ammonium_ug_N_per_m3
-  - qc_ammonium_ug_N_per_m3
-  - meta_ammonium_ug_N_per_m3
-  - v_ammonium_ug_per_m3
-  - qc_ammonium_ug_per_m3
-  - meta_ammonium_ug_per_m3
-  - v_nitrate_ug_N_per_m3
-  - qc_nitrate_ug_N_per_m3
-  - meta_nitrate_ug_N_per_m3
-  - v_nitrate_ug_per_m3
-  - qc_nitrate_ug_per_m3
-  - meta_nitrate_ug_per_m3
-  - v_nitric_acid
-  - qc_nitric_acid
-  - meta_nitric_acid
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_sulphate_total_ug_S_per_m3
-  - qc_sulphate_total_ug_S_per_m3
-  - meta_sulphate_total_ug_S_per_m3
-  - v_sulphate_total_ug_per_m3
-  - qc_sulphate_total_ug_per_m3
-  - meta_sulphate_total_ug_per_m3
-  - v_sulphur_dioxide
-  - qc_sulphur_dioxide
-  - meta_sulphur_dioxide
+  - v_nitrogen_dioxide_nmol_per_mol
+  - qc_nitrogen_dioxide_nmol_per_mol
+  - meta_nitrogen_dioxide_nmol_per_mol
+  - v_nitrogen_dioxide_ug_N_per_m3
+  - qc_nitrogen_dioxide_ug_N_per_m3
+  - meta_nitrogen_dioxide_ug_N_per_m3
+  - v_nitrogen_monoxide_nmol_per_mol
+  - qc_nitrogen_monoxide_nmol_per_mol
+  - meta_nitrogen_monoxide_nmol_per_mol
+  - v_nitrogen_monoxide_ug_N_per_m3
+  - qc_nitrogen_monoxide_ug_N_per_m3
+  - meta_nitrogen_monoxide_ug_N_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/27/99/FK/2799-FKK2.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Horiba_APNA-370CE_Brf
@@ -506,55 +490,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/2J/F4/7Z/2JF4-7ZSZ.nc:
   - v_nitrogen_monoxide
   - qc_nitrogen_monoxide
   - meta_nitrogen_monoxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/2K/4F/RA/2K4F-RAJZ.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: Teledyne_T200UP
-  ebas_measurement_height: 3.0 m
-  ebas_method_ref: FR01L_NOx_analysis
-  ebas_revision_date: '2019-11-14T14:05:58.597000Z'
-  ebas_station_altitude: 162.0 m
-  ebas_station_code: FR0020R
-  ebas_station_latitude: 48.70861111111111
-  ebas_station_longitude: 2.158888888888889
-  resolution: hourly
-  time_coverage_end: '2016-01-01T00:00:00Z'
-  time_coverage_start: '2015-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - d_Location
-  - qc_pressure
-  - meta_pressure
-  - qc_temperature
-  - meta_temperature
-  - v_nitrogen_dioxide_nmol_per_mol_amean
-  - qc_nitrogen_dioxide_nmol_per_mol_amean
-  - meta_nitrogen_dioxide_nmol_per_mol_amean
-  - v_nitrogen_dioxide_ug_N_per_m3_amean
-  - qc_nitrogen_dioxide_ug_N_per_m3_amean
-  - meta_nitrogen_dioxide_ug_N_per_m3_amean
-  - v_nitrogen_dioxide_nmol_per_mol_uncertainty
-  - qc_nitrogen_dioxide_nmol_per_mol_uncertainty
-  - meta_nitrogen_dioxide_nmol_per_mol_uncertainty
-  - v_nitrogen_dioxide_ug_N_per_m3_uncertainty
-  - qc_nitrogen_dioxide_ug_N_per_m3_uncertainty
-  - meta_nitrogen_dioxide_ug_N_per_m3_uncertainty
-  - v_nitrogen_monoxide_nmol_per_mol_amean
-  - qc_nitrogen_monoxide_nmol_per_mol_amean
-  - meta_nitrogen_monoxide_nmol_per_mol_amean
-  - v_nitrogen_monoxide_ug_N_per_m3_amean
-  - qc_nitrogen_monoxide_ug_N_per_m3_amean
-  - meta_nitrogen_monoxide_ug_N_per_m3_amean
-  - v_nitrogen_monoxide_nmol_per_mol_uncertainty
-  - qc_nitrogen_monoxide_nmol_per_mol_uncertainty
-  - meta_nitrogen_monoxide_nmol_per_mol_uncertainty
-  - v_nitrogen_monoxide_ug_N_per_m3_uncertainty
-  - qc_nitrogen_monoxide_ug_N_per_m3_uncertainty
-  - meta_nitrogen_monoxide_ug_N_per_m3_uncertainty
-  - v_pressure
-  - v_temperature
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/2K/C5/E8/2KC5-E8NV.nc:
   ebas_instrument_name: gs_17
   ebas_method_ref: FI01L_Griess_Saltzman
@@ -826,30 +761,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/2M/GG/YU/2MGG-YUFC.nc:
   - v_pressure
   - v_relative_humidity
   - v_temperature
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/2P/ES/6R/2PES-6RUN.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: NOxmon_12
-  ebas_method_ref: DK01L_Chemiluminescence
-  ebas_revision_date: '2025-10-10T10:16:59.722994Z'
-  ebas_station_altitude: 3.0 m
-  ebas_station_code: DK0012R
-  ebas_station_latitude: 55.693888889
-  ebas_station_longitude: 12.088611111
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2025-01-01T00:00:00Z'
-  time_coverage_start: '2010-08-05T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_nitrogen_monoxide
-  - qc_nitrogen_monoxide
-  - meta_nitrogen_monoxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/2Q/2A/9S/2Q2A-9S6E.nc:
   ebas_instrument_name: chemil_5
   ebas_method_ref: ES04L_chemilum
@@ -959,49 +870,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/2R/XX/MB/2RXX-MBBH.nc:
   - v_susp_part_matter
   - qc_susp_part_matter
   - meta_susp_part_matter
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/2S/7E/PC/2S7E-PCMS.nc:
-  ebas_instrument_name: chemilum_09
-  ebas_method_ref: NL01L_chemilum
-  ebas_revision_date: '2021-08-16T09:18:31.297000Z'
-  ebas_station_altitude: 1.0 m
-  ebas_station_code: NL0009R
-  ebas_station_latitude: 53.333889
-  ebas_station_longitude: 6.277222
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2011-01-01T00:00:00Z'
-  time_coverage_start: '2009-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_nitrogen_monoxide
-  - qc_nitrogen_monoxide
-  - meta_nitrogen_monoxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/2S/SQ/F2/2SSQ-F2FV.nc:
-  ebas_instrument_name: Chemilum_9
-  ebas_method_ref: NL01L_Chemilum
-  ebas_revision_date: '2003-03-20T00:00:00.000000Z'
-  ebas_station_altitude: 1.0 m
-  ebas_station_code: NL0009R
-  ebas_station_latitude: 53.333889
-  ebas_station_longitude: 6.277222
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '2002-12-31T23:00:00Z'
-  time_coverage_start: '1988-12-31T23:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/2T/ZJ/EH/2TZJ-EHQD.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ts_ANALYZER_42i_TL_no
@@ -1163,6 +1031,27 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/39/A7/RG/39A7-RGGZ.nc:
   - v_nitrogen_monoxide_ug_N_per_m3
   - qc_nitrogen_monoxide_ug_N_per_m3
   - meta_nitrogen_monoxide_ug_N_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3A/M6/EY/3AM6-EYTS.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: glass_d_0002
+  ebas_method_ref: NO01L_AA500_autoanalyzer
+  ebas_revision_date: '2025-03-26T09:05:27.164481Z'
+  ebas_station_altitude: 219.0 m
+  ebas_station_code: NO0002R
+  ebas_station_latitude: 58.38853
+  ebas_station_longitude: 8.252
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2025-01-01T07:00:00Z'
+  time_coverage_start: '2019-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3A/XD/GK/3AXD-GKPJ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_42i_GSN
@@ -1446,37 +1335,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3M/UF/B7/3MUF-B7E2.nc:
   - v_nitrogen_monoxide_ug_N_per_m3_stddev
   - qc_nitrogen_monoxide_ug_N_per_m3_stddev
   - meta_nitrogen_monoxide_ug_N_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/3N/DE/DE/3NDE-DE74.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: API200E_nl0009
-  ebas_measurement_height: 2.0 m
-  ebas_method_ref: NL01L_MIL-W-5300_NL01L_ILG-W-2900
-  ebas_revision_date: '2025-10-23T14:12:06.222298Z'
-  ebas_station_altitude: 1.0 m
-  ebas_station_code: NL0009R
-  ebas_station_latitude: 53.333889
-  ebas_station_longitude: 6.277222
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2025-01-01T00:00:00Z'
-  time_coverage_start: '2022-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide_nmol_per_mol
-  - qc_nitrogen_dioxide_nmol_per_mol
-  - meta_nitrogen_dioxide_nmol_per_mol
-  - v_nitrogen_dioxide_ug_N_per_m3
-  - qc_nitrogen_dioxide_ug_N_per_m3
-  - meta_nitrogen_dioxide_ug_N_per_m3
-  - v_nitrogen_monoxide_nmol_per_mol
-  - qc_nitrogen_monoxide_nmol_per_mol
-  - meta_nitrogen_monoxide_nmol_per_mol
-  - v_nitrogen_monoxide_ug_N_per_m3
-  - qc_nitrogen_monoxide_ug_N_per_m3
-  - meta_nitrogen_monoxide_ug_N_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3N/KS/CW/3NKS-CWUE.nc:
   ebas_data_level: '2'
   ebas_instrument_name: chemilum_45
@@ -1570,26 +1428,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3P/Q3/Q7/3PQ3-Q7NJ.nc:
   - v_sum_nitric_acid_and_nitrate
   - qc_sum_nitric_acid_and_nitrate
   - meta_sum_nitric_acid_and_nitrate
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/3Q/TQ/3U/3QTQ-3U6G.nc:
-  ebas_instrument_name: Chemilum_11
-  ebas_method_ref: EE01L_Chemilum
-  ebas_revision_date: '2008-06-01T00:00:00.000000Z'
-  ebas_station_altitude: 6.0 m
-  ebas_station_code: EE0011R
-  ebas_station_latitude: 58.383333
-  ebas_station_longitude: 21.816667
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '2007-01-01T00:00:00Z'
-  time_coverage_start: '1995-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3Q/XD/AE/3QXD-AEWC.nc:
   ebas_data_level: '2'
   ebas_instrument_name: glass_05
@@ -1611,48 +1449,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3Q/XD/AE/3QXD-AEWC.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/3T/CW/G2/3TCW-G2TJ.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: TAPIT500U_53
-  ebas_measurement_height: 5.0 m
-  ebas_method_ref: DE20L_NOx
-  ebas_revision_date: '2025-06-13T19:12:35.808791Z'
-  ebas_station_altitude: 797.0 m
-  ebas_station_code: CH0053R
-  ebas_station_latitude: 47.18961391
-  ebas_station_longitude: 8.175433684
-  resolution: hourly
-  time_coverage_end: '2025-01-01T00:00:00Z'
-  time_coverage_start: '2023-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide_nmol_per_mol_amean
-  - qc_nitrogen_dioxide_nmol_per_mol_amean
-  - meta_nitrogen_dioxide_nmol_per_mol_amean
-  - v_nitrogen_dioxide_ug_N_per_m3_amean
-  - qc_nitrogen_dioxide_ug_N_per_m3_amean
-  - meta_nitrogen_dioxide_ug_N_per_m3_amean
-  - v_nitrogen_dioxide_nmol_per_mol_prec1587
-  - qc_nitrogen_dioxide_nmol_per_mol_prec1587
-  - meta_nitrogen_dioxide_nmol_per_mol_prec1587
-  - v_nitrogen_dioxide_ug_N_per_m3_prec1587
-  - qc_nitrogen_dioxide_ug_N_per_m3_prec1587
-  - meta_nitrogen_dioxide_ug_N_per_m3_prec1587
-  - v_nitrogen_dioxide_nmol_per_mol_perc8413
-  - qc_nitrogen_dioxide_nmol_per_mol_perc8413
-  - meta_nitrogen_dioxide_nmol_per_mol_perc8413
-  - v_nitrogen_dioxide_ug_N_per_m3_perc8413
-  - qc_nitrogen_dioxide_ug_N_per_m3_perc8413
-  - meta_nitrogen_dioxide_ug_N_per_m3_perc8413
-  - v_nitrogen_dioxide_nmol_per_mol_stddev
-  - qc_nitrogen_dioxide_nmol_per_mol_stddev
-  - meta_nitrogen_dioxide_nmol_per_mol_stddev
-  - v_nitrogen_dioxide_ug_N_per_m3_stddev
-  - qc_nitrogen_dioxide_ug_N_per_m3_stddev
-  - meta_nitrogen_dioxide_ug_N_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3Z/BP/VN/3ZBP-VNE9.nc:
   ebas_instrument_name: fabs_07
   ebas_method_ref: DE03L_Saltzmann
@@ -1704,37 +1500,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3Z/XM/4M/3ZXM-4M2E.nc:
   - v_nitrogen_monoxide
   - qc_nitrogen_monoxide
   - meta_nitrogen_monoxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/3Z/YT/MX/3ZYT-MXTA.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: API200E_0091
-  ebas_measurement_height: 2.0 m
-  ebas_method_ref: NL01L_MIL-W-5300_NL01L_ILG-W-2900
-  ebas_revision_date: '2025-10-23T14:18:57.730921Z'
-  ebas_station_altitude: 4.0 m
-  ebas_station_code: NL0091R
-  ebas_station_latitude: 52.3
-  ebas_station_longitude: 4.5
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2025-01-01T00:00:00Z'
-  time_coverage_start: '2016-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide_nmol_per_mol
-  - qc_nitrogen_dioxide_nmol_per_mol
-  - meta_nitrogen_dioxide_nmol_per_mol
-  - v_nitrogen_dioxide_ug_N_per_m3
-  - qc_nitrogen_dioxide_ug_N_per_m3
-  - meta_nitrogen_dioxide_ug_N_per_m3
-  - v_nitrogen_monoxide_nmol_per_mol
-  - qc_nitrogen_monoxide_nmol_per_mol
-  - meta_nitrogen_monoxide_nmol_per_mol
-  - v_nitrogen_monoxide_ug_N_per_m3
-  - qc_nitrogen_monoxide_ug_N_per_m3
-  - meta_nitrogen_monoxide_ug_N_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/42/UY/N2/42UY-N2X8.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f2p_03
@@ -1946,26 +1711,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/4B/UN/7X/4BUN-7XAR.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/4C/8C/DM/4C8C-DMNX.nc:
-  ebas_instrument_name: tei42ctl_4
-  ebas_method_ref: CH01L_no2
-  ebas_revision_date: '2014-05-07T08:02:37.780000Z'
-  ebas_station_altitude: 1137.0 m
-  ebas_station_code: CH0004R
-  ebas_station_latitude: 47.049722
-  ebas_station_longitude: 6.979444
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '2011-01-01T00:00:00Z'
-  time_coverage_start: '2008-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/4D/BP/M2/4DBP-M2A8.nc:
   ebas_data_level: '2'
   ebas_instrument_name: T200UP
@@ -2020,26 +1765,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/4E/WS/99/4EWS-99FP.nc:
   resolution: daily
   time_coverage_end: '2013-01-01T00:00:00Z'
   time_coverage_start: '2010-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/4G/6W/DS/4G6W-DSWN.nc:
-  ebas_instrument_name: ANO1
-  ebas_method_ref: GB03L_AN_1
-  ebas_revision_date: '2015-01-28T10:22:20.270000Z'
-  ebas_station_altitude: 260.0 m
-  ebas_station_code: GB0048R
-  ebas_station_latitude: 55.79216
-  ebas_station_longitude: -3.2429
-  ebas_statistics: arithmetic mean
-  resolution: Unrecognised (P0000-00-00T00:00:00)
-  time_coverage_end: '2014-01-01T00:00:00Z'
-  time_coverage_start: '2011-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
@@ -2180,6 +1905,72 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/4N/CU/TJ/4NCU-TJTS.nc:
   - v_nitrogen_monoxide_ug_N_per_m3_stddev
   - qc_nitrogen_monoxide_ug_N_per_m3_stddev
   - meta_nitrogen_monoxide_ug_N_per_m3_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4P/DA/EV/4PDA-EVYZ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Thermo_42i_GSN
+  ebas_measurement_height: 10.0 m
+  ebas_method_ref: KR04L_chemiluminescence_Thermo_42i
+  ebas_revision_date: '2024-11-21T10:39:51.337548Z'
+  ebas_station_altitude: 71.0 m
+  ebas_station_code: KR0101R
+  ebas_station_latitude: 33.293917
+  ebas_station_longitude: 126.163111
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2022-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrogen_dioxide_nmol_per_mol_amean
+  - qc_nitrogen_dioxide_nmol_per_mol_amean
+  - meta_nitrogen_dioxide_nmol_per_mol_amean
+  - v_nitrogen_dioxide_ug_N_per_m3_amean
+  - qc_nitrogen_dioxide_ug_N_per_m3_amean
+  - meta_nitrogen_dioxide_ug_N_per_m3_amean
+  - v_nitrogen_dioxide_nmol_per_mol_max
+  - qc_nitrogen_dioxide_nmol_per_mol_max
+  - meta_nitrogen_dioxide_nmol_per_mol_max
+  - v_nitrogen_dioxide_ug_N_per_m3_max
+  - qc_nitrogen_dioxide_ug_N_per_m3_max
+  - meta_nitrogen_dioxide_ug_N_per_m3_max
+  - v_nitrogen_dioxide_nmol_per_mol_min
+  - qc_nitrogen_dioxide_nmol_per_mol_min
+  - meta_nitrogen_dioxide_nmol_per_mol_min
+  - v_nitrogen_dioxide_ug_N_per_m3_min
+  - qc_nitrogen_dioxide_ug_N_per_m3_min
+  - meta_nitrogen_dioxide_ug_N_per_m3_min
+  - v_nitrogen_dioxide_nmol_per_mol_stddev
+  - qc_nitrogen_dioxide_nmol_per_mol_stddev
+  - meta_nitrogen_dioxide_nmol_per_mol_stddev
+  - v_nitrogen_dioxide_ug_N_per_m3_stddev
+  - qc_nitrogen_dioxide_ug_N_per_m3_stddev
+  - meta_nitrogen_dioxide_ug_N_per_m3_stddev
+  - v_nitrogen_monoxide_nmol_per_mol_amean
+  - qc_nitrogen_monoxide_nmol_per_mol_amean
+  - meta_nitrogen_monoxide_nmol_per_mol_amean
+  - v_nitrogen_monoxide_ug_N_per_m3_amean
+  - qc_nitrogen_monoxide_ug_N_per_m3_amean
+  - meta_nitrogen_monoxide_ug_N_per_m3_amean
+  - v_nitrogen_monoxide_nmol_per_mol_max
+  - qc_nitrogen_monoxide_nmol_per_mol_max
+  - meta_nitrogen_monoxide_nmol_per_mol_max
+  - v_nitrogen_monoxide_ug_N_per_m3_max
+  - qc_nitrogen_monoxide_ug_N_per_m3_max
+  - meta_nitrogen_monoxide_ug_N_per_m3_max
+  - v_nitrogen_monoxide_nmol_per_mol_min
+  - qc_nitrogen_monoxide_nmol_per_mol_min
+  - meta_nitrogen_monoxide_nmol_per_mol_min
+  - v_nitrogen_monoxide_ug_N_per_m3_min
+  - qc_nitrogen_monoxide_ug_N_per_m3_min
+  - meta_nitrogen_monoxide_ug_N_per_m3_min
+  - v_nitrogen_monoxide_nmol_per_mol_stddev
+  - qc_nitrogen_monoxide_nmol_per_mol_stddev
+  - meta_nitrogen_monoxide_nmol_per_mol_stddev
+  - v_nitrogen_monoxide_ug_N_per_m3_stddev
+  - qc_nitrogen_monoxide_ug_N_per_m3_stddev
+  - meta_nitrogen_monoxide_ug_N_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/4P/DE/UH/4PDE-UHHA.nc:
   ebas_data_level: '2'
   ebas_instrument_name: abs_57
@@ -2213,27 +2004,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/4S/UD/EH/4SUD-EHJJ.nc:
   resolution: daily
   time_coverage_end: '2007-01-01T00:00:00Z'
   time_coverage_start: '2003-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/4U/KN/M2/4UKN-M2EV.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: apna370_Mo_53
-  ebas_method_ref: CH01L_no2
-  ebas_revision_date: '2020-04-29T08:22:15.443000Z'
-  ebas_station_altitude: 797.0 m
-  ebas_station_code: CH0053R
-  ebas_station_latitude: 47.18961391
-  ebas_station_longitude: 8.175433684
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2019-05-24T00:00:00Z'
-  time_coverage_start: '2016-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
@@ -2463,32 +2233,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/54/6A/5B/546A-5BGN.nc:
   - v_nitrogen_monoxide
   - qc_nitrogen_monoxide
   - meta_nitrogen_monoxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/56/SJ/XN/56SJ-XNH2.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: abs_8
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 134.0 m
-  ebas_station_code: ES0008R
-  ebas_station_latitude: 43.43917
-  ebas_station_longitude: -4.85
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '2002-01-01T07:00:00Z'
-  time_coverage_start: '2001-01-01T07:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_pm10_mass
-  - qc_pm10_mass
-  - meta_pm10_mass
-  - v_sulphur_dioxide
-  - qc_sulphur_dioxide
-  - meta_sulphur_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/57/ZC/WJ/57ZC-WJXV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f2p_03
@@ -2950,53 +2694,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/63/DP/HV/63DP-HVH2.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/65/BH/CM/65BH-CMNV.nc:
-  ebas_instrument_name: TEI42ITL_Mo_4
-  ebas_method_ref: CH01L_no2
-  ebas_revision_date: '2015-02-13T07:58:19.893000Z'
-  ebas_station_altitude: 1137.0 m
-  ebas_station_code: CH0004R
-  ebas_station_latitude: 47.049722
-  ebas_station_longitude: 6.979444
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '2014-01-01T00:00:00Z'
-  time_coverage_start: '2013-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/67/97/KQ/6797-KQYV.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: ES0011R_TIN-009
-  ebas_method_ref: ES04L_chemilum
-  ebas_revision_date: '2022-07-14T00:00:00.000000Z'
-  ebas_station_altitude: 393.0 m
-  ebas_station_code: ES0011R
-  ebas_station_latitude: 38.47278
-  ebas_station_longitude: -6.92361
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2022-01-01T00:00:00Z'
-  time_coverage_start: '2021-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_NOx
-  - qc_NOx
-  - meta_NOx
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_nitrogen_monoxide
-  - qc_nitrogen_monoxide
-  - meta_nitrogen_monoxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/69/RR/XA/69RR-XAHU.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_M_42SD
@@ -3341,32 +3038,37 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/6R/SS/9S/6RSS-9S4S.nc:
   - v_nitrogen_monoxide
   - qc_nitrogen_monoxide
   - meta_nitrogen_monoxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/6V/8W/N9/6V8W-N9VM.nc:
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/6R/V8/MY/6RV8-MY24.nc:
   ebas_data_level: '2'
-  ebas_instrument_name: abs_11
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 393.0 m
-  ebas_station_code: ES0011R
-  ebas_station_latitude: 38.47278
-  ebas_station_longitude: -6.92361
+  ebas_instrument_name: API200E_nl0010
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: NL01L_MIL-W-5300_NL01L_ILG-W-2900
+  ebas_revision_date: '2024-09-25T11:23:32.968893Z'
+  ebas_station_altitude: 28.0 m
+  ebas_station_code: NL0010R
+  ebas_station_latitude: 51.541111
+  ebas_station_longitude: 5.853611
   ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '2002-01-01T07:00:00Z'
-  time_coverage_start: '2001-01-01T07:00:00Z'
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2016-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_pm10_mass
-  - qc_pm10_mass
-  - meta_pm10_mass
-  - v_sulphur_dioxide
-  - qc_sulphur_dioxide
-  - meta_sulphur_dioxide
+  - v_nitrogen_dioxide_nmol_per_mol
+  - qc_nitrogen_dioxide_nmol_per_mol
+  - meta_nitrogen_dioxide_nmol_per_mol
+  - v_nitrogen_dioxide_ug_N_per_m3
+  - qc_nitrogen_dioxide_ug_N_per_m3
+  - meta_nitrogen_dioxide_ug_N_per_m3
+  - v_nitrogen_monoxide_nmol_per_mol
+  - qc_nitrogen_monoxide_nmol_per_mol
+  - meta_nitrogen_monoxide_nmol_per_mol
+  - v_nitrogen_monoxide_ug_N_per_m3
+  - qc_nitrogen_monoxide_ug_N_per_m3
+  - meta_nitrogen_monoxide_ug_N_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/6W/CW/MZ/6WCW-MZRW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: abst_7
@@ -3456,60 +3158,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/6Y/MM/M4/6YMM-M456.nc:
   - v_nitrogen_dioxide_ug_N_per_m3
   - qc_nitrogen_dioxide_ug_N_per_m3
   - meta_nitrogen_dioxide_ug_N_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/6Y/S6/2S/6YS6-2SAK.nc:
-  ebas_instrument_name: AN01
-  ebas_method_ref: GB03L_AN_1
-  ebas_revision_date: '2016-01-07T00:00:00.000000Z'
-  ebas_station_altitude: 260.0 m
-  ebas_station_code: GB0048R
-  ebas_station_latitude: 55.79216
-  ebas_station_longitude: -3.2429
-  ebas_statistics: arithmetic mean
-  resolution: Unrecognised (P0000-00-00T00:00:00)
-  time_coverage_end: '2015-01-01T00:00:00Z'
-  time_coverage_start: '2014-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/72/FT/KF/72FT-KFNC.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: API200E_0091
-  ebas_measurement_height: 2.0 m
-  ebas_method_ref: NL01L_MIL-W-5300_NL01L_ILG-W-2900
-  ebas_revision_date: '2023-11-13T14:17:32.252351Z'
-  ebas_station_altitude: 4.0 m
-  ebas_station_code: NL0091R
-  ebas_station_latitude: 52.3
-  ebas_station_longitude: 4.5
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2016-01-01T00:00:00Z'
-  time_coverage_start: '2013-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_NOx
-  - qc_NOx
-  - meta_NOx
-  - v_nitrogen_dioxide_nmol_per_mol
-  - qc_nitrogen_dioxide_nmol_per_mol
-  - meta_nitrogen_dioxide_nmol_per_mol
-  - v_nitrogen_dioxide_ug_N_per_m3
-  - qc_nitrogen_dioxide_ug_N_per_m3
-  - meta_nitrogen_dioxide_ug_N_per_m3
-  - v_nitrogen_monoxide_nmol_per_mol
-  - qc_nitrogen_monoxide_nmol_per_mol
-  - meta_nitrogen_monoxide_nmol_per_mol
-  - v_nitrogen_monoxide_ug_N_per_m3
-  - qc_nitrogen_monoxide_ug_N_per_m3
-  - meta_nitrogen_monoxide_ug_N_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/76/AE/NN/76AE-NNP4.nc:
   ebas_instrument_name: chemilum_11
   ebas_method_ref: NL01L_chemilum
@@ -3612,28 +3260,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/79/35/SY/7935-SYE5.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/7B/9V/8D/7B9V-8DRS.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: NO24
-  ebas_measurement_height: 3.0 m
-  ebas_method_ref: HU01L_OMSZ_Lachat
-  ebas_revision_date: '2019-09-26T11:32:24.500000Z'
-  ebas_station_altitude: 125.0 m
-  ebas_station_code: HU0002R
-  ebas_station_latitude: 46.966667
-  ebas_station_longitude: 19.583333
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '2017-01-01T07:00:00Z'
-  time_coverage_start: '2015-01-01T07:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/7B/DR/EX/7BDR-EXTE.nc:
   ebas_data_level: '2'
   ebas_instrument_name: glass_13
@@ -3681,6 +3307,71 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/7B/K3/6C/7BK3-6C7Y.nc:
   - v_nitrogen_monoxide
   - qc_nitrogen_monoxide
   - meta_nitrogen_monoxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/7C/MJ/EP/7CMJ-EPSC.nc:
+  ebas_data_level: '2'
+  ebas_measurement_height: 2.0 m
+  ebas_revision_date: '2024-03-28T00:00:00.000000Z'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: LT0015R
+  ebas_station_latitude: 55.37611111111111
+  ebas_station_longitude: 21.030555555555555
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2024-01-01T08:00:00Z'
+  time_coverage_start: '2023-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/7D/CJ/Z2/7DCJ-Z2FH.nc:
   ebas_instrument_name: cl1_09
   ebas_method_ref: EE01L_chemilum
@@ -3866,29 +3557,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/7F/YR/TQ/7FYR-TQDP.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/7G/BS/35/7GBS-35JW.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: abs_3
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 44.0 m
-  ebas_station_code: ES0003R
-  ebas_station_latitude: 40.820556
-  ebas_station_longitude: 0.491389
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '1990-01-01T07:00:00Z'
-  time_coverage_start: '1987-01-01T07:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_sulphur_dioxide
-  - qc_sulphur_dioxide
-  - meta_sulphur_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/7G/GF/HG/7GGF-HG46.nc:
   ebas_data_level: 3a
   ebas_instrument_name: Ecophysics_CLD770ALppt_CLD1
@@ -4118,53 +3786,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/7N/E7/9B/7NE7-9BHG.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/7P/XR/C2/7PXR-C2N4.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: glass_02
-  ebas_method_ref: SE01L_FIA
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 10.0 m
-  ebas_station_code: SE0002R
-  ebas_station_latitude: 57.416667
-  ebas_station_longitude: 11.933333
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '2002-01-01T06:00:00Z'
-  time_coverage_start: '2001-01-01T06:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/7Q/9Y/AU/7Q9Y-AUA7.nc:
-  ebas_instrument_name: chemilum_91
-  ebas_method_ref: NL01L_chemilum
-  ebas_revision_date: '2014-05-07T07:39:04.553000Z'
-  ebas_station_altitude: 4.0 m
-  ebas_station_code: NL0091R
-  ebas_station_latitude: 52.3
-  ebas_station_longitude: 4.5
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2012-01-01T00:00:00Z'
-  time_coverage_start: '2009-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_NOx
-  - qc_NOx
-  - meta_NOx
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_nitrogen_monoxide
-  - qc_nitrogen_monoxide
-  - meta_nitrogen_monoxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/7Q/P9/XE/7QP9-XESC.nc:
   ebas_instrument_name: chemilum_07
   ebas_method_ref: NL01L_chemilum
@@ -4321,26 +3942,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/7Y/ZQ/R4/7YZQ-R484.nc:
   - v_nitrogen_monoxide
   - qc_nitrogen_monoxide
   - meta_nitrogen_monoxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/7Z/A5/ZP/7ZA5-ZP8R.nc:
-  ebas_instrument_name: Chemilum_04
-  ebas_method_ref: CH01L_Chemilum
-  ebas_revision_date: '2014-05-01T00:00:00.000000Z'
-  ebas_station_altitude: 1137.0 m
-  ebas_station_code: CH0004R
-  ebas_station_latitude: 47.049722
-  ebas_station_longitude: 6.979444
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '2007-01-01T00:00:00Z'
-  time_coverage_start: '1992-01-01T07:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/84/P7/J5/84P7-J5W8.nc:
   ebas_data_level: '2'
   ebas_instrument_name: abst_1
@@ -4483,27 +4084,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/89/3U/A2/893U-A2M7.nc:
   - v_nitrogen_monoxide
   - qc_nitrogen_monoxide
   - meta_nitrogen_monoxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/89/5F/K9/895F-K96M.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: impregnated_filter
-  ebas_method_ref: SE01L_AD
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 58.0 m
-  ebas_station_code: SE0008R
-  ebas_station_latitude: 56.916667
-  ebas_station_longitude: 18.15
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '2009-01-01T06:00:00Z'
-  time_coverage_start: '2006-01-01T06:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/89/AD/KZ/89AD-KZ2P.nc:
   ebas_data_level: '1.5'
   ebas_instrument_name: Horiba_APNA-360CE_Brf
@@ -4580,27 +4160,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/89/AD/KZ/89AD-KZ2P.nc:
   - v_pressure
   - v_relative_humidity
   - v_temperature
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/89/UM/4J/89UM-4JKM.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: EE01_cl2_ee11
-  ebas_method_ref: EE01L_chlum_AD
-  ebas_revision_date: '2025-10-14T09:27:19.228226Z'
-  ebas_station_altitude: 6.0 m
-  ebas_station_code: EE0011R
-  ebas_station_latitude: 58.383333
-  ebas_station_longitude: 21.816667
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '2025-01-01T00:00:00Z'
-  time_coverage_start: '2013-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8A/69/9H/8A69-9HT9.nc:
   ebas_data_level: '2'
   ebas_instrument_name: abst_9
@@ -4654,27 +4213,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8B/DN/H5/8BDN-H5JK.nc:
   - v_sum_nitric_acid_and_nitrate
   - qc_sum_nitric_acid_and_nitrate
   - meta_sum_nitric_acid_and_nitrate
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/8C/R6/53/8CR6-53GX.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: glass_08
-  ebas_method_ref: SE01L_FIA
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 58.0 m
-  ebas_station_code: SE0008R
-  ebas_station_latitude: 56.916667
-  ebas_station_longitude: 18.15
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '2005-01-01T06:00:00Z'
-  time_coverage_start: '2001-01-01T06:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8D/4U/54/8D4U-54MN.nc:
   ebas_data_level: '2'
   ebas_instrument_name: abs_01
@@ -4708,26 +4246,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8E/4M/ZP/8E4M-ZPY2.nc:
   resolution: monthly
   time_coverage_end: '1996-01-01T00:00:00Z'
   time_coverage_start: '1990-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/8F/AT/6B/8FAT-6BHJ.nc:
-  ebas_instrument_name: fabs_2
-  ebas_method_ref: HU01L_Griess
-  ebas_revision_date: '2015-03-05T11:40:06.287000Z'
-  ebas_station_altitude: 125.0 m
-  ebas_station_code: HU0002R
-  ebas_station_latitude: 46.966667
-  ebas_station_longitude: 19.583333
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '2015-01-01T07:00:00Z'
-  time_coverage_start: '1991-01-01T07:00:00Z'
   variables:
   - time
   - time_bnds
@@ -5003,72 +4521,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8P/AN/M4/8PAN-M4XX.nc:
   - v_nitrogen_monoxide_ug_N_per_m3
   - qc_nitrogen_monoxide_ug_N_per_m3
   - meta_nitrogen_monoxide_ug_N_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/8Q/5G/7E/8Q5G-7E44.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: Teledyne_T200UP
-  ebas_measurement_height: 3.0 m
-  ebas_method_ref: FR01L_NOx_analysis
-  ebas_revision_date: '2019-11-14T14:05:58.597000Z'
-  ebas_station_altitude: 162.0 m
-  ebas_station_code: FR0020R
-  ebas_station_latitude: 48.7089
-  ebas_station_longitude: 2.1487
-  resolution: hourly
-  time_coverage_end: '2019-01-01T00:00:00Z'
-  time_coverage_start: '2018-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide_nmol_per_mol_amean
-  - qc_nitrogen_dioxide_nmol_per_mol_amean
-  - meta_nitrogen_dioxide_nmol_per_mol_amean
-  - v_nitrogen_dioxide_ug_N_per_m3_amean
-  - qc_nitrogen_dioxide_ug_N_per_m3_amean
-  - meta_nitrogen_dioxide_ug_N_per_m3_amean
-  - v_nitrogen_dioxide_nmol_per_mol_prec1587
-  - qc_nitrogen_dioxide_nmol_per_mol_prec1587
-  - meta_nitrogen_dioxide_nmol_per_mol_prec1587
-  - v_nitrogen_dioxide_ug_N_per_m3_prec1587
-  - qc_nitrogen_dioxide_ug_N_per_m3_prec1587
-  - meta_nitrogen_dioxide_ug_N_per_m3_prec1587
-  - v_nitrogen_dioxide_nmol_per_mol_perc8413
-  - qc_nitrogen_dioxide_nmol_per_mol_perc8413
-  - meta_nitrogen_dioxide_nmol_per_mol_perc8413
-  - v_nitrogen_dioxide_ug_N_per_m3_perc8413
-  - qc_nitrogen_dioxide_ug_N_per_m3_perc8413
-  - meta_nitrogen_dioxide_ug_N_per_m3_perc8413
-  - v_nitrogen_dioxide_nmol_per_mol_stddev
-  - qc_nitrogen_dioxide_nmol_per_mol_stddev
-  - meta_nitrogen_dioxide_nmol_per_mol_stddev
-  - v_nitrogen_dioxide_ug_N_per_m3_stddev
-  - qc_nitrogen_dioxide_ug_N_per_m3_stddev
-  - meta_nitrogen_dioxide_ug_N_per_m3_stddev
-  - v_nitrogen_monoxide_nmol_per_mol_amean
-  - qc_nitrogen_monoxide_nmol_per_mol_amean
-  - meta_nitrogen_monoxide_nmol_per_mol_amean
-  - v_nitrogen_monoxide_ug_N_per_m3_amean
-  - qc_nitrogen_monoxide_ug_N_per_m3_amean
-  - meta_nitrogen_monoxide_ug_N_per_m3_amean
-  - v_nitrogen_monoxide_nmol_per_mol_prec1587
-  - qc_nitrogen_monoxide_nmol_per_mol_prec1587
-  - meta_nitrogen_monoxide_nmol_per_mol_prec1587
-  - v_nitrogen_monoxide_ug_N_per_m3_prec1587
-  - qc_nitrogen_monoxide_ug_N_per_m3_prec1587
-  - meta_nitrogen_monoxide_ug_N_per_m3_prec1587
-  - v_nitrogen_monoxide_nmol_per_mol_perc8413
-  - qc_nitrogen_monoxide_nmol_per_mol_perc8413
-  - meta_nitrogen_monoxide_nmol_per_mol_perc8413
-  - v_nitrogen_monoxide_ug_N_per_m3_perc8413
-  - qc_nitrogen_monoxide_ug_N_per_m3_perc8413
-  - meta_nitrogen_monoxide_ug_N_per_m3_perc8413
-  - v_nitrogen_monoxide_nmol_per_mol_stddev
-  - qc_nitrogen_monoxide_nmol_per_mol_stddev
-  - meta_nitrogen_monoxide_nmol_per_mol_stddev
-  - v_nitrogen_monoxide_ug_N_per_m3_stddev
-  - qc_nitrogen_monoxide_ug_N_per_m3_stddev
-  - meta_nitrogen_monoxide_ug_N_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8T/9Z/PX/8T9Z-PXFF.nc:
   ebas_data_level: '2'
   ebas_instrument_name: chemilum_22
@@ -5142,6 +4594,34 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8U/EU/3Q/8UEU-3QM4.nc:
   - v_sulphur_dioxide
   - qc_sulphur_dioxide
   - meta_sulphur_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8W/CP/CE/8WCP-CEM6.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0009R_Thermo_42i-TL
+  ebas_measurement_height: 3.5 m
+  ebas_method_ref: ES04L_chemilum
+  ebas_revision_date: '2023-07-24T00:00:00.000000Z'
+  ebas_station_altitude: 1360.0 m
+  ebas_station_code: ES0009R
+  ebas_station_latitude: 41.27417
+  ebas_station_longitude: -3.1425
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2022-12-31T23:59:59Z'
+  time_coverage_start: '2022-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_NOx
+  - qc_NOx
+  - meta_NOx
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
+  - v_nitrogen_monoxide
+  - qc_nitrogen_monoxide
+  - meta_nitrogen_monoxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8X/7J/RU/8X7J-RU8Y.nc:
   ebas_data_level: '2'
   ebas_instrument_name: abs_02
@@ -5193,29 +4673,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8X/FV/44/8XFV-44RU.nc:
   - v_nitrogen_monoxide_ug_N_per_m3
   - qc_nitrogen_monoxide_ug_N_per_m3
   - meta_nitrogen_monoxide_ug_N_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/8X/GC/TK/8XGC-TK6W.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: abs_11
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 393.0 m
-  ebas_station_code: ES0011R
-  ebas_station_latitude: 38.47278
-  ebas_station_longitude: -6.92361
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '2001-01-01T07:00:00Z'
-  time_coverage_start: '1999-01-01T07:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_sulphur_dioxide
-  - qc_sulphur_dioxide
-  - meta_sulphur_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8Y/Z4/DJ/8YZ4-DJNQ.nc:
   ebas_instrument_name: NO12
   ebas_method_ref: BE01L_AH
@@ -5696,6 +5153,28 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9C/8E/5T/9C8E-5TCB.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/9C/NS/A9/9CNS-A954.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: abs_02
+  ebas_measurement_height: 2.24 m
+  ebas_method_ref: PL01L_spectrophotometric_griess
+  ebas_revision_date: '2024-06-21T11:32:39.485166Z'
+  ebas_station_altitude: 180.0 m
+  ebas_station_code: PL0002R
+  ebas_station_latitude: 51.814408
+  ebas_station_longitude: 21.972419
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2024-01-01T06:00:00Z'
+  time_coverage_start: '2014-01-01T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9C/U7/9G/9CU7-9GUW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: chemilum_5
@@ -5717,18 +5196,20 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9C/U7/9G/9CU7-9GUW.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/9F/5B/8K/9F5B-8KFR.nc:
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/9F/WG/5J/9FWG-5JXA.nc:
   ebas_data_level: '2'
-  ebas_instrument_name: abst_11
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 6.0 m
-  ebas_station_code: EE0011R
-  ebas_station_latitude: 58.383333
-  ebas_station_longitude: 21.816667
+  ebas_instrument_name: abs_03
+  ebas_measurement_height: 4.5 m
+  ebas_method_ref: PL01L_spectrophotometric_griess
+  ebas_revision_date: '2024-06-21T11:33:31.697008Z'
+  ebas_station_altitude: 1603.0 m
+  ebas_station_code: PL0003R
+  ebas_station_latitude: 50.736444
+  ebas_station_longitude: 15.7395
   ebas_statistics: arithmetic mean
   resolution: daily
-  time_coverage_end: '1990-01-01T07:00:00Z'
-  time_coverage_start: '1989-01-01T07:00:00Z'
+  time_coverage_end: '2024-01-01T06:00:00Z'
+  time_coverage_start: '2014-01-01T06:00:00Z'
   variables:
   - time
   - time_bnds
@@ -5737,9 +5218,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9F/5B/8K/9F5B-8KFR.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-  - v_sulphur_dioxide
-  - qc_sulphur_dioxide
-  - meta_sulphur_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9H/PS/FD/9HPS-FDMN.nc:
   ebas_instrument_name: Chemilum_7
   ebas_method_ref: NL01L_Chemilum
@@ -5752,58 +5230,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9H/PS/FD/9HPS-FDMN.nc:
   resolution: daily
   time_coverage_end: '1988-01-01T07:00:00Z'
   time_coverage_start: '1986-01-01T07:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/9K/6S/D6/9K6S-D6A9.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: Teledyne_T200UP
-  ebas_measurement_height: 3.0 m
-  ebas_method_ref: FR01L_NOx_analysis
-  ebas_revision_date: '2024-02-27T09:50:42.000000Z'
-  ebas_station_altitude: 162.0 m
-  ebas_station_code: FR0020R
-  ebas_station_latitude: 48.7089
-  ebas_station_longitude: 2.1487
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2023-01-01T00:00:00Z'
-  time_coverage_start: '2022-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide_nmol_per_mol
-  - qc_nitrogen_dioxide_nmol_per_mol
-  - meta_nitrogen_dioxide_nmol_per_mol
-  - v_nitrogen_dioxide_ug_N_per_m3
-  - qc_nitrogen_dioxide_ug_N_per_m3
-  - meta_nitrogen_dioxide_ug_N_per_m3
-  - v_nitrogen_monoxide_nmol_per_mol
-  - qc_nitrogen_monoxide_nmol_per_mol
-  - meta_nitrogen_monoxide_nmol_per_mol
-  - v_nitrogen_monoxide_ug_N_per_m3
-  - qc_nitrogen_monoxide_ug_N_per_m3
-  - meta_nitrogen_monoxide_ug_N_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/9K/H4/EZ/9KH4-EZ2V.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: glass_15
-  ebas_method_ref: NO01L_Griess_air
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 439.0 m
-  ebas_station_code: NO0015R
-  ebas_station_latitude: 65.833333
-  ebas_station_longitude: 13.916667
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '2002-01-01T07:00:00Z'
-  time_coverage_start: '1994-01-01T07:00:00Z'
   variables:
   - time
   - time_bnds
@@ -5923,27 +5349,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9N/KG/H6/9NKG-H6NG.nc:
   - v_nitrogen_monoxide_ug_N_per_m3_stddev
   - qc_nitrogen_monoxide_ug_N_per_m3_stddev
   - meta_nitrogen_monoxide_ug_N_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/9N/T9/U5/9NT9-U5DZ.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: ES0008R_1036546008
-  ebas_method_ref: ES04L_chemilum
-  ebas_revision_date: '2022-01-17T13:17:28.807000Z'
-  ebas_station_altitude: 134.0 m
-  ebas_station_code: ES0008R
-  ebas_station_latitude: 43.43917
-  ebas_station_longitude: -4.85
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2021-01-01T00:00:00Z'
-  time_coverage_start: '2013-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9Q/3C/K8/9Q3C-K8U8.nc:
   ebas_data_level: '2'
   ebas_instrument_name: abs_01
@@ -5957,27 +5362,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9Q/3C/K8/9Q3C-K8U8.nc:
   resolution: daily
   time_coverage_end: '2003-01-01T10:00:00Z'
   time_coverage_start: '1991-01-01T10:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/9Q/RT/CQ/9QRT-CQ7U.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: abs_d_0015
-  ebas_method_ref: NO01L_ANSA
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 439.0 m
-  ebas_station_code: NO0015R
-  ebas_station_latitude: 65.833333
-  ebas_station_longitude: 13.916667
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '1991-01-01T07:00:00Z'
-  time_coverage_start: '1988-01-01T07:00:00Z'
   variables:
   - time
   - time_bnds
@@ -6058,6 +5442,62 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9U/95/6Q/9U95-6QHU.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/9U/AP/NX/9UAP-NXRW.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0010R_Thermo_42i-TL
+  ebas_measurement_height: 3.5 m
+  ebas_method_ref: ES04L_chemilum
+  ebas_revision_date: '2025-07-15T00:00:00.000000Z'
+  ebas_station_altitude: 76.0 m
+  ebas_station_code: ES0010R
+  ebas_station_latitude: 42.31917
+  ebas_station_longitude: 3.31583
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-12-31T23:59:59Z'
+  time_coverage_start: '2022-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_NOx
+  - qc_NOx
+  - meta_NOx
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
+  - v_nitrogen_monoxide
+  - qc_nitrogen_monoxide
+  - meta_nitrogen_monoxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/9U/E4/4Z/9UE4-4ZV3.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0010R_Thermo_42i-TL
+  ebas_measurement_height: 3.5 m
+  ebas_method_ref: ES04L_chemilum
+  ebas_revision_date: '2025-02-03T00:00:00.000000Z'
+  ebas_station_altitude: 76.0 m
+  ebas_station_code: ES0010R
+  ebas_station_latitude: 42.31917
+  ebas_station_longitude: 3.31583
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2023-12-31T23:59:59Z'
+  time_coverage_start: '2022-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_NOx
+  - qc_NOx
+  - meta_NOx
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
+  - v_nitrogen_monoxide
+  - qc_nitrogen_monoxide
+  - meta_nitrogen_monoxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9U/XQ/XR/9UXQ-XRWH.nc:
   ebas_data_level: '2'
   ebas_instrument_name: abs_09
@@ -6177,6 +5617,28 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9X/3C/NN/9X3C-NNGV.nc:
   resolution: daily
   time_coverage_end: '1991-01-01T07:00:00Z'
   time_coverage_start: '1988-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/9X/JM/4G/9XJM-4GN9.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: LT25_no2
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: LT01L_LT15_griess
+  ebas_revision_date: '2018-04-20T07:31:18.000000Z'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: LT0015R
+  ebas_station_latitude: 55.37611111111111
+  ebas_station_longitude: 21.030555555555555
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2018-01-01T08:00:00Z'
+  time_coverage_start: '2017-01-01T08:00:00Z'
   variables:
   - time
   - time_bnds
@@ -6382,17 +5844,19 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/A9/FV/CZ/A9FV-CZ25.nc:
   - v_nitrogen_dioxide_ug_N_per_m3
   - qc_nitrogen_dioxide_ug_N_per_m3
   - meta_nitrogen_dioxide_ug_N_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/AA/3X/XD/AA3X-XDZR.nc:
-  ebas_instrument_name: fabs_2
-  ebas_revision_date: '1998-06-01T00:00:00.000000Z'
-  ebas_station_altitude: 125.0 m
-  ebas_station_code: HU0002R
-  ebas_station_latitude: 46.966667
-  ebas_station_longitude: 19.583333
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AB/WB/Q5/ABWB-Q594.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: glass_d_0039
+  ebas_method_ref: NO01L_AA500_autoanalyzer
+  ebas_revision_date: '2025-03-26T09:05:29.815359Z'
+  ebas_station_altitude: 210.0 m
+  ebas_station_code: NO0039R
+  ebas_station_latitude: 62.783333
+  ebas_station_longitude: 8.883333
   ebas_statistics: arithmetic mean
   resolution: daily
-  time_coverage_end: '1986-01-01T07:00:00Z'
-  time_coverage_start: '1981-01-01T07:00:00Z'
+  time_coverage_end: '2025-01-01T07:00:00Z'
+  time_coverage_start: '2019-01-01T07:00:00Z'
   variables:
   - time
   - time_bnds
@@ -6401,9 +5865,27 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AA/3X/XD/AA3X-XDZR.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-  - v_sulphur_dioxide
-  - qc_sulphur_dioxide
-  - meta_sulphur_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AC/3Y/2B/AC3Y-2BFD.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: chemilum_h_0001
+  ebas_method_ref: BE02L_chemilum
+  ebas_revision_date: '2025-02-12T13:50:14.437040Z'
+  ebas_station_altitude: 430.0 m
+  ebas_station_code: BE0001R
+  ebas_station_latitude: 49.877778
+  ebas_station_longitude: 5.203611
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2013-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AC/JH/ZW/ACJH-ZWPF.nc:
   ebas_instrument_name: chemilum_17
   ebas_method_ref: FI01L_chemilum
@@ -6424,29 +5906,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AC/JH/ZW/ACJH-ZWPF.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/AC/RB/QW/ACRB-QWNR.nc:
-  ebas_instrument_name: uv_41
-  ebas_method_ref: DK01L_chemilum
-  ebas_revision_date: '2014-05-01T00:00:00.000000Z'
-  ebas_station_altitude: 10.0 m
-  ebas_station_code: DK0041R
-  ebas_station_latitude: 55.686944
-  ebas_station_longitude: 12.126111
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2008-05-21T00:00:00Z'
-  time_coverage_start: '2006-06-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_nitrogen_monoxide
-  - qc_nitrogen_monoxide
-  - meta_nitrogen_monoxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AF/F3/GF/AFF3-GFRG.nc:
   ebas_instrument_name: 42ITL-1034346046
   ebas_method_ref: ES04L_chemilum
@@ -6493,49 +5952,37 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AF/H9/GQ/AFH9-GQ7C.nc:
   - v_sulphur_dioxide
   - qc_sulphur_dioxide
   - meta_sulphur_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/AG/4V/UD/AG4V-UDAC.nc:
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AF/V3/4S/AFV3-4STJ.nc:
   ebas_data_level: '2'
-  ebas_instrument_name: NO24
-  ebas_measurement_height: 3.0 m
-  ebas_method_ref: HU01L_OMSZ_SPM2
-  ebas_revision_date: '2023-01-11T11:53:00.912628Z'
-  ebas_station_altitude: 125.0 m
-  ebas_station_code: HU0002R
-  ebas_station_latitude: 46.966667
-  ebas_station_longitude: 19.583333
+  ebas_instrument_name: UBA_Ng_Mon_0501
+  ebas_measurement_height: 6.2 m
+  ebas_method_ref: DE03L_bl_cl
+  ebas_revision_date: '2023-10-31T09:03:35.632022Z'
+  ebas_station_altitude: 62.0 m
+  ebas_station_code: DE0007R
+  ebas_station_latitude: 53.141303
+  ebas_station_longitude: 13.031662
   ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '2022-01-01T07:00:00Z'
-  time_coverage_start: '2017-01-01T07:00:00Z'
+  resolution: hourly
+  time_coverage_end: '2021-12-31T23:00:00Z'
+  time_coverage_start: '2020-12-31T23:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/AG/74/P5/AG74-P53Y.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: abs_d_0796
-  ebas_method_ref: NO01L_NEDA
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 250.0 m
-  ebas_station_code: NO0796R
-  ebas_station_latitude: 59.052311
-  ebas_station_longitude: 7.566513
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '1994-01-01T07:00:00Z'
-  time_coverage_start: '1989-09-01T07:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
+  - v_nitrogen_dioxide_nmol_per_mol
+  - qc_nitrogen_dioxide_nmol_per_mol
+  - meta_nitrogen_dioxide_nmol_per_mol
+  - v_nitrogen_dioxide_ug_N_per_m3
+  - qc_nitrogen_dioxide_ug_N_per_m3
+  - meta_nitrogen_dioxide_ug_N_per_m3
+  - v_nitrogen_monoxide_nmol_per_mol
+  - qc_nitrogen_monoxide_nmol_per_mol
+  - meta_nitrogen_monoxide_nmol_per_mol
+  - v_nitrogen_monoxide_ug_N_per_m3
+  - qc_nitrogen_monoxide_ug_N_per_m3
+  - meta_nitrogen_monoxide_ug_N_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AM/MS/7Y/AMMS-7YNE.nc:
   ebas_data_level: '2'
   ebas_instrument_name: chemilum_22
@@ -6702,27 +6149,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AR/QC/X8/ARQC-X89S.nc:
   - v_nitrogen_monoxide_ug_N_per_m3_perc8413
   - qc_nitrogen_monoxide_ug_N_per_m3_perc8413
   - meta_nitrogen_monoxide_ug_N_per_m3_perc8413
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/AT/PJ/C5/ATPJ-C5R5.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: glass_02
-  ebas_method_ref: SE01L_saltzman
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 10.0 m
-  ebas_station_code: SE0002R
-  ebas_station_latitude: 57.416667
-  ebas_station_longitude: 11.933333
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '1987-01-01T06:00:00Z'
-  time_coverage_start: '1981-01-01T06:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AT/RT/65/ATRT-65MN.nc:
   ebas_data_level: '2'
   ebas_instrument_name: abs_5
@@ -6837,6 +6263,37 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AY/8F/A5/AY8F-A5QS.nc:
   - v_sulphur_dioxide
   - qc_sulphur_dioxide
   - meta_sulphur_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/B2/8B/58/B28B-5823.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Wa_Mon_0501
+  ebas_measurement_height: 7.0 m
+  ebas_method_ref: DE03L_bl_cl
+  ebas_revision_date: '2024-12-12T09:25:47.780352Z'
+  ebas_station_altitude: 74.0 m
+  ebas_station_code: DE0002R
+  ebas_station_latitude: 52.802222
+  ebas_station_longitude: 10.759444
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2023-12-31T23:00:00Z'
+  time_coverage_start: '2020-12-31T23:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrogen_dioxide_nmol_per_mol
+  - qc_nitrogen_dioxide_nmol_per_mol
+  - meta_nitrogen_dioxide_nmol_per_mol
+  - v_nitrogen_dioxide_ug_N_per_m3
+  - qc_nitrogen_dioxide_ug_N_per_m3
+  - meta_nitrogen_dioxide_ug_N_per_m3
+  - v_nitrogen_monoxide_nmol_per_mol
+  - qc_nitrogen_monoxide_nmol_per_mol
+  - meta_nitrogen_monoxide_nmol_per_mol
+  - v_nitrogen_monoxide_ug_N_per_m3
+  - qc_nitrogen_monoxide_ug_N_per_m3
+  - meta_nitrogen_monoxide_ug_N_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/B2/BJ/9H/B2BJ-9HVP.nc:
   ebas_data_level: '2'
   ebas_instrument_name: abs_12
@@ -7204,6 +6661,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/B9/32/4M/B932-4MXR.nc:
   - v_nitrogen_monoxide_ug_N_per_m3_stddev
   - qc_nitrogen_monoxide_ug_N_per_m3_stddev
   - meta_nitrogen_monoxide_ug_N_per_m3_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/B9/Q7/B7/B9Q7-B7WT.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: chemilum_14
+  ebas_method_ref: GB02L_chemilum
+  ebas_revision_date: '2025-09-22T13:03:43.236639Z'
+  ebas_station_altitude: 267.0 m
+  ebas_station_code: GB0014R
+  ebas_station_latitude: 54.334444
+  ebas_station_longitude: -0.8075
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2025-01-01T00:00:00Z'
+  time_coverage_start: '2003-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
+  - v_nitrogen_monoxide
+  - qc_nitrogen_monoxide
+  - meta_nitrogen_monoxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BB/96/Q3/BB96-Q3Q9.nc:
   ebas_data_level: '2'
   ebas_instrument_name: abs_30
@@ -7246,53 +6727,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BC/K2/HH/BCK2-HHUK.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/BD/NH/FT/BDNH-FTNT.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: TE42W_91
-  ebas_method_ref: NL01L_LLO_MM_141
-  ebas_revision_date: '2024-04-03T12:27:53.583512Z'
-  ebas_station_altitude: 4.0 m
-  ebas_station_code: NL0091R
-  ebas_station_latitude: 52.3
-  ebas_station_longitude: 4.5
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2003-01-01T00:00:00Z'
-  time_coverage_start: '1996-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/BE/2B/47/BE2B-4773.nc:
-  ebas_instrument_name: chemilum_09
-  ebas_method_ref: NL01L_chemilum
-  ebas_revision_date: '2021-08-16T09:18:31.297000Z'
-  ebas_station_altitude: 1.0 m
-  ebas_station_code: NL0009R
-  ebas_station_latitude: 53.333889
-  ebas_station_longitude: 6.277222
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2012-01-01T00:00:00Z'
-  time_coverage_start: '2011-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_NOx
-  - qc_NOx
-  - meta_NOx
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_nitrogen_monoxide
-  - qc_nitrogen_monoxide
-  - meta_nitrogen_monoxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BG/AQ/DK/BGAQ-DK3Z.nc:
   ebas_data_level: '2'
   ebas_instrument_name: gs_16
@@ -7314,6 +6748,34 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BG/AQ/DK/BGAQ-DK3Z.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BH/5C/FG/BH5C-FGQA.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0009R_Teledyne_T200UP
+  ebas_measurement_height: 3.5 m
+  ebas_method_ref: ES04L_chemilum
+  ebas_revision_date: '2025-02-03T00:00:00.000000Z'
+  ebas_station_altitude: 1360.0 m
+  ebas_station_code: ES0009R
+  ebas_station_latitude: 41.27417
+  ebas_station_longitude: -3.1425
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2023-12-31T23:59:59Z'
+  time_coverage_start: '2023-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_NOx
+  - qc_NOx
+  - meta_NOx
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
+  - v_nitrogen_monoxide
+  - qc_nitrogen_monoxide
+  - meta_nitrogen_monoxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BH/GS/K2/BHGS-K2QP.nc:
   ebas_data_level: '2'
   ebas_instrument_name: chemilum_45
@@ -7593,6 +7055,37 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BS/U7/MZ/BSU7-MZ6F.nc:
   - v_sulphur_dioxide
   - qc_sulphur_dioxide
   - meta_sulphur_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BU/BM/2B/BUBM-2BVG.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Sm_Mon_0501
+  ebas_measurement_height: 16.0 m
+  ebas_method_ref: DE03L_bl_cl
+  ebas_revision_date: '2024-12-12T09:26:17.423120Z'
+  ebas_station_altitude: 937.0 m
+  ebas_station_code: DE0008R
+  ebas_station_latitude: 50.65
+  ebas_station_longitude: 10.766667
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2023-12-31T23:00:00Z'
+  time_coverage_start: '2020-12-31T23:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrogen_dioxide_nmol_per_mol
+  - qc_nitrogen_dioxide_nmol_per_mol
+  - meta_nitrogen_dioxide_nmol_per_mol
+  - v_nitrogen_dioxide_ug_N_per_m3
+  - qc_nitrogen_dioxide_ug_N_per_m3
+  - meta_nitrogen_dioxide_ug_N_per_m3
+  - v_nitrogen_monoxide_nmol_per_mol
+  - qc_nitrogen_monoxide_nmol_per_mol
+  - meta_nitrogen_monoxide_nmol_per_mol
+  - v_nitrogen_monoxide_ug_N_per_m3
+  - qc_nitrogen_monoxide_ug_N_per_m3
+  - meta_nitrogen_monoxide_ug_N_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BW/GE/SH/BWGE-SHXN.nc:
   ebas_instrument_name: fabs_02
   ebas_method_ref: DE03L_Saltzmann
@@ -7716,49 +7209,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/C4/Y3/46/C4Y3-46VV.nc:
   resolution: daily
   time_coverage_end: '2002-01-01T07:00:00Z'
   time_coverage_start: '1994-01-01T07:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/CA/F4/KT/CAF4-KT3N.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: abs_8
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 134.0 m
-  ebas_station_code: ES0008R
-  ebas_station_latitude: 43.43917
-  ebas_station_longitude: -4.85
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '2001-01-01T07:00:00Z'
-  time_coverage_start: '1999-01-01T07:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_sulphur_dioxide
-  - qc_sulphur_dioxide
-  - meta_sulphur_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/CA/FG/63/CAFG-639C.nc:
-  ebas_instrument_name: fabs_2
-  ebas_method_ref: HU01L_Trieth-NEDA
-  ebas_revision_date: '1998-06-01T00:00:00.000000Z'
-  ebas_station_altitude: 125.0 m
-  ebas_station_code: HU0002R
-  ebas_station_latitude: 46.966667
-  ebas_station_longitude: 19.583333
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '1980-01-01T07:00:00Z'
-  time_coverage_start: '1977-01-01T07:00:00Z'
   variables:
   - time
   - time_bnds
@@ -8108,6 +7558,34 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/CZ/SJ/QV/CZSJ-QV4T.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/D3/QZ/BV/D3QZ-BVSM.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0009R_Teledyne_T200UP
+  ebas_measurement_height: 3.5 m
+  ebas_method_ref: ES04L_chemilum
+  ebas_revision_date: '2025-07-15T00:00:00.000000Z'
+  ebas_station_altitude: 1360.0 m
+  ebas_station_code: ES0009R
+  ebas_station_latitude: 41.27417
+  ebas_station_longitude: -3.1425
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-12-31T09:59:59Z'
+  time_coverage_start: '2023-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_NOx
+  - qc_NOx
+  - meta_NOx
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
+  - v_nitrogen_monoxide
+  - qc_nitrogen_monoxide
+  - meta_nitrogen_monoxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/D6/QC/2G/D6QC-2GQF.nc:
   ebas_data_level: '2'
   ebas_instrument_name: ES0005R_1036546009
@@ -8158,26 +7636,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/D7/CM/SU/D7CM-SUJM.nc:
   - v_sulphur_dioxide
   - qc_sulphur_dioxide
   - meta_sulphur_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/D7/VN/7Q/D7VN-7QYP.nc:
-  ebas_instrument_name: tei42ctl_4
-  ebas_method_ref: CH01L_chemilum
-  ebas_revision_date: '2013-01-01T00:00:00.000000Z'
-  ebas_station_altitude: 1137.0 m
-  ebas_station_code: CH0004R
-  ebas_station_latitude: 47.049722
-  ebas_station_longitude: 6.979444
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '2013-01-01T00:00:00Z'
-  time_coverage_start: '2011-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/D9/98/G2/D998-G2U5.nc:
   ebas_data_level: '2'
   ebas_instrument_name: chemilum_09
@@ -8381,6 +7839,27 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DG/7T/57/DG7T-57XQ.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/DH/32/VK/DH32-VKFS.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: glass_01
+  ebas_method_ref: MD02L_Griess_air
+  ebas_revision_date: '2024-02-14T09:19:54.439198Z'
+  ebas_station_altitude: 166.0 m
+  ebas_station_code: MD0013R
+  ebas_station_latitude: 46.4884
+  ebas_station_longitude: 28.2835
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2022-01-01T09:00:00Z'
+  time_coverage_start: '2009-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DH/NY/WE/DHNY-WEY8.nc:
   ebas_instrument_name: chemilum_12
   ebas_method_ref: ES04L_chemilum
@@ -8401,31 +7880,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DH/NY/WE/DHNY-WEY8.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/DJ/8G/W7/DJ8G-W72U.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: TAPIT500U_53
-  ebas_measurement_height: 5.0 m
-  ebas_method_ref: CH01L_no2
-  ebas_revision_date: '2023-12-14T12:50:46.000000Z'
-  ebas_station_altitude: 797.0 m
-  ebas_station_code: CH0053R
-  ebas_station_latitude: 47.18961391
-  ebas_station_longitude: 8.175433684
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2022-01-01T00:00:00Z'
-  time_coverage_start: '2021-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide_nmol_per_mol
-  - qc_nitrogen_dioxide_nmol_per_mol
-  - meta_nitrogen_dioxide_nmol_per_mol
-  - v_nitrogen_dioxide_ug_N_per_m3
-  - qc_nitrogen_dioxide_ug_N_per_m3
-  - meta_nitrogen_dioxide_ug_N_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DN/5T/5Y/DN5T-5YEX.nc:
   ebas_data_level: '2'
   ebas_instrument_name: glass_d_0041
@@ -8575,28 +8029,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DW/TU/92/DWTU-92BQ.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/DX/QJ/TF/DXQJ-TFU6.nc:
-  ebas_instrument_name: fabs_2
-  ebas_revision_date: '1998-06-01T00:00:00.000000Z'
-  ebas_station_altitude: 125.0 m
-  ebas_station_code: HU0002R
-  ebas_station_latitude: 46.966667
-  ebas_station_longitude: 19.583333
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '1981-01-01T07:00:00Z'
-  time_coverage_start: '1980-01-01T07:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_sulphur_dioxide
-  - qc_sulphur_dioxide
-  - meta_sulphur_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DX/X5/SV/DXX5-SV6P.nc:
   ebas_data_level: '2'
   ebas_instrument_name: abs_d_0762
@@ -8749,28 +8181,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/E4/M7/8Z/E4M7-8Z3T.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/E7/JE/4A/E7JE-4A7K.nc:
-  ebas_instrument_name: cl2_11
-  ebas_revision_date: '2013-09-30T00:00:00.000000Z'
-  ebas_station_altitude: 6.0 m
-  ebas_station_code: EE0011R
-  ebas_station_latitude: 58.383333
-  ebas_station_longitude: 21.816667
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2013-01-01T00:00:00Z'
-  time_coverage_start: '2012-01-01T01:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_NOx
-  - qc_NOx
-  - meta_NOx
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/E7/JK/TV/E7JK-TVU6.nc:
   ebas_data_level: '2'
   ebas_instrument_name: chemilum_2
@@ -8813,6 +8223,96 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/E7/PN/J6/E7PN-J65D.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/E8/J2/TH/E8J2-THAZ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: MAIDO_chem_photo_Teledyne_T200UP-112
+  ebas_measurement_height: 8.0 m
+  ebas_method_ref: DE20L_NOx
+  ebas_revision_date: '2024-05-22T00:00:00.000000Z'
+  ebas_station_altitude: 2160.0 m
+  ebas_station_code: FR0026R
+  ebas_station_latitude: -21.079449
+  ebas_station_longitude: 55.383006
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2023-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_NOx_nmol_per_mol_amean
+  - qc_NOx_nmol_per_mol_amean
+  - meta_NOx_nmol_per_mol_amean
+  - v_NOx_ug_N_per_m3_amean
+  - qc_NOx_ug_N_per_m3_amean
+  - meta_NOx_ug_N_per_m3_amean
+  - v_NOx_nmol_per_mol_prec1587
+  - qc_NOx_nmol_per_mol_prec1587
+  - meta_NOx_nmol_per_mol_prec1587
+  - v_NOx_ug_N_per_m3_prec1587
+  - qc_NOx_ug_N_per_m3_prec1587
+  - meta_NOx_ug_N_per_m3_prec1587
+  - v_NOx_nmol_per_mol_perc8413
+  - qc_NOx_nmol_per_mol_perc8413
+  - meta_NOx_nmol_per_mol_perc8413
+  - v_NOx_ug_N_per_m3_perc8413
+  - qc_NOx_ug_N_per_m3_perc8413
+  - meta_NOx_ug_N_per_m3_perc8413
+  - v_NOx_nmol_per_mol_stddev
+  - qc_NOx_nmol_per_mol_stddev
+  - meta_NOx_nmol_per_mol_stddev
+  - v_NOx_ug_N_per_m3_stddev
+  - qc_NOx_ug_N_per_m3_stddev
+  - meta_NOx_ug_N_per_m3_stddev
+  - v_nitrogen_dioxide_nmol_per_mol_amean
+  - qc_nitrogen_dioxide_nmol_per_mol_amean
+  - meta_nitrogen_dioxide_nmol_per_mol_amean
+  - v_nitrogen_dioxide_ug_N_per_m3_amean
+  - qc_nitrogen_dioxide_ug_N_per_m3_amean
+  - meta_nitrogen_dioxide_ug_N_per_m3_amean
+  - v_nitrogen_dioxide_nmol_per_mol_prec1587
+  - qc_nitrogen_dioxide_nmol_per_mol_prec1587
+  - meta_nitrogen_dioxide_nmol_per_mol_prec1587
+  - v_nitrogen_dioxide_ug_N_per_m3_prec1587
+  - qc_nitrogen_dioxide_ug_N_per_m3_prec1587
+  - meta_nitrogen_dioxide_ug_N_per_m3_prec1587
+  - v_nitrogen_dioxide_nmol_per_mol_perc8413
+  - qc_nitrogen_dioxide_nmol_per_mol_perc8413
+  - meta_nitrogen_dioxide_nmol_per_mol_perc8413
+  - v_nitrogen_dioxide_ug_N_per_m3_perc8413
+  - qc_nitrogen_dioxide_ug_N_per_m3_perc8413
+  - meta_nitrogen_dioxide_ug_N_per_m3_perc8413
+  - v_nitrogen_dioxide_nmol_per_mol_stddev
+  - qc_nitrogen_dioxide_nmol_per_mol_stddev
+  - meta_nitrogen_dioxide_nmol_per_mol_stddev
+  - v_nitrogen_dioxide_ug_N_per_m3_stddev
+  - qc_nitrogen_dioxide_ug_N_per_m3_stddev
+  - meta_nitrogen_dioxide_ug_N_per_m3_stddev
+  - v_nitrogen_monoxide_nmol_per_mol_amean
+  - qc_nitrogen_monoxide_nmol_per_mol_amean
+  - meta_nitrogen_monoxide_nmol_per_mol_amean
+  - v_nitrogen_monoxide_ug_N_per_m3_amean
+  - qc_nitrogen_monoxide_ug_N_per_m3_amean
+  - meta_nitrogen_monoxide_ug_N_per_m3_amean
+  - v_nitrogen_monoxide_nmol_per_mol_prec1587
+  - qc_nitrogen_monoxide_nmol_per_mol_prec1587
+  - meta_nitrogen_monoxide_nmol_per_mol_prec1587
+  - v_nitrogen_monoxide_ug_N_per_m3_prec1587
+  - qc_nitrogen_monoxide_ug_N_per_m3_prec1587
+  - meta_nitrogen_monoxide_ug_N_per_m3_prec1587
+  - v_nitrogen_monoxide_nmol_per_mol_perc8413
+  - qc_nitrogen_monoxide_nmol_per_mol_perc8413
+  - meta_nitrogen_monoxide_nmol_per_mol_perc8413
+  - v_nitrogen_monoxide_ug_N_per_m3_perc8413
+  - qc_nitrogen_monoxide_ug_N_per_m3_perc8413
+  - meta_nitrogen_monoxide_ug_N_per_m3_perc8413
+  - v_nitrogen_monoxide_nmol_per_mol_stddev
+  - qc_nitrogen_monoxide_nmol_per_mol_stddev
+  - meta_nitrogen_monoxide_nmol_per_mol_stddev
+  - v_nitrogen_monoxide_ug_N_per_m3_stddev
+  - qc_nitrogen_monoxide_ug_N_per_m3_stddev
+  - meta_nitrogen_monoxide_ug_N_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/EA/JR/34/EAJR-34WX.nc:
   ebas_data_level: '2'
   ebas_instrument_name: ES0010R_TIN-004
@@ -8840,27 +8340,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/EA/JR/34/EAJR-34WX.nc:
   - v_nitrogen_monoxide
   - qc_nitrogen_monoxide
   - meta_nitrogen_monoxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/EC/MK/E9/ECMK-E97U.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: abst_11
-  ebas_method_ref: SU01L_NEDA
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 6.0 m
-  ebas_station_code: EE0011R
-  ebas_station_latitude: 58.383333
-  ebas_station_longitude: 21.816667
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '1991-01-01T07:00:00Z'
-  time_coverage_start: '1990-01-01T07:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ED/EM/F3/EDEM-F38B.nc:
   ebas_instrument_name: bluelight_5
   ebas_method_ref: CH01L_no2
@@ -8893,27 +8372,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/EE/X6/M3/EEX6-M3AT.nc:
   resolution: daily
   time_coverage_end: '2015-01-01T00:00:00Z'
   time_coverage_start: '1996-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/EF/DJ/DH/EFDJ-DH8K.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: glass_02
-  ebas_method_ref: SE01L_Griess
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 10.0 m
-  ebas_station_code: SE0002R
-  ebas_station_latitude: 57.416667
-  ebas_station_longitude: 11.933333
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '2001-01-01T06:00:00Z'
-  time_coverage_start: '1991-01-01T06:00:00Z'
   variables:
   - time
   - time_bnds
@@ -8975,26 +8433,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/EH/X5/SE/EHX5-SEWU.nc:
   resolution: daily
   time_coverage_end: '2008-01-01T00:00:00Z'
   time_coverage_start: '2007-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/EM/8Z/9H/EM8Z-9H3Y.nc:
-  ebas_instrument_name: chemilum_91
-  ebas_method_ref: NL01L_chemilum
-  ebas_revision_date: '2014-05-01T00:00:00.000000Z'
-  ebas_station_altitude: 4.0 m
-  ebas_station_code: NL0091R
-  ebas_station_latitude: 52.3
-  ebas_station_longitude: 4.5
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2013-01-01T00:00:00Z'
-  time_coverage_start: '2012-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
@@ -9409,49 +8847,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/EX/HJ/69/EXHJ-69PM.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/F2/Q3/82/F2Q3-82WA.nc:
-  ebas_instrument_name: fabs_2
-  ebas_revision_date: '1998-06-01T00:00:00.000000Z'
-  ebas_station_altitude: 125.0 m
-  ebas_station_code: HU0002R
-  ebas_station_latitude: 46.966667
-  ebas_station_longitude: 19.583333
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '1988-01-01T07:00:00Z'
-  time_coverage_start: '1986-01-01T07:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_sulphur_dioxide
-  - qc_sulphur_dioxide
-  - meta_sulphur_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/F3/YR/V9/F3YR-V9DG.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: abst_8
-  ebas_method_ref: SE01L_NEDA
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 58.0 m
-  ebas_station_code: SE0008R
-  ebas_station_latitude: 56.916667
-  ebas_station_longitude: 18.15
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '1990-01-01T06:00:00Z'
-  time_coverage_start: '1989-01-01T06:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/F4/RN/5D/F4RN-5DCP.nc:
   ebas_instrument_name: cranox_5
   ebas_method_ref: CH01L_chemilium
@@ -9472,28 +8867,43 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/F4/RN/5D/F4RN-5DCP.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/F4/ZH/AX/F4ZH-AXPP.nc:
-  ebas_instrument_name: fabs_2
-  ebas_revision_date: '1998-06-01T00:00:00.000000Z'
-  ebas_station_altitude: 125.0 m
-  ebas_station_code: HU0002R
-  ebas_station_latitude: 46.966667
-  ebas_station_longitude: 19.583333
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/F5/67/8U/F567-8U53.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: NOxTS42i
+  ebas_measurement_height: 4.35 m
+  ebas_method_ref: PL05L_ANOxTHERMO
+  ebas_revision_date: '2024-09-17T13:39:03.173703Z'
+  ebas_station_altitude: 157.0 m
+  ebas_station_code: PL0005R
+  ebas_station_latitude: 54.15
+  ebas_station_longitude: 22.066667
   ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '1991-01-01T07:00:00Z'
-  time_coverage_start: '1988-01-01T07:00:00Z'
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2017-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_sulphur_dioxide
-  - qc_sulphur_dioxide
-  - meta_sulphur_dioxide
+  - v_NOx_nmol_per_mol
+  - qc_NOx_nmol_per_mol
+  - meta_NOx_nmol_per_mol
+  - v_NOx_ug_N_per_m3
+  - qc_NOx_ug_N_per_m3
+  - meta_NOx_ug_N_per_m3
+  - v_nitrogen_dioxide_nmol_per_mol
+  - qc_nitrogen_dioxide_nmol_per_mol
+  - meta_nitrogen_dioxide_nmol_per_mol
+  - v_nitrogen_dioxide_ug_N_per_m3
+  - qc_nitrogen_dioxide_ug_N_per_m3
+  - meta_nitrogen_dioxide_ug_N_per_m3
+  - v_nitrogen_monoxide_nmol_per_mol
+  - qc_nitrogen_monoxide_nmol_per_mol
+  - meta_nitrogen_monoxide_nmol_per_mol
+  - v_nitrogen_monoxide_ug_N_per_m3
+  - qc_nitrogen_monoxide_ug_N_per_m3
+  - meta_nitrogen_monoxide_ug_N_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/F6/33/UB/F633-UBWH.nc:
   ebas_data_level: '2'
   ebas_revision_date: '2023-07-31T00:00:00.000000Z'
@@ -9532,27 +8942,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/F7/74/9A/F774-9ADN.nc:
   resolution: daily
   time_coverage_end: '1992-01-01T07:00:00Z'
   time_coverage_start: '1991-01-01T07:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/F7/FA/DH/F7FA-DHUR.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: TEI42ITL_Mo_53
-  ebas_method_ref: CH01L_no2
-  ebas_revision_date: '2023-10-30T18:26:46.151095Z'
-  ebas_station_altitude: 797.0 m
-  ebas_station_code: CH0053R
-  ebas_station_latitude: 47.18961391
-  ebas_station_longitude: 8.175433684
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2021-01-01T00:00:00Z'
-  time_coverage_start: '2019-05-24T10:00:00Z'
   variables:
   - time
   - time_bnds
@@ -9692,6 +9081,37 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/FC/R2/BC/FCR2-BC6H.nc:
   - v_nitrogen_monoxide_ug_N_per_m3_stddev
   - qc_nitrogen_monoxide_ug_N_per_m3_stddev
   - meta_nitrogen_monoxide_ug_N_per_m3_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FE/4S/2D/FE4S-2DXV.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Zg_Mon_0501
+  ebas_measurement_height: 8.0 m
+  ebas_method_ref: DE03L_bl_cl
+  ebas_revision_date: '2024-12-10T15:47:44.077600Z'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: DE0009R
+  ebas_station_latitude: 54.4368
+  ebas_station_longitude: 12.7249
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2023-12-31T23:00:00Z'
+  time_coverage_start: '2013-12-31T23:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrogen_dioxide_nmol_per_mol
+  - qc_nitrogen_dioxide_nmol_per_mol
+  - meta_nitrogen_dioxide_nmol_per_mol
+  - v_nitrogen_dioxide_ug_N_per_m3
+  - qc_nitrogen_dioxide_ug_N_per_m3
+  - meta_nitrogen_dioxide_ug_N_per_m3
+  - v_nitrogen_monoxide_nmol_per_mol
+  - qc_nitrogen_monoxide_nmol_per_mol
+  - meta_nitrogen_monoxide_nmol_per_mol
+  - v_nitrogen_monoxide_ug_N_per_m3
+  - qc_nitrogen_monoxide_ug_N_per_m3
+  - meta_nitrogen_monoxide_ug_N_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FE/D4/ZX/FED4-ZX6Y.nc:
   ebas_instrument_name: fabs_07
   ebas_method_ref: DE07L_Saltzmann
@@ -9866,6 +9286,72 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/FJ/4J/E7/FJ4J-E7UA.nc:
   - v_sulphur_dioxide
   - qc_sulphur_dioxide
   - meta_sulphur_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FJ/SY/53/FJSY-53G7.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Thermo_42i_AMY
+  ebas_measurement_height: 46.0 m
+  ebas_method_ref: KR04L_chemiluminescence_Thermo_42i
+  ebas_revision_date: '2024-11-21T10:39:21.856337Z'
+  ebas_station_altitude: 46.0 m
+  ebas_station_code: KR0100R
+  ebas_station_latitude: 36.5383338928
+  ebas_station_longitude: 126.3300018311
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2018-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrogen_dioxide_nmol_per_mol_amean
+  - qc_nitrogen_dioxide_nmol_per_mol_amean
+  - meta_nitrogen_dioxide_nmol_per_mol_amean
+  - v_nitrogen_dioxide_ug_N_per_m3_amean
+  - qc_nitrogen_dioxide_ug_N_per_m3_amean
+  - meta_nitrogen_dioxide_ug_N_per_m3_amean
+  - v_nitrogen_dioxide_nmol_per_mol_max
+  - qc_nitrogen_dioxide_nmol_per_mol_max
+  - meta_nitrogen_dioxide_nmol_per_mol_max
+  - v_nitrogen_dioxide_ug_N_per_m3_max
+  - qc_nitrogen_dioxide_ug_N_per_m3_max
+  - meta_nitrogen_dioxide_ug_N_per_m3_max
+  - v_nitrogen_dioxide_nmol_per_mol_min
+  - qc_nitrogen_dioxide_nmol_per_mol_min
+  - meta_nitrogen_dioxide_nmol_per_mol_min
+  - v_nitrogen_dioxide_ug_N_per_m3_min
+  - qc_nitrogen_dioxide_ug_N_per_m3_min
+  - meta_nitrogen_dioxide_ug_N_per_m3_min
+  - v_nitrogen_dioxide_nmol_per_mol_stddev
+  - qc_nitrogen_dioxide_nmol_per_mol_stddev
+  - meta_nitrogen_dioxide_nmol_per_mol_stddev
+  - v_nitrogen_dioxide_ug_N_per_m3_stddev
+  - qc_nitrogen_dioxide_ug_N_per_m3_stddev
+  - meta_nitrogen_dioxide_ug_N_per_m3_stddev
+  - v_nitrogen_monoxide_nmol_per_mol_amean
+  - qc_nitrogen_monoxide_nmol_per_mol_amean
+  - meta_nitrogen_monoxide_nmol_per_mol_amean
+  - v_nitrogen_monoxide_ug_N_per_m3_amean
+  - qc_nitrogen_monoxide_ug_N_per_m3_amean
+  - meta_nitrogen_monoxide_ug_N_per_m3_amean
+  - v_nitrogen_monoxide_nmol_per_mol_max
+  - qc_nitrogen_monoxide_nmol_per_mol_max
+  - meta_nitrogen_monoxide_nmol_per_mol_max
+  - v_nitrogen_monoxide_ug_N_per_m3_max
+  - qc_nitrogen_monoxide_ug_N_per_m3_max
+  - meta_nitrogen_monoxide_ug_N_per_m3_max
+  - v_nitrogen_monoxide_nmol_per_mol_min
+  - qc_nitrogen_monoxide_nmol_per_mol_min
+  - meta_nitrogen_monoxide_nmol_per_mol_min
+  - v_nitrogen_monoxide_ug_N_per_m3_min
+  - qc_nitrogen_monoxide_ug_N_per_m3_min
+  - meta_nitrogen_monoxide_ug_N_per_m3_min
+  - v_nitrogen_monoxide_nmol_per_mol_stddev
+  - qc_nitrogen_monoxide_nmol_per_mol_stddev
+  - meta_nitrogen_monoxide_nmol_per_mol_stddev
+  - v_nitrogen_monoxide_ug_N_per_m3_stddev
+  - qc_nitrogen_monoxide_ug_N_per_m3_stddev
+  - meta_nitrogen_monoxide_ug_N_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FM/AM/6Y/FMAM-6YFJ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f2p_01
@@ -9940,96 +9426,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/FR/NW/4N/FRNW-4NXM.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/FS/JH/28/FSJH-28FN.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: Teledyne_T200UP
-  ebas_measurement_height: 3.0 m
-  ebas_method_ref: DE20L_NOx
-  ebas_revision_date: '2025-06-13T12:56:26.113879Z'
-  ebas_station_altitude: 162.0 m
-  ebas_station_code: FR0020R
-  ebas_station_latitude: 48.7089
-  ebas_station_longitude: 2.1487
-  resolution: hourly
-  time_coverage_end: '2025-01-01T00:00:00Z'
-  time_coverage_start: '2023-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_NOx_nmol_per_mol_amean
-  - qc_NOx_nmol_per_mol_amean
-  - meta_NOx_nmol_per_mol_amean
-  - v_NOx_ug_N_per_m3_amean
-  - qc_NOx_ug_N_per_m3_amean
-  - meta_NOx_ug_N_per_m3_amean
-  - v_NOx_nmol_per_mol_prec1587
-  - qc_NOx_nmol_per_mol_prec1587
-  - meta_NOx_nmol_per_mol_prec1587
-  - v_NOx_ug_N_per_m3_prec1587
-  - qc_NOx_ug_N_per_m3_prec1587
-  - meta_NOx_ug_N_per_m3_prec1587
-  - v_NOx_nmol_per_mol_perc8413
-  - qc_NOx_nmol_per_mol_perc8413
-  - meta_NOx_nmol_per_mol_perc8413
-  - v_NOx_ug_N_per_m3_perc8413
-  - qc_NOx_ug_N_per_m3_perc8413
-  - meta_NOx_ug_N_per_m3_perc8413
-  - v_NOx_nmol_per_mol_stddev
-  - qc_NOx_nmol_per_mol_stddev
-  - meta_NOx_nmol_per_mol_stddev
-  - v_NOx_ug_N_per_m3_stddev
-  - qc_NOx_ug_N_per_m3_stddev
-  - meta_NOx_ug_N_per_m3_stddev
-  - v_nitrogen_dioxide_nmol_per_mol_amean
-  - qc_nitrogen_dioxide_nmol_per_mol_amean
-  - meta_nitrogen_dioxide_nmol_per_mol_amean
-  - v_nitrogen_dioxide_ug_N_per_m3_amean
-  - qc_nitrogen_dioxide_ug_N_per_m3_amean
-  - meta_nitrogen_dioxide_ug_N_per_m3_amean
-  - v_nitrogen_dioxide_nmol_per_mol_prec1587
-  - qc_nitrogen_dioxide_nmol_per_mol_prec1587
-  - meta_nitrogen_dioxide_nmol_per_mol_prec1587
-  - v_nitrogen_dioxide_ug_N_per_m3_prec1587
-  - qc_nitrogen_dioxide_ug_N_per_m3_prec1587
-  - meta_nitrogen_dioxide_ug_N_per_m3_prec1587
-  - v_nitrogen_dioxide_nmol_per_mol_perc8413
-  - qc_nitrogen_dioxide_nmol_per_mol_perc8413
-  - meta_nitrogen_dioxide_nmol_per_mol_perc8413
-  - v_nitrogen_dioxide_ug_N_per_m3_perc8413
-  - qc_nitrogen_dioxide_ug_N_per_m3_perc8413
-  - meta_nitrogen_dioxide_ug_N_per_m3_perc8413
-  - v_nitrogen_dioxide_nmol_per_mol_stddev
-  - qc_nitrogen_dioxide_nmol_per_mol_stddev
-  - meta_nitrogen_dioxide_nmol_per_mol_stddev
-  - v_nitrogen_dioxide_ug_N_per_m3_stddev
-  - qc_nitrogen_dioxide_ug_N_per_m3_stddev
-  - meta_nitrogen_dioxide_ug_N_per_m3_stddev
-  - v_nitrogen_monoxide_nmol_per_mol_amean
-  - qc_nitrogen_monoxide_nmol_per_mol_amean
-  - meta_nitrogen_monoxide_nmol_per_mol_amean
-  - v_nitrogen_monoxide_ug_N_per_m3_amean
-  - qc_nitrogen_monoxide_ug_N_per_m3_amean
-  - meta_nitrogen_monoxide_ug_N_per_m3_amean
-  - v_nitrogen_monoxide_nmol_per_mol_prec1587
-  - qc_nitrogen_monoxide_nmol_per_mol_prec1587
-  - meta_nitrogen_monoxide_nmol_per_mol_prec1587
-  - v_nitrogen_monoxide_ug_N_per_m3_prec1587
-  - qc_nitrogen_monoxide_ug_N_per_m3_prec1587
-  - meta_nitrogen_monoxide_ug_N_per_m3_prec1587
-  - v_nitrogen_monoxide_nmol_per_mol_perc8413
-  - qc_nitrogen_monoxide_nmol_per_mol_perc8413
-  - meta_nitrogen_monoxide_nmol_per_mol_perc8413
-  - v_nitrogen_monoxide_ug_N_per_m3_perc8413
-  - qc_nitrogen_monoxide_ug_N_per_m3_perc8413
-  - meta_nitrogen_monoxide_ug_N_per_m3_perc8413
-  - v_nitrogen_monoxide_nmol_per_mol_stddev
-  - qc_nitrogen_monoxide_nmol_per_mol_stddev
-  - meta_nitrogen_monoxide_nmol_per_mol_stddev
-  - v_nitrogen_monoxide_ug_N_per_m3_stddev
-  - qc_nitrogen_monoxide_ug_N_per_m3_stddev
-  - meta_nitrogen_monoxide_ug_N_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FT/HX/ZT/FTHX-ZTSZ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Chemilum_473
@@ -10072,51 +9468,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/FT/HX/ZT/FTHX-ZTSZ.nc:
   - v_nitrogen_dioxide_ug_N_per_m3_stddev
   - qc_nitrogen_dioxide_ug_N_per_m3_stddev
   - meta_nitrogen_dioxide_ug_N_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/FT/VX/68/FTVX-68HH.nc:
-  ebas_instrument_name: fabs_3
-  ebas_revision_date: '1998-06-01T00:00:00.000000Z'
-  ebas_station_altitude: 44.0 m
-  ebas_station_code: ES0003R
-  ebas_station_latitude: 40.820556
-  ebas_station_longitude: 0.491389
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '1997-12-31T07:00:00Z'
-  time_coverage_start: '1991-01-01T07:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_sulphur_dioxide
-  - qc_sulphur_dioxide
-  - meta_sulphur_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/FU/V5/CC/FUV5-CC4C.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: abs_8
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 58.0 m
-  ebas_station_code: SE0008R
-  ebas_station_latitude: 56.916667
-  ebas_station_longitude: 18.15
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '1987-01-01T06:00:00Z'
-  time_coverage_start: '1982-01-01T06:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_sulphur_dioxide
-  - qc_sulphur_dioxide
-  - meta_sulphur_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FW/6W/WA/FW6W-WAQ5.nc:
   ebas_data_level: '2'
   ebas_instrument_name: abst_5
@@ -10163,6 +9514,60 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/FW/ZU/D6/FWZU-D6Z6.nc:
   - v_nitrogen_dioxide_ug_N_per_m3
   - qc_nitrogen_dioxide_ug_N_per_m3
   - meta_nitrogen_dioxide_ug_N_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FX/8K/ET/FX8K-ETD3.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: LEGMC_f2p_0010
+  ebas_measurement_height: 1.8 m
+  ebas_revision_date: '2024-07-26T10:00:00.000000Z'
+  ebas_station_altitude: 18.0 m
+  ebas_station_code: LV0010R
+  ebas_station_latitude: 56.161944
+  ebas_station_longitude: 21.173056
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2024-01-01T08:00:00Z'
+  time_coverage_start: '2023-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FX/9P/M5/FX9P-M5RW.nc:
   ebas_instrument_name: chemilum_15
   ebas_method_ref: FR07L_chemilum
@@ -10442,6 +9847,37 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/FZ/7M/QQ/FZ7M-QQCA.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FZ/KE/B4/FZKE-B4BU.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Sc_Mon_0501
+  ebas_measurement_height: 12.0 m
+  ebas_method_ref: DE03L_bl_cl
+  ebas_revision_date: '2023-10-31T09:05:02.417403Z'
+  ebas_station_altitude: 1205.0 m
+  ebas_station_code: DE0003R
+  ebas_station_latitude: 47.914722
+  ebas_station_longitude: 7.908611
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2021-12-31T23:00:00Z'
+  time_coverage_start: '2020-12-31T23:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrogen_dioxide_nmol_per_mol
+  - qc_nitrogen_dioxide_nmol_per_mol
+  - meta_nitrogen_dioxide_nmol_per_mol
+  - v_nitrogen_dioxide_ug_N_per_m3
+  - qc_nitrogen_dioxide_ug_N_per_m3
+  - meta_nitrogen_dioxide_ug_N_per_m3
+  - v_nitrogen_monoxide_nmol_per_mol
+  - qc_nitrogen_monoxide_nmol_per_mol
+  - meta_nitrogen_monoxide_nmol_per_mol
+  - v_nitrogen_monoxide_ug_N_per_m3
+  - qc_nitrogen_monoxide_ug_N_per_m3
+  - meta_nitrogen_monoxide_ug_N_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/G2/U6/EX/G2U6-EXQF.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Horiba_APNA-370CE_Brf
@@ -10569,96 +10005,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/G3/QP/M6/G3QP-M6PT.nc:
   - v_nitrogen_dioxide_ug_N_per_m3_stddev
   - qc_nitrogen_dioxide_ug_N_per_m3_stddev
   - meta_nitrogen_dioxide_ug_N_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/G3/TK/S4/G3TK-S4GD.nc:
-  ebas_data_level: 3a
-  ebas_instrument_name: TEI42ITL_Mo_53
-  ebas_measurement_height: 5.0 m
-  ebas_method_ref: DE20L_NOx_corr_O3_H2O
-  ebas_revision_date: '2025-06-13T18:06:11.475400Z'
-  ebas_station_altitude: 797.0 m
-  ebas_station_code: CH0053R
-  ebas_station_latitude: 47.18961391
-  ebas_station_longitude: 8.175433684
-  resolution: hourly
-  time_coverage_end: '2025-01-01T00:00:00Z'
-  time_coverage_start: '2023-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_NOx_nmol_per_mol_amean
-  - qc_NOx_nmol_per_mol_amean
-  - meta_NOx_nmol_per_mol_amean
-  - v_NOx_ug_N_per_m3_amean
-  - qc_NOx_ug_N_per_m3_amean
-  - meta_NOx_ug_N_per_m3_amean
-  - v_NOx_nmol_per_mol_prec1587
-  - qc_NOx_nmol_per_mol_prec1587
-  - meta_NOx_nmol_per_mol_prec1587
-  - v_NOx_ug_N_per_m3_prec1587
-  - qc_NOx_ug_N_per_m3_prec1587
-  - meta_NOx_ug_N_per_m3_prec1587
-  - v_NOx_nmol_per_mol_perc8413
-  - qc_NOx_nmol_per_mol_perc8413
-  - meta_NOx_nmol_per_mol_perc8413
-  - v_NOx_ug_N_per_m3_perc8413
-  - qc_NOx_ug_N_per_m3_perc8413
-  - meta_NOx_ug_N_per_m3_perc8413
-  - v_NOx_nmol_per_mol_stddev
-  - qc_NOx_nmol_per_mol_stddev
-  - meta_NOx_nmol_per_mol_stddev
-  - v_NOx_ug_N_per_m3_stddev
-  - qc_NOx_ug_N_per_m3_stddev
-  - meta_NOx_ug_N_per_m3_stddev
-  - v_nitrogen_dioxide_nmol_per_mol_amean
-  - qc_nitrogen_dioxide_nmol_per_mol_amean
-  - meta_nitrogen_dioxide_nmol_per_mol_amean
-  - v_nitrogen_dioxide_ug_N_per_m3_amean
-  - qc_nitrogen_dioxide_ug_N_per_m3_amean
-  - meta_nitrogen_dioxide_ug_N_per_m3_amean
-  - v_nitrogen_dioxide_nmol_per_mol_prec1587
-  - qc_nitrogen_dioxide_nmol_per_mol_prec1587
-  - meta_nitrogen_dioxide_nmol_per_mol_prec1587
-  - v_nitrogen_dioxide_ug_N_per_m3_prec1587
-  - qc_nitrogen_dioxide_ug_N_per_m3_prec1587
-  - meta_nitrogen_dioxide_ug_N_per_m3_prec1587
-  - v_nitrogen_dioxide_nmol_per_mol_perc8413
-  - qc_nitrogen_dioxide_nmol_per_mol_perc8413
-  - meta_nitrogen_dioxide_nmol_per_mol_perc8413
-  - v_nitrogen_dioxide_ug_N_per_m3_perc8413
-  - qc_nitrogen_dioxide_ug_N_per_m3_perc8413
-  - meta_nitrogen_dioxide_ug_N_per_m3_perc8413
-  - v_nitrogen_dioxide_nmol_per_mol_stddev
-  - qc_nitrogen_dioxide_nmol_per_mol_stddev
-  - meta_nitrogen_dioxide_nmol_per_mol_stddev
-  - v_nitrogen_dioxide_ug_N_per_m3_stddev
-  - qc_nitrogen_dioxide_ug_N_per_m3_stddev
-  - meta_nitrogen_dioxide_ug_N_per_m3_stddev
-  - v_nitrogen_monoxide_nmol_per_mol_amean
-  - qc_nitrogen_monoxide_nmol_per_mol_amean
-  - meta_nitrogen_monoxide_nmol_per_mol_amean
-  - v_nitrogen_monoxide_ug_N_per_m3_amean
-  - qc_nitrogen_monoxide_ug_N_per_m3_amean
-  - meta_nitrogen_monoxide_ug_N_per_m3_amean
-  - v_nitrogen_monoxide_nmol_per_mol_prec1587
-  - qc_nitrogen_monoxide_nmol_per_mol_prec1587
-  - meta_nitrogen_monoxide_nmol_per_mol_prec1587
-  - v_nitrogen_monoxide_ug_N_per_m3_prec1587
-  - qc_nitrogen_monoxide_ug_N_per_m3_prec1587
-  - meta_nitrogen_monoxide_ug_N_per_m3_prec1587
-  - v_nitrogen_monoxide_nmol_per_mol_perc8413
-  - qc_nitrogen_monoxide_nmol_per_mol_perc8413
-  - meta_nitrogen_monoxide_nmol_per_mol_perc8413
-  - v_nitrogen_monoxide_ug_N_per_m3_perc8413
-  - qc_nitrogen_monoxide_ug_N_per_m3_perc8413
-  - meta_nitrogen_monoxide_ug_N_per_m3_perc8413
-  - v_nitrogen_monoxide_nmol_per_mol_stddev
-  - qc_nitrogen_monoxide_nmol_per_mol_stddev
-  - meta_nitrogen_monoxide_nmol_per_mol_stddev
-  - v_nitrogen_monoxide_ug_N_per_m3_stddev
-  - qc_nitrogen_monoxide_ug_N_per_m3_stddev
-  - meta_nitrogen_monoxide_ug_N_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/G3/WQ/TQ/G3WQ-TQAJ.nc:
   ebas_instrument_name: NA
   ebas_method_ref: NL01L_NA
@@ -10730,27 +10076,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/G6/9Z/DP/G69Z-DPRZ.nc:
   - v_nitrogen_dioxide_ug_N_per_m3
   - qc_nitrogen_dioxide_ug_N_per_m3
   - meta_nitrogen_dioxide_ug_N_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/G8/HP/CY/G8HP-CYSC.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: glass_08
-  ebas_method_ref: SE01L_NEDA
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 58.0 m
-  ebas_station_code: SE0008R
-  ebas_station_latitude: 56.916667
-  ebas_station_longitude: 18.15
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '1991-01-01T07:00:00Z'
-  time_coverage_start: '1990-01-01T07:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/GD/PH/6F/GDPH-6FFF.nc:
   ebas_data_level: '2'
   ebas_instrument_name: abs_1
@@ -10927,6 +10252,48 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/GJ/5B/R5/GJ5B-R5RQ.nc:
   - v_sulphur_dioxide
   - qc_sulphur_dioxide
   - meta_sulphur_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GK/6V/Q3/GK6V-Q3EX.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: JRC_42iTL_739
+  ebas_measurement_height: 6.5 m
+  ebas_method_ref: IT04L_Chemilum_1
+  ebas_revision_date: '2024-07-18T00:00:00.000000Z'
+  ebas_station_altitude: 209.0 m
+  ebas_station_code: IT0004R
+  ebas_station_latitude: 45.814556
+  ebas_station_longitude: 8.635722
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2023-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrogen_dioxide_nmol_per_mol_amean
+  - qc_nitrogen_dioxide_nmol_per_mol_amean
+  - meta_nitrogen_dioxide_nmol_per_mol_amean
+  - v_nitrogen_dioxide_ug_N_per_m3_amean
+  - qc_nitrogen_dioxide_ug_N_per_m3_amean
+  - meta_nitrogen_dioxide_ug_N_per_m3_amean
+  - v_nitrogen_dioxide_nmol_per_mol_max
+  - qc_nitrogen_dioxide_nmol_per_mol_max
+  - meta_nitrogen_dioxide_nmol_per_mol_max
+  - v_nitrogen_dioxide_ug_N_per_m3_max
+  - qc_nitrogen_dioxide_ug_N_per_m3_max
+  - meta_nitrogen_dioxide_ug_N_per_m3_max
+  - v_nitrogen_dioxide_nmol_per_mol_min
+  - qc_nitrogen_dioxide_nmol_per_mol_min
+  - meta_nitrogen_dioxide_nmol_per_mol_min
+  - v_nitrogen_dioxide_ug_N_per_m3_min
+  - qc_nitrogen_dioxide_ug_N_per_m3_min
+  - meta_nitrogen_dioxide_ug_N_per_m3_min
+  - v_nitrogen_dioxide_nmol_per_mol_stddev
+  - qc_nitrogen_dioxide_nmol_per_mol_stddev
+  - meta_nitrogen_dioxide_nmol_per_mol_stddev
+  - v_nitrogen_dioxide_ug_N_per_m3_stddev
+  - qc_nitrogen_dioxide_ug_N_per_m3_stddev
+  - meta_nitrogen_dioxide_ug_N_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/GK/HD/89/GKHD-89H2.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Chemilum_1
@@ -10992,26 +10359,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/GP/QB/KA/GPQB-KAT3.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/GQ/5K/6B/GQ5K-6BHR.nc:
-  ebas_instrument_name: Chemilum_11
-  ebas_method_ref: EE01L_chlum_AD
-  ebas_revision_date: '2014-05-07T07:46:37.240000Z'
-  ebas_station_altitude: 6.0 m
-  ebas_station_code: EE0011R
-  ebas_station_latitude: 58.383333
-  ebas_station_longitude: 21.816667
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '2011-01-01T00:00:00Z'
-  time_coverage_start: '2008-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/GR/BJ/W3/GRBJ-W3HW.nc:
   ebas_instrument_name: NaJ_DE01L
   ebas_method_ref: DE03L_NaJ_method
@@ -11024,54 +10371,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/GR/BJ/W3/GRBJ-W3HW.nc:
   resolution: daily
   time_coverage_end: '2014-01-01T00:00:00Z'
   time_coverage_start: '2013-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/GV/MN/J2/GVMN-J285.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: ES0008R_1036546008
-  ebas_method_ref: ES04L_chemilum
-  ebas_revision_date: '2022-07-14T00:00:00.000000Z'
-  ebas_station_altitude: 134.0 m
-  ebas_station_code: ES0008R
-  ebas_station_latitude: 43.43917
-  ebas_station_longitude: -4.85
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2022-01-01T00:00:00Z'
-  time_coverage_start: '2021-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_NOx
-  - qc_NOx
-  - meta_NOx
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_nitrogen_monoxide
-  - qc_nitrogen_monoxide
-  - meta_nitrogen_monoxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/GX/PA/GP/GXPA-GPRQ.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: glass_2
-  ebas_method_ref: SE01L_NEDA
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 10.0 m
-  ebas_station_code: SE0002R
-  ebas_station_latitude: 57.416667
-  ebas_station_longitude: 11.933333
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '1991-01-01T06:00:00Z'
-  time_coverage_start: '1990-01-01T06:00:00Z'
   variables:
   - time
   - time_bnds
@@ -11391,150 +10690,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/H9/G3/AM/H9G3-AM3S.nc:
   - v_nitrogen_monoxide_ug_N_per_m3_stddev
   - qc_nitrogen_monoxide_ug_N_per_m3_stddev
   - meta_nitrogen_monoxide_ug_N_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/HB/HB/QS/HBHB-QSE2.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: T200UP_119
-  ebas_measurement_height: 3.6 m
-  ebas_method_ref: GB03L_AUC_T200UP
-  ebas_revision_date: '2025-02-21T14:42:54.858572Z'
-  ebas_station_altitude: 260.0 m
-  ebas_station_code: GB0048R
-  ebas_station_latitude: 55.79216
-  ebas_station_longitude: -3.2429
-  resolution: hourly
-  time_coverage_end: '2024-01-01T00:00:00Z'
-  time_coverage_start: '2020-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_NOx_nmol_per_mol_amean
-  - qc_NOx_nmol_per_mol_amean
-  - meta_NOx_nmol_per_mol_amean
-  - v_NOx_ug_N_per_m3_amean
-  - qc_NOx_ug_N_per_m3_amean
-  - meta_NOx_ug_N_per_m3_amean
-  - v_NOx_nmol_per_mol_det_lim
-  - qc_NOx_nmol_per_mol_det_lim
-  - meta_NOx_nmol_per_mol_det_lim
-  - v_NOx_ug_N_per_m3_det_lim
-  - qc_NOx_ug_N_per_m3_det_lim
-  - meta_NOx_ug_N_per_m3_det_lim
-  - v_NOx_nmol_per_mol_ExpUnc2s
-  - qc_NOx_nmol_per_mol_ExpUnc2s
-  - meta_NOx_nmol_per_mol_ExpUnc2s
-  - v_NOx_ug_N_per_m3_ExpUnc2s
-  - qc_NOx_ug_N_per_m3_ExpUnc2s
-  - meta_NOx_ug_N_per_m3_ExpUnc2s
-  - v_NOx_nmol_per_mol_prec1587
-  - qc_NOx_nmol_per_mol_prec1587
-  - meta_NOx_nmol_per_mol_prec1587
-  - v_NOx_ug_N_per_m3_prec1587
-  - qc_NOx_ug_N_per_m3_prec1587
-  - meta_NOx_ug_N_per_m3_prec1587
-  - v_NOx_nmol_per_mol_perc8413
-  - qc_NOx_nmol_per_mol_perc8413
-  - meta_NOx_nmol_per_mol_perc8413
-  - v_NOx_ug_N_per_m3_perc8413
-  - qc_NOx_ug_N_per_m3_perc8413
-  - meta_NOx_ug_N_per_m3_perc8413
-  - v_NOx_nmol_per_mol_precision
-  - qc_NOx_nmol_per_mol_precision
-  - meta_NOx_nmol_per_mol_precision
-  - v_NOx_ug_N_per_m3_precision
-  - qc_NOx_ug_N_per_m3_precision
-  - meta_NOx_ug_N_per_m3_precision
-  - v_NOx_nmol_per_mol_stddev
-  - qc_NOx_nmol_per_mol_stddev
-  - meta_NOx_nmol_per_mol_stddev
-  - v_NOx_ug_N_per_m3_stddev
-  - qc_NOx_ug_N_per_m3_stddev
-  - meta_NOx_ug_N_per_m3_stddev
-  - v_nitrogen_dioxide_nmol_per_mol_amean
-  - qc_nitrogen_dioxide_nmol_per_mol_amean
-  - meta_nitrogen_dioxide_nmol_per_mol_amean
-  - v_nitrogen_dioxide_ug_N_per_m3_amean
-  - qc_nitrogen_dioxide_ug_N_per_m3_amean
-  - meta_nitrogen_dioxide_ug_N_per_m3_amean
-  - v_nitrogen_dioxide_nmol_per_mol_det_lim
-  - qc_nitrogen_dioxide_nmol_per_mol_det_lim
-  - meta_nitrogen_dioxide_nmol_per_mol_det_lim
-  - v_nitrogen_dioxide_ug_N_per_m3_det_lim
-  - qc_nitrogen_dioxide_ug_N_per_m3_det_lim
-  - meta_nitrogen_dioxide_ug_N_per_m3_det_lim
-  - v_nitrogen_dioxide_nmol_per_mol_ExpUnc2s
-  - qc_nitrogen_dioxide_nmol_per_mol_ExpUnc2s
-  - meta_nitrogen_dioxide_nmol_per_mol_ExpUnc2s
-  - v_nitrogen_dioxide_ug_N_per_m3_ExpUnc2s
-  - qc_nitrogen_dioxide_ug_N_per_m3_ExpUnc2s
-  - meta_nitrogen_dioxide_ug_N_per_m3_ExpUnc2s
-  - v_nitrogen_dioxide_nmol_per_mol_prec1587
-  - qc_nitrogen_dioxide_nmol_per_mol_prec1587
-  - meta_nitrogen_dioxide_nmol_per_mol_prec1587
-  - v_nitrogen_dioxide_ug_N_per_m3_prec1587
-  - qc_nitrogen_dioxide_ug_N_per_m3_prec1587
-  - meta_nitrogen_dioxide_ug_N_per_m3_prec1587
-  - v_nitrogen_dioxide_nmol_per_mol_perc8413
-  - qc_nitrogen_dioxide_nmol_per_mol_perc8413
-  - meta_nitrogen_dioxide_nmol_per_mol_perc8413
-  - v_nitrogen_dioxide_ug_N_per_m3_perc8413
-  - qc_nitrogen_dioxide_ug_N_per_m3_perc8413
-  - meta_nitrogen_dioxide_ug_N_per_m3_perc8413
-  - v_nitrogen_dioxide_nmol_per_mol_precision
-  - qc_nitrogen_dioxide_nmol_per_mol_precision
-  - meta_nitrogen_dioxide_nmol_per_mol_precision
-  - v_nitrogen_dioxide_ug_N_per_m3_precision
-  - qc_nitrogen_dioxide_ug_N_per_m3_precision
-  - meta_nitrogen_dioxide_ug_N_per_m3_precision
-  - v_nitrogen_dioxide_nmol_per_mol_stddev
-  - qc_nitrogen_dioxide_nmol_per_mol_stddev
-  - meta_nitrogen_dioxide_nmol_per_mol_stddev
-  - v_nitrogen_dioxide_ug_N_per_m3_stddev
-  - qc_nitrogen_dioxide_ug_N_per_m3_stddev
-  - meta_nitrogen_dioxide_ug_N_per_m3_stddev
-  - v_nitrogen_monoxide_nmol_per_mol_amean
-  - qc_nitrogen_monoxide_nmol_per_mol_amean
-  - meta_nitrogen_monoxide_nmol_per_mol_amean
-  - v_nitrogen_monoxide_ug_N_per_m3_amean
-  - qc_nitrogen_monoxide_ug_N_per_m3_amean
-  - meta_nitrogen_monoxide_ug_N_per_m3_amean
-  - v_nitrogen_monoxide_nmol_per_mol_det_lim
-  - qc_nitrogen_monoxide_nmol_per_mol_det_lim
-  - meta_nitrogen_monoxide_nmol_per_mol_det_lim
-  - v_nitrogen_monoxide_ug_N_per_m3_det_lim
-  - qc_nitrogen_monoxide_ug_N_per_m3_det_lim
-  - meta_nitrogen_monoxide_ug_N_per_m3_det_lim
-  - v_nitrogen_monoxide_nmol_per_mol_ExpUnc2s
-  - qc_nitrogen_monoxide_nmol_per_mol_ExpUnc2s
-  - meta_nitrogen_monoxide_nmol_per_mol_ExpUnc2s
-  - v_nitrogen_monoxide_ug_N_per_m3_ExpUnc2s
-  - qc_nitrogen_monoxide_ug_N_per_m3_ExpUnc2s
-  - meta_nitrogen_monoxide_ug_N_per_m3_ExpUnc2s
-  - v_nitrogen_monoxide_nmol_per_mol_prec1587
-  - qc_nitrogen_monoxide_nmol_per_mol_prec1587
-  - meta_nitrogen_monoxide_nmol_per_mol_prec1587
-  - v_nitrogen_monoxide_ug_N_per_m3_prec1587
-  - qc_nitrogen_monoxide_ug_N_per_m3_prec1587
-  - meta_nitrogen_monoxide_ug_N_per_m3_prec1587
-  - v_nitrogen_monoxide_nmol_per_mol_perc8413
-  - qc_nitrogen_monoxide_nmol_per_mol_perc8413
-  - meta_nitrogen_monoxide_nmol_per_mol_perc8413
-  - v_nitrogen_monoxide_ug_N_per_m3_perc8413
-  - qc_nitrogen_monoxide_ug_N_per_m3_perc8413
-  - meta_nitrogen_monoxide_ug_N_per_m3_perc8413
-  - v_nitrogen_monoxide_nmol_per_mol_precision
-  - qc_nitrogen_monoxide_nmol_per_mol_precision
-  - meta_nitrogen_monoxide_nmol_per_mol_precision
-  - v_nitrogen_monoxide_ug_N_per_m3_precision
-  - qc_nitrogen_monoxide_ug_N_per_m3_precision
-  - meta_nitrogen_monoxide_ug_N_per_m3_precision
-  - v_nitrogen_monoxide_nmol_per_mol_stddev
-  - qc_nitrogen_monoxide_nmol_per_mol_stddev
-  - meta_nitrogen_monoxide_nmol_per_mol_stddev
-  - v_nitrogen_monoxide_ug_N_per_m3_stddev
-  - qc_nitrogen_monoxide_ug_N_per_m3_stddev
-  - meta_nitrogen_monoxide_ug_N_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HC/28/92/HC28-92NW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: abs_07
@@ -11567,28 +10722,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/HD/YG/83/HDYG-83KQ.nc:
   resolution: daily
   time_coverage_end: '1997-12-31T07:00:00Z'
   time_coverage_start: '1991-01-01T07:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_sulphur_dioxide
-  - qc_sulphur_dioxide
-  - meta_sulphur_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/HE/J9/W4/HEJ9-W4A7.nc:
-  ebas_instrument_name: fabs_3
-  ebas_revision_date: '1998-06-01T00:00:00.000000Z'
-  ebas_station_altitude: 44.0 m
-  ebas_station_code: ES0003R
-  ebas_station_latitude: 40.820556
-  ebas_station_longitude: 0.491389
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '1991-01-01T07:00:00Z'
-  time_coverage_start: '1990-01-01T07:00:00Z'
   variables:
   - time
   - time_bnds
@@ -11818,6 +10951,34 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/HX/5G/BZ/HX5G-BZVQ.nc:
   - time_bnds
   - metadata_time
   - metadata_time_bnds
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
+  - v_nitrogen_monoxide
+  - qc_nitrogen_monoxide
+  - meta_nitrogen_monoxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HY/F6/4D/HYF6-4DW5.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: LEGMC_APIT200_6990
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: LV33L_chem_analyzer
+  ebas_revision_date: '2025-01-24T00:00:00.000000Z'
+  ebas_station_altitude: 18.0 m
+  ebas_station_code: LV0010R
+  ebas_station_latitude: 56.161944
+  ebas_station_longitude: 21.173056
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2023-12-31T23:51:35Z'
+  time_coverage_start: '2023-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_NOx
+  - qc_NOx
+  - meta_NOx
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
@@ -12073,6 +11234,34 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/J8/7R/UC/J87R-UCJQ.nc:
   - v_sulphur_dioxide
   - qc_sulphur_dioxide
   - meta_sulphur_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/J9/BX/4T/J9BX-4TAV.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0013R_Teledyne_T200UP
+  ebas_measurement_height: 3.5 m
+  ebas_method_ref: ES04L_chemilum
+  ebas_revision_date: '2025-02-03T00:00:00.000000Z'
+  ebas_station_altitude: 985.0 m
+  ebas_station_code: ES0013R
+  ebas_station_latitude: 41.23889
+  ebas_station_longitude: -5.8975
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2023-12-31T23:59:59Z'
+  time_coverage_start: '2022-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_NOx
+  - qc_NOx
+  - meta_NOx
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
+  - v_nitrogen_monoxide
+  - qc_nitrogen_monoxide
+  - meta_nitrogen_monoxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/J9/DA/ZB/J9DA-ZBDJ.nc:
   ebas_instrument_name: chemilum_1
   ebas_method_ref: ES04L_chemilum
@@ -12133,29 +11322,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/JC/WT/PV/JCWT-PVKE.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/JD/72/EH/JD72-EHVF.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: abs_3
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 44.0 m
-  ebas_station_code: ES0003R
-  ebas_station_latitude: 40.820556
-  ebas_station_longitude: 0.491389
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '2001-01-01T07:00:00Z'
-  time_coverage_start: '1998-01-01T14:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_sulphur_dioxide
-  - qc_sulphur_dioxide
-  - meta_sulphur_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/JD/H3/XW/JDH3-XW6U.nc:
   ebas_data_level: '2'
   ebas_instrument_name: abst_03
@@ -12210,26 +11376,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/JJ/Q6/43/JJQ6-43HT.nc:
   resolution: monthly
   time_coverage_end: '2004-01-01T23:00:00Z'
   time_coverage_start: '1996-01-02T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/JK/5T/AG/JK5T-AGBH.nc:
-  ebas_instrument_name: chemilum_11
-  ebas_method_ref: ES04L_chemilum
-  ebas_revision_date: '2003-09-22T00:00:00.000000Z'
-  ebas_station_altitude: 393.0 m
-  ebas_station_code: ES0011R
-  ebas_station_latitude: 38.47278
-  ebas_station_longitude: -6.92361
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2003-01-01T00:00:00Z'
-  time_coverage_start: '1999-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
@@ -12498,96 +11644,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/JU/9K/BY/JU9K-BYEB.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/JV/QK/2U/JVQK-2UYR.nc:
-  ebas_data_level: 3a
-  ebas_instrument_name: T200UP_119
-  ebas_measurement_height: 3.6 m
-  ebas_method_ref: DE20L_NOx_corr_O3_H2O
-  ebas_revision_date: '2025-03-15T00:00:00.000000Z'
-  ebas_station_altitude: 260.0 m
-  ebas_station_code: GB0048R
-  ebas_station_latitude: 55.79216
-  ebas_station_longitude: -3.2429
-  resolution: hourly
-  time_coverage_end: '2023-09-20T09:00:00Z'
-  time_coverage_start: '2020-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_NOx_nmol_per_mol_amean
-  - qc_NOx_nmol_per_mol_amean
-  - meta_NOx_nmol_per_mol_amean
-  - v_NOx_ug_N_per_m3_amean
-  - qc_NOx_ug_N_per_m3_amean
-  - meta_NOx_ug_N_per_m3_amean
-  - v_NOx_nmol_per_mol_prec1587
-  - qc_NOx_nmol_per_mol_prec1587
-  - meta_NOx_nmol_per_mol_prec1587
-  - v_NOx_ug_N_per_m3_prec1587
-  - qc_NOx_ug_N_per_m3_prec1587
-  - meta_NOx_ug_N_per_m3_prec1587
-  - v_NOx_nmol_per_mol_perc8413
-  - qc_NOx_nmol_per_mol_perc8413
-  - meta_NOx_nmol_per_mol_perc8413
-  - v_NOx_ug_N_per_m3_perc8413
-  - qc_NOx_ug_N_per_m3_perc8413
-  - meta_NOx_ug_N_per_m3_perc8413
-  - v_NOx_nmol_per_mol_stddev
-  - qc_NOx_nmol_per_mol_stddev
-  - meta_NOx_nmol_per_mol_stddev
-  - v_NOx_ug_N_per_m3_stddev
-  - qc_NOx_ug_N_per_m3_stddev
-  - meta_NOx_ug_N_per_m3_stddev
-  - v_nitrogen_dioxide_nmol_per_mol_amean
-  - qc_nitrogen_dioxide_nmol_per_mol_amean
-  - meta_nitrogen_dioxide_nmol_per_mol_amean
-  - v_nitrogen_dioxide_ug_N_per_m3_amean
-  - qc_nitrogen_dioxide_ug_N_per_m3_amean
-  - meta_nitrogen_dioxide_ug_N_per_m3_amean
-  - v_nitrogen_dioxide_nmol_per_mol_prec1587
-  - qc_nitrogen_dioxide_nmol_per_mol_prec1587
-  - meta_nitrogen_dioxide_nmol_per_mol_prec1587
-  - v_nitrogen_dioxide_ug_N_per_m3_prec1587
-  - qc_nitrogen_dioxide_ug_N_per_m3_prec1587
-  - meta_nitrogen_dioxide_ug_N_per_m3_prec1587
-  - v_nitrogen_dioxide_nmol_per_mol_perc8413
-  - qc_nitrogen_dioxide_nmol_per_mol_perc8413
-  - meta_nitrogen_dioxide_nmol_per_mol_perc8413
-  - v_nitrogen_dioxide_ug_N_per_m3_perc8413
-  - qc_nitrogen_dioxide_ug_N_per_m3_perc8413
-  - meta_nitrogen_dioxide_ug_N_per_m3_perc8413
-  - v_nitrogen_dioxide_nmol_per_mol_stddev
-  - qc_nitrogen_dioxide_nmol_per_mol_stddev
-  - meta_nitrogen_dioxide_nmol_per_mol_stddev
-  - v_nitrogen_dioxide_ug_N_per_m3_stddev
-  - qc_nitrogen_dioxide_ug_N_per_m3_stddev
-  - meta_nitrogen_dioxide_ug_N_per_m3_stddev
-  - v_nitrogen_monoxide_nmol_per_mol_amean
-  - qc_nitrogen_monoxide_nmol_per_mol_amean
-  - meta_nitrogen_monoxide_nmol_per_mol_amean
-  - v_nitrogen_monoxide_ug_N_per_m3_amean
-  - qc_nitrogen_monoxide_ug_N_per_m3_amean
-  - meta_nitrogen_monoxide_ug_N_per_m3_amean
-  - v_nitrogen_monoxide_nmol_per_mol_prec1587
-  - qc_nitrogen_monoxide_nmol_per_mol_prec1587
-  - meta_nitrogen_monoxide_nmol_per_mol_prec1587
-  - v_nitrogen_monoxide_ug_N_per_m3_prec1587
-  - qc_nitrogen_monoxide_ug_N_per_m3_prec1587
-  - meta_nitrogen_monoxide_ug_N_per_m3_prec1587
-  - v_nitrogen_monoxide_nmol_per_mol_perc8413
-  - qc_nitrogen_monoxide_nmol_per_mol_perc8413
-  - meta_nitrogen_monoxide_nmol_per_mol_perc8413
-  - v_nitrogen_monoxide_ug_N_per_m3_perc8413
-  - qc_nitrogen_monoxide_ug_N_per_m3_perc8413
-  - meta_nitrogen_monoxide_ug_N_per_m3_perc8413
-  - v_nitrogen_monoxide_nmol_per_mol_stddev
-  - qc_nitrogen_monoxide_nmol_per_mol_stddev
-  - meta_nitrogen_monoxide_nmol_per_mol_stddev
-  - v_nitrogen_monoxide_ug_N_per_m3_stddev
-  - qc_nitrogen_monoxide_ug_N_per_m3_stddev
-  - meta_nitrogen_monoxide_ug_N_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/JX/HM/HN/JXHM-HNC5.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f3p_08
@@ -12710,6 +11766,27 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/JZ/VR/2G/JZVR-2GZR.nc:
   - v_nitrogen_monoxide_ug_N_per_m3_precision
   - qc_nitrogen_monoxide_ug_N_per_m3_precision
   - meta_nitrogen_monoxide_ug_N_per_m3_precision
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/K3/8Z/RX/K38Z-RXX4.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: chemilum_h_0032
+  ebas_method_ref: BE02L_chemilum
+  ebas_revision_date: '2025-02-12T13:50:27.045192Z'
+  ebas_station_altitude: 295.0 m
+  ebas_station_code: BE0032R
+  ebas_station_latitude: 50.629421
+  ebas_station_longitude: 6.001019
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2013-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/K5/8P/SF/K58P-SF76.nc:
   ebas_data_level: '2'
   ebas_instrument_name: abst_5
@@ -12743,26 +11820,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/K5/KX/63/K5KX-63Q2.nc:
   resolution: hourly
   time_coverage_end: '2009-01-01T00:00:00Z'
   time_coverage_start: '1998-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/K6/DF/KW/K6DF-KWVK.nc:
-  ebas_instrument_name: TIN-009
-  ebas_method_ref: ES04L_chemilum
-  ebas_revision_date: '2015-01-09T11:22:50.967000Z'
-  ebas_station_altitude: 393.0 m
-  ebas_station_code: ES0011R
-  ebas_station_latitude: 38.47278
-  ebas_station_longitude: -6.92361
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2014-01-01T00:00:00Z'
-  time_coverage_start: '2013-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
@@ -12812,96 +11869,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/K7/HM/8N/K7HM-8NZA.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/K8/CT/FE/K8CT-FE2D.nc:
-  ebas_data_level: 3a
-  ebas_instrument_name: Teledyne_T200UP
-  ebas_measurement_height: 3.0 m
-  ebas_method_ref: DE20L_NOx_corr_O3_H2O
-  ebas_revision_date: '2025-06-13T13:12:41.229398Z'
-  ebas_station_altitude: 162.0 m
-  ebas_station_code: FR0020R
-  ebas_station_latitude: 48.7089
-  ebas_station_longitude: 2.1487
-  resolution: hourly
-  time_coverage_end: '2025-01-01T00:00:00Z'
-  time_coverage_start: '2023-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_NOx_nmol_per_mol_amean
-  - qc_NOx_nmol_per_mol_amean
-  - meta_NOx_nmol_per_mol_amean
-  - v_NOx_ug_N_per_m3_amean
-  - qc_NOx_ug_N_per_m3_amean
-  - meta_NOx_ug_N_per_m3_amean
-  - v_NOx_nmol_per_mol_prec1587
-  - qc_NOx_nmol_per_mol_prec1587
-  - meta_NOx_nmol_per_mol_prec1587
-  - v_NOx_ug_N_per_m3_prec1587
-  - qc_NOx_ug_N_per_m3_prec1587
-  - meta_NOx_ug_N_per_m3_prec1587
-  - v_NOx_nmol_per_mol_perc8413
-  - qc_NOx_nmol_per_mol_perc8413
-  - meta_NOx_nmol_per_mol_perc8413
-  - v_NOx_ug_N_per_m3_perc8413
-  - qc_NOx_ug_N_per_m3_perc8413
-  - meta_NOx_ug_N_per_m3_perc8413
-  - v_NOx_nmol_per_mol_stddev
-  - qc_NOx_nmol_per_mol_stddev
-  - meta_NOx_nmol_per_mol_stddev
-  - v_NOx_ug_N_per_m3_stddev
-  - qc_NOx_ug_N_per_m3_stddev
-  - meta_NOx_ug_N_per_m3_stddev
-  - v_nitrogen_dioxide_nmol_per_mol_amean
-  - qc_nitrogen_dioxide_nmol_per_mol_amean
-  - meta_nitrogen_dioxide_nmol_per_mol_amean
-  - v_nitrogen_dioxide_ug_N_per_m3_amean
-  - qc_nitrogen_dioxide_ug_N_per_m3_amean
-  - meta_nitrogen_dioxide_ug_N_per_m3_amean
-  - v_nitrogen_dioxide_nmol_per_mol_prec1587
-  - qc_nitrogen_dioxide_nmol_per_mol_prec1587
-  - meta_nitrogen_dioxide_nmol_per_mol_prec1587
-  - v_nitrogen_dioxide_ug_N_per_m3_prec1587
-  - qc_nitrogen_dioxide_ug_N_per_m3_prec1587
-  - meta_nitrogen_dioxide_ug_N_per_m3_prec1587
-  - v_nitrogen_dioxide_nmol_per_mol_perc8413
-  - qc_nitrogen_dioxide_nmol_per_mol_perc8413
-  - meta_nitrogen_dioxide_nmol_per_mol_perc8413
-  - v_nitrogen_dioxide_ug_N_per_m3_perc8413
-  - qc_nitrogen_dioxide_ug_N_per_m3_perc8413
-  - meta_nitrogen_dioxide_ug_N_per_m3_perc8413
-  - v_nitrogen_dioxide_nmol_per_mol_stddev
-  - qc_nitrogen_dioxide_nmol_per_mol_stddev
-  - meta_nitrogen_dioxide_nmol_per_mol_stddev
-  - v_nitrogen_dioxide_ug_N_per_m3_stddev
-  - qc_nitrogen_dioxide_ug_N_per_m3_stddev
-  - meta_nitrogen_dioxide_ug_N_per_m3_stddev
-  - v_nitrogen_monoxide_nmol_per_mol_amean
-  - qc_nitrogen_monoxide_nmol_per_mol_amean
-  - meta_nitrogen_monoxide_nmol_per_mol_amean
-  - v_nitrogen_monoxide_ug_N_per_m3_amean
-  - qc_nitrogen_monoxide_ug_N_per_m3_amean
-  - meta_nitrogen_monoxide_ug_N_per_m3_amean
-  - v_nitrogen_monoxide_nmol_per_mol_prec1587
-  - qc_nitrogen_monoxide_nmol_per_mol_prec1587
-  - meta_nitrogen_monoxide_nmol_per_mol_prec1587
-  - v_nitrogen_monoxide_ug_N_per_m3_prec1587
-  - qc_nitrogen_monoxide_ug_N_per_m3_prec1587
-  - meta_nitrogen_monoxide_ug_N_per_m3_prec1587
-  - v_nitrogen_monoxide_nmol_per_mol_perc8413
-  - qc_nitrogen_monoxide_nmol_per_mol_perc8413
-  - meta_nitrogen_monoxide_nmol_per_mol_perc8413
-  - v_nitrogen_monoxide_ug_N_per_m3_perc8413
-  - qc_nitrogen_monoxide_ug_N_per_m3_perc8413
-  - meta_nitrogen_monoxide_ug_N_per_m3_perc8413
-  - v_nitrogen_monoxide_nmol_per_mol_stddev
-  - qc_nitrogen_monoxide_nmol_per_mol_stddev
-  - meta_nitrogen_monoxide_nmol_per_mol_stddev
-  - v_nitrogen_monoxide_ug_N_per_m3_stddev
-  - qc_nitrogen_monoxide_ug_N_per_m3_stddev
-  - meta_nitrogen_monoxide_ug_N_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/K8/T8/GA/K8T8-GAC3.nc:
   ebas_data_level: '2'
   ebas_instrument_name: abs_d_0047
@@ -13051,6 +12018,37 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/KC/FR/ZX/KCFR-ZXZR.nc:
   - v_nitrogen_monoxide_ug_N_per_m3_stddev
   - qc_nitrogen_monoxide_ug_N_per_m3_stddev
   - meta_nitrogen_monoxide_ug_N_per_m3_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/KD/26/TZ/KD26-TZ3R.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: API200E_nl0644
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: NL01L_MIL-W-5300_NL01L_ILG-W-2900
+  ebas_revision_date: '2024-09-18T13:32:56.249794Z'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: NL0644R
+  ebas_station_latitude: 51.974444
+  ebas_station_longitude: 4.923611
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2016-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrogen_dioxide_nmol_per_mol
+  - qc_nitrogen_dioxide_nmol_per_mol
+  - meta_nitrogen_dioxide_nmol_per_mol
+  - v_nitrogen_dioxide_ug_N_per_m3
+  - qc_nitrogen_dioxide_ug_N_per_m3
+  - meta_nitrogen_dioxide_ug_N_per_m3
+  - v_nitrogen_monoxide_nmol_per_mol
+  - qc_nitrogen_monoxide_nmol_per_mol
+  - meta_nitrogen_monoxide_nmol_per_mol
+  - v_nitrogen_monoxide_ug_N_per_m3
+  - qc_nitrogen_monoxide_ug_N_per_m3
+  - meta_nitrogen_monoxide_ug_N_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/KD/28/SM/KD28-SM6U.nc:
   ebas_data_level: '2'
   ebas_instrument_name: impinger_02
@@ -13382,28 +12380,41 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/KJ/5X/WN/KJ5X-WNH5.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/KM/SZ/DN/KMSZ-DN7B.nc:
-  ebas_instrument_name: fabs_8
-  ebas_revision_date: '1998-06-01T00:00:00.000000Z'
-  ebas_station_altitude: 58.0 m
-  ebas_station_code: SE0008R
-  ebas_station_latitude: 56.916667
-  ebas_station_longitude: 18.15
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/KK/YF/6Q/KKYF-6QYH.nc:
+  ebas_data_level: '2'
+  ebas_measurement_height: 2.0 m
+  ebas_revision_date: '2016-05-04T07:50:29.013000Z'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: LT0015R
+  ebas_station_latitude: 55.37611111111111
+  ebas_station_longitude: 21.030555555555555
   ebas_statistics: arithmetic mean
   resolution: daily
-  time_coverage_end: '1989-01-01T06:00:00Z'
-  time_coverage_start: '1987-01-01T06:00:00Z'
+  time_coverage_end: '2016-01-01T08:00:00Z'
+  time_coverage_start: '2014-01-01T08:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
   - v_sulphur_dioxide
   - qc_sulphur_dioxide
   - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/KQ/4S/8B/KQ4S-8BZX.nc:
   ebas_instrument_name: Chemilum_4
   ebas_method_ref: IT04L_Chemilum
@@ -13475,29 +12486,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/KQ/WJ/RA/KQWJ-RAJ2.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/KT/9W/C5/KT9W-C54E.nc:
-  ebas_instrument_name: chemilum_11
-  ebas_method_ref: ES04L_chemilum
-  ebas_revision_date: '2014-05-01T00:00:00.000000Z'
-  ebas_station_altitude: 393.0 m
-  ebas_station_code: ES0011R
-  ebas_station_latitude: 38.47278
-  ebas_station_longitude: -6.92361
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2004-01-01T00:00:00Z'
-  time_coverage_start: '2003-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_nitrogen_monoxide
-  - qc_nitrogen_monoxide
-  - meta_nitrogen_monoxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/KV/DY/MB/KVDY-MBRE.nc:
   ebas_instrument_name: NA
   ebas_method_ref: IT01L_NA
@@ -13647,6 +12635,34 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/KZ/H6/2M/KZH6-2MRT.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/M2/U6/72/M2U6-72US.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0014R_Thermo_42i-TL
+  ebas_measurement_height: 3.5 m
+  ebas_method_ref: ES04L_chemilum
+  ebas_revision_date: '2025-02-03T00:00:00.000000Z'
+  ebas_station_altitude: 470.0 m
+  ebas_station_code: ES0014R
+  ebas_station_latitude: 41.39389
+  ebas_station_longitude: 0.73472
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2023-12-31T23:59:59Z'
+  time_coverage_start: '2022-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_NOx
+  - qc_NOx
+  - meta_NOx
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
+  - v_nitrogen_monoxide
+  - qc_nitrogen_monoxide
+  - meta_nitrogen_monoxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/M4/KF/BY/M4KF-BYPC.nc:
   ebas_instrument_name: chemilum_9
   ebas_revision_date: '2010-06-30T00:00:00.000000Z'
@@ -13942,29 +12958,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ME/5E/SC/ME5E-SCF6.nc:
   - v_nitrogen_monoxide_ug_N_per_m3_stddev
   - qc_nitrogen_monoxide_ug_N_per_m3_stddev
   - meta_nitrogen_monoxide_ug_N_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/ME/PG/VS/MEPG-VSYS.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: abs_7
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 1332.0 m
-  ebas_station_code: MK0007R
-  ebas_station_latitude: 41.536111
-  ebas_station_longitude: 20.69389
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '1992-01-01T06:00:00Z'
-  time_coverage_start: '1990-01-01T06:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_sulphur_dioxide
-  - qc_sulphur_dioxide
-  - meta_sulphur_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/MF/AV/W7/MFAV-W7A9.nc:
   ebas_data_level: '2'
   ebas_instrument_name: JRC_42iTL_808-BLC
@@ -14141,53 +13134,43 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/MM/WZ/M3/MMWZ-M3F8.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/MQ/RH/2R/MQRH-2RZW.nc:
-  ebas_instrument_name: chemilum_11
-  ebas_method_ref: ES04L_chemilum
-  ebas_revision_date: '2014-05-01T00:00:00.000000Z'
-  ebas_station_altitude: 393.0 m
-  ebas_station_code: ES0011R
-  ebas_station_latitude: 38.47278
-  ebas_station_longitude: -6.92361
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2013-01-01T00:00:00Z'
-  time_coverage_start: '2004-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_NOx
-  - qc_NOx
-  - meta_NOx
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_nitrogen_monoxide
-  - qc_nitrogen_monoxide
-  - meta_nitrogen_monoxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/MR/FM/WV/MRFM-WVDN.nc:
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MN/VP/EP/MNVP-EPZH.nc:
   ebas_data_level: '2'
-  ebas_instrument_name: chemilum_09
-  ebas_method_ref: NL01L_chemilum
-  ebas_revision_date: '2021-08-16T09:18:31.297000Z'
-  ebas_station_altitude: 1.0 m
-  ebas_station_code: NL0009R
-  ebas_station_latitude: 53.333889
-  ebas_station_longitude: 6.277222
+  ebas_instrument_name: NO85NX
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: BE01L_DC1_Me_239_P04
+  ebas_revision_date: '2025-03-31T08:42:30.381864Z'
+  ebas_station_altitude: 496.0 m
+  ebas_station_code: BE0007R
+  ebas_station_latitude: 50.304003
+  ebas_station_longitude: 6.001271
   ebas_statistics: arithmetic mean
   resolution: hourly
-  time_coverage_end: '2013-01-01T00:00:00Z'
-  time_coverage_start: '2008-01-01T00:00:00Z'
+  time_coverage_end: '2025-01-01T00:00:00Z'
+  time_coverage_start: '2022-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
+  - v_NOx_nmol_per_mol
+  - qc_NOx_nmol_per_mol
+  - meta_NOx_nmol_per_mol
+  - v_NOx_ug_N_per_m3
+  - qc_NOx_ug_N_per_m3
+  - meta_NOx_ug_N_per_m3
+  - v_nitrogen_dioxide_nmol_per_mol
+  - qc_nitrogen_dioxide_nmol_per_mol
+  - meta_nitrogen_dioxide_nmol_per_mol
+  - v_nitrogen_dioxide_ug_N_per_m3
+  - qc_nitrogen_dioxide_ug_N_per_m3
+  - meta_nitrogen_dioxide_ug_N_per_m3
+  - v_nitrogen_monoxide_nmol_per_mol
+  - qc_nitrogen_monoxide_nmol_per_mol
+  - meta_nitrogen_monoxide_nmol_per_mol
+  - v_nitrogen_monoxide_ug_N_per_m3
+  - qc_nitrogen_monoxide_ug_N_per_m3
+  - meta_nitrogen_monoxide_ug_N_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/MS/XB/3K/MSXB-3KCM.nc:
   ebas_instrument_name: NaJ_03
   ebas_method_ref: DE03L_NaJ_method
@@ -14339,26 +13322,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/MY/DY/ZE/MYDY-ZED3.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/MZ/ZQ/9Z/MZZQ-9ZAW.nc:
-  ebas_instrument_name: chem_11
-  ebas_method_ref: EE01L_chlum_AD
-  ebas_revision_date: '2008-09-01T00:00:00.000000Z'
-  ebas_station_altitude: 6.0 m
-  ebas_station_code: EE0011R
-  ebas_station_latitude: 58.383333
-  ebas_station_longitude: 21.816667
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '2008-01-01T00:00:00Z'
-  time_coverage_start: '2007-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/N2/XT/HT/N2XT-HTD2.nc:
   ebas_data_level: '2'
   ebas_instrument_name: chemilum_37
@@ -14414,6 +13377,55 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/N5/JK/ZB/N5JK-ZB63.nc:
   - v_nitrogen_monoxide_ug_N_per_m3
   - qc_nitrogen_monoxide_ug_N_per_m3
   - meta_nitrogen_monoxide_ug_N_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/N5/XS/XW/N5XS-XWZJ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: impinger_06
+  ebas_method_ref: SK01L_modified_saltzman
+  ebas_revision_date: '2025-06-26T10:07:46.645287Z'
+  ebas_station_altitude: 345.0 m
+  ebas_station_code: SK0006R
+  ebas_station_latitude: 49.05
+  ebas_station_longitude: 22.266667
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2024-01-01T08:00:00Z'
+  time_coverage_start: '2013-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/N5/ZA/7Y/N5ZA-7YM8.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0001R_Teledyne_T200UP
+  ebas_measurement_height: 5.0 m
+  ebas_method_ref: ES04L_chemilum
+  ebas_revision_date: '2025-07-15T00:00:00.000000Z'
+  ebas_station_altitude: 917.0 m
+  ebas_station_code: ES0001R
+  ebas_station_latitude: 39.54694
+  ebas_station_longitude: -4.35056
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-12-31T23:59:59Z'
+  time_coverage_start: '2022-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_NOx
+  - qc_NOx
+  - meta_NOx
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
+  - v_nitrogen_monoxide
+  - qc_nitrogen_monoxide
+  - meta_nitrogen_monoxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/N6/TD/KQ/N6TD-KQCS.nc:
   ebas_data_level: '2'
   ebas_instrument_name: chemilum_h_0035
@@ -14599,56 +13611,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NN/BK/ZZ/NNBK-ZZPX.nc:
   - v_nitrogen_monoxide_ug_N_per_m3
   - qc_nitrogen_monoxide_ug_N_per_m3
   - meta_nitrogen_monoxide_ug_N_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/NP/WW/S6/NPWW-S69E.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: f3p_2
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 125.0 m
-  ebas_station_code: HU0002R
-  ebas_station_latitude: 46.966667
-  ebas_station_longitude: 19.583333
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '2011-01-01T07:00:00Z'
-  time_coverage_start: '2009-01-01T07:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ammonium_ug_N_per_m3
-  - qc_ammonium_ug_N_per_m3
-  - meta_ammonium_ug_N_per_m3
-  - v_ammonium_ug_per_m3
-  - qc_ammonium_ug_per_m3
-  - meta_ammonium_ug_per_m3
-  - v_nitrate_ug_N_per_m3
-  - qc_nitrate_ug_N_per_m3
-  - meta_nitrate_ug_N_per_m3
-  - v_nitrate_ug_per_m3
-  - qc_nitrate_ug_per_m3
-  - meta_nitrate_ug_per_m3
-  - v_nitric_acid
-  - qc_nitric_acid
-  - meta_nitric_acid
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_sulphate_total_ug_S_per_m3
-  - qc_sulphate_total_ug_S_per_m3
-  - meta_sulphate_total_ug_S_per_m3
-  - v_sulphate_total_ug_per_m3
-  - qc_sulphate_total_ug_per_m3
-  - meta_sulphate_total_ug_per_m3
-  - v_sulphur_dioxide
-  - qc_sulphur_dioxide
-  - meta_sulphur_dioxide
-  - v_sum_ammonia_and_ammonium
-  - qc_sum_ammonia_and_ammonium
-  - meta_sum_ammonia_and_ammonium
-  - v_sum_nitric_acid_and_nitrate
-  - qc_sum_nitric_acid_and_nitrate
-  - meta_sum_nitric_acid_and_nitrate
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NS/ZC/KR/NSZC-KREV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: glass_01
@@ -14705,6 +13667,47 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NT/X4/B8/NTX4-B8DA.nc:
   - v_sum_nitric_acid_and_nitrate
   - qc_sum_nitric_acid_and_nitrate
   - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NV/HA/8P/NVHA-8PCV.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ARSO_NO2_air_monitor_1
+  ebas_method_ref: SI01L_epa_caps
+  ebas_revision_date: '2025-08-25T10:19:29.604391Z'
+  ebas_station_altitude: 520.0 m
+  ebas_station_code: SI0008R
+  ebas_station_latitude: 45.566667
+  ebas_station_longitude: 14.866667
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2014-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrogen_dioxide_nmol_per_mol_amean
+  - qc_nitrogen_dioxide_nmol_per_mol_amean
+  - meta_nitrogen_dioxide_nmol_per_mol_amean
+  - v_nitrogen_dioxide_ug_N_per_m3_amean
+  - qc_nitrogen_dioxide_ug_N_per_m3_amean
+  - meta_nitrogen_dioxide_ug_N_per_m3_amean
+  - v_nitrogen_dioxide_nmol_per_mol_max
+  - qc_nitrogen_dioxide_nmol_per_mol_max
+  - meta_nitrogen_dioxide_nmol_per_mol_max
+  - v_nitrogen_dioxide_ug_N_per_m3_max
+  - qc_nitrogen_dioxide_ug_N_per_m3_max
+  - meta_nitrogen_dioxide_ug_N_per_m3_max
+  - v_nitrogen_dioxide_nmol_per_mol_min
+  - qc_nitrogen_dioxide_nmol_per_mol_min
+  - meta_nitrogen_dioxide_nmol_per_mol_min
+  - v_nitrogen_dioxide_ug_N_per_m3_min
+  - qc_nitrogen_dioxide_ug_N_per_m3_min
+  - meta_nitrogen_dioxide_ug_N_per_m3_min
+  - v_nitrogen_dioxide_nmol_per_mol_stddev
+  - qc_nitrogen_dioxide_nmol_per_mol_stddev
+  - meta_nitrogen_dioxide_nmol_per_mol_stddev
+  - v_nitrogen_dioxide_ug_N_per_m3_stddev
+  - qc_nitrogen_dioxide_ug_N_per_m3_stddev
+  - meta_nitrogen_dioxide_ug_N_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NW/BB/E5/NWBB-E5VX.nc:
   ebas_data_level: '2'
   ebas_instrument_name: glass_11
@@ -14768,27 +13771,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NX/BD/GH/NXBD-GHDY.nc:
   resolution: hourly
   time_coverage_end: '2014-01-01T00:00:00Z'
   time_coverage_start: '2013-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/NY/UZ/3H/NYUZ-3HAW.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: glass_d_0796
-  ebas_method_ref: NO01L_Griess_air
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 250.0 m
-  ebas_station_code: NO0796R
-  ebas_station_latitude: 59.052311
-  ebas_station_longitude: 7.566513
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '1995-07-01T07:00:00Z'
-  time_coverage_start: '1994-01-01T07:00:00Z'
   variables:
   - time
   - time_bnds
@@ -15101,6 +14083,27 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PP/WS/HF/PPWS-HFT8.nc:
   - v_nitrogen_monoxide
   - qc_nitrogen_monoxide
   - meta_nitrogen_monoxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PT/9W/HN/PT9W-HNTX.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: chemilum_h_0035
+  ebas_method_ref: BE02L_chemilum
+  ebas_revision_date: '2025-02-12T13:50:39.672658Z'
+  ebas_station_altitude: 160.0 m
+  ebas_station_code: BE0035R
+  ebas_station_latitude: 50.503333
+  ebas_station_longitude: 4.989444
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2013-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PU/XD/NF/PUXD-NFKG.nc:
   ebas_data_level: 3a
   ebas_instrument_name: JRC_42iTL_808-BLC
@@ -15258,6 +14261,27 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PW/4A/ME/PW4A-MENG.nc:
   - v_sulphur_dioxide
   - qc_sulphur_dioxide
   - meta_sulphur_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PX/WV/YZ/PXWV-YZK6.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: EE01_cl2
+  ebas_method_ref: EE01L_chlum_AD
+  ebas_revision_date: '2025-02-10T14:27:11.115401Z'
+  ebas_station_altitude: 32.0 m
+  ebas_station_code: EE0009R
+  ebas_station_latitude: 59.5
+  ebas_station_longitude: 25.9
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2013-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PY/A8/4G/PYA8-4GD4.nc:
   ebas_data_level: '2'
   ebas_instrument_name: abst_9
@@ -15817,66 +14841,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QW/TG/Z4/QWTG-Z4QA.nc:
   - v_nitrogen_dioxide_ug_N_per_m3
   - qc_nitrogen_dioxide_ug_N_per_m3
   - meta_nitrogen_dioxide_ug_N_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/QX/FA/9P/QXFA-9PJA.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: T500U_192
-  ebas_measurement_height: 3.6 m
-  ebas_method_ref: GB03L_AUC_T500U
-  ebas_revision_date: '2025-10-14T08:40:42.266784Z'
-  ebas_station_altitude: 260.0 m
-  ebas_station_code: GB0048R
-  ebas_station_latitude: 55.79216
-  ebas_station_longitude: -3.2429
-  resolution: hourly
-  time_coverage_end: '2025-01-01T00:00:00Z'
-  time_coverage_start: '2020-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide_nmol_per_mol_amean
-  - qc_nitrogen_dioxide_nmol_per_mol_amean
-  - meta_nitrogen_dioxide_nmol_per_mol_amean
-  - v_nitrogen_dioxide_ug_N_per_m3_amean
-  - qc_nitrogen_dioxide_ug_N_per_m3_amean
-  - meta_nitrogen_dioxide_ug_N_per_m3_amean
-  - v_nitrogen_dioxide_nmol_per_mol_det_lim
-  - qc_nitrogen_dioxide_nmol_per_mol_det_lim
-  - meta_nitrogen_dioxide_nmol_per_mol_det_lim
-  - v_nitrogen_dioxide_ug_N_per_m3_det_lim
-  - qc_nitrogen_dioxide_ug_N_per_m3_det_lim
-  - meta_nitrogen_dioxide_ug_N_per_m3_det_lim
-  - v_nitrogen_dioxide_nmol_per_mol_ExpUnc2s
-  - qc_nitrogen_dioxide_nmol_per_mol_ExpUnc2s
-  - meta_nitrogen_dioxide_nmol_per_mol_ExpUnc2s
-  - v_nitrogen_dioxide_ug_N_per_m3_ExpUnc2s
-  - qc_nitrogen_dioxide_ug_N_per_m3_ExpUnc2s
-  - meta_nitrogen_dioxide_ug_N_per_m3_ExpUnc2s
-  - v_nitrogen_dioxide_nmol_per_mol_prec1587
-  - qc_nitrogen_dioxide_nmol_per_mol_prec1587
-  - meta_nitrogen_dioxide_nmol_per_mol_prec1587
-  - v_nitrogen_dioxide_ug_N_per_m3_prec1587
-  - qc_nitrogen_dioxide_ug_N_per_m3_prec1587
-  - meta_nitrogen_dioxide_ug_N_per_m3_prec1587
-  - v_nitrogen_dioxide_nmol_per_mol_perc8413
-  - qc_nitrogen_dioxide_nmol_per_mol_perc8413
-  - meta_nitrogen_dioxide_nmol_per_mol_perc8413
-  - v_nitrogen_dioxide_ug_N_per_m3_perc8413
-  - qc_nitrogen_dioxide_ug_N_per_m3_perc8413
-  - meta_nitrogen_dioxide_ug_N_per_m3_perc8413
-  - v_nitrogen_dioxide_nmol_per_mol_precision
-  - qc_nitrogen_dioxide_nmol_per_mol_precision
-  - meta_nitrogen_dioxide_nmol_per_mol_precision
-  - v_nitrogen_dioxide_ug_N_per_m3_precision
-  - qc_nitrogen_dioxide_ug_N_per_m3_precision
-  - meta_nitrogen_dioxide_ug_N_per_m3_precision
-  - v_nitrogen_dioxide_nmol_per_mol_stddev
-  - qc_nitrogen_dioxide_nmol_per_mol_stddev
-  - meta_nitrogen_dioxide_nmol_per_mol_stddev
-  - v_nitrogen_dioxide_ug_N_per_m3_stddev
-  - qc_nitrogen_dioxide_ug_N_per_m3_stddev
-  - meta_nitrogen_dioxide_ug_N_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QX/TN/E8/QXTN-E8CB.nc:
   ebas_instrument_name: chemilum_13
   ebas_method_ref: ES04L_chemilum
@@ -16054,26 +15018,33 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RA/AD/46/RAAD-466E.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/RC/2V/MQ/RC2V-MQ93.nc:
-  ebas_instrument_name: API200E
-  ebas_method_ref: NL01L_LM-W-300-301-302-303-304_IL-W-900
-  ebas_revision_date: '2014-11-19T08:08:41.393000Z'
-  ebas_station_altitude: 1.0 m
-  ebas_station_code: NL0009R
-  ebas_station_latitude: 53.333889
-  ebas_station_longitude: 6.277222
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RD/VC/QE/RDVC-QEFV.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: chem_01
+  ebas_method_ref: GR01L_chem01
+  ebas_revision_date: '2025-04-30T12:22:08.556410Z'
+  ebas_station_altitude: 110.0 m
+  ebas_station_code: GR0001R
+  ebas_station_latitude: 38.366667
+  ebas_station_longitude: 23.083333
   ebas_statistics: arithmetic mean
   resolution: hourly
-  time_coverage_end: '2014-01-01T00:04:12Z'
-  time_coverage_start: '2013-01-01T00:00:00Z'
+  time_coverage_end: '2023-12-31T23:00:00Z'
+  time_coverage_start: '2006-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
+  - v_NOx
+  - qc_NOx
+  - meta_NOx
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
+  - v_nitrogen_monoxide
+  - qc_nitrogen_monoxide
+  - meta_nitrogen_monoxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RF/JG/67/RFJG-67P5.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f3p_1
@@ -16127,6 +15098,34 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RF/W8/B4/RFW8-B4C9.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RJ/7C/TQ/RJ7C-TQ28.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0012R_Teledyne_T200UP
+  ebas_measurement_height: 3.5 m
+  ebas_method_ref: ES04L_chemilum
+  ebas_revision_date: '2025-07-15T00:00:00.000000Z'
+  ebas_station_altitude: 885.0 m
+  ebas_station_code: ES0012R
+  ebas_station_latitude: 39.08278
+  ebas_station_longitude: -1.10111
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-12-31T23:59:59Z'
+  time_coverage_start: '2022-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_NOx
+  - qc_NOx
+  - meta_NOx
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
+  - v_nitrogen_monoxide
+  - qc_nitrogen_monoxide
+  - meta_nitrogen_monoxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RK/A9/JV/RKA9-JVR3.nc:
   ebas_instrument_name: chemilum_14
   ebas_method_ref: ES04L_chemilum
@@ -16147,6 +15146,37 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RK/A9/JV/RKA9-JVR3.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RK/BT/P4/RKBT-P4F9.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: API200E_nl0007
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: NL01L_MIL-W-5300_NL01L_ILG-W-2900
+  ebas_revision_date: '2024-09-25T11:11:22.274240Z'
+  ebas_station_altitude: 20.0 m
+  ebas_station_code: NL0007R
+  ebas_station_latitude: 52.083333
+  ebas_station_longitude: 6.566667
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2016-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrogen_dioxide_nmol_per_mol
+  - qc_nitrogen_dioxide_nmol_per_mol
+  - meta_nitrogen_dioxide_nmol_per_mol
+  - v_nitrogen_dioxide_ug_N_per_m3
+  - qc_nitrogen_dioxide_ug_N_per_m3
+  - meta_nitrogen_dioxide_ug_N_per_m3
+  - v_nitrogen_monoxide_nmol_per_mol
+  - qc_nitrogen_monoxide_nmol_per_mol
+  - meta_nitrogen_monoxide_nmol_per_mol
+  - v_nitrogen_monoxide_ug_N_per_m3
+  - qc_nitrogen_monoxide_ug_N_per_m3
+  - meta_nitrogen_monoxide_ug_N_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RN/QS/RM/RNQS-RMVS.nc:
   ebas_data_level: '2'
   ebas_instrument_name: impregnated_filter_05
@@ -16376,6 +15406,27 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RY/VM/VJ/RYVM-VJQ7.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/S2/T2/X8/S2T2-X888.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: impinger
+  ebas_method_ref: SK01L_modified_saltzman
+  ebas_revision_date: '2023-11-14T15:08:22.561394Z'
+  ebas_station_altitude: 2008.0 m
+  ebas_station_code: SK0002R
+  ebas_station_latitude: 48.933333
+  ebas_station_longitude: 19.583333
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2023-01-02T08:00:00Z'
+  time_coverage_start: '2013-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/S4/57/VH/S457-VH2U.nc:
   ebas_data_level: '2'
   ebas_instrument_name: abs_d_0039
@@ -16454,26 +15505,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/S5/MD/S6/S5MD-S6A4.nc:
   - v_sum_nitric_acid_and_nitrate
   - qc_sum_nitric_acid_and_nitrate
   - meta_sum_nitric_acid_and_nitrate
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/S5/MW/MR/S5MW-MR53.nc:
-  ebas_instrument_name: chemilum_3
-  ebas_method_ref: ES04L_chemilum
-  ebas_revision_date: '2014-05-01T00:00:00.000000Z'
-  ebas_station_altitude: 44.0 m
-  ebas_station_code: ES0003R
-  ebas_station_latitude: 40.820556
-  ebas_station_longitude: 0.491389
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2001-01-01T00:00:00Z'
-  time_coverage_start: '1998-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/S5/NK/H3/S5NK-H3SN.nc:
   ebas_data_level: '2'
   ebas_instrument_name: abs_04
@@ -16495,28 +15526,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/S5/NK/H3/S5NK-H3SN.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/S7/5Z/BM/S75Z-BMMV.nc:
-  ebas_instrument_name: chemilum_91
-  ebas_revision_date: '2009-08-27T00:00:00.000000Z'
-  ebas_station_altitude: 4.0 m
-  ebas_station_code: NL0091R
-  ebas_station_latitude: 52.3
-  ebas_station_longitude: 4.5
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2009-01-01T00:00:00Z'
-  time_coverage_start: '2008-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_nitrogen_monoxide
-  - qc_nitrogen_monoxide
-  - meta_nitrogen_monoxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/S9/8E/QF/S98E-QFYP.nc:
   ebas_instrument_name: chemilum_36
   ebas_method_ref: GB02L_chemilum
@@ -16723,48 +15732,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/SQ/72/96/SQ72-96TC.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/SX/ZA/26/SXZA-26F2.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: Teledyne_T200UP
-  ebas_measurement_height: 3.0 m
-  ebas_method_ref: FR01L_NOx_analysis
-  ebas_revision_date: '2019-10-18T07:49:40.950000Z'
-  ebas_station_altitude: 162.0 m
-  ebas_station_code: FR0020R
-  ebas_station_latitude: 48.70861111111111
-  ebas_station_longitude: 2.158888888888889
-  resolution: hourly
-  time_coverage_end: '2018-01-01T00:00:00Z'
-  time_coverage_start: '2017-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide_nmol_per_mol_amean
-  - qc_nitrogen_dioxide_nmol_per_mol_amean
-  - meta_nitrogen_dioxide_nmol_per_mol_amean
-  - v_nitrogen_dioxide_ug_N_per_m3_amean
-  - qc_nitrogen_dioxide_ug_N_per_m3_amean
-  - meta_nitrogen_dioxide_ug_N_per_m3_amean
-  - v_nitrogen_dioxide_nmol_per_mol_stddev
-  - qc_nitrogen_dioxide_nmol_per_mol_stddev
-  - meta_nitrogen_dioxide_nmol_per_mol_stddev
-  - v_nitrogen_dioxide_ug_N_per_m3_stddev
-  - qc_nitrogen_dioxide_ug_N_per_m3_stddev
-  - meta_nitrogen_dioxide_ug_N_per_m3_stddev
-  - v_nitrogen_monoxide_nmol_per_mol_amean
-  - qc_nitrogen_monoxide_nmol_per_mol_amean
-  - meta_nitrogen_monoxide_nmol_per_mol_amean
-  - v_nitrogen_monoxide_ug_N_per_m3_amean
-  - qc_nitrogen_monoxide_ug_N_per_m3_amean
-  - meta_nitrogen_monoxide_ug_N_per_m3_amean
-  - v_nitrogen_monoxide_nmol_per_mol_stddev
-  - qc_nitrogen_monoxide_nmol_per_mol_stddev
-  - meta_nitrogen_monoxide_nmol_per_mol_stddev
-  - v_nitrogen_monoxide_ug_N_per_m3_stddev
-  - qc_nitrogen_monoxide_ug_N_per_m3_stddev
-  - meta_nitrogen_monoxide_ug_N_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/SZ/4A/72/SZ4A-726T.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_42i_JGS
@@ -16925,55 +15892,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/T8/T9/PP/T8T9-PPCR.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/T9/V4/95/T9V4-95SS.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: Teledyne_T200UP
-  ebas_measurement_height: 3.0 m
-  ebas_method_ref: FR01L_NOx_analysis
-  ebas_revision_date: '2019-11-14T14:05:58.597000Z'
-  ebas_station_altitude: 162.0 m
-  ebas_station_code: FR0020R
-  ebas_station_latitude: 48.70861111111111
-  ebas_station_longitude: 2.158888888888889
-  resolution: hourly
-  time_coverage_end: '2017-01-01T00:00:00Z'
-  time_coverage_start: '2016-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - d_Location
-  - qc_pressure
-  - meta_pressure
-  - qc_temperature
-  - meta_temperature
-  - v_nitrogen_dioxide_nmol_per_mol_amean
-  - qc_nitrogen_dioxide_nmol_per_mol_amean
-  - meta_nitrogen_dioxide_nmol_per_mol_amean
-  - v_nitrogen_dioxide_ug_N_per_m3_amean
-  - qc_nitrogen_dioxide_ug_N_per_m3_amean
-  - meta_nitrogen_dioxide_ug_N_per_m3_amean
-  - v_nitrogen_dioxide_nmol_per_mol_stddev
-  - qc_nitrogen_dioxide_nmol_per_mol_stddev
-  - meta_nitrogen_dioxide_nmol_per_mol_stddev
-  - v_nitrogen_dioxide_ug_N_per_m3_stddev
-  - qc_nitrogen_dioxide_ug_N_per_m3_stddev
-  - meta_nitrogen_dioxide_ug_N_per_m3_stddev
-  - v_nitrogen_monoxide_nmol_per_mol_amean
-  - qc_nitrogen_monoxide_nmol_per_mol_amean
-  - meta_nitrogen_monoxide_nmol_per_mol_amean
-  - v_nitrogen_monoxide_ug_N_per_m3_amean
-  - qc_nitrogen_monoxide_ug_N_per_m3_amean
-  - meta_nitrogen_monoxide_ug_N_per_m3_amean
-  - v_nitrogen_monoxide_nmol_per_mol_stddev
-  - qc_nitrogen_monoxide_nmol_per_mol_stddev
-  - meta_nitrogen_monoxide_nmol_per_mol_stddev
-  - v_nitrogen_monoxide_ug_N_per_m3_stddev
-  - qc_nitrogen_monoxide_ug_N_per_m3_stddev
-  - meta_nitrogen_monoxide_ug_N_per_m3_stddev
-  - v_pressure
-  - v_temperature
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/TE/5K/EK/TE5K-EKJ9.nc:
   ebas_instrument_name: chemilum_01
   ebas_method_ref: BE02L_chemilum
@@ -17199,18 +16117,19 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/TR/VH/HC/TRVH-HC8V.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/TX/B5/5X/TXB5-5X62.nc:
-  ebas_instrument_name: Chemilum_9
-  ebas_method_ref: NL01L_Chemilum
-  ebas_revision_date: '2014-05-01T00:00:00.000000Z'
-  ebas_station_altitude: 1.0 m
-  ebas_station_code: NL0009R
-  ebas_station_latitude: 53.333889
-  ebas_station_longitude: 6.277222
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/TT/RX/WE/TTRX-WETC.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: glass_d_0056
+  ebas_method_ref: NO01L_AA500_autoanalyzer
+  ebas_revision_date: '2025-03-26T09:05:31.066539Z'
+  ebas_station_altitude: 300.0 m
+  ebas_station_code: NO0056R
+  ebas_station_latitude: 60.372386
+  ebas_station_longitude: 11.078142
   ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2004-01-01T00:00:00Z'
-  time_coverage_start: '1989-12-21T15:00:00Z'
+  resolution: daily
+  time_coverage_end: '2025-01-01T07:00:00Z'
+  time_coverage_start: '2019-01-01T07:00:00Z'
   variables:
   - time
   - time_bnds
@@ -17824,29 +16743,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/UJ/G6/MR/UJG6-MR96.nc:
   - v_sulphur_dioxide
   - qc_sulphur_dioxide
   - meta_sulphur_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/UM/8X/3F/UM8X-3FVM.nc:
-  ebas_instrument_name: chemilum_8
-  ebas_method_ref: ES04L_chemilum
-  ebas_revision_date: '2014-05-01T00:00:00.000000Z'
-  ebas_station_altitude: 134.0 m
-  ebas_station_code: ES0008R
-  ebas_station_latitude: 43.43917
-  ebas_station_longitude: -4.85
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2009-01-01T00:00:00Z'
-  time_coverage_start: '2003-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_nitrogen_monoxide
-  - qc_nitrogen_monoxide
-  - meta_nitrogen_monoxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/UN/38/T7/UN38-T7P7.nc:
   ebas_data_level: '2'
   ebas_instrument_name: abs_02
@@ -17975,29 +16871,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/UR/RF/AV/URRF-AV8W.nc:
   - v_nitrogen_dioxide_ug_N_per_m3
   - qc_nitrogen_dioxide_ug_N_per_m3
   - meta_nitrogen_dioxide_ug_N_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/US/GY/T2/USGY-T224.nc:
-  ebas_instrument_name: chemilum_08
-  ebas_method_ref: ES04L_chemilum
-  ebas_revision_date: '2014-05-07T07:22:34.127000Z'
-  ebas_station_altitude: 134.0 m
-  ebas_station_code: ES0008R
-  ebas_station_latitude: 43.43917
-  ebas_station_longitude: -4.85
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2013-01-01T00:00:00Z'
-  time_coverage_start: '2009-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_nitrogen_monoxide
-  - qc_nitrogen_monoxide
-  - meta_nitrogen_monoxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/UT/MV/PG/UTMV-PGGQ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: chemilum_09
@@ -18022,27 +16895,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/UT/MV/PG/UTMV-PGGQ.nc:
   - v_nitrogen_dioxide_ug_N_per_m3
   - qc_nitrogen_dioxide_ug_N_per_m3
   - meta_nitrogen_dioxide_ug_N_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/UT/R3/KU/UTR3-KUZW.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: TAPIT500U_53
-  ebas_method_ref: CH01L_no2
-  ebas_revision_date: '2025-02-17T17:15:59.067380Z'
-  ebas_station_altitude: 797.0 m
-  ebas_station_code: CH0053R
-  ebas_station_latitude: 47.18961391
-  ebas_station_longitude: 8.175433684
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2023-01-01T00:00:00Z'
-  time_coverage_start: '2021-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/UW/6E/5Z/UW6E-5ZB2.nc:
   ebas_data_level: '2'
   ebas_instrument_name: abs_d_0044
@@ -18112,28 +16964,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/UZ/YA/NX/UZYA-NXRG.nc:
   - v_nitrogen_dioxide_ug_N_per_m3
   - qc_nitrogen_dioxide_ug_N_per_m3
   - meta_nitrogen_dioxide_ug_N_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/V5/MV/DP/V5MV-DPGZ.nc:
-  ebas_instrument_name: fabs_2
-  ebas_revision_date: '1998-06-01T00:00:00.000000Z'
-  ebas_station_altitude: 10.0 m
-  ebas_station_code: SE0002R
-  ebas_station_latitude: 57.416667
-  ebas_station_longitude: 11.933333
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '1989-01-01T06:00:00Z'
-  time_coverage_start: '1987-01-01T06:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_sulphur_dioxide
-  - qc_sulphur_dioxide
-  - meta_sulphur_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/V7/GJ/S8/V7GJ-S86T.nc:
   ebas_data_level: '2'
   ebas_instrument_name: glass_05
@@ -18168,27 +16998,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/V9/UK/28/V9UK-28UD.nc:
   resolution: daily
   time_coverage_end: '2009-01-01T06:00:00Z'
   time_coverage_start: '2007-01-01T06:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/VA/T7/KW/VAT7-KWTU.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: abs_d_0797
-  ebas_method_ref: NO01L_NEDA
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 210.0 m
-  ebas_station_code: NO0797R
-  ebas_station_latitude: 59.466667
-  ebas_station_longitude: 9.85
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '1994-01-01T07:00:00Z'
-  time_coverage_start: '1989-08-01T07:00:00Z'
   variables:
   - time
   - time_bnds
@@ -18252,26 +17061,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VE/TY/ZG/VETY-ZG2X.nc:
   resolution: daily
   time_coverage_end: '2000-04-01T07:00:00Z'
   time_coverage_start: '1994-01-01T07:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/VE/U9/G6/VEU9-G6PZ.nc:
-  ebas_instrument_name: TE42W_09
-  ebas_method_ref: NL01L_Chemilum
-  ebas_revision_date: '2008-09-24T00:00:00.000000Z'
-  ebas_station_altitude: 1.0 m
-  ebas_station_code: NL0009R
-  ebas_station_latitude: 53.333889
-  ebas_station_longitude: 6.277222
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2008-01-01T00:00:00Z'
-  time_coverage_start: '1996-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
@@ -18585,6 +17374,31 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VW/WU/JG/VWWU-JGAW.nc:
   - v_nitrogen_monoxide_ug_N_per_m3_stddev
   - qc_nitrogen_monoxide_ug_N_per_m3_stddev
   - meta_nitrogen_monoxide_ug_N_per_m3_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VX/K4/Q5/VXK4-Q58G.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TAPI_T200UP
+  ebas_measurement_height: 3.2 m
+  ebas_method_ref: IT15L_CHEM_PHOTOL
+  ebas_revision_date: '2025-02-12T11:02:05.788706Z'
+  ebas_station_altitude: 1090.0 m
+  ebas_station_code: IT0019R
+  ebas_station_latitude: 42.805462
+  ebas_station_longitude: 12.565645
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2022-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrogen_dioxide_nmol_per_mol
+  - qc_nitrogen_dioxide_nmol_per_mol
+  - meta_nitrogen_dioxide_nmol_per_mol
+  - v_nitrogen_dioxide_ug_N_per_m3
+  - qc_nitrogen_dioxide_ug_N_per_m3
+  - meta_nitrogen_dioxide_ug_N_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VZ/9G/KN/VZ9G-KNF6.nc:
   ebas_data_level: '2'
   ebas_instrument_name: abs_2
@@ -18703,27 +17517,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/W9/VJ/DD/W9VJ-DD9M.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/WA/EV/NA/WAEV-NACA.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: abs_d_0015
-  ebas_method_ref: NO01L_Griess_air
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 439.0 m
-  ebas_station_code: NO0015R
-  ebas_station_latitude: 65.833333
-  ebas_station_longitude: 13.916667
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '1994-01-01T07:00:00Z'
-  time_coverage_start: '1991-01-01T07:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/WD/ZK/6B/WDZK-6B4N.nc:
   ebas_data_level: '2'
   ebas_instrument_name: impregnated_filter_20
@@ -18776,29 +17569,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/WF/U9/4C/WFU9-4CG5.nc:
   - v_nitrogen_monoxide_ug_N_per_m3
   - qc_nitrogen_monoxide_ug_N_per_m3
   - meta_nitrogen_monoxide_ug_N_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/WG/EX/QG/WGEX-QG2D.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: abs_6
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 970.0 m
-  ebas_station_code: BA0006R
-  ebas_station_latitude: 43.766667
-  ebas_station_longitude: 18.033333
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '1993-01-01T07:00:00Z'
-  time_coverage_start: '1990-01-01T06:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_sulphur_dioxide
-  - qc_sulphur_dioxide
-  - meta_sulphur_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/WH/HC/DU/WHHC-DU6Q.nc:
   ebas_data_level: '2'
   ebas_instrument_name: glass_1
@@ -19411,6 +18181,34 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/WV/N8/QA/WVN8-QAWX.nc:
   - v_nitrogen_monoxide_ug_N_per_m3_stddev
   - qc_nitrogen_monoxide_ug_N_per_m3_stddev
   - meta_nitrogen_monoxide_ug_N_per_m3_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/X6/XG/JB/X6XG-JBTR.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0005R_Thermo_42i-TL
+  ebas_measurement_height: 3.5 m
+  ebas_method_ref: ES04L_chemilum
+  ebas_revision_date: '2025-02-03T00:00:00.000000Z'
+  ebas_station_altitude: 683.0 m
+  ebas_station_code: ES0005R
+  ebas_station_latitude: 42.72056
+  ebas_station_longitude: -8.92361
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2023-12-31T23:59:59Z'
+  time_coverage_start: '2022-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_NOx
+  - qc_NOx
+  - meta_NOx
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
+  - v_nitrogen_monoxide
+  - qc_nitrogen_monoxide
+  - meta_nitrogen_monoxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/X7/EY/T2/X7EY-T27J.nc:
   ebas_data_level: '2'
   ebas_instrument_name: ES0001R_42ITL-1034346046
@@ -19565,52 +18363,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XA/MT/8E/XAMT-8ECA.nc:
   - v_nitrogen_monoxide_ug_N_per_m3_stddev
   - qc_nitrogen_monoxide_ug_N_per_m3_stddev
   - meta_nitrogen_monoxide_ug_N_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/XA/UY/9B/XAUY-9BU8.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: API200E_nl0009
-  ebas_measurement_height: 2.0 m
-  ebas_method_ref: NL01L_MIL-W-5300_NL01L_ILG-W-2900
-  ebas_revision_date: '2023-11-13T14:24:55.503331Z'
-  ebas_station_altitude: 1.0 m
-  ebas_station_code: NL0009R
-  ebas_station_latitude: 53.333889
-  ebas_station_longitude: 6.277222
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2022-01-01T00:00:00Z'
-  time_coverage_start: '2015-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide_nmol_per_mol
-  - qc_nitrogen_dioxide_nmol_per_mol
-  - meta_nitrogen_dioxide_nmol_per_mol
-  - v_nitrogen_dioxide_ug_N_per_m3
-  - qc_nitrogen_dioxide_ug_N_per_m3
-  - meta_nitrogen_dioxide_ug_N_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/XB/KU/EG/XBKU-EGYF.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: glass_d_0015
-  ebas_method_ref: NO01L_Griess_air
-  ebas_revision_date: '2020-03-18T11:13:30.330000Z'
-  ebas_station_altitude: 439.0 m
-  ebas_station_code: NO0015R
-  ebas_station_latitude: 65.833333
-  ebas_station_longitude: 13.916667
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '2019-01-01T07:00:00Z'
-  time_coverage_start: '2002-01-01T07:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XB/Q5/99/XBQ5-99UG.nc:
   ebas_instrument_name: ECO_Physics_DE43
   ebas_method_ref: DE09L_no2_photolytic_conversion
@@ -19968,6 +18720,34 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XF/SP/TM/XFSP-TMW9.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XG/36/WK/XG36-WKHQ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0012R_Teledyne_T200UP
+  ebas_measurement_height: 3.5 m
+  ebas_method_ref: ES04L_chemilum
+  ebas_revision_date: '2025-02-03T00:00:00.000000Z'
+  ebas_station_altitude: 885.0 m
+  ebas_station_code: ES0012R
+  ebas_station_latitude: 39.08278
+  ebas_station_longitude: -1.10111
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2023-12-31T23:59:59Z'
+  time_coverage_start: '2022-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_NOx
+  - qc_NOx
+  - meta_NOx
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
+  - v_nitrogen_monoxide
+  - qc_nitrogen_monoxide
+  - meta_nitrogen_monoxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XK/AQ/QF/XKAQ-QFC5.nc:
   ebas_data_level: '2'
   ebas_instrument_name: abst_13
@@ -20126,29 +18906,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XU/H7/Y4/XUH7-Y44H.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/XW/6X/XW/XW6X-XWTP.nc:
-  ebas_instrument_name: GNOx01
-  ebas_method_ref: GB03L_GNOx_1
-  ebas_revision_date: '2012-08-02T00:00:00.000000Z'
-  ebas_station_altitude: 260.0 m
-  ebas_station_code: GB0048R
-  ebas_station_latitude: 55.79216
-  ebas_station_longitude: -3.2429
-  ebas_statistics: arithmetic mean
-  resolution: Unrecognised (P0000-00-00T00:00:00)
-  time_coverage_end: '2012-01-01T00:00:00Z'
-  time_coverage_start: '2009-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_nitrogen_monoxide
-  - qc_nitrogen_monoxide
-  - meta_nitrogen_monoxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XZ/3M/XT/XZ3M-XT2U.nc:
   ebas_instrument_name: API200E
   ebas_method_ref: NL01L_LM-W-300-301-302-303-304_IL-W-900
@@ -20161,51 +18918,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XZ/3M/XT/XZ3M-XT2U.nc:
   resolution: hourly
   time_coverage_end: '2014-01-01T00:04:12Z'
   time_coverage_start: '2013-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y6/JH/RY/Y6JH-RYWQ.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: chemilum_1055
-  ebas_method_ref: GB02L_chemilum
-  ebas_revision_date: '2025-09-29T13:58:12.827068Z'
-  ebas_station_altitude: 78.0 m
-  ebas_station_code: GB1055R
-  ebas_station_latitude: 51.149617
-  ebas_station_longitude: -1.438228
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2025-01-01T00:00:00Z'
-  time_coverage_start: '2016-01-11T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_nitrogen_monoxide
-  - qc_nitrogen_monoxide
-  - meta_nitrogen_monoxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y7/64/8Q/Y764-8QMK.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: TEI42ITL_Mo_4
-  ebas_method_ref: CH01L_no2
-  ebas_revision_date: '2025-09-18T09:30:36.821160Z'
-  ebas_station_altitude: 1137.0 m
-  ebas_station_code: CH0004R
-  ebas_station_latitude: 47.049722
-  ebas_station_longitude: 6.979444
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2025-01-01T00:00:00Z'
-  time_coverage_start: '2014-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
@@ -20249,26 +18961,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y8/4M/73/Y84M-738T.nc:
   resolution: hourly
   time_coverage_end: '2014-01-01T00:00:00Z'
   time_coverage_start: '2013-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y8/89/S8/Y889-S8C3.nc:
-  ebas_instrument_name: chemilum_8
-  ebas_method_ref: ES04L_chemilum
-  ebas_revision_date: '2014-05-01T00:00:00.000000Z'
-  ebas_station_altitude: 134.0 m
-  ebas_station_code: ES0008R
-  ebas_station_latitude: 43.43917
-  ebas_station_longitude: -4.85
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2003-01-01T00:00:00Z'
-  time_coverage_start: '1999-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
@@ -20409,48 +19101,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/YD/BP/SN/YDBP-SNUN.nc:
   - v_sulphur_dioxide
   - qc_sulphur_dioxide
   - meta_sulphur_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/YD/X8/8X/YDX8-8XP3.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: ES0011R_TIN-009
-  ebas_method_ref: ES04L_chemilum
-  ebas_revision_date: '2022-01-17T13:18:28.937000Z'
-  ebas_station_altitude: 393.0 m
-  ebas_station_code: ES0011R
-  ebas_station_latitude: 38.47278
-  ebas_station_longitude: -6.92361
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2021-01-01T00:00:00Z'
-  time_coverage_start: '2014-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/YD/ZY/YV/YDZY-YVW5.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: glass_08
-  ebas_method_ref: SE01L_Griess
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 58.0 m
-  ebas_station_code: SE0008R
-  ebas_station_latitude: 56.916667
-  ebas_station_longitude: 18.15
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '2001-01-01T06:00:00Z'
-  time_coverage_start: '1991-01-01T07:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/YE/6T/2W/YE6T-2WSX.nc:
   ebas_data_level: '2'
   ebas_instrument_name: CAPS_T500U
@@ -20540,6 +19190,34 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/YJ/PR/VQ/YJPR-VQNS.nc:
   - v_nitrogen_monoxide_ug_N_per_m3
   - qc_nitrogen_monoxide_ug_N_per_m3
   - meta_nitrogen_monoxide_ug_N_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/YJ/TX/G2/YJTX-G2YD.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0013R_Teledyne_T200UP
+  ebas_measurement_height: 3.5 m
+  ebas_method_ref: ES04L_chemilum
+  ebas_revision_date: '2025-07-15T00:00:00.000000Z'
+  ebas_station_altitude: 985.0 m
+  ebas_station_code: ES0013R
+  ebas_station_latitude: 41.23889
+  ebas_station_longitude: -5.8975
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-12-31T23:59:59Z'
+  time_coverage_start: '2022-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_NOx
+  - qc_NOx
+  - meta_NOx
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
+  - v_nitrogen_monoxide
+  - qc_nitrogen_monoxide
+  - meta_nitrogen_monoxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/YN/RN/NQ/YNRN-NQBA.nc:
   ebas_instrument_name: chemilum_10
   ebas_method_ref: ES04L_chemilum
@@ -20587,26 +19265,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/YQ/KA/UG/YQKA-UG5K.nc:
   - v_nitrogen_monoxide
   - qc_nitrogen_monoxide
   - meta_nitrogen_monoxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/YR/QG/46/YRQG-46CW.nc:
-  ebas_instrument_name: TE42W_91
-  ebas_method_ref: NL01L_LVM_LU_P141
-  ebas_revision_date: '2008-09-24T00:00:00.000000Z'
-  ebas_station_altitude: 4.0 m
-  ebas_station_code: NL0091R
-  ebas_station_latitude: 52.3
-  ebas_station_longitude: 4.5
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2008-01-01T00:00:00Z'
-  time_coverage_start: '2003-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/YT/8T/T2/YT8T-T27R.nc:
   ebas_instrument_name: NA
   ebas_method_ref: NL01L_NA
@@ -20630,27 +19288,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/YT/8T/T2/YT8T-T27R.nc:
   - v_susp_part_matter
   - qc_susp_part_matter
   - meta_susp_part_matter
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/YU/6V/DT/YU6V-DT3R.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: abs_tube_gb06
-  ebas_method_ref: GB02L_difftube
-  ebas_revision_date: '2005-09-28T00:00:00.000000Z'
-  ebas_station_altitude: 126.0 m
-  ebas_station_code: GB0006R
-  ebas_station_latitude: 54.443056
-  ebas_station_longitude: -7.87
-  ebas_statistics: arithmetic mean
-  resolution: monthly
-  time_coverage_end: '2005-01-24T08:00:00Z'
-  time_coverage_start: '2003-12-29T08:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/YV/ME/75/YVME-75UG.nc:
   ebas_data_level: '2'
   ebas_instrument_name: UBA_Ng_PNS_0001
@@ -20882,27 +19519,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/Z9/8C/D3/Z98C-D3BK.nc:
   - v_sulphur_dioxide
   - qc_sulphur_dioxide
   - meta_sulphur_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/Z9/CK/WV/Z9CK-WVQQ.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: abs_08
-  ebas_method_ref: SE01L_AD
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 58.0 m
-  ebas_station_code: SE0008R
-  ebas_station_latitude: 56.916667
-  ebas_station_longitude: 18.15
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '2006-01-01T06:00:00Z'
-  time_coverage_start: '2005-01-01T06:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/Z9/D6/YE/Z9D6-YEK3.nc:
   ebas_data_level: '2'
   ebas_instrument_name: gs_10
@@ -20974,96 +19590,20 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZC/7T/H4/ZC7T-H4QT.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZF/ZA/PM/ZFZA-PMDR.nc:
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZF/Q2/U9/ZFQ2-U9YC.nc:
   ebas_data_level: '2'
-  ebas_instrument_name: Teledyne_T200UP
+  ebas_instrument_name: abs_04
   ebas_measurement_height: 3.0 m
-  ebas_method_ref: FR01L_NOx_analysis
-  ebas_revision_date: '2019-11-14T14:05:58.597000Z'
-  ebas_station_altitude: 162.0 m
-  ebas_station_code: FR0020R
-  ebas_station_latitude: 48.70861111111111
-  ebas_station_longitude: 2.158888888888889
-  resolution: hourly
-  time_coverage_end: '2015-01-01T00:00:00Z'
-  time_coverage_start: '2013-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - d_Location
-  - qc_pressure
-  - meta_pressure
-  - qc_temperature
-  - meta_temperature
-  - v_nitrogen_dioxide_nmol_per_mol_amean
-  - qc_nitrogen_dioxide_nmol_per_mol_amean
-  - meta_nitrogen_dioxide_nmol_per_mol_amean
-  - v_nitrogen_dioxide_ug_N_per_m3_amean
-  - qc_nitrogen_dioxide_ug_N_per_m3_amean
-  - meta_nitrogen_dioxide_ug_N_per_m3_amean
-  - v_nitrogen_dioxide_nmol_per_mol_uncertainty
-  - qc_nitrogen_dioxide_nmol_per_mol_uncertainty
-  - meta_nitrogen_dioxide_nmol_per_mol_uncertainty
-  - v_nitrogen_dioxide_ug_N_per_m3_uncertainty
-  - qc_nitrogen_dioxide_ug_N_per_m3_uncertainty
-  - meta_nitrogen_dioxide_ug_N_per_m3_uncertainty
-  - v_nitrogen_monoxide_nmol_per_mol_amean
-  - qc_nitrogen_monoxide_nmol_per_mol_amean
-  - meta_nitrogen_monoxide_nmol_per_mol_amean
-  - v_nitrogen_monoxide_ug_N_per_m3_amean
-  - qc_nitrogen_monoxide_ug_N_per_m3_amean
-  - meta_nitrogen_monoxide_ug_N_per_m3_amean
-  - v_nitrogen_monoxide_nmol_per_mol_uncertainty
-  - qc_nitrogen_monoxide_nmol_per_mol_uncertainty
-  - meta_nitrogen_monoxide_nmol_per_mol_uncertainty
-  - v_nitrogen_monoxide_ug_N_per_m3_uncertainty
-  - qc_nitrogen_monoxide_ug_N_per_m3_uncertainty
-  - meta_nitrogen_monoxide_ug_N_per_m3_uncertainty
-  - v_pressure
-  - v_temperature
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZJ/CB/S2/ZJCB-S23H.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: API200E
-  ebas_measurement_height: 2.0 m
-  ebas_method_ref: NL01L_LM-W-300-301-302-303-304_IL-W-900
-  ebas_revision_date: '2015-07-22T00:00:00.000000Z'
-  ebas_station_altitude: 1.0 m
-  ebas_station_code: NL0009R
-  ebas_station_latitude: 53.333889
-  ebas_station_longitude: 6.277222
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2015-01-01T00:00:00Z'
-  time_coverage_start: '2014-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_NOx
-  - qc_NOx
-  - meta_NOx
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-  - v_nitrogen_monoxide
-  - qc_nitrogen_monoxide
-  - meta_nitrogen_monoxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZJ/ZA/84/ZJZA-84D2.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: abst_2
-  ebas_method_ref: SE01L_NEDA
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 10.0 m
-  ebas_station_code: SE0002R
-  ebas_station_latitude: 57.416667
-  ebas_station_longitude: 11.933333
+  ebas_method_ref: PL01L_spectrophotometric_griess
+  ebas_revision_date: '2024-06-21T11:33:33.598457Z'
+  ebas_station_altitude: 2.0 m
+  ebas_station_code: PL0004R
+  ebas_station_latitude: 54.753894
+  ebas_station_longitude: 17.534264
   ebas_statistics: arithmetic mean
   resolution: daily
-  time_coverage_end: '1990-01-01T06:00:00Z'
-  time_coverage_start: '1989-01-01T06:00:00Z'
+  time_coverage_end: '2024-01-01T06:00:00Z'
+  time_coverage_start: '2014-01-01T06:00:00Z'
   variables:
   - time
   - time_bnds
@@ -21178,6 +19718,34 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZR/NQ/UZ/ZRNQ-UZ8P.nc:
   - v_nitrogen_dioxide
   - qc_nitrogen_dioxide
   - meta_nitrogen_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZR/R8/HG/ZRR8-HGY7.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0001R_Teledyne_T200UP
+  ebas_measurement_height: 5.0 m
+  ebas_method_ref: ES04L_chemilum
+  ebas_revision_date: '2025-02-03T00:00:00.000000Z'
+  ebas_station_altitude: 917.0 m
+  ebas_station_code: ES0001R
+  ebas_station_latitude: 39.54694
+  ebas_station_longitude: -4.35056
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2023-12-31T23:59:59Z'
+  time_coverage_start: '2022-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_NOx
+  - qc_NOx
+  - meta_NOx
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
+  - v_nitrogen_monoxide
+  - qc_nitrogen_monoxide
+  - meta_nitrogen_monoxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZS/NS/MB/ZSNS-MBAS.nc:
   ebas_data_level: '2'
   ebas_instrument_name: abs_1
@@ -21254,47 +19822,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZW/KK/BE/ZWKK-BE7E.nc:
   resolution: hourly
   time_coverage_end: '2021-01-01T00:00:00Z'
   time_coverage_start: '2013-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZW/N3/7G/ZWN3-7GRJ.nc:
-  ebas_instrument_name: ml8841_4
-  ebas_method_ref: CH01L_no2
-  ebas_revision_date: '2008-01-01T00:00:00.000000Z'
-  ebas_station_altitude: 1137.0 m
-  ebas_station_code: CH0004R
-  ebas_station_latitude: 47.049722
-  ebas_station_longitude: 6.979444
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '2008-01-01T00:00:00Z'
-  time_coverage_start: '2007-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_nitrogen_dioxide
-  - qc_nitrogen_dioxide
-  - meta_nitrogen_dioxide
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZW/SG/33/ZWSG-33A4.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: glass_d_0797
-  ebas_method_ref: NO01L_Griess_air
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 210.0 m
-  ebas_station_code: NO0797R
-  ebas_station_latitude: 59.466667
-  ebas_station_longitude: 9.85
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '1995-01-01T07:00:00Z'
-  time_coverage_start: '1994-01-01T07:00:00Z'
   variables:
   - time
   - time_bnds

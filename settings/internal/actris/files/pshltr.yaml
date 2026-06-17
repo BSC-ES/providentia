@@ -66,6 +66,45 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/28/8E/9S/288E-9SET.nc:
   - v_wind_speed
   - qc_wind_speed
   - meta_wind_speed
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/2E/JA/A5/2EJA-A5QQ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PUY_AWS_Vaisala_NA
+  ebas_method_ref: FR04L_Vaisala_custom_built_PUY
+  ebas_revision_date: '2025-03-13T16:02:13.568136Z'
+  ebas_station_altitude: 1465.0 m
+  ebas_station_code: FR0030R
+  ebas_station_latitude: 45.772223
+  ebas_station_longitude: 2.964886
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2025-01-01T00:00:00Z'
+  time_coverage_start: '2020-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_UVA_radiation
+  - qc_UVA_radiation
+  - meta_UVA_radiation
+  - v_downward_solar_radiation_flux_density
+  - qc_downward_solar_radiation_flux_density
+  - meta_downward_solar_radiation_flux_density
+  - v_pressure
+  - qc_pressure
+  - meta_pressure
+  - v_relative_humidity
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - v_temperature
+  - qc_temperature
+  - meta_temperature
+  - v_wind_direction
+  - qc_wind_direction
+  - meta_wind_direction
+  - v_wind_speed
+  - qc_wind_speed
+  - meta_wind_speed
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3H/SU/28/3HSU-28MU.nc:
   ebas_instrument_name: NO42_aws_10m
   ebas_method_ref: NO01L_aneroid_barometer
@@ -205,6 +244,37 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/43/RS/E5/43RS-E5A3.nc:
   - v_wind_speed
   - qc_wind_speed
   - meta_wind_speed
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/44/23/T7/4423-T7QB.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: RUN_Maido_MeteoStation1
+  ebas_measurement_height: 8.0 m
+  ebas_method_ref: FR14L_Maido_MeteoStation1_RUN
+  ebas_revision_date: '2025-03-07T10:17:47.000000Z'
+  ebas_station_altitude: 2160.0 m
+  ebas_station_code: FR0026R
+  ebas_station_latitude: -21.079449
+  ebas_station_longitude: 55.383006
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2025-01-01T00:00:00Z'
+  time_coverage_start: '2020-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_downward_solar_radiation_flux_density
+  - qc_downward_solar_radiation_flux_density
+  - meta_downward_solar_radiation_flux_density
+  - v_pressure
+  - qc_pressure
+  - meta_pressure
+  - v_relative_humidity
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - v_temperature
+  - qc_temperature
+  - meta_temperature
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/44/GJ/Z6/44GJ-Z6QB.nc:
   ebas_data_level: '2'
   ebas_instrument_name: ES0005R_ES05M3
@@ -252,6 +322,46 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/46/4P/S2/464P-S2PV.nc:
   - v_temperature
   - qc_temperature
   - meta_temperature
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4E/KZ/RQ/4EKZ-RQR6.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0009R_MCV_SVV-01
+  ebas_measurement_height: 2.5 m
+  ebas_method_ref: ES04L_met
+  ebas_revision_date: '2023-07-24T00:00:00.000000Z'
+  ebas_station_altitude: 1360.0 m
+  ebas_station_code: ES0009R
+  ebas_station_latitude: 41.27417
+  ebas_station_longitude: -3.1425
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2022-12-31T23:59:59Z'
+  time_coverage_start: '2022-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_UVA_radiation
+  - qc_UVA_radiation
+  - meta_UVA_radiation
+  - v_pressure
+  - qc_pressure
+  - meta_pressure
+  - v_relative_humidity
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - v_temperature
+  - qc_temperature
+  - meta_temperature
+  - v_wind_direction
+  - qc_wind_direction
+  - meta_wind_direction
+  - v_wind_speed
+  - qc_wind_speed
+  - meta_wind_speed
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/4T/CA/CP/4TCA-CP2S.nc:
   ebas_data_level: '2'
   ebas_instrument_name: aws_FR15
@@ -727,6 +837,46 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8N/GM/GT/8NGM-GTFF.nc:
   - v_wind_speed
   - qc_wind_speed
   - meta_wind_speed
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8T/8Z/HN/8T8Z-HN42.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0014R_MCV_SVV-01
+  ebas_measurement_height: 2.5 m
+  ebas_method_ref: ES04L_met
+  ebas_revision_date: '2023-07-24T00:00:00.000000Z'
+  ebas_station_altitude: 470.0 m
+  ebas_station_code: ES0014R
+  ebas_station_latitude: 41.39389
+  ebas_station_longitude: 0.73472
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2022-12-31T23:59:59Z'
+  time_coverage_start: '2022-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_UVA_radiation
+  - qc_UVA_radiation
+  - meta_UVA_radiation
+  - v_pressure
+  - qc_pressure
+  - meta_pressure
+  - v_relative_humidity
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - v_temperature
+  - qc_temperature
+  - meta_temperature
+  - v_wind_direction
+  - qc_wind_direction
+  - meta_wind_direction
+  - v_wind_speed
+  - qc_wind_speed
+  - meta_wind_speed
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9H/Z7/4F/9HZ7-4FN4.nc:
   ebas_instrument_name: NA
   ebas_method_ref: AT01L_NA
@@ -915,6 +1065,40 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AK/7E/3H/AK7E-3H9Y.nc:
   - v_wind_speed
   - qc_wind_speed
   - meta_wind_speed
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AK/YH/67/AKYH-672X.nc:
+  ebas_data_level: '2'
+  ebas_revision_date: '2025-07-18T08:08:04.446915Z'
+  ebas_station_altitude: 2165.0 m
+  ebas_station_code: IT0009R
+  ebas_station_latitude: 44.19320533600754
+  ebas_station_longitude: 10.701429456423515
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2025-01-01T00:00:00Z'
+  time_coverage_start: '2021-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_relative_humidity
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - v_temperature
+  - qc_temperature
+  - meta_temperature
+  - v_pressure
+  - qc_pressure
+  - meta_pressure
+  - v_wind_direction
+  - qc_wind_direction
+  - meta_wind_direction
+  - v_wind_speed
+  - qc_wind_speed
+  - meta_wind_speed
+  - v_downward_solar_radiation_flux_density
+  - qc_downward_solar_radiation_flux_density
+  - meta_downward_solar_radiation_flux_density
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AM/74/CW/AM74-CWEQ.nc:
   ebas_instrument_name: aws_B-221_13
   ebas_method_ref: ES04L_AWS
@@ -1341,6 +1525,46 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/CM/7J/T9/CM7J-T9SZ.nc:
   - v_wind_speed
   - qc_wind_speed
   - meta_wind_speed
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CM/UH/PT/CMUH-PTS3.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0011R_Thies_Clima_COMPACT
+  ebas_measurement_height: 2.5 m
+  ebas_method_ref: ES04L_met
+  ebas_revision_date: '2023-07-24T00:00:00.000000Z'
+  ebas_station_altitude: 393.0 m
+  ebas_station_code: ES0011R
+  ebas_station_latitude: 38.47278
+  ebas_station_longitude: -6.92361
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2022-12-31T23:59:59Z'
+  time_coverage_start: '2022-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_UVA_radiation
+  - qc_UVA_radiation
+  - meta_UVA_radiation
+  - v_pressure
+  - qc_pressure
+  - meta_pressure
+  - v_relative_humidity
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - v_temperature
+  - qc_temperature
+  - meta_temperature
+  - v_wind_direction
+  - qc_wind_direction
+  - meta_wind_direction
+  - v_wind_speed
+  - qc_wind_speed
+  - meta_wind_speed
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/CT/M2/QR/CTM2-QRAB.nc:
   ebas_data_level: '2'
   ebas_method_ref: ES04L_AWS
@@ -1446,6 +1670,46 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DJ/UQ/WY/DJUQ-WYHX.nc:
   - time_bnds
   - metadata_time
   - metadata_time_bnds
+  - v_pressure
+  - qc_pressure
+  - meta_pressure
+  - v_relative_humidity
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - v_temperature
+  - qc_temperature
+  - meta_temperature
+  - v_wind_direction
+  - qc_wind_direction
+  - meta_wind_direction
+  - v_wind_speed
+  - qc_wind_speed
+  - meta_wind_speed
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/DK/H5/GU/DKH5-GU5S.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0008R_MCV_SVV-01
+  ebas_measurement_height: 2.5 m
+  ebas_method_ref: ES04L_met
+  ebas_revision_date: '2023-07-24T00:00:00.000000Z'
+  ebas_station_altitude: 134.0 m
+  ebas_station_code: ES0008R
+  ebas_station_latitude: 43.43917
+  ebas_station_longitude: -4.85
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2022-12-31T23:59:59Z'
+  time_coverage_start: '2022-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_UVA_radiation
+  - qc_UVA_radiation
+  - meta_UVA_radiation
   - v_pressure
   - qc_pressure
   - meta_pressure
@@ -1856,6 +2120,46 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/FG/EV/D5/FGEV-D5FS.nc:
   - v_pressure
   - qc_pressure
   - meta_pressure
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FW/8A/Q2/FW8A-Q2RE.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: UHEL_AWS_HYY0
+  ebas_measurement_height: 33.0 m
+  ebas_method_ref: FI03L_AWS_HYY
+  ebas_revision_date: '2025-03-20T22:15:03.935999Z'
+  ebas_station_altitude: 181.0 m
+  ebas_station_code: FI0050R
+  ebas_station_latitude: 61.85
+  ebas_station_longitude: 24.283333
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2025-01-01T00:00:00Z'
+  time_coverage_start: '2011-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_downward_solar_radiation_flux_density
+  - qc_downward_solar_radiation_flux_density
+  - meta_downward_solar_radiation_flux_density
+  - v_pressure
+  - qc_pressure
+  - meta_pressure
+  - v_relative_humidity
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - v_temperature
+  - qc_temperature
+  - meta_temperature
+  - v_wind_direction
+  - qc_wind_direction
+  - meta_wind_direction
+  - v_wind_speed
+  - qc_wind_speed
+  - meta_wind_speed
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/G8/GX/MT/G8GX-MTQT.nc:
   ebas_data_level: '2'
   ebas_instrument_name: aws_FR16
@@ -2092,6 +2396,46 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/HG/XY/E9/HGXY-E9M8.nc:
   - v_pressure
   - qc_pressure
   - meta_pressure
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HS/H3/MN/HSH3-MND4.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0013R_MCV_SVV-01
+  ebas_measurement_height: 2.5 m
+  ebas_method_ref: ES04L_met
+  ebas_revision_date: '2023-07-24T00:00:00.000000Z'
+  ebas_station_altitude: 985.0 m
+  ebas_station_code: ES0013R
+  ebas_station_latitude: 41.23889
+  ebas_station_longitude: -5.8975
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2022-12-31T23:59:59Z'
+  time_coverage_start: '2022-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_UVA_radiation
+  - qc_UVA_radiation
+  - meta_UVA_radiation
+  - v_pressure
+  - qc_pressure
+  - meta_pressure
+  - v_relative_humidity
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - v_temperature
+  - qc_temperature
+  - meta_temperature
+  - v_wind_direction
+  - qc_wind_direction
+  - meta_wind_direction
+  - v_wind_speed
+  - qc_wind_speed
+  - meta_wind_speed
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HU/7D/RC/HU7D-RCHB.nc:
   ebas_data_level: '2'
   ebas_instrument_name: ES0012R_ES12_M3
@@ -2931,6 +3275,46 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PQ/HZ/JB/PQHZ-JB9Q.nc:
   - v_relative_humidity
   - qc_relative_humidity
   - meta_relative_humidity
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PW/AS/JT/PWAS-JTG3.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0001R_MCV_SVV-01
+  ebas_measurement_height: 2.5 m
+  ebas_method_ref: ES04L_met
+  ebas_revision_date: '2023-07-24T00:00:00.000000Z'
+  ebas_station_altitude: 917.0 m
+  ebas_station_code: ES0001R
+  ebas_station_latitude: 39.54694
+  ebas_station_longitude: -4.35056
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2022-12-31T23:59:59Z'
+  time_coverage_start: '2022-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_UVA_radiation
+  - qc_UVA_radiation
+  - meta_UVA_radiation
+  - v_pressure
+  - qc_pressure
+  - meta_pressure
+  - v_relative_humidity
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - v_temperature
+  - qc_temperature
+  - meta_temperature
+  - v_wind_direction
+  - qc_wind_direction
+  - meta_wind_direction
+  - v_wind_speed
+  - qc_wind_speed
+  - meta_wind_speed
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q7/AD/BY/Q7AD-BYF2.nc:
   ebas_instrument_name: AWS02
   ebas_method_ref: GB02L_AWS_1
@@ -2951,6 +3335,46 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q7/AD/BY/Q7AD-BYF2.nc:
   - v_pressure
   - qc_pressure
   - meta_pressure
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QD/Q6/RY/QDQ6-RYU6.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0005R_Young_86000
+  ebas_measurement_height: 2.5 m
+  ebas_method_ref: ES04L_met
+  ebas_revision_date: '2023-07-24T00:00:00.000000Z'
+  ebas_station_altitude: 683.0 m
+  ebas_station_code: ES0005R
+  ebas_station_latitude: 42.72056
+  ebas_station_longitude: -8.92361
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2022-12-31T23:59:59Z'
+  time_coverage_start: '2022-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_UVA_radiation
+  - qc_UVA_radiation
+  - meta_UVA_radiation
+  - v_pressure
+  - qc_pressure
+  - meta_pressure
+  - v_relative_humidity
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - v_temperature
+  - qc_temperature
+  - meta_temperature
+  - v_wind_direction
+  - qc_wind_direction
+  - meta_wind_direction
+  - v_wind_speed
+  - qc_wind_speed
+  - meta_wind_speed
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QE/ZG/ZX/QEZG-ZXUP.nc:
   ebas_instrument_name: NA
   ebas_method_ref: AT01L_NA
@@ -2991,6 +3415,46 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QG/UP/GR/QGUP-GR5G.nc:
   - v_pressure
   - qc_pressure
   - meta_pressure
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QK/RP/XP/QKRP-XPGA.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0012R_MCV_SVV-01
+  ebas_measurement_height: 2.5 m
+  ebas_method_ref: ES04L_met
+  ebas_revision_date: '2023-07-24T00:00:00.000000Z'
+  ebas_station_altitude: 885.0 m
+  ebas_station_code: ES0012R
+  ebas_station_latitude: 39.08278
+  ebas_station_longitude: -1.10111
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2022-12-31T23:59:59Z'
+  time_coverage_start: '2022-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_UVA_radiation
+  - qc_UVA_radiation
+  - meta_UVA_radiation
+  - v_pressure
+  - qc_pressure
+  - meta_pressure
+  - v_relative_humidity
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - v_temperature
+  - qc_temperature
+  - meta_temperature
+  - v_wind_direction
+  - qc_wind_direction
+  - meta_wind_direction
+  - v_wind_speed
+  - qc_wind_speed
+  - meta_wind_speed
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RH/E6/WR/RHE6-WREC.nc:
   ebas_instrument_name: NA
   ebas_method_ref: AT01L_NA
@@ -3017,6 +3481,46 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RH/E6/WR/RHE6-WREC.nc:
   - v_temperature
   - qc_temperature
   - meta_temperature
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RH/P5/WM/RHP5-WMMB.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0010R_Young_86000
+  ebas_measurement_height: 2.5 m
+  ebas_method_ref: ES04L_met
+  ebas_revision_date: '2023-07-24T00:00:00.000000Z'
+  ebas_station_altitude: 76.0 m
+  ebas_station_code: ES0010R
+  ebas_station_latitude: 42.31917
+  ebas_station_longitude: 3.31583
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2022-12-31T23:59:59Z'
+  time_coverage_start: '2022-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_UVA_radiation
+  - qc_UVA_radiation
+  - meta_UVA_radiation
+  - v_pressure
+  - qc_pressure
+  - meta_pressure
+  - v_relative_humidity
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - v_temperature
+  - qc_temperature
+  - meta_temperature
+  - v_wind_direction
+  - qc_wind_direction
+  - meta_wind_direction
+  - v_wind_speed
+  - qc_wind_speed
+  - meta_wind_speed
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RK/62/88/RK62-88RZ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: CZ_Vaisala
@@ -3163,6 +3667,28 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RY/9D/9H/RY9D-9HN5.nc:
   resolution: hourly
   time_coverage_end: '2014-12-31T23:00:00Z'
   time_coverage_start: '2014-04-07T10:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_pressure
+  - qc_pressure
+  - meta_pressure
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/S5/SW/YJ/S5SW-YJJE.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PTB110_W0928907
+  ebas_measurement_height: 2.8 m
+  ebas_method_ref: GB03L_AUC_PTB110
+  ebas_revision_date: '2025-03-11T11:31:30.000000Z'
+  ebas_station_altitude: 260.0 m
+  ebas_station_code: GB0048R
+  ebas_station_latitude: 55.79216
+  ebas_station_longitude: -3.2429
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2025-01-01T00:01:00Z'
+  time_coverage_start: '2020-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds

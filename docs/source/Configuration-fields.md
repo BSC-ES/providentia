@@ -72,7 +72,7 @@ Apart from the common parameters, these are the fields used by all analysis and 
 | `map_extent` | Set the map plot extents with the syntax: minimum longitude, maximum longitude, minimum latitude, maximum latitude (e.g. `-30, 50, 20, 90`). | `[-180, 180, -90, 90]` in Dashboard, adapted to selected stations in Report and Library |
 | `remove_extreme_stations` | Type of extreme stations removal, from the options given in `remove_extreme_stations.yaml`. | — |
 | `resampling_resolution` | Resolution you want to resample your data to: `hourly`, `3hourly`, `6hourly`, `daily`, `monthly`, `annual`. | — |
-| `multispecies_units` | Units of data in multispecies plots | — |
+| `multispecies_units` | Units of data in multispecies plots. Only accepts strings, if units for each species are: {'sconco3': 'ug m-3', 'sconcno2': 'ug m-3', 'sconcco': 'mg m-3', 'sconcso2': 'ug m-3'}, choose only one between ug m-3 and mg m-3 (e.g. `ug m-3`) and the data of the species that are not in the chosen units will be converted. | — |
 
 (dashboard-parameters)=
 ## Dashboard parameters

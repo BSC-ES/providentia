@@ -273,6 +273,11 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5H/7P/XW/5H7P-XWDJ.nc:
   - v_aerosol_optical_depth_amean
   - v_aerosol_optical_depth_median
   - v_aerosol_optical_depth_stddev
+  wavelengths:
+  - 367.6
+  - 411.9
+  - 501.0
+  - 863.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/64/CE/FY/64CE-FYRS.nc:
   ebas_instrument_name: sun_tracking_filter_radiometer_57
   ebas_method_ref: DE13L_optical_transmission
@@ -1425,35 +1430,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/CW/48/2J/CW48-2JAE.nc:
   - 412.0
   - 500.0
   - 862.0
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/D3/3M/P6/D33M-P63B.nc:
-  ebas_instrument_name: PMOD-WRC_PFR-N_RYO
-  ebas_method_ref: CH04L_optical_transmission
-  ebas_revision_date: '2011-08-16T00:00:00.000000Z'
-  ebas_station_altitude: 260.0 m
-  ebas_station_code: JP1020R
-  ebas_station_latitude: 39.0319
-  ebas_station_longitude: 141.8222
-  resolution: hourly
-  time_coverage_end: '2009-01-01T00:29:00Z'
-  time_coverage_start: '2008-12-31T23:30:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - d_Wavelength
-  - qc_sample_count
-  - meta_sample_count
-  - qc_aerosol_optical_depth_amean
-  - meta_aerosol_optical_depth_amean
-  - qc_aerosol_optical_depth_median
-  - meta_aerosol_optical_depth_median
-  - qc_aerosol_optical_depth_stddev
-  - meta_aerosol_optical_depth_stddev
-  - v_sample_count
-  - v_aerosol_optical_depth_amean
-  - v_aerosol_optical_depth_median
-  - v_aerosol_optical_depth_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/D6/M7/A9/D6M7-A9ND.nc:
   ebas_instrument_name: PFR_01
   ebas_method_ref: CH04L_Optical_Transmission
@@ -1553,6 +1529,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DG/SU/82/DGSU-82QS.nc:
   - v_aerosol_optical_depth_amean
   - v_aerosol_optical_depth_median
   - v_aerosol_optical_depth_stddev
+  wavelengths:
+  - 412.0
+  - 500.0
+  - 862.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DK/6R/6Y/DK6R-6YPV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: PMOD-WRC_PFR-N_MHD
@@ -1940,6 +1920,11 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/FY/FR/MD/FYFR-MDAQ.nc:
   - v_aerosol_optical_depth_amean
   - v_aerosol_optical_depth_median
   - v_aerosol_optical_depth_stddev
+  wavelengths:
+  - 367.6
+  - 412.1
+  - 501.0
+  - 862.1
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/GA/ME/K3/GAME-K34Q.nc:
   ebas_data_level: '2'
   ebas_instrument_name: PMOD-WRC_PFR-N_HPB
@@ -2169,6 +2154,11 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/H7/59/55/H759-55X3.nc:
   - v_aerosol_optical_depth_amean
   - v_aerosol_optical_depth_median
   - v_aerosol_optical_depth_stddev
+  wavelengths:
+  - 368.0
+  - 412.0
+  - 500.0
+  - 862.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/H8/AX/KG/H8AX-KGGE.nc:
   ebas_data_level: '2'
   ebas_instrument_name: PMOD-WRC_PFR-N_NYA
@@ -4379,37 +4369,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/WX/ZZ/PV/WXZZ-PVCY.nc:
   - 412.0
   - 500.0
   - 862.0
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/X6/T9/Z7/X6T9-Z7BH.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: PMOD-WRC_PFR-N_ASP
-  ebas_measurement_height: 1.0 m
-  ebas_method_ref: CH04L_optical_transmission
-  ebas_revision_date: '2019-11-13T18:20:34.000000Z'
-  ebas_station_altitude: 547.0 m
-  ebas_station_code: AU0001C
-  ebas_station_latitude: -23.795085
-  ebas_station_longitude: 133.88901
-  resolution: hourly
-  time_coverage_end: '2016-03-11T00:29:00Z'
-  time_coverage_start: '2014-01-01T23:30:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - d_Wavelength
-  - qc_sample_count
-  - meta_sample_count
-  - qc_aerosol_optical_depth_amean
-  - meta_aerosol_optical_depth_amean
-  - qc_aerosol_optical_depth_median
-  - meta_aerosol_optical_depth_median
-  - qc_aerosol_optical_depth_stddev
-  - meta_aerosol_optical_depth_stddev
-  - v_sample_count
-  - v_aerosol_optical_depth_amean
-  - v_aerosol_optical_depth_median
-  - v_aerosol_optical_depth_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/X9/62/H2/X962-H2CJ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: PMOD-WRC_PFR-N_DAV
@@ -4501,6 +4460,11 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XR/TA/TQ/XRTA-TQ9N.nc:
   - v_aerosol_optical_depth_amean
   - v_aerosol_optical_depth_median
   - v_aerosol_optical_depth_stddev
+  wavelengths:
+  - 368.0
+  - 412.0
+  - 499.7
+  - 861.4
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XX/6T/4Y/XX6T-4YEC.nc:
   ebas_data_level: '2'
   ebas_instrument_name: SP02_WOL
@@ -4826,6 +4790,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZF/RR/49/ZFRR-49YS.nc:
   - meta_aerosol_optical_depth
   - v_sample_count
   - v_aerosol_optical_depth
+  wavelengths:
+  - 368.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZZ/9Y/T5/ZZ9Y-T5FE.nc:
   ebas_data_level: '2'
   ebas_instrument_name: YES_MFR-7_GCR

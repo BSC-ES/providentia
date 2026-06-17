@@ -88,6 +88,57 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AY/GU/QG/AYGU-QGNM.nc:
   - v_mercury_PBM
   - qc_mercury_PBM
   - meta_mercury_PBM
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FK/9Z/4N/FK9Z-4NZ4.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: tekran_42_modified
+  ebas_method_ref: NO01L_afs
+  ebas_revision_date: '2025-02-25T13:24:39.291467Z'
+  ebas_station_altitude: 474.0 m
+  ebas_station_code: NO0042G
+  ebas_station_latitude: 78.90715
+  ebas_station_longitude: 11.88668
+  ebas_statistics: arithmetic mean
+  resolution: 3hourly
+  time_coverage_end: '2024-12-31T06:00:00Z'
+  time_coverage_start: '2022-01-03T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_mercury_GOM
+  - qc_mercury_GOM
+  - meta_mercury_GOM
+  - v_mercury_PBM
+  - qc_mercury_PBM
+  - meta_mercury_PBM
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GU/85/FD/GU85-FDXS.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Tekran_Rao
+  ebas_method_ref: SE01L_AH
+  ebas_revision_date: '2024-11-29T00:00:00.000000Z'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: SE0014R
+  ebas_station_latitude: 57.394
+  ebas_station_longitude: 11.914
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-00T04:00:00)
+  time_coverage_end: '2023-12-31T22:55:00Z'
+  time_coverage_start: '2021-01-01T01:40:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_mercury_GEM
+  - qc_mercury_GEM
+  - meta_mercury_GEM
+  - v_mercury_GOM
+  - qc_mercury_GOM
+  - meta_mercury_GOM
+  - v_mercury_PBM
+  - qc_mercury_PBM
+  - meta_mercury_PBM
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/M9/2G/R9/M92G-R9QQ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Tekran_Rao

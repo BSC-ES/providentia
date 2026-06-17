@@ -147,6 +147,50 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/2E/C9/KY/2EC9-KY6P.nc:
   - v_ammonia
   - qc_ammonia
   - meta_ammonia
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/2F/D9/GB/2FD9-GBE2.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f1p_1
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 917.0 m
+  ebas_station_code: ES0001R
+  ebas_station_latitude: 39.54694
+  ebas_station_longitude: -4.35056
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '1999-01-01T14:00:00Z'
+  time_coverage_start: '1996-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_acidity
+  - qc_acidity
+  - meta_acidity
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/2J/C7/Z7/2JC7-Z7D7.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f3p_31
@@ -734,6 +778,27 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3H/66/EZ/3H66-EZFR.nc:
   - v_sum_ammonia_and_ammonium
   - qc_sum_ammonia_and_ammonium
   - meta_sum_ammonia_and_ammonium
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3K/6Y/KF/3K6Y-KFCS.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f30_02
+  ebas_method_ref: DE03L_IC_air
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 74.0 m
+  ebas_station_code: DE0002R
+  ebas_station_latitude: 52.802222
+  ebas_station_longitude: 10.759444
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2009-01-01T00:00:00Z'
+  time_coverage_start: '2005-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3M/Y2/T7/3MY2-T72Z.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f3p_1
@@ -836,6 +901,60 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3N/E9/U2/3NE9-U2B3.nc:
   - v_sum_nitric_acid_and_nitrate
   - qc_sum_nitric_acid_and_nitrate
   - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3N/YN/KM/3NYN-KMWU.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_w_1154
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '2021-05-12T13:47:01.200000Z'
+  ebas_station_altitude: 8.0 m
+  ebas_station_code: NO1154R
+  ebas_station_latitude: 78.92501
+  ebas_station_longitude: 11.92659
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2020-01-06T07:00:00Z'
+  time_coverage_start: '2019-01-07T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3S/7T/VQ/3S7T-VQ5R.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f3p_d_0039
@@ -1136,6 +1255,31 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3W/NJ/6N/3WNJ-6NKC.nc:
   - v_sodium
   - qc_sodium
   - meta_sodium
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3X/G2/AJ/3XG2-AJJJ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Sm_Den_0002
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: DE27L_UBA_Ng_FIA_0001
+  ebas_revision_date: '2024-12-11T09:12:09.927209Z'
+  ebas_station_altitude: 937.0 m
+  ebas_station_code: DE0008R
+  ebas_station_latitude: 50.65
+  ebas_station_longitude: 10.766667
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2024-01-02T07:00:00Z'
+  time_coverage_start: '2015-12-29T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia_nmol_per_mol
+  - qc_ammonia_nmol_per_mol
+  - meta_ammonia_nmol_per_mol
+  - v_ammonia_ug_N_per_m3
+  - qc_ammonia_ug_N_per_m3
+  - meta_ammonia_ug_N_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3Z/F6/TD/3ZF6-TDQA.nc:
   ebas_data_level: '2'
   ebas_instrument_name: NH3_Bordeaux
@@ -1235,6 +1379,62 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3Z/Q5/HM/3ZQ5-HM8C.nc:
   - v_zinc
   - qc_zinc
   - meta_zinc
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/42/TM/7G/42TM-7GMQ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_09
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: DE0009R
+  ebas_station_latitude: 54.4368
+  ebas_station_longitude: 12.7249
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2008-01-01T00:00:00Z'
+  time_coverage_start: '2007-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/43/TC/V8/43TC-V86G.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f3p_d_0002
@@ -1399,6 +1599,147 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/49/TU/5P/49TU-5PDC.nc:
   - v_sulphate_total_ug_per_m3
   - qc_sulphate_total_ug_per_m3
   - meta_sulphate_total_ug_per_m3
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4B/46/F7/4B46-F7JU.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_d_0055
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 333.0 m
+  ebas_station_code: NO0055R
+  ebas_station_latitude: 69.466667
+  ebas_station_longitude: 25.216667
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2002-01-01T07:00:00Z'
+  time_coverage_start: '2001-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4G/6U/EA/4G6U-EA8C.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_14
+  ebas_method_ref: SE01L_AD
+  ebas_revision_date: '2025-05-14T11:13:00.247634Z'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: SE0014R
+  ebas_station_latitude: 57.394
+  ebas_station_longitude: 11.914
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2023-12-31T23:00:00Z'
+  time_coverage_start: '2010-01-01T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
   - v_sum_ammonia_and_ammonium
   - qc_sum_ammonia_and_ammonium
   - meta_sum_ammonia_and_ammonium
@@ -1833,6 +2174,63 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/53/MH/9A/53MH-9A5C.nc:
   - v_sum_nitric_acid_and_nitrate
   - qc_sum_nitric_acid_and_nitrate
   - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/55/NC/DW/55NC-DWVT.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: CEH_denuder_45
+  ebas_method_ref: GB03L_CEH
+  ebas_revision_date: '2024-11-07T13:18:39.203911Z'
+  ebas_station_altitude: 85.0 m
+  ebas_station_code: GB0054R
+  ebas_station_latitude: 56.907222
+  ebas_station_longitude: -2.559167
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2024-02-07T11:59:00Z'
+  time_coverage_start: '2006-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/56/AK/69/56AK-69X5.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_09
+  ebas_method_ref: DE03L_IC_c
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: DE0009R
+  ebas_station_latitude: 54.4368
+  ebas_station_longitude: 12.7249
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2011-01-01T00:00:00Z'
+  time_coverage_start: '2010-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5D/JR/PV/5DJR-PVKJ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: CEH_denuder_34
@@ -1901,6 +2299,104 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5H/VB/6P/5HVB-6PV7.nc:
   - v_sulphur_dioxide
   - qc_sulphur_dioxide
   - meta_sulphur_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5K/RH/ZN/5KRH-ZN3S.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f2p_03
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 535.0 m
+  ebas_station_code: CZ0003R
+  ebas_station_latitude: 49.573394
+  ebas_station_longitude: 15.080278
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '1999-01-01T00:00:00Z'
+  time_coverage_start: '1996-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5N/8W/ZT/5N8W-ZTCD.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_d_0001
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 190.0 m
+  ebas_station_code: NO0001R
+  ebas_station_latitude: 58.383333
+  ebas_station_longitude: 8.25
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2010-01-01T07:00:00Z'
+  time_coverage_start: '2009-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/63/Q8/VP/63Q8-VPZ9.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f3p_03
@@ -2326,6 +2822,62 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/73/R2/68/73R2-68G6.nc:
   - v_sum_nitric_acid_and_nitrate
   - qc_sum_nitric_acid_and_nitrate
   - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/73/WW/59/73WW-59WE.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: CEH_denuder_06
+  ebas_method_ref: GB03L_CEH
+  ebas_revision_date: '2024-11-18T10:16:17.255019Z'
+  ebas_station_altitude: 126.0 m
+  ebas_station_code: GB0006R
+  ebas_station_latitude: 54.443056
+  ebas_station_longitude: -7.87
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2024-01-01T13:25:00Z'
+  time_coverage_start: '2004-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/75/TA/UP/75TA-UPUK.nc:
+  ebas_instrument_name: denuder_09
+  ebas_method_ref: DE03L_FIA
+  ebas_revision_date: '2012-09-17T00:00:00.000000Z'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: DE0009R
+  ebas_station_latitude: 54.4368
+  ebas_station_longitude: 12.7249
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2012-01-02T00:00:00Z'
+  time_coverage_start: '2011-01-04T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/78/E2/R8/78E2-R87M.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f3p_01
@@ -2534,6 +3086,28 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/7U/FY/5Z/7UFY-5ZPG.nc:
   - v_sum_ammonia_and_ammonium
   - qc_sum_ammonia_and_ammonium
   - meta_sum_ammonia_and_ammonium
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/7W/J6/3K/7WJ6-3K7J.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Wa_Den_0001
+  ebas_measurement_height: 1.4 m
+  ebas_method_ref: DE27L_UBA_Ng_FIA_0001
+  ebas_revision_date: '2016-12-05T13:26:15.623000Z'
+  ebas_station_altitude: 74.0 m
+  ebas_station_code: DE0002R
+  ebas_station_latitude: 52.802222
+  ebas_station_longitude: 10.759444
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2015-12-29T07:00:00Z'
+  time_coverage_start: '2013-12-08T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/7Z/G5/G3/7ZG5-G38K.nc:
   ebas_data_level: '2'
   ebas_instrument_name: vav_denuder
@@ -2756,6 +3330,68 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8E/8J/GB/8E8J-GBM2.nc:
   - v_sulphur_dioxide
   - qc_sulphur_dioxide
   - meta_sulphur_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8F/D3/E9/8FD3-E9WV.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_09
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: DE0009R
+  ebas_station_latitude: 54.4368
+  ebas_station_longitude: 12.7249
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2007-01-01T00:00:00Z'
+  time_coverage_start: '2005-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8F/PN/VA/8FPN-VAG2.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f3p_10
@@ -2851,6 +3487,155 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8G/AB/S2/8GAB-S2KZ.nc:
   - v_sulphur_dioxide
   - qc_sulphur_dioxide
   - meta_sulphur_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8G/GA/9C/8GGA-9CDC.nc:
+  ebas_instrument_name: f3p_01
+  ebas_method_ref: MD02L_IC_air
+  ebas_revision_date: '2024-02-14T09:19:39.944287Z'
+  ebas_station_altitude: 166.0 m
+  ebas_station_code: MD0013R
+  ebas_station_latitude: 46.4884
+  ebas_station_longitude: 28.2835
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2013-01-01T09:00:00Z'
+  time_coverage_start: '2012-01-01T09:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8G/MT/TS/8GMT-TSN4.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Wa_3FP_0001
+  ebas_measurement_height: 3.8 m
+  ebas_revision_date: '2020-01-06T13:29:27.000000Z'
+  ebas_station_altitude: 74.0 m
+  ebas_station_code: DE0002R
+  ebas_station_latitude: 52.802222
+  ebas_station_longitude: 10.759444
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2014-12-31T23:00:00Z'
+  time_coverage_start: '2013-12-31T23:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia_nmol_per_mol
+  - qc_ammonia_nmol_per_mol
+  - meta_ammonia_nmol_per_mol
+  - v_ammonia_ug_N_per_m3
+  - qc_ammonia_ug_N_per_m3
+  - meta_ammonia_ug_N_per_m3
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_hydrochloric_acid_nmol_per_mol
+  - qc_hydrochloric_acid_nmol_per_mol
+  - meta_hydrochloric_acid_nmol_per_mol
+  - v_hydrochloric_acid_ug_Cl_per_m3
+  - qc_hydrochloric_acid_ug_Cl_per_m3
+  - meta_hydrochloric_acid_ug_Cl_per_m3
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid_nmol_per_mol
+  - qc_nitric_acid_nmol_per_mol
+  - meta_nitric_acid_nmol_per_mol
+  - v_nitric_acid_ug_N_per_m3
+  - qc_nitric_acid_ug_N_per_m3
+  - meta_nitric_acid_ug_N_per_m3
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide_nmol_per_mol
+  - qc_sulphur_dioxide_nmol_per_mol
+  - meta_sulphur_dioxide_nmol_per_mol
+  - v_sulphur_dioxide_ug_S_per_m3
+  - qc_sulphur_dioxide_ug_S_per_m3
+  - meta_sulphur_dioxide_ug_S_per_m3
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8H/D4/WS/8HD4-WSS3.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f3p_d_0039
@@ -2864,6 +3649,28 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8H/D4/WS/8HD4-WSS3.nc:
   resolution: daily
   time_coverage_end: '2023-01-01T07:00:00Z'
   time_coverage_start: '2014-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8N/69/3Z/8N69-3Z8Z.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: NH3_Murcia
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: ES04L_NH3_Murcia
+  ebas_revision_date: '2023-11-08T00:00:00.000000Z'
+  ebas_station_altitude: 41.0 m
+  ebas_station_code: ES0040U
+  ebas_station_latitude: 37.993611
+  ebas_station_longitude: -1.144722
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2023-07-17T00:00:00Z'
+  time_coverage_start: '2023-04-14T00:00:00Z'
   variables:
   - time
   - time_bnds
@@ -3072,6 +3879,28 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8Y/SC/6V/8YSC-6VW9.nc:
   - v_sum_nitric_acid_and_nitrate
   - qc_sum_nitric_acid_and_nitrate
   - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/95/7B/8F/957B-8FNN.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0008R_Radiello_RAD168
+  ebas_measurement_height: 1.7 m
+  ebas_method_ref: ES01L_spectrophotometric
+  ebas_revision_date: '2025-02-03T00:00:00.000000Z'
+  ebas_station_altitude: 134.0 m
+  ebas_station_code: ES0008R
+  ebas_station_latitude: 43.43917
+  ebas_station_longitude: -4.85
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2023-12-31T00:00:00Z'
+  time_coverage_start: '2022-01-03T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/97/PE/Y4/97PE-Y4K8.nc:
   ebas_data_level: '2'
   ebas_instrument_name: FP4N_12
@@ -3412,6 +4241,93 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/A9/V3/HK/A9V3-HKRR.nc:
   - v_sum_nitric_acid_and_nitrate
   - qc_sum_nitric_acid_and_nitrate
   - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AA/TK/AV/AATK-AV5C.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Ng_3FP_0001
+  ebas_measurement_height: 3.5 m
+  ebas_revision_date: '2025-10-07T13:56:48.026701Z'
+  ebas_station_altitude: 62.0 m
+  ebas_station_code: DE0007R
+  ebas_station_latitude: 53.141303
+  ebas_station_longitude: 13.031662
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2014-12-31T23:00:00Z'
+  time_coverage_start: '2013-12-31T23:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia_nmol_per_mol
+  - qc_ammonia_nmol_per_mol
+  - meta_ammonia_nmol_per_mol
+  - v_ammonia_ug_N_per_m3
+  - qc_ammonia_ug_N_per_m3
+  - meta_ammonia_ug_N_per_m3
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_hydrochloric_acid_nmol_per_mol
+  - qc_hydrochloric_acid_nmol_per_mol
+  - meta_hydrochloric_acid_nmol_per_mol
+  - v_hydrochloric_acid_ug_Cl_per_m3
+  - qc_hydrochloric_acid_ug_Cl_per_m3
+  - meta_hydrochloric_acid_ug_Cl_per_m3
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid_nmol_per_mol
+  - qc_nitric_acid_nmol_per_mol
+  - meta_nitric_acid_nmol_per_mol
+  - v_nitric_acid_ug_N_per_m3
+  - qc_nitric_acid_ug_N_per_m3
+  - meta_nitric_acid_ug_N_per_m3
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide_nmol_per_mol
+  - qc_sulphur_dioxide_nmol_per_mol
+  - meta_sulphur_dioxide_nmol_per_mol
+  - v_sulphur_dioxide_ug_S_per_m3
+  - qc_sulphur_dioxide_ug_S_per_m3
+  - meta_sulphur_dioxide_ug_S_per_m3
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AB/J7/ZS/ABJ7-ZSBN.nc:
   ebas_instrument_name: f3p_01
   ebas_method_ref: MD02L_IC_air
@@ -3602,6 +4518,78 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AK/CA/EM/AKCA-EMHN.nc:
   - v_sulphur_dioxide
   - qc_sulphur_dioxide
   - meta_sulphur_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AM/PF/NH/AMPF-NHYX.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_d_0055
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 333.0 m
+  ebas_station_code: NO0055R
+  ebas_station_latitude: 69.466667
+  ebas_station_longitude: 25.216667
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2010-03-01T07:00:00Z'
+  time_coverage_start: '2002-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AT/KJ/FE/ATKJ-FE2A.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f3p_02
@@ -3652,6 +4640,26 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AT/KJ/FE/ATKJ-FE2A.nc:
   - v_sum_nitric_acid_and_nitrate
   - qc_sum_nitric_acid_and_nitrate
   - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AU/9N/7B/AU9N-7BWP.nc:
+  ebas_instrument_name: online_IC_11
+  ebas_method_ref: NL01L_MARGA
+  ebas_revision_date: '2015-01-29T12:44:18.703000Z'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: NL0011R
+  ebas_station_latitude: 51.970278
+  ebas_station_longitude: 4.926389
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2009-03-24T06:00:00Z'
+  time_coverage_start: '2006-06-01T16:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AV/X5/SC/AVX5-SC8W.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f3p_03
@@ -3776,6 +4784,72 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AW/ZH/34/AWZH-349S.nc:
   - v_sulphur_dioxide
   - qc_sulphur_dioxide
   - meta_sulphur_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AY/48/PU/AY48-PUC5.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_w_1154
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '2023-03-13T14:14:56.512890Z'
+  ebas_station_altitude: 8.0 m
+  ebas_station_code: NO1154R
+  ebas_station_latitude: 78.92501
+  ebas_station_longitude: 11.92659
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2021-01-04T07:00:00Z'
+  time_coverage_start: '2020-12-28T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AY/X3/J2/AYX3-J24P.nc:
   ebas_data_level: '2'
   ebas_instrument_name: filter_holder_06
@@ -3980,6 +5054,27 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BJ/T5/AW/BJT5-AW8Z.nc:
   - v_ammonia
   - qc_ammonia
   - meta_ammonia
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BK/34/CS/BK34-CSB2.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: RADIELLO_01
+  ebas_method_ref: ES01L_uv_vis
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 917.0 m
+  ebas_station_code: ES0001R
+  ebas_station_latitude: 39.54694
+  ebas_station_longitude: -4.35056
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2012-12-31T07:00:00Z'
+  time_coverage_start: '2012-06-04T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BK/3Q/XG/BK3Q-XGQY.nc:
   ebas_data_level: '2'
   ebas_instrument_name: NH3_Lo
@@ -4002,6 +5097,78 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BK/3Q/XG/BK3Q-XGQY.nc:
   - v_ammonia
   - qc_ammonia
   - meta_ammonia
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BS/TF/DY/BSTF-DYQE.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: filter_holder_06
+  ebas_method_ref: SK01L_IC_Dionex
+  ebas_revision_date: '2025-06-26T12:32:28.554845Z'
+  ebas_station_altitude: 345.0 m
+  ebas_station_code: SK0006R
+  ebas_station_latitude: 49.05
+  ebas_station_longitude: 22.266667
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2024-01-01T08:00:00Z'
+  time_coverage_start: '2011-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BU/Q7/A8/BUQ7-A8XN.nc:
   ebas_data_level: '2'
   ebas_instrument_name: NH3_Campisabalos
@@ -4594,6 +5761,77 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/D2/8D/DJ/D28D-DJ4M.nc:
   - v_ammonia
   - qc_ammonia
   - meta_ammonia
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/D4/G3/XB/D4G3-XBRM.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_w_0058
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 1309.0 m
+  ebas_station_code: NO0058G
+  ebas_station_latitude: -72.016667
+  ebas_station_longitude: 2.533333
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2011-01-03T07:00:00Z'
+  time_coverage_start: '2010-01-04T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/D8/SF/95/D8SF-955K.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f1p_2
@@ -4685,6 +5923,139 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DC/45/E6/DC45-E66M.nc:
   - v_sum_nitric_acid_and_nitrate
   - qc_sum_nitric_acid_and_nitrate
   - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/DH/TA/Q5/DHTA-Q5DQ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: mini_5
+  ebas_method_ref: CH01L_den
+  ebas_revision_date: '2025-09-17T12:25:26.655595Z'
+  ebas_station_altitude: 1031.0 m
+  ebas_station_code: CH0005R
+  ebas_station_latitude: 47.0674167
+  ebas_station_longitude: 8.4633333
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-14T00:00:00)
+  time_coverage_end: '2025-01-07T10:00:00Z'
+  time_coverage_start: '2007-01-02T10:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/DN/EQ/EQ/DNEQ-EQ34.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Wa_Den_0002
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: DE27L_UBA_Ng_FIA_0001
+  ebas_revision_date: '2024-12-11T12:08:09.694302Z'
+  ebas_station_altitude: 74.0 m
+  ebas_station_code: DE0002R
+  ebas_station_latitude: 52.802222
+  ebas_station_longitude: 10.759444
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2024-01-02T07:00:00Z'
+  time_coverage_start: '2015-12-29T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia_nmol_per_mol
+  - qc_ammonia_nmol_per_mol
+  - meta_ammonia_nmol_per_mol
+  - v_ammonia_ug_N_per_m3
+  - qc_ammonia_ug_N_per_m3
+  - meta_ammonia_ug_N_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/DS/HS/P7/DSHS-P7P4.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_w_1154
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '2025-03-25T15:51:38.399567Z'
+  ebas_station_altitude: 8.0 m
+  ebas_station_code: NO1154R
+  ebas_station_latitude: 78.92501
+  ebas_station_longitude: 11.92659
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2025-01-06T07:00:00Z'
+  time_coverage_start: '2023-01-02T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DU/FV/85/DUFV-85Y6.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f3p_12
@@ -4741,6 +6112,45 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DX/JQ/QY/DXJQ-QYVY.nc:
   - v_nitric_acid
   - qc_nitric_acid
   - meta_nitric_acid
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/DZ/GA/56/DZGA-56WV.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: EK
+  ebas_measurement_height: 2.45 m
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 157.0 m
+  ebas_station_code: PL0005R
+  ebas_station_latitude: 54.15
+  ebas_station_longitude: 22.066667
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2016-01-01T06:00:00Z'
+  time_coverage_start: '2014-01-01T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
   - v_sum_nitric_acid_and_nitrate
   - qc_sum_nitric_acid_and_nitrate
   - meta_sum_nitric_acid_and_nitrate
@@ -5290,6 +6700,27 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/EW/YX/GJ/EWYX-GJYM.nc:
   - v_sum_nitric_acid_and_nitrate
   - qc_sum_nitric_acid_and_nitrate
   - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/EY/YA/5G/EYYA-5GJW.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_5
+  ebas_method_ref: PL02L_ASNHC
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 157.0 m
+  ebas_station_code: PL0005R
+  ebas_station_latitude: 54.15
+  ebas_station_longitude: 22.066667
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2014-01-01T06:00:00Z'
+  time_coverage_start: '2008-01-01T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/F6/3D/MT/F63D-MTME.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f1p_4
@@ -5334,6 +6765,31 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/F6/ME/7T/F6ME-7TCD.nc:
   - v_ammonia
   - qc_ammonia
   - meta_ammonia
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FD/ZR/CM/FDZR-CMTF.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Zg_Den_0002
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: DE27L_UBA_Ng_FIA_0001
+  ebas_revision_date: '2025-10-07T13:11:42.551562Z'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: DE0009R
+  ebas_station_latitude: 54.4368
+  ebas_station_longitude: 12.7249
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2025-01-07T07:00:00Z'
+  time_coverage_start: '2015-12-29T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia_nmol_per_mol
+  - qc_ammonia_nmol_per_mol
+  - meta_ammonia_nmol_per_mol
+  - v_ammonia_ug_N_per_m3
+  - qc_ammonia_ug_N_per_m3
+  - meta_ammonia_ug_N_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FK/GS/AW/FKGS-AW7T.nc:
   ebas_instrument_name: MA02
   ebas_method_ref: GB02L_MA_1
@@ -5448,6 +6904,60 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/FU/QQ/WX/FUQQ-WXBF.nc:
   - v_nitric_acid
   - qc_nitric_acid
   - meta_nitric_acid
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FX/8K/ET/FX8K-ETD3.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: LEGMC_f2p_0010
+  ebas_measurement_height: 1.8 m
+  ebas_revision_date: '2024-07-26T10:00:00.000000Z'
+  ebas_station_altitude: 18.0 m
+  ebas_station_code: LV0010R
+  ebas_station_latitude: 56.161944
+  ebas_station_longitude: 21.173056
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2024-01-01T08:00:00Z'
+  time_coverage_start: '2023-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FY/6U/2S/FY6U-2SQQ.nc:
   ebas_instrument_name: den_12
   ebas_method_ref: SE01L_NA
@@ -5562,6 +7072,54 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/FZ/24/ZN/FZ24-ZNAM.nc:
   - v_sulphur_dioxide
   - qc_sulphur_dioxide
   - meta_sulphur_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FZ/8K/NF/FZ8K-NF67.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: EK
+  ebas_measurement_height: 2.45 m
+  ebas_revision_date: '2024-09-17T13:55:01.474052Z'
+  ebas_station_altitude: 157.0 m
+  ebas_station_code: PL0005R
+  ebas_station_latitude: 54.15
+  ebas_station_longitude: 22.066667
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2024-01-01T06:00:00Z'
+  time_coverage_start: '2017-01-01T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/GC/FJ/AS/GCFJ-ASWS.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f3p_05
@@ -5618,6 +7176,33 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/GC/FJ/AS/GCFJ-ASWS.nc:
   - v_sum_nitric_acid_and_nitrate
   - qc_sum_nitric_acid_and_nitrate
   - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GC/R2/9N/GCR2-9NBH.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_02
+  ebas_method_ref: DE03L_IC_air
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 74.0 m
+  ebas_station_code: DE0002R
+  ebas_station_latitude: 52.802222
+  ebas_station_longitude: 10.759444
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2014-01-01T00:00:00Z'
+  time_coverage_start: '2013-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_hydrochloric_acid
+  - qc_hydrochloric_acid
+  - meta_hydrochloric_acid
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/GH/MQ/NU/GHMQ-NUSB.nc:
   ebas_data_level: '2'
   ebas_instrument_name: airsamp_UK
@@ -5944,6 +7529,73 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/H2/UM/GV/H2UM-GVRR.nc:
   - v_ammonia
   - qc_ammonia
   - meta_ammonia
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/H3/WM/2Z/H3WM-2ZNR.nc:
+  ebas_instrument_name: den_01
+  ebas_method_ref: NO01L_NA
+  ebas_revision_date: '1994-01-01T00:00:00.000000Z'
+  ebas_station_altitude: 190.0 m
+  ebas_station_code: NO0001R
+  ebas_station_latitude: 58.383333
+  ebas_station_longitude: 8.25
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '1993-09-27T07:00:00Z'
+  time_coverage_start: '1992-11-30T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/H4/QA/GG/H4QA-GG53.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f2p_03
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 535.0 m
+  ebas_station_code: CZ0003R
+  ebas_station_latitude: 49.573394
+  ebas_station_longitude: 15.080278
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2001-01-01T07:00:00Z'
+  time_coverage_start: '2000-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/H5/M4/Y9/H5M4-Y96B.nc:
   ebas_data_level: '2'
   ebas_instrument_name: 39KK01019_39KK01020
@@ -5966,6 +7618,100 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/H5/M4/Y9/H5M4-Y96B.nc:
   - v_ammonia
   - qc_ammonia
   - meta_ammonia
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/H6/6A/JJ/H66A-JJE9.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0001R_Radiello_RAD168
+  ebas_measurement_height: 1.7 m
+  ebas_method_ref: ES01L_spectrophotometric
+  ebas_revision_date: '2025-02-03T00:00:00.000000Z'
+  ebas_station_altitude: 917.0 m
+  ebas_station_code: ES0001R
+  ebas_station_latitude: 39.54694
+  ebas_station_longitude: -4.35056
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2023-12-31T00:00:00Z'
+  time_coverage_start: '2022-01-03T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/H7/PV/77/H7PV-77C5.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_d_0042
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '2025-03-25T15:48:19.414638Z'
+  ebas_station_altitude: 474.0 m
+  ebas_station_code: NO0042G
+  ebas_station_latitude: 78.90715
+  ebas_station_longitude: 11.88668
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2025-01-01T07:00:00Z'
+  time_coverage_start: '2001-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HA/MC/EG/HAMC-EGJ4.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f3p_d_0002
@@ -6186,6 +7932,79 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/HE/XA/54/HEXA-54E2.nc:
   - v_sulphur_dioxide
   - qc_sulphur_dioxide
   - meta_sulphur_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HG/JU/YM/HGJU-YMAR.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Dado_labQB1e_Lampedusa
+  ebas_measurement_height: 5.0 m
+  ebas_method_ref: IT01L_IT_01L_aquion_190960093_Montelibretti
+  ebas_revision_date: '2025-07-23T09:00:00.000000Z'
+  ebas_station_altitude: 45.0 m
+  ebas_station_code: IT0018R
+  ebas_station_latitude: 35.5182
+  ebas_station_longitude: 12.6305
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2025-01-01T00:00:00Z'
+  time_coverage_start: '2024-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HH/6S/3K/HH6S-3K2Z.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f3p_d_0042
@@ -6417,6 +8236,62 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/J2/D9/9W/J2D9-9WP3.nc:
   - v_ammonia
   - qc_ammonia
   - meta_ammonia
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/J4/N2/AP/J4N2-APFY.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_09
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: DE0009R
+  ebas_station_latitude: 54.4368
+  ebas_station_longitude: 12.7249
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2009-01-01T00:00:00Z'
+  time_coverage_start: '2008-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/J4/XA/Q3/J4XA-Q3RW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: mod_seq4750_31
@@ -6504,6 +8379,135 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/J5/58/NH/J558-NH6Q.nc:
   - v_sulphur_dioxide
   - qc_sulphur_dioxide
   - meta_sulphur_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/J5/KW/AH/J5KW-AHMA.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_20
+  ebas_method_ref: SE01L_AD
+  ebas_revision_date: '2025-05-14T08:36:34.555017Z'
+  ebas_station_altitude: 190.0 m
+  ebas_station_code: SE0020R
+  ebas_station_latitude: 56.0429
+  ebas_station_longitude: 13.148
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2023-12-31T23:00:00Z'
+  time_coverage_start: '2016-01-01T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/J7/59/HV/J759-HVTK.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Ng_Den_0002
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: DE27L_UBA_Ng_FIA_0001
+  ebas_revision_date: '2024-12-11T09:16:18.307825Z'
+  ebas_station_altitude: 62.0 m
+  ebas_station_code: DE0007R
+  ebas_station_latitude: 53.141303
+  ebas_station_longitude: 13.031662
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2024-01-02T07:00:00Z'
+  time_coverage_start: '2015-12-29T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia_nmol_per_mol
+  - qc_ammonia_nmol_per_mol
+  - meta_ammonia_nmol_per_mol
+  - v_ammonia_ug_N_per_m3
+  - qc_ammonia_ug_N_per_m3
+  - meta_ammonia_ug_N_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/J8/7R/UC/J87R-UCJQ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f2p_03
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 535.0 m
+  ebas_station_code: CZ0003R
+  ebas_station_latitude: 49.573394
+  ebas_station_longitude: 15.080278
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '1993-01-01T07:00:00Z'
+  time_coverage_start: '1990-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_nitrogen_dioxide
+  - qc_nitrogen_dioxide
+  - meta_nitrogen_dioxide
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/JB/RU/RR/JBRU-RRV8.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RADIELLO
@@ -6525,6 +8529,114 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/JB/RU/RR/JBRU-RRV8.nc:
   - v_ammonia
   - qc_ammonia
   - meta_ammonia
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/JH/DP/XG/JHDP-XG2J.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0014R_Radiello_RAD168
+  ebas_measurement_height: 1.7 m
+  ebas_method_ref: ES01L_spectrophotometric
+  ebas_revision_date: '2025-02-03T00:00:00.000000Z'
+  ebas_station_altitude: 470.0 m
+  ebas_station_code: ES0014R
+  ebas_station_latitude: 41.39389
+  ebas_station_longitude: 0.73472
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2023-12-31T00:00:00Z'
+  time_coverage_start: '2022-01-03T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/JJ/KY/2M/JJKY-2M9E.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: EK
+  ebas_measurement_height: 2.45 m
+  ebas_revision_date: '2020-11-10T11:57:18.000000Z'
+  ebas_station_altitude: 157.0 m
+  ebas_station_code: PL0005R
+  ebas_station_latitude: 54.15
+  ebas_station_longitude: 22.066667
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2017-01-01T06:00:00Z'
+  time_coverage_start: '2016-01-01T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/JJ/RT/H6/JJRT-H676.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f2p_03
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 535.0 m
+  ebas_station_code: CZ0003R
+  ebas_station_latitude: 49.573394
+  ebas_station_longitude: 15.080278
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '1994-01-01T14:00:00Z'
+  time_coverage_start: '1993-01-01T14:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/JM/WQ/6W/JMWQ-6WRN.nc:
   ebas_data_level: '2'
   ebas_instrument_name: LEGMC_f2p_0010
@@ -6678,6 +8790,33 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/JW/RQ/PD/JWRQ-PD3N.nc:
   - v_ammonia
   - qc_ammonia
   - meta_ammonia
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/JY/3R/FV/JY3R-FV5J.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f1p_5
+  ebas_method_ref: PL02L_Chlor_T
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 157.0 m
+  ebas_station_code: PL0005R
+  ebas_station_latitude: 54.15
+  ebas_station_longitude: 22.066667
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '1995-04-10T06:00:00Z'
+  time_coverage_start: '1995-01-01T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/K2/UM/NQ/K2UM-NQ2S.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f1p_3
@@ -6923,6 +9062,31 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/KP/NU/MQ/KPNU-MQ6A.nc:
   - v_ammonia
   - qc_ammonia
   - meta_ammonia
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/KS/KS/E2/KSKS-E242.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: NH3_Reims
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: FR22L_NH3_Reims
+  ebas_revision_date: '2023-11-08T00:00:00.000000Z'
+  ebas_station_altitude: 97.0 m
+  ebas_station_code: FR0054U
+  ebas_station_latitude: 49.22439
+  ebas_station_longitude: 4.0205278
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2023-01-01T00:00:00Z'
+  time_coverage_start: '2016-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia_nmol_per_mol
+  - qc_ammonia_nmol_per_mol
+  - meta_ammonia_nmol_per_mol
+  - v_ammonia_ug_N_per_m3
+  - qc_ammonia_ug_N_per_m3
+  - meta_ammonia_ug_N_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/KU/2T/U5/KU2T-U5JX.nc:
   ebas_data_level: '2'
   ebas_instrument_name: NH3_MAQS
@@ -7022,6 +9186,77 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/KV/H9/UM/KVH9-UMWP.nc:
   - v_zinc
   - qc_zinc
   - meta_zinc
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/KV/W2/8T/KVW2-8T2G.nc:
+  ebas_instrument_name: f3p_01
+  ebas_method_ref: MD02L_IC_air
+  ebas_revision_date: '2024-02-14T09:19:39.944287Z'
+  ebas_station_altitude: 166.0 m
+  ebas_station_code: MD0013R
+  ebas_station_latitude: 46.4884
+  ebas_station_longitude: 28.2835
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2012-01-01T09:00:00Z'
+  time_coverage_start: '2011-01-01T09:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/M6/7N/4S/M67N-4SHS.nc:
   ebas_instrument_name: den_12
   ebas_method_ref: SE01L_NA
@@ -7057,6 +9292,103 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/M6/7N/4S/M67N-4SHS.nc:
   - v_nitric_acid
   - qc_nitric_acid
   - meta_nitric_acid
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MB/R7/VS/MBR7-VSAZ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_05
+  ebas_method_ref: SE01L_AD
+  ebas_revision_date: '2025-05-14T08:22:11.696539Z'
+  ebas_station_altitude: 404.0 m
+  ebas_station_code: SE0005R
+  ebas_station_latitude: 63.85
+  ebas_station_longitude: 15.333333
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2023-12-31T23:00:00Z'
+  time_coverage_start: '2010-01-01T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MD/GY/FG/MDGY-FGE4.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: NH3_Strasbourg
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: FR22L_NH3_Strasbourg
+  ebas_revision_date: '2023-11-08T00:00:00.000000Z'
+  ebas_station_altitude: 140.0 m
+  ebas_station_code: FR0055U
+  ebas_station_latitude: 48.57279
+  ebas_station_longitude: 7.7529972
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2023-01-01T01:00:00Z'
+  time_coverage_start: '2019-12-04T12:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia_nmol_per_mol
+  - qc_ammonia_nmol_per_mol
+  - meta_ammonia_nmol_per_mol
+  - v_ammonia_ug_N_per_m3
+  - qc_ammonia_ug_N_per_m3
+  - meta_ammonia_ug_N_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ME/MK/SK/MEMK-SKS5.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f3p_03
@@ -7176,6 +9508,78 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/MJ/DU/H4/MJDU-H48T.nc:
   - v_sum_ammonia_and_ammonium
   - qc_sum_ammonia_and_ammonium
   - meta_sum_ammonia_and_ammonium
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MK/CV/35/MKCV-35JX.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_d_0002
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '2025-03-25T15:46:53.501717Z'
+  ebas_station_altitude: 219.0 m
+  ebas_station_code: NO0002R
+  ebas_station_latitude: 58.38853
+  ebas_station_longitude: 8.252
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2025-01-01T07:00:00Z'
+  time_coverage_start: '2012-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/MN/AB/8Z/MNAB-8ZH6.nc:
   ebas_data_level: '2'
   ebas_instrument_name: doas
@@ -7201,6 +9605,275 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/MN/AB/8Z/MNAB-8ZH6.nc:
   - v_ammonia_ug_N_per_m3
   - qc_ammonia_ug_N_per_m3
   - meta_ammonia_ug_N_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MY/ZQ/EC/MYZQ-ECTJ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_02
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 74.0 m
+  ebas_station_code: DE0002R
+  ebas_station_latitude: 52.802222
+  ebas_station_longitude: 10.759444
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2012-01-01T00:00:00Z'
+  time_coverage_start: '2011-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/N4/FA/7E/N4FA-7E5F.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Wa_3FP_0001
+  ebas_measurement_height: 3.8 m
+  ebas_revision_date: '2025-10-07T14:19:25.633174Z'
+  ebas_station_altitude: 74.0 m
+  ebas_station_code: DE0002R
+  ebas_station_latitude: 52.802222
+  ebas_station_longitude: 10.759444
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2018-12-31T23:00:00Z'
+  time_coverage_start: '2014-12-31T23:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia_nmol_per_mol
+  - qc_ammonia_nmol_per_mol
+  - meta_ammonia_nmol_per_mol
+  - v_ammonia_ug_N_per_m3
+  - qc_ammonia_ug_N_per_m3
+  - meta_ammonia_ug_N_per_m3
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_hydrochloric_acid_nmol_per_mol
+  - qc_hydrochloric_acid_nmol_per_mol
+  - meta_hydrochloric_acid_nmol_per_mol
+  - v_hydrochloric_acid_ug_Cl_per_m3
+  - qc_hydrochloric_acid_ug_Cl_per_m3
+  - meta_hydrochloric_acid_ug_Cl_per_m3
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid_nmol_per_mol
+  - qc_nitric_acid_nmol_per_mol
+  - meta_nitric_acid_nmol_per_mol
+  - v_nitric_acid_ug_N_per_m3
+  - qc_nitric_acid_ug_N_per_m3
+  - meta_nitric_acid_ug_N_per_m3
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide_nmol_per_mol
+  - qc_sulphur_dioxide_nmol_per_mol
+  - meta_sulphur_dioxide_nmol_per_mol
+  - v_sulphur_dioxide_ug_S_per_m3
+  - qc_sulphur_dioxide_ug_S_per_m3
+  - meta_sulphur_dioxide_ug_S_per_m3
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/N5/2E/7G/N52E-7GK6.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_d_0001
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 190.0 m
+  ebas_station_code: NO0001R
+  ebas_station_latitude: 58.383333
+  ebas_station_longitude: 8.25
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2010-02-01T07:00:00Z'
+  time_coverage_start: '2010-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NA/SN/PA/NASN-PAXB.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_d_1665
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '2019-03-28T12:42:41.463000Z'
+  ebas_station_altitude: 8.0 m
+  ebas_station_code: NO1665R
+  ebas_station_latitude: 78.92472
+  ebas_station_longitude: 11.92643
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2018-11-14T07:00:00Z'
+  time_coverage_start: '2016-01-04T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NC/Z7/FF/NCZ7-FF3S.nc:
   ebas_data_level: '2'
   ebas_instrument_name: NH3_Poitiers
@@ -7339,6 +10012,78 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NF/88/4V/NF88-4VKT.nc:
   - v_sum_nitric_acid_and_nitrate
   - qc_sum_nitric_acid_and_nitrate
   - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NR/2J/F6/NR2J-F625.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_22
+  ebas_method_ref: SE01L_AD
+  ebas_revision_date: '2025-05-14T11:25:54.458739Z'
+  ebas_station_altitude: 45.0 m
+  ebas_station_code: SE0022R
+  ebas_station_latitude: 60.0858
+  ebas_station_longitude: 17.50528
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2023-12-31T23:00:00Z'
+  time_coverage_start: '2018-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NS/YF/3B/NSYF-3BXV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: NH3_Coruna
@@ -7361,6 +10106,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NS/YF/3B/NSYF-3BXV.nc:
   - v_ammonia
   - qc_ammonia
   - meta_ammonia
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NU/GT/28/NUGT-28AP.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Marga_Finland
+  ebas_method_ref: FI01L_Marga_Finland
+  ebas_revision_date: '2023-08-25T16:00:00.000000Z'
+  ebas_station_altitude: 25.0 m
+  ebas_station_code: FI0038U
+  ebas_station_latitude: 60.20288
+  ebas_station_longitude: 24.961207
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2010-05-25T07:00:00Z'
+  time_coverage_start: '2009-11-01T01:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia_nmol_per_mol
+  - qc_ammonia_nmol_per_mol
+  - meta_ammonia_nmol_per_mol
+  - v_ammonia_ug_N_per_m3
+  - qc_ammonia_ug_N_per_m3
+  - meta_ammonia_ug_N_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NU/NJ/CK/NUNJ-CKNT.nc:
   ebas_data_level: '2'
   ebas_instrument_name: NH3_HOP
@@ -7399,6 +10168,28 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NX/CT/E7/NXCT-E7GB.nc:
   resolution: daily
   time_coverage_end: '2020-08-03T05:00:00Z'
   time_coverage_start: '2014-02-24T05:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NX/XG/ND/NXXG-NDAJ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Zg_Den_0001
+  ebas_measurement_height: 1.6 m
+  ebas_method_ref: DE27L_UBA_Ng_FIA_0001
+  ebas_revision_date: '2016-12-05T13:26:20.333000Z'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: DE0009R
+  ebas_station_latitude: 54.4368
+  ebas_station_longitude: 12.7249
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2015-12-29T07:00:00Z'
+  time_coverage_start: '2013-12-03T07:00:00Z'
   variables:
   - time
   - time_bnds
@@ -7476,6 +10267,27 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/P7/9U/2C/P79U-2CUK.nc:
   resolution: Unrecognised (P0000-00-07T00:00:00)
   time_coverage_end: '2012-01-02T00:00:00Z'
   time_coverage_start: '2011-01-04T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/P9/Y8/8C/P9Y8-8C77.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f2p_03
+  ebas_method_ref: CZ01L_indophenol
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 535.0 m
+  ebas_station_code: CZ0003R
+  ebas_station_latitude: 49.573394
+  ebas_station_longitude: 15.080278
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '1999-12-31T14:00:00Z'
+  time_coverage_start: '1995-01-01T07:00:00Z'
   variables:
   - time
   - time_bnds
@@ -7798,6 +10610,78 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q4/VB/38/Q4VB-388E.nc:
   - v_sum_nitric_acid_and_nitrate
   - qc_sum_nitric_acid_and_nitrate
   - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q9/MR/VX/Q9MR-VX9V.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_d_0039
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '2025-03-25T15:47:47.050436Z'
+  ebas_station_altitude: 210.0 m
+  ebas_station_code: NO0039R
+  ebas_station_latitude: 62.783333
+  ebas_station_longitude: 8.883333
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2025-01-01T07:00:00Z'
+  time_coverage_start: '2002-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QB/EM/4U/QBEM-4UW3.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f2p_10
@@ -8051,6 +10935,75 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QK/R3/73/QKR3-73MZ.nc:
   - v_sum_nitric_acid_and_nitrate
   - qc_sum_nitric_acid_and_nitrate
   - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QN/W6/JG/QNW6-JGZN.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_14
+  ebas_method_ref: SE01L_AD
+  ebas_revision_date: '2025-05-14T11:01:39.876157Z'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: SE0014R
+  ebas_station_latitude: 57.394
+  ebas_station_longitude: 11.914
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2010-01-01T06:00:00Z'
+  time_coverage_start: '2009-01-01T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QP/3K/8B/QP3K-8B3E.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f3p_10
@@ -8106,6 +11059,27 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QP/3K/8B/QP3K-8B3E.nc:
   - v_sulphur_dioxide
   - qc_sulphur_dioxide
   - meta_sulphur_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QV/BR/4N/QVBR-4N3K.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_11
+  ebas_method_ref: SE01L_AD
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 175.0 m
+  ebas_station_code: SE0011R
+  ebas_station_latitude: 56.016667
+  ebas_station_longitude: 13.15
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2016-01-01T06:00:00Z'
+  time_coverage_start: '1993-01-01T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QV/D2/6M/QVD2-6M3G.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Malaga_JuanXXIII_NH3
@@ -8128,6 +11102,42 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QV/D2/6M/QVD2-6M3G.nc:
   - v_ammonia
   - qc_ammonia
   - meta_ammonia
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QV/QE/VW/QVQE-VWN5.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: CEH_denuder_32
+  ebas_method_ref: GB03L_CEH
+  ebas_revision_date: '2024-11-21T08:30:26.436876Z'
+  ebas_station_altitude: 267.0 m
+  ebas_station_code: GB0014R
+  ebas_station_latitude: 54.334444
+  ebas_station_longitude: -0.8075
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2024-02-07T14:20:00Z'
+  time_coverage_start: '2002-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QY/YS/HB/QYYS-HB44.nc:
   ebas_data_level: '2'
   ebas_instrument_name: passive_SIRTA
@@ -8210,6 +11220,78 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/R3/8F/6X/R38F-6XPS.nc:
   - v_sulphur_dioxide
   - qc_sulphur_dioxide
   - meta_sulphur_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/R3/KJ/W6/R3KJ-W66B.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_d_0001
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 190.0 m
+  ebas_station_code: NO0001R
+  ebas_station_latitude: 58.383333
+  ebas_station_longitude: 8.25
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2009-01-01T07:00:00Z'
+  time_coverage_start: '2002-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/R4/B9/FX/R4B9-FXDD.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f1p_15
@@ -8314,6 +11396,79 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/R9/DZ/U5/R9DZ-U5YQ.nc:
   - v_ammonia
   - qc_ammonia
   - meta_ammonia
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/R9/FF/XS/R9FF-XSJR.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: fp3s50
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: FI01L_IC
+  ebas_revision_date: '2025-06-12T11:29:08.062824Z'
+  ebas_station_altitude: 181.0 m
+  ebas_station_code: FI0050R
+  ebas_station_latitude: 61.85
+  ebas_station_longitude: 24.283333
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2024-12-30T07:30:00Z'
+  time_coverage_start: '2017-01-16T08:05:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RB/TX/6A/RBTX-6AZY.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f3p_01
@@ -8362,6 +11517,35 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RD/ZZ/7N/RDZZ-7N9W.nc:
   - v_ammonium_ug_per_m3
   - qc_ammonium_ug_per_m3
   - meta_ammonium_ug_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RF/Q4/6E/RFQ4-6EVZ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f2p_03
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 535.0 m
+  ebas_station_code: CZ0003R
+  ebas_station_latitude: 49.573394
+  ebas_station_longitude: 15.080278
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '1995-01-01T07:00:00Z'
+  time_coverage_start: '1994-01-01T14:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RN/7E/AP/RN7E-APJM.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f3p_47
@@ -8430,6 +11614,110 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RN/T4/4U/RNT4-4UBB.nc:
   - v_sum_nitric_acid_and_nitrate
   - qc_sum_nitric_acid_and_nitrate
   - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RP/ZH/P2/RPZH-P22R.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_07
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 62.0 m
+  ebas_station_code: DE0007R
+  ebas_station_latitude: 53.166667
+  ebas_station_longitude: 13.033333
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2014-01-01T00:00:00Z'
+  time_coverage_start: '2013-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RS/FZ/RV/RSFZ-RV8Q.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_d_0001
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 190.0 m
+  ebas_station_code: NO0001R
+  ebas_station_latitude: 58.383333
+  ebas_station_longitude: 8.25
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2001-01-01T07:00:00Z'
+  time_coverage_start: '1996-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RS/XR/BQ/RSXR-BQMW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f3p_2d_0797
@@ -8781,6 +12069,51 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/SS/CD/E6/SSCD-E6W2.nc:
   - v_ammonia
   - qc_ammonia
   - meta_ammonia
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ST/3W/R6/ST3W-R6NF.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_w_0058
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 1309.0 m
+  ebas_station_code: NO0058G
+  ebas_station_latitude: -72.016667
+  ebas_station_longitude: 2.533333
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2011-05-02T07:00:00Z'
+  time_coverage_start: '2011-01-03T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ST/RJ/84/STRJ-84SG.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f3p_d_0039
@@ -8914,6 +12247,138 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/SZ/JZ/33/SZJZ-33NU.nc:
   resolution: hourly
   time_coverage_end: '2016-01-01T00:00:00Z'
   time_coverage_start: '1996-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/SZ/T2/HD/SZT2-HDZY.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_w_1154
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '2023-03-13T14:04:02.391991Z'
+  ebas_station_altitude: 8.0 m
+  ebas_station_code: NO1154R
+  ebas_station_latitude: 78.92501
+  ebas_station_longitude: 11.92659
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2023-01-02T07:00:00Z'
+  time_coverage_start: '2018-12-03T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/T3/UJ/SG/T3UJ-SG5F.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_14
+  ebas_method_ref: SE01L_AD
+  ebas_revision_date: '2025-05-14T11:01:55.514447Z'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: SE0014R
+  ebas_station_latitude: 57.394
+  ebas_station_longitude: 11.914
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2009-01-01T06:00:00Z'
+  time_coverage_start: '2002-01-01T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/T4/VZ/T3/T4VZ-T3XH.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES1778R_HVS_DIG_AIR_01
+  ebas_method_ref: ES05L_EE
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 700.0 m
+  ebas_station_code: ES1778R
+  ebas_station_latitude: 41.766667
+  ebas_station_longitude: 2.35
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2003-12-12T12:00:00Z'
+  time_coverage_start: '2002-03-22T12:00:00Z'
   variables:
   - time
   - time_bnds
@@ -9102,6 +12567,28 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/T9/RT/UQ/T9RT-UQR3.nc:
   - v_sum_nitric_acid_and_nitrate
   - qc_sum_nitric_acid_and_nitrate
   - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/TF/4W/MG/TF4W-MG3Q.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0009R_Radiello_RAD168
+  ebas_measurement_height: 1.7 m
+  ebas_method_ref: ES01L_spectrophotometric
+  ebas_revision_date: '2025-02-03T00:00:00.000000Z'
+  ebas_station_altitude: 1360.0 m
+  ebas_station_code: ES0009R
+  ebas_station_latitude: 41.27417
+  ebas_station_longitude: -3.1425
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2023-12-31T00:00:00Z'
+  time_coverage_start: '2022-01-03T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/TW/R4/UH/TWR4-UH6Q.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f3p_10
@@ -9253,6 +12740,51 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/UH/ME/FG/UHME-FGA3.nc:
   - v_ammonia
   - qc_ammonia
   - meta_ammonia
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UP/3Q/EV/UP3Q-EVPD.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_d_0001
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 190.0 m
+  ebas_station_code: NO0001R
+  ebas_station_latitude: 58.383333
+  ebas_station_longitude: 8.25
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '1996-01-01T07:00:00Z'
+  time_coverage_start: '1993-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/V2/K7/6U/V2K7-6UM2.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f3p_d_0030
@@ -9599,6 +13131,81 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VJ/QH/KH/VJQH-KH6P.nc:
   - v_ammonium_ug_per_m3
   - qc_ammonium_ug_per_m3
   - meta_ammonium_ug_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VN/MF/K7/VNMF-K7XG.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: CEH_denuder_34
+  ebas_method_ref: GB03L_CEH
+  ebas_revision_date: '2024-11-20T15:05:27.607145Z'
+  ebas_station_altitude: 119.0 m
+  ebas_station_code: GB0013R
+  ebas_station_latitude: 50.596389
+  ebas_station_longitude: -3.713056
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2024-01-03T07:45:00Z'
+  time_coverage_start: '2004-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VP/9B/YR/VP9B-YRZX.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_2d_0044
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 200.0 m
+  ebas_station_code: NO0044R
+  ebas_station_latitude: 60.266667
+  ebas_station_longitude: 11.1
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '1997-03-03T07:00:00Z'
+  time_coverage_start: '1993-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VS/BX/CR/VSBX-CRVD.nc:
   ebas_data_level: '2'
   ebas_instrument_name: mod_seq4750_08
@@ -9671,6 +13278,27 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VU/37/YA/VU37-YAFX.nc:
   resolution: daily
   time_coverage_end: '2022-01-01T00:00:00Z'
   time_coverage_start: '2011-10-11T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VX/YW/DW/VXYW-DW79.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_d_1665
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '2018-05-29T10:36:58.727000Z'
+  ebas_station_altitude: 8.0 m
+  ebas_station_code: NO1665R
+  ebas_station_latitude: 78.92472
+  ebas_station_longitude: 11.92643
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2016-01-04T07:00:00Z'
+  time_coverage_start: '2014-06-09T07:00:00Z'
   variables:
   - time
   - time_bnds
@@ -9918,6 +13546,27 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/WG/G3/MH/WGG3-MHHB.nc:
   - v_sum_nitric_acid_and_nitrate
   - qc_sum_nitric_acid_and_nitrate
   - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/WH/GW/GM/WHGW-GMWG.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0001R_RADIELLO
+  ebas_method_ref: ES01L_uv_vis
+  ebas_revision_date: '2022-07-18T00:00:00.000000Z'
+  ebas_station_altitude: 917.0 m
+  ebas_station_code: ES0001R
+  ebas_station_latitude: 39.54694
+  ebas_station_longitude: -4.35056
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2022-01-03T07:00:00Z'
+  time_coverage_start: '2013-12-31T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/WH/NZ/J2/WHNZ-J2XA.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f3p_10
@@ -9975,6 +13624,211 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/WH/NZ/J2/WHNZ-J2XA.nc:
   - v_sulphur_dioxide
   - qc_sulphur_dioxide
   - meta_sulphur_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/WJ/KZ/JQ/WJKZ-JQM2.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Dado_labQB1e_Montelibretti
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: IT01L_IC
+  ebas_revision_date: '2024-07-15T09:00:00.000000Z'
+  ebas_station_altitude: 48.0 m
+  ebas_station_code: IT0001R
+  ebas_station_latitude: 42.105694
+  ebas_station_longitude: 12.640139
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2023-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/WQ/J3/G6/WQJ3-G6U7.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_d_0056
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '2025-03-25T15:51:06.254282Z'
+  ebas_station_altitude: 300.0 m
+  ebas_station_code: NO0056R
+  ebas_station_latitude: 60.372386
+  ebas_station_longitude: 11.078142
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2025-01-01T07:00:00Z'
+  time_coverage_start: '2004-02-09T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/WQ/QG/UF/WQQG-UF66.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_d_0001
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 190.0 m
+  ebas_station_code: NO0001R
+  ebas_station_latitude: 58.383333
+  ebas_station_longitude: 8.25
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2002-01-01T07:00:00Z'
+  time_coverage_start: '2001-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/WR/DW/2N/WRDW-2NTM.nc:
   ebas_data_level: '2'
   ebas_instrument_name: ARSO_f3p_vz_0001
@@ -10161,6 +14015,71 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/WS/9B/VG/WS9B-VGP3.nc:
   - v_sulphur_dioxide
   - qc_sulphur_dioxide
   - meta_sulphur_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/WT/B8/26/WTB8-269Q.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_w_0058
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 1309.0 m
+  ebas_station_code: NO0058G
+  ebas_station_latitude: -72.016667
+  ebas_station_longitude: 2.533333
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2009-03-02T07:00:00Z'
+  time_coverage_start: '2007-02-13T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/WX/GY/KQ/WXGY-KQ5J.nc:
   ebas_data_level: '2'
   ebas_instrument_name: NH3_Malaga2
@@ -10232,6 +14151,41 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/X7/ES/KB/X7ES-KB9P.nc:
   - v_sulphur_dioxide
   - qc_sulphur_dioxide
   - meta_sulphur_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/X9/P4/7N/X9P4-7N5J.nc:
+  ebas_instrument_name: mini_5_dup
+  ebas_method_ref: CH01L_den
+  ebas_revision_date: '2014-05-07T07:10:09.177000Z'
+  ebas_station_altitude: 1031.0 m
+  ebas_station_code: CH0005R
+  ebas_station_latitude: 47.0675
+  ebas_station_longitude: 8.463889
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-14T00:00:00)
+  time_coverage_end: '2010-12-28T10:00:00Z'
+  time_coverage_start: '2008-12-29T10:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XA/3E/QV/XA3E-QVFH.nc:
   ebas_data_level: '2'
   ebas_instrument_name: FP3N
@@ -10482,6 +14436,48 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XJ/DC/XF/XJDC-XF42.nc:
   - v_sum_nitric_acid_and_nitrate
   - qc_sum_nitric_acid_and_nitrate
   - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XJ/ES/K9/XJES-K9HT.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_d_0055
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 333.0 m
+  ebas_station_code: NO0055R
+  ebas_station_latitude: 69.466667
+  ebas_station_longitude: 25.216667
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2001-01-01T07:00:00Z'
+  time_coverage_start: '1997-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XQ/RV/AM/XQRV-AMNT.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f3p_08
@@ -10665,6 +14661,110 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XY/MV/9V/XYMV-9VVE.nc:
   - v_sum_ammonia_and_ammonium
   - qc_sum_ammonia_and_ammonium
   - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y5/E4/9F/Y5E4-9FEQ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: RADIELLO
+  ebas_method_ref: ES01L_uv_vis
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 917.0 m
+  ebas_station_code: ES0001R
+  ebas_station_latitude: 39.54694
+  ebas_station_longitude: -4.35056
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2013-12-31T07:00:00Z'
+  time_coverage_start: '2013-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y6/H5/S6/Y6H5-S6T2.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_5
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 157.0 m
+  ebas_station_code: PL0005R
+  ebas_station_latitude: 54.15
+  ebas_station_longitude: 22.066667
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2013-01-01T06:00:00Z'
+  time_coverage_start: '2009-01-01T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y8/6E/RU/Y86E-RUMJ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: EK
+  ebas_measurement_height: 2.45 m
+  ebas_revision_date: '2019-02-28T14:56:32.753000Z'
+  ebas_station_altitude: 157.0 m
+  ebas_station_code: PL0005R
+  ebas_station_latitude: 54.15
+  ebas_station_longitude: 22.066667
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2017-01-01T06:00:00Z'
+  time_coverage_start: '2016-01-01T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
   - v_sum_nitric_acid_and_nitrate
   - qc_sum_nitric_acid_and_nitrate
   - meta_sum_nitric_acid_and_nitrate
@@ -10889,6 +14989,54 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/YM/RM/44/YMRM-44YC.nc:
   - v_ammonia
   - qc_ammonia
   - meta_ammonia
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/YN/3T/ET/YN3T-ETC7.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: EK
+  ebas_measurement_height: 2.45 m
+  ebas_revision_date: '2025-10-29T13:06:14.991216Z'
+  ebas_station_altitude: 157.0 m
+  ebas_station_code: PL0005R
+  ebas_station_latitude: 54.15
+  ebas_station_longitude: 22.066667
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2025-01-01T06:00:00Z'
+  time_coverage_start: '2017-01-01T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/YU/KJ/KD/YUKJ-KD46.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f3p_d_0042
@@ -10949,6 +15097,31 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/YU/KJ/KD/YUKJ-KD46.nc:
   - v_sum_nitric_acid_and_nitrate
   - qc_sum_nitric_acid_and_nitrate
   - meta_sum_nitric_acid_and_nitrate
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/YX/SX/7T/YXSX-7TK6.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Sc_Den_0002
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: DE27L_UBA_Ng_FIA_0001
+  ebas_revision_date: '2024-12-11T09:20:42.830942Z'
+  ebas_station_altitude: 1205.0 m
+  ebas_station_code: DE0003R
+  ebas_station_latitude: 47.914722
+  ebas_station_longitude: 7.908611
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2024-01-02T07:00:00Z'
+  time_coverage_start: '2015-12-29T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia_nmol_per_mol
+  - qc_ammonia_nmol_per_mol
+  - meta_ammonia_nmol_per_mol
+  - v_ammonia_ug_N_per_m3
+  - qc_ammonia_ug_N_per_m3
+  - meta_ammonia_ug_N_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZB/83/RK/ZB83-RKCU.nc:
   ebas_instrument_name: CEH_denuder_16
   ebas_method_ref: GB03L_CEH
@@ -10984,6 +15157,78 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZB/83/RK/ZB83-RKCU.nc:
   - v_sum_ammonia_and_ammonium
   - qc_sum_ammonia_and_ammonium
   - meta_sum_ammonia_and_ammonium
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZB/MT/QR/ZBMT-QRUD.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_d_0015
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '2025-03-25T15:47:19.865536Z'
+  ebas_station_altitude: 439.0 m
+  ebas_station_code: NO0015R
+  ebas_station_latitude: 65.833333
+  ebas_station_longitude: 13.916667
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2025-01-01T07:00:00Z'
+  time_coverage_start: '2002-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
+  - v_ammonium_ug_N_per_m3
+  - qc_ammonium_ug_N_per_m3
+  - meta_ammonium_ug_N_per_m3
+  - v_ammonium_ug_per_m3
+  - qc_ammonium_ug_per_m3
+  - meta_ammonium_ug_per_m3
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_ug_N_per_m3
+  - qc_nitrate_ug_N_per_m3
+  - meta_nitrate_ug_N_per_m3
+  - v_nitrate_ug_per_m3
+  - qc_nitrate_ug_per_m3
+  - meta_nitrate_ug_per_m3
+  - v_nitric_acid
+  - qc_nitric_acid
+  - meta_nitric_acid
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_ug_S_per_m3
+  - qc_sulphate_corrected_ug_S_per_m3
+  - meta_sulphate_corrected_ug_S_per_m3
+  - v_sulphate_corrected_ug_per_m3
+  - qc_sulphate_corrected_ug_per_m3
+  - meta_sulphate_corrected_ug_per_m3
+  - v_sulphate_total_ug_S_per_m3
+  - qc_sulphate_total_ug_S_per_m3
+  - meta_sulphate_total_ug_S_per_m3
+  - v_sulphate_total_ug_per_m3
+  - qc_sulphate_total_ug_per_m3
+  - meta_sulphate_total_ug_per_m3
+  - v_sulphur_dioxide
+  - qc_sulphur_dioxide
+  - meta_sulphur_dioxide
+  - v_sum_ammonia_and_ammonium
+  - qc_sum_ammonia_and_ammonium
+  - meta_sum_ammonia_and_ammonium
+  - v_sum_nitric_acid_and_nitrate
+  - qc_sum_nitric_acid_and_nitrate
+  - meta_sum_nitric_acid_and_nitrate
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZD/4E/TP/ZD4E-TP54.nc:
   ebas_data_level: '2'
   ebas_instrument_name: f3p_08
@@ -11111,6 +15356,53 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZQ/96/X5/ZQ96-X5NF.nc:
   - v_ammonia_ug_N_per_m3
   - qc_ammonia_ug_N_per_m3
   - meta_ammonia_ug_N_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZS/MG/HB/ZSMG-HBUB.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: doas
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: NL01L_MIL-W-5500_NL01L_ILG-W-2900
+  ebas_revision_date: '2024-09-25T12:46:23.938927Z'
+  ebas_station_altitude: 4.0 m
+  ebas_station_code: NL0091R
+  ebas_station_latitude: 52.3
+  ebas_station_longitude: 4.5
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2016-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia_nmol_per_mol
+  - qc_ammonia_nmol_per_mol
+  - meta_ammonia_nmol_per_mol
+  - v_ammonia_ug_N_per_m3
+  - qc_ammonia_ug_N_per_m3
+  - meta_ammonia_ug_N_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZV/63/HQ/ZV63-HQKT.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: NH3_Montseny
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: ES05L_NH3_Montseny
+  ebas_revision_date: '2023-11-09T00:00:00.000000Z'
+  ebas_station_altitude: 700.0 m
+  ebas_station_code: ES1778R
+  ebas_station_latitude: 41.766667
+  ebas_station_longitude: 2.35
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-21T00:00:00)
+  time_coverage_end: '2022-03-14T23:00:00Z'
+  time_coverage_start: '2011-02-18T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonia
+  - qc_ammonia
+  - meta_ammonia
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZX/G5/78/ZXG5-78AF.nc:
   ebas_data_level: '2'
   ebas_instrument_name: UBA_Sc_3FP_0001

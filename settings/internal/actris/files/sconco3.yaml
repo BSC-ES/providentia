@@ -1,3 +1,23 @@
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/22/QC/5Y/22QC-5YBV.nc:
+  ebas_instrument_name: uv_abs_11
+  ebas_method_ref: SE01L_uv_abs
+  ebas_revision_date: '2016-07-04T00:00:00.000000Z'
+  ebas_station_altitude: 175.0 m
+  ebas_station_code: SE0011R
+  ebas_station_latitude: 56.016667
+  ebas_station_longitude: 13.15
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2016-01-01T00:00:00Z'
+  time_coverage_start: '1988-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone
+  - qc_ozone
+  - meta_ozone
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/23/CP/FJ/23CP-FJT5.nc:
   ebas_instrument_name: uv_abs_32
   ebas_method_ref: SI01L_uv_abs
@@ -249,6 +269,31 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/2R/EW/9A/2REW-9AQU.nc:
   - v_ozone_ug_per_m3_stddev
   - qc_ozone_ug_per_m3_stddev
   - meta_ozone_ug_per_m3_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/2V/RA/K8/2VRA-K859.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Sm_Mon_0301
+  ebas_measurement_height: 16.0 m
+  ebas_method_ref: DE03L_uv_abs
+  ebas_revision_date: '2024-11-25T12:36:05.599470Z'
+  ebas_station_altitude: 937.0 m
+  ebas_station_code: DE0008R
+  ebas_station_latitude: 50.65
+  ebas_station_longitude: 10.766667
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2023-12-31T23:00:00Z'
+  time_coverage_start: '2021-12-31T23:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/2W/KV/MD/2WKV-MDJV.nc:
   ebas_instrument_name: uv_abs_42
   ebas_method_ref: DE03L_uv_abs
@@ -301,6 +346,26 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/34/NT/P9/34NT-P94K.nc:
   resolution: hourly
   time_coverage_end: '2013-01-01T00:00:00Z'
   time_coverage_start: '1990-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone
+  - qc_ozone
+  - meta_ozone
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/35/68/2W/3568-2W3Q.nc:
+  ebas_instrument_name: uv_abs_47
+  ebas_method_ref: DE03L_uv_abs
+  ebas_revision_date: '2014-05-01T00:00:00.000000Z'
+  ebas_station_altitude: 73.0 m
+  ebas_station_code: DE0047R
+  ebas_station_latitude: 52.166667
+  ebas_station_longitude: 14.116667
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2006-01-01T00:00:00Z'
+  time_coverage_start: '2000-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
@@ -385,6 +450,54 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/39/A7/RG/39A7-RGGZ.nc:
   - v_nitrogen_monoxide_ug_N_per_m3
   - qc_nitrogen_monoxide_ug_N_per_m3
   - meta_nitrogen_monoxide_ug_N_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3A/H6/2W/3AH6-2WFR.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: uv_abs_14
+  ebas_method_ref: SE01L_AH
+  ebas_revision_date: '2025-06-06T10:47:31.430542Z'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: SE0014R
+  ebas_station_latitude: 57.394
+  ebas_station_longitude: 11.914
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-12-31T23:00:00Z'
+  time_coverage_start: '2016-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3B/4H/V7/3B4H-V7QF.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: uv_31
+  ebas_method_ref: GB02L_uv_abs
+  ebas_revision_date: '2024-09-13T09:47:43.225614Z'
+  ebas_station_altitude: 370.0 m
+  ebas_station_code: GB0031R
+  ebas_station_latitude: 52.503889
+  ebas_station_longitude: -3.033056
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '1986-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3B/YV/BV/3BYV-BV38.nc:
   ebas_data_level: '2'
   ebas_instrument_name: smo_o3
@@ -496,30 +609,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3F/A6/XN/3FA6-XNRE.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/3N/JR/3A/3NJR-3A4E.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: uv_abs_02
-  ebas_method_ref: PL01L_uv_abs
-  ebas_revision_date: '2025-09-19T07:41:26.494429Z'
-  ebas_station_altitude: 180.0 m
-  ebas_station_code: PL0002R
-  ebas_station_latitude: 51.814408
-  ebas_station_longitude: 21.972419
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2025-01-01T00:00:00Z'
-  time_coverage_start: '1995-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol
-  - qc_ozone_nmol_per_mol
-  - meta_ozone_nmol_per_mol
-  - v_ozone_ug_per_m3
-  - qc_ozone_ug_per_m3
-  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3N/UQ/8N/3NUQ-8NG8.nc:
   ebas_data_level: '2'
   ebas_instrument_name: ARSO_O3_air_monitor_2
@@ -586,26 +675,48 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3P/9Z/6G/3P9Z-6GSC.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/3W/4A/23/3W4A-237S.nc:
-  ebas_instrument_name: uv_abs_46
-  ebas_method_ref: DE03L_uv_abs
-  ebas_revision_date: '2005-01-18T00:00:00.000000Z'
-  ebas_station_altitude: 552.0 m
-  ebas_station_code: DE0046R
-  ebas_station_latitude: 47.9
-  ebas_station_longitude: 11.1
-  ebas_statistics: arithmetic mean
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3W/9C/RD/3W9C-RDBX.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Thermo_49_MLO
+  ebas_measurement_height: 10.0 m
+  ebas_method_ref: US06L_AM
+  ebas_revision_date: '2018-11-19T11:52:06.403000Z'
+  ebas_station_altitude: 3397.0 m
+  ebas_station_code: US1200R
+  ebas_station_latitude: 19.5362300873
+  ebas_station_longitude: -155.5761566162
   resolution: hourly
-  time_coverage_end: '2004-12-31T23:00:00Z'
-  time_coverage_start: '2001-01-01T00:00:00Z'
+  time_coverage_end: '2010-01-01T10:00:00Z'
+  time_coverage_start: '2010-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
-  - v_ozone
-  - qc_ozone
-  - meta_ozone
+  - v_ozone_nmol_per_mol_amean
+  - qc_ozone_nmol_per_mol_amean
+  - meta_ozone_nmol_per_mol_amean
+  - v_ozone_ug_per_m3_amean
+  - qc_ozone_ug_per_m3_amean
+  - meta_ozone_ug_per_m3_amean
+  - v_ozone_nmol_per_mol_max
+  - qc_ozone_nmol_per_mol_max
+  - meta_ozone_nmol_per_mol_max
+  - v_ozone_ug_per_m3_max
+  - qc_ozone_ug_per_m3_max
+  - meta_ozone_ug_per_m3_max
+  - v_ozone_nmol_per_mol_min
+  - qc_ozone_nmol_per_mol_min
+  - meta_ozone_nmol_per_mol_min
+  - v_ozone_ug_per_m3_min
+  - qc_ozone_ug_per_m3_min
+  - meta_ozone_ug_per_m3_min
+  - v_ozone_nmol_per_mol_stddev
+  - qc_ozone_nmol_per_mol_stddev
+  - meta_ozone_nmol_per_mol_stddev
+  - v_ozone_ug_per_m3_stddev
+  - qc_ozone_ug_per_m3_stddev
+  - meta_ozone_ug_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3W/CZ/H2/3WCZ-H23E.nc:
   ebas_data_level: '2'
   ebas_instrument_name: JP02_uv_abs_069
@@ -636,6 +747,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3W/CZ/H2/3WCZ-H23E.nc:
   - v_ozone_ug_per_m3_stddev
   - qc_ozone_ug_per_m3_stddev
   - meta_ozone_ug_per_m3_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/44/S5/S3/44S5-S3HN.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: O3_FR18
+  ebas_method_ref: FR07L_uv_abs
+  ebas_revision_date: '2025-04-22T12:52:26.676164Z'
+  ebas_station_altitude: 309.0 m
+  ebas_station_code: FR0018R
+  ebas_station_latitude: 48.633333
+  ebas_station_longitude: -0.45
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2010-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/46/KU/SJ/46KU-SJJ9.nc:
   ebas_data_level: '2'
   ebas_instrument_name: LEGMC_Teledyne_API_T400_6221
@@ -824,6 +959,42 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/4N/KZ/YA/4NKZ-YAHK.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4Q/2R/N7/4Q2R-N7AM.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Thermo_49_MLO
+  ebas_measurement_height: 10.0 m
+  ebas_method_ref: US06L_AM
+  ebas_revision_date: '2018-11-19T12:58:56.180000Z'
+  ebas_station_altitude: 3397.0 m
+  ebas_station_code: US1200R
+  ebas_station_latitude: 19.5362300873
+  ebas_station_longitude: -155.5761566162
+  resolution: hourly
+  time_coverage_end: '2010-01-01T00:00:00Z'
+  time_coverage_start: '1973-09-01T01:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol_amean
+  - qc_ozone_nmol_per_mol_amean
+  - meta_ozone_nmol_per_mol_amean
+  - v_ozone_ug_per_m3_amean
+  - qc_ozone_ug_per_m3_amean
+  - meta_ozone_ug_per_m3_amean
+  - v_ozone_nmol_per_mol_max
+  - qc_ozone_nmol_per_mol_max
+  - meta_ozone_nmol_per_mol_max
+  - v_ozone_ug_per_m3_max
+  - qc_ozone_ug_per_m3_max
+  - meta_ozone_ug_per_m3_max
+  - v_ozone_nmol_per_mol_min
+  - qc_ozone_nmol_per_mol_min
+  - meta_ozone_nmol_per_mol_min
+  - v_ozone_ug_per_m3_min
+  - qc_ozone_ug_per_m3_min
+  - meta_ozone_ug_per_m3_min
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/4U/PA/7A/4UPA-7AHC.nc:
   ebas_data_level: '2'
   ebas_instrument_name: O3_FR13
@@ -945,36 +1116,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/4Y/YA/V2/4YYA-V2AQ.nc:
   - v_ozone_ug_per_m3_stddev
   - qc_ozone_ug_per_m3_stddev
   - meta_ozone_ug_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/54/F8/7M/54F8-7MJR.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: JP02_uv_abs_071
-  ebas_measurement_height: 2.0 m
-  ebas_method_ref: JP02L_uv_ab
-  ebas_revision_date: '2017-03-31T10:22:28.107000Z'
-  ebas_station_altitude: 25.2 m
-  ebas_station_code: JP0003U
-  ebas_station_latitude: 36.058055556
-  ebas_station_longitude: 140.125833333
-  resolution: hourly
-  time_coverage_end: '2011-04-30T15:00:00Z'
-  time_coverage_start: '2010-11-30T15:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol_amean
-  - qc_ozone_nmol_per_mol_amean
-  - meta_ozone_nmol_per_mol_amean
-  - v_ozone_ug_per_m3_amean
-  - qc_ozone_ug_per_m3_amean
-  - meta_ozone_ug_per_m3_amean
-  - v_ozone_nmol_per_mol_stddev
-  - qc_ozone_nmol_per_mol_stddev
-  - meta_ozone_nmol_per_mol_stddev
-  - v_ozone_ug_per_m3_stddev
-  - qc_ozone_ug_per_m3_stddev
-  - meta_ozone_ug_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/57/2Y/GF/572Y-GFFJ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: uv_abs_45
@@ -988,30 +1129,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/57/2Y/GF/572Y-GFFJ.nc:
   resolution: hourly
   time_coverage_end: '2025-01-01T00:00:00Z'
   time_coverage_start: '1990-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol
-  - qc_ozone_nmol_per_mol
-  - meta_ozone_nmol_per_mol
-  - v_ozone_ug_per_m3
-  - qc_ozone_ug_per_m3
-  - meta_ozone_ug_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/58/E6/83/58E6-837X.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: O341M
-  ebas_method_ref: LT01L_ozone1a
-  ebas_revision_date: '2025-09-19T07:51:04.933515Z'
-  ebas_station_altitude: 5.0 m
-  ebas_station_code: LT0015R
-  ebas_station_latitude: 55.37611111111111
-  ebas_station_longitude: 21.030555555555555
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2025-01-01T00:00:00Z'
-  time_coverage_start: '2012-12-31T23:00:00Z'
   variables:
   - time
   - time_bnds
@@ -1043,19 +1160,19 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/59/QQ/JQ/59QQ-JQ67.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/5G/V4/2D/5GV4-2DWF.nc:
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5A/W4/TB/5AW4-TBK6.nc:
   ebas_data_level: '2'
-  ebas_instrument_name: Thermo_49iQ_BRW
-  ebas_measurement_height: 4.0 m
-  ebas_method_ref: US06L_AM
-  ebas_revision_date: '2025-12-04T12:59:10.181433Z'
-  ebas_station_altitude: 11.0 m
-  ebas_station_code: US0008R
-  ebas_station_latitude: 71.3230133057
-  ebas_station_longitude: -156.6114654541
+  ebas_instrument_name: 49i_1225162557
+  ebas_measurement_height: 7.0 m
+  ebas_method_ref: IT06L_49i_uvab_1
+  ebas_revision_date: '2024-03-15T11:35:00.000000Z'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: IT0014R
+  ebas_station_latitude: 37.571111
+  ebas_station_longitude: 12.659722
   resolution: hourly
-  time_coverage_end: '2025-01-01T00:00:00Z'
-  time_coverage_start: '2022-01-01T00:00:00Z'
+  time_coverage_end: '2023-07-25T07:00:00Z'
+  time_coverage_start: '2023-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
@@ -1110,26 +1227,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5J/QA/Y6/5JQA-Y65J.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/5M/PE/PV/5MPE-PVWQ.nc:
-  ebas_instrument_name: uv_abs_35
-  ebas_method_ref: SE01L_uv_abs
-  ebas_revision_date: '2016-07-04T00:00:00.000000Z'
-  ebas_station_altitude: 225.0 m
-  ebas_station_code: SE0035R
-  ebas_station_latitude: 64.25
-  ebas_station_longitude: 19.766667
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5M/78/AD/5M78-ADNJ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: O3_FR10
+  ebas_method_ref: FR07L_uv_abs
+  ebas_revision_date: '2025-04-22T12:51:41.072318Z'
+  ebas_station_altitude: 620.0 m
+  ebas_station_code: FR0010R
+  ebas_station_latitude: 47.266667
+  ebas_station_longitude: 4.083333
   ebas_statistics: arithmetic mean
   resolution: hourly
-  time_coverage_end: '2016-01-01T00:00:00Z'
-  time_coverage_start: '1988-01-01T00:00:00Z'
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2010-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
-  - v_ozone
-  - qc_ozone
-  - meta_ozone
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5S/BR/79/5SBR-79VF.nc:
   ebas_instrument_name: uv_abs_10
   ebas_method_ref: NL01L_uv_abs
@@ -1142,26 +1263,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5S/BR/79/5SBR-79VF.nc:
   resolution: hourly
   time_coverage_end: '2013-01-01T00:00:00Z'
   time_coverage_start: '2011-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone
-  - qc_ozone
-  - meta_ozone
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/5V/K7/XR/5VK7-XRK9.nc:
-  ebas_instrument_name: uv_abs_35
-  ebas_method_ref: BE02L_uv_abs
-  ebas_revision_date: '2014-05-01T00:00:00.000000Z'
-  ebas_station_altitude: 160.0 m
-  ebas_station_code: BE0035R
-  ebas_station_latitude: 50.503333
-  ebas_station_longitude: 4.989444
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2012-12-31T23:00:00Z'
-  time_coverage_start: '1988-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
@@ -1276,6 +1377,26 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5Z/KT/7N/5ZKT-7NEA.nc:
   - v_ozone_ug_per_m3_stddev
   - qc_ozone_ug_per_m3_stddev
   - meta_ozone_ug_per_m3_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5Z/VS/HW/5ZVS-HWJQ.nc:
+  ebas_instrument_name: uv_abs_3
+  ebas_method_ref: DE03L_uv_abs
+  ebas_revision_date: '2014-10-22T11:22:28.807000Z'
+  ebas_station_altitude: 1205.0 m
+  ebas_station_code: DE0003R
+  ebas_station_latitude: 47.914722
+  ebas_station_longitude: 7.908611
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2013-12-31T23:00:00Z'
+  time_coverage_start: '1984-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone
+  - qc_ozone
+  - meta_ozone
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/63/N8/8W/63N8-8WDM.nc:
   ebas_data_level: '2'
   ebas_instrument_name: JP02_uv_abs_252
@@ -1306,6 +1427,54 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/63/N8/8W/63N8-8WDM.nc:
   - v_ozone_ug_per_m3_stddev
   - qc_ozone_ug_per_m3_stddev
   - meta_ozone_ug_per_m3_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/65/DW/36/65DW-36A4.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: dbl_o3
+  ebas_method_ref: LV33L_uv_abs
+  ebas_revision_date: '2019-10-30T00:00:00.000000Z'
+  ebas_station_altitude: 42.0 m
+  ebas_station_code: LV2000U
+  ebas_station_latitude: 56.6199
+  ebas_station_longitude: 23.3196
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2013-12-31T21:00:00Z'
+  time_coverage_start: '2008-12-31T22:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/65/NH/E7/65NH-E75G.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: O3_FR08
+  ebas_method_ref: FR07L_uv_abs
+  ebas_revision_date: '2025-04-22T12:51:25.454083Z'
+  ebas_station_altitude: 775.0 m
+  ebas_station_code: FR0008R
+  ebas_station_latitude: 48.5
+  ebas_station_longitude: 7.133333
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2010-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/68/AC/HJ/68AC-HJGF.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TE49c
@@ -1359,48 +1528,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/69/RE/B5/69RE-B5FQ.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/6E/6P/N6/6E6P-N6P2.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: Thermo_49C_BRW
-  ebas_measurement_height: 10.0 m
-  ebas_method_ref: US06L_AM
-  ebas_revision_date: '2024-01-26T13:46:20.118569Z'
-  ebas_station_altitude: 11.0 m
-  ebas_station_code: US0008R
-  ebas_station_latitude: 71.3230133057
-  ebas_station_longitude: -156.6114654541
-  resolution: hourly
-  time_coverage_end: '2022-01-01T00:00:00Z'
-  time_coverage_start: '2004-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol_amean
-  - qc_ozone_nmol_per_mol_amean
-  - meta_ozone_nmol_per_mol_amean
-  - v_ozone_ug_per_m3_amean
-  - qc_ozone_ug_per_m3_amean
-  - meta_ozone_ug_per_m3_amean
-  - v_ozone_nmol_per_mol_max
-  - qc_ozone_nmol_per_mol_max
-  - meta_ozone_nmol_per_mol_max
-  - v_ozone_ug_per_m3_max
-  - qc_ozone_ug_per_m3_max
-  - meta_ozone_ug_per_m3_max
-  - v_ozone_nmol_per_mol_min
-  - qc_ozone_nmol_per_mol_min
-  - meta_ozone_nmol_per_mol_min
-  - v_ozone_ug_per_m3_min
-  - qc_ozone_ug_per_m3_min
-  - meta_ozone_ug_per_m3_min
-  - v_ozone_nmol_per_mol_stddev
-  - qc_ozone_nmol_per_mol_stddev
-  - meta_ozone_nmol_per_mol_stddev
-  - v_ozone_ug_per_m3_stddev
-  - qc_ozone_ug_per_m3_stddev
-  - meta_ozone_ug_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/6G/NX/72/6GNX-7243.nc:
   ebas_instrument_name: uv_abs_07
   ebas_method_ref: MK01L_uv_abs
@@ -1487,6 +1614,31 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/6M/9Q/56/6M9Q-56E2.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/6M/EX/EB/6MEX-EB7E.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TAPI_400E
+  ebas_measurement_height: 3.2 m
+  ebas_method_ref: IT15L_UV_ABS
+  ebas_revision_date: '2025-02-12T10:58:38.961934Z'
+  ebas_station_altitude: 1090.0 m
+  ebas_station_code: IT0019R
+  ebas_station_latitude: 42.805462
+  ebas_station_longitude: 12.565645
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2022-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/6X/DU/H2/6XDU-H28B.nc:
   ebas_data_level: '2'
   ebas_instrument_name: uv_abs_h_0032
@@ -1532,6 +1684,31 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/6X/F2/MJ/6XF2-MJS6.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/6X/XU/6E/6XXU-6EP5.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TAPI_T400_cz01
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: CZ01L_T22AA010_21
+  ebas_revision_date: '2025-09-19T08:01:24.610984Z'
+  ebas_station_altitude: 735.0 m
+  ebas_station_code: CZ0001R
+  ebas_station_latitude: 49.735084444
+  ebas_station_longitude: 16.034196944
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2025-01-01T00:00:00Z'
+  time_coverage_start: '2022-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/6Y/G3/VZ/6YG3-VZGQ.nc:
   ebas_instrument_name: uv_abs_17
   ebas_method_ref: DE03L_uv_abs
@@ -1552,6 +1729,36 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/6Y/G3/VZ/6YG3-VZGQ.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/75/QM/QM/75QM-QMAK.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: JP02_uv_abs_075
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: JP02L_uv_ab
+  ebas_revision_date: '2024-01-08T11:55:47.261752Z'
+  ebas_station_altitude: 16.0 m
+  ebas_station_code: JP0002G
+  ebas_station_latitude: -69.005
+  ebas_station_longitude: 39.590555556
+  resolution: hourly
+  time_coverage_end: '2023-01-31T21:00:00Z'
+  time_coverage_start: '2010-07-31T21:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol_amean
+  - qc_ozone_nmol_per_mol_amean
+  - meta_ozone_nmol_per_mol_amean
+  - v_ozone_ug_per_m3_amean
+  - qc_ozone_ug_per_m3_amean
+  - meta_ozone_ug_per_m3_amean
+  - v_ozone_nmol_per_mol_stddev
+  - qc_ozone_nmol_per_mol_stddev
+  - meta_ozone_nmol_per_mol_stddev
+  - v_ozone_ug_per_m3_stddev
+  - qc_ozone_ug_per_m3_stddev
+  - meta_ozone_ug_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/77/BY/Y6/77BY-Y6JM.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_49C_BMW
@@ -1619,26 +1826,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/77/ZH/6X/77ZH-6XDA.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/78/G3/PY/78G3-PYVM.nc:
-  ebas_instrument_name: uv_abs_16
-  ebas_method_ref: RU01L_uv_abs
-  ebas_revision_date: '2005-01-18T00:00:00.000000Z'
-  ebas_station_altitude: 4.0 m
-  ebas_station_code: RU0016R
-  ebas_station_latitude: 59.966667
-  ebas_station_longitude: 29.116667
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2004-01-01T00:00:00Z'
-  time_coverage_start: '1995-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone
-  - qc_ozone
-  - meta_ozone
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/79/A3/M4/79A3-M4QP.nc:
   ebas_instrument_name: Horiba_APOA_350E_42
   ebas_method_ref: DE03L_uv_abs
@@ -1704,6 +1891,50 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/7A/DW/WW/7ADW-WWN2.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/7F/KK/4D/7FKK-4DB3.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: O3_ANALYZER-MODEL_T400
+  ebas_method_ref: CZ01L_uv_abs
+  ebas_revision_date: '2023-05-23T12:43:58.364079Z'
+  ebas_station_altitude: 735.0 m
+  ebas_station_code: CZ0001R
+  ebas_station_latitude: 49.735084444
+  ebas_station_longitude: 16.034196944
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2022-01-01T00:00:00Z'
+  time_coverage_start: '2016-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/7H/3K/FN/7H3K-FN3M.nc:
+  ebas_instrument_name: air_monitor_03
+  ebas_method_ref: CZ01L_97_3_3_1j
+  ebas_revision_date: '2016-06-23T00:00:00.000000Z'
+  ebas_station_altitude: 535.0 m
+  ebas_station_code: CZ0003R
+  ebas_station_latitude: 49.573394
+  ebas_station_longitude: 15.080278
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2016-01-01T00:00:00Z'
+  time_coverage_start: '2015-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone
+  - qc_ozone
+  - meta_ozone
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/7J/BA/VG/7JBA-VG98.nc:
   ebas_data_level: '2'
   ebas_instrument_name: 56_fluks_25m
@@ -1725,6 +1956,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/7J/BA/VG/7JBA-VG98.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/7N/WT/EK/7NWT-EK9G.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: uv_36
+  ebas_method_ref: GB02L_uv_abs
+  ebas_revision_date: '2024-09-13T09:49:50.223048Z'
+  ebas_station_altitude: 78.0 m
+  ebas_station_code: GB1055R
+  ebas_station_latitude: 51.149617
+  ebas_station_longitude: -1.438228
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2016-01-11T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/7Q/ZN/KZ/7QZN-KZ6M.nc:
   ebas_data_level: '2'
   ebas_instrument_name: uv_abs_uk_1007
@@ -1885,6 +2140,92 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/87/NH/HW/87NH-HWSM.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8B/FH/FT/8BFH-FTYN.nc:
+  ebas_instrument_name: uv_abs_03
+  ebas_method_ref: CZ01L_uv_abs
+  ebas_revision_date: '2015-08-20T09:58:38.633000Z'
+  ebas_station_altitude: 535.0 m
+  ebas_station_code: CZ0003R
+  ebas_station_latitude: 49.573394
+  ebas_station_longitude: 15.080278
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2015-01-01T00:00:00Z'
+  time_coverage_start: '2010-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone
+  - qc_ozone
+  - meta_ozone
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8B/Y4/ZV/8BY4-ZV6U.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Thermo_49C_ARH
+  ebas_measurement_height: 10.0 m
+  ebas_method_ref: US06L_AM
+  ebas_revision_date: '2025-09-19T07:44:11.788211Z'
+  ebas_station_altitude: 184.0 m
+  ebas_station_code: NZ0002R
+  ebas_station_latitude: -77.8320007324
+  ebas_station_longitude: 166.6600036621
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2003-01-01T05:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol_amean
+  - qc_ozone_nmol_per_mol_amean
+  - meta_ozone_nmol_per_mol_amean
+  - v_ozone_ug_per_m3_amean
+  - qc_ozone_ug_per_m3_amean
+  - meta_ozone_ug_per_m3_amean
+  - v_ozone_nmol_per_mol_max
+  - qc_ozone_nmol_per_mol_max
+  - meta_ozone_nmol_per_mol_max
+  - v_ozone_ug_per_m3_max
+  - qc_ozone_ug_per_m3_max
+  - meta_ozone_ug_per_m3_max
+  - v_ozone_nmol_per_mol_min
+  - qc_ozone_nmol_per_mol_min
+  - meta_ozone_nmol_per_mol_min
+  - v_ozone_ug_per_m3_min
+  - qc_ozone_ug_per_m3_min
+  - meta_ozone_ug_per_m3_min
+  - v_ozone_nmol_per_mol_stddev
+  - qc_ozone_nmol_per_mol_stddev
+  - meta_ozone_nmol_per_mol_stddev
+  - v_ozone_ug_per_m3_stddev
+  - qc_ozone_ug_per_m3_stddev
+  - meta_ozone_ug_per_m3_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8E/8E/W7/8E8E-W724.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: uv_49
+  ebas_method_ref: GB02L_uv_abs
+  ebas_revision_date: '2024-09-13T09:49:20.227485Z'
+  ebas_station_altitude: 16.0 m
+  ebas_station_code: GB0049R
+  ebas_station_latitude: 52.950556
+  ebas_station_longitude: 1.121944
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2001-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8F/8E/DR/8F8E-DR9J.nc:
   ebas_data_level: '2'
   ebas_instrument_name: uv_abs_uk_1011
@@ -1905,6 +2246,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8F/8E/DR/8F8E-DR9J.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8G/XW/5D/8GXW-5DT2.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: O3mon5
+  ebas_method_ref: DK01L_UV_absorption
+  ebas_revision_date: '2024-07-26T00:00:00.000000Z'
+  ebas_station_altitude: 10.0 m
+  ebas_station_code: DK0005R
+  ebas_station_latitude: 54.746495
+  ebas_station_longitude: 10.73616
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2013-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8H/V6/XA/8HV6-XA7R.nc:
   ebas_instrument_name: uv_abs_DE43
   ebas_method_ref: DE09L_uv_abs
@@ -1947,6 +2312,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8K/Y4/ZV/8KY4-ZVBS.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8M/26/R8/8M26-R8CY.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: O3_ANALYZER-MODEL_T400_cz03
+  ebas_method_ref: CZ01L_photometry_Teledyne_T400
+  ebas_revision_date: '2021-11-08T09:32:44.057000Z'
+  ebas_station_altitude: 535.0 m
+  ebas_station_code: CZ0003R
+  ebas_station_latitude: 49.573394
+  ebas_station_longitude: 15.080278
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2021-01-01T00:00:00Z'
+  time_coverage_start: '2016-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8M/D4/98/8MD4-98KV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TEI49i_368
@@ -1972,48 +2361,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8M/D4/98/8MD4-98KV.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/8M/FZ/TB/8MFZ-TB96.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: ARSO_O3_air_monitor_3
-  ebas_measurement_height: 5.0 m
-  ebas_method_ref: SI01L_uv_ab
-  ebas_revision_date: '2025-05-23T11:40:41.478842Z'
-  ebas_station_altitude: 520.0 m
-  ebas_station_code: SI0008R
-  ebas_station_latitude: 45.566667
-  ebas_station_longitude: 14.866667
-  resolution: hourly
-  time_coverage_end: '2024-01-01T00:00:00Z'
-  time_coverage_start: '2021-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol_amean
-  - qc_ozone_nmol_per_mol_amean
-  - meta_ozone_nmol_per_mol_amean
-  - v_ozone_ug_per_m3_amean
-  - qc_ozone_ug_per_m3_amean
-  - meta_ozone_ug_per_m3_amean
-  - v_ozone_nmol_per_mol_max
-  - qc_ozone_nmol_per_mol_max
-  - meta_ozone_nmol_per_mol_max
-  - v_ozone_ug_per_m3_max
-  - qc_ozone_ug_per_m3_max
-  - meta_ozone_ug_per_m3_max
-  - v_ozone_nmol_per_mol_min
-  - qc_ozone_nmol_per_mol_min
-  - meta_ozone_nmol_per_mol_min
-  - v_ozone_ug_per_m3_min
-  - qc_ozone_ug_per_m3_min
-  - meta_ozone_ug_per_m3_min
-  - v_ozone_nmol_per_mol_stddev
-  - qc_ozone_nmol_per_mol_stddev
-  - meta_ozone_nmol_per_mol_stddev
-  - v_ozone_ug_per_m3_stddev
-  - qc_ozone_ug_per_m3_stddev
-  - meta_ozone_ug_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8P/QF/99/8PQF-99ED.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TE49w_nl0009
@@ -2056,6 +2403,72 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8Q/C9/T9/8QC9-T9D3.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8Q/JK/WG/8QJK-WGK7.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: uv_14
+  ebas_method_ref: GB02L_uv_abs
+  ebas_revision_date: '2024-09-13T09:46:50.006882Z'
+  ebas_station_altitude: 267.0 m
+  ebas_station_code: GB0014R
+  ebas_station_latitude: 54.334444
+  ebas_station_longitude: -0.8075
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '1987-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8S/5Y/VR/8S5Y-VR6F.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Thermo_49i_LAU
+  ebas_measurement_height: 10.0 m
+  ebas_method_ref: US06L_AM
+  ebas_revision_date: '2018-11-30T12:01:30.513000Z'
+  ebas_station_altitude: 370.0 m
+  ebas_station_code: NZ0003G
+  ebas_station_latitude: -45.0379981995
+  ebas_station_longitude: 169.6840057373
+  resolution: hourly
+  time_coverage_end: '2015-07-19T07:00:00Z'
+  time_coverage_start: '2014-12-29T10:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol_amean
+  - qc_ozone_nmol_per_mol_amean
+  - meta_ozone_nmol_per_mol_amean
+  - v_ozone_ug_per_m3_amean
+  - qc_ozone_ug_per_m3_amean
+  - meta_ozone_ug_per_m3_amean
+  - v_ozone_nmol_per_mol_max
+  - qc_ozone_nmol_per_mol_max
+  - meta_ozone_nmol_per_mol_max
+  - v_ozone_ug_per_m3_max
+  - qc_ozone_ug_per_m3_max
+  - meta_ozone_ug_per_m3_max
+  - v_ozone_nmol_per_mol_min
+  - qc_ozone_nmol_per_mol_min
+  - meta_ozone_nmol_per_mol_min
+  - v_ozone_ug_per_m3_min
+  - qc_ozone_ug_per_m3_min
+  - meta_ozone_ug_per_m3_min
+  - v_ozone_nmol_per_mol_stddev
+  - qc_ozone_nmol_per_mol_stddev
+  - meta_ozone_nmol_per_mol_stddev
+  - v_ozone_ug_per_m3_stddev
+  - qc_ozone_ug_per_m3_stddev
+  - meta_ozone_ug_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8X/4G/6S/8X4G-6SVJ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: uv_abs_40
@@ -2092,26 +2505,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8X/YM/XV/8XYM-XVYY.nc:
   resolution: hourly
   time_coverage_end: '2008-09-11T00:00:00Z'
   time_coverage_start: '1998-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone
-  - qc_ozone
-  - meta_ozone
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/8Z/AT/SQ/8ZAT-SQVB.nc:
-  ebas_instrument_name: uv_abs_15
-  ebas_method_ref: LT01L_uv_abs
-  ebas_revision_date: '2014-05-01T00:00:00.000000Z'
-  ebas_station_altitude: 5.0 m
-  ebas_station_code: LT0015R
-  ebas_station_latitude: 55.37611111111111
-  ebas_station_longitude: 21.030555555555555
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2013-01-01T00:00:00Z'
-  time_coverage_start: '1992-12-31T22:00:00Z'
   variables:
   - time
   - time_bnds
@@ -2433,6 +2826,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9J/KA/EV/9JKA-EV99.nc:
   - v_ozone_ug_per_m3_stddev
   - qc_ozone_ug_per_m3_stddev
   - meta_ozone_ug_per_m3_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/9M/MX/8U/9MMX-8UA6.nc:
+  ebas_data_level: '2'
+  ebas_method_ref: CZ06L_uv_abs
+  ebas_revision_date: '2022-01-26T09:14:01.650000Z'
+  ebas_station_altitude: 535.0 m
+  ebas_station_code: CZ0003R
+  ebas_station_latitude: 49.573394
+  ebas_station_longitude: 15.080278
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2016-01-01T00:00:00Z'
+  time_coverage_start: '2013-09-06T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Tower_inlet_height
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
+  - v_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9N/HQ/25/9NHQ-25A6.nc:
   ebas_instrument_name: uv_16
   ebas_method_ref: LV01L_uv_abs
@@ -2493,6 +2910,48 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9Q/2N/FB/9Q2N-FBP3.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/9T/DE/69/9TDE-69C8.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: MSY_uv_abs
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: ES05L_uv_ab
+  ebas_revision_date: '2023-03-13T00:00:00.000000Z'
+  ebas_station_altitude: 700.0 m
+  ebas_station_code: ES1778R
+  ebas_station_latitude: 41.766667
+  ebas_station_longitude: 2.35
+  resolution: hourly
+  time_coverage_end: '2023-01-01T00:00:00Z'
+  time_coverage_start: '2022-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol_amean
+  - qc_ozone_nmol_per_mol_amean
+  - meta_ozone_nmol_per_mol_amean
+  - v_ozone_ug_per_m3_amean
+  - qc_ozone_ug_per_m3_amean
+  - meta_ozone_ug_per_m3_amean
+  - v_ozone_nmol_per_mol_max
+  - qc_ozone_nmol_per_mol_max
+  - meta_ozone_nmol_per_mol_max
+  - v_ozone_ug_per_m3_max
+  - qc_ozone_ug_per_m3_max
+  - meta_ozone_ug_per_m3_max
+  - v_ozone_nmol_per_mol_min
+  - qc_ozone_nmol_per_mol_min
+  - meta_ozone_nmol_per_mol_min
+  - v_ozone_ug_per_m3_min
+  - qc_ozone_ug_per_m3_min
+  - meta_ozone_ug_per_m3_min
+  - v_ozone_nmol_per_mol_stddev
+  - qc_ozone_nmol_per_mol_stddev
+  - meta_ozone_nmol_per_mol_stddev
+  - v_ozone_ug_per_m3_stddev
+  - qc_ozone_ug_per_m3_stddev
+  - meta_ozone_ug_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9U/9X/3A/9U9X-3AHW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: uv_abs_13
@@ -2614,6 +3073,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9Z/CT/Y7/9ZCT-Y77D.nc:
   - v_ozone_ug_per_m3_stddev
   - qc_ozone_ug_per_m3_stddev
   - meta_ozone_ug_per_m3_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/A5/2T/U4/A52T-U484.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: uv_2
+  ebas_method_ref: SK01L_uv_abs
+  ebas_revision_date: '2025-01-27T14:07:42.430819Z'
+  ebas_station_altitude: 2008.0 m
+  ebas_station_code: SK0002R
+  ebas_station_latitude: 48.933333
+  ebas_station_longitude: 19.583333
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '1994-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/A6/97/S2/A697-S2SV.nc:
   ebas_instrument_name: uv_10
   ebas_method_ref: NL01L_uv_abs
@@ -2626,6 +3109,26 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/A6/97/S2/A697-S2SV.nc:
   resolution: hourly
   time_coverage_end: '2011-01-01T00:00:00Z'
   time_coverage_start: '1986-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone
+  - qc_ozone
+  - meta_ozone
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/A7/TM/DG/A7TM-DGZY.nc:
+  ebas_instrument_name: uv_abs_39
+  ebas_method_ref: DE03L_uv_abs
+  ebas_revision_date: '2014-05-01T00:00:00.000000Z'
+  ebas_station_altitude: 15.0 m
+  ebas_station_code: DE0039R
+  ebas_station_latitude: 54.074722
+  ebas_station_longitude: 9.792778
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2006-01-01T00:00:00Z'
+  time_coverage_start: '1999-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
@@ -2804,6 +3307,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AM/26/MC/AM26-MCDB.nc:
   - v_ozone_ug_per_m3_stddev
   - qc_ozone_ug_per_m3_stddev
   - meta_ozone_ug_per_m3_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AM/G7/35/AMG7-35DN.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: O3_FR28
+  ebas_method_ref: FR07L_uv_abs
+  ebas_revision_date: '2025-04-22T12:52:47.439785Z'
+  ebas_station_altitude: 307.0 m
+  ebas_station_code: FR0028R
+  ebas_station_latitude: 48.261977778
+  ebas_station_longitude: -2.943830556
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2020-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AP/BU/HU/APBU-HUQH.nc:
   ebas_data_level: '2'
   ebas_instrument_name: thermo_49i_01
@@ -2898,18 +3425,18 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AS/M8/VJ/ASM8-VJYZ.nc:
   - v_ozone_ug_per_m3_stddev
   - qc_ozone_ug_per_m3_stddev
   - meta_ozone_ug_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/B2/S3/57/B2S3-57F6.nc:
-  ebas_instrument_name: uv_mon_14
-  ebas_method_ref: ES04L_uv_abs
-  ebas_revision_date: '2014-05-01T00:00:00.000000Z'
-  ebas_station_altitude: 470.0 m
-  ebas_station_code: ES0014R
-  ebas_station_latitude: 41.39389
-  ebas_station_longitude: 0.73472
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AY/ST/9W/AYST-9W43.nc:
+  ebas_instrument_name: uv_5
+  ebas_method_ref: PL02L_uv_abs
+  ebas_revision_date: '2014-12-16T11:29:18.713000Z'
+  ebas_station_altitude: 157.0 m
+  ebas_station_code: PL0005R
+  ebas_station_latitude: 54.15
+  ebas_station_longitude: 22.066667
   ebas_statistics: arithmetic mean
   resolution: hourly
-  time_coverage_end: '2013-01-01T00:00:00Z'
-  time_coverage_start: '2000-01-01T00:00:00Z'
+  time_coverage_end: '2014-01-01T00:00:00Z'
+  time_coverage_start: '1995-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
@@ -3016,42 +3543,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BB/88/RW/BB88-RWY8.nc:
   - v_ozone_ug_per_m3_stddev
   - qc_ozone_ug_per_m3_stddev
   - meta_ozone_ug_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/BC/A3/QE/BCA3-QE5K.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: Thermo_49C_BRW
-  ebas_measurement_height: 10.0 m
-  ebas_method_ref: US06L_AM
-  ebas_revision_date: '2025-12-04T11:30:23.280662Z'
-  ebas_station_altitude: 11.0 m
-  ebas_station_code: US0008R
-  ebas_station_latitude: 71.3230133057
-  ebas_station_longitude: -156.6114654541
-  resolution: hourly
-  time_coverage_end: '2007-01-01T00:00:00Z'
-  time_coverage_start: '2004-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol_amean
-  - qc_ozone_nmol_per_mol_amean
-  - meta_ozone_nmol_per_mol_amean
-  - v_ozone_ug_per_m3_amean
-  - qc_ozone_ug_per_m3_amean
-  - meta_ozone_ug_per_m3_amean
-  - v_ozone_nmol_per_mol_max
-  - qc_ozone_nmol_per_mol_max
-  - meta_ozone_nmol_per_mol_max
-  - v_ozone_ug_per_m3_max
-  - qc_ozone_ug_per_m3_max
-  - meta_ozone_ug_per_m3_max
-  - v_ozone_nmol_per_mol_min
-  - qc_ozone_nmol_per_mol_min
-  - meta_ozone_nmol_per_mol_min
-  - v_ozone_ug_per_m3_min
-  - qc_ozone_ug_per_m3_min
-  - meta_ozone_ug_per_m3_min
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BE/P9/P7/BEP9-P763.nc:
   ebas_data_level: '2'
   ebas_instrument_name: uv_abs_uk_0015
@@ -3076,61 +3567,19 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BE/P9/P7/BEP9-P763.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/BF/HU/3S/BFHU-3SNC.nc:
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BF/5M/XZ/BF5M-XZTZ.nc:
   ebas_data_level: '2'
-  ebas_instrument_name: Thermo_49i_BOS
-  ebas_measurement_height: 10.0 m
-  ebas_method_ref: US06L_AM
-  ebas_revision_date: '2025-12-03T13:10:46.529859Z'
-  ebas_station_altitude: 1689.0 m
-  ebas_station_code: US0901R
-  ebas_station_latitude: 40.12498
-  ebas_station_longitude: -105.2368
-  resolution: hourly
-  time_coverage_end: '2025-01-01T00:00:00Z'
-  time_coverage_start: '2016-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol_amean
-  - qc_ozone_nmol_per_mol_amean
-  - meta_ozone_nmol_per_mol_amean
-  - v_ozone_ug_per_m3_amean
-  - qc_ozone_ug_per_m3_amean
-  - meta_ozone_ug_per_m3_amean
-  - v_ozone_nmol_per_mol_max
-  - qc_ozone_nmol_per_mol_max
-  - meta_ozone_nmol_per_mol_max
-  - v_ozone_ug_per_m3_max
-  - qc_ozone_ug_per_m3_max
-  - meta_ozone_ug_per_m3_max
-  - v_ozone_nmol_per_mol_min
-  - qc_ozone_nmol_per_mol_min
-  - meta_ozone_nmol_per_mol_min
-  - v_ozone_ug_per_m3_min
-  - qc_ozone_ug_per_m3_min
-  - meta_ozone_ug_per_m3_min
-  - v_ozone_nmol_per_mol_stddev
-  - qc_ozone_nmol_per_mol_stddev
-  - meta_ozone_nmol_per_mol_stddev
-  - v_ozone_ug_per_m3_stddev
-  - qc_ozone_ug_per_m3_stddev
-  - meta_ozone_ug_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/BG/NQ/9X/BGNQ-9XFP.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: uv_abs_46
-  ebas_method_ref: AT03L_ozone1a
-  ebas_revision_date: '2025-06-24T12:25:53.221273Z'
-  ebas_station_altitude: 161.0 m
-  ebas_station_code: AT0046R
-  ebas_station_latitude: 48.334722
-  ebas_station_longitude: 16.730556
+  ebas_instrument_name: uv_7
+  ebas_method_ref: SK01L_uv_abs
+  ebas_revision_date: '2025-01-27T14:09:09.317088Z'
+  ebas_station_altitude: 113.0 m
+  ebas_station_code: SK0007R
+  ebas_station_latitude: 47.96
+  ebas_station_longitude: 17.860556
   ebas_statistics: arithmetic mean
   resolution: hourly
-  time_coverage_end: '2025-01-01T00:00:00Z'
-  time_coverage_start: '1990-01-01T00:00:00Z'
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '1994-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
@@ -3287,6 +3736,122 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BS/5H/VE/BS5H-VE46.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BW/HH/VM/BWHH-VMS7.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: O3_FR14
+  ebas_method_ref: FR07L_uv_abs
+  ebas_revision_date: '2025-04-22T12:51:56.250919Z'
+  ebas_station_altitude: 836.0 m
+  ebas_station_code: FR0014R
+  ebas_station_latitude: 47.3
+  ebas_station_longitude: 6.833333
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2010-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BX/74/RW/BX74-RW5T.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: uv_abs_h_0032
+  ebas_method_ref: BE02L_uv_abs
+  ebas_revision_date: '2025-08-28T09:10:41.870648Z'
+  ebas_station_altitude: 295.0 m
+  ebas_station_code: BE0032R
+  ebas_station_latitude: 50.629421
+  ebas_station_longitude: 6.001019
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2013-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BZ/MM/8H/BZMM-8HDJ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: O3mon1
+  ebas_method_ref: DK01L_UV_absorption
+  ebas_revision_date: '2024-11-26T13:19:55.555666Z'
+  ebas_station_altitude: 3.0 m
+  ebas_station_code: DK0012R
+  ebas_station_latitude: 55.693888889
+  ebas_station_longitude: 12.088611111
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2013-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/C5/6W/J5/C56W-J5KR.nc:
+  ebas_instrument_name: uv_abs_11
+  ebas_method_ref: NL01L_uv_abs
+  ebas_revision_date: '2012-07-11T00:00:00.000000Z'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: NL0011R
+  ebas_station_latitude: 51.970278
+  ebas_station_longitude: 4.926389
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2011-01-01T00:00:00Z'
+  time_coverage_start: '2008-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone
+  - qc_ozone
+  - meta_ozone
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/C6/JB/5Z/C6JB-5ZBE.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: uv_33
+  ebas_method_ref: GB02L_uv_abs
+  ebas_revision_date: '2024-09-13T09:47:55.853317Z'
+  ebas_station_altitude: 180.0 m
+  ebas_station_code: GB0033R
+  ebas_station_latitude: 55.862281
+  ebas_station_longitude: -3.205782
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '1986-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/CA/9B/FE/CA9B-FEA3.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_49C_ARH
@@ -3349,30 +3914,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/CA/BK/FJ/CABK-FJMM.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/CE/B9/ZX/CEB9-ZX26.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: uv_abs_02
-  ebas_method_ref: AT03L_ozone1a
-  ebas_revision_date: '2025-06-24T12:17:31.090995Z'
-  ebas_station_altitude: 117.0 m
-  ebas_station_code: AT0002R
-  ebas_station_latitude: 47.7666664124
-  ebas_station_longitude: 16.7666664124
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2025-01-01T00:00:00Z'
-  time_coverage_start: '1989-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol
-  - qc_ozone_nmol_per_mol
-  - meta_ozone_nmol_per_mol
-  - v_ozone_ug_per_m3
-  - qc_ozone_ug_per_m3
-  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/CG/NX/5W/CGNX-5WSG.nc:
   ebas_instrument_name: uv_abs_32
   ebas_method_ref: FR02L_uv_abs
@@ -3393,6 +3934,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/CG/NX/5W/CGNX-5WSG.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CK/ZE/XC/CKZE-XCXW.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: EE01_ua2
+  ebas_method_ref: EE01L_uvabs_AH
+  ebas_revision_date: '2025-05-23T12:58:56.612047Z'
+  ebas_station_altitude: 6.0 m
+  ebas_station_code: EE0011R
+  ebas_station_latitude: 58.383333
+  ebas_station_longitude: 21.816667
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2013-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/CM/N7/BF/CMN7-BFJ9.nc:
   ebas_instrument_name: uv_mon_9
   ebas_method_ref: ES04L_uv_abs
@@ -3473,36 +4038,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/CP/HG/6U/CPHG-6UUG.nc:
   - v_ozone_ug_per_m3_min
   - qc_ozone_ug_per_m3_min
   - meta_ozone_ug_per_m3_min
-  - v_ozone_nmol_per_mol_stddev
-  - qc_ozone_nmol_per_mol_stddev
-  - meta_ozone_nmol_per_mol_stddev
-  - v_ozone_ug_per_m3_stddev
-  - qc_ozone_ug_per_m3_stddev
-  - meta_ozone_ug_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/CQ/RW/S8/CQRW-S8HH.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: JP02_uv_abs_069
-  ebas_measurement_height: 5.0 m
-  ebas_method_ref: JP02L_uv_ab
-  ebas_revision_date: '2017-03-31T10:24:19.297000Z'
-  ebas_station_altitude: 25.2 m
-  ebas_station_code: JP0003U
-  ebas_station_latitude: 36.058055556
-  ebas_station_longitude: 140.125833333
-  resolution: hourly
-  time_coverage_end: '2016-12-31T15:00:00Z'
-  time_coverage_start: '2011-04-30T15:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol_amean
-  - qc_ozone_nmol_per_mol_amean
-  - meta_ozone_nmol_per_mol_amean
-  - v_ozone_ug_per_m3_amean
-  - qc_ozone_ug_per_m3_amean
-  - meta_ozone_ug_per_m3_amean
   - v_ozone_nmol_per_mol_stddev
   - qc_ozone_nmol_per_mol_stddev
   - meta_ozone_nmol_per_mol_stddev
@@ -3603,6 +4138,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/CU/NQ/32/CUNQ-32S7.nc:
   - v_ozone_ug_per_m3_stddev
   - qc_ozone_ug_per_m3_stddev
   - meta_ozone_ug_per_m3_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CW/4Z/UB/CW4Z-UBN8.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: O3_FR09
+  ebas_method_ref: FR07L_uv_abs
+  ebas_revision_date: '2025-04-22T12:51:33.111616Z'
+  ebas_station_altitude: 390.0 m
+  ebas_station_code: FR0009R
+  ebas_station_latitude: 49.9
+  ebas_station_longitude: 4.633333
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2010-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/CX/AQ/EW/CXAQ-EWYA.nc:
   ebas_data_level: '2'
   ebas_instrument_name: ES0011R_49C-65422-348
@@ -3727,69 +4286,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DB/3V/CP/DB3V-CPUV.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/DF/94/JX/DF94-JXX7.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: uv_abs_BAQS
-  ebas_measurement_height: 3.0 m
-  ebas_method_ref: GB16L_uv_ab
-  ebas_revision_date: '2023-10-09T12:39:51.919037Z'
-  ebas_station_altitude: 143.0 m
-  ebas_station_code: GB0101U
-  ebas_station_latitude: 52.456
-  ebas_station_longitude: -1.929
-  resolution: hourly
-  time_coverage_end: '2023-01-01T00:00:00Z'
-  time_coverage_start: '2019-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol_amean
-  - qc_ozone_nmol_per_mol_amean
-  - meta_ozone_nmol_per_mol_amean
-  - v_ozone_ug_per_m3_amean
-  - qc_ozone_ug_per_m3_amean
-  - meta_ozone_ug_per_m3_amean
-  - v_ozone_nmol_per_mol_max
-  - qc_ozone_nmol_per_mol_max
-  - meta_ozone_nmol_per_mol_max
-  - v_ozone_ug_per_m3_max
-  - qc_ozone_ug_per_m3_max
-  - meta_ozone_ug_per_m3_max
-  - v_ozone_nmol_per_mol_min
-  - qc_ozone_nmol_per_mol_min
-  - meta_ozone_nmol_per_mol_min
-  - v_ozone_ug_per_m3_min
-  - qc_ozone_ug_per_m3_min
-  - meta_ozone_ug_per_m3_min
-  - v_ozone_nmol_per_mol_stddev
-  - qc_ozone_nmol_per_mol_stddev
-  - meta_ozone_nmol_per_mol_stddev
-  - v_ozone_ug_per_m3_stddev
-  - qc_ozone_ug_per_m3_stddev
-  - meta_ozone_ug_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/DK/GP/BZ/DKGP-BZEZ.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: uv_abs_02
-  ebas_method_ref: AT03L_ozone1a_IMP_2022
-  ebas_revision_date: '2022-11-02T09:00:00.000000Z'
-  ebas_station_altitude: 117.0 m
-  ebas_station_code: AT0002R
-  ebas_station_latitude: 47.7666664124
-  ebas_station_longitude: 16.7666664124
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2022-07-20T01:00:00Z'
-  time_coverage_start: '2022-07-12T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone
-  - qc_ozone
-  - meta_ozone
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DN/X2/DS/DNX2-DSH7.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TEI49I_4
@@ -3906,46 +4402,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DU/2G/65/DU2G-65J4.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/DW/74/NM/DW74-NMTG.nc:
-  ebas_instrument_name: uv_1
-  ebas_method_ref: IT01L_uv_abs
-  ebas_revision_date: '2014-05-01T00:00:00.000000Z'
-  ebas_station_altitude: 48.0 m
-  ebas_station_code: IT0001R
-  ebas_station_latitude: 42.1
-  ebas_station_longitude: 12.633333
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/DX/DP/5K/DXDP-5KBE.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: uv_6
+  ebas_method_ref: GB02L_uv_abs
+  ebas_revision_date: '2024-09-13T08:49:14.370536Z'
+  ebas_station_altitude: 126.0 m
+  ebas_station_code: GB0006R
+  ebas_station_latitude: 54.443056
+  ebas_station_longitude: -7.87
   ebas_statistics: arithmetic mean
   resolution: hourly
-  time_coverage_end: '2008-01-01T00:00:00Z'
-  time_coverage_start: '1995-01-01T00:00:00Z'
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '1987-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
-  - v_ozone
-  - qc_ozone
-  - meta_ozone
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/DY/93/KS/DY93-KSCM.nc:
-  ebas_instrument_name: uv_abs_BKT
-  ebas_method_ref: CH01L_uv_abs
-  ebas_revision_date: '2010-03-24T00:00:00.000000Z'
-  ebas_station_altitude: 845.0 m
-  ebas_station_code: ID1013R
-  ebas_station_latitude: -0.202222
-  ebas_station_longitude: 100.318056
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2007-09-30T21:00:00Z'
-  time_coverage_start: '1996-09-02T08:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone
-  - qc_ozone
-  - meta_ozone
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DY/DB/KU/DYDB-KUES.nc:
   ebas_data_level: '2'
   ebas_instrument_name: ES0011R_Teledyne_T400
@@ -3991,30 +4471,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/E4/5Q/98/E45Q-986P.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/E6/F8/AM/E6F8-AMKC.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: uv_abs_35
-  ebas_method_ref: SE01L_AH
-  ebas_revision_date: '2025-06-06T10:47:55.159699Z'
-  ebas_station_altitude: 225.0 m
-  ebas_station_code: SE0035R
-  ebas_station_latitude: 64.25
-  ebas_station_longitude: 19.766667
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2024-12-31T23:00:00Z'
-  time_coverage_start: '2016-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol
-  - qc_ozone_nmol_per_mol
-  - meta_ozone_nmol_per_mol
-  - v_ozone_ug_per_m3
-  - qc_ozone_ug_per_m3
-  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/E7/KJ/38/E7KJ-385Q.nc:
   ebas_instrument_name: uv_10
   ebas_method_ref: LV01L_uv_abs
@@ -4055,30 +4511,26 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/E9/9N/WZ/E99N-WZPK.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/E9/MC/P3/E9MC-P3HV.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: TEI49C_no58547318
-  ebas_method_ref: ID04L_uv_abs
-  ebas_revision_date: '2019-04-25T13:13:53.877000Z'
-  ebas_station_altitude: 845.0 m
-  ebas_station_code: ID1013R
-  ebas_station_latitude: -0.202222
-  ebas_station_longitude: 100.318056
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/EB/B4/8S/EBB4-8SQV.nc:
+  ebas_instrument_name: uv_abs
+  ebas_method_ref: NL01L_uv_abs
+  ebas_revision_date: '2012-07-10T00:00:00.000000Z'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: NL0011R
+  ebas_station_latitude: 51.970278
+  ebas_station_longitude: 4.926389
   ebas_statistics: arithmetic mean
   resolution: hourly
-  time_coverage_end: '2013-01-01T00:00:00Z'
-  time_coverage_start: '2007-01-01T00:00:00Z'
+  time_coverage_end: '2012-01-01T00:00:00Z'
+  time_coverage_start: '2011-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
-  - v_ozone_nmol_per_mol
-  - qc_ozone_nmol_per_mol
-  - meta_ozone_nmol_per_mol
-  - v_ozone_ug_per_m3
-  - qc_ozone_ug_per_m3
-  - meta_ozone_ug_per_m3
+  - v_ozone
+  - qc_ozone
+  - meta_ozone
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/EB/CP/B8/EBCP-B8V9.nc:
   ebas_data_level: '2'
   ebas_instrument_name: O3mon1
@@ -4257,6 +4709,54 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/EU/Y4/VD/EUY4-VDMF.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/EV/7Q/KD/EV7Q-KDE5.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: uv_abs_h_0001
+  ebas_method_ref: BE02L_uv_abs
+  ebas_revision_date: '2025-08-28T09:10:28.961813Z'
+  ebas_station_altitude: 430.0 m
+  ebas_station_code: BE0001R
+  ebas_station_latitude: 49.877778
+  ebas_station_longitude: 5.203611
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2013-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/EV/KF/C2/EVKF-C2TU.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TEI49I_5
+  ebas_method_ref: CH01L_O3
+  ebas_revision_date: '2025-09-23T08:45:43.269750Z'
+  ebas_station_altitude: 1031.0 m
+  ebas_station_code: CH0005R
+  ebas_station_latitude: 47.0674167
+  ebas_station_longitude: 8.4633333
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2025-01-01T00:00:00Z'
+  time_coverage_start: '2013-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/EV/NS/V4/EVNS-V44V.nc:
   ebas_data_level: '2'
   ebas_instrument_name: uv_abs_uk_0052
@@ -4331,6 +4831,31 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/EY/PG/86/EYPG-86RH.nc:
   - v_ozone_ug_per_m3_stddev
   - qc_ozone_ug_per_m3_stddev
   - meta_ozone_ug_per_m3_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/F4/RU/JC/F4RU-JC5C.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: O3TS49i
+  ebas_measurement_height: 4.35 m
+  ebas_method_ref: PL05L_AO3THERMO
+  ebas_revision_date: '2023-10-17T11:31:52.800017Z'
+  ebas_station_altitude: 157.0 m
+  ebas_station_code: PL0005R
+  ebas_station_latitude: 54.15
+  ebas_station_longitude: 22.066667
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2023-01-01T00:00:00Z'
+  time_coverage_start: '2016-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/F9/7T/PG/F97T-PG7S.nc:
   ebas_data_level: '2'
   ebas_instrument_name: ES0009R_Thermo_49i
@@ -4428,6 +4953,26 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/F9/W7/E5/F9W7-E56A.nc:
   - v_ozone_ug_per_m3_min
   - qc_ozone_ug_per_m3_min
   - meta_ozone_ug_per_m3_min
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FE/MU/9Z/FEMU-9ZSG.nc:
+  ebas_instrument_name: uv_abs_1
+  ebas_method_ref: CZ01L_uv_abs
+  ebas_revision_date: '2015-08-20T09:53:06.810000Z'
+  ebas_station_altitude: 735.0 m
+  ebas_station_code: CZ0001R
+  ebas_station_latitude: 49.735084444
+  ebas_station_longitude: 16.034196944
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2015-01-01T00:00:00Z'
+  time_coverage_start: '1992-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone
+  - qc_ozone
+  - meta_ozone
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FH/ZD/2N/FHZD-2NF7.nc:
   ebas_instrument_name: uv_abs_8
   ebas_method_ref: DE03L_uv_abs
@@ -4489,30 +5034,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/FJ/KZ/KF/FJKZ-KF3A.nc:
   - v_ozone_ug_per_m3_stddev
   - qc_ozone_ug_per_m3_stddev
   - meta_ozone_ug_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/FJ/WX/88/FJWX-88GT.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: ES0014R_332503151
-  ebas_method_ref: ES04L_uv_abs
-  ebas_revision_date: '2023-07-04T12:29:37.568822Z'
-  ebas_station_altitude: 470.0 m
-  ebas_station_code: ES0014R
-  ebas_station_latitude: 41.39389
-  ebas_station_longitude: 0.73472
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2022-01-01T00:00:00Z'
-  time_coverage_start: '2013-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol
-  - qc_ozone_nmol_per_mol
-  - meta_ozone_nmol_per_mol
-  - v_ozone_ug_per_m3
-  - qc_ozone_ug_per_m3
-  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FK/45/RJ/FK45-RJNB.nc:
   ebas_data_level: '2'
   ebas_instrument_name: mcm_o3
@@ -4645,48 +5166,51 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/FX/J2/X3/FXJ2-X3ZN.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/FY/63/5R/FY63-5R8W.nc:
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FX/KW/V7/FXKW-V74Q.nc:
   ebas_data_level: '2'
-  ebas_instrument_name: UV_Photometric_O3_Analyzer
-  ebas_measurement_height: 7.0 m
-  ebas_method_ref: MT01L_GS-OP-100-01
-  ebas_revision_date: '2024-05-13T08:01:54.948177Z'
-  ebas_station_altitude: 167.0 m
-  ebas_station_code: MT0001R
-  ebas_station_latitude: 36.0722
-  ebas_station_longitude: 14.2184
+  ebas_instrument_name: uv_43
+  ebas_method_ref: GB02L_uv_abs
+  ebas_revision_date: '2024-09-13T09:48:57.568078Z'
+  ebas_station_altitude: 160.0 m
+  ebas_station_code: GB0043R
+  ebas_station_latitude: 51.781784
+  ebas_station_longitude: -4.691462
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  time_coverage_end: '2023-01-01T00:00:00Z'
-  time_coverage_start: '2015-01-01T00:00:00Z'
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '1997-01-20T00:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
-  - v_ozone_nmol_per_mol_amean
-  - qc_ozone_nmol_per_mol_amean
-  - meta_ozone_nmol_per_mol_amean
-  - v_ozone_ug_per_m3_amean
-  - qc_ozone_ug_per_m3_amean
-  - meta_ozone_ug_per_m3_amean
-  - v_ozone_nmol_per_mol_max
-  - qc_ozone_nmol_per_mol_max
-  - meta_ozone_nmol_per_mol_max
-  - v_ozone_ug_per_m3_max
-  - qc_ozone_ug_per_m3_max
-  - meta_ozone_ug_per_m3_max
-  - v_ozone_nmol_per_mol_min
-  - qc_ozone_nmol_per_mol_min
-  - meta_ozone_nmol_per_mol_min
-  - v_ozone_ug_per_m3_min
-  - qc_ozone_ug_per_m3_min
-  - meta_ozone_ug_per_m3_min
-  - v_ozone_nmol_per_mol_stddev
-  - qc_ozone_nmol_per_mol_stddev
-  - meta_ozone_nmol_per_mol_stddev
-  - v_ozone_ug_per_m3_stddev
-  - qc_ozone_ug_per_m3_stddev
-  - meta_ozone_ug_per_m3_stddev
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FY/3M/HA/FY3M-HA7F.nc:
+  ebas_instrument_name: O3MLB
+  ebas_measurement_height: 4.35 m
+  ebas_method_ref: PL02L_AO3MONLABS
+  ebas_revision_date: '2015-07-17T12:00:00.000000Z'
+  ebas_station_altitude: 157.0 m
+  ebas_station_code: PL0005R
+  ebas_station_latitude: 54.15
+  ebas_station_longitude: 22.066667
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2014-12-31T23:59:59Z'
+  time_coverage_start: '2014-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone
+  - qc_ozone
+  - meta_ozone
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FY/EU/U5/FYEU-U5QU.nc:
   ebas_data_level: '2'
   ebas_instrument_name: EIMV_O3_air_monitor_1
@@ -4775,6 +5299,31 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/G2/XY/6T/G2XY-6TM8.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/G5/8Z/DE/G58Z-DEU7.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Sc_Mon_0301
+  ebas_measurement_height: 12.0 m
+  ebas_method_ref: DE03L_uv_abs
+  ebas_revision_date: '2024-11-25T12:35:43.196242Z'
+  ebas_station_altitude: 1205.0 m
+  ebas_station_code: DE0003R
+  ebas_station_latitude: 47.914722
+  ebas_station_longitude: 7.908611
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2023-12-31T23:00:00Z'
+  time_coverage_start: '2021-12-31T23:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/G8/4G/CU/G84G-CUW4.nc:
   ebas_data_level: '2'
   ebas_instrument_name: uv_abs_18
@@ -4844,6 +5393,48 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/GC/YR/Z9/GCYR-Z9RV.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GG/5V/YH/GG5V-YHB5.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: 49i_1225011092
+  ebas_measurement_height: 30.0 m
+  ebas_method_ref: IT06L_49i_uvab
+  ebas_revision_date: '2025-02-17T10:32:00.000000Z'
+  ebas_station_altitude: 2165.0 m
+  ebas_station_code: IT0009R
+  ebas_station_latitude: 44.19320533600754
+  ebas_station_longitude: 10.701429456423515
+  resolution: hourly
+  time_coverage_end: '2025-01-01T00:00:00Z'
+  time_coverage_start: '2024-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol_amean
+  - qc_ozone_nmol_per_mol_amean
+  - meta_ozone_nmol_per_mol_amean
+  - v_ozone_ug_per_m3_amean
+  - qc_ozone_ug_per_m3_amean
+  - meta_ozone_ug_per_m3_amean
+  - v_ozone_nmol_per_mol_max
+  - qc_ozone_nmol_per_mol_max
+  - meta_ozone_nmol_per_mol_max
+  - v_ozone_ug_per_m3_max
+  - qc_ozone_ug_per_m3_max
+  - meta_ozone_ug_per_m3_max
+  - v_ozone_nmol_per_mol_min
+  - qc_ozone_nmol_per_mol_min
+  - meta_ozone_nmol_per_mol_min
+  - v_ozone_ug_per_m3_min
+  - qc_ozone_ug_per_m3_min
+  - meta_ozone_ug_per_m3_min
+  - v_ozone_nmol_per_mol_stddev
+  - qc_ozone_nmol_per_mol_stddev
+  - meta_ozone_nmol_per_mol_stddev
+  - v_ozone_ug_per_m3_stddev
+  - qc_ozone_ug_per_m3_stddev
+  - meta_ozone_ug_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/GH/6D/EZ/GH6D-EZ2E.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_49i_TIK
@@ -4880,65 +5471,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/GH/6D/EZ/GH6D-EZ2E.nc:
   - v_ozone_ug_per_m3_min
   - qc_ozone_ug_per_m3_min
   - meta_ozone_ug_per_m3_min
-  - v_ozone_nmol_per_mol_stddev
-  - qc_ozone_nmol_per_mol_stddev
-  - meta_ozone_nmol_per_mol_stddev
-  - v_ozone_ug_per_m3_stddev
-  - qc_ozone_ug_per_m3_stddev
-  - meta_ozone_ug_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/GJ/E9/K9/GJE9-K9CN.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: JP02_uv_abs_071
-  ebas_measurement_height: 5.0 m
-  ebas_method_ref: JP02L_uv_ab
-  ebas_revision_date: '2017-03-31T10:24:45.170000Z'
-  ebas_station_altitude: 25.2 m
-  ebas_station_code: JP0003U
-  ebas_station_latitude: 36.058055556
-  ebas_station_longitude: 140.125833333
-  resolution: hourly
-  time_coverage_end: '2016-01-31T15:00:00Z'
-  time_coverage_start: '2013-03-31T15:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol_amean
-  - qc_ozone_nmol_per_mol_amean
-  - meta_ozone_nmol_per_mol_amean
-  - v_ozone_ug_per_m3_amean
-  - qc_ozone_ug_per_m3_amean
-  - meta_ozone_ug_per_m3_amean
-  - v_ozone_nmol_per_mol_stddev
-  - qc_ozone_nmol_per_mol_stddev
-  - meta_ozone_nmol_per_mol_stddev
-  - v_ozone_ug_per_m3_stddev
-  - qc_ozone_ug_per_m3_stddev
-  - meta_ozone_ug_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/GQ/4Y/QM/GQ4Y-QMA3.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: JP02_uv_abs_310
-  ebas_method_ref: JP02L_uv_ab
-  ebas_revision_date: '2017-03-31T10:21:22.397000Z'
-  ebas_station_altitude: 25.2 m
-  ebas_station_code: JP0003U
-  ebas_station_latitude: 36.058055556
-  ebas_station_longitude: 140.125833333
-  resolution: hourly
-  time_coverage_end: '2016-03-31T15:00:00Z'
-  time_coverage_start: '2006-03-31T15:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol_amean
-  - qc_ozone_nmol_per_mol_amean
-  - meta_ozone_nmol_per_mol_amean
-  - v_ozone_ug_per_m3_amean
-  - qc_ozone_ug_per_m3_amean
-  - meta_ozone_ug_per_m3_amean
   - v_ozone_nmol_per_mol_stddev
   - qc_ozone_nmol_per_mol_stddev
   - meta_ozone_nmol_per_mol_stddev
@@ -5031,31 +5563,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/H8/SP/WD/H8SP-WDK9.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/HA/GY/B9/HAGY-B9HZ.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: JP02_uv_abs_349
-  ebas_measurement_height: 2.0 m
-  ebas_method_ref: JP02L_uv_ab
-  ebas_revision_date: '2017-03-31T10:19:56.317000Z'
-  ebas_station_altitude: 25.2 m
-  ebas_station_code: JP0003U
-  ebas_station_latitude: 36.058055556
-  ebas_station_longitude: 140.125833333
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2006-03-31T15:00:00Z'
-  time_coverage_start: '1993-03-31T15:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol
-  - qc_ozone_nmol_per_mol
-  - meta_ozone_nmol_per_mol
-  - v_ozone_ug_per_m3
-  - qc_ozone_ug_per_m3
-  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HD/PP/5F/HDPP-5F6N.nc:
   ebas_data_level: '2'
   ebas_instrument_name: alt_o3
@@ -5104,6 +5611,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/HD/U4/VW/HDU4-VW55.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HG/RW/WQ/HGRW-WQ79.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: O3_FR16
+  ebas_method_ref: FR07L_uv_abs
+  ebas_revision_date: '2025-04-22T12:52:11.318484Z'
+  ebas_station_altitude: 1750.0 m
+  ebas_station_code: FR0016R
+  ebas_station_latitude: 45.0
+  ebas_station_longitude: 6.466667
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2010-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HH/YT/5D/HHYT-5DXA.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_49_THD
@@ -5140,78 +5671,26 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/HH/YT/5D/HHYT-5DXA.nc:
   - v_ozone_ug_per_m3_min
   - qc_ozone_ug_per_m3_min
   - meta_ozone_ug_per_m3_min
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/HP/6K/7F/HP6K-7FCY.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: ARSO_O3_air_monitor_3
-  ebas_measurement_height: 3.0 m
-  ebas_method_ref: SI01L_uv_ab
-  ebas_revision_date: '2025-07-31T07:56:58.000000Z'
-  ebas_station_altitude: 520.0 m
-  ebas_station_code: SI0008R
-  ebas_station_latitude: 45.566667
-  ebas_station_longitude: 14.866667
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HR/3G/HE/HR3G-HESE.nc:
+  ebas_instrument_name: uv_abs_03
+  ebas_method_ref: CZ01L_97_3_3_1j
+  ebas_revision_date: '2012-05-14T00:00:00.000000Z'
+  ebas_station_altitude: 535.0 m
+  ebas_station_code: CZ0003R
+  ebas_station_latitude: 49.573394
+  ebas_station_longitude: 15.080278
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  time_coverage_end: '2025-01-01T00:00:00Z'
-  time_coverage_start: '2024-01-01T00:00:00Z'
+  time_coverage_end: '2010-01-01T00:00:00Z'
+  time_coverage_start: '2007-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
-  - v_ozone_nmol_per_mol_amean
-  - qc_ozone_nmol_per_mol_amean
-  - meta_ozone_nmol_per_mol_amean
-  - v_ozone_ug_per_m3_amean
-  - qc_ozone_ug_per_m3_amean
-  - meta_ozone_ug_per_m3_amean
-  - v_ozone_nmol_per_mol_max
-  - qc_ozone_nmol_per_mol_max
-  - meta_ozone_nmol_per_mol_max
-  - v_ozone_ug_per_m3_max
-  - qc_ozone_ug_per_m3_max
-  - meta_ozone_ug_per_m3_max
-  - v_ozone_nmol_per_mol_min
-  - qc_ozone_nmol_per_mol_min
-  - meta_ozone_nmol_per_mol_min
-  - v_ozone_ug_per_m3_min
-  - qc_ozone_ug_per_m3_min
-  - meta_ozone_ug_per_m3_min
-  - v_ozone_nmol_per_mol_stddev
-  - qc_ozone_nmol_per_mol_stddev
-  - meta_ozone_nmol_per_mol_stddev
-  - v_ozone_ug_per_m3_stddev
-  - qc_ozone_ug_per_m3_stddev
-  - meta_ozone_ug_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/HP/HQ/XP/HPHQ-XPTK.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: TEI49i_no120551879
-  ebas_measurement_height: 12.0 m
-  ebas_method_ref: VN02L_uv_abs
-  ebas_revision_date: '2025-11-05T10:45:21.264994Z'
-  ebas_station_altitude: 1466.0 m
-  ebas_station_code: VN0001R
-  ebas_station_latitude: 21.5731
-  ebas_station_longitude: 103.5157
-  resolution: hourly
-  time_coverage_end: '2025-01-01T00:00:00Z'
-  time_coverage_start: '2014-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol_amean
-  - qc_ozone_nmol_per_mol_amean
-  - meta_ozone_nmol_per_mol_amean
-  - v_ozone_ug_per_m3_amean
-  - qc_ozone_ug_per_m3_amean
-  - meta_ozone_ug_per_m3_amean
-  - v_ozone_nmol_per_mol_stddev
-  - qc_ozone_nmol_per_mol_stddev
-  - meta_ozone_nmol_per_mol_stddev
-  - v_ozone_ug_per_m3_stddev
-  - qc_ozone_ug_per_m3_stddev
-  - meta_ozone_ug_per_m3_stddev
+  - v_ozone
+  - qc_ozone
+  - meta_ozone
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HR/7T/A3/HR7T-A3ZF.nc:
   ebas_data_level: '2'
   ebas_instrument_name: hpb_o3
@@ -5292,36 +5771,31 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/HW/3R/5G/HW3R-5GG7.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/HW/UV/4Y/HWUV-4YJU.nc:
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HW/VT/49/HWVT-49ZZ.nc:
   ebas_data_level: '2'
-  ebas_instrument_name: JP02_uv_abs_310
-  ebas_measurement_height: 5.0 m
-  ebas_method_ref: JP02L_uv_ab
-  ebas_revision_date: '2017-03-30T06:14:04.000000Z'
-  ebas_station_altitude: 25.2 m
-  ebas_station_code: JP0003U
-  ebas_station_latitude: 36.058055556
-  ebas_station_longitude: 140.125833333
+  ebas_instrument_name: UBA_Sc_Mon_0301
+  ebas_measurement_height: 12.0 m
+  ebas_method_ref: DE03L_uv_abs
+  ebas_revision_date: '2022-12-19T14:25:34.320074Z'
+  ebas_station_altitude: 1205.0 m
+  ebas_station_code: DE0003R
+  ebas_station_latitude: 47.914722
+  ebas_station_longitude: 7.908611
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  time_coverage_end: '2012-06-30T15:00:00Z'
-  time_coverage_start: '2012-02-29T15:00:00Z'
+  time_coverage_end: '2021-12-31T23:00:00Z'
+  time_coverage_start: '2013-12-31T23:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
-  - v_ozone_nmol_per_mol_amean
-  - qc_ozone_nmol_per_mol_amean
-  - meta_ozone_nmol_per_mol_amean
-  - v_ozone_ug_per_m3_amean
-  - qc_ozone_ug_per_m3_amean
-  - meta_ozone_ug_per_m3_amean
-  - v_ozone_nmol_per_mol_stddev
-  - qc_ozone_nmol_per_mol_stddev
-  - meta_ozone_nmol_per_mol_stddev
-  - v_ozone_ug_per_m3_stddev
-  - qc_ozone_ug_per_m3_stddev
-  - meta_ozone_ug_per_m3_stddev
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HZ/UA/CJ/HZUA-CJMF.nc:
   ebas_instrument_name: uv_abs_02
   ebas_method_ref: AM01L_uv_abs
@@ -5492,26 +5966,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/JT/JX/KX/JTJX-KXCP.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/JT/NH/9W/JTNH-9W9Z.nc:
-  ebas_instrument_name: uv_abs_08
-  ebas_method_ref: SI01L_uv_abs
-  ebas_revision_date: '2014-12-17T09:02:51.623000Z'
-  ebas_station_altitude: 520.0 m
-  ebas_station_code: SI0008R
-  ebas_station_latitude: 45.566667
-  ebas_station_longitude: 14.866667
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2014-01-01T00:00:00Z'
-  time_coverage_start: '1997-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone
-  - qc_ozone
-  - meta_ozone
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/JU/AR/EX/JUAR-EXFV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TEI49I_2
@@ -5536,27 +5990,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/JU/AR/EX/JUAR-EXFV.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/JX/DU/5S/JXDU-5S6G.nc:
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/JW/UT/Y4/JWUT-Y4ZD.nc:
   ebas_data_level: '2'
-  ebas_instrument_name: uv_abs_uk_0030
-  ebas_method_ref: NO01L_uv_abs
-  ebas_revision_date: '2023-05-22T09:31:55.677904Z'
-  ebas_station_altitude: 255.0 m
-  ebas_station_code: NO0030R
-  ebas_station_latitude: 69.45
-  ebas_station_longitude: 24.6
+  ebas_instrument_name: O3mon10
+  ebas_method_ref: DK01L_UV_absorption
+  ebas_revision_date: '2025-01-24T08:59:11.680968Z'
+  ebas_station_altitude: 20.0 m
+  ebas_station_code: DK0010G
+  ebas_station_latitude: 81.6
+  ebas_station_longitude: -16.67
   ebas_statistics: arithmetic mean
   resolution: hourly
-  time_coverage_end: '1997-01-08T00:00:00Z'
-  time_coverage_start: '1988-03-31T23:00:00Z'
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2001-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
-  - v_ozone
-  - qc_ozone
-  - meta_ozone
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/JX/UE/PB/JXUE-PBXN.nc:
   ebas_data_level: '2'
   ebas_instrument_name: LEGMC_APOA_360_0016
@@ -5570,6 +6027,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/JX/UE/PB/JXUE-PBXN.nc:
   resolution: hourly
   time_coverage_end: '2023-01-01T00:00:00Z'
   time_coverage_start: '2014-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/K2/2Z/MT/K22Z-MTXA.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: uv_15
+  ebas_method_ref: GB02L_uv_abs
+  ebas_revision_date: '2024-09-13T09:47:30.760654Z'
+  ebas_station_altitude: 270.0 m
+  ebas_station_code: GB0015R
+  ebas_station_latitude: 57.734444
+  ebas_station_longitude: -4.774444
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '1987-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
@@ -5718,30 +6199,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/K7/H9/6Y/K7H9-6YVZ.nc:
   - v_ozone_ug_per_m3_stddev
   - qc_ozone_ug_per_m3_stddev
   - meta_ozone_ug_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/KB/Y3/U8/KBY3-U8NG.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: uv_abs_1
-  ebas_method_ref: IT01L_uv_abs
-  ebas_revision_date: '2017-01-13T12:40:38.860000Z'
-  ebas_station_altitude: 48.0 m
-  ebas_station_code: IT0001R
-  ebas_station_latitude: 42.1
-  ebas_station_longitude: 12.633333
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2016-01-01T00:00:00Z'
-  time_coverage_start: '2008-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol
-  - qc_ozone_nmol_per_mol
-  - meta_ozone_nmol_per_mol
-  - v_ozone_ug_per_m3
-  - qc_ozone_ug_per_m3
-  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/KG/VH/94/KGVH-942N.nc:
   ebas_data_level: '2'
   ebas_instrument_name: JP02_uv_abs_059
@@ -5928,61 +6385,43 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/KR/9Z/K6/KR9Z-K6A2.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/KX/N8/UT/KXN8-UTSC.nc:
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/KR/CV/GC/KRCV-GCMJ.nc:
   ebas_data_level: '2'
-  ebas_instrument_name: ARSO_O3_air_monitor_1
-  ebas_measurement_height: 5.0 m
-  ebas_method_ref: SI01L_uv_ab
-  ebas_revision_date: '2023-06-07T11:03:06.207317Z'
-  ebas_station_altitude: 520.0 m
-  ebas_station_code: SI0008R
-  ebas_station_latitude: 45.566667
-  ebas_station_longitude: 14.866667
+  ebas_instrument_name: O3mon31
+  ebas_method_ref: DK01L_UV_absorption
+  ebas_revision_date: '2024-11-26T13:22:39.217529Z'
+  ebas_station_altitude: 10.0 m
+  ebas_station_code: DK0031R
+  ebas_station_latitude: 56.290424
+  ebas_station_longitude: 8.427486
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  time_coverage_end: '2021-01-01T00:00:00Z'
-  time_coverage_start: '2014-01-01T00:00:00Z'
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2013-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
-  - v_ozone_nmol_per_mol_amean
-  - qc_ozone_nmol_per_mol_amean
-  - meta_ozone_nmol_per_mol_amean
-  - v_ozone_ug_per_m3_amean
-  - qc_ozone_ug_per_m3_amean
-  - meta_ozone_ug_per_m3_amean
-  - v_ozone_nmol_per_mol_max
-  - qc_ozone_nmol_per_mol_max
-  - meta_ozone_nmol_per_mol_max
-  - v_ozone_ug_per_m3_max
-  - qc_ozone_ug_per_m3_max
-  - meta_ozone_ug_per_m3_max
-  - v_ozone_nmol_per_mol_min
-  - qc_ozone_nmol_per_mol_min
-  - meta_ozone_nmol_per_mol_min
-  - v_ozone_ug_per_m3_min
-  - qc_ozone_ug_per_m3_min
-  - meta_ozone_ug_per_m3_min
-  - v_ozone_nmol_per_mol_stddev
-  - qc_ozone_nmol_per_mol_stddev
-  - meta_ozone_nmol_per_mol_stddev
-  - v_ozone_ug_per_m3_stddev
-  - qc_ozone_ug_per_m3_stddev
-  - meta_ozone_ug_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/KY/PA/NX/KYPA-NXQT.nc:
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/KU/YK/4S/KUYK-4SVQ.nc:
   ebas_data_level: '2'
-  ebas_instrument_name: uv_abs_h_0035
-  ebas_method_ref: BE02L_uv_abs
-  ebas_revision_date: '2025-10-15T10:15:04.987620Z'
-  ebas_station_altitude: 160.0 m
-  ebas_station_code: BE0035R
-  ebas_station_latitude: 50.503333
-  ebas_station_longitude: 4.989444
+  ebas_instrument_name: O3_FR13
+  ebas_method_ref: FR07L_uv_abs
+  ebas_revision_date: '2025-04-22T12:51:48.741203Z'
+  ebas_station_altitude: 200.0 m
+  ebas_station_code: FR0013R
+  ebas_station_latitude: 43.616667
+  ebas_station_longitude: 0.183333
   ebas_statistics: arithmetic mean
   resolution: hourly
-  time_coverage_end: '2025-01-01T00:00:00Z'
-  time_coverage_start: '2013-01-01T00:00:00Z'
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2010-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
@@ -6059,26 +6498,35 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/MB/BT/44/MBBT-44MX.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/MD/XS/DP/MDXS-DP46.nc:
-  ebas_instrument_name: uv_abs_15
-  ebas_method_ref: FR02L_uv_abs
-  ebas_revision_date: '2014-05-01T00:00:00.000000Z'
-  ebas_station_altitude: 133.0 m
-  ebas_station_code: FR0015R
-  ebas_station_latitude: 46.65
-  ebas_station_longitude: -0.75
-  ebas_statistics: arithmetic mean
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ME/DX/7K/MEDX-7KBX.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: JP02_uv_abs_01B
+  ebas_method_ref: JP02L_uv_ab
+  ebas_revision_date: '2017-03-31T10:00:26.573000Z'
+  ebas_station_altitude: 16.0 m
+  ebas_station_code: JP0002G
+  ebas_station_latitude: -69.005
+  ebas_station_longitude: 39.590555556
   resolution: hourly
-  time_coverage_end: '2010-01-01T00:00:00Z'
-  time_coverage_start: '2002-01-01T00:00:00Z'
+  time_coverage_end: '2008-09-29T21:00:00Z'
+  time_coverage_start: '1996-12-31T21:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
-  - v_ozone
-  - qc_ozone
-  - meta_ozone
+  - v_ozone_nmol_per_mol_amean
+  - qc_ozone_nmol_per_mol_amean
+  - meta_ozone_nmol_per_mol_amean
+  - v_ozone_ug_per_m3_amean
+  - qc_ozone_ug_per_m3_amean
+  - meta_ozone_ug_per_m3_amean
+  - v_ozone_nmol_per_mol_stddev
+  - qc_ozone_nmol_per_mol_stddev
+  - meta_ozone_nmol_per_mol_stddev
+  - v_ozone_ug_per_m3_stddev
+  - qc_ozone_ug_per_m3_stddev
+  - meta_ozone_ug_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/MG/NE/A9/MGNE-A9M9.nc:
   ebas_data_level: '2'
   ebas_instrument_name: N085O3
@@ -6121,59 +6569,19 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/MG/NE/A9/MGNE-A9M9.nc:
   - v_ozone_ug_per_m3_stddev
   - qc_ozone_ug_per_m3_stddev
   - meta_ozone_ug_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/MJ/33/UU/MJ33-UUWD.nc:
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MK/63/8U/MK63-8U68.nc:
   ebas_data_level: '2'
-  ebas_instrument_name: Thermo_49i_BOS
-  ebas_method_ref: US06L_AM
-  ebas_revision_date: '2024-01-26T13:54:00.278259Z'
-  ebas_station_altitude: 1689.0 m
-  ebas_station_code: US0901R
-  ebas_station_latitude: 40.12498
-  ebas_station_longitude: -105.2368
-  resolution: hourly
-  time_coverage_end: '2024-01-01T00:00:00Z'
-  time_coverage_start: '2018-01-03T20:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol_amean
-  - qc_ozone_nmol_per_mol_amean
-  - meta_ozone_nmol_per_mol_amean
-  - v_ozone_ug_per_m3_amean
-  - qc_ozone_ug_per_m3_amean
-  - meta_ozone_ug_per_m3_amean
-  - v_ozone_nmol_per_mol_max
-  - qc_ozone_nmol_per_mol_max
-  - meta_ozone_nmol_per_mol_max
-  - v_ozone_ug_per_m3_max
-  - qc_ozone_ug_per_m3_max
-  - meta_ozone_ug_per_m3_max
-  - v_ozone_nmol_per_mol_min
-  - qc_ozone_nmol_per_mol_min
-  - meta_ozone_nmol_per_mol_min
-  - v_ozone_ug_per_m3_min
-  - qc_ozone_ug_per_m3_min
-  - meta_ozone_ug_per_m3_min
-  - v_ozone_nmol_per_mol_stddev
-  - qc_ozone_nmol_per_mol_stddev
-  - meta_ozone_nmol_per_mol_stddev
-  - v_ozone_ug_per_m3_stddev
-  - qc_ozone_ug_per_m3_stddev
-  - meta_ozone_ug_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/MP/PH/SK/MPPH-SKYY.nc:
-  ebas_instrument_name: O3_FR30
-  ebas_method_ref: FR07L_uv_abs
-  ebas_revision_date: '2018-04-25T08:28:39.860000Z'
-  ebas_station_altitude: 1465.0 m
-  ebas_station_code: FR0030R
-  ebas_station_latitude: 45.772223
-  ebas_station_longitude: 2.964886
+  ebas_instrument_name: uv_13
+  ebas_method_ref: GB02L_uv_abs
+  ebas_revision_date: '2024-09-13T09:04:21.483310Z'
+  ebas_station_altitude: 119.0 m
+  ebas_station_code: GB0013R
+  ebas_station_latitude: 50.596389
+  ebas_station_longitude: -3.713056
   ebas_statistics: arithmetic mean
   resolution: hourly
-  time_coverage_end: '2017-01-01T00:00:00Z'
-  time_coverage_start: '2010-01-01T00:00:00Z'
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '1987-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
@@ -6185,72 +6593,57 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/MP/PH/SK/MPPH-SKYY.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/MS/TZ/92/MSTZ-92NC.nc:
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MQ/UE/5M/MQUE-5MU9.nc:
   ebas_data_level: '2'
-  ebas_instrument_name: uv_abs_uk_0043
+  ebas_instrument_name: TEI49i_no1304556621
+  ebas_measurement_height: 10.0 m
+  ebas_method_ref: KG02L_uv_abs
+  ebas_revision_date: '2024-09-25T08:20:35.833193Z'
+  ebas_station_altitude: 1613.0 m
+  ebas_station_code: KG0002U
+  ebas_station_latitude: 42.6369
+  ebas_station_longitude: 77.0675
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2016-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol_amean
+  - qc_ozone_nmol_per_mol_amean
+  - meta_ozone_nmol_per_mol_amean
+  - v_ozone_ug_per_m3_amean
+  - qc_ozone_ug_per_m3_amean
+  - meta_ozone_ug_per_m3_amean
+  - v_ozone_nmol_per_mol_stddev
+  - qc_ozone_nmol_per_mol_stddev
+  - meta_ozone_nmol_per_mol_stddev
+  - v_ozone_ug_per_m3_stddev
+  - qc_ozone_ug_per_m3_stddev
+  - meta_ozone_ug_per_m3_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MT/3H/4A/MT3H-4A5C.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: uv_abs_uk_0044
   ebas_method_ref: NO01L_uv_abs
-  ebas_revision_date: '2025-04-09T10:19:43.273215Z'
-  ebas_station_altitude: 160.0 m
-  ebas_station_code: NO0043R
-  ebas_station_latitude: 59.0
-  ebas_station_longitude: 11.533333
+  ebas_revision_date: '2023-05-22T09:31:55.677904Z'
+  ebas_station_altitude: 200.0 m
+  ebas_station_code: NO0044R
+  ebas_station_latitude: 60.266667
+  ebas_station_longitude: 11.1
   ebas_statistics: arithmetic mean
   resolution: hourly
-  time_coverage_end: '2024-12-31T23:00:00Z'
-  time_coverage_start: '1985-11-30T23:00:00Z'
+  time_coverage_end: '1997-02-28T23:00:00Z'
+  time_coverage_start: '1986-02-28T23:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
-  - v_ozone_nmol_per_mol
-  - qc_ozone_nmol_per_mol
-  - meta_ozone_nmol_per_mol
-  - v_ozone_ug_per_m3
-  - qc_ozone_ug_per_m3
-  - meta_ozone_ug_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/MU/SD/B7/MUSD-B7H4.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: UV_Photometric_O3_Analyzer
-  ebas_measurement_height: 7.0 m
-  ebas_method_ref: MT01L_GS-OP-100-01
-  ebas_revision_date: '2024-01-29T00:00:00.000000Z'
-  ebas_station_altitude: 167.0 m
-  ebas_station_code: MT0001R
-  ebas_station_latitude: 36.0722
-  ebas_station_longitude: 14.2184
-  resolution: hourly
-  time_coverage_end: '2024-01-01T00:00:00Z'
-  time_coverage_start: '2023-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol_amean
-  - qc_ozone_nmol_per_mol_amean
-  - meta_ozone_nmol_per_mol_amean
-  - v_ozone_ug_per_m3_amean
-  - qc_ozone_ug_per_m3_amean
-  - meta_ozone_ug_per_m3_amean
-  - v_ozone_nmol_per_mol_max
-  - qc_ozone_nmol_per_mol_max
-  - meta_ozone_nmol_per_mol_max
-  - v_ozone_ug_per_m3_max
-  - qc_ozone_ug_per_m3_max
-  - meta_ozone_ug_per_m3_max
-  - v_ozone_nmol_per_mol_min
-  - qc_ozone_nmol_per_mol_min
-  - meta_ozone_nmol_per_mol_min
-  - v_ozone_ug_per_m3_min
-  - qc_ozone_ug_per_m3_min
-  - meta_ozone_ug_per_m3_min
-  - v_ozone_nmol_per_mol_stddev
-  - qc_ozone_nmol_per_mol_stddev
-  - meta_ozone_nmol_per_mol_stddev
-  - v_ozone_ug_per_m3_stddev
-  - qc_ozone_ug_per_m3_stddev
-  - meta_ozone_ug_per_m3_stddev
+  - v_ozone
+  - qc_ozone
+  - meta_ozone
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/MW/U9/8P/MWU9-8P5X.nc:
   ebas_data_level: '2'
   ebas_instrument_name: ES0010R_Thermo_49i
@@ -6347,6 +6740,31 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/MY/4E/5Z/MY4E-5ZG4.nc:
   - v_ozone_ug_per_m3_stddev
   - qc_ozone_ug_per_m3_stddev
   - meta_ozone_ug_per_m3_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MY/Y2/NZ/MYY2-NZWR.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_We_Mon_0301
+  ebas_measurement_height: 10.5 m
+  ebas_method_ref: DE03L_uv_abs
+  ebas_revision_date: '2024-11-25T12:35:25.027393Z'
+  ebas_station_altitude: 12.0 m
+  ebas_station_code: DE0001R
+  ebas_station_latitude: 54.925556
+  ebas_station_longitude: 8.309722
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2023-12-31T23:00:00Z'
+  time_coverage_start: '2021-12-31T23:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/N3/KX/CF/N3KX-CFTC.nc:
   ebas_data_level: '2'
   ebas_instrument_name: JP02_uv_abs_074
@@ -6466,48 +6884,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/N7/B8/XS/N7B8-XSNR.nc:
   - v_ozone_ug_per_m3_stddev
   - qc_ozone_ug_per_m3_stddev
   - meta_ozone_ug_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/N7/N2/CQ/N7N2-CQRT.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: BCN_uv_abs
-  ebas_measurement_height: 4.0 m
-  ebas_method_ref: ES05L_uv_ab
-  ebas_revision_date: '2023-03-13T00:00:00.000000Z'
-  ebas_station_altitude: 80.0 m
-  ebas_station_code: ES0019U
-  ebas_station_latitude: 41.387463
-  ebas_station_longitude: 2.11532
-  resolution: hourly
-  time_coverage_end: '2023-01-01T00:00:00Z'
-  time_coverage_start: '2022-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol_amean
-  - qc_ozone_nmol_per_mol_amean
-  - meta_ozone_nmol_per_mol_amean
-  - v_ozone_ug_per_m3_amean
-  - qc_ozone_ug_per_m3_amean
-  - meta_ozone_ug_per_m3_amean
-  - v_ozone_nmol_per_mol_max
-  - qc_ozone_nmol_per_mol_max
-  - meta_ozone_nmol_per_mol_max
-  - v_ozone_ug_per_m3_max
-  - qc_ozone_ug_per_m3_max
-  - meta_ozone_ug_per_m3_max
-  - v_ozone_nmol_per_mol_min
-  - qc_ozone_nmol_per_mol_min
-  - meta_ozone_nmol_per_mol_min
-  - v_ozone_ug_per_m3_min
-  - qc_ozone_ug_per_m3_min
-  - meta_ozone_ug_per_m3_min
-  - v_ozone_nmol_per_mol_stddev
-  - qc_ozone_nmol_per_mol_stddev
-  - meta_ozone_nmol_per_mol_stddev
-  - v_ozone_ug_per_m3_stddev
-  - qc_ozone_ug_per_m3_stddev
-  - meta_ozone_ug_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NB/WG/XF/NBWG-XFPJ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: JP02_uv_abs_926
@@ -6538,19 +6914,19 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NB/WG/XF/NBWG-XFPJ.nc:
   - v_ozone_ug_per_m3_stddev
   - qc_ozone_ug_per_m3_stddev
   - meta_ozone_ug_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/NJ/BV/EF/NJBV-EFQB.nc:
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NC/5D/6G/NC5D-6GFP.nc:
   ebas_data_level: '2'
-  ebas_instrument_name: JP02_uv_abs_069
-  ebas_measurement_height: 2.0 m
-  ebas_method_ref: JP02L_uv_ab
-  ebas_revision_date: '2017-03-31T10:22:04.083000Z'
-  ebas_station_altitude: 25.2 m
-  ebas_station_code: JP0003U
-  ebas_station_latitude: 36.058055556
-  ebas_station_longitude: 140.125833333
+  ebas_instrument_name: Thermo_49_SUM
+  ebas_measurement_height: 10.0 m
+  ebas_method_ref: US06L_AM
+  ebas_revision_date: '2018-11-30T11:31:31.410000Z'
+  ebas_station_altitude: 3238.0 m
+  ebas_station_code: DK0025G
+  ebas_station_latitude: 72.5800018311
+  ebas_station_longitude: -38.4799995422
   resolution: hourly
-  time_coverage_end: '2010-11-30T15:00:00Z'
-  time_coverage_start: '2008-10-31T15:00:00Z'
+  time_coverage_end: '2015-01-01T00:00:00Z'
+  time_coverage_start: '2000-06-01T01:00:00Z'
   variables:
   - time
   - time_bnds
@@ -6562,12 +6938,42 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NJ/BV/EF/NJBV-EFQB.nc:
   - v_ozone_ug_per_m3_amean
   - qc_ozone_ug_per_m3_amean
   - meta_ozone_ug_per_m3_amean
-  - v_ozone_nmol_per_mol_stddev
-  - qc_ozone_nmol_per_mol_stddev
-  - meta_ozone_nmol_per_mol_stddev
-  - v_ozone_ug_per_m3_stddev
-  - qc_ozone_ug_per_m3_stddev
-  - meta_ozone_ug_per_m3_stddev
+  - v_ozone_nmol_per_mol_max
+  - qc_ozone_nmol_per_mol_max
+  - meta_ozone_nmol_per_mol_max
+  - v_ozone_ug_per_m3_max
+  - qc_ozone_ug_per_m3_max
+  - meta_ozone_ug_per_m3_max
+  - v_ozone_nmol_per_mol_min
+  - qc_ozone_nmol_per_mol_min
+  - meta_ozone_nmol_per_mol_min
+  - v_ozone_ug_per_m3_min
+  - qc_ozone_ug_per_m3_min
+  - meta_ozone_ug_per_m3_min
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NK/HE/8Q/NKHE-8QQU.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: uv_2
+  ebas_method_ref: GB02L_uv_abs
+  ebas_revision_date: '2024-09-13T08:32:12.419937Z'
+  ebas_station_altitude: 243.0 m
+  ebas_station_code: GB0002R
+  ebas_station_latitude: 55.313056
+  ebas_station_longitude: -3.204167
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '1986-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NQ/ES/57/NQES-57TN.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TE49W_nl0007
@@ -6665,48 +7071,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NU/YV/TT/NUYV-TT6R.nc:
   - v_ozone_ug_per_m3_stddev
   - qc_ozone_ug_per_m3_stddev
   - meta_ozone_ug_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/NW/9Y/T4/NW9Y-T4T2.nc:
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NV/A9/55/NVA9-55JZ.nc:
   ebas_data_level: '2'
-  ebas_instrument_name: uv_abs_Thermo_49i
-  ebas_measurement_height: 12.0 m
-  ebas_method_ref: FR04L_Thermo_49i_PUY_ambient
-  ebas_revision_date: '2022-04-19T10:17:47.210000Z'
-  ebas_station_altitude: 1465.0 m
-  ebas_station_code: FR0030R
-  ebas_station_latitude: 45.772223
-  ebas_station_longitude: 2.964886
+  ebas_instrument_name: uv_6
+  ebas_method_ref: SK01L_uv_abs
+  ebas_revision_date: '2025-01-27T14:08:50.007123Z'
+  ebas_station_altitude: 345.0 m
+  ebas_station_code: SK0006R
+  ebas_station_latitude: 49.05
+  ebas_station_longitude: 22.266667
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  time_coverage_end: '2019-01-01T00:00:00Z'
-  time_coverage_start: '2017-01-01T00:00:00Z'
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '1994-03-01T00:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
-  - v_ozone_nmol_per_mol_amean
-  - qc_ozone_nmol_per_mol_amean
-  - meta_ozone_nmol_per_mol_amean
-  - v_ozone_ug_per_m3_amean
-  - qc_ozone_ug_per_m3_amean
-  - meta_ozone_ug_per_m3_amean
-  - v_ozone_nmol_per_mol_max
-  - qc_ozone_nmol_per_mol_max
-  - meta_ozone_nmol_per_mol_max
-  - v_ozone_ug_per_m3_max
-  - qc_ozone_ug_per_m3_max
-  - meta_ozone_ug_per_m3_max
-  - v_ozone_nmol_per_mol_min
-  - qc_ozone_nmol_per_mol_min
-  - meta_ozone_nmol_per_mol_min
-  - v_ozone_ug_per_m3_min
-  - qc_ozone_ug_per_m3_min
-  - meta_ozone_ug_per_m3_min
-  - v_ozone_nmol_per_mol_stddev
-  - qc_ozone_nmol_per_mol_stddev
-  - meta_ozone_nmol_per_mol_stddev
-  - v_ozone_ug_per_m3_stddev
-  - qc_ozone_ug_per_m3_stddev
-  - meta_ozone_ug_per_m3_stddev
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NW/BY/VV/NWBY-VVQD.nc:
   ebas_data_level: '2'
   ebas_instrument_name: JP02_uv_abs_812
@@ -6737,6 +7125,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NW/BY/VV/NWBY-VVQD.nc:
   - v_ozone_ug_per_m3_stddev
   - qc_ozone_ug_per_m3_stddev
   - meta_ozone_ug_per_m3_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NW/X9/F6/NWX9-F62N.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: O3_FR17
+  ebas_method_ref: FR07L_uv_abs
+  ebas_revision_date: '2025-04-22T12:52:18.953965Z'
+  ebas_station_altitude: 810.0 m
+  ebas_station_code: FR0017R
+  ebas_station_latitude: 45.8
+  ebas_station_longitude: 2.066667
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2010-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NW/YX/SY/NWYX-SY2F.nc:
   ebas_data_level: '2'
   ebas_instrument_name: JP02_uv_abs_299
@@ -6767,30 +7179,36 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NW/YX/SY/NWYX-SY2F.nc:
   - v_ozone_ug_per_m3_stddev
   - qc_ozone_ug_per_m3_stddev
   - meta_ozone_ug_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/NX/94/KV/NX94-KVQH.nc:
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NY/EZ/MB/NYEZ-MBW3.nc:
   ebas_data_level: '2'
-  ebas_instrument_name: O3_FR19
-  ebas_method_ref: FR07L_uv_abs
-  ebas_revision_date: '2020-06-12T08:07:42.637000Z'
-  ebas_station_altitude: 2877.0 m
-  ebas_station_code: FR0019R
-  ebas_station_latitude: 42.936667
-  ebas_station_longitude: 0.141944
-  ebas_statistics: arithmetic mean
+  ebas_instrument_name: JP02_uv_abs_66A
+  ebas_measurement_height: 5.0 m
+  ebas_method_ref: JP02L_uv_ab
+  ebas_revision_date: '2017-03-31T10:05:35.233000Z'
+  ebas_station_altitude: 16.0 m
+  ebas_station_code: JP0002G
+  ebas_station_latitude: -69.005
+  ebas_station_longitude: 39.590555556
   resolution: hourly
-  time_coverage_end: '2019-01-01T00:00:00Z'
-  time_coverage_start: '2010-01-01T00:00:00Z'
+  time_coverage_end: '2008-01-31T21:00:00Z'
+  time_coverage_start: '1999-01-31T21:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
-  - v_ozone_nmol_per_mol
-  - qc_ozone_nmol_per_mol
-  - meta_ozone_nmol_per_mol
-  - v_ozone_ug_per_m3
-  - qc_ozone_ug_per_m3
-  - meta_ozone_ug_per_m3
+  - v_ozone_nmol_per_mol_amean
+  - qc_ozone_nmol_per_mol_amean
+  - meta_ozone_nmol_per_mol_amean
+  - v_ozone_ug_per_m3_amean
+  - qc_ozone_ug_per_m3_amean
+  - meta_ozone_ug_per_m3_amean
+  - v_ozone_nmol_per_mol_stddev
+  - qc_ozone_nmol_per_mol_stddev
+  - meta_ozone_nmol_per_mol_stddev
+  - v_ozone_ug_per_m3_stddev
+  - qc_ozone_ug_per_m3_stddev
+  - meta_ozone_ug_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NZ/FM/6H/NZFM-6HEP.nc:
   ebas_data_level: '2'
   ebas_instrument_name: egb_o3
@@ -7004,6 +7422,54 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/P9/EM/57/P9EM-57VW.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/P9/XZ/FQ/P9XZ-FQ8T.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: uv_abs_04
+  ebas_method_ref: PL01L_uv_abs
+  ebas_revision_date: '2025-09-19T07:41:43.073217Z'
+  ebas_station_altitude: 2.0 m
+  ebas_station_code: PL0004R
+  ebas_station_latitude: 54.753894
+  ebas_station_longitude: 17.534264
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2025-01-01T00:00:00Z'
+  time_coverage_start: '1995-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PA/5C/P7/PA5C-P7RC.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: uv_abs_03
+  ebas_method_ref: PL01L_uv_abs
+  ebas_revision_date: '2025-01-24T08:55:53.424214Z'
+  ebas_station_altitude: 1603.0 m
+  ebas_station_code: PL0003R
+  ebas_station_latitude: 50.736444
+  ebas_station_longitude: 15.7395
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2025-01-01T00:00:00Z'
+  time_coverage_start: '1995-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PA/RA/XZ/PARA-XZKA.nc:
   ebas_data_level: '2'
   ebas_instrument_name: ela_o3
@@ -7048,6 +7514,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PD/MX/V6/PDMX-V6MU.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PE/RA/2K/PERA-2KRP.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ice_o3
+  ebas_method_ref: US06L_uv_abs
+  ebas_revision_date: '2019-03-08T10:15:00.767000Z'
+  ebas_station_altitude: 118.0 m
+  ebas_station_code: IS0091R
+  ebas_station_latitude: 63.3998
+  ebas_station_longitude: -20.2884
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2010-10-01T00:00:00Z'
+  time_coverage_start: '1992-09-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PG/AW/NF/PGAW-NFJA.nc:
   ebas_data_level: '2'
   ebas_instrument_name: 56_fluks_15m
@@ -7069,6 +7559,42 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PG/AW/NF/PGAW-NFJA.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PK/QP/EH/PKQP-EHQF.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Thermo_49_SPO
+  ebas_measurement_height: 10.0 m
+  ebas_method_ref: US06L_AM
+  ebas_revision_date: '2019-01-03T14:10:49.237000Z'
+  ebas_station_altitude: 2841.0 m
+  ebas_station_code: US6004G
+  ebas_station_latitude: -89.9969482422
+  ebas_station_longitude: -24.7999992371
+  resolution: hourly
+  time_coverage_end: '2015-08-01T10:00:00Z'
+  time_coverage_start: '1975-01-01T01:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol_amean
+  - qc_ozone_nmol_per_mol_amean
+  - meta_ozone_nmol_per_mol_amean
+  - v_ozone_ug_per_m3_amean
+  - qc_ozone_ug_per_m3_amean
+  - meta_ozone_ug_per_m3_amean
+  - v_ozone_nmol_per_mol_max
+  - qc_ozone_nmol_per_mol_max
+  - meta_ozone_nmol_per_mol_max
+  - v_ozone_ug_per_m3_max
+  - qc_ozone_ug_per_m3_max
+  - meta_ozone_ug_per_m3_max
+  - v_ozone_nmol_per_mol_min
+  - qc_ozone_nmol_per_mol_min
+  - meta_ozone_nmol_per_mol_min
+  - v_ozone_ug_per_m3_min
+  - qc_ozone_ug_per_m3_min
+  - meta_ozone_ug_per_m3_min
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PK/SQ/R9/PKSQ-R99Q.nc:
   ebas_instrument_name: TE49W
   ebas_method_ref: NL01L_LM-W-401-400-402_IL-W-900
@@ -7133,31 +7659,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PN/37/DE/PN37-DECV.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/PS/4Z/R9/PS4Z-R99G.nc:
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PP/2Z/CJ/PP2Z-CJMY.nc:
   ebas_data_level: '2'
-  ebas_instrument_name: ES0014R_Teledyne_T400
-  ebas_measurement_height: 3.5 m
-  ebas_method_ref: ES04L_uv_abs
-  ebas_revision_date: '2025-07-15T00:00:00.000000Z'
-  ebas_station_altitude: 470.0 m
-  ebas_station_code: ES0014R
-  ebas_station_latitude: 41.39389
-  ebas_station_longitude: 0.73472
+  ebas_method_ref: CZ06L_uv_abs
+  ebas_revision_date: '2024-01-08T09:08:39.879130Z'
+  ebas_station_altitude: 535.0 m
+  ebas_station_code: CZ0003R
+  ebas_station_latitude: 49.573394
+  ebas_station_longitude: 15.080278
   ebas_statistics: arithmetic mean
   resolution: hourly
-  time_coverage_end: '2024-12-31T23:59:59Z'
-  time_coverage_start: '2022-01-01T00:00:00Z'
+  time_coverage_end: '2023-01-01T00:00:00Z'
+  time_coverage_start: '2016-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
-  - v_ozone_nmol_per_mol
+  - d_Tower_inlet_height
   - qc_ozone_nmol_per_mol
   - meta_ozone_nmol_per_mol
-  - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
+  - v_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PU/J4/HD/PUJ4-HDV7.nc:
   ebas_data_level: '2'
   ebas_instrument_name: OZ17
@@ -7172,6 +7697,55 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PU/J4/HD/PUJ4-HDV7.nc:
   resolution: hourly
   time_coverage_end: '2022-01-01T00:00:00Z'
   time_coverage_start: '2020-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PU/X6/7C/PUX6-7CWD.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: O3_FR24
+  ebas_method_ref: FR07L_uv_abs
+  ebas_revision_date: '2020-12-02T00:00:00.000000Z'
+  ebas_station_altitude: 29.45 m
+  ebas_station_code: FR0024R
+  ebas_station_latitude: 47.831888889
+  ebas_station_longitude: -1.836333333
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2020-01-01T00:00:00Z'
+  time_coverage_start: '2019-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PV/5S/U5/PV5S-U5CX.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: GR0101_UV_Photometric_Ozone_Analyzer
+  ebas_measurement_height: 6.0 m
+  ebas_method_ref: GR05L_UV_Photometry
+  ebas_revision_date: '2017-06-26T13:23:00.000000Z'
+  ebas_station_altitude: 2340.0 m
+  ebas_station_code: GR0101R
+  ebas_station_latitude: 37.984265
+  ebas_station_longitude: 22.196262
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2016-12-31T22:00:00Z'
+  time_coverage_start: '2016-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
@@ -7465,6 +8039,26 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QA/8T/US/QA8T-USYY.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QA/DF/A9/QADF-A933.nc:
+  ebas_instrument_name: uv_abs_14
+  ebas_method_ref: SE01L_uv_abs
+  ebas_revision_date: '2016-07-04T00:00:00.000000Z'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: SE0014R
+  ebas_station_latitude: 57.394
+  ebas_station_longitude: 11.914
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2016-01-01T00:00:00Z'
+  time_coverage_start: '2002-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone
+  - qc_ozone
+  - meta_ozone
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QE/QK/5K/QEQK-5KQM.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TEI49C_368
@@ -7504,6 +8098,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QJ/ZY/YC/QJZY-YCRN.nc:
   resolution: hourly
   time_coverage_end: '2025-01-01T00:00:00Z'
   time_coverage_start: '2022-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QM/MG/5G/QMMG-5GC6.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: uv_48
+  ebas_method_ref: GB02L_uv_abs
+  ebas_revision_date: '2024-09-13T09:52:01.252400Z'
+  ebas_station_altitude: 260.0 m
+  ebas_station_code: GB0048R
+  ebas_station_latitude: 55.79216
+  ebas_station_longitude: -3.2429
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2014-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
@@ -7557,6 +8175,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QN/52/N5/QN52-N5BU.nc:
   - v_ozone_ug_per_m3_stddev
   - qc_ozone_ug_per_m3_stddev
   - meta_ozone_ug_per_m3_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QP/MF/9G/QPMF-9GUV.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: uv_abs_01
+  ebas_method_ref: CH01L_uv_abs
+  ebas_revision_date: '2025-02-26T15:09:09.558346Z'
+  ebas_station_altitude: 3578.0 m
+  ebas_station_code: CH0001G
+  ebas_station_latitude: 46.5475
+  ebas_station_longitude: 7.985
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2013-01-01T00:00:00Z'
+  time_coverage_start: '2007-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QR/MK/TW/QRMK-TWM2.nc:
   ebas_instrument_name: TE49W
   ebas_method_ref: NL01L_LM-W-401-400-402_IL-W-900
@@ -7674,47 +8316,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QU/BN/AJ/QUBN-AJTU.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/R2/KG/F9/R2KG-F9WM.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: Thermo_49i_EUK
-  ebas_method_ref: US06L_AM
-  ebas_revision_date: '2024-01-26T13:31:59.932284Z'
-  ebas_station_altitude: 610.0 m
-  ebas_station_code: CA0103R
-  ebas_station_latitude: 80.0500030518
-  ebas_station_longitude: -86.4166564941
-  resolution: hourly
-  time_coverage_end: '2023-01-01T00:00:00Z'
-  time_coverage_start: '2016-08-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol_amean
-  - qc_ozone_nmol_per_mol_amean
-  - meta_ozone_nmol_per_mol_amean
-  - v_ozone_ug_per_m3_amean
-  - qc_ozone_ug_per_m3_amean
-  - meta_ozone_ug_per_m3_amean
-  - v_ozone_nmol_per_mol_max
-  - qc_ozone_nmol_per_mol_max
-  - meta_ozone_nmol_per_mol_max
-  - v_ozone_ug_per_m3_max
-  - qc_ozone_ug_per_m3_max
-  - meta_ozone_ug_per_m3_max
-  - v_ozone_nmol_per_mol_min
-  - qc_ozone_nmol_per_mol_min
-  - meta_ozone_nmol_per_mol_min
-  - v_ozone_ug_per_m3_min
-  - qc_ozone_ug_per_m3_min
-  - meta_ozone_ug_per_m3_min
-  - v_ozone_nmol_per_mol_stddev
-  - qc_ozone_nmol_per_mol_stddev
-  - meta_ozone_nmol_per_mol_stddev
-  - v_ozone_ug_per_m3_stddev
-  - qc_ozone_ug_per_m3_stddev
-  - meta_ozone_ug_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/R4/HH/JV/R4HH-JVTP.nc:
   ebas_data_level: '2'
   ebas_instrument_name: uv_abs_uk_0056
@@ -7803,42 +8404,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/R6/85/CM/R685-CMSE.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/R8/PG/AX/R8PG-AXS2.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: Thermo_49_BRW
-  ebas_measurement_height: 10.0 m
-  ebas_method_ref: US06L_AM
-  ebas_revision_date: '2018-11-30T14:00:59.223000Z'
-  ebas_station_altitude: 11.0 m
-  ebas_station_code: US0008R
-  ebas_station_latitude: 71.3230133057
-  ebas_station_longitude: -156.6114654541
-  resolution: hourly
-  time_coverage_end: '2003-01-01T00:00:00Z'
-  time_coverage_start: '1974-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol_amean
-  - qc_ozone_nmol_per_mol_amean
-  - meta_ozone_nmol_per_mol_amean
-  - v_ozone_ug_per_m3_amean
-  - qc_ozone_ug_per_m3_amean
-  - meta_ozone_ug_per_m3_amean
-  - v_ozone_nmol_per_mol_max
-  - qc_ozone_nmol_per_mol_max
-  - meta_ozone_nmol_per_mol_max
-  - v_ozone_ug_per_m3_max
-  - qc_ozone_ug_per_m3_max
-  - meta_ozone_ug_per_m3_max
-  - v_ozone_nmol_per_mol_min
-  - qc_ozone_nmol_per_mol_min
-  - meta_ozone_nmol_per_mol_min
-  - v_ozone_ug_per_m3_min
-  - qc_ozone_ug_per_m3_min
-  - meta_ozone_ug_per_m3_min
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RC/NA/A6/RCNA-A6AZ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: uv_abs_0047
@@ -7904,35 +8469,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RG/79/3Z/RG79-3ZD8.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/RG/YH/3R/RGYH-3RG4.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: izo_o3
-  ebas_method_ref: ES07L_uv_abs
-  ebas_revision_date: '2019-10-30T00:00:00.000000Z'
-  ebas_station_altitude: 2373.0 m
-  ebas_station_code: ES0018G
-  ebas_station_latitude: 28.309
-  ebas_station_longitude: -16.4994
-  resolution: hourly
-  time_coverage_end: '2014-01-01T00:00:00Z'
-  time_coverage_start: '1987-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol_amean
-  - qc_ozone_nmol_per_mol_amean
-  - meta_ozone_nmol_per_mol_amean
-  - v_ozone_ug_per_m3_amean
-  - qc_ozone_ug_per_m3_amean
-  - meta_ozone_ug_per_m3_amean
-  - v_ozone_nmol_per_mol_stddev
-  - qc_ozone_nmol_per_mol_stddev
-  - meta_ozone_nmol_per_mol_stddev
-  - v_ozone_ug_per_m3_stddev
-  - qc_ozone_ug_per_m3_stddev
-  - meta_ozone_ug_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RH/MV/RP/RHMV-RPUR.nc:
   ebas_data_level: '2'
   ebas_instrument_name: uv_abs_USH3
@@ -8054,6 +8590,31 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RQ/SD/XM/RQSD-XM7D.nc:
   - v_ozone_ug_per_m3_stddev
   - qc_ozone_ug_per_m3_stddev
   - meta_ozone_ug_per_m3_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RR/X2/V6/RRX2-V6QP.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: OZ11
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: HU01L_uv_abs
+  ebas_revision_date: '2025-01-23T14:18:27.881017Z'
+  ebas_station_altitude: 125.0 m
+  ebas_station_code: HU0002R
+  ebas_station_latitude: 46.965333
+  ebas_station_longitude: 19.544889
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2022-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RT/XS/U8/RTXS-U8P8.nc:
   ebas_instrument_name: uv_abs_6
   ebas_method_ref: DE03L_uv_abs
@@ -8124,6 +8685,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/S5/EN/J8/S5EN-J8DR.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/S5/SF/9Q/S5SF-9QV6.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: uv_45
+  ebas_method_ref: GB02L_uv_abs
+  ebas_revision_date: '2024-09-13T09:49:08.609391Z'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: GB0045R
+  ebas_station_latitude: 52.298333
+  ebas_station_longitude: 0.292778
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '1997-10-15T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/S9/5G/Q8/S95G-Q848.nc:
   ebas_data_level: '2'
   ebas_instrument_name: uv_6
@@ -8273,6 +8858,31 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/SH/5Q/GA/SH5Q-GA2K.nc:
   - v_ozone_ug_per_m3_stddev
   - qc_ozone_ug_per_m3_stddev
   - meta_ozone_ug_per_m3_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/SK/2Z/MG/SK2Z-MGDM.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: OZ17
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: HU01L_uv_abs
+  ebas_revision_date: '2025-02-03T13:45:01.354273Z'
+  ebas_station_altitude: 670.0 m
+  ebas_station_code: HU0017R
+  ebas_station_latitude: 47.89972
+  ebas_station_longitude: 19.94667
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2022-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/SS/ZQ/59/SSZQ-59QF.nc:
   ebas_instrument_name: uv_abs_04
   ebas_method_ref: CH01L_uv_abs
@@ -8317,26 +8927,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/SU/2S/3V/SU2S-3VZX.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/SW/BK/GH/SWBK-GHGP.nc:
-  ebas_instrument_name: uv_abs_3
-  ebas_method_ref: GR04L_uv_abs
-  ebas_revision_date: '2005-01-18T00:00:00.000000Z'
-  ebas_station_altitude: 850.0 m
-  ebas_station_code: GR0003R
-  ebas_station_latitude: 40.533333
-  ebas_station_longitude: 23.25
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2001-01-01T00:00:00Z'
-  time_coverage_start: '2000-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone
-  - qc_ozone
-  - meta_ozone
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/T2/28/3V/T228-3V74.nc:
   ebas_instrument_name: uv_abs_32
   ebas_method_ref: BE02L_uv_abs
@@ -8417,6 +9007,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/T8/7M/ZN/T87M-ZNCE.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/T9/U5/MV/T9U5-MVAX.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: uv_39
+  ebas_method_ref: GB02L_uv_abs
+  ebas_revision_date: '2024-09-13T09:48:34.103784Z'
+  ebas_station_altitude: 46.0 m
+  ebas_station_code: GB0039R
+  ebas_station_latitude: 52.293889
+  ebas_station_longitude: 1.463056
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '1977-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/TA/ER/YH/TAER-YH7N.nc:
   ebas_data_level: '2'
   ebas_instrument_name: '1108'
@@ -8616,6 +9230,26 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/U4/2S/MV/U42S-MVZB.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/U9/MG/F4/U9MG-F4QR.nc:
+  ebas_instrument_name: air_monitor
+  ebas_method_ref: CZ01L_97_3_3_1j
+  ebas_revision_date: '2016-06-23T00:00:00.000000Z'
+  ebas_station_altitude: 735.0 m
+  ebas_station_code: CZ0001R
+  ebas_station_latitude: 49.735084444
+  ebas_station_longitude: 16.034196944
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2016-01-01T00:00:00Z'
+  time_coverage_start: '2015-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone
+  - qc_ozone
+  - meta_ozone
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/UD/C9/9F/UDC9-9FYB.nc:
   ebas_data_level: '2'
   ebas_instrument_name: sat_o3
@@ -8640,6 +9274,27 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/UD/C9/9F/UDC9-9FYB.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UJ/J2/AW/UJJ2-AWSH.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: uv_abs_uk_0001
+  ebas_method_ref: NO01L_uv_abs
+  ebas_revision_date: '2023-05-22T09:31:55.677904Z'
+  ebas_station_altitude: 190.0 m
+  ebas_station_code: NO0001R
+  ebas_station_latitude: 58.383333
+  ebas_station_longitude: 8.25
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2012-05-31T23:00:00Z'
+  time_coverage_start: '1985-06-30T23:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone
+  - qc_ozone
+  - meta_ozone
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/UK/SD/G2/UKSD-G2YP.nc:
   ebas_data_level: '2'
   ebas_instrument_name: uv_abs_32
@@ -8708,19 +9363,70 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/UM/P7/2A/UMP7-2AVB.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/UP/JH/BF/UPJH-BFEP.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: est_o3
-  ebas_method_ref: CA01L_uv_abs
-  ebas_revision_date: '2019-11-11T00:00:00.000000Z'
-  ebas_station_altitude: 707.0 m
-  ebas_station_code: CA0002R
-  ebas_station_latitude: 51.666667
-  ebas_station_longitude: -110.2
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UU/4S/CS/UU4S-CS8A.nc:
+  ebas_instrument_name: uv_41
+  ebas_method_ref: GB02L_uv_abs
+  ebas_revision_date: '2014-05-01T00:00:00.000000Z'
+  ebas_station_altitude: 26.0 m
+  ebas_station_code: GB0041R
+  ebas_station_latitude: 54.616667
+  ebas_station_longitude: -2.466667
   ebas_statistics: arithmetic mean
   resolution: hourly
-  time_coverage_end: '2013-01-01T07:00:00Z'
-  time_coverage_start: '1994-07-12T00:00:00Z'
+  time_coverage_end: '1996-01-01T00:00:00Z'
+  time_coverage_start: '1986-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone
+  - qc_ozone
+  - meta_ozone
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UU/4W/3F/UU4W-3FBH.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: JP02_uv_abs_077
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: JP02L_uv_ab
+  ebas_revision_date: '2024-01-08T11:52:05.559978Z'
+  ebas_station_altitude: 16.0 m
+  ebas_station_code: JP0002G
+  ebas_station_latitude: -69.005
+  ebas_station_longitude: 39.590555556
+  resolution: hourly
+  time_coverage_end: '2022-11-30T21:00:00Z'
+  time_coverage_start: '2010-01-31T21:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol_amean
+  - qc_ozone_nmol_per_mol_amean
+  - meta_ozone_nmol_per_mol_amean
+  - v_ozone_ug_per_m3_amean
+  - qc_ozone_ug_per_m3_amean
+  - meta_ozone_ug_per_m3_amean
+  - v_ozone_nmol_per_mol_stddev
+  - qc_ozone_nmol_per_mol_stddev
+  - meta_ozone_nmol_per_mol_stddev
+  - v_ozone_ug_per_m3_stddev
+  - qc_ozone_ug_per_m3_stddev
+  - meta_ozone_ug_per_m3_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UV/PV/UW/UVPV-UW74.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TAPI_T400
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: CZ01L_T22AA010_21
+  ebas_revision_date: '2025-09-19T07:59:21.886949Z'
+  ebas_station_altitude: 535.0 m
+  ebas_station_code: CZ0003R
+  ebas_station_latitude: 49.573394
+  ebas_station_longitude: 15.080278
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2025-01-01T00:00:00Z'
+  time_coverage_start: '2021-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
@@ -8732,26 +9438,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/UP/JH/BF/UPJH-BFEP.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/UV/XA/AX/UVXA-AX43.nc:
-  ebas_instrument_name: uv_abs_01
-  ebas_method_ref: MT01L_uv_abs
-  ebas_revision_date: '2015-09-25T00:00:00.000000Z'
-  ebas_station_altitude: 167.0 m
-  ebas_station_code: MT0001R
-  ebas_station_latitude: 36.0722
-  ebas_station_longitude: 14.2184
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2014-12-31T23:00:00Z'
-  time_coverage_start: '1997-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone
-  - qc_ozone
-  - meta_ozone
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/UY/2T/VH/UY2T-VHGQ.nc:
   ebas_data_level: 3a
   ebas_instrument_name: HPB_ozone_1971_1994
@@ -8796,18 +9482,19 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/UZ/N2/2E/UZN2-2EAS.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/V9/A7/TY/V9A7-TYD8.nc:
-  ebas_instrument_name: 03_FR19
-  ebas_method_ref: FR05L_uv_abs
-  ebas_revision_date: '2010-04-12T00:00:00.000000Z'
-  ebas_station_altitude: 2877.0 m
-  ebas_station_code: FR0019R
-  ebas_station_latitude: 42.936667
-  ebas_station_longitude: 0.141944
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/V2/FY/ZS/V2FY-ZSDN.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0013R_A-102
+  ebas_method_ref: ES04L_uv_abs
+  ebas_revision_date: '2022-09-13T17:06:29.707532Z'
+  ebas_station_altitude: 985.0 m
+  ebas_station_code: ES0013R
+  ebas_station_latitude: 41.23889
+  ebas_station_longitude: -5.8975
   ebas_statistics: arithmetic mean
   resolution: hourly
-  time_coverage_end: '2010-01-01T00:00:00Z'
-  time_coverage_start: '2007-01-01T00:00:00Z'
+  time_coverage_end: '2022-01-01T00:00:00Z'
+  time_coverage_start: '2013-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
@@ -8816,6 +9503,31 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/V9/A7/TY/V9A7-TYD8.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/V6/FM/BG/V6FM-BGGH.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: uv_abs_Teledyne_T400
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: FR01L_03_Teledyne_T400_GIF_ambient
+  ebas_revision_date: '2025-04-28T08:23:50.843002Z'
+  ebas_station_altitude: 162.0 m
+  ebas_station_code: FR0020R
+  ebas_station_latitude: 48.7089
+  ebas_station_longitude: 2.1487
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2025-01-01T00:00:00Z'
+  time_coverage_start: '2017-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VA/7M/K5/VA7M-K5ZC.nc:
   ebas_instrument_name: uv_abs_2
   ebas_method_ref: SE01L_uv_abs
@@ -8836,6 +9548,73 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VA/7M/K5/VA7M-K5ZC.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VA/A4/ZC/VAA4-ZCAA.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: O3TS49i
+  ebas_measurement_height: 4.35 m
+  ebas_method_ref: PL05L_AO3THERMO
+  ebas_revision_date: '2025-09-19T07:42:00.524955Z'
+  ebas_station_altitude: 157.0 m
+  ebas_station_code: PL0005R
+  ebas_station_latitude: 54.15
+  ebas_station_longitude: 22.066667
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2025-01-01T00:00:00Z'
+  time_coverage_start: '2023-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VA/WM/QS/VAWM-QS37.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Thermo_49_SUM
+  ebas_measurement_height: 10.0 m
+  ebas_method_ref: US06L_AM
+  ebas_revision_date: '2018-11-30T10:46:17.490000Z'
+  ebas_station_altitude: 3238.0 m
+  ebas_station_code: DK0025G
+  ebas_station_latitude: 72.5800018311
+  ebas_station_longitude: -38.4799995422
+  resolution: hourly
+  time_coverage_end: '2015-01-01T10:00:00Z'
+  time_coverage_start: '2015-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol_amean
+  - qc_ozone_nmol_per_mol_amean
+  - meta_ozone_nmol_per_mol_amean
+  - v_ozone_ug_per_m3_amean
+  - qc_ozone_ug_per_m3_amean
+  - meta_ozone_ug_per_m3_amean
+  - v_ozone_nmol_per_mol_max
+  - qc_ozone_nmol_per_mol_max
+  - meta_ozone_nmol_per_mol_max
+  - v_ozone_ug_per_m3_max
+  - qc_ozone_ug_per_m3_max
+  - meta_ozone_ug_per_m3_max
+  - v_ozone_nmol_per_mol_min
+  - qc_ozone_nmol_per_mol_min
+  - meta_ozone_nmol_per_mol_min
+  - v_ozone_ug_per_m3_min
+  - qc_ozone_ug_per_m3_min
+  - meta_ozone_ug_per_m3_min
+  - v_ozone_nmol_per_mol_stddev
+  - qc_ozone_nmol_per_mol_stddev
+  - meta_ozone_nmol_per_mol_stddev
+  - v_ozone_ug_per_m3_stddev
+  - qc_ozone_ug_per_m3_stddev
+  - meta_ozone_ug_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VE/KZ/QJ/VEKZ-QJJ8.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TE49w_nl0010
@@ -8858,18 +9637,18 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VE/KZ/QJ/VEKZ-QJJ8.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/VJ/XP/DW/VJXP-DWX5.nc:
-  ebas_instrument_name: 03_FR30
-  ebas_method_ref: FR04L_uv_abs
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VE/M5/WB/VEM5-WBJ6.nc:
+  ebas_instrument_name: uv_abs_3
+  ebas_method_ref: CZ01L_uv_abs
   ebas_revision_date: '2014-05-01T00:00:00.000000Z'
-  ebas_station_altitude: 1465.0 m
-  ebas_station_code: FR0030R
-  ebas_station_latitude: 45.772223
-  ebas_station_longitude: 2.964886
+  ebas_station_altitude: 535.0 m
+  ebas_station_code: CZ0003R
+  ebas_station_latitude: 49.573394
+  ebas_station_longitude: 15.080278
   ebas_statistics: arithmetic mean
   resolution: hourly
-  time_coverage_end: '2010-01-01T00:00:00Z'
-  time_coverage_start: '2007-01-01T00:00:00Z'
+  time_coverage_end: '2007-01-01T00:00:00Z'
+  time_coverage_start: '1992-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
@@ -8919,26 +9698,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VQ/FQ/EV/VQFQ-EVAH.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/VS/H8/HK/VSH8-HKX7.nc:
-  ebas_instrument_name: uv_44
-  ebas_method_ref: GB02L_uv_abs
-  ebas_revision_date: '2010-01-01T00:00:00.000000Z'
-  ebas_station_altitude: 55.0 m
-  ebas_station_code: GB0044R
-  ebas_station_latitude: 51.231111
-  ebas_station_longitude: -3.048056
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2009-01-01T00:00:00Z'
-  time_coverage_start: '1996-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone
-  - qc_ozone
-  - meta_ozone
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VY/MS/MC/VYMS-MCJJ.nc:
   ebas_instrument_name: uv_abs_18
   ebas_method_ref: RU01L_uv_abs
@@ -8959,6 +9718,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VY/MS/MC/VYMS-MCJJ.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VZ/EP/8C/VZEP-8CY7.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: uv_52
+  ebas_method_ref: GB02L_uv_abs
+  ebas_revision_date: '2024-09-13T09:49:38.665080Z'
+  ebas_station_altitude: 85.0 m
+  ebas_station_code: GB0052R
+  ebas_station_latitude: 60.13922
+  ebas_station_longitude: -1.185319
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2005-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/W2/9P/XH/W29P-XHBQ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: JP02_uv_abs_464
@@ -8989,31 +9772,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/W2/9P/XH/W29P-XHBQ.nc:
   - v_ozone_ug_per_m3_stddev
   - qc_ozone_ug_per_m3_stddev
   - meta_ozone_ug_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/W4/4V/5A/W44V-5A3K.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: JP02_uv_abs_349
-  ebas_measurement_height: 4.5 m
-  ebas_method_ref: JP02L_uv_ab
-  ebas_revision_date: '2017-03-31T10:17:29.953000Z'
-  ebas_station_altitude: 25.2 m
-  ebas_station_code: JP0003U
-  ebas_station_latitude: 36.058055556
-  ebas_station_longitude: 140.125833333
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '1993-03-31T15:00:00Z'
-  time_coverage_start: '1988-08-22T14:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol
-  - qc_ozone_nmol_per_mol
-  - meta_ozone_nmol_per_mol
-  - v_ozone_ug_per_m3
-  - qc_ozone_ug_per_m3
-  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/W5/ZH/YX/W5ZH-YXNV.nc:
   ebas_instrument_name: uv_abs_1
   ebas_method_ref: DE01L_uv_abs
@@ -9143,6 +9901,35 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/WD/TH/SM/WDTH-SMCZ.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/WH/JM/YU/WHJM-YUYW.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: JP02_uv_abs_01A
+  ebas_method_ref: JP02L_uv_ab
+  ebas_revision_date: '2017-03-31T10:06:04.240000Z'
+  ebas_station_altitude: 16.0 m
+  ebas_station_code: JP0002G
+  ebas_station_latitude: -69.005
+  ebas_station_longitude: 39.590555556
+  resolution: hourly
+  time_coverage_end: '2009-01-25T21:00:00Z'
+  time_coverage_start: '1998-01-31T21:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol_amean
+  - qc_ozone_nmol_per_mol_amean
+  - meta_ozone_nmol_per_mol_amean
+  - v_ozone_ug_per_m3_amean
+  - qc_ozone_ug_per_m3_amean
+  - meta_ozone_ug_per_m3_amean
+  - v_ozone_nmol_per_mol_stddev
+  - qc_ozone_nmol_per_mol_stddev
+  - meta_ozone_nmol_per_mol_stddev
+  - v_ozone_ug_per_m3_stddev
+  - qc_ozone_ug_per_m3_stddev
+  - meta_ozone_ug_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/WH/Y8/3Z/WHY8-3ZVN.nc:
   ebas_instrument_name: uv_mon_5
   ebas_method_ref: ES04L_uv_abs
@@ -9163,48 +9950,51 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/WH/Y8/3Z/WHY8-3ZVN.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/WK/7S/TJ/WK7S-TJT2.nc:
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/WK/YE/FU/WKYE-FUEV.nc:
   ebas_data_level: '2'
-  ebas_instrument_name: Thermo_49C_BRW
-  ebas_measurement_height: 10.0 m
-  ebas_method_ref: US06L_AM
-  ebas_revision_date: '2025-12-04T12:51:01.692726Z'
-  ebas_station_altitude: 11.0 m
-  ebas_station_code: US0008R
-  ebas_station_latitude: 71.3230133057
-  ebas_station_longitude: -156.6114654541
+  ebas_instrument_name: TEI94C_1
+  ebas_method_ref: CH01L_O3
+  ebas_revision_date: '2025-02-26T15:09:09.558346Z'
+  ebas_station_altitude: 3578.0 m
+  ebas_station_code: CH0001G
+  ebas_station_latitude: 46.5475
+  ebas_station_longitude: 7.985
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  time_coverage_end: '2022-01-01T00:00:00Z'
-  time_coverage_start: '2007-01-01T00:00:00Z'
+  time_coverage_end: '2007-01-01T00:00:00Z'
+  time_coverage_start: '1991-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
-  - v_ozone_nmol_per_mol_amean
-  - qc_ozone_nmol_per_mol_amean
-  - meta_ozone_nmol_per_mol_amean
-  - v_ozone_ug_per_m3_amean
-  - qc_ozone_ug_per_m3_amean
-  - meta_ozone_ug_per_m3_amean
-  - v_ozone_nmol_per_mol_max
-  - qc_ozone_nmol_per_mol_max
-  - meta_ozone_nmol_per_mol_max
-  - v_ozone_ug_per_m3_max
-  - qc_ozone_ug_per_m3_max
-  - meta_ozone_ug_per_m3_max
-  - v_ozone_nmol_per_mol_min
-  - qc_ozone_nmol_per_mol_min
-  - meta_ozone_nmol_per_mol_min
-  - v_ozone_ug_per_m3_min
-  - qc_ozone_ug_per_m3_min
-  - meta_ozone_ug_per_m3_min
-  - v_ozone_nmol_per_mol_stddev
-  - qc_ozone_nmol_per_mol_stddev
-  - meta_ozone_nmol_per_mol_stddev
-  - v_ozone_ug_per_m3_stddev
-  - qc_ozone_ug_per_m3_stddev
-  - meta_ozone_ug_per_m3_stddev
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/WM/U7/F7/WMU7-F7WQ.nc:
+  ebas_instrument_name: O3MLB
+  ebas_measurement_height: 4.35 m
+  ebas_method_ref: PL05L_AO3MONLABS
+  ebas_revision_date: '2016-07-17T12:00:00.000000Z'
+  ebas_station_altitude: 157.0 m
+  ebas_station_code: PL0005R
+  ebas_station_latitude: 54.15
+  ebas_station_longitude: 22.066667
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2015-12-31T23:59:59Z'
+  time_coverage_start: '2015-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone
+  - qc_ozone
+  - meta_ozone
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/WM/UH/FN/WMUH-FNSW.nc:
   ebas_instrument_name: uv_abs_10
   ebas_method_ref: FR02L_uv_abs
@@ -9381,6 +10171,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/X6/M4/3H/X6M4-3HJ4.nc:
   - v_ozone_ug_per_m3_stddev
   - qc_ozone_ug_per_m3_stddev
   - meta_ozone_ug_per_m3_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/X7/E7/QA/X7E7-QAZQ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: uv_IE0031
+  ebas_method_ref: GB02L_uv_abs
+  ebas_revision_date: '2024-06-06T13:20:28.272724Z'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: IE0031R
+  ebas_station_latitude: 53.32583
+  ebas_station_longitude: -9.89944
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2013-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/X7/XW/BV/X7XW-BVUJ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: ES0009R_CM08110024
@@ -9624,26 +10438,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XS/T2/CU/XST2-CURD.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/XT/GT/Y5/XTGT-Y5T2.nc:
-  ebas_instrument_name: uv_51
-  ebas_method_ref: GB02L_uv_abs
-  ebas_revision_date: '2014-01-01T00:00:00.000000Z'
-  ebas_station_altitude: 145.0 m
-  ebas_station_code: GB0051R
-  ebas_station_latitude: 52.554444
-  ebas_station_longitude: -0.772222
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2012-01-01T00:00:00Z'
-  time_coverage_start: '2003-12-10T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone
-  - qc_ozone
-  - meta_ozone
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XT/MR/VY/XTMR-VYWG.nc:
   ebas_instrument_name: uv_abs_32
   ebas_method_ref: DK01L_uv_abs
@@ -9728,26 +10522,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XY/3A/RE/XY3A-REBQ.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/XY/JN/CP/XYJN-CPHU.nc:
-  ebas_instrument_name: uv_5
-  ebas_method_ref: SK01L_uv_abs
-  ebas_revision_date: '2014-05-01T00:00:00.000000Z'
-  ebas_station_altitude: 892.0 m
-  ebas_station_code: SK0005R
-  ebas_station_latitude: 49.366667
-  ebas_station_longitude: 19.683333
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2007-01-01T00:00:00Z'
-  time_coverage_start: '2005-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone
-  - qc_ozone
-  - meta_ozone
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y4/XB/WA/Y4XB-WAVE.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_49C_MLO
@@ -9790,6 +10564,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y4/XB/WA/Y4XB-WAVE.nc:
   - v_ozone_ug_per_m3_stddev
   - qc_ozone_ug_per_m3_stddev
   - meta_ozone_ug_per_m3_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y8/B7/5R/Y8B7-5RFY.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TEI49I_1
+  ebas_method_ref: CH01L_O3
+  ebas_revision_date: '2025-09-23T08:45:08.535757Z'
+  ebas_station_altitude: 3578.0 m
+  ebas_station_code: CH0001G
+  ebas_station_latitude: 46.5475
+  ebas_station_longitude: 7.985
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2025-01-01T00:00:00Z'
+  time_coverage_start: '2013-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone_nmol_per_mol
+  - qc_ozone_nmol_per_mol
+  - meta_ozone_nmol_per_mol
+  - v_ozone_ug_per_m3
+  - qc_ozone_ug_per_m3
+  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/YA/N5/YX/YAN5-YXBK.nc:
   ebas_data_level: '2'
   ebas_instrument_name: thermo_49i_01
@@ -9862,77 +10660,26 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/YC/NA/4G/YCNA-4GD4.nc:
   - v_ozone_ug_per_m3_stddev
   - qc_ozone_ug_per_m3_stddev
   - meta_ozone_ug_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/YE/6P/FY/YE6P-FYP3.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: ES01_uv_abs_01
-  ebas_measurement_height: 5.0 m
-  ebas_method_ref: ES07L_uv_ab
-  ebas_revision_date: '2023-03-13T08:58:32.993204Z'
-  ebas_station_altitude: 2373.0 m
-  ebas_station_code: ES0018G
-  ebas_station_latitude: 28.309
-  ebas_station_longitude: -16.4994
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/YJ/3R/ME/YJ3R-ME2E.nc:
+  ebas_instrument_name: uv_abs_38
+  ebas_method_ref: DE03L_uv_abs
+  ebas_revision_date: '2005-01-18T00:00:00.000000Z'
+  ebas_station_altitude: 622.0 m
+  ebas_station_code: DE0038R
+  ebas_station_latitude: 47.651389
+  ebas_station_longitude: 11.203333
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  time_coverage_end: '2023-01-01T00:00:00Z'
-  time_coverage_start: '2014-01-01T00:00:00Z'
+  time_coverage_end: '1999-12-31T23:00:00Z'
+  time_coverage_start: '1996-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
   - metadata_time
   - metadata_time_bnds
-  - v_ozone_nmol_per_mol_amean
-  - qc_ozone_nmol_per_mol_amean
-  - meta_ozone_nmol_per_mol_amean
-  - v_ozone_ug_per_m3_amean
-  - qc_ozone_ug_per_m3_amean
-  - meta_ozone_ug_per_m3_amean
-  - v_ozone_nmol_per_mol_max
-  - qc_ozone_nmol_per_mol_max
-  - meta_ozone_nmol_per_mol_max
-  - v_ozone_ug_per_m3_max
-  - qc_ozone_ug_per_m3_max
-  - meta_ozone_ug_per_m3_max
-  - v_ozone_nmol_per_mol_min
-  - qc_ozone_nmol_per_mol_min
-  - meta_ozone_nmol_per_mol_min
-  - v_ozone_ug_per_m3_min
-  - qc_ozone_ug_per_m3_min
-  - meta_ozone_ug_per_m3_min
-  - v_ozone_nmol_per_mol_stddev
-  - qc_ozone_nmol_per_mol_stddev
-  - meta_ozone_nmol_per_mol_stddev
-  - v_ozone_ug_per_m3_stddev
-  - qc_ozone_ug_per_m3_stddev
-  - meta_ozone_ug_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/YG/VK/9C/YGVK-9CPN.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: TEI49C_no58547318
-  ebas_method_ref: ID04L_uv_abs
-  ebas_revision_date: '2019-04-25T13:20:54.223000Z'
-  ebas_station_altitude: 845.0 m
-  ebas_station_code: ID1013R
-  ebas_station_latitude: -0.202222
-  ebas_station_longitude: 100.318056
-  resolution: hourly
-  time_coverage_end: '2019-01-01T00:00:00Z'
-  time_coverage_start: '2013-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol_amean
-  - qc_ozone_nmol_per_mol_amean
-  - meta_ozone_nmol_per_mol_amean
-  - v_ozone_ug_per_m3_amean
-  - qc_ozone_ug_per_m3_amean
-  - meta_ozone_ug_per_m3_amean
-  - v_ozone_nmol_per_mol_stddev
-  - qc_ozone_nmol_per_mol_stddev
-  - meta_ozone_nmol_per_mol_stddev
-  - v_ozone_ug_per_m3_stddev
-  - qc_ozone_ug_per_m3_stddev
-  - meta_ozone_ug_per_m3_stddev
+  - v_ozone
+  - qc_ozone
+  - meta_ozone
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/YJ/JT/J2/YJJT-J2WR.nc:
   ebas_data_level: '2'
   ebas_instrument_name: uv_abs_uk_0492
@@ -9954,59 +10701,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/YJ/JT/J2/YJJT-J2WR.nc:
   - v_ozone
   - qc_ozone
   - meta_ozone
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/YK/CC/8B/YKCC-8BFD.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: TE49IQ_no1191412978
-  ebas_method_ref: ID04L_uv_abs
-  ebas_revision_date: '2022-02-07T01:00:00.000000Z'
-  ebas_station_altitude: 845.0 m
-  ebas_station_code: ID1013R
-  ebas_station_latitude: -0.202222
-  ebas_station_longitude: 100.318056
-  resolution: hourly
-  time_coverage_end: '2022-01-01T00:00:00Z'
-  time_coverage_start: '2021-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol_amean
-  - qc_ozone_nmol_per_mol_amean
-  - meta_ozone_nmol_per_mol_amean
-  - v_ozone_ug_per_m3_amean
-  - qc_ozone_ug_per_m3_amean
-  - meta_ozone_ug_per_m3_amean
-  - v_ozone_nmol_per_mol_stddev
-  - qc_ozone_nmol_per_mol_stddev
-  - meta_ozone_nmol_per_mol_stddev
-  - v_ozone_ug_per_m3_stddev
-  - qc_ozone_ug_per_m3_stddev
-  - meta_ozone_ug_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/YM/X6/V4/YMX6-V4EE.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: uv_abs_47
-  ebas_method_ref: AT03L_ozone1a
-  ebas_revision_date: '2025-06-24T12:26:01.858855Z'
-  ebas_station_altitude: 240.0 m
-  ebas_station_code: AT0047R
-  ebas_station_latitude: 48.050833
-  ebas_station_longitude: 16.676667
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2025-01-01T00:00:00Z'
-  time_coverage_start: '1990-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol
-  - qc_ozone_nmol_per_mol
-  - meta_ozone_nmol_per_mol
-  - v_ozone_ug_per_m3
-  - qc_ozone_ug_per_m3
-  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/YN/EN/VE/YNEN-VEGG.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_49i_BMW
@@ -10067,36 +10761,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/YQ/5F/PB/YQ5F-PB6Z.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/YQ/74/QD/YQ74-QDZ3.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: uv_abs_LQO2
-  ebas_measurement_height: 4.0 m
-  ebas_method_ref: AR01L_uv_abs
-  ebas_revision_date: '2019-09-06T09:50:53.730000Z'
-  ebas_station_altitude: 3459.0 m
-  ebas_station_code: AR0004R
-  ebas_station_latitude: -22.10333333333333
-  ebas_station_longitude: -65.60083333333333
-  resolution: hourly
-  time_coverage_end: '2019-01-01T00:00:00Z'
-  time_coverage_start: '1996-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol_amean
-  - qc_ozone_nmol_per_mol_amean
-  - meta_ozone_nmol_per_mol_amean
-  - v_ozone_ug_per_m3_amean
-  - qc_ozone_ug_per_m3_amean
-  - meta_ozone_ug_per_m3_amean
-  - v_ozone_nmol_per_mol_stddev
-  - qc_ozone_nmol_per_mol_stddev
-  - meta_ozone_nmol_per_mol_stddev
-  - v_ozone_ug_per_m3_stddev
-  - qc_ozone_ug_per_m3_stddev
-  - meta_ozone_ug_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/YS/C3/C2/YSC3-C2DA.nc:
   ebas_data_level: '2'
   ebas_instrument_name: tll_o3
@@ -10369,72 +11033,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZF/HS/UN/ZFHS-UNP9.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZF/JY/GH/ZFJY-GHWC.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: Thermo_49iQ_BRW
-  ebas_measurement_height: 4.0 m
-  ebas_method_ref: US06L_AM
-  ebas_revision_date: '2024-01-26T13:53:42.596555Z'
-  ebas_station_altitude: 11.0 m
-  ebas_station_code: US0008R
-  ebas_station_latitude: 71.3230133057
-  ebas_station_longitude: -156.6114654541
-  resolution: hourly
-  time_coverage_end: '2024-01-01T00:00:00Z'
-  time_coverage_start: '2022-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol_amean
-  - qc_ozone_nmol_per_mol_amean
-  - meta_ozone_nmol_per_mol_amean
-  - v_ozone_ug_per_m3_amean
-  - qc_ozone_ug_per_m3_amean
-  - meta_ozone_ug_per_m3_amean
-  - v_ozone_nmol_per_mol_max
-  - qc_ozone_nmol_per_mol_max
-  - meta_ozone_nmol_per_mol_max
-  - v_ozone_ug_per_m3_max
-  - qc_ozone_ug_per_m3_max
-  - meta_ozone_ug_per_m3_max
-  - v_ozone_nmol_per_mol_min
-  - qc_ozone_nmol_per_mol_min
-  - meta_ozone_nmol_per_mol_min
-  - v_ozone_ug_per_m3_min
-  - qc_ozone_ug_per_m3_min
-  - meta_ozone_ug_per_m3_min
-  - v_ozone_nmol_per_mol_stddev
-  - qc_ozone_nmol_per_mol_stddev
-  - meta_ozone_nmol_per_mol_stddev
-  - v_ozone_ug_per_m3_stddev
-  - qc_ozone_ug_per_m3_stddev
-  - meta_ozone_ug_per_m3_stddev
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZG/PT/VV/ZGPT-VV3Q.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: uv_01
-  ebas_method_ref: IE02L_uv_abs
-  ebas_revision_date: '2025-02-12T13:20:47.864605Z'
-  ebas_station_altitude: 11.0 m
-  ebas_station_code: IE0001R
-  ebas_station_latitude: 51.939722
-  ebas_station_longitude: -10.244444
-  ebas_statistics: arithmetic mean
-  resolution: hourly
-  time_coverage_end: '2024-01-01T00:00:00Z'
-  time_coverage_start: '2001-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol
-  - qc_ozone_nmol_per_mol
-  - meta_ozone_nmol_per_mol
-  - v_ozone_ug_per_m3
-  - qc_ozone_ug_per_m3
-  - meta_ozone_ug_per_m3
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZJ/HG/YE/ZJHG-YEHY.nc:
   ebas_instrument_name: uv_abs_08
   ebas_method_ref: DE03L_uv_abs
@@ -10499,48 +11097,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZP/MH/P5/ZPMH-P5ZV.nc:
   - v_ozone_ug_per_m3
   - qc_ozone_ug_per_m3
   - meta_ozone_ug_per_m3
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZR/5A/9Z/ZR5A-9ZQT.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: PE01_uv_abs_IGP
-  ebas_measurement_height: 6.0 m
-  ebas_method_ref: PE01L_uv_ab
-  ebas_revision_date: '2021-11-24T12:22:33.097000Z'
-  ebas_station_altitude: 3313.0 m
-  ebas_station_code: PE0001R
-  ebas_station_latitude: -12.0402
-  ebas_station_longitude: -75.3209
-  resolution: hourly
-  time_coverage_end: '2020-01-01T00:00:00Z'
-  time_coverage_start: '2014-01-01T00:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ozone_nmol_per_mol_amean
-  - qc_ozone_nmol_per_mol_amean
-  - meta_ozone_nmol_per_mol_amean
-  - v_ozone_ug_per_m3_amean
-  - qc_ozone_ug_per_m3_amean
-  - meta_ozone_ug_per_m3_amean
-  - v_ozone_nmol_per_mol_max
-  - qc_ozone_nmol_per_mol_max
-  - meta_ozone_nmol_per_mol_max
-  - v_ozone_ug_per_m3_max
-  - qc_ozone_ug_per_m3_max
-  - meta_ozone_ug_per_m3_max
-  - v_ozone_nmol_per_mol_min
-  - qc_ozone_nmol_per_mol_min
-  - meta_ozone_nmol_per_mol_min
-  - v_ozone_ug_per_m3_min
-  - qc_ozone_ug_per_m3_min
-  - meta_ozone_ug_per_m3_min
-  - v_ozone_nmol_per_mol_stddev
-  - qc_ozone_nmol_per_mol_stddev
-  - meta_ozone_nmol_per_mol_stddev
-  - v_ozone_ug_per_m3_stddev
-  - qc_ozone_ug_per_m3_stddev
-  - meta_ozone_ug_per_m3_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZS/8U/FY/ZS8U-FYRS.nc:
   ebas_instrument_name: uv_abs_03
   ebas_method_ref: SE01L_uv_abs
@@ -10641,6 +11197,27 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZV/FQ/7T/ZVFQ-7TS7.nc:
   ebas_station_code: AT0044R
   ebas_station_latitude: 47.113056
   ebas_station_longitude: 15.470556
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2013-01-01T00:00:00Z'
+  time_coverage_start: '1992-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ozone
+  - qc_ozone
+  - meta_ozone
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZW/MK/5S/ZWMK-5S37.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: uv_abs_05
+  ebas_method_ref: CH01L_uv_abs
+  ebas_revision_date: '2025-02-26T15:40:23.900880Z'
+  ebas_station_altitude: 1031.0 m
+  ebas_station_code: CH0005R
+  ebas_station_latitude: 47.0674167
+  ebas_station_longitude: 8.4633333
   ebas_statistics: arithmetic mean
   resolution: hourly
   time_coverage_end: '2013-01-01T00:00:00Z'

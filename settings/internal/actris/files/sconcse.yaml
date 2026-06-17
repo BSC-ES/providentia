@@ -1860,6 +1860,73 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VX/ZR/Y6/VXZR-Y654.nc:
   - v_zirconium
   - qc_zirconium
   - meta_zirconium
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/W8/9S/U4/W89S-U463.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Sm_LVS_0201
+  ebas_measurement_height: 1.6 m
+  ebas_method_ref: DE03L_UBA_La_ICP_0003
+  ebas_revision_date: '2024-12-11T09:14:05.423555Z'
+  ebas_station_altitude: 937.0 m
+  ebas_station_code: DE0008R
+  ebas_station_latitude: 50.65
+  ebas_station_longitude: 10.766667
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2024-01-01T23:00:00Z'
+  time_coverage_start: '2020-12-28T23:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_antimony
+  - qc_antimony
+  - meta_antimony
+  - v_arsenic
+  - qc_arsenic
+  - meta_arsenic
+  - v_cadmium
+  - qc_cadmium
+  - meta_cadmium
+  - v_chromium
+  - qc_chromium
+  - meta_chromium
+  - v_cobalt
+  - qc_cobalt
+  - meta_cobalt
+  - v_copper
+  - qc_copper
+  - meta_copper
+  - v_iron
+  - qc_iron
+  - meta_iron
+  - v_lead
+  - qc_lead
+  - meta_lead
+  - v_manganese
+  - qc_manganese
+  - meta_manganese
+  - v_molybdenum
+  - qc_molybdenum
+  - meta_molybdenum
+  - v_nickel
+  - qc_nickel
+  - meta_nickel
+  - v_selenium
+  - qc_selenium
+  - meta_selenium
+  - v_thallium
+  - qc_thallium
+  - meta_thallium
+  - v_titanium
+  - qc_titanium
+  - meta_titanium
+  - v_vanadium
+  - qc_vanadium
+  - meta_vanadium
+  - v_zinc
+  - qc_zinc
+  - meta_zinc
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XU/MC/PA/XUMC-PA8H.nc:
   ebas_data_level: '2'
   ebas_instrument_name: thermo_22

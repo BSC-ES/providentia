@@ -488,6 +488,52 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/34/NU/FC/34NU-FCH6.nc:
   - v_total_carbon
   - qc_total_carbon
   - meta_total_carbon
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3D/T3/N3/3DT3-N3F5.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: SC-OCEC_RT3182
+  ebas_measurement_height: 4.5 m
+  ebas_method_ref: FI01L_thermal-optical_analysis_EUSAAR_2
+  ebas_revision_date: '2024-05-07T10:00:00.000000Z'
+  ebas_station_altitude: 7.0 m
+  ebas_station_code: FI0009R
+  ebas_station_latitude: 59.779167
+  ebas_station_longitude: 21.377222
+  resolution: Unrecognised (P0000-00-00T11:00:00)
+  time_coverage_end: '2023-12-31T21:30:00Z'
+  time_coverage_start: '2022-12-31T22:30:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_pressure
+  - qc_pressure
+  - meta_pressure
+  - v_temperature
+  - qc_temperature
+  - meta_temperature
+  - v_elemental_carbon_amean
+  - qc_elemental_carbon_amean
+  - meta_elemental_carbon_amean
+  - v_elemental_carbon_uncertainty
+  - qc_elemental_carbon_uncertainty
+  - meta_elemental_carbon_uncertainty
+  - v_organic_carbon_amean
+  - qc_organic_carbon_amean
+  - meta_organic_carbon_amean
+  - v_organic_carbon_uncertainty
+  - qc_organic_carbon_uncertainty
+  - meta_organic_carbon_uncertainty
+  - d_Fraction
+  - qc_organic_carbon_amean_d_Fraction
+  - meta_organic_carbon_amean_d_Fraction
+  - v_total_carbon_amean
+  - qc_total_carbon_amean
+  - meta_total_carbon_amean
+  - v_total_carbon_uncertainty
+  - qc_total_carbon_uncertainty
+  - meta_total_carbon_uncertainty
+  - v_organic_carbon_amean_d_Fraction
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3F/UQ/GT/3FUQ-GT74.nc:
   ebas_data_level: '2'
   ebas_instrument_name: SwamDC_3.7beq_Montelibretti
@@ -1114,6 +1160,35 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/63/Z5/MP/63Z5-MPRR.nc:
   - v_elemental_carbon_uncertainty
   - qc_elemental_carbon_uncertainty
   - meta_elemental_carbon_uncertainty
+  - v_organic_carbon_amean
+  - qc_organic_carbon_amean
+  - meta_organic_carbon_amean
+  - v_organic_carbon_uncertainty
+  - qc_organic_carbon_uncertainty
+  - meta_organic_carbon_uncertainty
+  - v_total_carbon_amean
+  - qc_total_carbon_amean
+  - meta_total_carbon_amean
+  - v_total_carbon_uncertainty
+  - qc_total_carbon_uncertainty
+  - meta_total_carbon_uncertainty
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/65/FZ/DN/65FZ-DNDB.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: kfg_no39_pm10_pm25
+  ebas_method_ref: NO01L_NILU_sunset_002
+  ebas_revision_date: '2024-04-16T14:19:44.115131Z'
+  ebas_station_altitude: 210.0 m
+  ebas_station_code: NO0039R
+  ebas_station_latitude: 62.783333
+  ebas_station_longitude: 8.883333
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2024-01-03T07:00:00Z'
+  time_coverage_start: '2017-01-02T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
   - v_organic_carbon_amean
   - qc_organic_carbon_amean
   - meta_organic_carbon_amean
@@ -2272,6 +2347,42 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/97/Y3/H6/97Y3-H69V.nc:
   - v_zirconium
   - qc_zirconium
   - meta_zirconium
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/99/QV/FX/99QV-FX29.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: kfg_no56_pm10
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: NO01L_NILU_sunset_002
+  ebas_revision_date: '2025-03-18T13:49:40.323389Z'
+  ebas_station_altitude: 300.0 m
+  ebas_station_code: NO0056R
+  ebas_station_latitude: 60.372386
+  ebas_station_longitude: 11.078142
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2025-01-01T07:00:00Z'
+  time_coverage_start: '2020-01-06T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_elemental_carbon_amean
+  - qc_elemental_carbon_amean
+  - meta_elemental_carbon_amean
+  - v_elemental_carbon_uncertainty
+  - qc_elemental_carbon_uncertainty
+  - meta_elemental_carbon_uncertainty
+  - v_organic_carbon_amean
+  - qc_organic_carbon_amean
+  - meta_organic_carbon_amean
+  - v_organic_carbon_uncertainty
+  - qc_organic_carbon_uncertainty
+  - meta_organic_carbon_uncertainty
+  - v_total_carbon_amean
+  - qc_total_carbon_amean
+  - meta_total_carbon_amean
+  - v_total_carbon_uncertainty
+  - qc_total_carbon_uncertainty
+  - meta_total_carbon_uncertainty
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9A/W7/GG/9AW7-GGSX.nc:
   ebas_data_level: '2'
   ebas_instrument_name: HVS_DIG_PM25-02
@@ -2457,6 +2568,52 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/A6/N3/Y8/A6N3-Y8EA.nc:
   - qc_total_carbon_uncertainty
   - meta_total_carbon_uncertainty
   - v_organic_carbon_amean_d_Fraction
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/A7/93/HB/A793-HBWB.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: CG_Sunset_Lab_OCEC_Analyzer
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: CZ06L_thermal-optical_analysis_EUSAAR_2
+  ebas_revision_date: '2025-01-13T08:00:00.000000Z'
+  ebas_station_altitude: 535.0 m
+  ebas_station_code: CZ0003R
+  ebas_station_latitude: 49.573394
+  ebas_station_longitude: 15.080278
+  resolution: Unrecognised (P0000-00-00T04:00:00)
+  time_coverage_end: '2025-01-01T01:41:03Z'
+  time_coverage_start: '2020-01-01T02:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_pressure
+  - qc_pressure
+  - meta_pressure
+  - v_temperature
+  - qc_temperature
+  - meta_temperature
+  - v_elemental_carbon_amean
+  - qc_elemental_carbon_amean
+  - meta_elemental_carbon_amean
+  - v_elemental_carbon_uncertainty
+  - qc_elemental_carbon_uncertainty
+  - meta_elemental_carbon_uncertainty
+  - v_organic_carbon_amean
+  - qc_organic_carbon_amean
+  - meta_organic_carbon_amean
+  - v_organic_carbon_uncertainty
+  - qc_organic_carbon_uncertainty
+  - meta_organic_carbon_uncertainty
+  - d_Fraction
+  - qc_organic_carbon_amean_d_Fraction
+  - meta_organic_carbon_amean_d_Fraction
+  - v_total_carbon_amean
+  - qc_total_carbon_amean
+  - meta_total_carbon_amean
+  - v_total_carbon_uncertainty
+  - qc_total_carbon_uncertainty
+  - meta_total_carbon_uncertainty
+  - v_organic_carbon_amean_d_Fraction
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AA/HK/N5/AAHK-N5BD.nc:
   ebas_data_level: '2'
   ebas_instrument_name: ES1778R_HVS_DIG_AEROSOL_01
@@ -2519,6 +2676,39 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AA/HK/N5/AAHK-N5BD.nc:
   - v_total_carbon
   - qc_total_carbon
   - meta_total_carbon
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AB/TU/R8/ABTU-R86S.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: kfg_no02_pm10
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: NO01L_NILU_sunset_002
+  ebas_revision_date: '2024-04-16T14:17:30.587168Z'
+  ebas_station_altitude: 219.0 m
+  ebas_station_code: NO0002R
+  ebas_station_latitude: 58.38853
+  ebas_station_longitude: 8.252
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2020-01-01T07:00:00Z'
+  time_coverage_start: '2019-01-02T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_elemental_carbon
+  - qc_elemental_carbon
+  - meta_elemental_carbon
+  - v_organic_carbon_amean
+  - qc_organic_carbon_amean
+  - meta_organic_carbon_amean
+  - v_organic_carbon_uncertainty
+  - qc_organic_carbon_uncertainty
+  - meta_organic_carbon_uncertainty
+  - v_total_carbon_amean
+  - qc_total_carbon_amean
+  - meta_total_carbon_amean
+  - v_total_carbon_uncertainty
+  - qc_total_carbon_uncertainty
+  - meta_total_carbon_uncertainty
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AF/T2/XX/AFT2-XX4Z.nc:
   ebas_data_level: '2'
   ebas_instrument_name: SC-OCEC_RT3182
@@ -2683,6 +2873,46 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AW/5Q/X9/AW5Q-X9G3.nc:
   - v_total_carbon_uncertainty
   - qc_total_carbon_uncertainty
   - meta_total_carbon_uncertainty
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AW/BN/GV/AWBN-GV54.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: HVS_DIGITEL_MSY_pm10
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: ES05L_OCEC_Sunset_IDAEA
+  ebas_revision_date: '2021-10-25T00:00:00.000000Z'
+  ebas_station_altitude: 700.0 m
+  ebas_station_code: ES1778R
+  ebas_station_latitude: 41.766667
+  ebas_station_longitude: 2.35
+  resolution: Unrecognised (P0000-00-04T00:00:00)
+  time_coverage_end: '2020-12-31T00:00:00Z'
+  time_coverage_start: '2015-01-03T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_elemental_carbon_amean
+  - qc_elemental_carbon_amean
+  - meta_elemental_carbon_amean
+  - v_elemental_carbon_uncertainty
+  - qc_elemental_carbon_uncertainty
+  - meta_elemental_carbon_uncertainty
+  - v_organic_carbon_amean
+  - qc_organic_carbon_amean
+  - meta_organic_carbon_amean
+  - v_organic_carbon_uncertainty
+  - qc_organic_carbon_uncertainty
+  - meta_organic_carbon_uncertainty
+  - d_Fraction
+  - qc_organic_carbon_amean_d_Fraction
+  - meta_organic_carbon_amean_d_Fraction
+  - v_total_carbon_amean
+  - qc_total_carbon_amean
+  - meta_total_carbon_amean
+  - v_total_carbon_uncertainty
+  - qc_total_carbon_uncertainty
+  - meta_total_carbon_uncertainty
+  - v_organic_carbon_amean_d_Fraction
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AY/6J/95/AY6J-95S2.nc:
   ebas_data_level: '2'
   ebas_instrument_name: DHA-80
@@ -2837,6 +3067,55 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/B9/WZ/KF/B9WZ-KFUD.nc:
   - v_organic_carbon_amean_d_Artifact
   - v_organic_carbon_uncertainty_d_Artifact
   - v_organic_carbon_amean_d_Fraction
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/B9/ZM/9R/B9ZM-9R56.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Digitel_DA80_FR09
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: FR12L_sunset_EUSAAR2
+  ebas_revision_date: '2025-04-08T09:00:00.000000Z'
+  ebas_station_altitude: 390.0 m
+  ebas_station_code: FR0009R
+  ebas_station_latitude: 49.9
+  ebas_station_longitude: 4.633333
+  resolution: Unrecognised (P0000-00-06T00:00:00)
+  time_coverage_end: '2023-12-28T09:00:00Z'
+  time_coverage_start: '2023-01-01T09:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_elemental_carbon_amean
+  - qc_elemental_carbon_amean
+  - meta_elemental_carbon_amean
+  - v_elemental_carbon_uncertainty
+  - qc_elemental_carbon_uncertainty
+  - meta_elemental_carbon_uncertainty
+  - v_organic_carbon_amean
+  - qc_organic_carbon_amean
+  - meta_organic_carbon_amean
+  - v_organic_carbon_det_lim
+  - qc_organic_carbon_det_lim
+  - meta_organic_carbon_det_lim
+  - v_organic_carbon_uncertainty
+  - qc_organic_carbon_uncertainty
+  - meta_organic_carbon_uncertainty
+  - d_Fraction
+  - qc_organic_carbon_amean_d_Fraction
+  - meta_organic_carbon_amean_d_Fraction
+  - qc_organic_carbon_det_lim_d_Fraction
+  - meta_organic_carbon_det_lim_d_Fraction
+  - v_total_carbon_amean
+  - qc_total_carbon_amean
+  - meta_total_carbon_amean
+  - v_total_carbon_det_lim
+  - qc_total_carbon_det_lim
+  - meta_total_carbon_det_lim
+  - v_total_carbon_uncertainty
+  - qc_total_carbon_uncertainty
+  - meta_total_carbon_uncertainty
+  - v_organic_carbon_amean_d_Fraction
+  - v_organic_carbon_det_lim_d_Fraction
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BC/6X/WK/BC6X-WKRC.nc:
   ebas_data_level: 3a
   ebas_instrument_name: kfg_no02_pm25
@@ -3170,6 +3449,46 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/CK/HK/M6/CKHK-M6PR.nc:
   - v_organic_carbon_uncertainty_d_Artifact
   - v_organic_carbon_amean_d_Fraction
   - v_organic_carbon_max_d_Fraction
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CM/G3/VJ/CMG3-VJTT.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: HVS_DIGITEL_DHA-80
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: DE08L_TROPOS_sunset_001
+  ebas_revision_date: '2025-06-12T08:35:11.160127Z'
+  ebas_station_altitude: 86.0 m
+  ebas_station_code: DE0044R
+  ebas_station_latitude: 51.5255
+  ebas_station_longitude: 12.9277
+  resolution: daily
+  time_coverage_end: '2025-01-01T00:00:00Z'
+  time_coverage_start: '2016-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_elemental_carbon_amean
+  - qc_elemental_carbon_amean
+  - meta_elemental_carbon_amean
+  - v_elemental_carbon_uncertainty
+  - qc_elemental_carbon_uncertainty
+  - meta_elemental_carbon_uncertainty
+  - v_organic_carbon_amean
+  - qc_organic_carbon_amean
+  - meta_organic_carbon_amean
+  - v_organic_carbon_uncertainty
+  - qc_organic_carbon_uncertainty
+  - meta_organic_carbon_uncertainty
+  - d_Fraction
+  - qc_organic_carbon_amean_d_Fraction
+  - meta_organic_carbon_amean_d_Fraction
+  - v_total_carbon_amean
+  - qc_total_carbon_amean
+  - meta_total_carbon_amean
+  - v_total_carbon_uncertainty
+  - qc_total_carbon_uncertainty
+  - meta_total_carbon_uncertainty
+  - v_organic_carbon_amean_d_Fraction
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/CP/SZ/J6/CPSZ-J6SK.nc:
   ebas_data_level: '2'
   ebas_instrument_name: HVS_01_pm10
@@ -3749,6 +4068,41 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DV/NJ/AV/DVNJ-AV6Y.nc:
   - qc_total_carbon_uncertainty
   - meta_total_carbon_uncertainty
   - v_organic_carbon_amean_d_Fraction
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/E5/8G/9X/E58G-9XSX.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: kfg_no39_pm10
+  ebas_method_ref: NO01L_NILU_sunset_002
+  ebas_revision_date: '2025-03-18T13:56:37.550829Z'
+  ebas_station_altitude: 210.0 m
+  ebas_station_code: NO0039R
+  ebas_station_latitude: 62.783333
+  ebas_station_longitude: 8.883333
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2025-01-01T07:00:00Z'
+  time_coverage_start: '2020-01-06T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_elemental_carbon_amean
+  - qc_elemental_carbon_amean
+  - meta_elemental_carbon_amean
+  - v_elemental_carbon_uncertainty
+  - qc_elemental_carbon_uncertainty
+  - meta_elemental_carbon_uncertainty
+  - v_organic_carbon_amean
+  - qc_organic_carbon_amean
+  - meta_organic_carbon_amean
+  - v_organic_carbon_uncertainty
+  - qc_organic_carbon_uncertainty
+  - meta_organic_carbon_uncertainty
+  - v_total_carbon_amean
+  - qc_total_carbon_amean
+  - meta_total_carbon_amean
+  - v_total_carbon_uncertainty
+  - qc_total_carbon_uncertainty
+  - meta_total_carbon_uncertainty
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/E7/6A/YW/E76A-YW4E.nc:
   ebas_data_level: '2'
   ebas_instrument_name: lvs_pm25_02
@@ -3776,6 +4130,42 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/E7/6A/YW/E76A-YW4E.nc:
   - v_total_carbon
   - qc_total_carbon
   - meta_total_carbon
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/E9/RN/FW/E9RN-FWPB.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: HVS_MCV_BCN_pm1
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: ES05L_OCEC_Sunset_IDAEA
+  ebas_revision_date: '2023-11-03T00:00:00.000000Z'
+  ebas_station_altitude: 80.0 m
+  ebas_station_code: ES0019U
+  ebas_station_latitude: 41.387463
+  ebas_station_longitude: 2.11532
+  resolution: Unrecognised (P0000-00-04T00:00:00)
+  time_coverage_end: '2022-12-29T00:00:00Z'
+  time_coverage_start: '2022-01-02T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_elemental_carbon_amean
+  - qc_elemental_carbon_amean
+  - meta_elemental_carbon_amean
+  - v_elemental_carbon_uncertainty
+  - qc_elemental_carbon_uncertainty
+  - meta_elemental_carbon_uncertainty
+  - v_organic_carbon_amean
+  - qc_organic_carbon_amean
+  - meta_organic_carbon_amean
+  - v_organic_carbon_uncertainty
+  - qc_organic_carbon_uncertainty
+  - meta_organic_carbon_uncertainty
+  - v_total_carbon_amean
+  - qc_total_carbon_amean
+  - meta_total_carbon_amean
+  - v_total_carbon_uncertainty
+  - qc_total_carbon_uncertainty
+  - meta_total_carbon_uncertainty
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/EA/US/9Q/EAUS-9QWC.nc:
   ebas_data_level: '2'
   ebas_instrument_name: kfg_no39_pm25
@@ -3815,6 +4205,104 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/EA/US/9Q/EAUS-9QWC.nc:
   - qc_total_carbon_uncertainty
   - meta_total_carbon_uncertainty
   - v_organic_carbon_amean_d_Fraction
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/EF/DQ/TD/EFDQ-TDZV.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Digitel_DA80_FR25
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: FR12L_sunset_EUSAAR2
+  ebas_revision_date: '2025-04-08T09:00:00.000000Z'
+  ebas_station_altitude: 182.0 m
+  ebas_station_code: FR0025R
+  ebas_station_latitude: 46.814727778
+  ebas_station_longitude: 2.610008333
+  resolution: Unrecognised (P0000-00-06T00:00:00)
+  time_coverage_end: '2023-12-28T09:00:00Z'
+  time_coverage_start: '2023-01-01T09:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_elemental_carbon_amean
+  - qc_elemental_carbon_amean
+  - meta_elemental_carbon_amean
+  - v_elemental_carbon_uncertainty
+  - qc_elemental_carbon_uncertainty
+  - meta_elemental_carbon_uncertainty
+  - v_organic_carbon_amean
+  - qc_organic_carbon_amean
+  - meta_organic_carbon_amean
+  - v_organic_carbon_det_lim
+  - qc_organic_carbon_det_lim
+  - meta_organic_carbon_det_lim
+  - v_organic_carbon_uncertainty
+  - qc_organic_carbon_uncertainty
+  - meta_organic_carbon_uncertainty
+  - d_Fraction
+  - qc_organic_carbon_amean_d_Fraction
+  - meta_organic_carbon_amean_d_Fraction
+  - qc_organic_carbon_det_lim_d_Fraction
+  - meta_organic_carbon_det_lim_d_Fraction
+  - v_total_carbon_amean
+  - qc_total_carbon_amean
+  - meta_total_carbon_amean
+  - v_total_carbon_det_lim
+  - qc_total_carbon_det_lim
+  - meta_total_carbon_det_lim
+  - v_total_carbon_uncertainty
+  - qc_total_carbon_uncertainty
+  - meta_total_carbon_uncertainty
+  - v_organic_carbon_amean_d_Fraction
+  - v_organic_carbon_det_lim_d_Fraction
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/EJ/9Z/BA/EJ9Z-BA8C.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Digitel_DA80_FR13
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: FR12L_sunset_EUSAAR2
+  ebas_revision_date: '2025-04-08T09:00:00.000000Z'
+  ebas_station_altitude: 200.0 m
+  ebas_station_code: FR0013R
+  ebas_station_latitude: 43.616667
+  ebas_station_longitude: 0.183333
+  resolution: Unrecognised (P0000-00-06T00:00:00)
+  time_coverage_end: '2023-12-28T09:00:00Z'
+  time_coverage_start: '2023-01-01T09:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_elemental_carbon_amean
+  - qc_elemental_carbon_amean
+  - meta_elemental_carbon_amean
+  - v_elemental_carbon_uncertainty
+  - qc_elemental_carbon_uncertainty
+  - meta_elemental_carbon_uncertainty
+  - v_organic_carbon_amean
+  - qc_organic_carbon_amean
+  - meta_organic_carbon_amean
+  - v_organic_carbon_det_lim
+  - qc_organic_carbon_det_lim
+  - meta_organic_carbon_det_lim
+  - v_organic_carbon_uncertainty
+  - qc_organic_carbon_uncertainty
+  - meta_organic_carbon_uncertainty
+  - d_Fraction
+  - qc_organic_carbon_amean_d_Fraction
+  - meta_organic_carbon_amean_d_Fraction
+  - qc_organic_carbon_det_lim_d_Fraction
+  - meta_organic_carbon_det_lim_d_Fraction
+  - v_total_carbon_amean
+  - qc_total_carbon_amean
+  - meta_total_carbon_amean
+  - v_total_carbon_det_lim
+  - qc_total_carbon_det_lim
+  - meta_total_carbon_det_lim
+  - v_total_carbon_uncertainty
+  - qc_total_carbon_uncertainty
+  - meta_total_carbon_uncertainty
+  - v_organic_carbon_amean_d_Fraction
+  - v_organic_carbon_det_lim_d_Fraction
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/EK/28/AZ/EK28-AZKC.nc:
   ebas_data_level: '2'
   ebas_instrument_name: lvs_2
@@ -4315,6 +4803,55 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/FK/23/CH/FK23-CH86.nc:
   - v_total_carbon
   - qc_total_carbon
   - meta_total_carbon
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FM/FT/XZ/FMFT-XZ2R.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Digitel_DA80_FR08
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: FR12L_sunset_EUSAAR2
+  ebas_revision_date: '2025-04-08T09:00:00.000000Z'
+  ebas_station_altitude: 775.0 m
+  ebas_station_code: FR0008R
+  ebas_station_latitude: 48.5
+  ebas_station_longitude: 7.133333
+  resolution: Unrecognised (P0000-00-06T00:00:00)
+  time_coverage_end: '2023-12-28T09:00:00Z'
+  time_coverage_start: '2023-01-01T09:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_elemental_carbon_amean
+  - qc_elemental_carbon_amean
+  - meta_elemental_carbon_amean
+  - v_elemental_carbon_uncertainty
+  - qc_elemental_carbon_uncertainty
+  - meta_elemental_carbon_uncertainty
+  - v_organic_carbon_amean
+  - qc_organic_carbon_amean
+  - meta_organic_carbon_amean
+  - v_organic_carbon_det_lim
+  - qc_organic_carbon_det_lim
+  - meta_organic_carbon_det_lim
+  - v_organic_carbon_uncertainty
+  - qc_organic_carbon_uncertainty
+  - meta_organic_carbon_uncertainty
+  - d_Fraction
+  - qc_organic_carbon_amean_d_Fraction
+  - meta_organic_carbon_amean_d_Fraction
+  - qc_organic_carbon_det_lim_d_Fraction
+  - meta_organic_carbon_det_lim_d_Fraction
+  - v_total_carbon_amean
+  - qc_total_carbon_amean
+  - meta_total_carbon_amean
+  - v_total_carbon_det_lim
+  - qc_total_carbon_det_lim
+  - meta_total_carbon_det_lim
+  - v_total_carbon_uncertainty
+  - qc_total_carbon_uncertainty
+  - meta_total_carbon_uncertainty
+  - v_organic_carbon_amean_d_Fraction
+  - v_organic_carbon_det_lim_d_Fraction
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FN/GC/ZT/FNGC-ZT43.nc:
   ebas_data_level: '2'
   ebas_instrument_name: lvs_644
@@ -5473,6 +6010,41 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/JJ/ZK/NS/JJZK-NS3K.nc:
   - v_organic_carbon_uncertainty_d_Artifact
   - v_organic_carbon_amean_d_Fraction
   - v_organic_carbon_max_d_Fraction
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/JK/S9/5U/JKS9-5U7A.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: kfg_no39_pm25
+  ebas_method_ref: NO01L_NILU_sunset_002
+  ebas_revision_date: '2025-03-18T13:56:49.946744Z'
+  ebas_station_altitude: 210.0 m
+  ebas_station_code: NO0039R
+  ebas_station_latitude: 62.783333
+  ebas_station_longitude: 8.883333
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2025-01-01T07:00:00Z'
+  time_coverage_start: '2019-01-07T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_elemental_carbon_amean
+  - qc_elemental_carbon_amean
+  - meta_elemental_carbon_amean
+  - v_elemental_carbon_uncertainty
+  - qc_elemental_carbon_uncertainty
+  - meta_elemental_carbon_uncertainty
+  - v_organic_carbon_amean
+  - qc_organic_carbon_amean
+  - meta_organic_carbon_amean
+  - v_organic_carbon_uncertainty
+  - qc_organic_carbon_uncertainty
+  - meta_organic_carbon_uncertainty
+  - v_total_carbon_amean
+  - qc_total_carbon_amean
+  - meta_total_carbon_amean
+  - v_total_carbon_uncertainty
+  - qc_total_carbon_uncertainty
+  - meta_total_carbon_uncertainty
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/JM/TU/AF/JMTU-AF98.nc:
   ebas_data_level: '2'
   ebas_instrument_name: HVS_DIGITEL_MSY_pm1
@@ -5877,6 +6449,42 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/KC/ZW/QP/KCZW-QP9Y.nc:
   - v_organic_carbon_amean_d_Artifact
   - v_organic_carbon_uncertainty_d_Artifact
   - v_organic_carbon_amean_d_Fraction
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/KU/D8/H6/KUD8-H6WP.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: kfg_no56_pm25
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: NO01L_NILU_sunset_002
+  ebas_revision_date: '2025-03-18T13:50:34.494656Z'
+  ebas_station_altitude: 300.0 m
+  ebas_station_code: NO0056R
+  ebas_station_latitude: 60.372386
+  ebas_station_longitude: 11.078142
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2025-01-01T07:00:00Z'
+  time_coverage_start: '2019-01-07T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_elemental_carbon_amean
+  - qc_elemental_carbon_amean
+  - meta_elemental_carbon_amean
+  - v_elemental_carbon_uncertainty
+  - qc_elemental_carbon_uncertainty
+  - meta_elemental_carbon_uncertainty
+  - v_organic_carbon_amean
+  - qc_organic_carbon_amean
+  - meta_organic_carbon_amean
+  - v_organic_carbon_uncertainty
+  - qc_organic_carbon_uncertainty
+  - meta_organic_carbon_uncertainty
+  - v_total_carbon_amean
+  - qc_total_carbon_amean
+  - meta_total_carbon_amean
+  - v_total_carbon_uncertainty
+  - qc_total_carbon_uncertainty
+  - meta_total_carbon_uncertainty
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/M6/4H/GY/M64H-GYWN.nc:
   ebas_data_level: '2'
   ebas_instrument_name: HVS_DIGITEL_MSY_pm1
@@ -6373,6 +6981,72 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NN/PB/CY/NNPB-CYFJ.nc:
   - v_total_carbon
   - qc_total_carbon
   - meta_total_carbon
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NP/F2/XH/NPF2-XHJV.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: lvs_week_no42_pm10
+  ebas_measurement_height: 7.0 m
+  ebas_method_ref: NO01L_NILU_sunset_002
+  ebas_revision_date: '2025-03-19T10:55:33.092044Z'
+  ebas_station_altitude: 474.0 m
+  ebas_station_code: NO0042G
+  ebas_station_latitude: 78.90715
+  ebas_station_longitude: 11.88668
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2025-01-07T07:00:00Z'
+  time_coverage_start: '2023-12-11T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_elemental_carbon_amean
+  - qc_elemental_carbon_amean
+  - meta_elemental_carbon_amean
+  - v_elemental_carbon_det_lim
+  - qc_elemental_carbon_det_lim
+  - meta_elemental_carbon_det_lim
+  - v_organic_carbon_amean
+  - qc_organic_carbon_amean
+  - meta_organic_carbon_amean
+  - v_organic_carbon_det_lim
+  - qc_organic_carbon_det_lim
+  - meta_organic_carbon_det_lim
+  - v_total_carbon_amean
+  - qc_total_carbon_amean
+  - meta_total_carbon_amean
+  - v_total_carbon_det_lim
+  - qc_total_carbon_det_lim
+  - meta_total_carbon_det_lim
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NR/AT/2S/NRAT-2S2K.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: kfg_no56_pm10_pm25
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: NO01L_NILU_sunset_002
+  ebas_revision_date: '2024-04-16T14:20:16.214058Z'
+  ebas_station_altitude: 300.0 m
+  ebas_station_code: NO0056R
+  ebas_station_latitude: 60.372386
+  ebas_station_longitude: 11.078142
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2024-01-03T07:00:00Z'
+  time_coverage_start: '2017-01-02T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_organic_carbon_amean
+  - qc_organic_carbon_amean
+  - meta_organic_carbon_amean
+  - v_organic_carbon_uncertainty
+  - qc_organic_carbon_uncertainty
+  - meta_organic_carbon_uncertainty
+  - v_total_carbon_amean
+  - qc_total_carbon_amean
+  - meta_total_carbon_amean
+  - v_total_carbon_uncertainty
+  - qc_total_carbon_uncertainty
+  - meta_total_carbon_uncertainty
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NU/JX/B8/NUJX-B8SW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Digitel
@@ -6450,6 +7124,46 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NY/WJ/RT/NYWJ-RTNH.nc:
   - v_organic_carbon_amean_d_Artifact
   - v_organic_carbon_uncertainty_d_Artifact
   - v_organic_carbon_max_d_Fraction
+  - v_organic_carbon_amean_d_Fraction
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/P8/5A/35/P85A-35N3.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: kfg_no02_pm10
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: NO01L_NILU_sunset_002
+  ebas_revision_date: '2020-03-19T08:38:11.697000Z'
+  ebas_station_altitude: 219.0 m
+  ebas_station_code: NO0002R
+  ebas_station_latitude: 58.38853
+  ebas_station_longitude: 8.252
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2016-01-06T07:00:00Z'
+  time_coverage_start: '2014-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_elemental_carbon_amean
+  - qc_elemental_carbon_amean
+  - meta_elemental_carbon_amean
+  - v_elemental_carbon_uncertainty
+  - qc_elemental_carbon_uncertainty
+  - meta_elemental_carbon_uncertainty
+  - v_organic_carbon_amean
+  - qc_organic_carbon_amean
+  - meta_organic_carbon_amean
+  - v_organic_carbon_uncertainty
+  - qc_organic_carbon_uncertainty
+  - meta_organic_carbon_uncertainty
+  - d_Fraction
+  - qc_organic_carbon_amean_d_Fraction
+  - meta_organic_carbon_amean_d_Fraction
+  - v_total_carbon_amean
+  - qc_total_carbon_amean
+  - meta_total_carbon_amean
+  - v_total_carbon_uncertainty
+  - qc_total_carbon_uncertainty
+  - meta_total_carbon_uncertainty
   - v_organic_carbon_amean_d_Fraction
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/P9/Z6/WR/P9Z6-WRAY.nc:
   ebas_data_level: '2'
@@ -6666,6 +7380,42 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PG/2J/DU/PG2J-DU6G.nc:
   - v_total_carbon
   - qc_total_carbon
   - meta_total_carbon
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PG/E4/BB/PGE4-BBPE.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: HVS_DIGITEL_BCN_pm10
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: ES05L_OCEC_Sunset_IDAEA
+  ebas_revision_date: '2023-11-03T00:00:00.000000Z'
+  ebas_station_altitude: 80.0 m
+  ebas_station_code: ES0019U
+  ebas_station_latitude: 41.387463
+  ebas_station_longitude: 2.11532
+  resolution: Unrecognised (P0000-00-02T00:00:00)
+  time_coverage_end: '2022-12-31T00:00:00Z'
+  time_coverage_start: '2022-01-02T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_elemental_carbon_amean
+  - qc_elemental_carbon_amean
+  - meta_elemental_carbon_amean
+  - v_elemental_carbon_uncertainty
+  - qc_elemental_carbon_uncertainty
+  - meta_elemental_carbon_uncertainty
+  - v_organic_carbon_amean
+  - qc_organic_carbon_amean
+  - meta_organic_carbon_amean
+  - v_organic_carbon_uncertainty
+  - qc_organic_carbon_uncertainty
+  - meta_organic_carbon_uncertainty
+  - v_total_carbon_amean
+  - qc_total_carbon_amean
+  - meta_total_carbon_amean
+  - v_total_carbon_uncertainty
+  - qc_total_carbon_uncertainty
+  - meta_total_carbon_uncertainty
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PN/AD/M9/PNAD-M9HK.nc:
   ebas_data_level: '2'
   ebas_instrument_name: lvs_1
@@ -6847,6 +7597,82 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q6/P6/43/Q6P6-43W6.nc:
   - v_organic_carbon_uncertainty_d_Artifact
   - v_organic_carbon_amean_d_Fraction
   - v_organic_carbon_max_d_Fraction
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q7/4C/AT/Q74C-ATG9.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: HVS_DIGITEL_DHA-80
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: DE08L_TROPOS_sunset_001
+  ebas_revision_date: '2025-06-12T08:36:11.567434Z'
+  ebas_station_altitude: 86.0 m
+  ebas_station_code: DE0044R
+  ebas_station_latitude: 51.5255
+  ebas_station_longitude: 12.9277
+  resolution: daily
+  time_coverage_end: '2025-01-01T00:00:00Z'
+  time_coverage_start: '2016-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_elemental_carbon_amean
+  - qc_elemental_carbon_amean
+  - meta_elemental_carbon_amean
+  - v_elemental_carbon_uncertainty
+  - qc_elemental_carbon_uncertainty
+  - meta_elemental_carbon_uncertainty
+  - v_organic_carbon_amean
+  - qc_organic_carbon_amean
+  - meta_organic_carbon_amean
+  - v_organic_carbon_uncertainty
+  - qc_organic_carbon_uncertainty
+  - meta_organic_carbon_uncertainty
+  - d_Fraction
+  - qc_organic_carbon_amean_d_Fraction
+  - meta_organic_carbon_amean_d_Fraction
+  - v_total_carbon_amean
+  - qc_total_carbon_amean
+  - meta_total_carbon_amean
+  - v_total_carbon_uncertainty
+  - qc_total_carbon_uncertainty
+  - meta_total_carbon_uncertainty
+  - v_organic_carbon_amean_d_Fraction
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q8/UX/UR/Q8UX-URAZ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: kfg_no02_pm10
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: NO01L_NILU_sunset_002
+  ebas_revision_date: '2025-03-18T13:51:22.993222Z'
+  ebas_station_altitude: 219.0 m
+  ebas_station_code: NO0002R
+  ebas_station_latitude: 58.38853
+  ebas_station_longitude: 8.252
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2025-01-01T07:00:00Z'
+  time_coverage_start: '2020-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_elemental_carbon_amean
+  - qc_elemental_carbon_amean
+  - meta_elemental_carbon_amean
+  - v_elemental_carbon_uncertainty
+  - qc_elemental_carbon_uncertainty
+  - meta_elemental_carbon_uncertainty
+  - v_organic_carbon_amean
+  - qc_organic_carbon_amean
+  - meta_organic_carbon_amean
+  - v_organic_carbon_uncertainty
+  - qc_organic_carbon_uncertainty
+  - meta_organic_carbon_uncertainty
+  - v_total_carbon_amean
+  - qc_total_carbon_amean
+  - meta_total_carbon_amean
+  - v_total_carbon_uncertainty
+  - qc_total_carbon_uncertainty
+  - meta_total_carbon_uncertainty
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QC/2T/UT/QC2T-UT7A.nc:
   ebas_data_level: '2'
   ebas_instrument_name: kfg_no01
@@ -6883,6 +7709,55 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QC/2T/UT/QC2T-UT7A.nc:
   - v_total_carbon_pm25
   - qc_total_carbon_pm25
   - meta_total_carbon_pm25
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QC/2U/KZ/QC2U-KZCV.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Digitel_DA80_28
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: FR12L_sunset_EUSAAR2
+  ebas_revision_date: '2025-04-08T09:00:00.000000Z'
+  ebas_station_altitude: 307.0 m
+  ebas_station_code: FR0028R
+  ebas_station_latitude: 48.261977778
+  ebas_station_longitude: -2.943830556
+  resolution: Unrecognised (P0000-00-06T00:00:00)
+  time_coverage_end: '2023-12-28T09:00:00Z'
+  time_coverage_start: '2023-01-01T09:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_elemental_carbon_amean
+  - qc_elemental_carbon_amean
+  - meta_elemental_carbon_amean
+  - v_elemental_carbon_uncertainty
+  - qc_elemental_carbon_uncertainty
+  - meta_elemental_carbon_uncertainty
+  - v_organic_carbon_amean
+  - qc_organic_carbon_amean
+  - meta_organic_carbon_amean
+  - v_organic_carbon_det_lim
+  - qc_organic_carbon_det_lim
+  - meta_organic_carbon_det_lim
+  - v_organic_carbon_uncertainty
+  - qc_organic_carbon_uncertainty
+  - meta_organic_carbon_uncertainty
+  - d_Fraction
+  - qc_organic_carbon_amean_d_Fraction
+  - meta_organic_carbon_amean_d_Fraction
+  - qc_organic_carbon_det_lim_d_Fraction
+  - meta_organic_carbon_det_lim_d_Fraction
+  - v_total_carbon_amean
+  - qc_total_carbon_amean
+  - meta_total_carbon_amean
+  - v_total_carbon_det_lim
+  - qc_total_carbon_det_lim
+  - meta_total_carbon_det_lim
+  - v_total_carbon_uncertainty
+  - qc_total_carbon_uncertainty
+  - meta_total_carbon_uncertainty
+  - v_organic_carbon_amean_d_Fraction
+  - v_organic_carbon_det_lim_d_Fraction
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QC/ZS/8R/QCZS-8RW3.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Partisol
@@ -7561,6 +8436,46 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RR/BV/RZ/RRBV-RZNW.nc:
   - v_total_carbon_corrected_pm25
   - qc_total_carbon_corrected_pm25
   - meta_total_carbon_corrected_pm25
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RW/DW/S8/RWDW-S8TE.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: kfg_no02_pm25
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: NO01L_NILU_sunset_002
+  ebas_revision_date: '2020-03-19T08:39:18.933000Z'
+  ebas_station_altitude: 219.0 m
+  ebas_station_code: NO0002R
+  ebas_station_latitude: 58.38853
+  ebas_station_longitude: 8.252
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2019-01-02T07:00:00Z'
+  time_coverage_start: '2016-01-06T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_elemental_carbon_amean
+  - qc_elemental_carbon_amean
+  - meta_elemental_carbon_amean
+  - v_elemental_carbon_uncertainty
+  - qc_elemental_carbon_uncertainty
+  - meta_elemental_carbon_uncertainty
+  - v_organic_carbon_amean
+  - qc_organic_carbon_amean
+  - meta_organic_carbon_amean
+  - v_organic_carbon_uncertainty
+  - qc_organic_carbon_uncertainty
+  - meta_organic_carbon_uncertainty
+  - d_Fraction
+  - qc_organic_carbon_amean_d_Fraction
+  - meta_organic_carbon_amean_d_Fraction
+  - v_total_carbon_amean
+  - qc_total_carbon_amean
+  - meta_total_carbon_amean
+  - v_total_carbon_uncertainty
+  - qc_total_carbon_uncertainty
+  - meta_total_carbon_uncertainty
+  - v_organic_carbon_amean_d_Fraction
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/S3/HU/Q4/S3HU-Q4M8.nc:
   ebas_instrument_name: LU_DRI-2
   ebas_method_ref: SE04L_EUSAAR-2
@@ -7860,6 +8775,52 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/T3/SB/DZ/T3SB-DZPE.nc:
   - v_organic_carbon_uncertainty_d_Artifact
   - v_organic_carbon_amean_d_Fraction
   - v_organic_carbon_max_d_Fraction
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/T5/8V/9D/T58V-9DNQ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: SC-OCEC_RT3183
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: FI01L_thermal-optical_analysis_EUSAAR_2
+  ebas_revision_date: '2025-05-12T13:00:00.000000Z'
+  ebas_station_altitude: 340.0 m
+  ebas_station_code: FI0036R
+  ebas_station_latitude: 68.0
+  ebas_station_longitude: 24.237222222
+  resolution: Unrecognised (P0000-00-00T23:00:00)
+  time_coverage_end: '2024-12-31T21:30:00Z'
+  time_coverage_start: '2023-12-31T22:30:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_pressure
+  - qc_pressure
+  - meta_pressure
+  - v_temperature
+  - qc_temperature
+  - meta_temperature
+  - v_elemental_carbon_amean
+  - qc_elemental_carbon_amean
+  - meta_elemental_carbon_amean
+  - v_elemental_carbon_uncertainty
+  - qc_elemental_carbon_uncertainty
+  - meta_elemental_carbon_uncertainty
+  - v_organic_carbon_amean
+  - qc_organic_carbon_amean
+  - meta_organic_carbon_amean
+  - v_organic_carbon_uncertainty
+  - qc_organic_carbon_uncertainty
+  - meta_organic_carbon_uncertainty
+  - d_Fraction
+  - qc_organic_carbon_amean_d_Fraction
+  - meta_organic_carbon_amean_d_Fraction
+  - v_total_carbon_amean
+  - qc_total_carbon_amean
+  - meta_total_carbon_amean
+  - v_total_carbon_uncertainty
+  - qc_total_carbon_uncertainty
+  - meta_total_carbon_uncertainty
+  - v_organic_carbon_amean_d_Fraction
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/T5/MF/YW/T5MF-YWM3.nc:
   ebas_data_level: '2'
   ebas_instrument_name: lvs_at02
@@ -7890,6 +8851,46 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/T5/MF/YW/T5MF-YWM3.nc:
   - v_total_carbon
   - qc_total_carbon
   - meta_total_carbon
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/T8/93/4S/T893-4S65.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: kfg_no02_pm25
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: NO01L_NILU_sunset_002
+  ebas_revision_date: '2020-03-19T08:39:18.933000Z'
+  ebas_station_altitude: 219.0 m
+  ebas_station_code: NO0002R
+  ebas_station_latitude: 58.38853
+  ebas_station_longitude: 8.252
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2016-01-06T07:00:00Z'
+  time_coverage_start: '2014-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_elemental_carbon_amean
+  - qc_elemental_carbon_amean
+  - meta_elemental_carbon_amean
+  - v_elemental_carbon_uncertainty
+  - qc_elemental_carbon_uncertainty
+  - meta_elemental_carbon_uncertainty
+  - v_organic_carbon_amean
+  - qc_organic_carbon_amean
+  - meta_organic_carbon_amean
+  - v_organic_carbon_uncertainty
+  - qc_organic_carbon_uncertainty
+  - meta_organic_carbon_uncertainty
+  - d_Fraction
+  - qc_organic_carbon_amean_d_Fraction
+  - meta_organic_carbon_amean_d_Fraction
+  - v_total_carbon_amean
+  - qc_total_carbon_amean
+  - meta_total_carbon_amean
+  - v_total_carbon_uncertainty
+  - qc_total_carbon_uncertainty
+  - meta_total_carbon_uncertainty
+  - v_organic_carbon_amean_d_Fraction
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/TH/HG/TW/THHG-TWBS.nc:
   ebas_data_level: '2'
   ebas_instrument_name: ARSO_pm25vz_2
@@ -8082,6 +9083,36 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/U9/KB/7H/U9KB-7H8R.nc:
   - qc_total_carbon_uncertainty
   - meta_total_carbon_uncertainty
   - v_organic_carbon_amean_d_Fraction
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UF/4Q/W6/UF4Q-W6EU.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: kfg_no02_pm10_pm25
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: NO01L_NILU_sunset_002
+  ebas_revision_date: '2024-04-16T14:19:24.919038Z'
+  ebas_station_altitude: 219.0 m
+  ebas_station_code: NO0002R
+  ebas_station_latitude: 58.38853
+  ebas_station_longitude: 8.252
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2024-01-03T07:00:00Z'
+  time_coverage_start: '2017-01-04T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_organic_carbon_amean
+  - qc_organic_carbon_amean
+  - meta_organic_carbon_amean
+  - v_organic_carbon_uncertainty
+  - qc_organic_carbon_uncertainty
+  - meta_organic_carbon_uncertainty
+  - v_total_carbon_amean
+  - qc_total_carbon_amean
+  - meta_total_carbon_amean
+  - v_total_carbon_uncertainty
+  - qc_total_carbon_uncertainty
+  - meta_total_carbon_uncertainty
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/US/YK/S6/USYK-S69Z.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Filter_Holder_Inside_Shelter
@@ -8532,6 +9563,108 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VP/YM/4X/VPYM-4XEN.nc:
   - v_total_carbon
   - qc_total_carbon
   - meta_total_carbon
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VV/TS/7F/VVTS-7F5W.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: kfg_no02_pm10_pm25
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: NO01L_NILU_sunset_002
+  ebas_revision_date: '2020-03-19T08:40:15.660000Z'
+  ebas_station_altitude: 219.0 m
+  ebas_station_code: NO0002R
+  ebas_station_latitude: 58.38853
+  ebas_station_longitude: 8.252
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2017-01-04T07:00:00Z'
+  time_coverage_start: '2016-01-06T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_organic_carbon_amean
+  - qc_organic_carbon_amean
+  - meta_organic_carbon_amean
+  - v_organic_carbon_uncertainty
+  - qc_organic_carbon_uncertainty
+  - meta_organic_carbon_uncertainty
+  - d_Fraction
+  - qc_organic_carbon_amean_d_Fraction
+  - meta_organic_carbon_amean_d_Fraction
+  - v_total_carbon_amean
+  - qc_total_carbon_amean
+  - meta_total_carbon_amean
+  - v_total_carbon_uncertainty
+  - qc_total_carbon_uncertainty
+  - meta_total_carbon_uncertainty
+  - v_organic_carbon_amean_d_Fraction
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/WB/SY/EX/WBSY-EXV9.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: kfg_no01
+  ebas_method_ref: NO01L_Thermo_Optical-Sunset_Lab
+  ebas_revision_date: '2017-10-10T19:55:00.000000Z'
+  ebas_station_altitude: 219.0 m
+  ebas_station_code: NO0002R
+  ebas_station_latitude: 58.38853
+  ebas_station_longitude: 8.252
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2012-01-04T07:00:00Z'
+  time_coverage_start: '2011-01-05T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_elemental_carbon_pm10_amean
+  - qc_elemental_carbon_pm10_amean
+  - meta_elemental_carbon_pm10_amean
+  - v_elemental_carbon_pm25_amean
+  - qc_elemental_carbon_pm25_amean
+  - meta_elemental_carbon_pm25_amean
+  - v_elemental_carbon_pm10_uncertainty
+  - qc_elemental_carbon_pm10_uncertainty
+  - meta_elemental_carbon_pm10_uncertainty
+  - v_elemental_carbon_pm25_uncertainty
+  - qc_elemental_carbon_pm25_uncertainty
+  - meta_elemental_carbon_pm25_uncertainty
+  - v_organic_carbon_pm10_amean
+  - qc_organic_carbon_pm10_amean
+  - meta_organic_carbon_pm10_amean
+  - v_organic_carbon_pm25_amean
+  - qc_organic_carbon_pm25_amean
+  - meta_organic_carbon_pm25_amean
+  - v_organic_carbon_pm10_uncertainty
+  - qc_organic_carbon_pm10_uncertainty
+  - meta_organic_carbon_pm10_uncertainty
+  - v_organic_carbon_pm25_uncertainty
+  - qc_organic_carbon_pm25_uncertainty
+  - meta_organic_carbon_pm25_uncertainty
+  - d_Fraction_d0
+  - qc_organic_carbon_pm10_max_d_Fraction
+  - meta_organic_carbon_pm10_max_d_Fraction
+  - d_Fraction_d1
+  - qc_organic_carbon_pm25_max_d_Fraction
+  - meta_organic_carbon_pm25_max_d_Fraction
+  - d_Fraction_d2
+  - qc_organic_carbon_pm10_amean_d_Fraction
+  - meta_organic_carbon_pm10_amean_d_Fraction
+  - qc_organic_carbon_pm25_amean_d_Fraction
+  - meta_organic_carbon_pm25_amean_d_Fraction
+  - v_total_carbon_pm10_amean
+  - qc_total_carbon_pm10_amean
+  - meta_total_carbon_pm10_amean
+  - v_total_carbon_pm25_amean
+  - qc_total_carbon_pm25_amean
+  - meta_total_carbon_pm25_amean
+  - v_total_carbon_pm10_uncertainty
+  - qc_total_carbon_pm10_uncertainty
+  - meta_total_carbon_pm10_uncertainty
+  - v_total_carbon_pm25_uncertainty
+  - qc_total_carbon_pm25_uncertainty
+  - meta_total_carbon_pm25_uncertainty
+  - v_organic_carbon_pm10_max_d_Fraction
+  - v_organic_carbon_pm25_max_d_Fraction
+  - v_organic_carbon_pm10_amean_d_Fraction
+  - v_organic_carbon_pm25_amean_d_Fraction
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/WE/XF/XE/WEXF-XEU4.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Digitel_gb48
@@ -8913,6 +10046,78 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XE/YQ/8E/XEYQ-8E4G.nc:
   resolution: daily
   time_coverage_end: '2022-07-20T00:00:00Z'
   time_coverage_start: '2022-07-12T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_elemental_carbon_amean
+  - qc_elemental_carbon_amean
+  - meta_elemental_carbon_amean
+  - v_elemental_carbon_uncertainty
+  - qc_elemental_carbon_uncertainty
+  - meta_elemental_carbon_uncertainty
+  - v_organic_carbon_amean
+  - qc_organic_carbon_amean
+  - meta_organic_carbon_amean
+  - v_organic_carbon_uncertainty
+  - qc_organic_carbon_uncertainty
+  - meta_organic_carbon_uncertainty
+  - v_total_carbon_amean
+  - qc_total_carbon_amean
+  - meta_total_carbon_amean
+  - v_total_carbon_uncertainty
+  - qc_total_carbon_uncertainty
+  - meta_total_carbon_uncertainty
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XF/7D/HY/XF7D-HY6U.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: HVS_DIGITEL_BCN_pm25
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: ES05L_OCEC_Sunset_IDAEA
+  ebas_revision_date: '2023-11-03T00:00:00.000000Z'
+  ebas_station_altitude: 80.0 m
+  ebas_station_code: ES0019U
+  ebas_station_latitude: 41.387463
+  ebas_station_longitude: 2.11532
+  resolution: Unrecognised (P0000-00-02T00:00:00)
+  time_coverage_end: '2022-12-31T00:00:00Z'
+  time_coverage_start: '2022-01-02T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_elemental_carbon_amean
+  - qc_elemental_carbon_amean
+  - meta_elemental_carbon_amean
+  - v_elemental_carbon_uncertainty
+  - qc_elemental_carbon_uncertainty
+  - meta_elemental_carbon_uncertainty
+  - v_organic_carbon_amean
+  - qc_organic_carbon_amean
+  - meta_organic_carbon_amean
+  - v_organic_carbon_uncertainty
+  - qc_organic_carbon_uncertainty
+  - meta_organic_carbon_uncertainty
+  - v_total_carbon_amean
+  - qc_total_carbon_amean
+  - meta_total_carbon_amean
+  - v_total_carbon_uncertainty
+  - qc_total_carbon_uncertainty
+  - meta_total_carbon_uncertainty
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XN/99/72/XN99-72KD.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: kfg_no02_pm25
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: NO01L_NILU_sunset_002
+  ebas_revision_date: '2025-03-18T13:51:35.902878Z'
+  ebas_station_altitude: 219.0 m
+  ebas_station_code: NO0002R
+  ebas_station_latitude: 58.38853
+  ebas_station_longitude: 8.252
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2025-01-01T07:00:00Z'
+  time_coverage_start: '2019-01-02T07:00:00Z'
   variables:
   - time
   - time_bnds

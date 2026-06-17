@@ -2686,6 +2686,27 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/CC/JT/73/CCJT-733F.nc:
   - v_propanone
   - qc_propanone
   - meta_propanone
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CK/8P/AJ/CK8P-AJXU.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: HPLC-UV
+  ebas_method_ref: EE01L_EPA_TO-11A_1999
+  ebas_revision_date: '2020-06-03T00:00:00.000000Z'
+  ebas_station_altitude: 32.0 m
+  ebas_station_code: EE0009R
+  ebas_station_latitude: 59.5
+  ebas_station_longitude: 25.9
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2020-01-01T00:00:00Z'
+  time_coverage_start: '2011-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ethanal
+  - qc_ethanal
+  - meta_ethanal
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/D5/KB/WK/D5KB-WKM7.nc:
   ebas_data_level: '2'
   ebas_instrument_name: ES0001R_3583699

@@ -558,6 +558,48 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/CM/HW/BA/CMHW-BAFP.nc:
   - v_methane_nmol_per_mol_stddev
   - qc_methane_nmol_per_mol_stddev
   - meta_methane_nmol_per_mol_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CT/HT/6V/CTHT-6VUX.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: CFKADS2262
+  ebas_method_ref: NO01L_picarro_tower
+  ebas_revision_date: '2025-04-24T13:10:24.957751Z'
+  ebas_station_altitude: 219.0 m
+  ebas_station_code: NO0002R
+  ebas_station_latitude: 58.38853
+  ebas_station_longitude: 8.252
+  resolution: hourly
+  time_coverage_end: '2025-01-01T00:00:00Z'
+  time_coverage_start: '2021-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Tower_inlet_height
+  - qc_carbon_dioxide_amean
+  - meta_carbon_dioxide_amean
+  - qc_carbon_dioxide_stddev
+  - meta_carbon_dioxide_stddev
+  - qc_carbon_monoxide_amean
+  - meta_carbon_monoxide_amean
+  - qc_carbon_monoxide_stddev
+  - meta_carbon_monoxide_stddev
+  - qc_methane_mg_per_m3_amean
+  - meta_methane_mg_per_m3_amean
+  - qc_methane_nmol_per_mol_amean
+  - meta_methane_nmol_per_mol_amean
+  - qc_methane_mg_per_m3_stddev
+  - meta_methane_mg_per_m3_stddev
+  - qc_methane_nmol_per_mol_stddev
+  - meta_methane_nmol_per_mol_stddev
+  - v_carbon_dioxide_amean
+  - v_carbon_dioxide_stddev
+  - v_carbon_monoxide_amean
+  - v_carbon_monoxide_stddev
+  - v_methane_mg_per_m3_amean
+  - v_methane_nmol_per_mol_amean
+  - v_methane_mg_per_m3_stddev
+  - v_methane_nmol_per_mol_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DN/YR/E3/DNYR-E3VM.nc:
   ebas_data_level: '2'
   ebas_instrument_name: SilcoCan_at02
@@ -813,6 +855,48 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/HC/WV/78/HCWV-78DY.nc:
   - v_methane_nmol_per_mol
   - qc_methane_nmol_per_mol
   - meta_methane_nmol_per_mol
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HQ/B3/8J/HQB3-8JM9.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: picarro2_G2401_ICOS
+  ebas_measurement_height: 15.0 m
+  ebas_method_ref: NO01L_picarro
+  ebas_revision_date: '2025-04-23T12:24:05.681753Z'
+  ebas_station_altitude: 474.0 m
+  ebas_station_code: NO0042G
+  ebas_station_latitude: 78.90715
+  ebas_station_longitude: 11.88668
+  resolution: hourly
+  time_coverage_end: '2025-01-01T00:00:00Z'
+  time_coverage_start: '2017-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_carbon_dioxide_amean
+  - qc_carbon_dioxide_amean
+  - meta_carbon_dioxide_amean
+  - v_carbon_dioxide_stddev
+  - qc_carbon_dioxide_stddev
+  - meta_carbon_dioxide_stddev
+  - v_carbon_monoxide_amean
+  - qc_carbon_monoxide_amean
+  - meta_carbon_monoxide_amean
+  - v_carbon_monoxide_stddev
+  - qc_carbon_monoxide_stddev
+  - meta_carbon_monoxide_stddev
+  - v_methane_mg_per_m3_amean
+  - qc_methane_mg_per_m3_amean
+  - meta_methane_mg_per_m3_amean
+  - v_methane_nmol_per_mol_amean
+  - qc_methane_nmol_per_mol_amean
+  - meta_methane_nmol_per_mol_amean
+  - v_methane_mg_per_m3_stddev
+  - qc_methane_mg_per_m3_stddev
+  - meta_methane_mg_per_m3_stddev
+  - v_methane_nmol_per_mol_stddev
+  - qc_methane_nmol_per_mol_stddev
+  - meta_methane_nmol_per_mol_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HU/BQ/4T/HUBQ-4TE2.nc:
   ebas_data_level: '2'
   ebas_instrument_name: SilcoCan_fr27
@@ -1076,6 +1160,49 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NP/4M/JH/NP4M-JHDQ.nc:
   - v_methane_nmol_per_mol
   - qc_methane_nmol_per_mol
   - meta_methane_nmol_per_mol
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NZ/NT/E6/NZNT-E6U3.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: CFKADS2417
+  ebas_measurement_height: 5.0 m
+  ebas_method_ref: NO01L_picarro
+  ebas_revision_date: '2025-03-14T00:00:00.000000Z'
+  ebas_station_altitude: 1553.0 m
+  ebas_station_code: NO0059G
+  ebas_station_latitude: -72.0117
+  ebas_station_longitude: 2.5351
+  resolution: hourly
+  time_coverage_end: '2025-01-01T00:00:00Z'
+  time_coverage_start: '2021-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Tower_inlet_height
+  - qc_carbon_dioxide_amean
+  - meta_carbon_dioxide_amean
+  - qc_carbon_dioxide_stddev
+  - meta_carbon_dioxide_stddev
+  - qc_carbon_monoxide_amean
+  - meta_carbon_monoxide_amean
+  - qc_carbon_monoxide_stddev
+  - meta_carbon_monoxide_stddev
+  - qc_methane_mg_per_m3_amean
+  - meta_methane_mg_per_m3_amean
+  - qc_methane_nmol_per_mol_amean
+  - meta_methane_nmol_per_mol_amean
+  - qc_methane_mg_per_m3_stddev
+  - meta_methane_mg_per_m3_stddev
+  - qc_methane_nmol_per_mol_stddev
+  - meta_methane_nmol_per_mol_stddev
+  - v_carbon_dioxide_amean
+  - v_carbon_dioxide_stddev
+  - v_carbon_monoxide_amean
+  - v_carbon_monoxide_stddev
+  - v_methane_mg_per_m3_amean
+  - v_methane_nmol_per_mol_amean
+  - v_methane_mg_per_m3_stddev
+  - v_methane_nmol_per_mol_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/P3/QG/TS/P3QG-TSRH.nc:
   ebas_instrument_name: GC_Sichromat_07
   ebas_method_ref: DE07L_GC

@@ -833,6 +833,185 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/4Z/V3/YP/4ZV3-YPD6.nc:
   - v_benzo_a_pyrene
   - qc_benzo_a_pyrene
   - meta_benzo_a_pyrene
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/53/GQ/9P/53GQ-9PNG.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: b_samp_nor
+  ebas_method_ref: SE01L_BM
+  ebas_revision_date: '2025-01-28T13:19:25.721526Z'
+  ebas_station_altitude: 45.0 m
+  ebas_station_code: SE0022R
+  ebas_station_latitude: 60.0858
+  ebas_station_longitude: 17.50528
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2023-01-16T23:00:00Z'
+  time_coverage_start: '2022-01-04T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_BDE_100
+  - qc_BDE_100
+  - meta_BDE_100
+  - v_BDE_47
+  - qc_BDE_47
+  - meta_BDE_47
+  - v_BDE_99
+  - qc_BDE_99
+  - meta_BDE_99
+  - v_HCB
+  - qc_HCB
+  - meta_HCB
+  - v_PCB_101
+  - qc_PCB_101
+  - meta_PCB_101
+  - v_PCB_118
+  - qc_PCB_118
+  - meta_PCB_118
+  - v_PCB_138
+  - qc_PCB_138
+  - meta_PCB_138
+  - v_PCB_153
+  - qc_PCB_153
+  - meta_PCB_153
+  - v_PCB_180
+  - qc_PCB_180
+  - meta_PCB_180
+  - v_PCB_28
+  - qc_PCB_28
+  - meta_PCB_28
+  - v_PCB_52
+  - qc_PCB_52
+  - meta_PCB_52
+  - v_alpha_HCH
+  - qc_alpha_HCH
+  - meta_alpha_HCH
+  - v_anthracene
+  - qc_anthracene
+  - meta_anthracene
+  - v_benz_a_anthracene
+  - qc_benz_a_anthracene
+  - meta_benz_a_anthracene
+  - v_benzo_a_pyrene
+  - qc_benzo_a_pyrene
+  - meta_benzo_a_pyrene
+  - v_benzo_b_fluoranthene
+  - qc_benzo_b_fluoranthene
+  - meta_benzo_b_fluoranthene
+  - v_benzo_ghi_perylene
+  - qc_benzo_ghi_perylene
+  - meta_benzo_ghi_perylene
+  - v_benzo_j_fluoranthene
+  - qc_benzo_j_fluoranthene
+  - meta_benzo_j_fluoranthene
+  - v_benzo_k_fluoranthene
+  - qc_benzo_k_fluoranthene
+  - meta_benzo_k_fluoranthene
+  - v_chrysene
+  - qc_chrysene
+  - meta_chrysene
+  - v_dibenzo_ah_anthracene
+  - qc_dibenzo_ah_anthracene
+  - meta_dibenzo_ah_anthracene
+  - v_fluoranthene
+  - qc_fluoranthene
+  - meta_fluoranthene
+  - v_gamma_HCH
+  - qc_gamma_HCH
+  - meta_gamma_HCH
+  - v_inden_123cd_pyrene
+  - qc_inden_123cd_pyrene
+  - meta_inden_123cd_pyrene
+  - v_phenanthrene
+  - qc_phenanthrene
+  - meta_phenanthrene
+  - v_pp_DDD
+  - qc_pp_DDD
+  - meta_pp_DDD
+  - v_pp_DDE
+  - qc_pp_DDE
+  - meta_pp_DDE
+  - v_pp_DDT
+  - qc_pp_DDT
+  - meta_pp_DDT
+  - v_pyrene
+  - qc_pyrene
+  - meta_pyrene
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5E/M5/HA/5EM5-HAS6.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: b_samp_96
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 340.0 m
+  ebas_station_code: FI0036R
+  ebas_station_latitude: 68.0
+  ebas_station_longitude: 24.237222222
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2002-12-17T06:00:00Z'
+  time_coverage_start: '2000-01-18T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_PCB_101
+  - qc_PCB_101
+  - meta_PCB_101
+  - v_PCB_118
+  - qc_PCB_118
+  - meta_PCB_118
+  - v_PCB_138
+  - qc_PCB_138
+  - meta_PCB_138
+  - v_PCB_153
+  - qc_PCB_153
+  - meta_PCB_153
+  - v_PCB_180
+  - qc_PCB_180
+  - meta_PCB_180
+  - v_PCB_28
+  - qc_PCB_28
+  - meta_PCB_28
+  - v_PCB_52
+  - qc_PCB_52
+  - meta_PCB_52
+  - v_alpha_HCH
+  - qc_alpha_HCH
+  - meta_alpha_HCH
+  - v_anthracene
+  - qc_anthracene
+  - meta_anthracene
+  - v_benz_a_anthracene
+  - qc_benz_a_anthracene
+  - meta_benz_a_anthracene
+  - v_benzo_a_pyrene
+  - qc_benzo_a_pyrene
+  - meta_benzo_a_pyrene
+  - v_benzo_b_fluoranthene
+  - qc_benzo_b_fluoranthene
+  - meta_benzo_b_fluoranthene
+  - v_benzo_ghi_perylene
+  - qc_benzo_ghi_perylene
+  - meta_benzo_ghi_perylene
+  - v_benzo_k_fluoranthene
+  - qc_benzo_k_fluoranthene
+  - meta_benzo_k_fluoranthene
+  - v_fluoranthene
+  - qc_fluoranthene
+  - meta_fluoranthene
+  - v_gamma_HCH
+  - qc_gamma_HCH
+  - meta_gamma_HCH
+  - v_inden_123cd_pyrene
+  - qc_inden_123cd_pyrene
+  - meta_inden_123cd_pyrene
+  - v_phenanthrene
+  - qc_phenanthrene
+  - meta_phenanthrene
+  - v_pyrene
+  - qc_pyrene
+  - meta_pyrene
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5K/SJ/SD/5KSJ-SDXS.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_pop_17
@@ -863,6 +1042,48 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5K/SJ/SD/5KSJ-SDXS.nc:
   - v_inden_123cd_pyrene
   - qc_inden_123cd_pyrene
   - meta_inden_123cd_pyrene
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5R/6H/JP/5R6H-JPKU.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: b_samp_14
+  ebas_method_ref: SE01L_HPLC
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: SE0014R
+  ebas_station_latitude: 57.394
+  ebas_station_longitude: 11.914
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2008-01-02T06:00:00Z'
+  time_coverage_start: '2003-01-27T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_alpha_HCH
+  - qc_alpha_HCH
+  - meta_alpha_HCH
+  - v_anthracene
+  - qc_anthracene
+  - meta_anthracene
+  - v_benzo_a_pyrene
+  - qc_benzo_a_pyrene
+  - meta_benzo_a_pyrene
+  - v_benzo_ghi_perylene
+  - qc_benzo_ghi_perylene
+  - meta_benzo_ghi_perylene
+  - v_fluoranthene
+  - qc_fluoranthene
+  - meta_fluoranthene
+  - v_gamma_HCH
+  - qc_gamma_HCH
+  - meta_gamma_HCH
+  - v_phenanthrene
+  - qc_phenanthrene
+  - meta_phenanthrene
+  - v_pyrene
+  - qc_pyrene
+  - meta_pyrene
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5S/RD/PH/5SRD-PHPV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: b_samp_12
@@ -925,6 +1146,68 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5S/RD/PH/5SRD-PHPV.nc:
   - v_pyrene
   - qc_pyrene
   - meta_pyrene
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/65/2Q/WT/652Q-WT6T.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: b_samp_96
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 340.0 m
+  ebas_station_code: FI0036R
+  ebas_station_latitude: 68.0
+  ebas_station_longitude: 24.237222222
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '1997-12-29T06:00:00Z'
+  time_coverage_start: '1997-01-20T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_PCB_101
+  - qc_PCB_101
+  - meta_PCB_101
+  - v_PCB_118
+  - qc_PCB_118
+  - meta_PCB_118
+  - v_PCB_138
+  - qc_PCB_138
+  - meta_PCB_138
+  - v_PCB_153
+  - qc_PCB_153
+  - meta_PCB_153
+  - v_PCB_180
+  - qc_PCB_180
+  - meta_PCB_180
+  - v_PCB_28
+  - qc_PCB_28
+  - meta_PCB_28
+  - v_PCB_52
+  - qc_PCB_52
+  - meta_PCB_52
+  - v_alpha_HCH
+  - qc_alpha_HCH
+  - meta_alpha_HCH
+  - v_anthracene
+  - qc_anthracene
+  - meta_anthracene
+  - v_benzo_a_pyrene
+  - qc_benzo_a_pyrene
+  - meta_benzo_a_pyrene
+  - v_benzo_ghi_perylene
+  - qc_benzo_ghi_perylene
+  - meta_benzo_ghi_perylene
+  - v_fluoranthene
+  - qc_fluoranthene
+  - meta_fluoranthene
+  - v_gamma_HCH
+  - qc_gamma_HCH
+  - meta_gamma_HCH
+  - v_phenanthrene
+  - qc_phenanthrene
+  - meta_phenanthrene
+  - v_pyrene
+  - qc_pyrene
+  - meta_pyrene
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/68/SH/8V/68SH-8VBX.nc:
   ebas_data_level: '2'
   ebas_instrument_name: b_samp_36
@@ -970,6 +1253,77 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/68/SH/8V/68SH-8VBX.nc:
   - v_gamma_HCH
   - qc_gamma_HCH
   - meta_gamma_HCH
+  - v_inden_123cd_pyrene
+  - qc_inden_123cd_pyrene
+  - meta_inden_123cd_pyrene
+  - v_phenanthrene
+  - qc_phenanthrene
+  - meta_phenanthrene
+  - v_pyrene
+  - qc_pyrene
+  - meta_pyrene
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/6M/UR/U7/6MUR-U7VY.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: b_samp_96
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 340.0 m
+  ebas_station_code: FI0036R
+  ebas_station_latitude: 68.0
+  ebas_station_longitude: 24.237222222
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2001-12-17T06:00:00Z'
+  time_coverage_start: '2001-01-23T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_PCB_101
+  - qc_PCB_101
+  - meta_PCB_101
+  - v_PCB_118
+  - qc_PCB_118
+  - meta_PCB_118
+  - v_PCB_138
+  - qc_PCB_138
+  - meta_PCB_138
+  - v_PCB_153
+  - qc_PCB_153
+  - meta_PCB_153
+  - v_PCB_180
+  - qc_PCB_180
+  - meta_PCB_180
+  - v_PCB_28
+  - qc_PCB_28
+  - meta_PCB_28
+  - v_PCB_52
+  - qc_PCB_52
+  - meta_PCB_52
+  - v_anthracene
+  - qc_anthracene
+  - meta_anthracene
+  - v_benz_a_anthracene
+  - qc_benz_a_anthracene
+  - meta_benz_a_anthracene
+  - v_benzo_a_pyrene
+  - qc_benzo_a_pyrene
+  - meta_benzo_a_pyrene
+  - v_benzo_b_fluoranthene
+  - qc_benzo_b_fluoranthene
+  - meta_benzo_b_fluoranthene
+  - v_benzo_ghi_perylene
+  - qc_benzo_ghi_perylene
+  - meta_benzo_ghi_perylene
+  - v_benzo_k_fluoranthene
+  - qc_benzo_k_fluoranthene
+  - meta_benzo_k_fluoranthene
+  - v_chrysene_triphenylene
+  - qc_chrysene_triphenylene
+  - meta_chrysene_triphenylene
+  - v_fluoranthene
+  - qc_fluoranthene
+  - meta_fluoranthene
   - v_inden_123cd_pyrene
   - qc_inden_123cd_pyrene
   - meta_inden_123cd_pyrene
@@ -1232,6 +1586,75 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/83/9V/DK/839V-DKRS.nc:
   - v_phenanthrene
   - qc_phenanthrene
   - meta_phenanthrene
+  - v_pyrene
+  - qc_pyrene
+  - meta_pyrene
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/95/SN/7Z/95SN-7ZSX.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: b_samp_36
+  ebas_method_ref: SE01L_BM
+  ebas_revision_date: '2025-01-21T00:00:00.000000Z'
+  ebas_station_altitude: 340.0 m
+  ebas_station_code: FI0036R
+  ebas_station_latitude: 68.0
+  ebas_station_longitude: 24.237222222
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2024-01-01T23:00:00Z'
+  time_coverage_start: '2023-01-01T23:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_HCB
+  - qc_HCB
+  - meta_HCB
+  - v_anthracene
+  - qc_anthracene
+  - meta_anthracene
+  - v_benz_a_anthracene
+  - qc_benz_a_anthracene
+  - meta_benz_a_anthracene
+  - v_benzo_a_pyrene
+  - qc_benzo_a_pyrene
+  - meta_benzo_a_pyrene
+  - v_benzo_b_fluoranthene
+  - qc_benzo_b_fluoranthene
+  - meta_benzo_b_fluoranthene
+  - v_benzo_ghi_perylene
+  - qc_benzo_ghi_perylene
+  - meta_benzo_ghi_perylene
+  - v_benzo_j_fluoranthene
+  - qc_benzo_j_fluoranthene
+  - meta_benzo_j_fluoranthene
+  - v_benzo_k_fluoranthene
+  - qc_benzo_k_fluoranthene
+  - meta_benzo_k_fluoranthene
+  - v_chrysene
+  - qc_chrysene
+  - meta_chrysene
+  - v_dibenzo_ah_anthracene
+  - qc_dibenzo_ah_anthracene
+  - meta_dibenzo_ah_anthracene
+  - v_fluoranthene
+  - qc_fluoranthene
+  - meta_fluoranthene
+  - v_inden_123cd_pyrene
+  - qc_inden_123cd_pyrene
+  - meta_inden_123cd_pyrene
+  - v_phenanthrene
+  - qc_phenanthrene
+  - meta_phenanthrene
+  - v_pp_DDD
+  - qc_pp_DDD
+  - meta_pp_DDD
+  - v_pp_DDE
+  - qc_pp_DDE
+  - meta_pp_DDE
+  - v_pp_DDT
+  - qc_pp_DDT
+  - meta_pp_DDT
   - v_pyrene
   - qc_pyrene
   - meta_pyrene
@@ -2145,6 +2568,27 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/C4/YF/4G/C4YF-4GW2.nc:
   - v_pyrene
   - qc_pyrene
   - meta_pyrene
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/C9/ZX/RZ/C9ZX-RZQZ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: b_samp_14
+  ebas_method_ref: SE01L_BM
+  ebas_revision_date: '2021-07-05T13:40:44.000000Z'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: SE0014R
+  ebas_station_latitude: 57.394
+  ebas_station_longitude: 11.914
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2021-01-04T00:00:00Z'
+  time_coverage_start: '2016-01-04T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_benzo_a_pyrene
+  - qc_benzo_a_pyrene
+  - meta_benzo_a_pyrene
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/CD/X3/9W/CDX3-9WJS.nc:
   ebas_data_level: '2'
   ebas_instrument_name: b_samp_96
@@ -2222,6 +2666,27 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/CD/X3/9W/CDX3-9WJS.nc:
   - v_pyrene
   - qc_pyrene
   - meta_pyrene
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CJ/83/VY/CJ83-VYRJ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: b_samp_36
+  ebas_method_ref: SE01L_GC_MS
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 340.0 m
+  ebas_station_code: FI0036R
+  ebas_station_latitude: 68.0
+  ebas_station_longitude: 24.237222222
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2016-01-26T06:00:00Z'
+  time_coverage_start: '2013-01-02T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_benzo_a_pyrene
+  - qc_benzo_a_pyrene
+  - meta_benzo_a_pyrene
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/CQ/Y4/5A/CQY4-5AFT.nc:
   ebas_data_level: '2'
   ebas_instrument_name: b_samp_12
@@ -2668,6 +3133,63 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/EP/VK/SV/EPVK-SVKN.nc:
   - v_pyrene
   - qc_pyrene
   - meta_pyrene
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/EV/99/5Q/EV99-5Q97.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: b_samp_vav
+  ebas_method_ref: SE01L_BM
+  ebas_revision_date: '2025-01-21T00:00:00.000000Z'
+  ebas_station_altitude: 190.0 m
+  ebas_station_code: SE0020R
+  ebas_station_latitude: 56.0429
+  ebas_station_longitude: 13.148
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2023-12-31T23:00:00Z'
+  time_coverage_start: '2022-12-25T23:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_anthracene
+  - qc_anthracene
+  - meta_anthracene
+  - v_benz_a_anthracene
+  - qc_benz_a_anthracene
+  - meta_benz_a_anthracene
+  - v_benzo_a_pyrene
+  - qc_benzo_a_pyrene
+  - meta_benzo_a_pyrene
+  - v_benzo_b_fluoranthene
+  - qc_benzo_b_fluoranthene
+  - meta_benzo_b_fluoranthene
+  - v_benzo_ghi_perylene
+  - qc_benzo_ghi_perylene
+  - meta_benzo_ghi_perylene
+  - v_benzo_j_fluoranthene
+  - qc_benzo_j_fluoranthene
+  - meta_benzo_j_fluoranthene
+  - v_benzo_k_fluoranthene
+  - qc_benzo_k_fluoranthene
+  - meta_benzo_k_fluoranthene
+  - v_chrysene
+  - qc_chrysene
+  - meta_chrysene
+  - v_dibenzo_ah_anthracene
+  - qc_dibenzo_ah_anthracene
+  - meta_dibenzo_ah_anthracene
+  - v_fluoranthene
+  - qc_fluoranthene
+  - meta_fluoranthene
+  - v_inden_123cd_pyrene
+  - qc_inden_123cd_pyrene
+  - meta_inden_123cd_pyrene
+  - v_phenanthrene
+  - qc_phenanthrene
+  - meta_phenanthrene
+  - v_pyrene
+  - qc_pyrene
+  - meta_pyrene
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/F6/8S/NR/F68S-NRED.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_pop_18
@@ -2783,6 +3305,81 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/FK/V4/UK/FKV4-UKBV.nc:
   - v_pp_DDT
   - qc_pp_DDT
   - meta_pp_DDT
+  - v_pyrene
+  - qc_pyrene
+  - meta_pyrene
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FN/C3/4W/FNC3-4WQ3.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: b_samp_14
+  ebas_method_ref: SE01L_GC_MS
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: SE0014R
+  ebas_station_latitude: 57.394
+  ebas_station_longitude: 11.914
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2008-12-29T06:00:00Z'
+  time_coverage_start: '2008-01-02T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_PCB_101
+  - qc_PCB_101
+  - meta_PCB_101
+  - v_PCB_118
+  - qc_PCB_118
+  - meta_PCB_118
+  - v_PCB_138
+  - qc_PCB_138
+  - meta_PCB_138
+  - v_PCB_180
+  - qc_PCB_180
+  - meta_PCB_180
+  - v_PCB_28
+  - qc_PCB_28
+  - meta_PCB_28
+  - v_PCB_52
+  - qc_PCB_52
+  - meta_PCB_52
+  - v_alpha_HCH
+  - qc_alpha_HCH
+  - meta_alpha_HCH
+  - v_anthracene
+  - qc_anthracene
+  - meta_anthracene
+  - v_benz_a_anthracene
+  - qc_benz_a_anthracene
+  - meta_benz_a_anthracene
+  - v_benzo_a_pyrene
+  - qc_benzo_a_pyrene
+  - meta_benzo_a_pyrene
+  - v_benzo_b_fluoranthene
+  - qc_benzo_b_fluoranthene
+  - meta_benzo_b_fluoranthene
+  - v_benzo_ghi_perylene
+  - qc_benzo_ghi_perylene
+  - meta_benzo_ghi_perylene
+  - v_benzo_k_fluoranthene
+  - qc_benzo_k_fluoranthene
+  - meta_benzo_k_fluoranthene
+  - v_chrysene_triphenylene
+  - qc_chrysene_triphenylene
+  - meta_chrysene_triphenylene
+  - v_fluoranthene
+  - qc_fluoranthene
+  - meta_fluoranthene
+  - v_gamma_HCH
+  - qc_gamma_HCH
+  - meta_gamma_HCH
+  - v_inden_123cd_pyrene
+  - qc_inden_123cd_pyrene
+  - meta_inden_123cd_pyrene
+  - v_phenanthrene
+  - qc_phenanthrene
+  - meta_phenanthrene
   - v_pyrene
   - qc_pyrene
   - meta_pyrene
@@ -2921,6 +3518,96 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/G5/JQ/BP/G5JQ-BPP7.nc:
   - v_benzo_a_pyrene
   - qc_benzo_a_pyrene
   - meta_benzo_a_pyrene
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GK/KQ/ZW/GKKQ-ZWX7.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: b_samp_nor
+  ebas_method_ref: SE01L_BM
+  ebas_revision_date: '2025-01-22T00:00:00.000000Z'
+  ebas_station_altitude: 45.0 m
+  ebas_station_code: SE0022R
+  ebas_station_latitude: 60.0858
+  ebas_station_longitude: 17.50528
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2023-12-18T23:00:00Z'
+  time_coverage_start: '2023-01-16T23:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_HCB
+  - qc_HCB
+  - meta_HCB
+  - v_PCB_101
+  - qc_PCB_101
+  - meta_PCB_101
+  - v_PCB_118
+  - qc_PCB_118
+  - meta_PCB_118
+  - v_PCB_138
+  - qc_PCB_138
+  - meta_PCB_138
+  - v_PCB_153
+  - qc_PCB_153
+  - meta_PCB_153
+  - v_PCB_180
+  - qc_PCB_180
+  - meta_PCB_180
+  - v_PCB_28
+  - qc_PCB_28
+  - meta_PCB_28
+  - v_PCB_52
+  - qc_PCB_52
+  - meta_PCB_52
+  - v_anthracene
+  - qc_anthracene
+  - meta_anthracene
+  - v_benz_a_anthracene
+  - qc_benz_a_anthracene
+  - meta_benz_a_anthracene
+  - v_benzo_a_pyrene
+  - qc_benzo_a_pyrene
+  - meta_benzo_a_pyrene
+  - v_benzo_b_fluoranthene
+  - qc_benzo_b_fluoranthene
+  - meta_benzo_b_fluoranthene
+  - v_benzo_ghi_perylene
+  - qc_benzo_ghi_perylene
+  - meta_benzo_ghi_perylene
+  - v_benzo_j_fluoranthene
+  - qc_benzo_j_fluoranthene
+  - meta_benzo_j_fluoranthene
+  - v_benzo_k_fluoranthene
+  - qc_benzo_k_fluoranthene
+  - meta_benzo_k_fluoranthene
+  - v_chrysene
+  - qc_chrysene
+  - meta_chrysene
+  - v_dibenzo_ah_anthracene
+  - qc_dibenzo_ah_anthracene
+  - meta_dibenzo_ah_anthracene
+  - v_fluoranthene
+  - qc_fluoranthene
+  - meta_fluoranthene
+  - v_inden_123cd_pyrene
+  - qc_inden_123cd_pyrene
+  - meta_inden_123cd_pyrene
+  - v_phenanthrene
+  - qc_phenanthrene
+  - meta_phenanthrene
+  - v_pp_DDD
+  - qc_pp_DDD
+  - meta_pp_DDD
+  - v_pp_DDE
+  - qc_pp_DDE
+  - meta_pp_DDE
+  - v_pp_DDT
+  - qc_pp_DDT
+  - meta_pp_DDT
+  - v_pyrene
+  - qc_pyrene
+  - meta_pyrene
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/GS/MS/26/GSMS-26NH.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_pop_50
@@ -2973,6 +3660,80 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/GZ/VY/QZ/GZVY-QZG3.nc:
   - v_benzo_a_pyrene
   - qc_benzo_a_pyrene
   - meta_benzo_a_pyrene
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HF/MK/35/HFMK-35HT.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: b_samp_96
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 340.0 m
+  ebas_station_code: FI0036R
+  ebas_station_latitude: 68.0
+  ebas_station_longitude: 24.237222222
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2006-12-19T06:00:00Z'
+  time_coverage_start: '2006-01-23T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_PCB_101
+  - qc_PCB_101
+  - meta_PCB_101
+  - v_PCB_118
+  - qc_PCB_118
+  - meta_PCB_118
+  - v_PCB_138
+  - qc_PCB_138
+  - meta_PCB_138
+  - v_PCB_153
+  - qc_PCB_153
+  - meta_PCB_153
+  - v_PCB_180
+  - qc_PCB_180
+  - meta_PCB_180
+  - v_PCB_52
+  - qc_PCB_52
+  - meta_PCB_52
+  - v_alpha_HCH
+  - qc_alpha_HCH
+  - meta_alpha_HCH
+  - v_anthracene
+  - qc_anthracene
+  - meta_anthracene
+  - v_benz_a_anthracene
+  - qc_benz_a_anthracene
+  - meta_benz_a_anthracene
+  - v_benzo_a_pyrene
+  - qc_benzo_a_pyrene
+  - meta_benzo_a_pyrene
+  - v_benzo_b_fluoranthene
+  - qc_benzo_b_fluoranthene
+  - meta_benzo_b_fluoranthene
+  - v_benzo_ghi_perylene
+  - qc_benzo_ghi_perylene
+  - meta_benzo_ghi_perylene
+  - v_benzo_k_fluoranthene
+  - qc_benzo_k_fluoranthene
+  - meta_benzo_k_fluoranthene
+  - v_chrysene_triphenylene
+  - qc_chrysene_triphenylene
+  - meta_chrysene_triphenylene
+  - v_fluoranthene
+  - qc_fluoranthene
+  - meta_fluoranthene
+  - v_gamma_HCH
+  - qc_gamma_HCH
+  - meta_gamma_HCH
+  - v_inden_123cd_pyrene
+  - qc_inden_123cd_pyrene
+  - meta_inden_123cd_pyrene
+  - v_phenanthrene
+  - qc_phenanthrene
+  - meta_phenanthrene
+  - v_pyrene
+  - qc_pyrene
+  - meta_pyrene
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/JP/9W/2Q/JP9W-2QPZ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: b_samp_14
@@ -4049,6 +4810,155 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QH/W5/MH/QHW5-MHZB.nc:
   - v_inden_123cd_pyrene
   - qc_inden_123cd_pyrene
   - meta_inden_123cd_pyrene
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QY/QS/HX/QYQS-HXN8.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: b_samp_nor
+  ebas_method_ref: SE01L_BM
+  ebas_revision_date: '2021-07-05T13:40:44.000000Z'
+  ebas_station_altitude: 45.0 m
+  ebas_station_code: SE0022R
+  ebas_station_latitude: 60.0858
+  ebas_station_longitude: 17.50528
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2020-12-29T00:00:00Z'
+  time_coverage_start: '2017-12-29T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_benzo_a_pyrene
+  - qc_benzo_a_pyrene
+  - meta_benzo_a_pyrene
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/R2/M6/JS/R2M6-JS6K.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: b_samp_96
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 340.0 m
+  ebas_station_code: FI0036R
+  ebas_station_latitude: 68.0
+  ebas_station_longitude: 24.237222222
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2003-12-22T06:00:00Z'
+  time_coverage_start: '2003-01-27T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_PCB_101
+  - qc_PCB_101
+  - meta_PCB_101
+  - v_PCB_118
+  - qc_PCB_118
+  - meta_PCB_118
+  - v_PCB_138
+  - qc_PCB_138
+  - meta_PCB_138
+  - v_PCB_153
+  - qc_PCB_153
+  - meta_PCB_153
+  - v_PCB_180
+  - qc_PCB_180
+  - meta_PCB_180
+  - v_PCB_28
+  - qc_PCB_28
+  - meta_PCB_28
+  - v_PCB_52
+  - qc_PCB_52
+  - meta_PCB_52
+  - v_alpha_HCH
+  - qc_alpha_HCH
+  - meta_alpha_HCH
+  - v_anthracene
+  - qc_anthracene
+  - meta_anthracene
+  - v_benz_a_anthracene
+  - qc_benz_a_anthracene
+  - meta_benz_a_anthracene
+  - v_benzo_a_pyrene
+  - qc_benzo_a_pyrene
+  - meta_benzo_a_pyrene
+  - v_benzo_b_fluoranthene
+  - qc_benzo_b_fluoranthene
+  - meta_benzo_b_fluoranthene
+  - v_benzo_ghi_perylene
+  - qc_benzo_ghi_perylene
+  - meta_benzo_ghi_perylene
+  - v_benzo_k_fluoranthene
+  - qc_benzo_k_fluoranthene
+  - meta_benzo_k_fluoranthene
+  - v_chrysene_triphenylene
+  - qc_chrysene_triphenylene
+  - meta_chrysene_triphenylene
+  - v_fluoranthene
+  - qc_fluoranthene
+  - meta_fluoranthene
+  - v_gamma_HCH
+  - qc_gamma_HCH
+  - meta_gamma_HCH
+  - v_phenanthrene
+  - qc_phenanthrene
+  - meta_phenanthrene
+  - v_pyrene
+  - qc_pyrene
+  - meta_pyrene
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/R3/QR/2R/R3QR-2RMC.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ARSO_UNS130_vz_1
+  ebas_method_ref: SI01L_GCMS_precip
+  ebas_revision_date: '2024-09-18T12:25:09.221654Z'
+  ebas_station_altitude: 520.0 m
+  ebas_station_code: SI0008R
+  ebas_station_latitude: 45.566667
+  ebas_station_longitude: 14.866667
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2024-01-01T08:00:00Z'
+  time_coverage_start: '2017-01-02T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_benz_a_anthracene
+  - qc_benz_a_anthracene
+  - meta_benz_a_anthracene
+  - v_benzo_a_pyrene
+  - qc_benzo_a_pyrene
+  - meta_benzo_a_pyrene
+  - v_benzo_bjk_fluoranthenes
+  - qc_benzo_bjk_fluoranthenes
+  - meta_benzo_bjk_fluoranthenes
+  - v_dibenzo_ah_anthracene
+  - qc_dibenzo_ah_anthracene
+  - meta_dibenzo_ah_anthracene
+  - v_inden_123cd_pyrene
+  - qc_inden_123cd_pyrene
+  - meta_inden_123cd_pyrene
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/R6/Q2/VH/R6Q2-VH68.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: b_samp_14
+  ebas_method_ref: SE01L_GC_MS
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: SE0014R
+  ebas_station_latitude: 57.394
+  ebas_station_longitude: 11.914
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2015-12-28T06:00:00Z'
+  time_coverage_start: '2013-01-02T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_benzo_a_pyrene
+  - qc_benzo_a_pyrene
+  - meta_benzo_a_pyrene
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/R7/58/E9/R758-E953.nc:
   ebas_data_level: '2'
   ebas_instrument_name: ES0012R_Ambiental_CPS004
@@ -4678,6 +5588,87 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/TV/R5/YW/TVR5-YWE9.nc:
   - v_pyrene
   - qc_pyrene
   - meta_pyrene
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/TX/CJ/SK/TXCJ-SK9Z.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: b_samp_14
+  ebas_method_ref: SE01L_BM
+  ebas_revision_date: '2025-01-22T00:00:00.000000Z'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: SE0014R
+  ebas_station_latitude: 57.394
+  ebas_station_longitude: 11.914
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2023-12-10T23:00:00Z'
+  time_coverage_start: '2023-01-01T23:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_HCB
+  - qc_HCB
+  - meta_HCB
+  - v_PCB_101
+  - qc_PCB_101
+  - meta_PCB_101
+  - v_PCB_118
+  - qc_PCB_118
+  - meta_PCB_118
+  - v_PCB_138
+  - qc_PCB_138
+  - meta_PCB_138
+  - v_PCB_153
+  - qc_PCB_153
+  - meta_PCB_153
+  - v_PCB_180
+  - qc_PCB_180
+  - meta_PCB_180
+  - v_PCB_28
+  - qc_PCB_28
+  - meta_PCB_28
+  - v_PCB_52
+  - qc_PCB_52
+  - meta_PCB_52
+  - v_anthracene
+  - qc_anthracene
+  - meta_anthracene
+  - v_benz_a_anthracene
+  - qc_benz_a_anthracene
+  - meta_benz_a_anthracene
+  - v_benzo_a_pyrene
+  - qc_benzo_a_pyrene
+  - meta_benzo_a_pyrene
+  - v_benzo_b_fluoranthene
+  - qc_benzo_b_fluoranthene
+  - meta_benzo_b_fluoranthene
+  - v_benzo_ghi_perylene
+  - qc_benzo_ghi_perylene
+  - meta_benzo_ghi_perylene
+  - v_benzo_j_fluoranthene
+  - qc_benzo_j_fluoranthene
+  - meta_benzo_j_fluoranthene
+  - v_benzo_k_fluoranthene
+  - qc_benzo_k_fluoranthene
+  - meta_benzo_k_fluoranthene
+  - v_chrysene
+  - qc_chrysene
+  - meta_chrysene
+  - v_dibenzo_ah_anthracene
+  - qc_dibenzo_ah_anthracene
+  - meta_dibenzo_ah_anthracene
+  - v_fluoranthene
+  - qc_fluoranthene
+  - meta_fluoranthene
+  - v_inden_123cd_pyrene
+  - qc_inden_123cd_pyrene
+  - meta_inden_123cd_pyrene
+  - v_phenanthrene
+  - qc_phenanthrene
+  - meta_phenanthrene
+  - v_pyrene
+  - qc_pyrene
+  - meta_pyrene
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VM/5A/ZQ/VM5A-ZQBS.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_total_14
@@ -5024,6 +6015,45 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XU/6K/EM/XU6K-EMU3.nc:
   - v_pyrene
   - qc_pyrene
   - meta_pyrene
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XY/VF/KP/XYVF-KPV6.nc:
+  ebas_data_level: '2'
+  ebas_measurement_height: 1.5 m
+  ebas_method_ref: SI01L_ARSO_GCMS_1
+  ebas_revision_date: '2016-09-27T09:46:52.090000Z'
+  ebas_station_altitude: 520.0 m
+  ebas_station_code: SI0008R
+  ebas_station_latitude: 45.566667
+  ebas_station_longitude: 14.866667
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2015-01-05T07:00:00Z'
+  time_coverage_start: '2013-12-30T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_precipitation_amount_off
+  - qc_precipitation_amount_off
+  - meta_precipitation_amount_off
+  - v_benz_a_anthracene
+  - qc_benz_a_anthracene
+  - meta_benz_a_anthracene
+  - v_benzo_a_pyrene
+  - qc_benzo_a_pyrene
+  - meta_benzo_a_pyrene
+  - v_benzo_bjk_fluoranthenes
+  - qc_benzo_bjk_fluoranthenes
+  - meta_benzo_bjk_fluoranthenes
+  - v_dibenzo_ah_anthracene
+  - qc_dibenzo_ah_anthracene
+  - meta_dibenzo_ah_anthracene
+  - v_inden_123cd_pyrene
+  - qc_inden_123cd_pyrene
+  - meta_inden_123cd_pyrene
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y4/3J/8F/Y43J-8FSX.nc:
   ebas_data_level: '2'
   ebas_instrument_name: ES0001R_DP1222_0807
@@ -5045,6 +6075,114 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y4/3J/8F/Y43J-8FSX.nc:
   - v_benzo_a_pyrene
   - qc_benzo_a_pyrene
   - meta_benzo_a_pyrene
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y5/2S/55/Y52S-55WR.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: b_samp_14
+  ebas_method_ref: SE01L_BM
+  ebas_revision_date: '2024-03-12T00:00:00.000000Z'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: SE0014R
+  ebas_station_latitude: 57.394
+  ebas_station_longitude: 11.914
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2023-01-01T23:00:00Z'
+  time_coverage_start: '2022-01-03T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_BDE_100
+  - qc_BDE_100
+  - meta_BDE_100
+  - v_BDE_209
+  - qc_BDE_209
+  - meta_BDE_209
+  - v_BDE_47
+  - qc_BDE_47
+  - meta_BDE_47
+  - v_BDE_99
+  - qc_BDE_99
+  - meta_BDE_99
+  - v_HCB
+  - qc_HCB
+  - meta_HCB
+  - v_PCB_101
+  - qc_PCB_101
+  - meta_PCB_101
+  - v_PCB_118
+  - qc_PCB_118
+  - meta_PCB_118
+  - v_PCB_138
+  - qc_PCB_138
+  - meta_PCB_138
+  - v_PCB_153
+  - qc_PCB_153
+  - meta_PCB_153
+  - v_PCB_180
+  - qc_PCB_180
+  - meta_PCB_180
+  - v_PCB_28
+  - qc_PCB_28
+  - meta_PCB_28
+  - v_PCB_52
+  - qc_PCB_52
+  - meta_PCB_52
+  - v_alpha_HCH
+  - qc_alpha_HCH
+  - meta_alpha_HCH
+  - v_anthracene
+  - qc_anthracene
+  - meta_anthracene
+  - v_benz_a_anthracene
+  - qc_benz_a_anthracene
+  - meta_benz_a_anthracene
+  - v_benzo_a_pyrene
+  - qc_benzo_a_pyrene
+  - meta_benzo_a_pyrene
+  - v_benzo_b_fluoranthene
+  - qc_benzo_b_fluoranthene
+  - meta_benzo_b_fluoranthene
+  - v_benzo_ghi_perylene
+  - qc_benzo_ghi_perylene
+  - meta_benzo_ghi_perylene
+  - v_benzo_j_fluoranthene
+  - qc_benzo_j_fluoranthene
+  - meta_benzo_j_fluoranthene
+  - v_benzo_k_fluoranthene
+  - qc_benzo_k_fluoranthene
+  - meta_benzo_k_fluoranthene
+  - v_chrysene
+  - qc_chrysene
+  - meta_chrysene
+  - v_dibenzo_ah_anthracene
+  - qc_dibenzo_ah_anthracene
+  - meta_dibenzo_ah_anthracene
+  - v_fluoranthene
+  - qc_fluoranthene
+  - meta_fluoranthene
+  - v_gamma_HCH
+  - qc_gamma_HCH
+  - meta_gamma_HCH
+  - v_inden_123cd_pyrene
+  - qc_inden_123cd_pyrene
+  - meta_inden_123cd_pyrene
+  - v_phenanthrene
+  - qc_phenanthrene
+  - meta_phenanthrene
+  - v_pp_DDD
+  - qc_pp_DDD
+  - meta_pp_DDD
+  - v_pp_DDE
+  - qc_pp_DDE
+  - meta_pp_DDE
+  - v_pp_DDT
+  - qc_pp_DDT
+  - meta_pp_DDT
+  - v_pyrene
+  - qc_pyrene
+  - meta_pyrene
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/YD/HA/DG/YDHA-DGXW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: b_samp_12
@@ -5134,6 +6272,71 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/YE/83/2C/YE83-2CKX.nc:
   - v_benzo_a_pyrene
   - qc_benzo_a_pyrene
   - meta_benzo_a_pyrene
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/YR/62/8J/YR62-8JSQ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: b_samp_96
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 340.0 m
+  ebas_station_code: FI0036R
+  ebas_station_latitude: 68.0
+  ebas_station_longitude: 24.237222222
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '1999-12-27T06:00:00Z'
+  time_coverage_start: '1999-01-19T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_PCB_101
+  - qc_PCB_101
+  - meta_PCB_101
+  - v_PCB_118
+  - qc_PCB_118
+  - meta_PCB_118
+  - v_PCB_138
+  - qc_PCB_138
+  - meta_PCB_138
+  - v_PCB_153
+  - qc_PCB_153
+  - meta_PCB_153
+  - v_PCB_180
+  - qc_PCB_180
+  - meta_PCB_180
+  - v_PCB_28
+  - qc_PCB_28
+  - meta_PCB_28
+  - v_PCB_52
+  - qc_PCB_52
+  - meta_PCB_52
+  - v_alpha_HCH
+  - qc_alpha_HCH
+  - meta_alpha_HCH
+  - v_anthracene
+  - qc_anthracene
+  - meta_anthracene
+  - v_benzo_a_pyrene
+  - qc_benzo_a_pyrene
+  - meta_benzo_a_pyrene
+  - v_benzo_ghi_perylene
+  - qc_benzo_ghi_perylene
+  - meta_benzo_ghi_perylene
+  - v_fluoranthene
+  - qc_fluoranthene
+  - meta_fluoranthene
+  - v_gamma_HCH
+  - qc_gamma_HCH
+  - meta_gamma_HCH
+  - v_inden_123cd_pyrene
+  - qc_inden_123cd_pyrene
+  - meta_inden_123cd_pyrene
+  - v_phenanthrene
+  - qc_phenanthrene
+  - meta_phenanthrene
+  - v_pyrene
+  - qc_pyrene
+  - meta_pyrene
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/YR/B5/V6/YRB5-V695.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_pop_17
@@ -5244,6 +6447,135 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/YX/RK/QA/YXRK-QA8P.nc:
   - v_zinc
   - qc_zinc
   - meta_zinc
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/YY/A6/ZE/YYA6-ZE8R.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: b_samp_36
+  ebas_method_ref: SE01L_BM
+  ebas_revision_date: '2021-10-27T12:18:20.000000Z'
+  ebas_station_altitude: 340.0 m
+  ebas_station_code: FI0036R
+  ebas_station_latitude: 68.0
+  ebas_station_longitude: 24.237222222
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2020-12-28T00:00:00Z'
+  time_coverage_start: '2017-12-27T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_benzo_a_pyrene
+  - qc_benzo_a_pyrene
+  - meta_benzo_a_pyrene
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZD/8T/V3/ZD8T-V37P.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: b_samp_36
+  ebas_method_ref: SE01L_BM
+  ebas_revision_date: '2024-03-12T00:00:00.000000Z'
+  ebas_station_altitude: 340.0 m
+  ebas_station_code: FI0036R
+  ebas_station_latitude: 68.0
+  ebas_station_longitude: 24.237222222
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2023-01-01T23:00:00Z'
+  time_coverage_start: '2022-01-03T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_BDE_100
+  - qc_BDE_100
+  - meta_BDE_100
+  - v_BDE_209
+  - qc_BDE_209
+  - meta_BDE_209
+  - v_BDE_47
+  - qc_BDE_47
+  - meta_BDE_47
+  - v_BDE_99
+  - qc_BDE_99
+  - meta_BDE_99
+  - v_HCB
+  - qc_HCB
+  - meta_HCB
+  - v_PCB_101
+  - qc_PCB_101
+  - meta_PCB_101
+  - v_PCB_118
+  - qc_PCB_118
+  - meta_PCB_118
+  - v_PCB_138
+  - qc_PCB_138
+  - meta_PCB_138
+  - v_PCB_153
+  - qc_PCB_153
+  - meta_PCB_153
+  - v_PCB_180
+  - qc_PCB_180
+  - meta_PCB_180
+  - v_PCB_28
+  - qc_PCB_28
+  - meta_PCB_28
+  - v_PCB_52
+  - qc_PCB_52
+  - meta_PCB_52
+  - v_alpha_HCH
+  - qc_alpha_HCH
+  - meta_alpha_HCH
+  - v_anthracene
+  - qc_anthracene
+  - meta_anthracene
+  - v_benz_a_anthracene
+  - qc_benz_a_anthracene
+  - meta_benz_a_anthracene
+  - v_benzo_a_pyrene
+  - qc_benzo_a_pyrene
+  - meta_benzo_a_pyrene
+  - v_benzo_b_fluoranthene
+  - qc_benzo_b_fluoranthene
+  - meta_benzo_b_fluoranthene
+  - v_benzo_ghi_perylene
+  - qc_benzo_ghi_perylene
+  - meta_benzo_ghi_perylene
+  - v_benzo_j_fluoranthene
+  - qc_benzo_j_fluoranthene
+  - meta_benzo_j_fluoranthene
+  - v_benzo_k_fluoranthene
+  - qc_benzo_k_fluoranthene
+  - meta_benzo_k_fluoranthene
+  - v_chrysene
+  - qc_chrysene
+  - meta_chrysene
+  - v_dibenzo_ah_anthracene
+  - qc_dibenzo_ah_anthracene
+  - meta_dibenzo_ah_anthracene
+  - v_fluoranthene
+  - qc_fluoranthene
+  - meta_fluoranthene
+  - v_gamma_HCH
+  - qc_gamma_HCH
+  - meta_gamma_HCH
+  - v_inden_123cd_pyrene
+  - qc_inden_123cd_pyrene
+  - meta_inden_123cd_pyrene
+  - v_phenanthrene
+  - qc_phenanthrene
+  - meta_phenanthrene
+  - v_pp_DDD
+  - qc_pp_DDD
+  - meta_pp_DDD
+  - v_pp_DDE
+  - qc_pp_DDE
+  - meta_pp_DDE
+  - v_pp_DDT
+  - qc_pp_DDT
+  - meta_pp_DDT
+  - v_pyrene
+  - qc_pyrene
+  - meta_pyrene
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZK/V3/7W/ZKV3-7WHU.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_pop_18

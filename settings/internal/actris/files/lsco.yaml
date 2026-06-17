@@ -165,6 +165,42 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/2A/VG/69/2AVG-69HA.nc:
   - 550.0
   - 700.0
   - 850.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/2C/B5/M8/2CB5-M8WM.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Optec-NGN-2_US2098
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: US11L_IMPROVE_nephelometer_2004
+  ebas_revision_date: '2016-06-21T12:03:01.040000Z'
+  ebas_station_altitude: 150.0 m
+  ebas_station_code: US2098R
+  ebas_station_latitude: 44.3772
+  ebas_station_longitude: -68.2608
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2014-10-02T05:00:00Z'
+  time_coverage_start: '1993-04-02T05:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location_d0
+  - qc_pressure
+  - meta_pressure
+  - d_Location_d1
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient
+  - meta_aerosol_light_scattering_coefficient
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_scattering_coefficient
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/2E/3H/V5/2E3H-V5E7.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_M9003_DMV
@@ -251,6 +287,37 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/2F/GN/NP/2FGN-NP9C.nc:
   - 450.0
   - 525.0
   - 635.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/2K/NB/7K/2KNB-7KPM.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Optec-NGN-2_US2098R
+  ebas_method_ref: US11L_IMPROVE_nephelometer_2004
+  ebas_revision_date: '2018-10-31T14:50:00.000000Z'
+  ebas_station_altitude: 150.0 m
+  ebas_station_code: US2098R
+  ebas_station_latitude: 44.3772
+  ebas_station_longitude: -68.2608
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2012-06-30T23:00:00Z'
+  time_coverage_start: '1993-04-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient
+  - meta_aerosol_light_scattering_coefficient
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_scattering_coefficient
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/34/PD/26/34PD-26T5.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Optec-NGN-2_US2705R
@@ -364,6 +431,57 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3A/8N/EP/3A8N-EP6B.nc:
   - v_aerosol_light_scattering_coefficient
   wavelengths:
   - 550.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3D/U5/U6/3DU5-U6BQ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_3563
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: CZ06L_scat_coef
+  ebas_revision_date: '2016-07-03T14:50:00.000000Z'
+  ebas_station_altitude: 535.0 m
+  ebas_station_code: CZ0003R
+  ebas_station_latitude: 49.573394
+  ebas_station_longitude: 15.080278
+  resolution: hourly
+  time_coverage_end: '2015-12-31T23:59:59Z'
+  time_coverage_start: '2012-08-15T13:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3E/SB/FD/3ESB-FDAK.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Optech-NGN-2
@@ -548,6 +666,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3X/QB/AZ/3XQB-AZGX.nc:
   - v_aerosol_light_scattering_coefficient_amean
   - v_aerosol_light_scattering_coefficient_prec1587
   - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 520.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3Y/SV/XM/3YSV-XMRG.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_2009
@@ -650,6 +772,57 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/42/5M/N3/425M-N3DZ.nc:
   - 450.0
   - 525.0
   - 635.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/43/AE/JH/43AE-JHP8.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Ecotech_Aurora_3000
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: ES05L_neph_control_lev2
+  ebas_revision_date: '2016-07-07T00:00:00.000000Z'
+  ebas_station_altitude: 700.0 m
+  ebas_station_code: ES1778R
+  ebas_station_latitude: 41.766667
+  ebas_station_longitude: 2.35
+  resolution: hourly
+  time_coverage_end: '2016-01-01T00:04:12Z'
+  time_coverage_start: '2015-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/43/FA/5B/43FA-5BJV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_Aurora3000_DemStation
@@ -701,6 +874,93 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/43/FA/5B/43FA-5BJV.nc:
   - 450.0
   - 525.0
   - 635.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4B/88/PB/4B88-PB4B.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_3563_TRL
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: NO01L_scat_coef_TSI3563
+  ebas_revision_date: '2024-06-04T11:42:44.391786Z'
+  ebas_station_altitude: 1553.0 m
+  ebas_station_code: NO0059G
+  ebas_station_latitude: -72.0117
+  ebas_station_longitude: 2.5351
+  resolution: hourly
+  time_coverage_end: '2023-01-01T00:00:00Z'
+  time_coverage_start: '2014-01-29T19:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4B/MR/Z6/4BMR-Z699.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Optec-NGN-2_US0014
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: US11L_IMPROVE_nephelometer_2004
+  ebas_revision_date: '2015-03-18T10:20:46.000000Z'
+  ebas_station_altitude: 1166.0 m
+  ebas_station_code: US0014R
+  ebas_station_latitude: 36.0778
+  ebas_station_longitude: -112.1288
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2013-10-02T07:00:00Z'
+  time_coverage_start: '2004-04-02T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location_d0
+  - qc_pressure
+  - meta_pressure
+  - d_Location_d1
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient
+  - meta_aerosol_light_scattering_coefficient
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_scattering_coefficient
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/4E/RE/XD/4ERE-XDTV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_M9003_GIF_ambient_525
@@ -1029,6 +1289,139 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/53/XH/4K/53XH-4KFQ.nc:
   - v_aerosol_light_scattering_coefficient
   wavelengths:
   - 550.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/55/WQ/VG/55WQ-VG6N.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Ecotech_AURORA_3000_AEROLAB
+  ebas_measurement_height: 5.0 m
+  ebas_method_ref: IT06L_Aurora3000
+  ebas_revision_date: '2024-10-31T13:44:00.000000Z'
+  ebas_station_altitude: 110.0 m
+  ebas_station_code: IT0042U
+  ebas_station_latitude: 45.4619
+  ebas_station_longitude: 9.2768
+  resolution: hourly
+  time_coverage_end: '2023-09-19T13:00:00Z'
+  time_coverage_start: '2023-01-19T11:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/58/83/KQ/5883-KQVE.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Radiance_Research_M903_FNL_dry
+  ebas_measurement_height: 5.0 m
+  ebas_method_ref: GR01L_scat_coef
+  ebas_revision_date: '2016-07-06T13:40:36.083000Z'
+  ebas_station_altitude: 150.0 m
+  ebas_station_code: GR0002R
+  ebas_station_latitude: 35.3377990723
+  ebas_station_longitude: 25.6693992615
+  resolution: hourly
+  time_coverage_end: '2011-01-01T00:00:00Z'
+  time_coverage_start: '2010-12-31T22:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 532.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5A/WR/99/5AWR-99WP.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ECOTECHneph_Vavihill01
+  ebas_measurement_height: 5.0 m
+  ebas_method_ref: SE04L_scat_coef
+  ebas_revision_date: '2018-06-04T00:00:00.000000Z'
+  ebas_station_altitude: 175.0 m
+  ebas_station_code: SE0011R
+  ebas_station_latitude: 56.016667
+  ebas_station_longitude: 13.15
+  resolution: hourly
+  time_coverage_end: '2018-01-01T00:00:00Z'
+  time_coverage_start: '2017-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5B/VZ/DF/5BVZ-DF7H.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_SGP
@@ -1166,6 +1559,57 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5F/6V/87/5F6V-87E4.nc:
   - v_aerosol_light_scattering_coefficient
   wavelengths:
   - 550.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5K/J9/W8/5KJ9-W8AP.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_3563_TRL
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: NO01L_scat_coef_TSI3563
+  ebas_revision_date: '2025-06-05T12:49:52.663909Z'
+  ebas_station_altitude: 1553.0 m
+  ebas_station_code: NO0059G
+  ebas_station_latitude: -72.0117
+  ebas_station_longitude: 2.5351
+  resolution: hourly
+  time_coverage_end: '2025-01-01T00:00:00Z'
+  time_coverage_start: '2023-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5M/Y6/R4/5MY6-R4HK.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Optec-NGN-2_GrandCanyon
@@ -1233,6 +1677,57 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5S/2G/B3/5S2G-B3PR.nc:
   - v_aerosol_light_scattering_coefficient
   wavelengths:
   - 550.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/64/PQ/X9/64PQ-X9F2.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_3563_GSN_pm1
+  ebas_measurement_height: 10.0 m
+  ebas_method_ref: US06L_scat_coef
+  ebas_revision_date: '2021-01-11T11:41:11.927000Z'
+  ebas_station_altitude: 71.0 m
+  ebas_station_code: KR0101R
+  ebas_station_latitude: 33.293917
+  ebas_station_longitude: 126.163111
+  resolution: hourly
+  time_coverage_end: '2020-01-01T00:00:00Z'
+  time_coverage_start: '2001-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/6A/7G/RE/6A7G-REZA.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Optec-NGN-2_US0082R
@@ -1392,6 +1887,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/6M/P7/ZT/6MP7-ZT7G.nc:
   - 450.0
   - 525.0
   - 635.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/6M/VX/2X/6MVX-2XBF.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: neph_gr02
+  ebas_method_ref: GR02L_neph
+  ebas_revision_date: '2018-10-31T14:50:00.000000Z'
+  ebas_station_altitude: 150.0 m
+  ebas_station_code: GR0002R
+  ebas_station_latitude: 35.3377990723
+  ebas_station_longitude: 25.6693992615
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2011-01-01T00:00:00Z'
+  time_coverage_start: '2004-04-17T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient
+  - meta_aerosol_light_scattering_coefficient
+  - v_aerosol_light_scattering_coefficient
+  wavelengths:
+  - 532.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/6U/UW/43/6UUW-43Y4.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_BND_pm10
@@ -1433,6 +1952,38 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/6U/UW/43/6UUW-43Y4.nc:
   - 450.0
   - 550.0
   - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/6X/J2/BG/6XJ2-BGUU.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Aurora_3000_CIEMAT
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: ES09L_scat_coef_Aurora3000_ciemat
+  ebas_revision_date: '2022-05-05T13:35:13.807000Z'
+  ebas_station_altitude: 669.0 m
+  ebas_station_code: ES0021U
+  ebas_station_latitude: 40.456436
+  ebas_station_longitude: -3.725631
+  resolution: hourly
+  time_coverage_end: '2020-10-05T00:00:00Z'
+  time_coverage_start: '2020-03-12T10:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/74/RG/YC/74RG-YCU6.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_Melpitz
@@ -1709,6 +2260,44 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/7W/RP/X6/7WRP-X69Y.nc:
   - 450.0
   - 525.0
   - 635.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/7X/4H/BF/7X4H-BFCA.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ECOTECHneph_Vavihill01_aerosol
+  ebas_method_ref: SE04L_scat_coef
+  ebas_revision_date: '2018-10-31T14:50:00.000000Z'
+  ebas_station_altitude: 175.0 m
+  ebas_station_code: SE0011R
+  ebas_station_latitude: 56.016667
+  ebas_station_longitude: 13.15
+  resolution: hourly
+  time_coverage_end: '2010-01-01T00:00:00Z'
+  time_coverage_start: '2008-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_temperature
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 520.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/83/Z8/QV/83Z8-QVPQ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Optec-NGN-2_US9037R
@@ -1722,6 +2311,37 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/83/Z8/QV/83Z8-QVPQ.nc:
   resolution: hourly
   time_coverage_end: '2005-08-10T13:00:00Z'
   time_coverage_start: '2000-07-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient
+  - meta_aerosol_light_scattering_coefficient
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_scattering_coefficient
+  wavelengths:
+  - 550.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/85/XY/S9/85XY-S9F3.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Optec-NGN-2_US0061R
+  ebas_method_ref: US11L_IMPROVE_nephelometer_2004
+  ebas_revision_date: '2018-10-31T14:50:00.000000Z'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: US0061R
+  ebas_station_latitude: 39.465
+  ebas_station_longitude: -74.4492
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '1994-07-01T05:00:00Z'
+  time_coverage_start: '1993-04-01T05:00:00Z'
   variables:
   - time
   - time_bnds
@@ -1860,6 +2480,57 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8C/F6/KK/8CF6-KKRW.nc:
   - 450.0
   - 550.0
   - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8F/EM/GH/8FEM-GHXE.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Ecotech_Aurora_MSY
+  ebas_measurement_height: 10.0 m
+  ebas_method_ref: ES05L_scat_coef
+  ebas_revision_date: '2020-03-05T15:42:17.857000Z'
+  ebas_station_altitude: 700.0 m
+  ebas_station_code: ES1778R
+  ebas_station_latitude: 41.766667
+  ebas_station_longitude: 2.35
+  resolution: hourly
+  time_coverage_end: '2014-01-01T00:00:00Z'
+  time_coverage_start: '2010-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8H/7S/JF/8H7S-JFC6.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_BEO
@@ -2013,6 +2684,57 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8P/D4/CW/8PD4-CWN9.nc:
   - 450.0
   - 550.0
   - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8Q/CM/UX/8QCM-UXPG.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_3563_ETL_pm25
+  ebas_measurement_height: 10.0 m
+  ebas_method_ref: CA01L_scat_coef
+  ebas_revision_date: '2021-04-14T16:21:35.000000Z'
+  ebas_station_altitude: 500.0 m
+  ebas_station_code: CA0102R
+  ebas_station_latitude: 54.353743
+  ebas_station_longitude: -104.986864
+  resolution: hourly
+  time_coverage_end: '2009-01-01T00:00:00Z'
+  time_coverage_start: '2008-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8X/HZ/HW/8XHZ-HW7K.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_2009
@@ -2114,6 +2836,93 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8X/MA/SE/8XMA-SE9E.nc:
   - 450.0
   - 550.0
   - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8Y/X3/3M/8YX3-3MF8.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_3563_CPR_pm1
+  ebas_measurement_height: 10.0 m
+  ebas_method_ref: US06L_scat_coef
+  ebas_revision_date: '2022-05-04T13:24:37.873000Z'
+  ebas_station_altitude: 65.0 m
+  ebas_station_code: PR0100C
+  ebas_station_latitude: 18.381
+  ebas_station_longitude: -65.618
+  resolution: hourly
+  time_coverage_end: '2021-01-01T00:00:00Z'
+  time_coverage_start: '2006-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/94/JT/XG/94JT-XGAT.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Optec-NGN-2_US5501
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: US11L_IMPROVE_nephelometer_2004
+  ebas_revision_date: '2012-02-22T00:00:00.000000Z'
+  ebas_station_altitude: 56.0 m
+  ebas_station_code: US5501R
+  ebas_station_latitude: 18.3362
+  ebas_station_longitude: -64.7962
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2005-10-02T04:00:00Z'
+  time_coverage_start: '1998-04-02T04:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location_d0
+  - qc_pressure
+  - meta_pressure
+  - d_Location_d1
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient
+  - meta_aerosol_light_scattering_coefficient
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_scattering_coefficient
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9A/JQ/TF/9AJQ-TFBW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_2009
@@ -2261,6 +3070,45 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9J/JH/P2/9JJH-P2YC.nc:
   - v_aerosol_light_scattering_coefficient
   - qc_aerosol_light_scattering_coefficient
   - meta_aerosol_light_scattering_coefficient
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/9S/6M/T4/9S6M-T48H.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: tsi_neph_3563_aerosol
+  ebas_method_ref: DE09L_nephelometer
+  ebas_revision_date: '2016-07-08T14:45:00.000000Z'
+  ebas_station_altitude: 975.0 m
+  ebas_station_code: DE0043G
+  ebas_station_latitude: 47.8014984131
+  ebas_station_longitude: 11.009619
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2010-01-01T00:00:00Z'
+  time_coverage_start: '2006-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient
+  - meta_aerosol_light_backscattering_coefficient
+  - qc_aerosol_light_scattering_coefficient
+  - meta_aerosol_light_scattering_coefficient
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient
+  - v_aerosol_light_scattering_coefficient
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9X/RW/3H/9XRW-3H2S.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_BND_pm1
@@ -2292,6 +3140,57 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9X/RW/3H/9XRW-3H2S.nc:
   - meta_aerosol_light_scattering_coefficient_prec1587
   - qc_aerosol_light_scattering_coefficient_perc8413
   - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/9Z/89/Y8/9Z89-Y85N.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_3563_EGB_pm1
+  ebas_measurement_height: 10.0 m
+  ebas_method_ref: CA01L_scat_coef
+  ebas_revision_date: '2024-08-05T22:11:01.690169Z'
+  ebas_station_altitude: 255.0 m
+  ebas_station_code: CA0011R
+  ebas_station_latitude: 44.231006
+  ebas_station_longitude: -79.783839
+  resolution: hourly
+  time_coverage_end: '2023-01-01T00:00:00Z'
+  time_coverage_start: '2009-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
   - v_aerosol_light_backscattering_coefficient_amean
   - v_aerosol_light_backscattering_coefficient_prec1587
   - v_aerosol_light_backscattering_coefficient_perc8413
@@ -2404,6 +3303,57 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AD/96/G6/AD96-G6VN.nc:
   wavelengths:
   - 450.0
   - 525.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AN/HS/AU/ANHS-AUN5.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_3563_ALT_pm10
+  ebas_measurement_height: 210.0 m
+  ebas_method_ref: CA01L_scat_coef
+  ebas_revision_date: '2024-01-24T22:40:14.000000Z'
+  ebas_station_altitude: 210.0 m
+  ebas_station_code: CA0420G
+  ebas_station_latitude: 82.4991455078
+  ebas_station_longitude: -62.3415260315
+  resolution: hourly
+  time_coverage_end: '2023-01-01T00:00:00Z'
+  time_coverage_start: '2004-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AR/BV/RY/ARBV-RYSG.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI3563_70622035
@@ -2878,6 +3828,57 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BC/CT/FC/BCCT-FCJU.nc:
   - 450.0
   - 550.0
   - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BJ/7K/JF/BJ7K-JFJY.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_3563_ETL_pm10
+  ebas_measurement_height: 10.0 m
+  ebas_method_ref: CA01L_scat_coef
+  ebas_revision_date: '2021-05-03T23:00:16.037000Z'
+  ebas_station_altitude: 500.0 m
+  ebas_station_code: CA0102R
+  ebas_station_latitude: 54.353743
+  ebas_station_longitude: -104.986864
+  resolution: hourly
+  time_coverage_end: '2013-01-01T00:00:00Z'
+  time_coverage_start: '2012-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BM/AW/TG/BMAW-TGWX.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Optec-NGN-2_US0092U
@@ -2990,6 +3991,57 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BP/PN/MZ/BPPN-MZBH.nc:
   - 450.0
   - 550.0
   - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BP/YT/QS/BPYT-QSGV.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_3563_ALT_pm1
+  ebas_measurement_height: 210.0 m
+  ebas_method_ref: CA01L_scat_coef
+  ebas_revision_date: '2024-01-24T22:40:14.000000Z'
+  ebas_station_altitude: 210.0 m
+  ebas_station_code: CA0420G
+  ebas_station_latitude: 82.4991455078
+  ebas_station_longitude: -62.3415260315
+  resolution: hourly
+  time_coverage_end: '2023-01-01T00:00:00Z'
+  time_coverage_start: '2005-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BW/F3/Q4/BWF3-Q47G.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_ARN
@@ -3064,6 +4116,58 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BX/KV/JN/BXKV-JNJY.nc:
   - meta_pressure
   - qc_relative_humidity
   - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BX/YD/KV/BXYD-KVQS.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Aurora4000_PRG
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: CZ03L_scat_coef_Aurora4000
+  ebas_revision_date: '2025-03-21T00:00:00.000000Z'
+  ebas_station_altitude: 270.0 m
+  ebas_station_code: CZ0004B
+  ebas_station_latitude: 50.126389
+  ebas_station_longitude: 14.384648
+  resolution: hourly
+  time_coverage_end: '2025-01-01T00:00:00Z'
+  time_coverage_start: '2024-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location_d0
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - d_Location_d1
   - qc_temperature
   - meta_temperature
   - d_Wavelength
@@ -3328,6 +4432,77 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/CC/XT/ZX/CCXT-ZXPV.nc:
   - v_aerosol_light_scattering_coefficient
   wavelengths:
   - 520.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CJ/ME/5N/CJME-5NG2.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Optec-NGN-2_US3201R
+  ebas_method_ref: US11L_IMPROVE_nephelometer_2004
+  ebas_revision_date: '2018-10-31T14:50:00.000000Z'
+  ebas_station_altitude: 1772.0 m
+  ebas_station_code: US3201R
+  ebas_station_latitude: 33.2203
+  ebas_station_longitude: -108.2347
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2001-08-11T01:00:00Z'
+  time_coverage_start: '1994-04-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient
+  - meta_aerosol_light_scattering_coefficient
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_scattering_coefficient
+  wavelengths:
+  - 550.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CM/AC/FE/CMAC-FE3X.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Ecotech_Aurora_1000_FNK_dry_pm1
+  ebas_measurement_height: 5.0 m
+  ebas_method_ref: GR01L_scat_coef
+  ebas_revision_date: '2014-02-10T00:00:00.000000Z'
+  ebas_station_altitude: 150.0 m
+  ebas_station_code: GR0002R
+  ebas_station_latitude: 35.3377990723
+  ebas_station_longitude: 25.6693992615
+  resolution: hourly
+  time_coverage_end: '2013-01-01T00:00:00Z'
+  time_coverage_start: '2012-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/CR/EU/XY/CREU-XYZY.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Optec-NGN-2_US9034R
@@ -3443,6 +4618,88 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/D4/79/UF/D479-UFCT.nc:
   - 450.0
   - 550.0
   - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/D7/TX/3J/D7TX-3J63.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_3563_MLO_pm1
+  ebas_measurement_height: 10.0 m
+  ebas_method_ref: US06L_scat_coef
+  ebas_revision_date: '2023-01-12T15:02:39.621734Z'
+  ebas_station_altitude: 3397.0 m
+  ebas_station_code: US1200R
+  ebas_station_latitude: 19.5362300873
+  ebas_station_longitude: -155.5761566162
+  resolution: hourly
+  time_coverage_end: '2023-01-01T00:00:00Z'
+  time_coverage_start: '2000-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/D8/55/P3/D855-P3DF.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Optec-NGN-2_US0019R
+  ebas_method_ref: US11L_IMPROVE_nephelometer_2004
+  ebas_revision_date: '2018-10-31T14:50:00.000000Z'
+  ebas_station_altitude: 2130.0 m
+  ebas_station_code: US0019R
+  ebas_station_latitude: 38.9761
+  ebas_station_longitude: -120.1025
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2001-05-31T14:00:00Z'
+  time_coverage_start: '1996-07-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient
+  - meta_aerosol_light_scattering_coefficient
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_scattering_coefficient
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DE/XC/AS/DEXC-AS2W.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Optec-NGN-2_US0076
@@ -3728,6 +4985,58 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DU/SG/S4/DUSG-S43V.nc:
   - 450.0
   - 550.0
   - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/DX/G8/KJ/DXG8-KJQW.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Ecotech_Aurora_3000_FNK_dry
+  ebas_measurement_height: 5.0 m
+  ebas_method_ref: GR01L_scat_coef
+  ebas_revision_date: '2016-08-02T00:00:00.000000Z'
+  ebas_station_altitude: 150.0 m
+  ebas_station_code: GR0002R
+  ebas_station_latitude: 35.3377990723
+  ebas_station_longitude: 25.6693992615
+  resolution: hourly
+  time_coverage_end: '2015-12-31T22:00:00Z'
+  time_coverage_start: '2015-03-09T14:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location_d0
+  - qc_pressure
+  - meta_pressure
+  - d_Location_d1
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/E7/NU/PA/E7NU-PAR3.nc:
   ebas_data_level: '2'
   ebas_instrument_name: nephelometer_Ecotech_Aurora3000
@@ -4124,6 +5433,37 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/EV/7S/M3/EV7S-M3ED.nc:
   - v_aerosol_light_scattering_coefficient
   wavelengths:
   - 550.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/F2/6T/2E/F26T-2EPQ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Optec-NGN-2_US9077R
+  ebas_method_ref: US11L_IMPROVE_nephelometer_2004
+  ebas_revision_date: '2018-10-31T14:50:00.000000Z'
+  ebas_station_altitude: 1049.0 m
+  ebas_station_code: US9077R
+  ebas_station_latitude: 47.422
+  ebas_station_longitude: -121.4259
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2001-07-01T08:00:00Z'
+  time_coverage_start: '1993-07-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient
+  - meta_aerosol_light_scattering_coefficient
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_scattering_coefficient
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/F5/ED/V9/F5ED-V98W.nc:
   ebas_data_level: 3a
   ebas_instrument_name: SMPS_IFT
@@ -4222,6 +5562,57 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/F9/WM/UZ/F9WM-UZ9P.nc:
   - 450.0
   - 550.0
   - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FA/SW/A8/FASW-A8CR.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_Neph_3563
+  ebas_measurement_height: 15.0 m
+  ebas_method_ref: DE09L_GAW_MOHP
+  ebas_revision_date: '2025-04-24T17:57:25.000000Z'
+  ebas_station_altitude: 975.0 m
+  ebas_station_code: DE0043G
+  ebas_station_latitude: 47.8014984131
+  ebas_station_longitude: 11.009619
+  resolution: hourly
+  time_coverage_end: '2024-12-31T23:59:59Z'
+  time_coverage_start: '2017-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FA/ZB/UW/FAZB-UWFW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_BOS_pm1
@@ -4272,6 +5663,89 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/FA/ZB/UW/FAZB-UWFW.nc:
   - 450.0
   - 550.0
   - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FB/EV/7N/FBEV-7NEM.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ECOTECHneph_Vavihill01
+  ebas_measurement_height: 5.0 m
+  ebas_method_ref: SE04L_scat_coef
+  ebas_revision_date: '2016-07-04T07:41:17.377000Z'
+  ebas_station_altitude: 175.0 m
+  ebas_station_code: SE0011R
+  ebas_station_latitude: 56.016667
+  ebas_station_longitude: 13.15
+  resolution: hourly
+  time_coverage_end: '2015-01-01T00:00:00Z'
+  time_coverage_start: '2014-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location_d0
+  - qc_pressure
+  - meta_pressure
+  - d_Location_d1
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 520.0
+  - 635.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FE/3P/2C/FE3P-2CN6.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Optec-NGN-2_US0398R
+  ebas_method_ref: US11L_IMPROVE_nephelometer_2004
+  ebas_revision_date: '2018-10-31T14:50:00.000000Z'
+  ebas_station_altitude: 1570.0 m
+  ebas_station_code: US0398R
+  ebas_station_latitude: 32.0097
+  ebas_station_longitude: -109.3889
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2010-07-01T07:00:00Z'
+  time_coverage_start: '2003-10-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient
+  - meta_aerosol_light_scattering_coefficient
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_scattering_coefficient
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FF/B7/BD/FFB7-BDYS.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_Aurora3000_DemStation
@@ -4350,6 +5824,56 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/FK/BX/X7/FKBX-X78P.nc:
   - v_aerosol_light_scattering_coefficient
   wavelengths:
   - 550.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FM/GF/3Q/FMGF-3QGE.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_3563_TNO
+  ebas_method_ref: NL02L_scat_coef
+  ebas_revision_date: '2018-10-31T14:50:00.000000Z'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: NL0011R
+  ebas_station_latitude: 51.970278
+  ebas_station_longitude: 4.926389
+  resolution: hourly
+  time_coverage_end: '2013-01-01T00:00:00Z'
+  time_coverage_start: '2008-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FR/P7/QE/FRP7-QETB.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_AURORA3000_MSA_dry
@@ -4625,6 +6149,156 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/GU/WZ/T8/GUWZ-T8TT.nc:
   - 450.0
   - 550.0
   - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GV/SR/U5/GVSR-U5WU.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Radiance_Research_M903_FNL_dry_pm1
+  ebas_measurement_height: 5.0 m
+  ebas_method_ref: GR01L_scat_coef
+  ebas_revision_date: '2016-07-06T13:45:27.067000Z'
+  ebas_station_altitude: 150.0 m
+  ebas_station_code: GR0002R
+  ebas_station_latitude: 35.3377990723
+  ebas_station_longitude: 25.6693992615
+  resolution: hourly
+  time_coverage_end: '2012-01-01T00:00:00Z'
+  time_coverage_start: '2010-12-31T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 532.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GV/U2/SG/GVU2-SGYU.nc:
+  ebas_data_level: 3a
+  ebas_instrument_name: NILU_DMPSmodel2_TRL
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: NO01L_dmps_DMPS_TRL02_Adis_OptPar_from_DMPS
+  ebas_revision_date: '2017-09-22T08:13:35.000000Z'
+  ebas_station_altitude: 1553.0 m
+  ebas_station_code: NO0059G
+  ebas_station_latitude: -72.0117
+  ebas_station_longitude: 2.5351
+  resolution: hourly
+  time_coverage_end: '2017-01-01T00:00:00Z'
+  time_coverage_start: '2016-01-25T16:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GV/WN/2N/GVWN-2NP7.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Optec-NGN-2_US9002R
+  ebas_method_ref: US11L_IMPROVE_nephelometer_2004
+  ebas_revision_date: '2018-10-31T14:50:00.000000Z'
+  ebas_station_altitude: 3243.0 m
+  ebas_station_code: US9002R
+  ebas_station_latitude: 40.5383
+  ebas_station_longitude: -106.6766
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '1997-05-18T17:00:00Z'
+  time_coverage_start: '1993-10-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient
+  - meta_aerosol_light_scattering_coefficient
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_scattering_coefficient
+  wavelengths:
+  - 550.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GY/94/B4/GY94-B4QV.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Optec-NGN-2_US0064R
+  ebas_method_ref: US11L_IMPROVE_nephelometer_2004
+  ebas_revision_date: '2018-10-31T14:50:00.000000Z'
+  ebas_station_altitude: 1869.0 m
+  ebas_station_code: US0064R
+  ebas_station_latitude: 41.8926
+  ebas_station_longitude: -115.4261
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '1998-01-01T08:00:00Z'
+  time_coverage_start: '1993-04-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient
+  - meta_aerosol_light_scattering_coefficient
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_scattering_coefficient
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/H2/DQ/W8/H2DQ-W8Q2.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_BOS_pm10
@@ -4668,6 +6342,45 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/H2/DQ/W8/H2DQ-W8Q2.nc:
   - v_aerosol_light_backscattering_coefficient_amean
   - v_aerosol_light_backscattering_coefficient_prec1587
   - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/H3/BS/WU/H3BS-WUV9.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: MsE_3W-02_MLO
+  ebas_measurement_height: 10.0 m
+  ebas_method_ref: US06L_scat_coef
+  ebas_revision_date: '2020-04-14T06:52:39.027000Z'
+  ebas_station_altitude: 3397.0 m
+  ebas_station_code: US1200R
+  ebas_station_latitude: 19.5362300873
+  ebas_station_longitude: -155.5761566162
+  resolution: hourly
+  time_coverage_end: '2000-01-01T00:00:00Z'
+  time_coverage_start: '1994-04-21T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_temperature
   - v_aerosol_light_scattering_coefficient_amean
   - v_aerosol_light_scattering_coefficient_prec1587
   - v_aerosol_light_scattering_coefficient_perc8413
@@ -4762,6 +6475,189 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/H4/WZ/MD/H4WZ-MDKP.nc:
   - v_aerosol_light_scattering_coefficient_perc8413
   wavelengths:
   - 520.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/H5/VA/MD/H5VA-MDDE.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Optec-NGN-2_US0060R
+  ebas_method_ref: US11L_IMPROVE_nephelometer_2004
+  ebas_revision_date: '2018-10-31T14:50:00.000000Z'
+  ebas_station_altitude: 453.0 m
+  ebas_station_code: US0060R
+  ebas_station_latitude: 44.3082
+  ebas_station_longitude: -71.2177
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2005-04-01T05:00:00Z'
+  time_coverage_start: '1995-04-01T05:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient
+  - meta_aerosol_light_scattering_coefficient
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_scattering_coefficient
+  wavelengths:
+  - 550.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HE/RK/9T/HERK-9TZJ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_3563_MLO_aerosol
+  ebas_measurement_height: 10.0 m
+  ebas_method_ref: US06L_scat_coef
+  ebas_revision_date: '2025-04-02T08:46:15.563474Z'
+  ebas_station_altitude: 3397.0 m
+  ebas_station_code: US1200R
+  ebas_station_latitude: 19.5362300873
+  ebas_station_longitude: -155.5761566162
+  resolution: hourly
+  time_coverage_end: '2025-01-01T00:00:00Z'
+  time_coverage_start: '2000-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HH/EA/VJ/HHEA-VJ7P.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_3563_TNO
+  ebas_method_ref: NL02L_scat_coef
+  ebas_revision_date: '2018-10-31T14:50:00.000000Z'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: NL0011R
+  ebas_station_latitude: 51.970278
+  ebas_station_longitude: 4.926389
+  resolution: hourly
+  time_coverage_end: '2011-01-01T00:00:00Z'
+  time_coverage_start: '2010-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength_d0
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - d_Wavelength_d1
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HJ/WE/ZU/HJWE-ZUQ6.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Ecotech_Aurora_3000_FNK_dry
+  ebas_measurement_height: 5.0 m
+  ebas_method_ref: GR01L_scat_coef
+  ebas_revision_date: '2019-11-04T09:50:52.933000Z'
+  ebas_station_altitude: 150.0 m
+  ebas_station_code: GR0002R
+  ebas_station_latitude: 35.3377990723
+  ebas_station_longitude: 25.6693992615
+  resolution: hourly
+  time_coverage_end: '2018-06-26T07:00:00Z'
+  time_coverage_start: '2016-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HK/U5/WJ/HKU5-WJVH.nc:
   ebas_data_level: '2'
   ebas_instrument_name: nephelometer_Ecotech_Aurora3000
@@ -4934,6 +6830,46 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/J3/JZ/UV/J3JZ-UVXA.nc:
   - v_aerosol_light_scattering_coefficient_perc8413
   wavelengths:
   - 525.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/J6/WJ/5A/J6WJ-5A8E.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Ecotech_Aurora_1000_FNK_dry
+  ebas_measurement_height: 5.0 m
+  ebas_method_ref: GR01L_scat_coef
+  ebas_revision_date: '2015-08-20T08:24:06.940000Z'
+  ebas_station_altitude: 150.0 m
+  ebas_station_code: GR0002R
+  ebas_station_latitude: 35.3377990723
+  ebas_station_longitude: 25.6693992615
+  resolution: hourly
+  time_coverage_end: '2015-01-01T00:00:00Z'
+  time_coverage_start: '2013-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/JH/QG/QG/JHQG-QGJK.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Neph_TSI_3563133901
@@ -4975,6 +6911,46 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/JH/QG/QG/JHQG-QGJK.nc:
   - v_pressure
   - v_relative_humidity
   - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/JJ/7D/3V/JJ7D-3VUP.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_3563
+  ebas_method_ref: IT06L_scat_coef
+  ebas_revision_date: '2018-03-23T12:55:00.000000Z'
+  ebas_station_altitude: 36.0 m
+  ebas_station_code: IT0015U
+  ebas_station_latitude: 40.3358
+  ebas_station_longitude: 18.1245
+  resolution: hourly
+  time_coverage_end: '2017-01-01T00:00:00Z'
+  time_coverage_start: '2016-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
   - v_aerosol_light_backscattering_coefficient_amean
   - v_aerosol_light_backscattering_coefficient_prec1587
   - v_aerosol_light_backscattering_coefficient_perc8413
@@ -5087,6 +7063,57 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/JP/Q5/5G/JPQ5-5GXT.nc:
   - 450.0
   - 550.0
   - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/KB/Q8/KC/KBQ8-KCKS.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Aurora_3000_CIEMAT
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: ES09L_scat_coef_Aurora3000_ciemat_1
+  ebas_revision_date: '2025-06-05T11:29:05.912820Z'
+  ebas_station_altitude: 669.0 m
+  ebas_station_code: ES0021U
+  ebas_station_latitude: 40.456436
+  ebas_station_longitude: -3.725631
+  resolution: hourly
+  time_coverage_end: '2024-12-31T23:00:00Z'
+  time_coverage_start: '2024-01-01T09:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/KC/BQ/KE/KCBQ-KEFZ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Aurora_3000
@@ -5251,6 +7278,57 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/KG/S7/47/KGS7-47F5.nc:
   - v_aerosol_light_scattering_coefficient
   wavelengths:
   - 550.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/KK/AS/T5/KKAS-T5D5.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_3563_pm10
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: CZ06L_scat_coef
+  ebas_revision_date: '2016-05-26T10:19:17.847000Z'
+  ebas_station_altitude: 535.0 m
+  ebas_station_code: CZ0003R
+  ebas_station_latitude: 49.573394
+  ebas_station_longitude: 15.080278
+  resolution: hourly
+  time_coverage_end: '2015-01-01T00:00:00Z'
+  time_coverage_start: '2013-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/KM/3U/QG/KM3U-QGKC.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_SMR_pm10
@@ -5350,6 +7428,88 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/KZ/JN/ND/KZJN-NDUB.nc:
   resolution: hourly
   time_coverage_end: '2023-01-01T00:00:00Z'
   time_coverage_start: '2015-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/M4/VY/SB/M4VY-SB34.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Optec-NGN-2_US0014R
+  ebas_method_ref: US11L_IMPROVE_nephelometer_2004
+  ebas_revision_date: '2018-10-31T14:50:00.000000Z'
+  ebas_station_altitude: 1166.0 m
+  ebas_station_code: US0014R
+  ebas_station_latitude: 36.0778
+  ebas_station_longitude: -112.1288
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2012-07-01T00:00:00Z'
+  time_coverage_start: '2004-04-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient
+  - meta_aerosol_light_scattering_coefficient
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_scattering_coefficient
+  wavelengths:
+  - 550.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ME/HQ/BR/MEHQ-BRK9.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_3563_GSN_pm10
+  ebas_measurement_height: 10.0 m
+  ebas_method_ref: US06L_scat_coef
+  ebas_revision_date: '2021-01-11T11:33:48.667000Z'
+  ebas_station_altitude: 71.0 m
+  ebas_station_code: KR0101R
+  ebas_station_latitude: 33.293917
+  ebas_station_longitude: 126.163111
+  resolution: hourly
+  time_coverage_end: '2020-01-01T00:00:00Z'
+  time_coverage_start: '2001-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
@@ -5541,6 +7701,57 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/MM/EG/VW/MMEG-VWVD.nc:
   - 450.0
   - 550.0
   - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MM/FV/UX/MMFV-UX3U.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_3563_KOS_dry
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: CZ06L_scat_coef
+  ebas_revision_date: '2020-01-24T00:00:00.000000Z'
+  ebas_station_altitude: 535.0 m
+  ebas_station_code: CZ0003R
+  ebas_station_latitude: 49.573394
+  ebas_station_longitude: 15.080278
+  resolution: hourly
+  time_coverage_end: '2019-09-16T12:00:00Z'
+  time_coverage_start: '2016-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/MN/N8/DZ/MNN8-DZ5Z.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI3563
@@ -5588,6 +7799,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/MN/N8/DZ/MNN8-DZ5Z.nc:
   - v_aerosol_light_scattering_coefficient_amean
   - v_aerosol_light_scattering_coefficient_prec1587
   - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/MP/MW/MR/MPMW-MR3G.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_BOS_pm10
@@ -5776,6 +7991,57 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NG/GP/YA/NGGP-YA24.nc:
   - 450.0
   - 550.0
   - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/P2/CH/2P/P2CH-2PT6.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_3563_ETL_pm1
+  ebas_measurement_height: 10.0 m
+  ebas_method_ref: CA01L_scat_coef
+  ebas_revision_date: '2024-08-07T14:46:26.587748Z'
+  ebas_station_altitude: 500.0 m
+  ebas_station_code: CA0102R
+  ebas_station_latitude: 54.353743
+  ebas_station_longitude: -104.986864
+  resolution: hourly
+  time_coverage_end: '2023-01-01T00:00:00Z'
+  time_coverage_start: '2008-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PD/BC/8B/PDBC-8BEF.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_Aurora3000_CHC_ambient
@@ -5828,6 +8094,97 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PD/BC/8B/PDBC-8BEF.nc:
   - 450.0
   - 525.0
   - 635.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PH/X4/R4/PHX4-R4UX.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_3563_MLO_pm10
+  ebas_measurement_height: 10.0 m
+  ebas_method_ref: US06L_scat_coef
+  ebas_revision_date: '2023-01-12T15:16:43.199689Z'
+  ebas_station_altitude: 3397.0 m
+  ebas_station_code: US1200R
+  ebas_station_latitude: 19.5362300873
+  ebas_station_longitude: -155.5761566162
+  resolution: hourly
+  time_coverage_end: '2023-01-01T00:00:00Z'
+  time_coverage_start: '2000-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PJ/XM/64/PJXM-6427.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Ecotech_Aurora_1000_FNK_dry
+  ebas_measurement_height: 5.0 m
+  ebas_method_ref: GR01L_scat_coef
+  ebas_revision_date: '2021-05-19T15:04:28.017000Z'
+  ebas_station_altitude: 150.0 m
+  ebas_station_code: GR0002R
+  ebas_station_latitude: 35.3377990723
+  ebas_station_longitude: 25.6693992615
+  resolution: hourly
+  time_coverage_end: '2020-08-13T00:00:00Z'
+  time_coverage_start: '2018-07-17T12:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 525.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PK/TJ/62/PKTJ-62WN.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_WSA_pm10
@@ -5912,6 +8269,93 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PU/HR/CB/PUHR-CBC8.nc:
   - v_aerosol_light_scattering_coefficient
   wavelengths:
   - 550.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PV/75/Q3/PV75-Q38M.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Optech-NGN-2
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: US11L_IMPROVE_nephelometer_2004
+  ebas_revision_date: '2012-02-22T00:00:00.000000Z'
+  ebas_station_altitude: 289.0 m
+  ebas_station_code: US0080R
+  ebas_station_latitude: 37.6266
+  ebas_station_longitude: -79.5125
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2004-01-01T05:00:00Z'
+  time_coverage_start: '2000-10-01T05:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location_d0
+  - qc_pressure
+  - meta_pressure
+  - d_Location_d1
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient
+  - meta_aerosol_light_scattering_coefficient
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_scattering_coefficient
+  wavelengths:
+  - 550.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PW/R3/J3/PWR3-J3G6.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ECOTECHneph_Vavihill01_aerosol
+  ebas_method_ref: SE04L_scat_coef
+  ebas_revision_date: '2016-07-04T07:41:17.377000Z'
+  ebas_station_altitude: 175.0 m
+  ebas_station_code: SE0011R
+  ebas_station_latitude: 56.016667
+  ebas_station_longitude: 13.15
+  resolution: hourly
+  time_coverage_end: '2014-01-01T00:00:00Z'
+  time_coverage_start: '2012-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location_d0
+  - qc_pressure
+  - meta_pressure
+  - d_Location_d1
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 520.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PY/8T/FX/PY8T-FXPS.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_KPS_pm1
@@ -5963,6 +8407,90 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PY/8T/FX/PY8T-FXPS.nc:
   - 450.0
   - 550.0
   - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q4/BN/8J/Q4BN-8JZR.nc:
+  ebas_data_level: '1'
+  ebas_instrument_name: TSI_3563_TNO
+  ebas_measurement_height: 60.0 m
+  ebas_method_ref: NL02L_scat_coef
+  ebas_revision_date: '2015-10-07T07:37:04.093000Z'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: NL0011R
+  ebas_station_latitude: 51.970278
+  ebas_station_longitude: 4.926389
+  resolution: hourly
+  time_coverage_end: '2014-03-07T17:00:00Z'
+  time_coverage_start: '2014-01-02T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q4/U3/SK/Q4U3-SKQV.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: MRI_4-W_MLO
+  ebas_measurement_height: 10.0 m
+  ebas_method_ref: US06L_scat_coef
+  ebas_revision_date: '2020-04-14T06:51:32.337000Z'
+  ebas_station_altitude: 3397.0 m
+  ebas_station_code: US1200R
+  ebas_station_latitude: 19.5362300873
+  ebas_station_longitude: -155.5761566162
+  resolution: hourly
+  time_coverage_end: '1994-04-21T00:00:00Z'
+  time_coverage_start: '1974-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
+  - 850.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QE/C6/W5/QEC6-W57W.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_Aurora_3000
@@ -6010,6 +8538,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QE/C6/W5/QEC6-W57W.nc:
   - v_aerosol_light_scattering_coefficient_amean
   - v_aerosol_light_scattering_coefficient_prec1587
   - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QG/SE/EY/QGSE-EYMR.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_ARN_pm1
@@ -6061,6 +8593,54 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QG/SE/EY/QGSE-EYMR.nc:
   - 450.0
   - 550.0
   - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QG/ZS/5X/QGZS-5XKM.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ECOTECHneph_Vavihill01_aerosol
+  ebas_method_ref: SE04L_scat_coef
+  ebas_revision_date: '2016-07-04T07:41:17.377000Z'
+  ebas_station_altitude: 175.0 m
+  ebas_station_code: SE0011R
+  ebas_station_latitude: 56.016667
+  ebas_station_longitude: 13.15
+  resolution: hourly
+  time_coverage_end: '2012-01-01T00:00:00Z'
+  time_coverage_start: '2010-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location_d0
+  - qc_pressure
+  - meta_pressure
+  - d_Location_d1
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 520.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QS/NH/GM/QSNH-GMQV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: nephelometer_Ecotech_M9003_525nm
@@ -6102,6 +8682,57 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QS/NH/GM/QSNH-GMQV.nc:
   - v_aerosol_light_scattering_coefficient_perc8413
   wavelengths:
   - 525.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QS/S6/6C/QSS6-6CRV.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Ecotech_AURORA3000_MSY_dry
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: ES05L_scat_coef
+  ebas_revision_date: '2017-04-26T00:00:00.000000Z'
+  ebas_station_altitude: 700.0 m
+  ebas_station_code: ES1778R
+  ebas_station_latitude: 41.766667
+  ebas_station_longitude: 2.35
+  resolution: hourly
+  time_coverage_end: '2017-01-01T00:00:00Z'
+  time_coverage_start: '2016-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QT/QF/KS/QTQF-KSAZ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Optec-NGN-2_US0038R
@@ -6381,6 +9012,37 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/R4/XX/U2/R4XX-U2YA.nc:
   - 450.0
   - 550.0
   - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/R6/5B/8R/R65B-8RYC.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Optec-NGN-2_US9085R
+  ebas_method_ref: US11L_IMPROVE_nephelometer_2004
+  ebas_revision_date: '2018-10-31T14:50:00.000000Z'
+  ebas_station_altitude: 1690.0 m
+  ebas_station_code: US9085R
+  ebas_station_latitude: 34.9139
+  ebas_station_longitude: -109.7958
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2010-07-01T07:00:00Z'
+  time_coverage_start: '2003-10-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient
+  - meta_aerosol_light_scattering_coefficient
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_scattering_coefficient
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/R8/S5/KK/R8S5-KKR9.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Optec-NGN-2_US9035
@@ -6417,6 +9079,57 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/R8/S5/KK/R8S5-KKR9.nc:
   - v_aerosol_light_scattering_coefficient
   wavelengths:
   - 550.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RD/YR/69/RDYR-69K8.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_3563_CPR_pm10
+  ebas_measurement_height: 10.0 m
+  ebas_method_ref: US06L_scat_coef
+  ebas_revision_date: '2022-05-04T13:27:03.260000Z'
+  ebas_station_altitude: 65.0 m
+  ebas_station_code: PR0100C
+  ebas_station_latitude: 18.381
+  ebas_station_longitude: -65.618
+  resolution: hourly
+  time_coverage_end: '2021-01-01T00:00:00Z'
+  time_coverage_start: '2006-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RE/FD/JN/REFD-JN7W.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_WHI_pm1
@@ -6607,6 +9320,41 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RJ/XN/Y3/RJXN-Y378.nc:
   - 450.0
   - 525.0
   - 635.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RK/58/TD/RK58-TDKF.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Optec-NGN-2_MLO
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: US11L_IMPROVE_nephelometer_2004
+  ebas_revision_date: '2016-12-14T12:01:10.000000Z'
+  ebas_station_altitude: 1166.0 m
+  ebas_station_code: US0014R
+  ebas_station_latitude: 36.0778
+  ebas_station_longitude: -112.1288
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2013-10-02T07:00:00Z'
+  time_coverage_start: '2004-04-02T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient
+  - meta_aerosol_light_scattering_coefficient
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_scattering_coefficient
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RM/6G/8C/RM6G-8CY3.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI3563_sernum_1027_and_1025
@@ -6807,6 +9555,94 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RS/PB/53/RSPB-53NA.nc:
   - 450.0
   - 550.0
   - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/S3/UF/7A/S3UF-7AWR.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Ecotech_Aurora_1000_FNK_dry
+  ebas_measurement_height: 5.0 m
+  ebas_method_ref: GR01L_scat_coef
+  ebas_revision_date: '2016-08-10T00:00:00.000000Z'
+  ebas_station_altitude: 150.0 m
+  ebas_station_code: GR0002R
+  ebas_station_latitude: 35.3377990723
+  ebas_station_longitude: 25.6693992615
+  resolution: hourly
+  time_coverage_end: '2015-03-09T15:00:00Z'
+  time_coverage_start: '2015-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 525.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/SC/68/PB/SC68-PBSQ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Ecotech_Aurora_4000
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: AT04L_neph_control_lev2_0_0_1
+  ebas_revision_date: '2025-08-15T09:52:57.971474Z'
+  ebas_station_altitude: 3106.0 m
+  ebas_station_code: AT0034G
+  ebas_station_latitude: 47.05407
+  ebas_station_longitude: 12.95794
+  resolution: hourly
+  time_coverage_end: '2025-01-01T00:00:00Z'
+  time_coverage_start: '2016-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/SG/RH/DD/SGRH-DDPC.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI3561_sernum_1035
@@ -6852,6 +9688,57 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/SG/RH/DD/SGRH-DDPC.nc:
   - v_aerosol_light_scattering_coefficient_perc8413
   wavelengths:
   - 550.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/SJ/JB/4R/SJJB-4RPJ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_Neph_3563
+  ebas_measurement_height: 15.0 m
+  ebas_method_ref: DE09L_scatt_NEPH
+  ebas_revision_date: '2017-07-21T00:00:00.000000Z'
+  ebas_station_altitude: 975.0 m
+  ebas_station_code: DE0043G
+  ebas_station_latitude: 47.8014984131
+  ebas_station_longitude: 11.009619
+  resolution: hourly
+  time_coverage_end: '2016-12-31T23:59:59Z'
+  time_coverage_start: '2010-02-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/SS/UN/9W/SSUN-9WS8.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Optec-NGN-2_US2905
@@ -7139,6 +10026,210 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/T9/G7/TU/T9G7-TUDY.nc:
   - v_aerosol_light_scattering_coefficient
   wavelengths:
   - 550.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/TG/8X/A9/TG8X-A965.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_3563_ZEP_dry
+  ebas_method_ref: SE02L_scat_coef
+  ebas_revision_date: '2015-02-16T11:12:41.373000Z'
+  ebas_station_altitude: 474.0 m
+  ebas_station_code: NO0042G
+  ebas_station_latitude: 78.90715
+  ebas_station_longitude: 11.88668
+  resolution: hourly
+  time_coverage_end: '2014-01-01T00:00:00Z'
+  time_coverage_start: '2010-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/TK/D8/4Q/TKD8-4QP5.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Aurora4000_PRG
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: CZ03L_scat_coef_Aurora4000
+  ebas_revision_date: '2024-05-31T00:00:00.000000Z'
+  ebas_station_altitude: 270.0 m
+  ebas_station_code: CZ0004B
+  ebas_station_latitude: 50.126389
+  ebas_station_longitude: 14.384648
+  resolution: hourly
+  time_coverage_end: '2023-12-31T23:00:00Z'
+  time_coverage_start: '2023-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location_d0
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - d_Location_d1
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/TN/J6/RU/TNJ6-RUD2.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_3563_GSN_aerosol
+  ebas_measurement_height: 10.0 m
+  ebas_method_ref: US06L_scat_coef
+  ebas_revision_date: '2020-02-19T23:01:27.947000Z'
+  ebas_station_altitude: 71.0 m
+  ebas_station_code: KR0101R
+  ebas_station_latitude: 33.293917
+  ebas_station_longitude: 126.163111
+  resolution: hourly
+  time_coverage_end: '2012-01-01T00:00:00Z'
+  time_coverage_start: '2008-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/TN/MS/9R/TNMS-9RC5.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Aurora3000_KOS
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: CZ06L_scat_coef_Aurora3000
+  ebas_revision_date: '2023-05-16T15:49:43.389253Z'
+  ebas_station_altitude: 535.0 m
+  ebas_station_code: CZ0003R
+  ebas_station_latitude: 49.573394
+  ebas_station_longitude: 15.080278
+  resolution: hourly
+  time_coverage_end: '2022-12-31T23:00:00Z'
+  time_coverage_start: '2020-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/TP/G3/EW/TPG3-EWY8.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI3563_1081
@@ -7381,6 +10472,97 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/UB/MJ/ET/UBMJ-ETWE.nc:
   - 450.0
   - 550.0
   - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UM/GK/SS/UMGK-SSZM.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Aurora_3000_CIEMAT
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: ES09L_scat_coef_Aurora3000_ciemat
+  ebas_revision_date: '2024-05-04T12:00:00.000000Z'
+  ebas_station_altitude: 669.0 m
+  ebas_station_code: ES0021U
+  ebas_station_latitude: 40.456436
+  ebas_station_longitude: -3.725631
+  resolution: hourly
+  time_coverage_end: '2023-12-29T13:00:00Z'
+  time_coverage_start: '2020-10-05T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/V6/AS/X7/V6AS-X7Z4.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_3563_EGB
+  ebas_method_ref: CA01L_scat_coef
+  ebas_revision_date: '2018-10-31T14:50:00.000000Z'
+  ebas_station_altitude: 255.0 m
+  ebas_station_code: CA0011R
+  ebas_station_latitude: 44.231006
+  ebas_station_longitude: -79.783839
+  resolution: hourly
+  time_coverage_end: '2010-01-01T00:00:00Z'
+  time_coverage_start: '2009-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/V9/GN/45/V9GN-4538.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_Aurora3000_JFJ_dry
@@ -7586,6 +10768,57 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VH/FZ/D5/VHFZ-D5FQ.nc:
   - 450.0
   - 550.0
   - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VK/7W/CV/VK7W-CVQT.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_3563_CPT_pm10
+  ebas_measurement_height: 30.0 m
+  ebas_method_ref: ZA02L_scat_coef
+  ebas_revision_date: '2015-09-16T12:00:46.057000Z'
+  ebas_station_altitude: 230.0 m
+  ebas_station_code: ZA0001G
+  ebas_station_latitude: -34.35348
+  ebas_station_longitude: 18.48968
+  resolution: hourly
+  time_coverage_end: '2014-01-01T00:00:00Z'
+  time_coverage_start: '2006-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VM/CT/23/VMCT-23ZB.nc:
   ebas_data_level: '2'
   ebas_instrument_name: IN3563
@@ -7671,6 +10904,124 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VN/ES/8Y/VNES-8YBM.nc:
   - v_aerosol_light_scattering_coefficient_amean
   - v_aerosol_light_scattering_coefficient_prec1587
   - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 550.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VQ/SZ/R2/VQSZ-R2DM.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Optec-NGN-2_US9077
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: US11L_IMPROVE_nephelometer_2004
+  ebas_revision_date: '2012-02-22T00:00:00.000000Z'
+  ebas_station_altitude: 1049.0 m
+  ebas_station_code: US9077R
+  ebas_station_latitude: 47.422
+  ebas_station_longitude: -121.4259
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2001-07-02T08:00:00Z'
+  time_coverage_start: '1993-07-02T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location_d0
+  - qc_pressure
+  - meta_pressure
+  - d_Location_d1
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient
+  - meta_aerosol_light_scattering_coefficient
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_scattering_coefficient
+  wavelengths:
+  - 550.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VR/34/B4/VR34-B44S.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_3563_CPT_pm1
+  ebas_measurement_height: 30.0 m
+  ebas_method_ref: ZA02L_scat_coef
+  ebas_revision_date: '2015-09-16T11:57:26.547000Z'
+  ebas_station_altitude: 230.0 m
+  ebas_station_code: ZA0001G
+  ebas_station_latitude: -34.35348
+  ebas_station_longitude: 18.48968
+  resolution: hourly
+  time_coverage_end: '2014-01-01T00:00:00Z'
+  time_coverage_start: '2005-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VS/FS/F2/VSFS-F27B.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Optec-NGN-2_US0083R
+  ebas_method_ref: US11L_IMPROVE_nephelometer_2004
+  ebas_revision_date: '2018-10-31T14:50:00.000000Z'
+  ebas_station_altitude: 178.0 m
+  ebas_station_code: US0083R
+  ebas_station_latitude: 45.6644
+  ebas_station_longitude: -121.0008
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2005-04-01T08:00:00Z'
+  time_coverage_start: '1993-07-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient
+  - meta_aerosol_light_scattering_coefficient
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_scattering_coefficient
   wavelengths:
   - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VY/9P/HX/VY9P-HXGG.nc:
@@ -7788,6 +11139,57 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/W7/SU/N2/W7SU-N2MR.nc:
   resolution: hourly
   time_coverage_end: '2012-06-29T17:00:00Z'
   time_coverage_start: '2008-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/WB/UD/CT/WBUD-CTEP.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_3563_THD_pm10
+  ebas_measurement_height: 10.0 m
+  ebas_method_ref: US06L_scat_coef
+  ebas_revision_date: '2020-03-06T14:20:31.227000Z'
+  ebas_station_altitude: 107.0 m
+  ebas_station_code: US6005G
+  ebas_station_latitude: 41.0541000366
+  ebas_station_longitude: -124.1510009766
+  resolution: hourly
+  time_coverage_end: '2018-01-01T00:00:00Z'
+  time_coverage_start: '2002-01-01T00:00:00Z'
   variables:
   - time
   - time_bnds
@@ -8175,6 +11577,95 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XJ/J2/29/XJJ2-29BY.nc:
   - 450.0
   - 525.0
   - 635.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XK/FC/A9/XKFC-A995.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Aurora_3000_CIEMAT
+  ebas_measurement_height: 4.0 m
+  ebas_method_ref: ES09L_scat_coef_Aurora3000_ciemat
+  ebas_revision_date: '2022-05-04T12:00:00.000000Z'
+  ebas_station_altitude: 669.0 m
+  ebas_station_code: ES0021U
+  ebas_station_latitude: 40.456436
+  ebas_station_longitude: -3.725631
+  resolution: hourly
+  time_coverage_end: '2022-01-01T00:00:00Z'
+  time_coverage_start: '2021-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XM/QG/SD/XMQG-SDDV.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Ecotech_Aurora3000_TLL_dry
+  ebas_measurement_height: 8.0 m
+  ebas_method_ref: CL01L_scat_coef
+  ebas_revision_date: '2021-06-13T13:45:41.127000Z'
+  ebas_station_altitude: 2220.0 m
+  ebas_station_code: CL0001R
+  ebas_station_latitude: -30.17254
+  ebas_station_longitude: -70.79923
+  resolution: hourly
+  time_coverage_end: '2020-01-01T00:00:00Z'
+  time_coverage_start: '2013-04-29T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XP/27/YD/XP27-YDGT.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_PAL_dry
@@ -8223,6 +11714,118 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XP/27/YD/XP27-YDGT.nc:
   - 450.0
   - 550.0
   - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XP/CB/KC/XPCB-KCZJ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Aurora3000_Vielsalm
+  ebas_measurement_height: 3.5 m
+  ebas_method_ref: BE03L_Nephelometer
+  ebas_revision_date: '2025-12-10T00:00:00.000000Z'
+  ebas_station_altitude: 496.0 m
+  ebas_station_code: BE0007R
+  ebas_station_latitude: 50.304003
+  ebas_station_longitude: 6.001271
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2025-01-01T00:00:00Z'
+  time_coverage_start: '2024-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient
+  - meta_aerosol_light_backscattering_coefficient
+  - qc_aerosol_light_scattering_coefficient
+  - meta_aerosol_light_scattering_coefficient
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient
+  - v_aerosol_light_scattering_coefficient
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XQ/DN/69/XQDN-693Z.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TSI_3563_THD_pm1
+  ebas_measurement_height: 10.0 m
+  ebas_method_ref: US06L_scat_coef
+  ebas_revision_date: '2020-03-06T14:02:31.793000Z'
+  ebas_station_altitude: 107.0 m
+  ebas_station_code: US6005G
+  ebas_station_latitude: 41.0541000366
+  ebas_station_longitude: -124.1510009766
+  resolution: hourly
+  time_coverage_end: '2018-01-01T00:00:00Z'
+  time_coverage_start: '2002-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_pressure
+  - meta_pressure
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_backscattering_coefficient_amean
+  - meta_aerosol_light_backscattering_coefficient_amean
+  - qc_aerosol_light_backscattering_coefficient_prec1587
+  - meta_aerosol_light_backscattering_coefficient_prec1587
+  - qc_aerosol_light_backscattering_coefficient_perc8413
+  - meta_aerosol_light_backscattering_coefficient_perc8413
+  - qc_aerosol_light_scattering_coefficient_amean
+  - meta_aerosol_light_scattering_coefficient_amean
+  - qc_aerosol_light_scattering_coefficient_prec1587
+  - meta_aerosol_light_scattering_coefficient_prec1587
+  - qc_aerosol_light_scattering_coefficient_perc8413
+  - meta_aerosol_light_scattering_coefficient_perc8413
+  - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_backscattering_coefficient_amean
+  - v_aerosol_light_backscattering_coefficient_prec1587
+  - v_aerosol_light_backscattering_coefficient_perc8413
+  - v_aerosol_light_scattering_coefficient_amean
+  - v_aerosol_light_scattering_coefficient_prec1587
+  - v_aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XX/9Q/37/XX9Q-37ET.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Neph1
+  ebas_method_ref: NL01L_scatter_coef
+  ebas_revision_date: '2018-10-31T14:50:00.000000Z'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: NL0011R
+  ebas_station_latitude: 51.970278
+  ebas_station_longitude: 4.926389
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2006-01-01T00:00:00Z'
+  time_coverage_start: '2005-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_aerosol_light_scattering_coefficient
+  - qc_aerosol_light_scattering_coefficient
+  - meta_aerosol_light_scattering_coefficient
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XZ/4Q/EB/XZ4Q-EBRW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_SUM
@@ -8356,6 +11959,37 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/YH/DY/R8/YHDY-R8HC.nc:
   - 450.0
   - 550.0
   - 700.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/YT/PV/NT/YTPV-NTES.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Optec-NGN-2_US0080R
+  ebas_method_ref: US11L_IMPROVE_nephelometer_2004
+  ebas_revision_date: '2018-10-31T14:50:00.000000Z'
+  ebas_station_altitude: 289.0 m
+  ebas_station_code: US0080R
+  ebas_station_latitude: 37.6266
+  ebas_station_longitude: -79.5125
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2004-01-01T05:00:00Z'
+  time_coverage_start: '2000-10-01T05:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient
+  - meta_aerosol_light_scattering_coefficient
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_scattering_coefficient
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/YU/8U/3R/YU8U-3RSW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Neph_TSI_356313390
@@ -8660,6 +12294,37 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZP/CC/4W/ZPCC-4W84.nc:
   - qc_aerosol_light_scattering_coefficient
   - meta_aerosol_light_scattering_coefficient
   - v_pressure
+  - v_relative_humidity
+  - v_temperature
+  - v_aerosol_light_scattering_coefficient
+  wavelengths:
+  - 550.0
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZR/FF/ST/ZRFF-ST72.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Optec-NGN-2_US5501R
+  ebas_method_ref: US11L_IMPROVE_nephelometer_2004
+  ebas_revision_date: '2018-10-31T14:50:00.000000Z'
+  ebas_station_altitude: 56.0 m
+  ebas_station_code: US5501R
+  ebas_station_latitude: 18.3362
+  ebas_station_longitude: -64.7962
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: '2005-10-01T04:00:00Z'
+  time_coverage_start: '1998-04-01T04:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - d_Location
+  - qc_relative_humidity
+  - meta_relative_humidity
+  - qc_temperature
+  - meta_temperature
+  - d_Wavelength
+  - qc_aerosol_light_scattering_coefficient
+  - meta_aerosol_light_scattering_coefficient
   - v_relative_humidity
   - v_temperature
   - v_aerosol_light_scattering_coefficient

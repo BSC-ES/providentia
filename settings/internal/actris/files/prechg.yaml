@@ -1,3 +1,24 @@
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/2M/DG/CD/2MDG-CD6Z.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: hg_bs_91
+  ebas_method_ref: GB03L_ICP_MS
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 120.0 m
+  ebas_station_code: GB0091R
+  ebas_station_latitude: 57.076667
+  ebas_station_longitude: -2.534444
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2010-01-16T08:00:00Z'
+  time_coverage_start: '2009-01-11T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/2N/9A/C7/2N9A-C7D2.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_hg_01
@@ -18,6 +39,29 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/2N/9A/C7/2N9A-C7D2.nc:
   - v_precipitation_amount
   - qc_precipitation_amount
   - meta_precipitation_amount
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/2S/CG/MF/2SCG-MF7X.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: NSA_1
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: DE0009R
+  ebas_station_latitude: 54.4368
+  ebas_station_longitude: 12.7249
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '1999-01-02T08:00:00Z'
+  time_coverage_start: '1998-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount_off
+  - qc_precipitation_amount_off
+  - meta_precipitation_amount_off
   - v_mercury
   - qc_mercury
   - meta_mercury
@@ -394,6 +438,29 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/48/TX/S6/48TX-S6PX.nc:
   - v_zinc
   - qc_zinc
   - meta_zinc
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/49/23/FN/4923-FNFJ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: EQ1_MP_05_69
+  ebas_revision_date: '2025-10-14T00:00:00.000000Z'
+  ebas_station_altitude: 496.0 m
+  ebas_station_code: BE0007R
+  ebas_station_latitude: 50.304003
+  ebas_station_longitude: 6.001271
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2025-01-06T00:00:00Z'
+  time_coverage_start: '2024-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/49/UJ/DE/49UJ-DE3P.nc:
   ebas_data_level: '2'
   ebas_instrument_name: wados_8
@@ -797,6 +864,81 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5A/3W/QM/5A3W-QM64.nc:
   - v_mercury
   - qc_mercury
   - meta_mercury
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5G/9V/W9/5G9V-W9H9.nc:
+  ebas_data_level: '2'
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 420.0 m
+  ebas_station_code: IE0002R
+  ebas_station_latitude: 53.036667
+  ebas_station_longitude: -6.4
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '1994-01-01T00:00:00Z'
+  time_coverage_start: '1992-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount_0
+  - qc_precipitation_amount_0
+  - meta_precipitation_amount_0
+  - v_precipitation_amount_1
+  - qc_precipitation_amount_1
+  - meta_precipitation_amount_1
+  - v_alpha_HCH
+  - qc_alpha_HCH
+  - meta_alpha_HCH
+  - v_gamma_HCH
+  - qc_gamma_HCH
+  - meta_gamma_HCH
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
+  - v_arsenic
+  - qc_arsenic
+  - meta_arsenic
+  - v_cadmium
+  - qc_cadmium
+  - meta_cadmium
+  - v_chromium
+  - qc_chromium
+  - meta_chromium
+  - v_copper
+  - qc_copper
+  - meta_copper
+  - v_lead
+  - qc_lead
+  - meta_lead
+  - v_nickel
+  - qc_nickel
+  - meta_nickel
+  - v_zinc
+  - qc_zinc
+  - meta_zinc
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5H/TG/C5/5HTG-C5EQ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: hg_bs_91
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 120.0 m
+  ebas_station_code: GB0091R
+  ebas_station_latitude: 57.076667
+  ebas_station_longitude: -2.534444
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2013-01-13T14:00:00Z'
+  time_coverage_start: '2010-01-16T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/62/29/E3/6229-E3DP.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bulk_hg_samp_36
@@ -1070,6 +1212,51 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/6W/M4/FG/6WM4-FGCN.nc:
   resolution: Unrecognised (P0000-00-07T00:00:00)
   time_coverage_end: '2013-01-01T06:00:00Z'
   time_coverage_start: '2012-01-03T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/7H/BE/PE/7HBE-PEQK.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: wados_hg_08
+  ebas_method_ref: SI03L_precip_EMEPbased_AAS
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 520.0 m
+  ebas_station_code: SI0008R
+  ebas_station_latitude: 45.566667
+  ebas_station_longitude: 14.866667
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-14T00:00:00)
+  time_coverage_end: '2014-01-06T10:00:00Z'
+  time_coverage_start: '2010-01-11T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/7K/WF/ZF/7KWF-ZFUZ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: b_Hg
+  ebas_measurement_height: 1.5 m
+  ebas_revision_date: '2024-11-04T14:10:07.588420Z'
+  ebas_station_altitude: 157.0 m
+  ebas_station_code: PL0005R
+  ebas_station_latitude: 54.15
+  ebas_station_longitude: 22.066667
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-28T00:00:00)
+  time_coverage_end: '2024-01-01T06:00:00Z'
+  time_coverage_start: '2016-01-04T06:00:00Z'
   variables:
   - time
   - time_bnds
@@ -1434,6 +1621,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8Z/5M/DF/8Z5M-DFG2.nc:
   - v_mercury
   - qc_mercury
   - meta_mercury
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/93/FX/EN/93FX-EN7V.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: IJS_AAS_1
+  ebas_method_ref: SI03L_precip_EMEPbased_AAS
+  ebas_revision_date: '2024-09-18T12:48:53.198005Z'
+  ebas_station_altitude: 520.0 m
+  ebas_station_code: SI0008R
+  ebas_station_latitude: 45.566667
+  ebas_station_longitude: 14.866667
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2024-01-01T08:00:00Z'
+  time_coverage_start: '2015-01-05T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/98/7C/PE/987C-PEND.nc:
   ebas_data_level: '2'
   ebas_instrument_name: APA01_MV
@@ -1698,6 +1909,29 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/98/T6/MS/98T6-MSG9.nc:
   - v_mercury
   - qc_mercury
   - meta_mercury
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/9B/U9/BX/9BU9-BXZK.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ARS_Hg
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 12.0 m
+  ebas_station_code: DE0001R
+  ebas_station_latitude: 54.925556
+  ebas_station_longitude: 8.309722
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2013-01-02T08:00:00Z'
+  time_coverage_start: '2012-01-03T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9D/4F/V5/9D4F-V5SH.nc:
   ebas_data_level: '2'
   ebas_instrument_name: wados_hg_08
@@ -1860,6 +2094,29 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9U/JF/7K/9UJF-7KV4.nc:
   - v_mercury
   - qc_mercury
   - meta_mercury
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/9U/SF/98/9USF-98Q6.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0008R_MCV_CL-002
+  ebas_revision_date: '2025-03-24T15:57:27.353751Z'
+  ebas_station_altitude: 134.0 m
+  ebas_station_code: ES0008R
+  ebas_station_latitude: 43.43917
+  ebas_station_longitude: -4.85
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2023-12-31T00:00:00Z'
+  time_coverage_start: '2023-01-02T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9V/VK/BN/9VVK-BNNZ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bulk_hg_samp_14
@@ -1927,6 +2184,54 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AH/J6/AD/AHJ6-AD97.nc:
   - v_zinc
   - qc_zinc
   - meta_zinc
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AM/J9/ZH/AMJ9-ZHM8.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: bulk_hg_samp_14
+  ebas_method_ref: SE01L_WM
+  ebas_revision_date: '2024-12-04T12:52:35.881420Z'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: SE0014R
+  ebas_station_latitude: 57.394
+  ebas_station_longitude: 11.914
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-14T00:00:00)
+  time_coverage_end: '2024-01-01T23:00:00Z'
+  time_coverage_start: '2015-01-01T23:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/B2/YH/B3/B2YH-B3PR.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Sc_NSA_0101
+  ebas_measurement_height: 1.9 m
+  ebas_revision_date: '2024-11-06T06:00:00.000000Z'
+  ebas_station_altitude: 1205.0 m
+  ebas_station_code: DE0003R
+  ebas_station_latitude: 47.914722
+  ebas_station_longitude: 7.908611
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2024-01-02T07:00:00Z'
+  time_coverage_start: '2013-12-30T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/B7/ZF/VA/B7ZF-VAYK.nc:
   ebas_data_level: '2'
   ebas_instrument_name: hm_bs_1
@@ -2203,6 +2508,70 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/C4/U3/PV/C4U3-PVXH.nc:
   - v_vanadium
   - qc_vanadium
   - meta_vanadium
+  - v_zinc
+  - qc_zinc
+  - meta_zinc
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CP/SH/5A/CPSH-5AGT.nc:
+  ebas_data_level: '2'
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 420.0 m
+  ebas_station_code: IE0002R
+  ebas_station_latitude: 53.036667
+  ebas_station_longitude: -6.4
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '1996-01-01T00:00:00Z'
+  time_coverage_start: '1995-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount_0
+  - qc_precipitation_amount_0
+  - meta_precipitation_amount_0
+  - v_precipitation_amount_1
+  - qc_precipitation_amount_1
+  - meta_precipitation_amount_1
+  - v_aldrin
+  - qc_aldrin
+  - meta_aldrin
+  - v_alpha_HCH
+  - qc_alpha_HCH
+  - meta_alpha_HCH
+  - v_dieldrin
+  - qc_dieldrin
+  - meta_dieldrin
+  - v_endrin
+  - qc_endrin
+  - meta_endrin
+  - v_gamma_HCH
+  - qc_gamma_HCH
+  - meta_gamma_HCH
+  - v_heptachlor
+  - qc_heptachlor
+  - meta_heptachlor
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
+  - v_arsenic
+  - qc_arsenic
+  - meta_arsenic
+  - v_cadmium
+  - qc_cadmium
+  - meta_cadmium
+  - v_chromium
+  - qc_chromium
+  - meta_chromium
+  - v_copper
+  - qc_copper
+  - meta_copper
+  - v_lead
+  - qc_lead
+  - meta_lead
+  - v_nickel
+  - qc_nickel
+  - meta_nickel
   - v_zinc
   - qc_zinc
   - meta_zinc
@@ -2519,6 +2888,29 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DV/Z6/5D/DVZ6-5DWA.nc:
   - v_zinc
   - qc_zinc
   - meta_zinc
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/DY/XZ/ZH/DYXZ-ZH2E.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ivl-type37
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 340.0 m
+  ebas_station_code: FI0036R
+  ebas_station_latitude: 68.0
+  ebas_station_longitude: 24.237222222
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2012-01-01T06:00:00Z'
+  time_coverage_start: '2011-01-01T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/E9/RQ/XP/E9RQ-XPF4.nc:
   ebas_data_level: '2'
   ebas_instrument_name: NSA_Hg_03
@@ -2899,6 +3291,41 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/G5/XZ/WS/G5XZ-WS6T.nc:
   - v_mercury
   - qc_mercury
   - meta_mercury
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/G5/Y4/EZ/G5Y4-EZKR.nc:
+  ebas_data_level: '2'
+  ebas_measurement_height: 1.8 m
+  ebas_revision_date: '2015-08-21T14:19:08.000000Z'
+  ebas_station_altitude: 18.0 m
+  ebas_station_code: LV0010R
+  ebas_station_latitude: 56.161944
+  ebas_station_longitude: 21.173056
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2015-01-05T08:00:00Z'
+  time_coverage_start: '2013-12-30T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount_off
+  - qc_precipitation_amount_off
+  - meta_precipitation_amount_off
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
+  - v_arsenic
+  - qc_arsenic
+  - meta_arsenic
+  - v_cadmium
+  - qc_cadmium
+  - meta_cadmium
+  - v_lead
+  - qc_lead
+  - meta_lead
+  - v_nickel
+  - qc_nickel
+  - meta_nickel
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/G9/X9/SY/G9X9-SYBK.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_93
@@ -3056,6 +3483,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/GJ/UQ/9B/GJUQ-9BDB.nc:
   - qc_zinc
   - meta_zinc
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/GN/2C/HC/GN2C-HC2R.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_We_NSA_0101
+  ebas_measurement_height: 1.6 m
+  ebas_revision_date: '2025-10-07T13:15:23.619501Z'
+  ebas_station_altitude: 12.0 m
+  ebas_station_code: DE0001R
+  ebas_station_latitude: 54.925556
+  ebas_station_longitude: 8.309722
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2024-12-30T07:00:00Z'
+  time_coverage_start: '2013-12-30T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GQ/W2/PU/GQW2-PUKZ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: UBA_We_NSA_0101
   ebas_measurement_height: 1.6 m
@@ -3534,6 +3985,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/JM/CE/YS/JMCE-YSNJ.nc:
   - v_mercury
   - qc_mercury
   - meta_mercury
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/JS/VF/2G/JSVF-2GBH.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Zg_NSA_0101
+  ebas_measurement_height: 1.6 m
+  ebas_revision_date: '2025-07-01T06:00:00.000000Z'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: DE0009R
+  ebas_station_latitude: 54.4368
+  ebas_station_longitude: 12.7249
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2025-01-07T07:00:00Z'
+  time_coverage_start: '2013-12-30T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/JT/J2/CR/JTJ2-CRVP.nc:
   ebas_data_level: '2'
   ebas_instrument_name: ivl-type37
@@ -3557,6 +4032,79 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/JT/J2/CR/JTJ2-CRVP.nc:
   - v_mercury
   - qc_mercury
   - meta_mercury
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/K6/58/8H/K658-8H7F.nc:
+  ebas_data_level: '2'
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 420.0 m
+  ebas_station_code: IE0002R
+  ebas_station_latitude: 53.036667
+  ebas_station_longitude: -6.4
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '1999-01-01T00:00:00Z'
+  time_coverage_start: '1996-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount_0
+  - qc_precipitation_amount_0
+  - meta_precipitation_amount_0
+  - v_precipitation_amount_1
+  - qc_precipitation_amount_1
+  - meta_precipitation_amount_1
+  - v_aldrin
+  - qc_aldrin
+  - meta_aldrin
+  - v_alpha_HCH
+  - qc_alpha_HCH
+  - meta_alpha_HCH
+  - v_dieldrin
+  - qc_dieldrin
+  - meta_dieldrin
+  - v_endrin
+  - qc_endrin
+  - meta_endrin
+  - v_gamma_HCH
+  - qc_gamma_HCH
+  - meta_gamma_HCH
+  - v_heptachlor
+  - qc_heptachlor
+  - meta_heptachlor
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
+  - v_pp_DDD
+  - qc_pp_DDD
+  - meta_pp_DDD
+  - v_pp_DDE
+  - qc_pp_DDE
+  - meta_pp_DDE
+  - v_pp_DDT
+  - qc_pp_DDT
+  - meta_pp_DDT
+  - v_arsenic
+  - qc_arsenic
+  - meta_arsenic
+  - v_cadmium
+  - qc_cadmium
+  - meta_cadmium
+  - v_chromium
+  - qc_chromium
+  - meta_chromium
+  - v_copper
+  - qc_copper
+  - meta_copper
+  - v_lead
+  - qc_lead
+  - meta_lead
+  - v_nickel
+  - qc_nickel
+  - meta_nickel
+  - v_zinc
+  - qc_zinc
+  - meta_zinc
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/KC/7C/2X/KC7C-2XT6.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Eigenbrodt_UNS-130E
@@ -3649,6 +4197,51 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/KN/UJ/43/KNUJ-43SP.nc:
   - time_bnds
   - metadata_time
   - metadata_time_bnds
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/KS/75/RT/KS75-RTU4.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: wados_1w_08
+  ebas_method_ref: ES01L_cvafs
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 134.0 m
+  ebas_station_code: ES0008R
+  ebas_station_latitude: 43.43917
+  ebas_station_longitude: -4.85
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2011-01-03T07:00:00Z'
+  time_coverage_start: '2009-01-05T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/M3/SW/R7/M3SW-R79G.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: bulk_hg_samp_20
+  ebas_method_ref: SE01L_WM
+  ebas_revision_date: '2024-12-04T10:10:30.959304Z'
+  ebas_station_altitude: 190.0 m
+  ebas_station_code: SE0020R
+  ebas_station_latitude: 56.0429
+  ebas_station_longitude: 13.148
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-14T00:00:00)
+  time_coverage_end: '2023-12-31T23:00:00Z'
+  time_coverage_start: '2016-01-03T23:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
   - v_mercury
   - qc_mercury
   - meta_mercury
@@ -3901,6 +4494,68 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NF/6P/JZ/NF6P-JZXA.nc:
   - v_mercury
   - qc_mercury
   - meta_mercury
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NN/RJ/D3/NNRJ-D3EK.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: BS1a
+  ebas_revision_date: '2023-08-24T13:26:00.000000Z'
+  ebas_station_altitude: 11.0 m
+  ebas_station_code: IE0001R
+  ebas_station_latitude: 51.939722
+  ebas_station_longitude: -10.244444
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2023-01-01T12:00:00Z'
+  time_coverage_start: '2022-01-01T12:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_aluminium
+  - qc_aluminium
+  - meta_aluminium
+  - v_antimony
+  - qc_antimony
+  - meta_antimony
+  - v_arsenic
+  - qc_arsenic
+  - meta_arsenic
+  - v_barium
+  - qc_barium
+  - meta_barium
+  - v_cadmium
+  - qc_cadmium
+  - meta_cadmium
+  - v_chromium
+  - qc_chromium
+  - meta_chromium
+  - v_cobalt
+  - qc_cobalt
+  - meta_cobalt
+  - v_copper
+  - qc_copper
+  - meta_copper
+  - v_lead
+  - qc_lead
+  - meta_lead
+  - v_manganese
+  - qc_manganese
+  - meta_manganese
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
+  - v_nickel
+  - qc_nickel
+  - meta_nickel
+  - v_vanadium
+  - qc_vanadium
+  - meta_vanadium
+  - v_zinc
+  - qc_zinc
+  - meta_zinc
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NP/8E/XD/NP8E-XD62.nc:
   ebas_data_level: '2'
   ebas_instrument_name: hg_bs_03
@@ -4087,6 +4742,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/P4/AS/Q2/P4AS-Q2DD.nc:
   - v_zinc
   - qc_zinc
   - meta_zinc
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/P6/X4/QP/P6X4-QPMC.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: bulk_hg_samp_36
+  ebas_method_ref: SE01L_WM
+  ebas_revision_date: '2025-02-03T12:48:59.608165Z'
+  ebas_station_altitude: 340.0 m
+  ebas_station_code: FI0036R
+  ebas_station_latitude: 68.0
+  ebas_station_longitude: 24.237222222
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-14T00:00:00)
+  time_coverage_end: '2024-01-01T22:00:00Z'
+  time_coverage_start: '2016-01-05T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PE/2A/4Z/PE2A-4ZG2.nc:
   ebas_data_level: '2'
   ebas_measurement_height: 1.8 m
@@ -4234,6 +4913,29 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PE/WM/J6/PEWM-J6HU.nc:
   - v_zinc
   - qc_zinc
   - meta_zinc
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PV/6E/VY/PV6E-VY9C.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0008R_MCV_CL-002_hg
+  ebas_revision_date: '2024-06-10T00:00:00.000000Z'
+  ebas_station_altitude: 134.0 m
+  ebas_station_code: ES0008R
+  ebas_station_latitude: 43.43917
+  ebas_station_longitude: -4.85
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2023-01-01T00:00:00Z'
+  time_coverage_start: '2022-01-17T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PX/QJ/PZ/PXQJ-PZW2.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bulk_hg_samp_11
@@ -4521,6 +5223,29 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QX/CX/MR/QXCX-MRKQ.nc:
   - v_zinc
   - qc_zinc
   - meta_zinc
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/R5/GW/AP/R5GW-APW6.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: EE01_bs1
+  ebas_revision_date: '2025-02-10T13:50:06.890425Z'
+  ebas_station_altitude: 32.0 m
+  ebas_station_code: EE0009R
+  ebas_station_latitude: 59.5
+  ebas_station_longitude: 25.9
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2024-01-01T08:00:00Z'
+  time_coverage_start: '2020-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/R7/9D/8E/R79D-8EZU.nc:
   ebas_data_level: '2'
   ebas_instrument_name: wo_hg_08
@@ -4573,6 +5298,27 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RB/F8/QY/RBF8-QYSU.nc:
   - v_gamma_HCH
   - qc_gamma_HCH
   - meta_gamma_HCH
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RB/J7/2H/RBJ7-2H67.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: BS1a
+  ebas_method_ref: IE02L_ICP_BM
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 11.0 m
+  ebas_station_code: IE0001R
+  ebas_station_latitude: 51.939722
+  ebas_station_longitude: -10.244444
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2017-01-01T09:00:00Z'
+  time_coverage_start: '2013-01-01T09:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
   - v_mercury
   - qc_mercury
   - meta_mercury
@@ -4674,6 +5420,31 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RV/M7/2A/RVM7-2AZ3.nc:
   - v_mercury
   - qc_mercury
   - meta_mercury
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RY/AX/YF/RYAX-YF8W.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: UNS130D
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: NL01L_ILG-W-2900_NL01L_MIL-W-5804
+  ebas_revision_date: '2024-09-25T12:57:05.163371Z'
+  ebas_station_altitude: 4.0 m
+  ebas_station_code: NL0091R
+  ebas_station_latitude: 52.3
+  ebas_station_longitude: 4.5
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2023-12-27T00:00:00Z'
+  time_coverage_start: '2016-12-28T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/SM/FQ/YJ/SMFQ-YJBR.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bulk_hg_samp_14
@@ -4695,6 +5466,51 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/SM/FQ/YJ/SMFQ-YJBR.nc:
   - v_precipitation_amount
   - qc_precipitation_amount
   - meta_precipitation_amount
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/SQ/6N/AH/SQ6N-AHQ6.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: bulk_hg_samp_05
+  ebas_method_ref: SE01L_WM
+  ebas_revision_date: '2025-02-04T12:52:48.440977Z'
+  ebas_station_altitude: 404.0 m
+  ebas_station_code: SE0005R
+  ebas_station_latitude: 63.85
+  ebas_station_longitude: 15.333333
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-14T00:00:00)
+  time_coverage_end: '2023-12-25T23:00:00Z'
+  time_coverage_start: '2020-12-29T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/SR/HS/TZ/SRHS-TZ2A.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: bulk_hg_samp_05
+  ebas_method_ref: SE01L_cvafs
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 404.0 m
+  ebas_station_code: SE0005R
+  ebas_station_latitude: 63.85
+  ebas_station_longitude: 15.333333
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2015-01-07T06:00:00Z'
+  time_coverage_start: '1998-01-01T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
   - v_mercury
   - qc_mercury
   - meta_mercury
@@ -4877,6 +5693,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/TJ/Y6/Y6/TJY6-Y6FE.nc:
   - v_mercury
   - qc_mercury
   - meta_mercury
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/TT/S6/YY/TTS6-YYTS.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Sm_NSA_0101
+  ebas_measurement_height: 1.9 m
+  ebas_revision_date: '2024-12-11T12:15:22.467128Z'
+  ebas_station_altitude: 937.0 m
+  ebas_station_code: DE0008R
+  ebas_station_latitude: 50.65
+  ebas_station_longitude: 10.766667
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2023-12-27T07:00:00Z'
+  time_coverage_start: '2013-12-30T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/UA/R3/Q5/UAR3-Q5U7.nc:
   ebas_data_level: '2'
   ebas_measurement_height: 1.8 m
@@ -4912,6 +5752,27 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/UA/R3/Q5/UAR3-Q5U7.nc:
   - v_nickel
   - qc_nickel
   - meta_nickel
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UA/RZ/RY/UARZ-RY4T.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: hg_wados_10
+  ebas_method_ref: LV33L_CV_AFS
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 18.0 m
+  ebas_station_code: LV0010R
+  ebas_station_latitude: 56.161944
+  ebas_station_longitude: 21.173056
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2013-01-07T00:00:00Z'
+  time_coverage_start: '2011-12-26T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/UB/WG/WE/UBWG-WEPM.nc:
   ebas_data_level: '2'
   ebas_instrument_name: hg_wados_10_dup
@@ -5193,6 +6054,48 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/V2/UK/7A/V2UK-7A29.nc:
   - v_zinc
   - qc_zinc
   - meta_zinc
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/V5/J3/78/V5J3-78TA.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: bulk_hg_samp_36
+  ebas_method_ref: SE01L_WM
+  ebas_revision_date: '2021-07-06T07:23:50.000000Z'
+  ebas_station_altitude: 340.0 m
+  ebas_station_code: FI0036R
+  ebas_station_latitude: 68.0
+  ebas_station_longitude: 24.237222222
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-14T00:00:00)
+  time_coverage_end: '2021-01-04T00:00:00Z'
+  time_coverage_start: '2018-01-08T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VB/DW/ZS/VBDW-ZSNH.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: EE01_bs1
+  ebas_method_ref: EE01L_aa_BD
+  ebas_revision_date: '2022-07-13T00:00:00.000000Z'
+  ebas_station_altitude: 32.0 m
+  ebas_station_code: EE0009R
+  ebas_station_latitude: 59.5
+  ebas_station_longitude: 25.9
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2022-01-01T08:00:00Z'
+  time_coverage_start: '2014-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VG/J3/PB/VGJ3-PBU6.nc:
   ebas_data_level: '2'
   ebas_instrument_name: ARS_Hg
@@ -5211,6 +6114,29 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VG/J3/PB/VGJ3-PBU6.nc:
   - time_bnds
   - metadata_time
   - metadata_time_bnds
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VN/M2/ZJ/VNM2-ZJ4V.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: hg_bs_13
+  ebas_revision_date: '2024-11-20T12:02:19.499709Z'
+  ebas_station_altitude: 119.0 m
+  ebas_station_code: GB0013R
+  ebas_station_latitude: 50.596389
+  ebas_station_longitude: -3.713056
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2024-01-03T08:15:00Z'
+  time_coverage_start: '2005-02-02T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
   - v_mercury
   - qc_mercury
   - meta_mercury
@@ -5415,6 +6341,64 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/X7/6D/C9/X76D-C9VF.nc:
   - v_mercury
   - qc_mercury
   - meta_mercury
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/X7/PP/NS/X7PP-NSSK.nc:
+  ebas_data_level: '2'
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: DE0009R
+  ebas_station_latitude: 54.4368
+  ebas_station_longitude: 12.7249
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2006-01-03T08:00:00Z'
+  time_coverage_start: '2005-01-04T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount_0
+  - qc_precipitation_amount_0
+  - meta_precipitation_amount_0
+  - v_precipitation_amount_1
+  - qc_precipitation_amount_1
+  - meta_precipitation_amount_1
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
+  - v_arsenic
+  - qc_arsenic
+  - meta_arsenic
+  - v_cadmium
+  - qc_cadmium
+  - meta_cadmium
+  - v_chromium
+  - qc_chromium
+  - meta_chromium
+  - v_cobalt
+  - qc_cobalt
+  - meta_cobalt
+  - v_copper
+  - qc_copper
+  - meta_copper
+  - v_iron
+  - qc_iron
+  - meta_iron
+  - v_lead
+  - qc_lead
+  - meta_lead
+  - v_manganese
+  - qc_manganese
+  - meta_manganese
+  - v_nickel
+  - qc_nickel
+  - meta_nickel
+  - v_vanadium
+  - qc_vanadium
+  - meta_vanadium
+  - v_zinc
+  - qc_zinc
+  - meta_zinc
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XF/CZ/AH/XFCZ-AH58.nc:
   ebas_data_level: '2'
   ebas_instrument_name: hg_wados_09
@@ -5436,6 +6420,51 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XF/CZ/AH/XFCZ-AH58.nc:
   - v_mercury
   - qc_mercury
   - meta_mercury
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XF/VG/VB/XFVG-VB46.nc:
+  ebas_data_level: '2'
+  ebas_measurement_height: 1.8 m
+  ebas_method_ref: LV33L_LEGMC_Thermo_Scientific_iCAP
+  ebas_revision_date: '2025-06-27T00:00:00.000000Z'
+  ebas_station_altitude: 18.0 m
+  ebas_station_code: LV0010R
+  ebas_station_latitude: 56.161944
+  ebas_station_longitude: 21.173056
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2024-01-08T08:00:00Z'
+  time_coverage_start: '2023-01-02T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount_off
+  - qc_precipitation_amount_off
+  - meta_precipitation_amount_off
+  - v_arsenic
+  - qc_arsenic
+  - meta_arsenic
+  - v_cadmium
+  - qc_cadmium
+  - meta_cadmium
+  - v_chromium
+  - qc_chromium
+  - meta_chromium
+  - v_copper
+  - qc_copper
+  - meta_copper
+  - v_lead
+  - qc_lead
+  - meta_lead
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
+  - v_nickel
+  - qc_nickel
+  - meta_nickel
+  - v_zinc
+  - qc_zinc
+  - meta_zinc
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XH/MT/HF/XHMT-HFWW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: ivl-type93
@@ -5597,6 +6626,29 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XZ/9Y/C9/XZ9Y-C9WR.nc:
   - v_mercury
   - qc_mercury
   - meta_mercury
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y2/C2/FX/Y2C2-FXV9.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: bs_hg_36
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 137.0 m
+  ebas_station_code: GB0036R
+  ebas_station_latitude: 51.573056
+  ebas_station_longitude: -1.316667
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2013-01-23T15:10:00Z'
+  time_coverage_start: '2011-01-12T15:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y3/FG/DF/Y3FG-DFZE.nc:
   ebas_data_level: '2'
   ebas_instrument_name: APA01_MV
@@ -5715,6 +6767,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/YN/Q4/5V/YNQ4-5VBK.nc:
   - v_zinc
   - qc_zinc
   - meta_zinc
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/YN/XC/AW/YNXC-AWBU.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Wa_NSA_0101
+  ebas_measurement_height: 1.6 m
+  ebas_revision_date: '2024-12-11T12:12:34.673603Z'
+  ebas_station_altitude: 74.0 m
+  ebas_station_code: DE0002R
+  ebas_station_latitude: 52.802222
+  ebas_station_longitude: 10.759444
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2024-01-02T07:00:00Z'
+  time_coverage_start: '2013-01-02T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/YP/K9/TX/YPK9-TXH4.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GB03L_hm_bs_91
@@ -5869,3 +6945,64 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZT/X7/ND/ZTX7-ND8K.nc:
   - v_nickel
   - qc_nickel
   - meta_nickel
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZU/AD/SF/ZUAD-SF5U.nc:
+  ebas_data_level: '2'
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 420.0 m
+  ebas_station_code: IE0002R
+  ebas_station_latitude: 53.036667
+  ebas_station_longitude: -6.4
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '1995-01-01T00:00:00Z'
+  time_coverage_start: '1994-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount_0
+  - qc_precipitation_amount_0
+  - meta_precipitation_amount_0
+  - v_precipitation_amount_1
+  - qc_precipitation_amount_1
+  - meta_precipitation_amount_1
+  - v_aldrin
+  - qc_aldrin
+  - meta_aldrin
+  - v_alpha_HCH
+  - qc_alpha_HCH
+  - meta_alpha_HCH
+  - v_dieldrin
+  - qc_dieldrin
+  - meta_dieldrin
+  - v_endrin
+  - qc_endrin
+  - meta_endrin
+  - v_gamma_HCH
+  - qc_gamma_HCH
+  - meta_gamma_HCH
+  - v_mercury
+  - qc_mercury
+  - meta_mercury
+  - v_arsenic
+  - qc_arsenic
+  - meta_arsenic
+  - v_cadmium
+  - qc_cadmium
+  - meta_cadmium
+  - v_chromium
+  - qc_chromium
+  - meta_chromium
+  - v_copper
+  - qc_copper
+  - meta_copper
+  - v_lead
+  - qc_lead
+  - meta_lead
+  - v_nickel
+  - qc_nickel
+  - meta_nickel
+  - v_zinc
+  - qc_zinc
+  - meta_zinc

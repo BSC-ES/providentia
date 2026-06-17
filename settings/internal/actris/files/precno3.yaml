@@ -783,6 +783,68 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/2G/AF/N3/2GAF-N33N.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/2G/D5/HE/2GD5-HEXK.nc:
+  ebas_data_level: '2'
+  ebas_measurement_height: 1.5 m
+  ebas_revision_date: '2017-02-28T10:11:24.777000Z'
+  ebas_station_altitude: 520.0 m
+  ebas_station_code: SI0008R
+  ebas_station_latitude: 45.566667
+  ebas_station_longitude: 14.866667
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2016-01-01T06:00:00Z'
+  time_coverage_start: '2015-01-01T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_precipitation_amount_off
+  - qc_precipitation_amount_off
+  - meta_precipitation_amount_off
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/2H/9Y/95/2H9Y-95XX.nc:
   ebas_instrument_name: NA
   ebas_method_ref: RO01L_NA
@@ -886,6 +948,65 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/2H/FP/3N/2HFP-3NZP.nc:
   - v_sodium
   - qc_sodium
   - meta_sodium
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/2H/HW/4X/2HHW-4XYA.nc:
+  ebas_data_level: '2'
+  ebas_measurement_height: 1.8 m
+  ebas_revision_date: '2015-08-21T14:43:37.000000Z'
+  ebas_station_altitude: 18.0 m
+  ebas_station_code: LV0010R
+  ebas_station_latitude: 56.161944
+  ebas_station_longitude: 21.173056
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2015-01-01T08:00:00Z'
+  time_coverage_start: '2014-01-04T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount_off
+  - qc_precipitation_amount_off
+  - meta_precipitation_amount_off
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/2J/CV/5M/2JCV-5MDM.nc:
   ebas_data_level: '2'
   ebas_instrument_name: precip_bulk_UK
@@ -2622,6 +2743,50 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/38/PG/Y9/38PG-Y9GQ.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3A/7C/2V/3A7C-2VP5.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: wados_03
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 1205.0 m
+  ebas_station_code: DE0003R
+  ebas_station_latitude: 47.914722
+  ebas_station_longitude: 7.908611
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2006-01-03T08:00:00Z'
+  time_coverage_start: '2001-01-02T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3B/5F/KY/3B5F-KYAW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_22
@@ -2723,6 +2888,65 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3B/7W/SU/3B7W-SU6Z.nc:
   - v_sulphate_corrected_mg_per_l
   - qc_sulphate_corrected_mg_per_l
   - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3C/QV/4Q/3CQV-4QNX.nc:
+  ebas_data_level: '2'
+  ebas_measurement_height: 1.8 m
+  ebas_revision_date: '2023-11-22T14:02:05.715384Z'
+  ebas_station_altitude: 18.0 m
+  ebas_station_code: LV0010R
+  ebas_station_latitude: 56.161944
+  ebas_station_longitude: 21.173056
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2023-01-01T08:00:00Z'
+  time_coverage_start: '2017-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount_off
+  - qc_precipitation_amount_off
+  - meta_precipitation_amount_off
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
   - v_sulphate_total_mg_S_per_l
   - qc_sulphate_total_mg_S_per_l
   - meta_sulphate_total_mg_S_per_l
@@ -3071,6 +3295,65 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3K/UV/AN/3KUV-ANTW.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3M/8W/EE/3M8W-EE6A.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: wet_only_06
+  ebas_revision_date: '2023-11-24T10:30:41.744881Z'
+  ebas_station_altitude: 345.0 m
+  ebas_station_code: SK0006R
+  ebas_station_latitude: 49.05
+  ebas_station_longitude: 22.266667
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2022-01-01T08:00:00Z'
+  time_coverage_start: '2018-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3M/EP/6V/3MEP-6VVM.nc:
   ebas_data_level: '2'
   ebas_instrument_name: wados_05
@@ -3248,6 +3531,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3Q/N9/FH/3QN9-FHU3.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3Q/PW/HR/3QPW-HRWU.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: wet_only_07
+  ebas_method_ref: SK01L_precip1_IC
+  ebas_revision_date: '2017-03-24T10:07:19.173000Z'
+  ebas_station_altitude: 113.0 m
+  ebas_station_code: SK0007R
+  ebas_station_latitude: 47.96
+  ebas_station_longitude: 17.860556
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2004-07-01T08:00:00Z'
+  time_coverage_start: '2001-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3R/KZ/NF/3RKZ-NF5M.nc:
   ebas_data_level: '2'
   ebas_instrument_name: ES0001R_Eigenbrodt_D21225
@@ -3443,6 +3750,72 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3U/X8/BK/3UX8-BK3X.nc:
   - v_pH
   - qc_pH
   - meta_pH
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3V/3E/4W/3V3E-4WN3.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ARSO_NSA181_vz_0002
+  ebas_measurement_height: 1.5 m
+  ebas_revision_date: '2015-08-07T00:00:00.000000Z'
+  ebas_station_altitude: 520.0 m
+  ebas_station_code: SI0008R
+  ebas_station_latitude: 45.566667
+  ebas_station_longitude: 14.866667
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2015-01-01T06:00:00Z'
+  time_coverage_start: '2014-01-01T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
   - v_sulphate_corrected_mg_S_per_l
   - qc_sulphate_corrected_mg_S_per_l
   - meta_sulphate_corrected_mg_S_per_l
@@ -6089,6 +6462,65 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/4X/BK/KD/4XBK-KDHU.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4X/N9/RD/4XN9-RDZU.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: bs_01
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 735.0 m
+  ebas_station_code: CZ0001R
+  ebas_station_latitude: 49.735084444
+  ebas_station_longitude: 16.034196944
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '1989-01-01T07:00:00Z'
+  time_coverage_start: '1988-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/4Y/9R/PS/4Y9R-PS36.nc:
   ebas_data_level: '2'
   ebas_instrument_name: wados_8
@@ -7112,6 +7544,66 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5D/BB/VJ/5DBB-VJ4T.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5F/AR/6D/5FAR-6DYW.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: MTX_ARS1500
+  ebas_measurement_height: 3.0 m
+  ebas_revision_date: '2023-11-22T13:11:33.719444Z'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: LT0015R
+  ebas_station_latitude: 55.37611111111111
+  ebas_station_longitude: 21.030555555555555
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2023-01-01T08:00:00Z'
+  time_coverage_start: '2016-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5F/UF/Y5/5FUF-Y52P.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_16
@@ -7439,6 +7931,71 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5N/6X/UJ/5N6X-UJ37.nc:
   - v_chloride
   - qc_chloride
   - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5N/Y9/F9/5NY9-F9ZN.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: NILU_PE_collector
+  ebas_revision_date: '2025-01-27T16:30:51.178030Z'
+  ebas_station_altitude: 2008.0 m
+  ebas_station_code: SK0002R
+  ebas_station_latitude: 48.933333
+  ebas_station_longitude: 19.583333
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2024-01-01T08:00:00Z'
+  time_coverage_start: '2022-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
   - v_magnesium
   - qc_magnesium
   - meta_magnesium
@@ -8697,6 +9254,68 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/69/AP/BF/69AP-BFFZ.nc:
   - v_zinc
   - qc_zinc
   - meta_zinc
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/6A/WR/AE/6AWR-AEU6.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: WOS_FR15
+  ebas_revision_date: '2025-04-24T11:50:47.238213Z'
+  ebas_station_altitude: 133.0 m
+  ebas_station_code: FR0015R
+  ebas_station_latitude: 46.65
+  ebas_station_longitude: -0.75
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2024-01-01T09:00:00Z'
+  time_coverage_start: '2019-01-01T09:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/6B/5K/98/6B5K-98EY.nc:
   ebas_data_level: '2'
   ebas_instrument_name: ns04
@@ -9573,6 +10192,65 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/6M/65/4W/6M65-4WWV.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/6M/7Y/KN/6M7Y-KN8F.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: bs_03
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 1205.0 m
+  ebas_station_code: DE0003R
+  ebas_station_latitude: 47.914722
+  ebas_station_longitude: 7.908611
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '1990-01-01T07:00:00Z'
+  time_coverage_start: '1988-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/6M/EX/2K/6MEX-2KTE.nc:
   ebas_data_level: '2'
   ebas_instrument_name: APA02_APA
@@ -9713,6 +10391,73 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/6P/Z8/FH/6PZ8-FHWD.nc:
   - v_precipitation_amount
   - qc_precipitation_amount
   - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/6T/P7/76/6TP7-76W2.nc:
+  ebas_data_level: '2'
+  ebas_revision_date: '2025-05-02T15:46:48.127920Z'
+  ebas_station_altitude: 209.0 m
+  ebas_station_code: IT0004R
+  ebas_station_latitude: 45.814556
+  ebas_station_longitude: 8.635722
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2024-01-01T08:00:00Z'
+  time_coverage_start: '2016-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_precipitation_amount_off
+  - qc_precipitation_amount_off
+  - meta_precipitation_amount_off
   - v_ammonium_mg_N_per_l
   - qc_ammonium_mg_N_per_l
   - meta_ammonium_mg_N_per_l
@@ -10020,6 +10765,37 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/6Y/ZP/TW/6YZP-TWZ8.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/72/2F/A5/722F-A5QP.nc:
+  ebas_data_level: '2'
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 735.0 m
+  ebas_station_code: CZ0001R
+  ebas_station_latitude: 49.735084444
+  ebas_station_longitude: 16.034196944
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '1983-01-01T00:00:00Z'
+  time_coverage_start: '1982-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/72/5B/AG/725B-AG3T.nc:
   ebas_data_level: '2'
   ebas_instrument_name: wados_2
@@ -10266,6 +11042,127 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/76/95/X3/7695-X3EG.nc:
   - v_nitrate_mg_per_l
   - qc_nitrate_mg_per_l
   - meta_nitrate_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/77/XY/4D/77XY-4DWD.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: wados_10
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 18.0 m
+  ebas_station_code: LV0010R
+  ebas_station_latitude: 56.161944
+  ebas_station_longitude: 21.173056
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2011-01-01T08:00:00Z'
+  time_coverage_start: '2009-12-24T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/7A/EA/WN/7AEA-WNZT.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: WOS_FR16
+  ebas_revision_date: '2025-04-24T11:55:50.191056Z'
+  ebas_station_altitude: 1750.0 m
+  ebas_station_code: FR0016R
+  ebas_station_latitude: 45.0
+  ebas_station_longitude: 6.466667
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2024-01-01T09:00:00Z'
+  time_coverage_start: '2019-01-01T09:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/7A/VB/VC/7AVB-VCGX.nc:
   ebas_data_level: '2'
   ebas_instrument_name: WOS_FR13
@@ -10415,6 +11312,74 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/7B/A2/M6/7BA2-M6RZ.nc:
   - time_bnds
   - metadata_time
   - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/7C/QT/P8/7CQT-P8CQ.nc:
+  ebas_data_level: '2'
+  ebas_measurement_height: 2.0 m
+  ebas_revision_date: '2025-07-04T13:15:37.719499Z'
+  ebas_station_altitude: 62.0 m
+  ebas_station_code: IE0009R
+  ebas_station_latitude: 52.298889
+  ebas_station_longitude: -6.510833
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2025-01-01T00:00:00Z'
+  time_coverage_start: '2024-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount_off
+  - qc_precipitation_amount_off
+  - meta_precipitation_amount_off
   - v_precipitation_amount
   - qc_precipitation_amount
   - meta_precipitation_amount
@@ -12919,6 +13884,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8E/BD/XH/8EBD-XHSU.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8F/VT/UW/8FVT-UW56.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: wados_01
+  ebas_method_ref: CZ01L_93_I
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 735.0 m
+  ebas_station_code: CZ0001R
+  ebas_station_latitude: 49.735084444
+  ebas_station_longitude: 16.034196944
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2014-01-07T06:00:00Z'
+  time_coverage_start: '2013-01-01T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8H/4W/UH/8H4W-UHJ5.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_w_0799
@@ -13397,6 +14386,68 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8P/32/SH/8P32-SHW9.nc:
   - v_sodium
   - qc_sodium
   - meta_sodium
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8P/B3/H5/8PB3-H5KV.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: bs_03
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 1205.0 m
+  ebas_station_code: DE0003R
+  ebas_station_latitude: 47.914722
+  ebas_station_longitude: 7.908611
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2000-01-01T07:00:00Z'
+  time_coverage_start: '1990-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
   - v_sulphate_total_mg_S_per_l
   - qc_sulphate_total_mg_S_per_l
   - meta_sulphate_total_mg_S_per_l
@@ -14026,6 +15077,45 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8X/QK/83/8XQK-83J3.nc:
   - v_nitrate_mg_per_l
   - qc_nitrate_mg_per_l
   - meta_nitrate_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8X/VK/5G/8XVK-5GTN.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: wet_only_md01
+  ebas_method_ref: MD02L_wet_only
+  ebas_revision_date: '2023-04-14T00:00:00.000000Z'
+  ebas_station_altitude: 166.0 m
+  ebas_station_code: MD0013R
+  ebas_station_latitude: 46.4884
+  ebas_station_longitude: 28.2835
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2022-01-01T09:00:00Z'
+  time_coverage_start: '2021-01-01T09:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8Z/RT/DV/8ZRT-DVWW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_8
@@ -14439,6 +15529,71 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/97/JV/UP/97JV-UPTA.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/9A/42/T5/9A42-T537.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: bs_w_0047
+  ebas_revision_date: '2025-05-12T12:39:34.757597Z'
+  ebas_station_altitude: 30.0 m
+  ebas_station_code: NO0047R
+  ebas_station_latitude: 69.45
+  ebas_station_longitude: 30.033333
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2025-01-01T07:00:00Z'
+  time_coverage_start: '2000-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9A/QM/RQ/9AQM-RQNT.nc:
   ebas_data_level: '2'
   ebas_instrument_name: wados_2
@@ -14544,6 +15699,76 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9D/SQ/A2/9DSQ-A2KW.nc:
   - v_precipitation_amount
   - qc_precipitation_amount
   - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/9E/VG/RF/9EVG-RFFZ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: NSA181KHT
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: NL01L_MIL-W-5800_NEN6585
+  ebas_revision_date: '2024-07-25T00:00:00.000000Z'
+  ebas_station_altitude: 4.0 m
+  ebas_station_code: NL0091R
+  ebas_station_latitude: 52.3
+  ebas_station_longitude: 4.5
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2024-01-01T00:00:00Z'
+  time_coverage_start: '2023-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_acidity
+  - qc_acidity
+  - meta_acidity
   - v_ammonium_mg_N_per_l
   - qc_ammonium_mg_N_per_l
   - meta_ammonium_mg_N_per_l
@@ -14849,6 +16074,86 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9J/T6/T3/9JT6-T3PG.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/9K/D6/YA/9KD6-YAYA.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: EE01_bs2
+  ebas_revision_date: '2022-07-13T00:00:00.000000Z'
+  ebas_station_altitude: 6.0 m
+  ebas_station_code: EE0011R
+  ebas_station_latitude: 58.383333
+  ebas_station_longitude: 21.816667
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2022-01-01T08:00:00Z'
+  time_coverage_start: '2021-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_cadmium
+  - qc_cadmium
+  - meta_cadmium
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_copper
+  - qc_copper
+  - meta_copper
+  - v_lead
+  - qc_lead
+  - meta_lead
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_manganese
+  - qc_manganese
+  - meta_manganese
+  - v_nickel
+  - qc_nickel
+  - meta_nickel
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_phosphate
+  - qc_phosphate
+  - meta_phosphate
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
+  - v_zinc
+  - qc_zinc
+  - meta_zinc
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9K/PQ/9Z/9KPQ-9ZSF.nc:
   ebas_data_level: '2'
   ebas_instrument_name: wados_91
@@ -15940,6 +17245,73 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9Z/DZ/6R/9ZDZ-6R8V.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/9Z/PB/HN/9ZPB-HNZY.nc:
+  ebas_data_level: '2'
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 1205.0 m
+  ebas_station_code: DE0003R
+  ebas_station_latitude: 47.914722
+  ebas_station_longitude: 7.908611
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2010-01-01T08:00:00Z'
+  time_coverage_start: '2009-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount_0
+  - qc_precipitation_amount_0
+  - meta_precipitation_amount_0
+  - v_precipitation_amount_1
+  - qc_precipitation_amount_1
+  - meta_precipitation_amount_1
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/A2/EV/NH/A2EV-NHW5.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_15
@@ -16964,6 +18336,72 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AE/BJ/CS/AEBJ-CS5X.nc:
   - v_nitrate_mg_per_l
   - qc_nitrate_mg_per_l
   - meta_nitrate_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AE/CD/9F/AECD-9FZA.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: wo_sampler_05
+  ebas_method_ref: SE01L_WW
+  ebas_revision_date: '2025-06-16T09:09:57.634459Z'
+  ebas_station_altitude: 404.0 m
+  ebas_station_code: SE0005R
+  ebas_station_latitude: 63.85
+  ebas_station_longitude: 15.333333
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2024-12-30T23:00:00Z'
+  time_coverage_start: '1995-07-01T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AE/NZ/36/AENZ-36JW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: wados_09
@@ -17366,6 +18804,68 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AM/Q6/YU/AMQ6-YUS7.nc:
   - v_conductivity
   - qc_conductivity
   - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AM/XJ/UD/AMXJ-UD6G.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: WOS_FR14
+  ebas_revision_date: '2025-04-24T11:33:09.516848Z'
+  ebas_station_altitude: 836.0 m
+  ebas_station_code: FR0014R
+  ebas_station_latitude: 47.3
+  ebas_station_longitude: 6.833333
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2024-01-01T09:00:00Z'
+  time_coverage_start: '2019-01-01T09:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
   - v_magnesium
   - qc_magnesium
   - meta_magnesium
@@ -18225,6 +19725,65 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AX/AV/HV/AXAV-HV9Z.nc:
   - v_pH
   - qc_pH
   - meta_pH
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AX/NG/QJ/AXNG-QJSX.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: BS01
+  ebas_revision_date: '2025-06-25T10:02:09.320562Z'
+  ebas_station_altitude: 66.0 m
+  ebas_station_code: IS0002R
+  ebas_station_latitude: 64.083333
+  ebas_station_longitude: -21.016667
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2023-01-01T09:00:00Z'
+  time_coverage_start: '2006-01-01T09:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
   - v_sulphate_corrected_mg_S_per_l
   - qc_sulphate_corrected_mg_S_per_l
   - meta_sulphate_corrected_mg_S_per_l
@@ -19946,6 +21505,92 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BQ/CK/H3/BQCK-H3YU.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BQ/GQ/VG/BQGQ-VG77.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: EE01_bs2
+  ebas_revision_date: '2025-02-07T13:49:28.124107Z'
+  ebas_station_altitude: 6.0 m
+  ebas_station_code: EE0011R
+  ebas_station_latitude: 58.383333
+  ebas_station_longitude: 21.816667
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2024-01-01T08:00:00Z'
+  time_coverage_start: '2022-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_cadmium
+  - qc_cadmium
+  - meta_cadmium
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_copper
+  - qc_copper
+  - meta_copper
+  - v_lead
+  - qc_lead
+  - meta_lead
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_manganese
+  - qc_manganese
+  - meta_manganese
+  - v_nickel
+  - qc_nickel
+  - meta_nickel
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_phosphate
+  - qc_phosphate
+  - meta_phosphate
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
+  - v_zinc
+  - qc_zinc
+  - meta_zinc
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BQ/NJ/9A/BQNJ-9AQ7.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_35
@@ -20270,6 +21915,73 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BS/FA/XM/BSFA-XMKX.nc:
   - v_pH
   - qc_pH
   - meta_pH
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BT/MF/JQ/BTMF-JQJJ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Eigenbrodt_NSA181_KS
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: NL01L_MIL-W-5800_NEN6585
+  ebas_revision_date: '2023-07-03T00:00:00.000000Z'
+  ebas_station_altitude: 4.0 m
+  ebas_station_code: NL0091R
+  ebas_station_latitude: 52.3
+  ebas_station_longitude: 4.5
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2023-01-01T00:00:00Z'
+  time_coverage_start: '2022-01-01T01:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
   - v_sulphate_corrected_mg_S_per_l
   - qc_sulphate_corrected_mg_S_per_l
   - meta_sulphate_corrected_mg_S_per_l
@@ -21418,6 +23130,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/CD/T6/A9/CDT6-A92H.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CH/82/6E/CH82-6EEP.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: wet_only_06
+  ebas_method_ref: SK01L_precip1_IC
+  ebas_revision_date: '2021-07-20T00:00:00.000000Z'
+  ebas_station_altitude: 345.0 m
+  ebas_station_code: SK0006R
+  ebas_station_latitude: 49.05
+  ebas_station_longitude: 22.266667
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2021-01-01T08:00:00Z'
+  time_coverage_start: '1994-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/CH/9E/DT/CH9E-DTFA.nc:
   ebas_data_level: '2'
   ebas_instrument_name: wados_15
@@ -22084,6 +23820,73 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/CQ/K2/YR/CQK2-YRDC.nc:
   - v_nitrate_mg_per_l
   - qc_nitrate_mg_per_l
   - meta_nitrate_mg_per_l
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CQ/M2/QG/CQM2-QGPN.nc:
+  ebas_data_level: '2'
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 1205.0 m
+  ebas_station_code: DE0003R
+  ebas_station_latitude: 47.914722
+  ebas_station_longitude: 7.908611
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2012-01-01T08:00:00Z'
+  time_coverage_start: '2011-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount_0
+  - qc_precipitation_amount_0
+  - meta_precipitation_amount_0
+  - v_precipitation_amount_1
+  - qc_precipitation_amount_1
+  - meta_precipitation_amount_1
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
   - v_potassium
   - qc_potassium
   - meta_potassium
@@ -23768,6 +25571,71 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DE/NZ/S3/DENZ-S384.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/DE/QV/K5/DEQV-K52K.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: wados_03
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 1205.0 m
+  ebas_station_code: DE0003R
+  ebas_station_latitude: 47.914722
+  ebas_station_longitude: 7.908611
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2011-01-01T08:00:00Z'
+  time_coverage_start: '2010-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DF/77/E8/DF77-E8AH.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_d_0015
@@ -24687,6 +26555,71 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DY/UR/WP/DYUR-WPDA.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/DZ/9K/4B/DZ9K-4BRT.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: wados_1d_02
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 1205.0 m
+  ebas_station_code: DE0003R
+  ebas_station_latitude: 47.914722
+  ebas_station_longitude: 7.908611
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2013-01-01T08:00:00Z'
+  time_coverage_start: '2012-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DZ/VG/E9/DZVG-E96P.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_47
@@ -24746,6 +26679,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DZ/VG/E9/DZVG-E96P.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/E2/7M/Z4/E27M-Z4BS.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: wados_1d_03
+  ebas_method_ref: DE03L_IC
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 1205.0 m
+  ebas_station_code: DE0003R
+  ebas_station_latitude: 47.914722
+  ebas_station_longitude: 7.908611
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2014-01-01T08:00:00Z'
+  time_coverage_start: '2013-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/E2/BB/RK/E2BB-RKGD.nc:
   ebas_data_level: '2'
   ebas_instrument_name: wados_02
@@ -24962,6 +26919,65 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/E5/JB/H7/E5JB-H7UV.nc:
   - v_nitrate_mg_per_l
   - qc_nitrate_mg_per_l
   - meta_nitrate_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/E5/VQ/54/E5VQ-54SM.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: bs_w_1218
+  ebas_revision_date: '2025-04-03T10:52:09.115198Z'
+  ebas_station_altitude: 390.0 m
+  ebas_station_code: NO1218R
+  ebas_station_latitude: 60.3
+  ebas_station_longitude: 9.733333
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2011-01-01T07:00:00Z'
+  time_coverage_start: '2010-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/E5/ZJ/RB/E5ZJ-RBUM.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_22
@@ -25296,6 +27312,92 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/EA/JE/46/EAJE-46W7.nc:
   - v_sodium
   - qc_sodium
   - meta_sodium
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/EA/MN/8E/EAMN-8EWU.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: EE01_bs2
+  ebas_method_ref: EE01L_ic_BD
+  ebas_revision_date: '2021-06-21T00:00:00.000000Z'
+  ebas_station_altitude: 6.0 m
+  ebas_station_code: EE0011R
+  ebas_station_latitude: 58.383333
+  ebas_station_longitude: 21.816667
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2021-01-01T08:00:00Z'
+  time_coverage_start: '2019-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/EA/Q2/69/EAQ2-69M9.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: wados_01
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 735.0 m
+  ebas_station_code: CZ0001R
+  ebas_station_latitude: 49.735084444
+  ebas_station_longitude: 16.034196944
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2008-01-01T06:00:00Z'
+  time_coverage_start: '2002-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/EB/3C/EX/EB3C-EXDR.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_5
@@ -25397,6 +27499,68 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/EB/D4/GW/EBD4-GW84.nc:
   - v_conductivity
   - qc_conductivity
   - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/EB/D7/MG/EBD7-MGXY.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: WOS_FR18
+  ebas_revision_date: '2025-04-25T08:37:15.694875Z'
+  ebas_station_altitude: 309.0 m
+  ebas_station_code: FR0018R
+  ebas_station_latitude: 48.633333
+  ebas_station_longitude: -0.45
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2024-01-01T09:00:00Z'
+  time_coverage_start: '2019-01-01T09:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
   - v_magnesium
   - qc_magnesium
   - meta_magnesium
@@ -29025,6 +31189,71 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/FM/EY/23/FMEY-233H.nc:
   - v_nitrate_mg_per_l
   - qc_nitrate_mg_per_l
   - meta_nitrate_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FM/FY/XF/FMFY-XFVE.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: bs_d_0039
+  ebas_revision_date: '2025-03-25T15:33:47.237267Z'
+  ebas_station_altitude: 210.0 m
+  ebas_station_code: NO0039R
+  ebas_station_latitude: 62.783333
+  ebas_station_longitude: 8.883333
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2025-01-01T07:00:00Z'
+  time_coverage_start: '2002-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FM/YR/TE/FMYR-TETY.nc:
   ebas_revision_date: '2018-12-10T13:30:00.000000Z'
   ebas_station_altitude: 133.0 m
@@ -30733,6 +32962,71 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/GE/3Q/JQ/GE3Q-JQJS.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GF/KT/U9/GFKT-U9CE.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Sc_NSA_0301
+  ebas_revision_date: '2024-12-11T14:21:11.413855Z'
+  ebas_station_altitude: 1205.0 m
+  ebas_station_code: DE0003R
+  ebas_station_latitude: 47.914722
+  ebas_station_longitude: 7.908611
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2024-01-01T07:00:00Z'
+  time_coverage_start: '2014-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/GF/X9/FA/GFX9-FA7P.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_13
@@ -31219,6 +33513,72 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/GJ/R6/PK/GJR6-PKT7.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GK/WB/XQ/GKWB-XQRH.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_We_NSA_0301
+  ebas_measurement_height: 1.6 m
+  ebas_revision_date: '2024-12-10T15:41:37.350540Z'
+  ebas_station_altitude: 12.0 m
+  ebas_station_code: DE0001R
+  ebas_station_latitude: 54.925556
+  ebas_station_longitude: 8.309722
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2024-01-02T07:00:00Z'
+  time_coverage_start: '2013-12-30T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/GM/A7/7F/GMA7-7FCQ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_09
@@ -31254,6 +33614,68 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/GM/A7/7F/GMA7-7FCQ.nc:
   - v_conductivity
   - qc_conductivity
   - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GP/4V/WK/GP4V-WKAS.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: WOS_FR08
+  ebas_revision_date: '2025-04-01T09:20:16.926652Z'
+  ebas_station_altitude: 775.0 m
+  ebas_station_code: FR0008R
+  ebas_station_latitude: 48.5
+  ebas_station_longitude: 7.133333
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2024-01-01T09:00:00Z'
+  time_coverage_start: '2019-01-01T09:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
   - v_magnesium
   - qc_magnesium
   - meta_magnesium
@@ -32051,6 +34473,71 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/H3/HS/FS/H3HS-FSJG.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/H4/5B/3V/H45B-3VTZ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: bs_w_0236
+  ebas_revision_date: '2025-07-03T10:20:47.929216Z'
+  ebas_station_altitude: 300.0 m
+  ebas_station_code: NO0236R
+  ebas_station_latitude: 59.016667
+  ebas_station_longitude: 8.516667
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2025-01-01T07:00:00Z'
+  time_coverage_start: '1993-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/H4/EX/5H/H4EX-5H2C.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_47
@@ -32207,6 +34694,71 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/H4/YA/RV/H4YA-RV4Q.nc:
   - v_sodium
   - qc_sodium
   - meta_sodium
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/H6/5U/FT/H65U-FTBF.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: wet_only_07
+  ebas_revision_date: '2024-07-31T00:00:00.000000Z'
+  ebas_station_altitude: 113.0 m
+  ebas_station_code: SK0007R
+  ebas_station_latitude: 47.96
+  ebas_station_longitude: 17.860556
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2024-01-02T08:00:00Z'
+  time_coverage_start: '2023-01-03T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
   - v_sulphate_total_mg_S_per_l
   - qc_sulphate_total_mg_S_per_l
   - meta_sulphate_total_mg_S_per_l
@@ -32621,6 +35173,70 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/HB/PQ/7M/HBPQ-7M75.nc:
   - v_sulphate_corrected_mg_per_l
   - qc_sulphate_corrected_mg_per_l
   - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HC/7Q/QU/HC7Q-QUWN.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Eigenbrodt_NSA181_KS
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: NL01L_MIL-W-5800_NEN6585
+  ebas_revision_date: '2023-11-23T09:56:25.513282Z'
+  ebas_station_altitude: 4.0 m
+  ebas_station_code: NL0091R
+  ebas_station_latitude: 52.3
+  ebas_station_longitude: 4.5
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2022-01-01T01:00:00Z'
+  time_coverage_start: '2018-01-01T01:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_acidity
+  - qc_acidity
+  - meta_acidity
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
   - v_sulphate_total_mg_S_per_l
   - qc_sulphate_total_mg_S_per_l
   - meta_sulphate_total_mg_S_per_l
@@ -33443,6 +36059,67 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/HR/H2/2U/HRH2-2UWE.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HS/RZ/8Q/HSRZ-8QEY.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Eigenbrodt_NSA181_KS
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: NL01L_MIL-W-5800_NEN6585
+  ebas_revision_date: '2023-11-23T09:56:25.513282Z'
+  ebas_station_altitude: 4.0 m
+  ebas_station_code: NL0091R
+  ebas_station_latitude: 52.3
+  ebas_station_longitude: 4.5
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2018-01-01T01:00:00Z'
+  time_coverage_start: '2014-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HT/GG/QK/HTGG-QK3Z.nc:
   ebas_data_level: '2'
   ebas_instrument_name: fhlut1
@@ -33502,6 +36179,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/HT/GG/QK/HTGG-QK3Z.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HX/23/VA/HX23-VARN.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: EE01_bs1
+  ebas_method_ref: EE01L_ic_BD
+  ebas_revision_date: '2021-06-22T00:00:00.000000Z'
+  ebas_station_altitude: 32.0 m
+  ebas_station_code: EE0009R
+  ebas_station_latitude: 59.5
+  ebas_station_longitude: 25.9
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2021-01-01T08:00:00Z'
+  time_coverage_start: '2013-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HZ/8E/EV/HZ8E-EVSE.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_1
@@ -33561,6 +36262,69 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/HZ/8E/EV/HZ8E-EVSE.nc:
   - v_sulphate_corrected_mg_per_l
   - qc_sulphate_corrected_mg_per_l
   - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HZ/PY/EE/HZPY-EEQ4.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ARSO_NSA181_vz_0002
+  ebas_measurement_height: 1.5 m
+  ebas_revision_date: '2023-11-24T12:21:11.348990Z'
+  ebas_station_altitude: 520.0 m
+  ebas_station_code: SI0008R
+  ebas_station_latitude: 45.566667
+  ebas_station_longitude: 14.866667
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2023-01-01T06:00:00Z'
+  time_coverage_start: '2020-01-01T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_precipitation_amount_off
+  - qc_precipitation_amount_off
+  - meta_precipitation_amount_off
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
   - v_sulphate_total_mg_S_per_l
   - qc_sulphate_total_mg_S_per_l
   - meta_sulphate_total_mg_S_per_l
@@ -34205,6 +36969,71 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/J9/9Z/PA/J99Z-PA2S.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/J9/ZJ/MD/J9ZJ-MDXA.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: bs_d_0015
+  ebas_revision_date: '2025-03-25T15:33:27.847238Z'
+  ebas_station_altitude: 439.0 m
+  ebas_station_code: NO0015R
+  ebas_station_latitude: 65.833333
+  ebas_station_longitude: 13.916667
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2025-01-01T07:00:00Z'
+  time_coverage_start: '2002-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/JA/5Q/3D/JA5Q-3DGZ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: wados_14
@@ -34798,6 +37627,76 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/JM/EE/78/JMEE-78EY.nc:
   - v_nitrate_mg_per_l
   - qc_nitrate_mg_per_l
   - meta_nitrate_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/JM/P3/2B/JMP3-2BNH.nc:
+  ebas_data_level: '2'
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 735.0 m
+  ebas_station_code: CZ0001R
+  ebas_station_latitude: 49.735084444
+  ebas_station_longitude: 16.034196944
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2010-01-05T06:00:00Z'
+  time_coverage_start: '2008-01-01T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_lead
+  - qc_lead
+  - meta_lead
+  - v_nickel
+  - qc_nickel
+  - meta_nickel
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/JM/YA/PX/JMYA-PXX9.nc:
   ebas_data_level: '2'
   ebas_revision_date: '2025-04-01T12:31:06.086422Z'
@@ -38435,6 +41334,71 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/M8/95/TX/M895-TX9E.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/M8/VG/HN/M8VG-HN5T.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: wet_only_06
+  ebas_revision_date: '2025-01-27T16:33:45.598895Z'
+  ebas_station_altitude: 345.0 m
+  ebas_station_code: SK0006R
+  ebas_station_latitude: 49.05
+  ebas_station_longitude: 22.266667
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2024-01-01T08:00:00Z'
+  time_coverage_start: '2022-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/M9/DG/EA/M9DG-EASW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: wados_09
@@ -39056,6 +42020,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/MH/WG/AJ/MHWG-AJKN.nc:
   - v_nitrate_mg_per_l
   - qc_nitrate_mg_per_l
   - meta_nitrate_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MJ/X6/3M/MJX6-3MJR.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: NILU_PE_collector
+  ebas_method_ref: SK01L_precip1_IC
+  ebas_revision_date: '2021-07-20T00:00:00.000000Z'
+  ebas_station_altitude: 2008.0 m
+  ebas_station_code: SK0002R
+  ebas_station_latitude: 48.933333
+  ebas_station_longitude: 19.583333
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2021-01-01T08:00:00Z'
+  time_coverage_start: '2013-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/MJ/YY/D7/MJYY-D7D4.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_d_0210
@@ -39171,6 +42159,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/MK/YC/CB/MKYC-CB4E.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MM/5R/SW/MM5R-SW2X.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: wo_cz01
+  ebas_method_ref: CZ01L_93_I_2_1
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 735.0 m
+  ebas_station_code: CZ0001R
+  ebas_station_latitude: 49.735084444
+  ebas_station_longitude: 16.034196944
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2017-01-03T06:00:00Z'
+  time_coverage_start: '2014-01-07T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/MM/74/B4/MM74-B4TY.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_98
@@ -39345,6 +42357,131 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/MP/N4/M5/MPN4-M5GP.nc:
   - v_nitrate_mg_per_l
   - qc_nitrate_mg_per_l
   - meta_nitrate_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MP/N6/TK/MPN6-TK42.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: fhlut2
+  ebas_revision_date: '2024-11-21T12:47:24.893664Z'
+  ebas_station_altitude: 118.0 m
+  ebas_station_code: IS0091R
+  ebas_station_latitude: 63.3998
+  ebas_station_longitude: -20.2884
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-28T00:00:00)
+  time_coverage_end: '2024-01-02T00:00:00Z'
+  time_coverage_start: '2010-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MR/52/B6/MR52-B6XE.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ARSO_NSA181_vz_0002
+  ebas_measurement_height: 1.5 m
+  ebas_revision_date: '2020-04-20T08:46:13.547000Z'
+  ebas_station_altitude: 520.0 m
+  ebas_station_code: SI0008R
+  ebas_station_latitude: 45.566667
+  ebas_station_longitude: 14.866667
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2019-01-01T06:00:00Z'
+  time_coverage_start: '2017-01-01T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount_off
+  - qc_precipitation_amount_off
+  - meta_precipitation_amount_off
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/MU/76/RT/MU76-RTUE.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_1
@@ -39579,6 +42716,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/MX/DP/77/MXDP-77AH.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MZ/4Z/X9/MZ4Z-X9WX.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: wados_10
+  ebas_method_ref: LV33L_IC_a
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 18.0 m
+  ebas_station_code: LV0010R
+  ebas_station_latitude: 56.161944
+  ebas_station_longitude: 21.173056
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2014-01-01T00:00:00Z'
+  time_coverage_start: '2012-12-31T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/MZ/S2/3W/MZS2-3WFB.nc:
   ebas_data_level: '2'
   ebas_instrument_name: wados_2
@@ -40507,6 +43668,68 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NC/VN/VX/NCVN-VX7Z.nc:
   - v_pH
   - qc_pH
   - meta_pH
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NE/4E/YT/NE4E-YTU4.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: WOS_FR10
+  ebas_revision_date: '2025-04-07T10:28:04.681376Z'
+  ebas_station_altitude: 620.0 m
+  ebas_station_code: FR0010R
+  ebas_station_latitude: 47.266667
+  ebas_station_longitude: 4.083333
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2024-01-01T09:00:00Z'
+  time_coverage_start: '2019-01-01T09:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
   - v_sulphate_corrected_mg_S_per_l
   - qc_sulphate_corrected_mg_S_per_l
   - meta_sulphate_corrected_mg_S_per_l
@@ -42992,6 +46215,72 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PC/RN/S3/PCRN-S3DD.nc:
   - v_susp_part_matter
   - qc_susp_part_matter
   - meta_susp_part_matter
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PC/XR/9R/PCXR-9RDD.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: LEGMC_wos_2_0010
+  ebas_measurement_height: 1.8 m
+  ebas_revision_date: '2024-07-26T13:00:00.000000Z'
+  ebas_station_altitude: 18.0 m
+  ebas_station_code: LV0010R
+  ebas_station_latitude: 56.161944
+  ebas_station_longitude: 21.173056
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2024-01-01T08:00:00Z'
+  time_coverage_start: '2023-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount_off
+  - qc_precipitation_amount_off
+  - meta_precipitation_amount_off
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PD/X7/HF/PDX7-HFKE.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_35
@@ -43093,6 +46382,71 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PE/W4/CV/PEW4-CV2R.nc:
   resolution: daily
   time_coverage_end: '2024-01-01T00:00:00Z'
   time_coverage_start: '2022-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PG/TK/74/PGTK-74A3.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: bs_w_1218
+  ebas_revision_date: '2025-04-03T10:54:04.086588Z'
+  ebas_station_altitude: 390.0 m
+  ebas_station_code: NO1218R
+  ebas_station_latitude: 60.3
+  ebas_station_longitude: 9.733333
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2025-01-01T07:00:00Z'
+  time_coverage_start: '1997-12-03T07:00:00Z'
   variables:
   - time
   - time_bnds
@@ -43570,6 +46924,71 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PM/8K/4Q/PM8K-4QAM.nc:
   resolution: daily
   time_coverage_end: '1989-01-01T06:00:00Z'
   time_coverage_start: '1988-01-01T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PN/2E/YC/PN2E-YC6Q.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: bs_w_0655
+  ebas_revision_date: '2025-03-25T15:34:39.293112Z'
+  ebas_station_altitude: 230.0 m
+  ebas_station_code: NO0655R
+  ebas_station_latitude: 61.577408
+  ebas_station_longitude: 5.898247
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2025-01-01T07:00:00Z'
+  time_coverage_start: '1991-01-01T07:00:00Z'
   variables:
   - time
   - time_bnds
@@ -44352,6 +47771,68 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PY/YF/T3/PYYF-T3YG.nc:
   - v_conductivity
   - qc_conductivity
   - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PZ/UG/TE/PZUG-TEG5.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: WOS_FR13
+  ebas_revision_date: '2025-04-07T12:08:09.476403Z'
+  ebas_station_altitude: 200.0 m
+  ebas_station_code: FR0013R
+  ebas_station_latitude: 43.616667
+  ebas_station_longitude: 0.183333
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2024-01-01T09:00:00Z'
+  time_coverage_start: '2019-01-01T09:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
   - v_magnesium
   - qc_magnesium
   - meta_magnesium
@@ -45601,6 +49082,71 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QH/KP/6Q/QHKP-6QC5.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QH/TS/XK/QHTS-XKMA.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: EE01_bs1
+  ebas_revision_date: '2025-02-10T13:29:02.021261Z'
+  ebas_station_altitude: 32.0 m
+  ebas_station_code: EE0009R
+  ebas_station_latitude: 59.5
+  ebas_station_longitude: 25.9
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2024-01-01T08:00:00Z'
+  time_coverage_start: '2022-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QM/5Y/43/QM5Y-43HZ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_9
@@ -46426,6 +49972,59 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/R2/SP/N3/R2SP-N38B.nc:
   - v_susp_part_matter
   - qc_susp_part_matter
   - meta_susp_part_matter
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/R3/BR/WS/R3BR-WS4E.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: bs_03
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 1205.0 m
+  ebas_station_code: DE0003R
+  ebas_station_latitude: 47.914722
+  ebas_station_longitude: 7.908611
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '1988-01-01T07:00:00Z'
+  time_coverage_start: '1983-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/R3/HH/5V/R3HH-5V6H.nc:
   ebas_data_level: '2'
   ebas_instrument_name: WOS_FR18
@@ -47156,6 +50755,65 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/R7/SR/F8/R7SR-F835.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/R7/X8/22/R7X8-22BZ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: wet_only_07
+  ebas_revision_date: '2023-11-16T13:37:26.069452Z'
+  ebas_station_altitude: 113.0 m
+  ebas_station_code: SK0007R
+  ebas_station_latitude: 47.96
+  ebas_station_longitude: 17.860556
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2023-01-03T08:00:00Z'
+  time_coverage_start: '2017-01-03T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/R9/65/6Y/R965-6YG8.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_14
@@ -47870,6 +51528,71 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RK/8B/DA/RK8B-DAEY.nc:
   - v_susp_part_matter
   - qc_susp_part_matter
   - meta_susp_part_matter
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RK/8D/W5/RK8D-W5NE.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: bs_d_0056
+  ebas_revision_date: '2025-03-25T14:27:14.570087Z'
+  ebas_station_altitude: 300.0 m
+  ebas_station_code: NO0056R
+  ebas_station_latitude: 60.372386
+  ebas_station_longitude: 11.078142
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2025-01-01T07:00:00Z'
+  time_coverage_start: '2004-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RK/8F/KV/RK8F-KV95.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_16
@@ -49831,6 +53554,30 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/SD/XA/2G/SDXA-2G94.nc:
   - v_conductivity
   - qc_conductivity
   - meta_conductivity
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/SE/AE/39/SEAE-39UV.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: bs_99
+  ebas_method_ref: NO01L_icp_ms
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 13.0 m
+  ebas_station_code: NO0099R
+  ebas_station_latitude: 58.1
+  ebas_station_longitude: 6.566667
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '1991-01-01T00:00:00Z'
+  time_coverage_start: '1990-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/SE/Q7/9N/SEQ7-9NUY.nc:
   ebas_data_level: '2'
   ebas_instrument_name: WOS_FR13
@@ -50621,6 +54368,71 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/SS/HR/GA/SSHR-GA6Y.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ST/7G/P8/ST7G-P8HB.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: bs_w_0572
+  ebas_revision_date: '2025-07-02T14:18:02.002833Z'
+  ebas_station_altitude: 60.0 m
+  ebas_station_code: NO0572R
+  ebas_station_latitude: 59.536766
+  ebas_station_longitude: 5.972167
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2025-01-01T07:00:00Z'
+  time_coverage_start: '1993-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ST/HB/CR/STHB-CRTP.nc:
   ebas_data_level: '2'
   ebas_instrument_name: wados_15
@@ -50852,6 +54664,65 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/SX/4U/49/SX4U-49H7.nc:
   - v_sulphate_corrected_mg_per_l
   - qc_sulphate_corrected_mg_per_l
   - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/SX/7T/VM/SX7T-VMTB.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: bs_01
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 735.0 m
+  ebas_station_code: CZ0001R
+  ebas_station_latitude: 49.735084444
+  ebas_station_longitude: 16.034196944
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '1988-01-01T07:00:00Z'
+  time_coverage_start: '1986-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
   - v_sulphate_total_mg_S_per_l
   - qc_sulphate_total_mg_S_per_l
   - meta_sulphate_total_mg_S_per_l
@@ -51107,6 +54978,72 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/T2/F4/5P/T2F4-5PP4.nc:
   - v_nitrate_mg_per_l
   - qc_nitrate_mg_per_l
   - meta_nitrate_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/T2/ME/BF/T2ME-BFMP.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: MTX_ARS1500
+  ebas_measurement_height: 3.0 m
+  ebas_revision_date: '2024-03-28T00:00:00.000000Z'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: LT0015R
+  ebas_station_latitude: 55.37611111111111
+  ebas_station_longitude: 21.030555555555555
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2024-01-01T08:00:00Z'
+  time_coverage_start: '2023-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/T2/RZ/63/T2RZ-63UF.nc:
   ebas_data_level: '2'
   ebas_instrument_name: wados_22
@@ -52086,6 +56023,67 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/TF/BR/CZ/TFBR-CZMA.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/TG/K9/R8/TGK9-R8J7.nc:
+  ebas_data_level: '2'
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 1205.0 m
+  ebas_station_code: DE0003R
+  ebas_station_latitude: 47.914722
+  ebas_station_longitude: 7.908611
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2009-01-01T08:00:00Z'
+  time_coverage_start: '2008-01-01T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount_0
+  - qc_precipitation_amount_0
+  - meta_precipitation_amount_0
+  - v_precipitation_amount_1
+  - qc_precipitation_amount_1
+  - meta_precipitation_amount_1
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/TH/BB/TH/THBB-THE2.nc:
   ebas_instrument_name: NA
   ebas_method_ref: IT01L_NA
@@ -52324,6 +56322,71 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/TJ/9B/WZ/TJ9B-WZ6C.nc:
   - v_pH
   - qc_pH
   - meta_pH
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/TJ/CG/RK/TJCG-RKES.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: bs_w_0218
+  ebas_revision_date: '2025-07-02T09:53:30.899813Z'
+  ebas_station_altitude: 135.0 m
+  ebas_station_code: NO0218R
+  ebas_station_latitude: 59.805443
+  ebas_station_longitude: 11.460562
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2025-01-01T07:00:00Z'
+  time_coverage_start: '2011-01-03T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
   - v_sulphate_total_mg_S_per_l
   - qc_sulphate_total_mg_S_per_l
   - meta_sulphate_total_mg_S_per_l
@@ -52728,6 +56791,72 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/TT/86/3S/TT86-3S2Y.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/TU/6Y/FR/TU6Y-FRZP.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: wo_sampler_20
+  ebas_method_ref: SE01L_WW
+  ebas_revision_date: '2025-06-06T11:10:41.710513Z'
+  ebas_station_altitude: 190.0 m
+  ebas_station_code: SE0020R
+  ebas_station_latitude: 56.0429
+  ebas_station_longitude: 13.148
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2024-12-29T23:00:00Z'
+  time_coverage_start: '2020-12-27T23:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/TU/79/DJ/TU79-DJMJ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: dra_2
@@ -52890,6 +57019,70 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/TZ/2C/UD/TZ2C-UD7Q.nc:
   - v_nitrate_mg_per_l
   - qc_nitrate_mg_per_l
   - meta_nitrate_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/TZ/XR/EB/TZXR-EBSR.nc:
+  ebas_data_level: '2'
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 735.0 m
+  ebas_station_code: CZ0001R
+  ebas_station_latitude: 49.735084444
+  ebas_station_longitude: 16.034196944
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: '2013-01-01T06:00:00Z'
+  time_coverage_start: '2010-01-05T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/U2/KK/4A/U2KK-4APH.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_3
@@ -54436,6 +58629,71 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/UR/R9/5Y/URR9-5YZ8.nc:
   - v_susp_part_matter
   - qc_susp_part_matter
   - meta_susp_part_matter
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/US/7R/EQ/US7R-EQQF.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: bsned_53
+  ebas_method_ref: SE01L_BM
+  ebas_revision_date: '2025-01-28T12:53:12.260400Z'
+  ebas_station_code: SE0053R
+  ebas_station_latitude: 64.166667
+  ebas_station_longitude: 20.933333
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '2024-01-06T23:00:00Z'
+  time_coverage_start: '2008-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/UT/PJ/Y3/UTPJ-Y3W9.nc:
   ebas_data_level: '2'
   ebas_instrument_name: wados_2
@@ -58280,6 +62538,68 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/WQ/Z9/GE/WQZ9-GEDJ.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/WR/JU/8C/WRJU-8CX2.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: WOS_FR17
+  ebas_revision_date: '2025-04-24T12:00:14.128879Z'
+  ebas_station_altitude: 810.0 m
+  ebas_station_code: FR0017R
+  ebas_station_latitude: 45.8
+  ebas_station_longitude: 2.066667
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2024-01-01T09:00:00Z'
+  time_coverage_start: '2019-01-01T09:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/WR/NU/NY/WRNU-NYZF.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bulk_5009_01
@@ -59117,6 +63437,68 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/X3/GG/D5/X3GG-D58P.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/X3/SP/H9/X3SP-H93W.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: WOS_FR09
+  ebas_revision_date: '2025-04-01T12:20:18.536476Z'
+  ebas_station_altitude: 390.0 m
+  ebas_station_code: FR0009R
+  ebas_station_latitude: 49.9
+  ebas_station_longitude: 4.633333
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2024-01-01T09:00:00Z'
+  time_coverage_start: '2019-01-01T09:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/X3/T6/6C/X3T6-6CGR.nc:
   ebas_data_level: '2'
   ebas_instrument_name: wados_08
@@ -59341,6 +63723,32 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/X5/9U/UG/X59U-UGBB.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/X6/CZ/4M/X6CZ-4M4E.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: wados_01
+  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
+  ebas_station_altitude: 735.0 m
+  ebas_station_code: CZ0001R
+  ebas_station_latitude: 49.735084444
+  ebas_station_longitude: 16.034196944
+  ebas_statistics: arithmetic mean
+  resolution: monthly
+  time_coverage_end: '1986-01-01T00:00:00Z'
+  time_coverage_start: '1978-01-01T00:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/X7/7Y/QK/X77Y-QKVJ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: bs_w_0752
@@ -60099,6 +64507,74 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XP/3U/U5/XP3U-U5JX.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XP/M8/JT/XPM8-JTXS.nc:
+  ebas_data_level: '2'
+  ebas_measurement_height: 3.0 m
+  ebas_revision_date: '2025-01-15T13:16:26.948026Z'
+  ebas_station_altitude: 125.0 m
+  ebas_station_code: HU0002R
+  ebas_station_latitude: 46.965333
+  ebas_station_longitude: 19.544889
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2024-01-01T07:00:00Z'
+  time_coverage_start: '2023-01-01T07:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_precipitation_amount_off
+  - qc_precipitation_amount_off
+  - meta_precipitation_amount_off
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XQ/CR/CA/XQCR-CAM4.nc:
   ebas_data_level: '2'
   ebas_instrument_name: WOS_FR08
@@ -60699,6 +65175,38 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XX/J7/AP/XXJ7-APME.nc:
   - v_sulphate_total_mg_per_l
   - qc_sulphate_total_mg_per_l
   - meta_sulphate_total_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XX/TN/FE/XXTN-FEVP.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: bs_54
+  ebas_revision_date: '2024-11-07T13:37:04.997496Z'
+  ebas_station_altitude: 85.0 m
+  ebas_station_code: GB0054R
+  ebas_station_latitude: 56.907222
+  ebas_station_longitude: -2.559167
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-14T00:00:00)
+  time_coverage_end: '2024-01-10T12:00:00Z'
+  time_coverage_start: '2006-01-17T08:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XX/VX/7M/XXVX-7MHK.nc:
   ebas_data_level: '2'
   ebas_revision_date: '2022-07-14T00:00:00.000000Z'
@@ -61102,6 +65610,75 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y3/A5/Q2/Y3A5-Q2DN.nc:
   - v_nitrate_mg_per_l
   - qc_nitrate_mg_per_l
   - meta_nitrate_mg_per_l
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y5/JH/4S/Y5JH-4SBT.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ARSO_NSA181_vz_0002
+  ebas_measurement_height: 1.5 m
+  ebas_revision_date: '2024-04-10T11:00:00.000000Z'
+  ebas_station_altitude: 520.0 m
+  ebas_station_code: SI0008R
+  ebas_station_latitude: 45.566667
+  ebas_station_longitude: 14.866667
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: '2024-01-01T06:00:00Z'
+  time_coverage_start: '2023-01-01T06:00:00Z'
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - v_precipitation_amount
+  - qc_precipitation_amount
+  - meta_precipitation_amount
+  - v_precipitation_amount_off
+  - qc_precipitation_amount_off
+  - meta_precipitation_amount_off
+  - v_ammonium_mg_N_per_l
+  - qc_ammonium_mg_N_per_l
+  - meta_ammonium_mg_N_per_l
+  - v_ammonium_mg_per_l
+  - qc_ammonium_mg_per_l
+  - meta_ammonium_mg_per_l
+  - v_calcium
+  - qc_calcium
+  - meta_calcium
+  - v_chloride
+  - qc_chloride
+  - meta_chloride
+  - v_conductivity
+  - qc_conductivity
+  - meta_conductivity
+  - v_magnesium
+  - qc_magnesium
+  - meta_magnesium
+  - v_nitrate_mg_N_per_l
+  - qc_nitrate_mg_N_per_l
+  - meta_nitrate_mg_N_per_l
+  - v_nitrate_mg_per_l
+  - qc_nitrate_mg_per_l
+  - meta_nitrate_mg_per_l
+  - v_pH
+  - qc_pH
+  - meta_pH
+  - v_potassium
+  - qc_potassium
+  - meta_potassium
+  - v_sodium
+  - qc_sodium
+  - meta_sodium
+  - v_sulphate_corrected_mg_S_per_l
+  - qc_sulphate_corrected_mg_S_per_l
+  - meta_sulphate_corrected_mg_S_per_l
+  - v_sulphate_corrected_mg_per_l
+  - qc_sulphate_corrected_mg_per_l
+  - meta_sulphate_corrected_mg_per_l
+  - v_sulphate_total_mg_S_per_l
+  - qc_sulphate_total_mg_S_per_l
+  - meta_sulphate_total_mg_S_per_l
+  - v_sulphate_total_mg_per_l
+  - qc_sulphate_total_mg_per_l
+  - meta_sulphate_total_mg_per_l
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y6/HJ/HU/Y6HJ-HU3B.nc:
   ebas_data_level: '2'
   ebas_revision_date: '2018-12-10T13:30:00.000000Z'
@@ -63185,59 +67762,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/Z7/3V/AP/Z73V-APRX.nc:
   - v_pH
   - qc_pH
   - meta_pH
-  - v_sulphate_total_mg_S_per_l
-  - qc_sulphate_total_mg_S_per_l
-  - meta_sulphate_total_mg_S_per_l
-  - v_sulphate_total_mg_per_l
-  - qc_sulphate_total_mg_per_l
-  - meta_sulphate_total_mg_per_l
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/Z8/GK/ZK/Z8GK-ZKPX.nc:
-  ebas_data_level: '2'
-  ebas_instrument_name: wados_1
-  ebas_revision_date: '2018-12-10T13:30:00.000000Z'
-  ebas_station_altitude: 917.0 m
-  ebas_station_code: ES0001R
-  ebas_station_latitude: 39.54694
-  ebas_station_longitude: -4.35056
-  ebas_statistics: arithmetic mean
-  resolution: daily
-  time_coverage_end: '2010-01-01T07:00:00Z'
-  time_coverage_start: '1990-01-01T07:00:00Z'
-  variables:
-  - time
-  - time_bnds
-  - metadata_time
-  - metadata_time_bnds
-  - v_ammonium_mg_N_per_l
-  - qc_ammonium_mg_N_per_l
-  - meta_ammonium_mg_N_per_l
-  - v_ammonium_mg_per_l
-  - qc_ammonium_mg_per_l
-  - meta_ammonium_mg_per_l
-  - v_calcium
-  - qc_calcium
-  - meta_calcium
-  - v_chloride
-  - qc_chloride
-  - meta_chloride
-  - v_conductivity
-  - qc_conductivity
-  - meta_conductivity
-  - v_magnesium
-  - qc_magnesium
-  - meta_magnesium
-  - v_nitrate_mg_N_per_l
-  - qc_nitrate_mg_N_per_l
-  - meta_nitrate_mg_N_per_l
-  - v_nitrate_mg_per_l
-  - qc_nitrate_mg_per_l
-  - meta_nitrate_mg_per_l
-  - v_sulphate_corrected_mg_S_per_l
-  - qc_sulphate_corrected_mg_S_per_l
-  - meta_sulphate_corrected_mg_S_per_l
-  - v_sulphate_corrected_mg_per_l
-  - qc_sulphate_corrected_mg_per_l
-  - meta_sulphate_corrected_mg_per_l
   - v_sulphate_total_mg_S_per_l
   - qc_sulphate_total_mg_S_per_l
   - meta_sulphate_total_mg_S_per_l
