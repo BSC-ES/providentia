@@ -152,12 +152,17 @@ class Download(object):
 
             # update self with section variables (if not passed via command line)
             for k, val in self.section_opts.items():
-                if k not in self.commandline_arguments:
+                # n_cpus is always passed via command line, either as default or explicit,
+                # only read n_cpus from conf if it was not explicitly defined in command line
+                if ((k not in self.commandline_arguments) 
+                    or (k == "n_cpus" and self.commandline_arguments['n_cpus_explicit'] == 'false')):
                     setattr(self, k, self.provconf.parse_parameter(k, val))
 
             # now all variables have been parsed, check validity of those, throwing errors where necessary
             self.provconf.check_validity()
 
+            print(f"Using {self.n_cpus} CPUs.")
+            
             # TODO: make it work directly with the asterisk
             # transform asterisk fields to empty since it was originally coded this way
             for field in ["species", "resolution"]:

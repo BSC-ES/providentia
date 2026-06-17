@@ -4,10 +4,8 @@ base_defaults: &base_defaults
   resolution:
   start_date:
   end_date:
-  cpus_per_task: 12
   generate_file_tree: False
   disable_file_tree: False
-  cores_explicit: False
   observations_data_label: observations
 
 visualization_defaults: &visualization_defaults

@@ -16,18 +16,19 @@ import psutil
 import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join
-from interpolation.aux_interp import (
-    get_aeronet_bin_radius_from_bin_variable,
-    get_model_bin_radii,
-    check_for_ghost,
-)
-from configuration import ProvConfiguration, load_conf
 
 # get current path and providentia root path
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 
 sys.path.append(join(PROVIDENTIA_ROOT, "providentia", "interpolation"))
 sys.path.append(join(PROVIDENTIA_ROOT, "providentia"))
+
+from interpolation.aux_interp import (
+    get_aeronet_bin_radius_from_bin_variable,
+    get_model_bin_radii,
+    check_for_ghost,
+)
+from configuration import ProvConfiguration, load_conf
 
 # load the defined models and species yamls
 interp_models = yaml.safe_load(
@@ -155,9 +156,16 @@ class SubmitInterpolation(object):
 
             # update self with section variables (if not passed via command line)
             for k, val in self.section_opts.items():
-                if k not in self.commandline_arguments:
+                # n_cpus is always passed via command line, either as default or explicit,
+                # only read n_cpus from conf if it was not explicitly defined in command line
+                if ((k not in self.commandline_arguments) 
+                    or (k == "n_cpus" and self.commandline_arguments['n_cpus_explicit'] == 'false')):
                     setattr(self, k, self.provconf.parse_parameter(k, val))
-
+            
+            # if n_cpus are defined in configuration file, consider as explicit
+            if "n_cpus" in self.section_opts.keys():
+                setattr(self, "n_cpus_explicit", self.provconf.parse_parameter("n_cpus_explicit", True))
+            
             # now all variables have been parsed, check validity of those, throwing errors where necessary
             self.provconf.check_validity()
 
@@ -1272,8 +1280,8 @@ class SubmitInterpolation(object):
         # if n_cpus hasn't been defined, use 1 or half of the available CPUS to
         # avoid having to kill other processes locally
         if self.machine == "local":
-            # use value passed through --cores in terminal
-            if self.cores_explicit:
+            # use value passed through --n_cpus in terminal or configuration file
+            if self.n_cpus_explicit:
                 n_cpus = self.n_cpus
                 msg = f"Using {n_cpus} CPUs."
             # otherwise estimate the number of safe pool workers
@@ -1284,7 +1292,7 @@ class SubmitInterpolation(object):
                 msg += (
                     " consider reducing the number of CPUS by running Providentia using"
                 )
-                msg += " --cores (./bin/providentia --cores=2)."
+                msg += " --n_cpus (./bin/providentia --n_cpus=2)."
         else:
             n_cpus = self.n_cpus
             msg = f"Using {n_cpus} CPUs."
