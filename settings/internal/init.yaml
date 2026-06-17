@@ -73,7 +73,7 @@
         "interp_model_upsampling",
         "multispecies_units",
       ],
-    "non_writing_vars":
+    "non_writing_vars": # to stop the variable from being written  when saving a configuration file
       [
         "conf",
         "config",
