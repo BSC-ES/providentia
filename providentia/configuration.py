@@ -39,6 +39,12 @@ modes = yaml.safe_load(
 wildcard = yaml.safe_load(
     open(join(PROVIDENTIA_ROOT, "settings", "internal", "wildcard.yaml"))
 )
+available_inputs = yaml.safe_load(
+    open(join(PROVIDENTIA_ROOT, "settings", "available_inputs.yaml"))
+)
+init = yaml.safe_load(
+    open(join(PROVIDENTIA_ROOT, "settings", "internal", "init.yaml"))
+)
 actris_standard_metadata = yaml.safe_load(
     open(
         join(
@@ -81,30 +87,28 @@ class ProvConfiguration:
 
         self.read_instance = read_instance
 
-        # set variable defaults
-        self.var_defaults = yaml.safe_load(
-            open(join(PROVIDENTIA_ROOT, "settings", "internal", "init.yaml"))
-        )
-        self.var_defaults["config_dir"] = join(
-            PROVIDENTIA_ROOT, self.var_defaults["config_dir"]
-        )
-        modifiable_var_defaults = yaml.safe_load(
-            open(join(PROVIDENTIA_ROOT, "settings", "available_inputs.yaml"))
-        )
-        self.var_defaults.update(modifiable_var_defaults)
+        # set the parameters required at the initisialization
+        self.required_init = init["required_init"] 
+        
+        for k, val in self.required_init.items():
+            val = kwargs.get(k, val)
+            setattr(self.read_instance, k, self.parse_parameter(k, val))
 
-        # set mode
+        # set mode, library mode preferably
         active_modes = list(set(modes) & set(kwargs))
 
-        # choose the mode that is not the library one if multiple modes are active
         if len(active_modes) == 1:
             self.read_instance.mode = active_modes[0]
         else:
             non_library = [m for m in active_modes if m not in "library"]
             self.read_instance.mode = non_library[0]
 
-        # if variable is given by command line, set that value, otherwise set as init value
-        for k, val in self.var_defaults.items():
+        # initialise command line values or empty values in empty_init, otherwise 
+        self.init = init["empty_init"]
+        self.init.update(self.required_init)
+        self.init.update(available_inputs)
+
+        for k, val in self.init.items():
             val = kwargs.get(k, val)
             setattr(self.read_instance, k, self.parse_parameter(k, val))
 
@@ -121,7 +125,7 @@ class ProvConfiguration:
 
         # for any passed command line arguments not in default Providentia variables, now set them to self
         for kwarg in kwargs:
-            if kwarg not in self.var_defaults:
+            if kwarg not in self.init:
                 # do not set section or subsection arguments if not in library mode
                 if (self.read_instance.mode != "library") & (
                     kwarg in ["section", "subsection"]
@@ -360,7 +364,7 @@ class ProvConfiguration:
             if isinstance(value, str):
                 # treat leaving the field blank as default
                 if value == "":
-                    return self.var_defaults[key]
+                    return self.init[key]
                 # parse multiple networks
                 if "," in value:
                     return [network.strip() for network in value.split(",")]
@@ -373,7 +377,7 @@ class ProvConfiguration:
             if isinstance(value, str):
                 # treat leaving the field blank as default
                 if value == "":
-                    return self.var_defaults[key]
+                    return self.init[key]
                 # parse multiple resolutions only in interpolation and download
                 if self.read_instance.mode in ["interpolation", "download"]:
                     return [res.strip() for res in value.split(",")]
@@ -386,7 +390,7 @@ class ProvConfiguration:
             if (isinstance(value, str)) or (isinstance(value, int)):
                 # treat leaving the field blank as default
                 if value == "":
-                    return self.var_defaults[key]
+                    return self.init[key]
                 # throw error if date is empty str
                 value = str(value)
                 return value.strip()
@@ -558,7 +562,7 @@ class ProvConfiguration:
             if value is not None:
                 # treat leaving the field blank as default
                 if value == "":
-                    return self.var_defaults[key]
+                    return self.init[key]
 
                 # split list, if only one ensemble, then creates list of one element
                 ensemble_opts = []
@@ -1370,7 +1374,7 @@ class ProvConfiguration:
         """
 
         # remove aliases and move the value to the destination
-        for destination, option_list in self.var_defaults["aliases"].items():
+        for destination, option_list in self.read_instance.aliases.items():
             defined_vars = []
 
             # check destination
@@ -1418,12 +1422,12 @@ class ProvConfiguration:
 
             # get aliases list
             aliases = []
-            for alias_list in self.var_defaults["aliases"].values():
+            for alias_list in self.read_instance.aliases.values():
                 aliases += alias_list
 
             # remove init.yaml values from invalid fields
             self.read_instance.non_default_fields_per_section = {
-                field_name: fields - set(self.var_defaults) - set(aliases)
+                field_name: fields - set(self.init) - set(aliases)
                 for field_name, fields in self.read_instance.fields_per_section.items()
             }
 
