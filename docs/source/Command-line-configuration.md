@@ -17,7 +17,7 @@ However, there are some parameters that can only be set through the command line
 | `conf`, `config` | Configuration file path or configuration file name if the file is stored in `providentia/configurations`. | — |
 | `section` | Section within configuration file. | — |
 | `logfile` | Redirects output to a file. More info in the [Redirecting output to a file](Redirecting-output-to-a-file)  page. | — |
-| `cores` | Number of cores. | `12` |
+| `n_cpus` | Number of CPUs. | `12` for interpolation and download, `1` for dashboard, library and report |
 | `time` | Requested time. | `02:00:00` |
 | `jobname` | Job name. | `PRV` |
 | `queue` | Job queue. | `debug` |
@@ -26,7 +26,6 @@ However, there are some parameters that can only be set through the command line
 | `version`, `V` | Print version of Providentia. | — |
 | `generate_file_tree`, `gft` | Generate file tree to update data directories. | `False` |
 | `disable_file_tree`, `dft` | Disable file tree to update data directories. | `False` |
-| `cpus_per_task` | Number of CPUs per task. | `12` |
 
 You can also see all the available options by typing `./bin/providentia --usage` and `./bin/providentia --help`.
 

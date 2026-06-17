@@ -6,7 +6,7 @@ mem="20Gb"
 constraint="medmem"
 
 function usage () {
-echo "Usage: providentia [-u|--usage] [-c|--cores NUM_CORES (default=16)]"
+echo "Usage: providentia [-u|--usage] [-c|--n_cpus)]"
 echo "    [-J|--jobname JOB_NAME (default=PRV)] [-q|--queue QUEUE_NAME (default=debug)]"
 echo "    [-m|--mem MEMORY (only valid on P9, default=20Gb)]"
 echo "    [--constraint CONSTRAINT (default=medmem)]"
@@ -81,7 +81,7 @@ sanitise_python_environment
 # An option followed by double colons '::' means that its argument is optional.
 # See `man getopt'.
 SHORT=uc:t:J:q:m:V
-LONG=usage,cores:,time:,jobname:,queue:,mem:,constraint:,help,version,debug,clean,section:,ghost_version:,ghost_features:,conf:,config:,config_dir:,cartopy_data_dir:,ghost_root:,nonghost_root:,exp_root:,exp_to_interp_root:,generate_file_tree,gft,disable_file_tree,dft,report,reports,offline,download,dl,interpolation,interp,interpolate,notebook,nb,jupyter,dir_merge,slurm_job_id:,network:,framework:,observation:,species:,resolution:,model_resolution:,start_date:,end_date:,observations_data_label:,experiments:,experiment:,model:,models:,domain:,ensemble:,forecast:,qa:,flags:,add_qa:,subtract_qa:,add_flags:,subtract_flags:,temporal_colocation:,spatial_colocation:,spatial_colocation_tolerance:,spatial_colocation_station_reference:,spatial_colocation_station_name:,spatial_colocation_longitude_latitude:,spatial_colocation_measurement_altitude:,spatial_colocation_validation:,spatial_colocation_validation_tolerance:,map_extent:,filter_species:,calibration_factor:,lower_bound:,upper_bound:,remove_extreme_stations:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,harmonise_summary:,harmonise_stations:,active_dashboard_plots:,resampling_resolution:,statistic_mode:,statistic_aggregation:,periodic_statistic_mode:,periodic_statistic_aggregation:,timeseries_statistic_aggregation:,plot_characteristics_filename:,dl_overwrite:,dl_ghost_source:,dl_interpolated:,dl_mode:,dl_timeout:,dl_thredds_update:,interp_multiprocessing:,interp_n_neighbours:,interp_reverse_vertical_orientation:,interp_chunk_size:,interp_job_array_limit:,interp_spinup_timesteps:,z:,interp_model_downsampling:,interp_model_upsampling:,logfile::,multispecies_units:
+LONG=usage,n_cpus:,time:,jobname:,queue:,mem:,constraint:,help,version,debug,clean,section:,ghost_version:,ghost_features:,conf:,config:,config_dir:,cartopy_data_dir:,ghost_root:,nonghost_root:,exp_root:,exp_to_interp_root:,generate_file_tree,gft,disable_file_tree,dft,report,reports,offline,download,dl,interpolation,interp,interpolate,notebook,nb,jupyter,dir_merge,slurm_job_id:,network:,framework:,observation:,species:,resolution:,model_resolution:,start_date:,end_date:,observations_data_label:,experiments:,experiment:,model:,models:,domain:,ensemble:,forecast:,qa:,flags:,add_qa:,subtract_qa:,add_flags:,subtract_flags:,temporal_colocation:,spatial_colocation:,spatial_colocation_tolerance:,spatial_colocation_station_reference:,spatial_colocation_station_name:,spatial_colocation_longitude_latitude:,spatial_colocation_measurement_altitude:,spatial_colocation_validation:,spatial_colocation_validation_tolerance:,map_extent:,filter_species:,calibration_factor:,lower_bound:,upper_bound:,remove_extreme_stations:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,harmonise_summary:,harmonise_stations:,active_dashboard_plots:,resampling_resolution:,statistic_mode:,statistic_aggregation:,periodic_statistic_mode:,periodic_statistic_aggregation:,timeseries_statistic_aggregation:,plot_characteristics_filename:,dl_overwrite:,dl_ghost_source:,dl_interpolated:,dl_mode:,dl_timeout:,dl_thredds_update:,interp_multiprocessing:,interp_n_neighbours:,interp_reverse_vertical_orientation:,interp_chunk_size:,interp_job_array_limit:,interp_spinup_timesteps:,z:,interp_model_downsampling:,interp_model_upsampling:,logfile::,multispecies_units:
 
 # parse arguments
 PARSED=$(getopt --options ${SHORT} \
@@ -93,9 +93,16 @@ if [[ $? -ne 0 ]]; then
     exit 2
 fi
 
-# define default number of cores
-cores="12"
-coresexplicit=false
+# define default number of cpus
+# 12 for interpolation and download modes
+if [[ $PARSED =~ "--interp" || $PARSED =~ "--interpolation" || $PARSED =~ "--interpolate" ||
+      $PARSED =~ "--download" || $PARSED =~ "--dl" ]]; then
+    n_cpus=12
+# 1 for dashboard and report modes
+else
+    n_cpus=1
+fi
+n_cpus_explicit=false
 
 # set qos depending on the mode and machine
 if [[ $PARSED =~ "--interp" || $PARSED =~ "--interpolation" || $PARSED =~ "--interpolate" ]]; then
@@ -141,9 +148,10 @@ while [ $# -gt 0 ]; do
                     usage 
                     exit 0
                     ;;
-        -c|--cores) shift
-                    cores=$OPTARG
-                    coresexplicit=true
+        -c|--n_cpus) shift
+                    n_cpus=$OPTARG
+                    n_cpus_explicit=true
+                    OTHEROPTS+="--n_cpus=$OPTARG "
                     ;;
         -t|--time) shift
                     time=$OPTARG;;
@@ -157,7 +165,7 @@ while [ $# -gt 0 ]; do
                     constraint=$OPTARG;;            
         -*) shift
             OTHEROPTS+="$OPT ";;
-        * ) echo "ALL OPTIONS MUST BE PREFIXED WITH '-' or '--', AND ARGUMENTS MUST BE PREFIXED WITH '=', e.g. '--cores=10'" 
+        * ) echo "ALL OPTIONS MUST BE PREFIXED WITH '-' or '--', AND ARGUMENTS MUST BE PREFIXED WITH '=', e.g. '--n_cpus=10'" 
             exit 2
   esac
 done
@@ -165,11 +173,11 @@ done
 account_option="--account=bsc32"
 queue_option="--qos=$queue"
 memory_option="--mem=$mem"
-cores_option="--cpus-per-task=$cores"
-cores_explicit_option="--cores-explicit=$coresexplicit"
+n_cpus_option="--cpus-per-task=$n_cpus"
+n_cpus_explicit_option="--n_cpus_explicit=$n_cpus_explicit"
 constraint_option="--constraint=$constraint"
 load_command="source bin/load_modules.sh"
-notebook_alloc_command="sbatch -t $time -c $cores -J $jobname"
+notebook_alloc_command="sbatch -t $time -c $n_cpus -J $jobname"
 script_dir=$(dirname $(realpath $(dirname $0)))
 
 # use python 3 if not in windows
@@ -192,11 +200,12 @@ fi
 
 # Avoid x11 forwarding when creating reports or doing interpolations
 if [[ $PARSED =~ "--report" || $PARSED =~ "--reports" || $PARSED =~ "--offline" || $PARSED =~ "--download" || $PARSED =~ "--dl" ]]; then
-    salloc_command="salloc -t $time -c $cores -J $jobname"
+    salloc_command="salloc -t $time -c $n_cpus -J $jobname"
 elif [[ $PARSED =~ "--interp" || $PARSED =~ "--interpolation" || $PARSED =~ "--interpolate" ]]; then
     salloc_command="salloc -t $time -c 1 -J $jobname"
+# For dashboard, use x11 forwarding
 else
-    salloc_command="salloc -t $time -c $cores -J $jobname --x11"
+    salloc_command="salloc -t $time -c $n_cpus -J $jobname --x11"
 fi
 
 # if using debug mode then just reserve allocation, do not execute providentia
@@ -323,11 +332,11 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
     echo "INFO: Running on MN5..."
 
     if $interpolation; then
-        echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
+        echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
         echo "Loading dependencies..."
         eval "${load_command}"
         sanitise_python_environment
-        jobid=$(eval "sbatch ${cores_option} ${account_option} ${queue_option} bin/submit_interpolation_${BSC_MACHINE}.sh $OTHEROPTS | awk '{print \$4}'")
+        jobid=$(eval "sbatch ${n_cpus_option} ${account_option} ${queue_option} bin/submit_interpolation_${BSC_MACHINE}.sh $OTHEROPTS | awk '{print \$4}'")
         echo "Check submission info in 'logs/interpolation/management_logs/$jobid.out'"
 
     else
@@ -350,7 +359,7 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
 
         if $active_env; then
             if $notebook; then
-                echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+                echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
                 echo "Starting Jupyter session."
                 echo "Check 'notebook.out' for information on how to connect to session."
                 
@@ -361,7 +370,7 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
                 fi
 
             elif $debug; then
-                echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+                echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
                 echo "Entering debug mode"
                 if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
                     eval "${salloc_command} ${account_option} ${queue_option}"
@@ -373,7 +382,7 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
                 if $debugexec; then
                     eval "srun ${account_option} ${python_command}"
                 else
-                    echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+                    echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
                     if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
                         eval "${salloc_command} ${account_option} ${queue_option} srun ${python_command}"
                     else
@@ -411,11 +420,11 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
     echo "INFO: Running on ${BSC_MACHINE}..."
 
     if $interpolation; then
-        echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
+        echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
         echo "Loading dependencies..."
         eval "${load_command}"
         sanitise_python_environment
-        jobid=$(eval "sbatch ${cores_option} ${account_option} ${queue_option} bin/submit_interpolation_${BSC_MACHINE}.sh $OTHEROPTS | awk '{print \$4}'")
+        jobid=$(eval "sbatch ${n_cpus_option} ${account_option} ${queue_option} bin/submit_interpolation_${BSC_MACHINE}.sh $OTHEROPTS | awk '{print \$4}'")
         echo "Check submission info in 'logs/interpolation/management_logs/$jobid.out'"
 
     else
@@ -438,7 +447,7 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
 
         if $active_env; then
             if $notebook; then
-                echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+                echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
                 echo "Starting Jupyter session."
                 echo "Check 'notebook.out' for information on how to connect to session."
                 
@@ -449,7 +458,7 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
                 fi
 
             elif $debug; then
-                echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+                echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
                 echo "Entering debug mode"
                 if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
                     eval "${salloc_command} ${account_option} ${queue_option}"
@@ -461,7 +470,7 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
                 if $debugexec; then
                     eval "srun ${account_option} ${python_command}"
                 else
-                    echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+                    echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
                     if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
                         eval "${salloc_command} ${account_option} ${queue_option} srun nord3_singu_es ${python_command}"
                     else
@@ -487,9 +496,9 @@ elif [ "${ip}" == "84.88.185.205" ]; then
         jupyter-lab --port 8888 --ip 0.0.0.0 --allow-root
     elif $interpolation; then
         unique_id=$(printf "%06d\n" $((RANDOM % 1000000)))
-        eval "${python_command} ${cores_option} ${cores_explicit_option} --slurm_job_id=$unique_id" 2>&1 | tee logs/interpolation/management_logs/$unique_id.out
+        eval "${python_command} ${n_cpus_option} ${n_cpus_explicit_option} --slurm_job_id=$unique_id" 2>&1 | tee logs/interpolation/management_logs/$unique_id.out
     else
-        eval "${python_command}"
+        eval "${python_command} ${n_cpus_option} ${n_cpus_explicit_option}"
     fi
 
 # Local machines (Workstations, dust02 machine and personal laptops)
@@ -534,8 +543,8 @@ else
         jupyter-lab --port 8888 --ip 0.0.0.0 --allow-root
     elif $interpolation; then
         unique_id=$(printf "%06d\n" $((RANDOM % 1000000)))
-        eval "${python_command} ${cores_option} ${cores_explicit_option} --slurm_job_id=$unique_id" 2>&1 | tee logs/interpolation/management_logs/$unique_id.out
+        eval "${python_command} ${n_cpus_option} ${n_cpus_explicit_option} --slurm_job_id=$unique_id" 2>&1 | tee logs/interpolation/management_logs/$unique_id.out
     else
-        eval "${python_command}"
+        eval "${python_command} ${n_cpus_option} ${n_cpus_explicit_option}"
     fi
 fi

@@ -530,7 +530,6 @@ def read_netcdf_metadata(tuple_arguments):
         "measurement_altitude",
     ]
     metadata_read = []
-    print(relevant_file)
     # iterate though metadata variables to read
     for meta_var in metadata_vars_to_read:
         # do extra work for non-GHOST data
@@ -584,7 +583,6 @@ def read_netcdf_metadata(tuple_arguments):
 
             # longitude
             elif meta_var == "longitude":
-                print(ncdf_root.variables.keys())
                 if "longitude" in ncdf_root.variables:
                     meta_val = ncdf_root["longitude"][fi:li]
                     meta_val = meta_val[non_nan_station_indices_adjusted]

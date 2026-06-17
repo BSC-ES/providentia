@@ -140,13 +140,13 @@ class ProvArgumentParser(object):
             )
             self.parser.add_argument(
                 "--cpus-per-task",
-                dest="cpus_per_task",
+                dest="n_cpus",
                 help="number of CPUs used in interpolation",
             )
             self.parser.add_argument(
-                "--cores-explicit",
-                dest="cores_explicit",
-                help="define if cores has been passed through command line",
+                "--n_cpus_explicit",
+                dest="n_cpus_explicit",
+                help="define if number of CPUSs has been passed through command line",
             )
             self.parser.add_argument(
                 "--network",

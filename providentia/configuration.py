@@ -237,9 +237,10 @@ class ProvConfiguration:
             # define number of CPUs to process on (leave empty to automatically
             # utilise all available CPUs) NOTE: if this value is set higher than the
             # actual number of CPUs available, then the max number of CPUs is used.
-
             if (value == "") or (int(value) > self.read_instance.available_cpus):
                 return self.read_instance.available_cpus
+            else:
+                return math.ceil(float(value))
 
         elif key == "ghost_root":
             # define GHOST observational root data directory (if undefined it is
@@ -762,10 +763,6 @@ class ProvConfiguration:
                     ]
                 else:
                     return [value.strip()]
-
-        elif key == "cpus_per_task":
-            if value is not None:
-                return math.ceil(float(value))
 
         elif key == "dl_timeout":
             if value is not None:
@@ -1796,14 +1793,14 @@ class ProvConfiguration:
             self.read_instance.interp_multiprocessing = True
             if (
                 1
-                <= self.read_instance.cpus_per_task
+                <= self.read_instance.n_cpus
                 <= self.read_instance.available_cpus
             ):
-                default = self.read_instance.cpus_per_task
+                default = self.read_instance.n_cpus
             else:
                 default = self.read_instance.available_cpus
-                msg = "Number of cores ('{}') cannot be superior than number of available cpus ('{}') ".format(
-                    self.read_instance.cpus_per_task, default
+                msg = "Number of CPUs ('{}') cannot be superior than number of available CPUs ('{}') ".format(
+                    self.read_instance.n_cpus, default
                 )
                 msg += "or less than 1. Using '{}' as default.".format(default)
                 show_message(
