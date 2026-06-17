@@ -279,7 +279,21 @@ git<span class="w"> </span>push<span class="w"> </span>--mirror<span class="w"> 
 </section>
 <section id="run-tests">
 <h2>Run tests<a class="headerlink" href="#run-tests" title="Link to this heading"></a></h2>
-<p>To run all the pipeline tests in your local machine and read the data from the folder <code class="docutils literal notranslate"><span class="pre">tests/data</span></code>, you will need to add <code class="docutils literal notranslate"><span class="pre">return</span> <span class="pre">&quot;github&quot;</span></code> in the function <code class="docutils literal notranslate"><span class="pre">get_machine()</span></code> in <code class="docutils literal notranslate"><span class="pre">auxiliar.py</span></code> and then run:</p>
+<p>To run all the pipeline tests in your local machine and read the data from the folder <code class="docutils literal notranslate"><span class="pre">tests/data</span></code>, first, you will need to change your <code class="docutils literal notranslate"><span class="pre">get_machine()</span></code> function in <code class="docutils literal notranslate"><span class="pre">auxiliar.py</span></code> to this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_machine</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get machine where code is running</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    str</span>
+<span class="sd">        Machine</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="s2">&quot;github&quot;</span>
+</pre></div>
+</div>
+<p>Next, you will need to run:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>activate<span class="w"> </span>providentia-env_v<span class="o">[</span>version<span class="o">]</span>
 pytest<span class="w"> </span>tests
 </pre></div>
