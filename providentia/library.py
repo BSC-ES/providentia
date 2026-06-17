@@ -1772,7 +1772,7 @@ class Providentia:
 
         # for any passed arguments not in default Providentia variables, now set them to self
         for kwarg in kwargs:
-            if kwarg not in self.provconf.var_defaults:
+            if kwarg not in self.provconf.init:
                 setattr(self, kwarg, kwargs[kwarg])
 
         # update variables to set from config file

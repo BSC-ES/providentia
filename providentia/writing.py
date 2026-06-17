@@ -680,22 +680,22 @@ def export_configuration(prv, cname, separator="||"):
             )
 
     # load initialisation defaults
-    init_defaults = yaml.safe_load(
+    init = yaml.safe_load(
         open(join(PROVIDENTIA_ROOT, "settings", "internal", "init.yaml"))
     )
     # load variable defaults
-    var_defaults = yaml.safe_load(
+    defaults = yaml.safe_load(
         open(join(PROVIDENTIA_ROOT, "settings", "internal", "defaults.yaml"))
     )
     # load modifiable variable defaults
-    modifiable_var_defaults = yaml.safe_load(
+    available_inputs = yaml.safe_load(
         open(join(PROVIDENTIA_ROOT, "settings", "available_inputs.yaml"))
     )
 
     # merge defaults
-    merged_defaults = init_defaults.copy()
-    merged_defaults.update(var_defaults[prv.mode])
-    merged_defaults.update(modifiable_var_defaults)
+    merged_defaults = init["required_init"].copy() + init["empty_init"].copy()
+    merged_defaults.update(defaults[prv.mode])
+    merged_defaults.update(available_inputs)
 
     # ensure cname has correct extension
     if cname[-5:] != ".conf":
@@ -930,8 +930,6 @@ def export_configuration(prv, cname, separator="||"):
     # add each variable to be writen out if: not a variable that should not be written, if value not default value,
     # not already written out, not None or empty str, and not empty list/dict
     for var, default_val in merged_defaults.items():
-        if var in ["dashboard", "report", "library", "download", "interpolation"]:
-            continue
         default_val = str(copy.deepcopy(default_val))
         current_val = str(copy.deepcopy(getattr(prv, var)))
         if (
