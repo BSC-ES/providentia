@@ -308,7 +308,7 @@ class ProvConfiguration:
             self.read_instance.ghost_available_networks = list(standard_networks.keys())
 
             # get EBAS_network_priorities (v1.5 onwards)
-            if key not in ["1.2", "1.3", "1.3.1", "1.3.2", "1.3.3", "1.4"]:
+            if value not in ["1.2", "1.3", "1.3.1", "1.3.2", "1.3.3", "1.4"]:
                 # EBAS network priorities
                 from GHOST_standards import EBAS_network_priorities
 
@@ -396,100 +396,106 @@ class ProvConfiguration:
         elif key == "qa":
             # parse qa
 
-            from GHOST_standards import providentia_defaults
-
-            if self.read_instance.network == ["actris/actris"]:
-                defaults = {
-                    "flag": [],
-                    "qa_standard": ["Invalid Data Provider Flags - GHOST Decreed"],
-                    "qa_non_negative": ["Invalid Data Provider Flags - GHOST Decreed"],
-                }
-            else:
-                defaults = providentia_defaults
-
+            # initialize qa additional lists for (v1.3.2 and backwards)
+            self.read_instance.default_qa_standard = []
+            self.read_instance.default_qa_non_negative = []
+            
             # set default qa codes (can differ per GHOST version)
-            self.read_instance.default_qa_standard = [
-                self.read_instance.standard_QA_name_to_QA_code[qa_name]
-                for qa_name in defaults["qa_standard"]
-            ]
-            self.read_instance.default_qa_non_negative = [
-                self.read_instance.standard_QA_name_to_QA_code[qa_name]
-                for qa_name in defaults["qa_non_negative"]
-            ]
+            if self.read_instance.ghost_version not in ['1.2', '1.3', '1.3.1', '1.3.2']:
+                from GHOST_standards import providentia_defaults
 
-            # if not None then set QA by that given
-            if value is not None:
-                # if conf has only 1 QA
-                if isinstance(value, int):
-                    value = [value]
-                # empty string
-                elif value == "":
-                    value = []
-                # if the QAs are written with their names
-                elif isinstance(value, str):
-                    value = sorted(
-                        [
-                            self.read_instance.standard_QA_name_to_QA_code[q.strip()]
-                            for q in value.split(",")
-                        ]
-                    )
-                # list of integer codes
-                else:
-                    value = sorted(list(value))
-                # if we have an ACTRIS network, keep only qa that can be applied
                 if self.read_instance.network == ["actris/actris"]:
-                    value = [val for val in value if val in [6, 7]]
-                return value
-            # otherwise, set default QA per species (set later)
-            else:
-                # set qa to be empty dict (to be later filled)
-                return {}
+                    defaults = {
+                        "flag": [],
+                        "qa_standard": ["Invalid Data Provider Flags - GHOST Decreed"],
+                        "qa_non_negative": ["Invalid Data Provider Flags - GHOST Decreed"],
+                    }
+                else:
+                    defaults = providentia_defaults
+
+                self.read_instance.default_qa_standard = [
+                    self.read_instance.standard_QA_name_to_QA_code[qa_name]
+                    for qa_name in defaults["qa_standard"]
+                ]
+                self.read_instance.default_qa_non_negative = [
+                    self.read_instance.standard_QA_name_to_QA_code[qa_name]
+                    for qa_name in defaults["qa_non_negative"]
+                ]
+
+                # if not None then set QA by that given
+                if value is not None:
+                    # if conf has only 1 QA
+                    if isinstance(value, int):
+                        value = [value]
+                    # empty string
+                    elif value == "":
+                        value = []
+                    # if the QAs are written with their names
+                    elif isinstance(value, str):
+                        value = sorted(
+                            [
+                                self.read_instance.standard_QA_name_to_QA_code[q.strip()]
+                                for q in value.split(",")
+                            ]
+                        )
+                    # list of integer codes
+                    else:
+                        value = sorted(list(value))
+                    # if we have an ACTRIS network, keep only qa that can be applied
+                    if self.read_instance.network == ["actris/actris"]:
+                        value = [val for val in value if val in [6, 7]]
+                    return value
+                # otherwise, set default QA per species (set later)
+                else:
+                    # set qa to be empty dict (to be later filled)
+                    return {}
 
         elif key == "flags":
             # parse flags
+            if self.read_instance.ghost_version not in ['1.2', '1.3', '1.3.1', '1.3.2']:
 
-            from GHOST_standards import providentia_defaults
+                from GHOST_standards import providentia_defaults
 
-            if self.read_instance.network == ["actris/actris"]:
-                defaults = {
-                    "flag": [],
-                    "qa_standard": ["Invalid Data Provider Flags - GHOST Decreed"],
-                    "qa_non_negative": ["Invalid Data Provider Flags - GHOST Decreed"],
-                }
-            else:
-                defaults = providentia_defaults
+                if self.read_instance.network == ["actris/actris"]:
+                    defaults = {
+                        "flag": [],
+                        "qa_standard": ["Invalid Data Provider Flags - GHOST Decreed"],
+                        "qa_non_negative": ["Invalid Data Provider Flags - GHOST Decreed"],
+                    }
+                else:
+                    defaults = providentia_defaults
 
-            # if not None then set flags by that given
-            if value is not None:
-                # if conf has only one flag
-                if isinstance(value, int):
-                    return [value]
-                # empty string
-                elif value == "":
-                    return []
-                # if the flags are written with their names
-                elif isinstance(value, str):
+                # if not None then set flags by that given
+                if value is not None:
+                    # if conf has only one flag
+                    if isinstance(value, int):
+                        return [value]
+                    # empty string
+                    elif value == "":
+                        return []
+                    # if the flags are written with their names
+                    elif isinstance(value, str):
+                        return sorted(
+                            [
+                                self.read_instance.standard_data_flag_name_to_data_flag_code[
+                                    f.strip()
+                                ]
+                                for f in value.split(",")
+                            ]
+                        )
+                    # list of integer codes
+                    else:
+                        return sorted(list(value))
+                # otherwise, set default flags
+                else:
                     return sorted(
                         [
                             self.read_instance.standard_data_flag_name_to_data_flag_code[
-                                f.strip()
+                                flag_name
                             ]
-                            for f in value.split(",")
+                            for flag_name in defaults["flag"]
                         ]
                     )
-                # list of integer codes
-                else:
-                    return sorted(list(value))
-            # otherwise, set default flags
-            else:
-                return sorted(
-                    [
-                        self.read_instance.standard_data_flag_name_to_data_flag_code[
-                            flag_name
-                        ]
-                        for flag_name in defaults["flag"]
-                    ]
-                )
 
         elif key in ["add_qa", "subtract_qa"]:
             # parse add/subtract qa
