@@ -181,8 +181,10 @@ class Report:
             for k, val in self.section_opts.items():
                 # n_cpus is always passed via command line, either as default or explicit,
                 # only read n_cpus from conf if it was not explicitly defined in command line
-                if ((k not in self.commandline_arguments) 
-                    or (k == "n_cpus" and self.commandline_arguments['n_cpus_explicit'] == 'false')):
+                if (k not in self.commandline_arguments) or (
+                    k == "n_cpus"
+                    and self.commandline_arguments["n_cpus_explicit"] == "false"
+                ):
                     setattr(self, k, provconf.parse_parameter(k, val))
 
             # if first section or GHOST version has changed
@@ -1252,8 +1254,10 @@ class Report:
                 for k, val in self.subsection_opts.items():
                     # n_cpus is always passed via command line, either as default or explicit,
                     # only read n_cpus from conf if it was not explicitly defined in command line
-                    if ((k not in self.commandline_arguments) 
-                        or (k == "n_cpus" and self.commandline_arguments['n_cpus_explicit'] == 'false')):
+                    if (k not in self.commandline_arguments) or (
+                        k == "n_cpus"
+                        and self.commandline_arguments["n_cpus_explicit"] == "false"
+                    ):
                         value = provconf.parse_parameter(
                             k, val, deactivate_warning=True
                         )

@@ -158,14 +158,20 @@ class SubmitInterpolation(object):
             for k, val in self.section_opts.items():
                 # n_cpus is always passed via command line, either as default or explicit,
                 # only read n_cpus from conf if it was not explicitly defined in command line
-                if ((k not in self.commandline_arguments) 
-                    or (k == "n_cpus" and self.commandline_arguments['n_cpus_explicit'] == 'false')):
+                if (k not in self.commandline_arguments) or (
+                    k == "n_cpus"
+                    and self.commandline_arguments["n_cpus_explicit"] == "false"
+                ):
                     setattr(self, k, self.provconf.parse_parameter(k, val))
-            
+
             # if n_cpus are defined in configuration file, consider as explicit
             if "n_cpus" in self.section_opts.keys():
-                setattr(self, "n_cpus_explicit", self.provconf.parse_parameter("n_cpus_explicit", True))
-            
+                setattr(
+                    self,
+                    "n_cpus_explicit",
+                    self.provconf.parse_parameter("n_cpus_explicit", True),
+                )
+
             # now all variables have been parsed, check validity of those, throwing errors where necessary
             self.provconf.check_validity()
 

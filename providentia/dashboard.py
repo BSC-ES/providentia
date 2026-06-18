@@ -20,7 +20,14 @@ from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
 from .canvas import Canvas
 from .configuration import load_conf
 from .configuration import ProvConfiguration
-from .dashboard_elements import ComboBox, QVLine, InputDialog, set_cursor, unset_cursor
+from .dashboard_elements import (
+    CheckableComboBox,
+    ComboBox,
+    QVLine,
+    InputDialog,
+    set_cursor,
+    unset_cursor,
+)
 from .dashboard_elements import set_formatting
 from .fields_menus import (
     init_models,
@@ -191,15 +198,17 @@ class Dashboard(QtWidgets.QWidget):
             for k, val in self.current_config.items():
                 # n_cpus is always passed via command line, either as default or explicit,
                 # only read n_cpus from conf if it was not explicitly defined in command line
-                if ((k not in self.commandline_arguments) 
-                    or (k == "n_cpus" and self.commandline_arguments['n_cpus_explicit'] == 'false')):
+                if (k not in self.commandline_arguments) or (
+                    k == "n_cpus"
+                    and self.commandline_arguments["n_cpus_explicit"] == "false"
+                ):
                     setattr(self, k, self.provconf.parse_parameter(k, val))
 
         # now all variables have been parsed, check validity of those, throwing errors where necessary
         self.provconf.check_validity()
 
         print(f"Using {self.n_cpus} CPUs.")
-        
+
         # get operating system specific formatting
         if self.operating_system == "Mac":
             self.formatting_dict = yaml.safe_load(
@@ -538,7 +547,6 @@ class Dashboard(QtWidgets.QWidget):
         # add one more horizontal layout
         hbox = QtWidgets.QHBoxLayout()
 
-        # define all configuration box objects (labels, comboboxes etc.)
         # data selection section
         self.lb_data_selection = set_formatting(
             QtWidgets.QLabel(self, text="Data Selection"),
@@ -547,12 +555,9 @@ class Dashboard(QtWidgets.QWidget):
         self.lb_data_selection.setToolTip(
             "Setup configuration of data to read into memory"
         )
-        self.cb_network = set_formatting(
-            ComboBox(self), self.formatting_dict["menu_combobox"]
-        )
-        self.cb_network.setToolTip(
-            "Select providing observational data network. "
-            "Names starting with * indicate non-GHOST datasets"
+        self.lb_general_selection = set_formatting(
+            QtWidgets.QLabel(self, text="General"),
+            self.formatting_dict["menu_title"],
         )
         self.cb_resolution = set_formatting(
             ComboBox(self), self.formatting_dict["menu_combobox"]
@@ -566,6 +571,7 @@ class Dashboard(QtWidgets.QWidget):
             ComboBox(self), self.formatting_dict["menu_combobox"]
         )
         self.cb_species.setToolTip("Select species")
+
         self.le_start_date = set_formatting(
             QtWidgets.QLineEdit(self), self.formatting_dict["menu_lineedit"]
         )
@@ -574,6 +580,34 @@ class Dashboard(QtWidgets.QWidget):
             QtWidgets.QLineEdit(self), self.formatting_dict["menu_lineedit"]
         )
         self.le_end_date.setToolTip("Set data end date: YYYYMMDD")
+
+        self.vertical_splitter_1 = QVLine()
+        self.vertical_splitter_1.setMaximumWidth(20)
+
+        # observations selection section
+        self.lb_obs_selection = set_formatting(
+            QtWidgets.QLabel(self, text="Observations"),
+            self.formatting_dict["menu_title"],
+        )
+
+        self.cb_ghost_version = set_formatting(
+            ComboBox(self), self.formatting_dict["menu_combobox"]
+        )
+        self.cb_ghost_version.setToolTip("Select GHOST version")
+
+        self.cb_ghost_features = set_formatting(
+            ComboBox(self), self.formatting_dict["menu_combobox"]
+        )
+        self.cb_ghost_features.setToolTip("Select GHOST features")
+
+        self.cb_network = set_formatting(
+            ComboBox(self), self.formatting_dict["menu_combobox"]
+        )
+        self.cb_network.setToolTip(
+            "Select providing observational data network. "
+            "Names starting with * indicate non-GHOST datasets"
+        )
+
         self.bu_QA = set_formatting(
             QtWidgets.QPushButton("QA", self), self.formatting_dict["menu_button"]
         )
@@ -586,22 +620,35 @@ class Dashboard(QtWidgets.QWidget):
         self.bu_flags.setToolTip(
             "Select standardised data reporter provided flags to filter by"
         )
-        self.bu_models = set_formatting(
-            QtWidgets.QPushButton("MODELS", self), self.formatting_dict["menu_button"]
-        )
-        self.bu_models.setToolTip("Select model/s data to read")
+
         self.bu_multispecies = set_formatting(
             QtWidgets.QPushButton("SPECIES", self), self.formatting_dict["menu_button"]
         )
         self.bu_multispecies.setToolTip("Select species data to filter by")
+
+        self.vertical_splitter_2 = QVLine()
+        self.vertical_splitter_2.setMaximumWidth(20)
+
+        # models selection section
+        self.lb_mod_selection = set_formatting(
+            QtWidgets.QLabel(self, text="Models"),
+            self.formatting_dict["menu_title"],
+        )
+
+        self.bu_models = set_formatting(
+            QtWidgets.QPushButton("MODELS", self), self.formatting_dict["menu_button"]
+        )
+        self.bu_models.setToolTip("Select model/s data to read")
+
         self.bu_read = set_formatting(
             QtWidgets.QPushButton("READ", self),
             self.formatting_dict["menu_button"],
             extra_arguments={"color": "green"},
         )
         self.bu_read.setToolTip("Read selected configuration of data into memory")
-        self.vertical_splitter_1 = QVLine()
-        self.vertical_splitter_1.setMaximumWidth(20)
+
+        self.vertical_splitter_3 = QVLine()
+        self.vertical_splitter_3.setMaximumWidth(20)
 
         # filters section
         self.lb_data_filter = set_formatting(
@@ -644,8 +691,8 @@ class Dashboard(QtWidgets.QWidget):
             QtWidgets.QLineEdit(self), self.formatting_dict["menu_lineedit"]
         )
         self.le_maximum_value.setToolTip("Set upper bound of data")
-        self.vertical_splitter_2 = QVLine()
-        self.vertical_splitter_2.setMaximumWidth(20)
+        self.vertical_splitter_4 = QVLine()
+        self.vertical_splitter_4.setMaximumWidth(20)
 
         # statistical calculation section
         self.lb_statistic = set_formatting(
@@ -674,8 +721,8 @@ class Dashboard(QtWidgets.QWidget):
         self.cb_statistic_aggregation.setToolTip(
             "Select statistic for spatial aggregation"
         )
-        self.vertical_splitter_3 = QVLine()
-        self.vertical_splitter_3.setMaximumWidth(20)
+        self.vertical_splitter_5 = QVLine()
+        self.vertical_splitter_5.setMaximumWidth(20)
 
         # colocation section
         self.lb_colocate = set_formatting(
@@ -687,8 +734,8 @@ class Dashboard(QtWidgets.QWidget):
             QtWidgets.QCheckBox("Temporal"), self.formatting_dict["menu_checkbox"]
         )
         self.ch_colocate.setToolTip("Temporally colocate observational/model data")
-        self.vertical_splitter_4 = QVLine()
-        self.vertical_splitter_4.setMaximumWidth(20)
+        self.vertical_splitter_6 = QVLine()
+        self.vertical_splitter_6.setMaximumWidth(20)
 
         # resampling section
         self.lb_resampling = set_formatting(
@@ -702,8 +749,8 @@ class Dashboard(QtWidgets.QWidget):
         self.cb_resampling_resolution.setToolTip(
             "Select temporal resolution to resample the data to"
         )
-        self.vertical_splitter_5 = QVLine()
-        self.vertical_splitter_5.setMaximumWidth(20)
+        self.vertical_splitter_7 = QVLine()
+        self.vertical_splitter_7.setMaximumWidth(20)
 
         # station selection section
         self.lb_station_selection = set_formatting(
@@ -729,63 +776,74 @@ class Dashboard(QtWidgets.QWidget):
         # position objects on gridded configuration bar
         # data selection section
         config_bar.addWidget(self.lb_data_selection, 0, 0, 1, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_network, 1, 0, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_resolution, 2, 0, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_matrix, 1, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_species, 1, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.le_start_date, 2, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.le_end_date, 2, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_QA, 1, 3, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_flags, 2, 3, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_models, 1, 4, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_multispecies, 2, 4, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_read, 3, 4, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_1, 0, 5, 4, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_general_selection, 1, 0, 1, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_matrix, 2, 0, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_species, 2, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_resolution, 3, 0, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.le_start_date, 3, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.le_end_date, 3, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_1, 1, 4, 3, 1, QtCore.Qt.AlignLeft)
+
+        # observations
+        config_bar.addWidget(self.lb_obs_selection, 1, 5, 1, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_ghost_version, 2, 5, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_ghost_features, 2, 6, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_network, 2, 7, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_QA, 3, 5, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_flags, 3, 6, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_multispecies, 3, 7, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_2, 1, 8, 3, 1, QtCore.Qt.AlignLeft)
+
+        # models
+        config_bar.addWidget(self.lb_mod_selection, 1, 9, 1, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_models, 2, 9, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_read, 3, 9, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_3, 0, 10, 4, 1, QtCore.Qt.AlignLeft)
 
         # filters section
-        config_bar.addWidget(self.lb_data_filter, 0, 6, 1, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.lb_data_bounds, 1, 6, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.le_minimum_value, 1, 7, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.le_maximum_value, 1, 8, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_rep, 2, 6, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_period, 2, 7, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_meta, 2, 8, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_reset, 3, 7, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_filter, 3, 8, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_2, 0, 9, 4, 1, QtCore.Qt.AlignLeft)
-
-        # station aggregation section
-        config_bar.addWidget(self.lb_statistic, 0, 10, 1, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.lb_statistic_mode, 1, 10, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.lb_statistic_aggregation, 2, 10, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_statistic_mode, 1, 11, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_statistic_aggregation, 2, 11, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_3, 0, 12, 4, 1, QtCore.Qt.AlignLeft)
-
-        # colocation section
-        config_bar.addWidget(self.lb_colocate, 0, 13, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_colocate, 1, 13, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_data_filter, 0, 11, 1, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_data_bounds, 1, 11, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.le_minimum_value, 1, 12, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.le_maximum_value, 1, 13, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_rep, 2, 11, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_period, 2, 12, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_meta, 2, 13, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_reset, 3, 12, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_filter, 3, 13, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.vertical_splitter_4, 0, 14, 4, 1, QtCore.Qt.AlignLeft)
 
+        # station aggregation section
+        config_bar.addWidget(self.lb_statistic, 0, 15, 1, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_statistic_mode, 1, 15, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_statistic_aggregation, 2, 15, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_statistic_mode, 1, 16, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_statistic_aggregation, 2, 16, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_5, 0, 17, 4, 1, QtCore.Qt.AlignLeft)
+
+        # colocation section
+        config_bar.addWidget(self.lb_colocate, 0, 18, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_colocate, 1, 18, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_6, 0, 19, 4, 1, QtCore.Qt.AlignLeft)
+
         # resampling section
-        config_bar.addWidget(self.lb_resampling, 0, 15, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_resampling, 0, 20, 1, 1, QtCore.Qt.AlignLeft)
         config_bar.addWidget(
-            self.cb_resampling_resolution, 1, 15, 1, 1, QtCore.Qt.AlignLeft
+            self.cb_resampling_resolution, 1, 20, 1, 1, QtCore.Qt.AlignLeft
         )
-        config_bar.addWidget(self.vertical_splitter_5, 0, 16, 4, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_7, 0, 21, 4, 1, QtCore.Qt.AlignLeft)
 
         # station selection section
-        config_bar.addWidget(self.lb_station_selection, 0, 17, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_select_all, 1, 17, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_intersect, 2, 17, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_extent, 3, 17, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_station_selection, 0, 22, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_select_all, 1, 22, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_intersect, 2, 22, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_extent, 3, 22, QtCore.Qt.AlignLeft)
 
         # enable dynamic updating of specific configuration bar fields
         self.cb_network.currentTextChanged.connect(self.handle_config_bar_params_change)
         self.cb_resolution.currentTextChanged.connect(
             self.handle_config_bar_params_change
         )
-        self.cb_matrix.currentTextChanged.connect(self.handle_config_bar_params_change)
+        # self.cb_matrix.currentTextChanged.connect(self.handle_config_bar_params_change)
         self.cb_species.currentTextChanged.connect(self.handle_config_bar_params_change)
         self.le_start_date.textChanged.connect(self.handle_config_bar_params_change)
         self.le_end_date.textChanged.connect(self.handle_config_bar_params_change)

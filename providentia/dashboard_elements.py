@@ -27,6 +27,63 @@ elif operating_system in ["Windows", "MINGW32_NT", "MINGW64_NT"]:
         open(join(PROVIDENTIA_ROOT, "settings/internal/stylesheet_windows.yaml"))
     )
 
+CURSOR_MAP = {
+    "ArrowCursor": QtCore.Qt.ArrowCursor,
+    "PointingHandCursor": QtCore.Qt.PointingHandCursor,
+    "IBeamCursor": QtCore.Qt.IBeamCursor,
+    "WaitCursor": QtCore.Qt.WaitCursor,
+    "SizeAllCursor": QtCore.Qt.SizeAllCursor,
+    "ForbiddenCursor": QtCore.Qt.ForbiddenCursor,
+}
+
+
+def define_style(defined_style, is_base_widget, format_name, format_val, PyQt5_obj):
+    """Set or append style to a PyQt5 object.
+
+    Parameters
+    ----------
+    defined_style : str
+        Style
+    is_base_widget : bool
+        If the object is a base widget (i.e. not a pseudo-element)
+    format_name : str
+        Style key to edit
+    format_val : str
+        Style value to apply
+    PyQt5_obj : PyQt5 object
+        Object to edit style of
+
+    Returns
+    -------
+    str
+        Updated defined style
+    """
+
+    if is_base_widget and format_name in [
+        "height",
+        "width",
+        "min-height",
+        "min-width",
+        "max-height",
+        "max-width",
+    ]:
+        if format_name == "height":
+            PyQt5_obj.setFixedHeight(int(format_val))
+        elif format_name == "width":
+            PyQt5_obj.setFixedWidth(int(format_val))
+        elif format_name == "min-height":
+            PyQt5_obj.setMinimumHeight(int(format_val))
+        elif format_name == "min-width":
+            PyQt5_obj.setMinimumWidth(int(format_val))
+        elif format_name == "max-height":
+            PyQt5_obj.setMaximumHeight(int(format_val))
+        elif format_name == "max-width":
+            PyQt5_obj.setMaximumWidth(int(format_val))
+    else:
+        defined_style += "{}: {};".format(format_name, format_val)
+
+    return defined_style
+
 
 def set_formatting(
     PyQt5_obj, format, valid_obj=None, disabled=False, extra_arguments={}
@@ -61,7 +118,6 @@ def set_formatting(
         if valid_obj:
             if obj_type not in valid_obj:
                 continue
-
         if len(extra_arguments) > 0:
             if obj_type in extra_arguments:
                 cut_extra_arguments = extra_arguments[obj_type]
@@ -70,45 +126,35 @@ def set_formatting(
         else:
             cut_extra_arguments = {}
 
-        defined_style = ""
+        # check if the object is a base widget (i.e. not a pseudo-element like QComboBox::down-arrow)
+        is_base_widget = "::" not in obj_type
 
+        defined_style = ""
         for format_name, format_val in format[obj_type].items():
             if format_name in cut_extra_arguments:
                 format_val = cut_extra_arguments[format_name]
                 del cut_extra_arguments[format_name]
-
-            if format_name == "height":
-                PyQt5_obj.setFixedHeight(int(format_val))
-            elif format_name == "width":
-                PyQt5_obj.setFixedWidth(int(format_val))
-            elif format_name == "min-height":
-                PyQt5_obj.setMinimumHeight(int(format_val))
-            elif format_name == "min-width":
-                PyQt5_obj.setMinimumWidth(int(format_val))
-            elif format_name == "max-height":
-                PyQt5_obj.setMaximumHeight(int(format_val))
-            elif format_name == "max-width":
-                PyQt5_obj.setMaximumWidth(int(format_val))
-            else:
-                defined_style += "{}: {};".format(format_name, format_val)
+            defined_style = define_style(
+                defined_style, is_base_widget, format_name, format_val, PyQt5_obj
+            )
 
         # have remaining extra arguments to add?
         if len(cut_extra_arguments) > 0:
             for format_name, format_val in cut_extra_arguments.items():
-                if format_name == "height":
-                    PyQt5_obj.setFixedHeight(int(format_val))
-                elif format_name == "width":
-                    PyQt5_obj.setFixedWidth(int(format_val))
-                elif format_name == "min-height":
-                    PyQt5_obj.setMinimumHeight(int(format_val))
-                elif format_name == "min-width":
-                    PyQt5_obj.setMinimumWidth(int(format_val))
-                elif format_name == "max-height":
-                    PyQt5_obj.setMaximumHeight(int(format_val))
-                elif format_name == "max-width":
-                    PyQt5_obj.setMaximumWidth(int(format_val))
-                else:
-                    defined_style += "{}: {};".format(format_name, format_val)
+                defined_style = define_style(
+                    defined_style, is_base_widget, format_name, format_val, PyQt5_obj
+                )
+
+        # inject arrow image path for any down-arrow pseudo-element
+        if "::down-arrow" in obj_type:
+            # when dropdown is open, show arrow looking up
+            if obj_type.endswith(":on"):
+                arrow_file = "arrow_up.png"
+            # when closed, arrow looking down
+            else:
+                arrow_file = "arrow_down.png"
+            arrow_path = join(PROVIDENTIA_ROOT, f"assets/{arrow_file}")
+            defined_style += f'image: url("{arrow_path}");'
 
         if disabled:
             defined_style = "{}:disabled {{ {} }} ".format(obj_type, defined_style)

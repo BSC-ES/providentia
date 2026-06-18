@@ -42,9 +42,7 @@ wildcard = yaml.safe_load(
 available_inputs = yaml.safe_load(
     open(join(PROVIDENTIA_ROOT, "settings", "available_inputs.yaml"))
 )
-init = yaml.safe_load(
-    open(join(PROVIDENTIA_ROOT, "settings", "internal", "init.yaml"))
-)
+init = yaml.safe_load(open(join(PROVIDENTIA_ROOT, "settings", "internal", "init.yaml")))
 actris_standard_metadata = yaml.safe_load(
     open(
         join(
@@ -88,8 +86,8 @@ class ProvConfiguration:
         self.read_instance = read_instance
 
         # set the parameters required at the initisialization
-        self.required_init = init["required_init"] 
-        
+        self.required_init = init["required_init"]
+
         for k, val in self.required_init.items():
             val = kwargs.get(k, val)
             setattr(self.read_instance, k, self.parse_parameter(k, val))
@@ -103,7 +101,7 @@ class ProvConfiguration:
             non_library = [m for m in active_modes if m not in "library"]
             self.read_instance.mode = non_library[0]
 
-        # initialise command line values or empty values in empty_init, otherwise 
+        # initialise command line values or empty values in empty_init, otherwise
         self.init = init["empty_init"]
         self.init.update(self.required_init)
         self.init.update(available_inputs)
@@ -1795,11 +1793,7 @@ class ProvConfiguration:
                 deactivate=deactivate_warning,
             )
             self.read_instance.interp_multiprocessing = True
-            if (
-                1
-                <= self.read_instance.n_cpus
-                <= self.read_instance.available_cpus
-            ):
+            if 1 <= self.read_instance.n_cpus <= self.read_instance.available_cpus:
                 default = self.read_instance.n_cpus
             else:
                 default = self.read_instance.available_cpus

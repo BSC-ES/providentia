@@ -701,7 +701,7 @@ class Actris:
                 "Wavelength",
                 "Wavelengthx",
                 "d_Wavelength",
-                "d_Wavelengthx", 
+                "d_Wavelengthx",
                 "d_Wavelength_d0",
             ]
             available_vars = files_info[file]["variables"]
