@@ -161,7 +161,7 @@ class Download(object):
             # now all variables have been parsed, check validity of those, throwing errors where necessary
             self.provconf.check_validity()
 
-            print(f"Using {self.n_cpus} CPUs.")
+            print(f"\nUsing {self.n_cpus} CPUs.")
             
             # TODO: make it work directly with the asterisk
             # transform asterisk fields to empty since it was originally coded this way
@@ -381,11 +381,11 @@ class Download(object):
             self.domain = []
             self.ensemble = []
 
-            # reinitialise default configuration variables
-            # modified by commandline arguments, if given
-            self.provconf = ProvConfiguration(self, **self.commandline_arguments)
-
             if section_ind != len(self.sections) - 1:
+                # reinitialise default configuration variables
+                # modified by commandline arguments, if given
+                self.provconf = ProvConfiguration(self, **self.commandline_arguments)
+
                 self.logger.info("\n" + "=" * 70)
 
         # show message in case models or observations were ignored

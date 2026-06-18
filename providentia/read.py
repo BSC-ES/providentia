@@ -390,7 +390,7 @@ class DataReader:
                 self.read_instance.metadata_vars_to_read = [
                     key
                     for key in ghost_metadata_vars_to_read
-                    if not pd.isnull(
+                    if key in self.read_instance.standard_metadata and not pd.isnull(
                         self.read_instance.standard_metadata[key]["metadata_type"]
                     )
                 ]
