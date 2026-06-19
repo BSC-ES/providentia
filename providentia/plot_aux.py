@@ -1176,8 +1176,8 @@ def handle_test_or_save_df(
     if read_instance.tests:
         generated_output = df
         generated_output = generated_output.replace("", np.nan)
-        print("Generated_output")
-        print(generated_output)
+        read_instance.logger.info("Generated_output")
+        read_instance.logger.info(generated_output)
         if tests_generate_output:
             # during tests save empty spaces in dataframe as 'nan' because pd.read_csv creates nans on indices
             # and it is not possible to compare the dataframes
@@ -1190,8 +1190,8 @@ def handle_test_or_save_df(
         if "time" in generated_output.columns:
             parse_dates.append("time")
         expected_output = pd.read_csv(f"{path}/{filename}.csv", parse_dates=parse_dates)
-        print(f'Expected_output ({f"{path}/{filename}.csv"})')
-        print(expected_output)
+        read_instance.logger.info(f'Expected_output ({f"{path}/{filename}.csv"})')
+        read_instance.logger.info(expected_output)
         if "metadata" in filename:
             expected_output["value"] = expected_output["value"].astype(str)
         assert assert_frame_equal(generated_output, expected_output, atol=1e-5) is None

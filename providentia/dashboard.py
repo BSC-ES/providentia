@@ -198,7 +198,7 @@ class Dashboard(QtWidgets.QWidget):
         # now all variables have been parsed, check validity of those, throwing errors where necessary
         self.provconf.check_validity()
 
-        print(f"Using {self.n_cpus} CPUs.")
+        self.logger.info(f"Using {self.n_cpus} CPUs.")
         
         # get operating system specific formatting
         if self.operating_system == "Mac":
