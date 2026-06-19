@@ -181,11 +181,16 @@ class Cams(object):
             self.download_instance.end_date, "%Y%m%d"
         ) - timedelta(days=1)
 
-        # download N days ahead for forecast
-        cams_start_date = cams_start_date - timedelta(days=cams_dict["lookahead_days"])
-
         # warn the user that download is going to be for N days before
         if cams_dict["lookahead_days"] > 0:
+            # download N days ahead for forecast
+            lookahead_cams_start_date = cams_start_date - timedelta(days=cams_dict["lookahead_days"])
+
+            # bool to control if the lookahead days change make the start date on the previous month
+            self.month_change = lookahead_cams_start_date.month != cams_start_date.month
+
+            cams_start_date = lookahead_cams_start_date
+
             msg = f"Model data will be downloaded {cams_dict['lookahead_days']} day(s) in advance relative to the configured date."
             show_message(self.download_instance, msg, deactivate=initial_check)
 
@@ -1141,6 +1146,10 @@ class Cams(object):
                         - timedelta(days=1)
                     )
 
+                    #  if the lookahead days made the month change
+                    if cams_dict["lookahead_days"] > 0 and self.month_change:
+                        next_cams_date = next_cams_date + relativedelta(months=1)
+
                     while current_cams_date <= cams_end_date:
                         # add one month
                         next_cams_date = (
@@ -1372,8 +1381,6 @@ class Cams(object):
 
                             # change the last downloaded file
                             self.download_instance.latest_nc_file_path = "/path/to/file"
-
-                        self.download_instance.logger.info("")
 
                         # add one day to the date
                         current_cams_date = next_cams_date + timedelta(days=1)
