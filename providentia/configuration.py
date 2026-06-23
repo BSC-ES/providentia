@@ -1279,13 +1279,14 @@ class ProvConfiguration:
                     except FileNotFoundError:
                         msg += f"2. Remote HPC path: '{mod_to_interp_path}'\n"
 
+                msg = (
+                f"Model ID '{modid}' not found. Checked in:\n{msg}"
+                + "\nPlease, add the model ID to the file or ensure it exists on the HPC path.\n"
+                )
+
         # if model does not exist, exit
         # supressed warning deactivation
         if model_exists is False:
-            msg = (
-                f"Model ID '{modid}' not found. Checked in:\n{msg}"
-                + "Please, add the model ID to the file or ensure it exists on the HPC path.\n"
-            )
             show_message(
                 self.read_instance, msg, from_conf=self.read_instance.from_conf
             )
