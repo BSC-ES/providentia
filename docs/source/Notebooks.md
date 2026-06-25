@@ -39,7 +39,7 @@ You will also need to load the necessary modules for it to function, for this yo
 conda activate providentia-env_v[version]
 ```
 
-where `version` is the relevant version of Providentia, e.g. `3.0.2`.
+where `version` is the relevant version of Providentia, e.g. `3.1.0`.
 
 Then the Providentia library can be safely imported as a module:
 

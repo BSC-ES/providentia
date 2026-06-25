@@ -163,7 +163,7 @@ class Download(object):
             # now all variables have been parsed, check validity of those, throwing errors where necessary
             self.provconf.check_validity()
 
-            print(f"\nUsing {self.n_cpus} CPUs.")
+            self.logger.info(f"\nUsing {self.n_cpus} CPUs.")
             
             # TODO: make it work directly with the asterisk
             # transform asterisk fields to empty since it was originally coded this way

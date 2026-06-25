@@ -218,7 +218,7 @@ class Report:
             # now all variables have been parsed, check validity of those, throwing errors where necessary
             provconf.check_validity()
 
-            print(f"Using {self.n_cpus} CPUs.")
+            self.logger.info(f"Using {self.n_cpus} CPUs.")
 
             # if some filename has not been provided through the configuration file use default names
             if "report_filename" in self.section_opts:

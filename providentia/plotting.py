@@ -2618,7 +2618,6 @@ class Plotting:
 
         # track plot elements
         if self.read_instance.mode not in ["report"]:
-            print(heatmap)
             self.track_plot_elements(
                 self.read_instance.observations_data_label,
                 "heatmap",
