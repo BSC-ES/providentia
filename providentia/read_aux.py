@@ -826,7 +826,7 @@ def check_for_ghost(network_name):
         return True
 
 
-def get_ghost_observational_tree(instance):
+def get_ghost_observational_tree(instance, ghost_version):
     """
     Creates a nested dictionary representing the GHOST observational data tree and exports it to JSON.
 
@@ -849,7 +849,7 @@ def get_ghost_observational_tree(instance):
         # check if directory for network exists
         # if not, continue
         if not os.path.exists(
-            "%s/%s/%s" % (instance.ghost_root, network, instance.ghost_version)
+            "%s/%s/%s" % (instance.ghost_root, network, ghost_version)
         ):
             continue
 
@@ -862,7 +862,7 @@ def get_ghost_observational_tree(instance):
             # if not, continue
             if not os.path.exists(
                 "%s/%s/%s/%s"
-                % (instance.ghost_root, network, instance.ghost_version, resolution)
+                % (instance.ghost_root, network, ghost_version, resolution)
             ):
                 continue
 
@@ -872,7 +872,7 @@ def get_ghost_observational_tree(instance):
             # get available species for network/resolution
             available_species = os.listdir(
                 "%s/%s/%s/%s"
-                % (instance.ghost_root, network, instance.ghost_version, resolution)
+                % (instance.ghost_root, network, ghost_version, resolution)
             )
 
             # iterate through available files per species
@@ -883,7 +883,7 @@ def get_ghost_observational_tree(instance):
                     % (
                         instance.ghost_root,
                         network,
-                        instance.ghost_version,
+                        ghost_version,
                         resolution,
                         speci,
                     )
@@ -914,7 +914,7 @@ def get_ghost_observational_tree(instance):
     with open(
         join(
             PROVIDENTIA_ROOT,
-            "settings/internal/ghost_filetree_{}.json".format(instance.ghost_version),
+            "settings/internal/ghost_filetree_{}.json".format(ghost_version),
         ),
         "w",
     ) as json_file:
@@ -1384,7 +1384,7 @@ def valid_date(date_text):
         return False
 
 
-def generate_file_trees(instance):
+def generate_file_trees(instance, ghost_version=None, only_ghost=False):
     """
     Handles the dynamic generation or loading of observational data catalogues.
 
@@ -1408,13 +1408,14 @@ def generate_file_trees(instance):
     elif instance.filetree_type == "local":
         gft = True
 
+    # GHOST version is only passed to this function when updating version in dashboard from dropdown
+    if ghost_version is None:
+        ghost_version = instance.ghost_version
+
     # generate file trees
     ghost_filetree_path = join(
         PROVIDENTIA_ROOT,
-        "settings/internal/ghost_filetree_{}.json".format(instance.ghost_version),
-    )
-    nonghost_filetree_path = join(
-        PROVIDENTIA_ROOT, "settings/internal/nonghost_filetree.json"
+        "settings/internal/ghost_filetree_{}.json".format(ghost_version),
     )
 
     # generate file trees for ghost
@@ -1424,7 +1425,7 @@ def generate_file_trees(instance):
             instance.logger.info(f"Generating file tree {ghost_filetree_path}...")
         else:
             instance.logger.info(f"Updating file tree {ghost_filetree_path}...")
-        instance.all_observation_data = get_ghost_observational_tree(instance)
+        instance.all_observation_data = get_ghost_observational_tree(instance, ghost_version)
     # load file trees
     else:
         instance.logger.info(f"Loading file tree {ghost_filetree_path}...")
@@ -1434,19 +1435,22 @@ def generate_file_trees(instance):
                     join(
                         PROVIDENTIA_ROOT,
                         "settings/internal/ghost_filetree_{}.json".format(
-                            instance.ghost_version
+                            ghost_version
                         ),
                     )
                 )
             )
         except FileNotFoundError:
             error = "Error: Trying to load 'settings/internal/ghost_filetree_{}.json' but file does not exist. Run with the flag '--gft' to generate this file.".format(
-                instance.ghost_version
+                ghost_version
             )
             instance.logger.error(error)
             sys.exit(1)
 
-    if instance.nonghost_root is not None:
+    if instance.nonghost_root is not None and not only_ghost:
+        nonghost_filetree_path = join(
+            PROVIDENTIA_ROOT, "settings/internal/nonghost_filetree.json"
+        )
         # generate file trees for nonghost
         if gft or (not os.path.exists(nonghost_filetree_path)):
             if not os.path.exists(nonghost_filetree_path):

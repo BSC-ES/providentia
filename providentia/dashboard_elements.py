@@ -286,7 +286,13 @@ class ComboBox(QtWidgets.QComboBox):
         # add vertical scroll bar
         self.view().setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
 
-
+    def getItems(self):
+        """
+        Return all items in the combobox as a list of strings
+        """
+        
+        return [self.itemText(i) for i in range(self.count())]
+    
 class CheckableComboBox(QtWidgets.QComboBox):
     def __init__(self, *args, **kwargs):
         """

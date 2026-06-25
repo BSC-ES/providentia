@@ -548,13 +548,6 @@ class Dashboard(QtWidgets.QWidget):
         hbox = QtWidgets.QHBoxLayout()
 
         # data selection section
-        self.lb_data_selection = set_formatting(
-            QtWidgets.QLabel(self, text="Data Selection"),
-            self.formatting_dict["menu_title"],
-        )
-        self.lb_data_selection.setToolTip(
-            "Setup configuration of data to read into memory"
-        )
         self.lb_general_selection = set_formatting(
             QtWidgets.QLabel(self, text="General"),
             self.formatting_dict["menu_title"],
@@ -775,28 +768,27 @@ class Dashboard(QtWidgets.QWidget):
 
         # position objects on gridded configuration bar
         # data selection section
-        config_bar.addWidget(self.lb_data_selection, 0, 0, 1, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.lb_general_selection, 1, 0, 1, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_matrix, 2, 0, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_species, 2, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_resolution, 3, 0, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.le_start_date, 3, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.le_end_date, 3, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_1, 1, 4, 3, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_general_selection, 0, 0, 1, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_matrix, 1, 0, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_species, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_resolution, 2, 0, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.le_start_date, 2, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.le_end_date, 2, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_1, 0, 4, 3, 1, QtCore.Qt.AlignLeft)
 
         # observations
-        config_bar.addWidget(self.lb_obs_selection, 1, 5, 1, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_ghost_version, 2, 5, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_ghost_features, 2, 6, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_network, 2, 7, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_QA, 3, 5, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_flags, 3, 6, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_multispecies, 3, 7, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_2, 1, 8, 3, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_obs_selection, 0, 5, 1, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_network, 1, 5, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_ghost_version, 1, 6, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_ghost_features, 1, 7, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_QA, 2, 5, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_flags, 2, 6, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_multispecies, 2, 7, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_2, 0, 8, 3, 1, QtCore.Qt.AlignLeft)
 
         # models
-        config_bar.addWidget(self.lb_mod_selection, 1, 9, 1, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_models, 2, 9, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_mod_selection, 0, 9, 1, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_models, 1, 9, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.bu_read, 3, 9, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.vertical_splitter_3, 0, 10, 4, 1, QtCore.Qt.AlignLeft)
 
@@ -843,13 +835,15 @@ class Dashboard(QtWidgets.QWidget):
         self.cb_resolution.currentTextChanged.connect(
             self.handle_config_bar_params_change
         )
-        # self.cb_matrix.currentTextChanged.connect(self.handle_config_bar_params_change)
+        self.cb_matrix.currentTextChanged.connect(self.handle_config_bar_params_change)
         self.cb_species.currentTextChanged.connect(self.handle_config_bar_params_change)
         self.le_start_date.textChanged.connect(self.handle_config_bar_params_change)
         self.le_end_date.textChanged.connect(self.handle_config_bar_params_change)
         self.cb_statistic_mode.currentTextChanged.connect(
             self.handle_config_bar_params_change
         )
+        self.cb_ghost_version.currentTextChanged.connect(self.handle_config_bar_params_change)
+        self.cb_ghost_features.currentTextChanged.connect(self.handle_config_bar_params_change)
 
         # setup pop-up window menu tree for flags, qa, models,
         # % data coverage, data periods and metadata
@@ -1020,6 +1014,8 @@ class Dashboard(QtWidgets.QWidget):
             self.le_end_date.setText(str(self.end_date))
             self.date_range_has_changed = False
 
+            self.ghost_version_has_changed = False
+
             # initialise resampling resolution combobox
             self.cb_resampling_resolution.addItems([self.resampling_resolution])
 
@@ -1067,6 +1063,8 @@ class Dashboard(QtWidgets.QWidget):
             self.selected_networkspeci = "{}|{}".format(
                 self.selected_network, self.selected_species
             )
+            self.selected_ghost_version = copy.deepcopy(self.ghost_version)
+            self.selected_ghost_features = copy.deepcopy(self.ghost_features)
 
             # set initial filter species in widgets as empty dictionaries
             self.selected_widget_network = dict()
@@ -1092,8 +1090,8 @@ class Dashboard(QtWidgets.QWidget):
                 self.qa_per_species[self.selected_species]
             )
 
-        # if date range has changed then update available observational data dictionary
-        if self.date_range_has_changed:
+        # if date range or ghost version has changed then update available observational data dictionary
+        if self.date_range_has_changed or self.ghost_version_has_changed:
             get_valid_obs_files_in_date_range(
                 self, self.le_start_date.text(), self.le_end_date.text()
             )
@@ -1106,6 +1104,7 @@ class Dashboard(QtWidgets.QWidget):
         self.cb_species.clear()
         self.cb_statistic_mode.clear()
         self.cb_statistic_aggregation.clear()
+        self.cb_ghost_features.clear()
         self.mpl_canvas.statsummary_periodic_aggregation.clear()
         self.mpl_canvas.statsummary_periodic_mode.clear()
         self.mpl_canvas.timeseries_stat.clear()
@@ -1118,6 +1117,10 @@ class Dashboard(QtWidgets.QWidget):
             return
         else:
             self.no_data_to_read = False
+
+            # initialise ghost version if we have data
+            # if we clear it earlier we are not able to change the version if we find no data for a specific version
+            self.cb_ghost_version.clear()
 
         # update network field
         available_networks = list(self.available_observation_data.keys())
@@ -1169,6 +1172,29 @@ class Dashboard(QtWidgets.QWidget):
             self.cb_matrix.setCurrentText(self.selected_matrix)
         else:
             self.selected_matrix = self.cb_matrix.currentText()
+
+        # update GHOST version field
+        available_ghost_versions = self.available_ghost_versions
+        self.cb_ghost_version.addItems(available_ghost_versions)
+        if self.selected_ghost_version in available_ghost_versions:
+            self.cb_ghost_version.setCurrentText(self.selected_ghost_version)
+        else:
+            if self.from_conf:
+                msg = f"GHOST version {self.selected_ghost_version} is not available."
+                self.logger.error(msg)
+                sys.exit(1)
+            else:
+                msg = f"GHOST version {self.selected_ghost_version} is not available. Choosing {self.cb_ghost_version.currentText()} as it is the first option in the dropdown."
+                show_message(self, msg)
+                self.selected_resolution = self.cb_resolution.currentText()
+
+        # update GHOST features field
+        available_ghost_features = self.available_ghost_features
+        self.cb_ghost_features.addItems(available_ghost_features)
+        if self.selected_ghost_features in available_ghost_features:
+            self.cb_ghost_features.setCurrentText(self.selected_ghost_features)
+        else:
+            self.selected_ghost_features = self.cb_ghost_features.currentText()
 
         # update species field
         available_species = sorted(
@@ -1613,6 +1639,7 @@ class Dashboard(QtWidgets.QWidget):
         """
 
         if (changed_param != "") & (not self.block_config_bar_handling_updates):
+            print('handle_config_bar_params_change')
             # get event origin source
             event_source = self.sender()
 
@@ -1642,6 +1669,16 @@ class Dashboard(QtWidgets.QWidget):
             elif event_source == self.cb_statistic_mode:
                 self.selected_statistic_mode = changed_param
 
+            elif event_source == self.cb_ghost_version:
+                self.selected_ghost_version = changed_param
+                
+                generate_file_trees(self, ghost_version=self.selected_ghost_version, only_ghost=True)
+
+                self.ghost_version_has_changed = True
+
+            elif event_source == self.cb_ghost_features:
+                self.selected_ghost_features = changed_param
+
             # set variable to check if date range changes
             self.date_range_has_changed = False
 
@@ -1657,6 +1694,7 @@ class Dashboard(QtWidgets.QWidget):
                 self.cb_resolution,
                 self.cb_matrix,
                 self.cb_species,
+                self.cb_ghost_version
             ]:
                 init_multispecies(self)
 
