@@ -473,7 +473,7 @@ make<span class="w"> </span>html
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>providentia-env_v3.1.0<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.11.5<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>--override-channels
 conda<span class="w"> </span>activate<span class="w"> </span>providentia-env_v3.1.0
 conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span><span class="nv">cartopy</span><span class="o">=</span><span class="m">0</span>.25.0<span class="w"> </span><span class="nv">jupyterlab</span><span class="o">==</span><span class="m">4</span>.5.3<span class="w"> </span><span class="nv">ghostscript</span><span class="o">==</span><span class="m">10</span>.06.0<span class="w"> </span><span class="nv">dask</span><span class="o">==</span><span class="m">2026</span>.1.2<span class="w"> </span><span class="nv">nco</span><span class="o">==</span><span class="m">5</span>.3.6<span class="w"> </span><span class="nv">pyproj</span><span class="o">=</span><span class="m">3</span>.7.2<span class="w"> </span><span class="nv">proj</span><span class="o">=</span><span class="m">9</span>.7.1<span class="w"> </span>--override-channels
-pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+pip<span class="w"> </span>install<span class="w"> </span>--no-user<span class="w"> </span>-r<span class="w"> </span>requirements.txt
 </pre></div>
 </div>
 </section>
@@ -484,7 +484,7 @@ module<span class="w"> </span>load<span class="w"> </span>GCC/10.2.0
 conda<span class="w"> </span>create<span class="w"> </span>-p<span class="w"> </span>/gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.1.0-nord4<span class="w"> </span>-y<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.11.5<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>--override-channels
 conda<span class="w"> </span>activate<span class="w"> </span>/gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.1.0-nord4
 conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span><span class="nv">cartopy</span><span class="o">=</span><span class="m">0</span>.25.0<span class="w"> </span><span class="nv">jupyterlab</span><span class="o">==</span><span class="m">4</span>.5.3<span class="w"> </span><span class="nv">ghostscript</span><span class="o">==</span><span class="m">10</span>.06.0<span class="w"> </span><span class="nv">dask</span><span class="o">==</span><span class="m">2026</span>.1.2<span class="w"> </span><span class="nv">nco</span><span class="o">==</span><span class="m">5</span>.3.6<span class="w"> </span><span class="nv">pyproj</span><span class="o">=</span><span class="m">3</span>.7.2<span class="w"> </span><span class="nv">proj</span><span class="o">=</span><span class="m">9</span>.7.1<span class="w"> </span>--override-channels
-pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+pip<span class="w"> </span>install<span class="w"> </span>--no-user<span class="w"> </span>-r<span class="w"> </span>requirements.txt
 </pre></div>
 </div>
 </section>
@@ -493,7 +493,7 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>-p<span class="w"> </span>/gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.1.0<span class="w"> </span>-y<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.11.5<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>--override-channels
 conda<span class="w"> </span>activate<span class="w"> </span>/gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.1.0
 conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span><span class="nv">cartopy</span><span class="o">=</span><span class="m">0</span>.25.0<span class="w"> </span><span class="nv">jupyterlab</span><span class="o">==</span><span class="m">4</span>.5.3<span class="w"> </span><span class="nv">ghostscript</span><span class="o">==</span><span class="m">10</span>.06.0<span class="w"> </span><span class="nv">dask</span><span class="o">==</span><span class="m">2026</span>.1.2<span class="w"> </span><span class="nv">nco</span><span class="o">==</span><span class="m">5</span>.3.6<span class="w"> </span><span class="nv">pyproj</span><span class="o">=</span><span class="m">3</span>.7.2<span class="w"> </span><span class="nv">proj</span><span class="o">=</span><span class="m">9</span>.7.1<span class="w"> </span>--override-channels
-pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+pip<span class="w"> </span>install<span class="w"> </span>--no-user<span class="w"> </span>-r<span class="w"> </span>requirements.txt
 </pre></div>
 </div>
 </section>

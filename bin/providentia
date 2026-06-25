@@ -319,7 +319,7 @@ setup_providentia_env() {
         conda activate "$ENV_NAME"
         conda install -c conda-forge cartopy=0.25.0 jupyterlab==4.5.3 ghostscript==10.06.0 dask==2026.1.2 nco==5.3.6 pyproj=3.7.2 proj=9.7.1 --override-channels -y
         if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
+            pip install --no-user -r requirements.txt
         fi
         active_env=true
     fi
