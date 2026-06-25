@@ -649,40 +649,8 @@ class ModelInterpolation(object):
                     if self.mod_grid_type == "crs":
                         self.y = self.y - 90
 
-                # Check for monotonicity before ordering coordinates if needed (with tolerance for small numerical issues)
-                # TODO: Review if there was any reason why prior to this commit the monotonicity check was done before shift of coordinates
-                # There are cases (as seen in interpolation of cams_forecast_ensemble) where we need to shift the coordinates
-                # before the monotonicity check, as the original coordinates are in 0-360 format and therefore not monotonic,
-                # but once shifted to -180-180 they are monotonic.
+                # initialise tolerance    
                 tol = 1e-10
-                x_diff = np.diff(self.x)
-                y_diff = np.diff(self.y)
-                increasing_x = np.all(x_diff > tol)
-                decreasing_x = np.all(x_diff < -tol)
-                increasing_y = np.all(y_diff > tol)
-                decreasing_y = np.all(y_diff < -tol)
-                if not (increasing_x or decreasing_x):
-                    # remove scientific notation
-                    np.set_printoptions(suppress=True)
-                    self.log_file_str += (
-                        "Longitude is not monotonic. Terminating process."
-                    )
-                    self.log_file_str += (
-                        "\nLongitudes: \n{0}.\nDifferences: \n{1}".format(
-                            self.x, x_diff
-                        )
-                    )
-                    create_output_logfile(1, self.log_file_str)
-                if not (increasing_y or decreasing_y):
-                    # remove scientific notation
-                    np.set_printoptions(suppress=True)
-                    self.log_file_str += (
-                        "Latitude is not monotonic. Terminating process."
-                    )
-                    self.log_file_str += (
-                        "\nLatitudes: \n{0}.\nDifferences: \n{1}".format(self.y, y_diff)
-                    )
-                    create_output_logfile(1, self.log_file_str)
 
                 # need to order coordinates?
                 # geographic grid?
@@ -733,6 +701,42 @@ class ModelInterpolation(object):
                         self.mod_lons_centre = self.mod_lons_centre[self.y_idx, :]
                         self.mod_lats_centre = self.mod_lats_centre[self.y_idx, :]
                         self.y = self.y[self.y_idx]
+
+                # Check for monotonicity before ordering coordinates if needed (with tolerance for small numerical issues)
+                # TODO: Review if there was any reason why prior to this commit the monotonicity check was done before shift of coordinates
+                # There are cases (as seen in interpolation of cams_forecast_ensemble) where we need to shift the coordinates
+                # before the monotonicity check, as the original coordinates are in 0-360 format and therefore not monotonic,
+                # but once shifted to -180-180 they are monotonic.
+                
+                x_diff = np.diff(self.x)
+                y_diff = np.diff(self.y)
+                increasing_x = np.all(x_diff > tol)
+                decreasing_x = np.all(x_diff < -tol)
+                increasing_y = np.all(y_diff > tol)
+                decreasing_y = np.all(y_diff < -tol)
+                
+                if not (increasing_x or decreasing_x):
+                    # remove scientific notation
+                    np.set_printoptions(suppress=True)
+                    self.log_file_str += (
+                        "Longitude is not monotonic. Terminating process."
+                    )
+                    self.log_file_str += (
+                        "\nLongitudes: \n{0}.\nDifferences: \n{1}".format(
+                            self.x, x_diff
+                        )
+                    )
+                    create_output_logfile(1, self.log_file_str)
+                if not (increasing_y or decreasing_y):
+                    # remove scientific notation
+                    np.set_printoptions(suppress=True)
+                    self.log_file_str += (
+                        "Latitude is not monotonic. Terminating process."
+                    )
+                    self.log_file_str += (
+                        "\nLatitudes: \n{0}.\nDifferences: \n{1}".format(self.y, y_diff)
+                    )
+                    create_output_logfile(1, self.log_file_str)
 
                 # close model netCDF root
                 mod_nc_root.close()
