@@ -13,4 +13,4 @@ dependencies:
   - proj=9.7.1
   - pip
   - pip:
-    - --no-user -r requirements.txt
+    - -r requirements.txt
