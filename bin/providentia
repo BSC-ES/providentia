@@ -71,7 +71,6 @@ sanitise_python_environment() {
     unset PYTHONUSERBASE || true
 
     export PYTHONNOUSERSITE=1
-    export PIP_NO_USER=1
 }
 
 # sanitise python environment to avoid conflicts
