@@ -7,6 +7,7 @@ import yaml
 from netCDF4 import Dataset
 import numpy as np
 import shutil
+import pandas as pd
 
 from .warnings_prv import show_message
 
@@ -21,12 +22,12 @@ cams_species_units = yaml.safe_load(
         )
     )
 )
-ghost_tropopause_variables = yaml.safe_load(
-    open(join(PROVIDENTIA_ROOT, "settings", "internal", "cams", "tropopause.yaml"))
+
+mapping_species = yaml.safe_load(
+    open(join(PROVIDENTIA_ROOT, "settings", "mapping_species.yaml"))
 )
 
-
-class Tropopause(object):
+class ICAP(object):
     """
     Class that manages the interaction with Juelich
     to retrieve ERA5 datasets and convert downloaded
@@ -42,6 +43,64 @@ class Tropopause(object):
         """
 
         self.download_instance = download_instance
+
+    def control_domain(self, domain, initial_check):
+        # TODO HARDCODED
+        correct_resolution = "6hourly"
+        
+        # check if the domain is the correct one for the dataset
+        if domain not in cams_options[prefix]:
+            possible_domains = "', '".join(cams_options[prefix])
+            msg = (
+                f"The current domain '{domain}' is not valid for the CAMS dataset. "
+                f"It must be '{possible_domains}'."
+            )
+            show_message(self.download_instance, msg, deactivate=initial_check)
+            return
+
+    def control_resolutions(self, initial_check):
+        resolution_list = (
+            self.download_instance.model_resolution
+            if self.download_instance.model_resolution
+            else self.download_instance.resolution
+        )
+        
+        # TODO HARDCODED
+        correct_resolution = "6hourly"
+
+        final_resolution_list = []
+
+        for resolution in resolution_list:
+            if correct_resolution == resolution:
+                final_resolution_list.append(resolution)
+            else:
+                msg = f"The current resolution '{resolution}' is not valid. It must be '{correct_resolution}'."
+                show_message(
+                    self.download_instance, msg, deactivate=initial_check
+                )
+
+        return final_resolution_list
+
+    def control_species(self, initial_check):
+
+        # TODO HARDCODED
+        correct_species = "od550aero"
+
+        final_species_list = []
+
+        for species in self.download_instance.species:
+            if correct_species == species or correct_species in mapping_species[correct_species]:
+                final_species_list.append(correct_species)
+            else:
+                msg = f"The species '{species}' is not available in CAMS."
+                show_message(
+                    self.download_instance, msg, deactivate=initial_check
+                )
+
+        return final_species_list
+        
+    def control_dates(self):
+        pass
 
     def format_data(self, input_filepath, output_filepath, species):
         """
@@ -146,13 +205,93 @@ class Tropopause(object):
         output_file.close()
         input_file.close()
 
-    def find_mode(self):
+    def build_nc_file_paths_in_range(self):
         # look for model before download
-        pass
 
+        model = "cams_icap"
+        domain = "global"
 
+        path = join(self.download_instance.mod_to_interp_root, model, domain, resolution, species)
 
-    def download_non_interpolated_model(
+        months = pd.date_range(start=self.download_instance.start_date, end=self.download_instance.end_date, freq="MS")
+
+        initial_check_nc_files = {
+            path: {
+                "nc_files": [f"{species}_{date}.nc" for date in months.strftime("%Y%m")]
+            }
+        }
+
+        return initial_check_nc_files
+    
+    def find_available_dates(self):
+        # TODO Hardcoded
+        first_start_date = datetime(2014, 11, 1)
+        last_end_date = datetime.today()
+        
+    # TODO change name
+    def download_ICAP(self, files_to_download_info):
+        # TODO hardcoded
+        ORIG = "https://nrlgodae1.nrlmry.navy.mil/ftp/outgoing/nrl/ICAP-MME/"
+
+        # get directory structure
+        dir_tail = join(config_modid, domain, resolution, ghost_species)
+
+        # temporal directory for the zip file
+        temp_root_dir = join(self.download_instance.mod_to_interp_root, ".temp")
+        temp_dir = join(temp_root_dir, dir_tail)
+
+        ODIR = "./recon/aemet/icap/original_files"
+        MEANDIR = "./recon/aemet/icap/6hourly/mean"
+
+        for path in [ODIR, MEANDIR]:
+            os.makedirs(path, exist_ok=True)
+
+        current = self.download_instance.start_date
+        
+        while current <= end:
+
+            date = current.strftime("%Y%m%d")
+            date1 = current.strftime("%Y-%m-%d")
+
+            Y = current.strftime("%Y")
+            M = current.strftime("%m")
+
+            nam0 = f"icap_{date}00_C4_dustaod550.nc"
+            nam1 = f"{date}_ICAP-MME_MEAN.nc"
+
+            # Download source file
+            source_file = os.path.join(ODIR, nam0)
+
+            if not os.path.exists(source_file):
+
+                url = f"{ORIG}{Y}/{Y}{M}/{nam0}"
+                print(f"Downloading {url}")
+
+                response = requests.get(url, stream=True)
+                response.raise_for_status()
+
+                with open(source_file, "wb") as f:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        f.write(chunk)
+
+            else:
+                print("File already downloaded")
+
+            print("Running formatting scripts")
+
+            # Mean file
+            mean_file = os.path.join(MEANDIR, nam1)
+
+            if not os.path.exists(mean_file):
+
+                fmt(date, str(ODIR), str(MEANDIR), nam1, date1)
+
+            else:
+                print("Mean file already formatted")
+
+            current += timedelta(days=1)
+
+    def download_ICAP_model(
         self, model, initial_check, files_to_download=None
     ):
         """
@@ -179,55 +318,34 @@ class Tropopause(object):
 
         if initial_check:
             # print current model
-            self.logger.info("\n" + "-" * 40)
-            self.logger.info(
+            self.download_instance.logger.info("\n" + "-" * 40)
+            self.download_instance.logger.info(
                 f"\nDownloading {model} model data from the U.S. Naval Research Laboratory..."
             )
 
-            # check if ssh exists and check if still active, connect if not
-            if (self.ssh is None) or (self.ssh.get_transport().is_active()):
-                self.connect()
+            self.control_domain(initial_check)
 
-            # look for the model in the remote machine
-            model_exists, remote_dir = find_model(self, mod_id, domain, initial_check)
+            valid_resolutions = self.control_resolutions(initial_check)
 
-            if not model_exists:
+            if not valid_resolutions:
                 return
 
-            # valid_resolutions = find_available_resolutions(
-            #     self, remote_dir, mod_id, domain, initial_check
-            # )
+            valid_resolutions_species_dir = self.control_species()
 
-            # valid_resolutions_species_dir = find_available_species(
-            #     self,
-            #     valid_resolutions,
-            #     remote_dir,
-            #     ensemble,
-            #     mod_id,
-            #     domain,
-            #     initial_check,
-            # )
+            cams_start_date, cams_end_date = self.control_dates()
 
-            path_files_dict = find_available_nc_files(
-                self, valid_resolutions_species_dir, initial_check
-            )
-
-            initial_check_nc_files = build_nc_file_paths_in_range(
-                self, path_files_dict, initial_check
-            )
+            initial_check_nc_files = self.build_nc_file_paths_in_range()
 
             return initial_check_nc_files
 
         elif files_to_download:
-            self.logger.info(
+            self.download_instance.logger.info(
                 f"\n{model} model data to download ({len(files_to_download)}):"
             )
 
-            download_non_interpolated_sftp(self, files_to_download)
+            self.download_ICAP(files_to_download)
 
         else:
             # tell the user if not valid resolution specie date combinations
             msg = "There is no available model output to be downloaded."
             show_message(self, msg, deactivate=initial_check)
-
-        return initial_check_nc_files

@@ -27,9 +27,6 @@ defaults = yaml.safe_load(
 multispecies_map = yaml.safe_load(
     open(join(PROVIDENTIA_ROOT, "settings", "multispecies_shortcuts.yaml"))
 )
-mapping_species = yaml.safe_load(
-    open(join(PROVIDENTIA_ROOT, "settings", "mapping_species.yaml"))
-)
 interp_models = yaml.safe_load(
     open(join(PROVIDENTIA_ROOT, "settings", "interp_models.yaml"))
 )
@@ -1243,7 +1240,7 @@ class ProvConfiguration:
             # TODO Hardcoded ERA5
             # cams model is directly valid
             if model.startswith(tuple(model_options.keys())) or model.startswith(
-                "era5_tropopause"
+                "era5_tropopause") or model.startswith("cams_icap"
             ):
                 return [model]
 

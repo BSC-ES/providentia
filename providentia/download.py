@@ -19,6 +19,7 @@ from .actris import Actris
 from .cams import Cams, cams_options
 from providentia.auxiliar import CURRENT_PATH, join
 from .configuration import ProvConfiguration, load_conf
+from .icap import ICAP
 from .read_aux import check_for_ghost
 from .tropopause import Tropopause
 from .warnings_prv import show_message
@@ -354,6 +355,23 @@ class Download(object):
                                 files_to_download=files_to_download,
                             )
 
+                    elif model.startswith("cams_icap"):
+                        self.icap = ICAP(self)
+                        initial_check_nc_files = (
+                            self.icap.download_ICAP_model(
+                                model, initial_check=True
+                            )
+                        )
+                        files_to_download = self.select_files_to_download(
+                            initial_check_nc_files
+                        )
+                        if not initial_check_nc_files or files_to_download:
+                            self.icap.download_ICAP_model(
+                                model,
+                                initial_check=False,
+                                files_to_download=files_to_download,
+                            )
+
                     # BSC machines
                     else:
                         # iterate the models download
@@ -598,9 +616,11 @@ class Download(object):
 
                         if dir_not_downloaded_paths:
                             not_downloaded_paths[dir] = {
-                                "remote_dir": dir_dict["remote_dir"],
-                                "nc_files": dir_not_downloaded_paths,
-                            }
+                                    "nc_files": dir_not_downloaded_paths,
+                                }
+                            if "remote_dir" in nc_filepaths_to_download:
+                                not_downloaded_paths["remote_dir"] = dir_dict["remote_dir"]
+                                
 
                 else:
                     not_downloaded_paths = nc_filepaths_to_download
