@@ -194,7 +194,10 @@ class ProvConfiguration:
                 return value
             
         elif key == "config_dir":
-            return join(PROVIDENTIA_ROOT, value)
+            if  os.path.isabs(value):
+                return value
+            else:
+                return join(PROVIDENTIA_ROOT, value)
 
         elif key == "operating_system":
             # get operating system
