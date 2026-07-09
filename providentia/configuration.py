@@ -89,9 +89,7 @@ class ProvConfiguration:
 
         # set the parameters required at the initisialization
         self.required_init = init["required_init"] 
-        self.required_init["config_dir"] = join(
-            PROVIDENTIA_ROOT, self.required_init["config_dir"]
-        )
+
         for k, val in self.required_init.items():
             val = kwargs.get(k, val)
             setattr(self.read_instance, k, self.parse_parameter(k, val))
