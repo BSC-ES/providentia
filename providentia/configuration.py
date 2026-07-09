@@ -192,6 +192,9 @@ class ProvConfiguration:
                     return value
             else:
                 return value
+            
+        elif key == "config_dir":
+            return join(PROVIDENTIA_ROOT, value)
 
         elif key == "operating_system":
             # get operating system
