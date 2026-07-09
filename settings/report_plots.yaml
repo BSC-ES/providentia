@@ -81,6 +81,6 @@
 
     "training3": ['map-MB','timeseries','periodic-r','distribution','statsummary'],
 
-    "kuwait": ["map-Median", "map-r", "timeseries_annotate", "periodic-Mean_threshold", "statsummary_multispecies", "taylor-r2", "scatter_annotate_individual"]
+    "kuwait": ["map-Median", "map-r", "timeseries_annotate", "periodic-Mean_threshold", "statsummary", "taylor-r2", "scatter_annotate"]
 
 }

@@ -21,6 +21,7 @@ tutorials/data/output/**/*.nc
 tutorials/data/output/**/*.png
 tutorials/data/source/cams/**/*.nc
 tutorials/data/.ipynb_checkpoints
+trainings/.ipynb_checkpoints
 trainings/data/output/**/*.nc
 trainings/data/output/**/*.png
 trainings/data/.ipynb_checkpoints
