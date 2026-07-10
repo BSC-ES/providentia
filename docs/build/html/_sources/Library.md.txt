@@ -146,7 +146,7 @@ If wanting to apply a filter not set in the configuration file, this can be done
 provi.filter(field, ...)
 ```
 
-where `field` is the field to filter by. The fields to filter by can be coverage fields, period fields or metadata fields.
+where `field` is the field to filter by. The fields to filter by can be bounds, coverage fields, period fields or metadata fields.
 
 If the field is numeric, lower and upper limits to retain data between can be set as follows:
 
