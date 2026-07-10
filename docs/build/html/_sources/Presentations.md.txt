@@ -40,9 +40,12 @@ Below you will find the recorded videos and presentations of the last user meeti
 
 Below you will find the presentations involving Providentia at scientific or technical conferences and workshops outside BSC:
 
+* 30/06/2026, Alba Vilanova Cortezón, RIKEN Open Seminar (online), [Presentation](uploads/presentations/20260630_Providentia_RIKEN_AIP_Open_Seminar.pdf) 
+
+* 05/05/2026, Paula Serrano Sierra, EGU (Vienna, Austria), [Presentation](uploads/presentations/20260505_Providentia_EGU.pdf) 
+
 * 22/04/2026, Alba Vilanova Cortezón, ACTRIS Science Conference (Oslo, Norway), [Poster](uploads/posters/20260422_ACTRIS_Science_Conference_Poster.pdf) 
 
-* 11/03/2026, Alba Vilanova Cortezón and Paula Serrano Sierra, ATARRI Training (online), [Providentia](uploads/presentations/20260311_Providentia_Atarri.pdf) 
+* 11/03/2026, Alba Vilanova Cortezón and Paula Serrano Sierra, ATARRI Training (online), [Presentation](uploads/presentations/20260311_Providentia_Atarri.pdf) 
 
-* 05/06/2025, Paula Serrano Sierra, ACTRIS DC Workshop (Oslo, Norway), [Providentia: 
-An Evaluation and Visualisation Tool for ACTRIS Data](uploads/presentations/20250605_Providentia_ACTRIS_DC_Workshop.pdf)
+* 05/06/2025, Paula Serrano Sierra, ACTRIS DC Workshop (Oslo, Norway), [Presentation](uploads/presentations/20250605_Providentia_ACTRIS_DC_Workshop.pdf)

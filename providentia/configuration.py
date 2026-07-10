@@ -89,7 +89,7 @@ class ProvConfiguration:
 
         # set the parameters required at the initisialization
         self.required_init = init["required_init"] 
-        
+
         for k, val in self.required_init.items():
             val = kwargs.get(k, val)
             setattr(self.read_instance, k, self.parse_parameter(k, val))

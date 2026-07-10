@@ -281,6 +281,26 @@ class Providentia:
                         new_remove.append(item)
                 self.period_menu["checkboxes"]["remove_selected"] = new_remove
 
+        # field is bounds?
+        elif field == 'bounds':
+            # if neither lower or upper are defined, filtering cannot be done
+            if (lower is None) and (upper is None):
+                msg = "When filtering by a numeric metadata field, 'lower' or 'upper' must be passed as arguments."
+                show_message(self, msg)
+                return
+                    
+            do_filter = True
+            if lower is not None:
+                self.lower_bound = {
+                    speci: np.float32(lower)
+                    for speci in self.species
+                }
+            if upper is not None:
+                self.upper_bound = {
+                    speci: np.float32(upper)
+                    for speci in self.species
+                }
+        
         # fields is a metadata field?
         else:
             for menu_type in self.metadata_types:
