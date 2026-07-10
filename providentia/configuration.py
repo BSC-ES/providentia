@@ -86,7 +86,7 @@ class ProvConfiguration:
         self.read_instance = read_instance
 
         # set the parameters required at the initisialization
-        self.required_init = init["required_init"]
+        self.required_init = init["required_init"] 
 
         for k, val in self.required_init.items():
             val = kwargs.get(k, val)
@@ -190,6 +190,12 @@ class ProvConfiguration:
                     return value
             else:
                 return value
+            
+        elif key == "config_dir":
+            if  os.path.isabs(value):
+                return value
+            else:
+                return join(PROVIDENTIA_ROOT, value)
 
         elif key == "operating_system":
             # get operating system

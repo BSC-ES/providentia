@@ -5,7 +5,7 @@ import pytest
 possibilities = [
     (
         prv.Providentia(
-            "tests_ghost.conf",
+            "tests/tests_ghost.conf",
             statistic_mode="Flattened",
             statistic_aggregation="",
             tests=True,
@@ -15,7 +15,7 @@ possibilities = [
     ),
     (
         prv.Providentia(
-            "tests_ghost.conf",
+            "tests/tests_ghost.conf",
             statistic_mode="Spatial|Temporal",
             statistic_aggregation="Median",
             tests=True,
@@ -23,10 +23,10 @@ possibilities = [
         "spatial_temporal",
         "ghost",
     ),
-    (prv.Providentia("tests_ghost.conf", tests=True), "temporal_spatial", "ghost"),
+    (prv.Providentia("tests/tests_ghost.conf", tests=True), "temporal_spatial", "ghost"),
     (
         prv.Providentia(
-            "tests_nonghost.conf",
+            "tests/tests_nonghost.conf",
             statistic_mode="Flattened",
             statistic_aggregation="",
             tests=True,
@@ -36,7 +36,7 @@ possibilities = [
     ),
     (
         prv.Providentia(
-            "tests_nonghost.conf",
+            "tests/tests_nonghost.conf",
             statistic_mode="Spatial|Temporal",
             statistic_aggregation="Median",
             tests=True,
@@ -45,7 +45,7 @@ possibilities = [
         "nonghost",
     ),
     (
-        prv.Providentia("tests_nonghost.conf", tests=True),
+        prv.Providentia("tests/tests_nonghost.conf", tests=True),
         "temporal_spatial",
         "nonghost",
     ),
@@ -60,14 +60,14 @@ def test_statistics(inst, statistic_mode, network_type):
 
 
 def test_calibration():
-    inst = prv.Providentia("tests_calibration.conf")
+    inst = prv.Providentia("tests/tests_calibration.conf")
     path = "tests/reference/nonghost/calibration/data/data_calibration.npy"
     inst.load()
     read_data(inst, path)
 
 
 def test_forecast():
-    inst = prv.Providentia("tests_forecast.conf")
+    inst = prv.Providentia("tests/tests_forecast.conf")
     path = "tests/reference/nonghost/forecast/data/data_forecast.npy"
     inst.load()
     read_data(inst, path)
