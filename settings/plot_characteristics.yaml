@@ -334,7 +334,7 @@
           "page_title":
             {
               "t": "Metadata",
-              "fontsize": 11,
+              "fontsize": 10,
               "ha": "left",
               "x": 0.05,
               "y": 0.98,
@@ -442,7 +442,7 @@
           "orientation": "portrait",
           "figure": { "ncols": 2, "nrows": 2 },
           "page_title":
-            { "t": "Map", "fontsize": 11, "ha": "left", "x": 0.05, "y": 0.98 },
+            { "t": "Map", "fontsize": 10, "ha": "left", "x": 0.05, "y": 0.98 },
           "axis_title": { "fontsize": 8 },
           "subplots_adjust":
             {
@@ -645,7 +645,7 @@
           "page_title":
             {
               "t": "Timeseries",
-              "fontsize": 11,
+              "fontsize": 10,
               "ha": "left",
               "x": 0.05,
               "y": 0.98,
@@ -816,7 +816,7 @@
           "page_title":
             {
               "t": "Periodic",
-              "fontsize": 11,
+              "fontsize": 10,
               "ha": "left",
               "x": 0.05,
               "y": 0.98,
@@ -974,7 +974,7 @@
           "page_title":
             {
               "t": "Violin",
-              "fontsize": 11,
+              "fontsize": 10,
               "ha": "left",
               "x": 0.05,
               "y": 0.98,
@@ -1177,7 +1177,7 @@
           "page_title":
             {
               "t": "Distribution",
-              "fontsize": 11,
+              "fontsize": 10,
               "ha": "left",
               "x": 0.05,
               "y": 0.98,
@@ -1353,7 +1353,7 @@
           "page_title":
             {
               "t": "Scatter",
-              "fontsize": 11,
+              "fontsize": 10,
               "ha": "left",
               "x": 0.05,
               "y": 0.98,
@@ -1500,7 +1500,7 @@
           "page_title":
             {
               "t": "Boxplot",
-              "fontsize": 11,
+              "fontsize": 10,
               "ha": "left",
               "x": 0.05,
               "y": 0.98,
@@ -1654,7 +1654,7 @@
           "page_title":
             {
               "t": "Heatmap",
-              "fontsize": 11,
+              "fontsize": 10,
               "ha": "left",
               "x": 0.05,
               "y": 0.98,
@@ -1790,7 +1790,7 @@
           "page_title":
             {
               "t": "Table",
-              "fontsize": 11,
+              "fontsize": 10,
               "ha": "left",
               "x": 0.05,
               "y": 0.98,
@@ -1935,7 +1935,7 @@
           "page_title":
             {
               "t": "StatSummary",
-              "fontsize": 11,
+              "fontsize": 10,
               "ha": "left",
               "x": 0.05,
               "y": 0.98,
@@ -2124,7 +2124,7 @@
           "page_title":
             {
               "t": "Taylor diagram",
-              "fontsize": 11,
+              "fontsize": 10,
               "ha": "left",
               "x": 0.05,
               "y": 0.98,
@@ -2386,7 +2386,7 @@
           "page_title":
             {
               "t": "Fairmode target",
-              "fontsize": 11,
+              "fontsize": 10,
               "ha": "left",
               "x": 0.05,
               "y": 0.98,
@@ -2788,7 +2788,7 @@
             "page_title":
               {
                 "t": "Contingency table",
-                "fontsize": 11,
+                "fontsize": 10,
                 "ha": "left",
                 "x": 0.05,
                 "y": 0.98,
