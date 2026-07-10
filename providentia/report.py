@@ -265,11 +265,12 @@ class Report:
             # read data
             self.datareader.read_setup(["reset"])
 
-            # initialise previous QA, flags, filter species and calibration factor as section values
+            # initialise previous QA, flags, filter species, ghost features and calibration factor as section values
             self.previous_qa = copy.deepcopy(self.qa)
             self.previous_flags = copy.deepcopy(self.flags)
             self.previous_filter_species = copy.deepcopy(self.filter_species)
             self.previous_calibration_factor = copy.deepcopy(self.calibration_factor)
+            self.previous_ghost_features = copy.deepcopy(self.ghost_features)
 
             # if no valid data has been found be to be read, then skip to next section
             if self.invalid_read:
@@ -1270,9 +1271,10 @@ class Report:
                 self.species = read_species
                 self.networkspecies = read_networkspecies
 
-            # determine if need to re-read data (qa, flags, filter_species or calibration factor have changed)
+            # determine if need to re-read data (qa, flags, filter_species, ghost features or calibration factor have changed)
             if (
-                (not np.array_equal(self.qa, self.previous_qa))
+                (self.ghost_features != self.previous_ghost_features)
+                or (not np.array_equal(self.qa, self.previous_qa))
                 or (not np.array_equal(self.flags, self.previous_flags))
                 or (
                     str(dict(sorted(self.filter_species.items())))
@@ -1313,11 +1315,12 @@ class Report:
                 update_metadata_fields(self)
                 metadata_conf(self)
 
-            # set previous QA, flags, filter species and calibration factor as subsection
+            # set previous QA, flags, filter species, ghost features and calibration factor as subsection
             self.previous_qa = copy.deepcopy(self.qa)
             self.previous_flags = copy.deepcopy(self.flags)
             self.previous_filter_species = copy.deepcopy(self.filter_species)
             self.previous_calibration_factor = copy.deepcopy(self.calibration_factor)
+            self.previous_ghost_features = copy.deepcopy(self.ghost_features)
 
             # filter dataset for current subsection
             self.logger.info(

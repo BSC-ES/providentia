@@ -111,6 +111,7 @@
         },
     },
 
+
   "menu_combobox":
     {
       "QComboBox":
@@ -126,6 +127,50 @@
           "selection-background-color": "grey",
           "border": "1px solid lightgrey",
         },
+      "QComboBox::drop-down":
+        {
+          "subcontrol-origin": "padding",
+          "subcontrol-position": "top right",
+          "width": "20",
+          "border": "none",
+          "background": "transparent",
+        },
+      "QComboBox::down-arrow": { "width": "10px", "height": "10px" },
+      "QComboBox::down-arrow:on": { "width": "10px", "height": "10px" },
+      "QToolTip":
+        {
+          "font-family": "SansSerif",
+          "font-style": "normal",
+          "font-size": "9.5pt",
+          "color": "black",
+        },
+    },
+
+  "menu_combobox_disabled":
+    {
+      "QComboBox":
+        {
+          "font-family": "SansSerif",
+          "font-style": "normal",
+          "font-size": "9.5pt",
+          "height": "20",
+          "width": "100",
+          "color": "black",
+          "background-color": "#DCDCDC",
+          "selection-color": "white",
+          "selection-background-color": "grey",
+          "border": "1px solid lightgrey",
+        },
+      "QComboBox::drop-down":
+        {
+          "subcontrol-origin": "padding",
+          "subcontrol-position": "top right",
+          "width": "20",
+          "border": "none",
+          "background": "transparent",
+        },
+      "QComboBox::down-arrow": { "width": "10px", "height": "10px" },
+      "QComboBox::down-arrow:on": { "width": "10px", "height": "10px" },
       "QToolTip":
         {
           "font-family": "SansSerif",

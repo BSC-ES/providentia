@@ -2199,6 +2199,8 @@ class Dashboard(QtWidgets.QWidget):
         self.mpl_canvas.previous_plot_options = copy.deepcopy(
             self.mpl_canvas.current_plot_options
         )
+        self.previous_ghost_features = self.ghost_features
+
         # if previous data labels contain daily or combined forecast data, then ensure data labels, models and plotting params
         # refer to the data labels per day, not the summary label
         if (
@@ -2251,6 +2253,9 @@ class Dashboard(QtWidgets.QWidget):
         ]
         self.networkspeci = self.networkspecies[0]
         self.filter_species = copy.deepcopy(self.selected_filter_species)
+        self.ghost_version = self.selected_ghost_version
+        self.ghost_features = self.selected_ghost_features
+
         # if are not loading from conf then get data labels, models and forecast indices
         if not self.from_conf:
             models = {}
@@ -2347,12 +2352,13 @@ class Dashboard(QtWidgets.QWidget):
             read_operations = ["reset"]
 
         # determine if any of the key variables have changed
-        # (network, resolution, species, qa, flags, filter_species)
+        # (network, resolution, species, qa, flags, filter_species, ghost_features)
         # if any have changed, observations and any selected models have to be re-read entirely
         elif (
             (self.network[0] != self.previous_network[0])
             or (self.resolution != self.previous_resolution)
             or (self.species[0] != self.previous_species[0])
+            or (self.ghost_features != self.previous_ghost_features)
             or (not np.array_equal(self.qa, self.previous_qa))
             or (not np.array_equal(self.flags, self.previous_flags))
             or (
@@ -2629,6 +2635,8 @@ class Dashboard(QtWidgets.QWidget):
         qa_active = False
         flags_active = False
         period_active = False
+        ghost_version_active = False
+        ghost_features_active = False
 
         # if have a GHOST network then QA and flags are active
         # also GHOST features are not set to min then period is also active
@@ -2637,6 +2645,8 @@ class Dashboard(QtWidgets.QWidget):
             flags_active = True
             if self.ghost_features != "min":
                 period_active = True
+            ghost_version_active = True
+            ghost_features_active = True
         # if are reading ACTRIS network then QA and flags are active
         elif self.selected_network == "actris/actris":
             qa_active = True
@@ -2668,6 +2678,32 @@ class Dashboard(QtWidgets.QWidget):
                     disabled=True,
                 )
                 self.bu_flags.setEnabled(False)
+            if ghost_version_active:
+                self.cb_ghost_version = set_formatting(
+                    self.cb_ghost_version, 
+                    self.formatting_dict["menu_combobox"], 
+                )
+                self.cb_ghost_version.setEnabled(True)
+            else:
+                self.cb_ghost_version = set_formatting(
+                    self.cb_ghost_version, 
+                    self.formatting_dict["menu_combobox_disabled"],
+                    disabled=True
+                )
+                self.cb_ghost_version.setEnabled(False)
+            if ghost_features_active:
+                self.cb_ghost_features = set_formatting(
+                    self.cb_ghost_features, 
+                    self.formatting_dict["menu_combobox"], 
+                )
+                self.cb_ghost_features.setEnabled(True)
+            else:
+                self.cb_ghost_features = set_formatting(
+                    self.cb_ghost_features, 
+                    self.formatting_dict["menu_combobox_disabled"],
+                    disabled=True
+                )
+                self.cb_ghost_features.setEnabled(False)
         elif event_source == "handle_data_selection_update":
             if period_active:
                 self.bu_period = set_formatting(
