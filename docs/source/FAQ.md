@@ -60,7 +60,7 @@ To avoid this issue, remember that your .bashrc file in /home/bsc/{username} nee
 
 ## Could not load the Qt platform plugin "xcb" on HPC
 
-When testing new machines and attempting to opening the dashboard for the first time, for example Grace and the operational runs machine, we encountered this error:
+When testing new machines, such as Grace and the operational runs machine, and attempting to open the dashboard for the first time we encountered this error:
 
 ```
 qt.qpa.plugin: Could not load the Qt platform plugin "xcb" in "" even though it was found.
@@ -78,6 +78,7 @@ sudo dnf libxcb xcb-util xcb-util-image xcb-util-keysyms xcb-util-renderutil xcb
 
 These are the module names for Rocky Linux.
 
+This error has also appeared multiple times on MN5 and went away on its own. After doing some research (explained in https://github.com/BSC-ES/providentia/issues/920) the issue was solved by updating the bin/providentia file to contain `export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"` to ensure that the conda environment libraries are always loaded first.
 
 ## Could not load the Qt platform plugin "xcb" on local machine
 
