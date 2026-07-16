@@ -1634,21 +1634,10 @@ class ProvConfiguration:
                     sys.exit(1)
                 self.read_instance.reading_ghost = is_ghost
 
-        # if are using dashboard then just take first network/species pair, as multivar not supported yet
-        if (
-            (len(self.read_instance.network) > 1)
-            and (len(self.read_instance.species) > 1)
-            and (self.read_instance.mode == "dashboard")
-        ):
-            msg = "Multiple networks/species are not supported in the dashboard. First ones will be taken."
-            show_message(
-                self.read_instance,
-                msg,
-                from_conf=self.read_instance.from_conf,
-                deactivate=deactivate_warning,
-            )
-
+        # if only one network or species, save in list
+        if len(self.read_instance.network) == 1:
             self.read_instance.network = [self.read_instance.network[0]]
+        if len(self.read_instance.species) == 1:
             self.read_instance.species = [self.read_instance.species[0]]
 
         # initialise networkspeci as first network and species pair

@@ -561,7 +561,7 @@ class Dashboard(QtWidgets.QWidget):
         )
         self.cb_matrix.setToolTip("Select data matrix")
         self.cb_species = set_formatting(
-            ComboBox(self), self.formatting_dict["menu_combobox"]
+            CheckableComboBox(self), self.formatting_dict["menu_combobox"]
         )
         self.cb_species.setToolTip("Select species")
 
@@ -1045,7 +1045,7 @@ class Dashboard(QtWidgets.QWidget):
             self.selected_network = copy.deepcopy(self.network[0])
             self.selected_resolution = copy.deepcopy(self.resolution)
             self.selected_matrix = self.parameter_dictionary[self.species[0]]["matrix"]
-            self.selected_species = copy.deepcopy(self.species[0])
+            self.selected_species = copy.deepcopy(self.species)
             self.selected_statistic_mode = copy.deepcopy(self.statistic_mode)
             self.selected_statistic_aggregation = copy.deepcopy(
                 self.statistic_aggregation
@@ -1086,9 +1086,10 @@ class Dashboard(QtWidgets.QWidget):
 
             # update qa / flags checkboxes
             self.flag_menu["checkboxes"]["remove_selected"] = copy.deepcopy(self.flags)
-            self.qa_menu["checkboxes"]["remove_selected"] = copy.deepcopy(
-                self.qa_per_species[self.selected_species]
-            )
+            self.qa_menu["checkboxes"]["remove_selected"] = {
+                speci: copy.deepcopy(self.qa_per_species[speci])
+                for speci in self.selected_species
+            }
 
         # if date range or ghost version has changed then update available observational data dictionary
         if self.date_range_has_changed or self.ghost_version_has_changed:
@@ -1202,23 +1203,77 @@ class Dashboard(QtWidgets.QWidget):
                 self.selected_resolution
             ][self.selected_matrix]
         )
-        self.cb_species.addItems(available_species)
-        if self.selected_species in available_species:
-            self.cb_species.setCurrentText(self.selected_species)
-        else:
+        for species in available_species:
+            self.cb_species.addItem(species)
+            item = self.cb_species.model().item(
+                self.cb_species.count() - 1, 0
+            )
+            item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
+            item.setCheckState(QtCore.Qt.Unchecked)
+
+        # convert selected_species string to list if needed
+        if isinstance(self.selected_species, str):
+            self.selected_species = [
+                species.strip()
+                for species in self.selected_species.split(",")
+                if species.strip()
+            ]
+
+        # check which species are missing
+        missing_species = [
+            species
+            for species in self.selected_species
+            if species not in available_species
+        ]
+
+        if missing_species:
             if self.from_conf:
-                msg = f"Species {self.selected_species} is not available."
+                msg = f"Species {', '.join(missing_species)} is not available."
                 self.logger.error(msg)
                 sys.exit(1)
             else:
-                msg = f"Species {self.selected_species} is not available. Choosing {self.cb_species.currentText()} as it is the first option in the dropdown."
+                msg = (
+                    f"Species {', '.join(missing_species)} is not available. "
+                    "Removing unavailable species."
+                )
                 show_message(self, msg)
-                self.selected_species = self.cb_species.currentText()
+
+                # keep only available species
+                self.selected_species = [
+                    species
+                    for species in self.selected_species
+                    if species in available_species
+                ]
+
+        # populate checkable combobox
+        self.cb_species.clear()
+
+        for species in available_species:
+            self.cb_species.addItem(species)
+
+            item = self.cb_species.model().item(
+                self.cb_species.count() - 1, 0
+            )
+
+            item.setFlags(
+                item.flags() | QtCore.Qt.ItemIsUserCheckable
+            )
+
+            item.setCheckState(
+                QtCore.Qt.Checked
+                if species in self.selected_species
+                else QtCore.Qt.Unchecked
+            )
+
+        print('selected species', self.selected_species)
 
         # update networkspecies field
-        self.selected_networkspeci = "{}|{}".format(
-            self.selected_network, self.selected_species
-        )
+        self.selected_networkspecies = self.networkspecies = [
+            "{}|{}".format(network, species)
+            for network in [self.selected_network] # TODO: Remove [] when it becomes a list
+            for species in self.selected_species
+        ]
+        print('selected networkspecies', self.selected_networkspecies)
 
         # check if have filter species data
         for filter_networkspeci in copy.deepcopy(self.selected_filter_species).keys():
@@ -1406,7 +1461,7 @@ class Dashboard(QtWidgets.QWidget):
             self.le_end_date.text(),
             self.selected_resolution,
             [self.selected_network],
-            [self.selected_species],
+            self.selected_species,
         )
 
         # update models -- keeping previously selected models if available
@@ -1460,7 +1515,7 @@ class Dashboard(QtWidgets.QWidget):
         self.datareader.check_forecast(
             data_labels=all_data_labels,
             data_labels_raw=all_data_labels_raw,
-            networkspecies=[self.selected_networkspeci],
+            networkspecies=self.selected_networkspecies,
             resolution=self.selected_resolution,
             ghost_version=self.ghost_version,
         )
@@ -1475,7 +1530,7 @@ class Dashboard(QtWidgets.QWidget):
             data_labels_raw=all_data_labels_raw,
             selected_data_labels=selected_data_labels,
             selected_data_labels_raw=selected_data_labels_raw,
-            networkspecies=[self.selected_networkspeci],
+            networkspecies=self.selected_networkspecies,
             init=True,
         )
 
@@ -1486,7 +1541,10 @@ class Dashboard(QtWidgets.QWidget):
             self.experiments = copy.deepcopy(selected_models)
 
         # update default qa
-        default_qa = get_default_qa(self, self.selected_species)
+        default_qa = {
+            speci: get_default_qa(self, speci)
+            for speci in self.selected_species
+        }
         previous_default_qa = copy.deepcopy(
             self.qa_menu["checkboxes"]["remove_default"]
         )
@@ -1639,7 +1697,6 @@ class Dashboard(QtWidgets.QWidget):
         """
 
         if (changed_param != "") & (not self.block_config_bar_handling_updates):
-            print('handle_config_bar_params_change')
             # get event origin source
             event_source = self.sender()
 
@@ -1898,7 +1955,7 @@ class Dashboard(QtWidgets.QWidget):
         elif changed_plot_type == "fairmode-statsummary":
             # get number of rows and columns
             ncols = 4
-            nrows = 8 if self.species[0] in ["sconco3", "sconcno2", "pm10"] else 7
+            nrows = 8 if any(species in ["sconco3", "sconcno2", "pm10"] for species in self.species) else 7
 
         # position 2 (top right)
         if changed_position == self.cb_position_2 or changed_position == 2:
@@ -2243,14 +2300,19 @@ class Dashboard(QtWidgets.QWidget):
             self.active_resolution = self.resampling_resolution
         else:
             self.active_resolution = self.resolution
-        self.species = [self.selected_species]
+        self.species = self.selected_species
         self.qa = copy.deepcopy(self.qa_menu["checkboxes"]["remove_selected"])
-        self.qa_per_species[self.selected_species] = copy.deepcopy(self.qa)
+        self.qa_per_species = {
+            speci: copy.deepcopy(self.qa)
+            for speci in self.selected_species
+        }
         self.flags = copy.deepcopy(self.flag_menu["checkboxes"]["remove_selected"])
         self.networkspecies = [
-            "{}|{}".format(network, speci)
-            for network, speci in zip(self.network, self.species)
+            "{}|{}".format(network, species)
+            for network in self.network
+            for species in self.species
         ]
+        
         self.networkspeci = self.networkspecies[0]
         self.filter_species = copy.deepcopy(self.selected_filter_species)
         self.ghost_version = self.selected_ghost_version
@@ -2323,7 +2385,7 @@ class Dashboard(QtWidgets.QWidget):
             ) = self.datareader.update_forecast_indices(
                 data_labels=data_labels,
                 data_labels_raw=data_labels_raw,
-                networkspecies=[self.networkspeci],
+                networkspecies=self.networkspecies,
             )
 
         # remove bias plot options if have no models loaded
@@ -2357,7 +2419,7 @@ class Dashboard(QtWidgets.QWidget):
         elif (
             (self.network[0] != self.previous_network[0])
             or (self.resolution != self.previous_resolution)
-            or (self.species[0] != self.previous_species[0])
+            or (self.species != self.previous_species)
             or (self.ghost_features != self.previous_ghost_features)
             or (not np.array_equal(self.qa, self.previous_qa))
             or (not np.array_equal(self.flags, self.previous_flags))
@@ -2511,11 +2573,12 @@ class Dashboard(QtWidgets.QWidget):
                 return
 
             # if species has changed, or first read, update species specific lower/upper limits
-            if (self.first_read) or (self.species[0] != self.previous_species[0]):
+            if (self.first_read) or (self.species != self.previous_species):
                 # on first read set bounds on boxes, but do not update from parameter_dictionary again 
                 # they might have been updated in a configuration file
-                if self.species[0] != self.previous_species[0]:
+                if self.species != self.previous_species:
                     # get default GHOST limits
+                    # TODO: Set bounds per species
                     self.lower_bound[self.species[0]] = np.float32(
                         self.parameter_dictionary[self.species[0]]["extreme_lower_limit"]
                     )

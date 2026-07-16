@@ -448,7 +448,7 @@ class Canvas(FigureCanvas):
             self.handle_periodic_statistic_update()
             self.update_timeseries_chunk_statistics()
 
-            # # restore block_MPL_canvas_updates
+            # restore block_MPL_canvas_updates
             self.read_instance.block_MPL_canvas_updates = (
                 original_block_MPL_canvas_updates
             )
@@ -1380,7 +1380,7 @@ class Canvas(FigureCanvas):
                 get_selected_station_data(
                     read_instance=self.read_instance,
                     canvas_instance=self,
-                    networkspecies=[self.read_instance.networkspeci],
+                    networkspecies=self.read_instance.networkspecies,
                 )
 
                 # iterate through active_dashboard_plots
@@ -1547,7 +1547,7 @@ class Canvas(FigureCanvas):
                 get_selected_station_data(
                     read_instance=self.read_instance,
                     canvas_instance=self,
-                    networkspecies=[self.read_instance.networkspeci],
+                    networkspecies=self.read_instance.networkspecies,
                 )
 
                 # update plot
@@ -1633,7 +1633,7 @@ class Canvas(FigureCanvas):
                     get_selected_station_data(
                         read_instance=self.read_instance,
                         canvas_instance=self,
-                        networkspecies=[self.read_instance.networkspeci],
+                        networkspecies=self.read_instance.networkspecies,
                     )
 
                     # update plot

@@ -155,7 +155,7 @@ class NavigationToolbar(NavigationToolbar2QT):
             + "_"
             + self.read_instance.le_end_date.text()
         )
-        default_name = "PRV_" + str(self.read_instance.species[0]) + "_" + daterange
+        default_name = "PRV_" + str(self.read_instance.species) + "_" + daterange
         start = join(startpath, default_name)
 
         filter_ext = [

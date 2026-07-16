@@ -2675,48 +2675,71 @@ class Plotting:
         else:
             bias = False
 
+        plot_options = ["multispecies"]
+
         # if statistical dataframe is not provided then create it
         if not isinstance(stats_df, pd.DataFrame):
-            # get valid data labels for networkspeci
-            valid_data_labels = self.canvas_instance.selected_station_data_labels[
-                networkspeci
-            ]
+            stats_table = {}
 
-            # cut data_labels for those in valid data labels
-            cut_data_labels = [
-                data_label
-                for data_label in data_labels
-                if data_label in valid_data_labels
-            ]
+            for networkspeci in self.read_instance.networkspecies:
+                valid_data_labels = self.canvas_instance.selected_station_data_labels[
+                    networkspeci
+                ]
+                print(valid_data_labels)
 
-            # calculate statistics
-            if bias:
-                if self.read_instance.observations_data_label in cut_data_labels:
-                    cut_data_labels.remove(self.read_instance.observations_data_label)
-                stats_calc = calculate_statistic(
-                    self.read_instance,
-                    self.canvas_instance,
-                    networkspeci,
-                    zstats,
-                    [self.read_instance.observations_data_label] * len(cut_data_labels),
-                    cut_data_labels,
-                )
-            else:
-                stats_calc = calculate_statistic(
-                    self.read_instance,
-                    self.canvas_instance,
-                    networkspeci,
-                    zstats,
-                    cut_data_labels,
-                    [],
-                )
+                cut_data_labels = [
+                    data_label
+                    for data_label in data_labels
+                    if data_label in valid_data_labels
+                ]
 
+                # calculate statistics
+                if bias:
+                    if self.read_instance.observations_data_label in cut_data_labels:
+                        cut_data_labels.remove(
+                            self.read_instance.observations_data_label
+                        )
+
+                    stats_calc = calculate_statistic(
+                        self.read_instance,
+                        self.canvas_instance,
+                        networkspeci,
+                        zstats,
+                        [self.read_instance.observations_data_label] * len(cut_data_labels),
+                        cut_data_labels,
+                    )
+                else:
+                    stats_calc = calculate_statistic(
+                        self.read_instance,
+                        self.canvas_instance,
+                        networkspeci,
+                        zstats,
+                        cut_data_labels,
+                        [],
+                    )
+
+                for label in cut_data_labels:
+                    stats_table[(networkspeci, label)] = {
+                        key: value[0]
+                        for key, value in stats_calc.items()
+                    }
+                    
             # create stats dataframe
+            index = pd.MultiIndex.from_product(
+                [self.read_instance.networkspecies, cut_data_labels],
+                names=["networkspecies", "labels"],
+            )
             if len(stats_calc) == 0:
-                stats_df = pd.DataFrame(index=cut_data_labels, dtype=np.float64)
+                stats_df = pd.DataFrame(index=index, dtype=np.float64)
             else:
-                stats_df = pd.DataFrame(
-                    data=stats_calc, index=cut_data_labels, dtype=np.float64
+                stats_df = pd.DataFrame.from_dict(
+                    stats_table,
+                    orient="index"
+                )
+
+                stats_df.index = pd.MultiIndex.from_tuples(
+                    stats_df.index,
+                    names=["networkspecies", "labels"]
                 )
 
         # when we have 1 stat in the statsummary, the column name is 0
@@ -2741,19 +2764,20 @@ class Plotting:
         # get column labels
         col_labels = stats_df.columns.tolist()
 
+        # get relevant data
+        if "multispecies" not in plot_options:
+            stats_df = stats_df.iloc[
+                stats_df.index.get_level_values("networkspecies") == networkspeci
+            ]
+        elif self.read_instance.multispecies_units is not None:
+            # convert units
+            base_plot_type = "statsummary" if statsummary else "table"
+            stats_df = convert_multispecies_df_units(
+                self.read_instance, stats_df, zstats, base_plot_type
+            )
+
         # reports
         if self.read_instance.mode in ["report", "library"]:
-            # get relevant data
-            if "multispecies" not in plot_options:
-                stats_df = stats_df.iloc[
-                    stats_df.index.get_level_values("networkspecies") == networkspeci
-                ]
-            elif self.read_instance.multispecies_units is not None:
-                # convert units
-                base_plot_type = "statsummary" if statsummary else "table"
-                stats_df = convert_multispecies_df_units(
-                    self.read_instance, stats_df, zstats, base_plot_type
-                )
 
             if plotting_paradigm == "station":
                 stats_df = stats_df.iloc[
@@ -2839,14 +2863,14 @@ class Plotting:
             # there is only statsummary
             if statsummary:
                 # get labels
-                data_labels = list(stats_df.index)
+                data_labels = list(stats_df.index.get_level_values("labels"))
                 stats = list(stats_df.columns)
 
                 # reset index
                 stats_df = stats_df.reset_index()
 
                 # get number of "empty" cells (without stats)
-                empty_cells = 1
+                empty_cells = 2
                 col_labels = [""] * empty_cells + stats
 
         # set cell colors
@@ -2900,6 +2924,7 @@ class Plotting:
                     ] * empty_cells + col_colours
 
         # make table
+        print(stats_df)
         table = relevant_axis.table(
             cellText=stats_df.values,
             colLabels=col_labels,

@@ -95,8 +95,6 @@ def expand_plot_characteristics(plot_characteristics, mode):
                         # since we select the statistics from other dropdowns
                         if ("bias" in value) and (plot_type[:4] == "map"):
                             value.remove("bias")
-                    if (mode == "dashboard") and ("multispecies" in value):
-                        value.remove("multispecies")
                     plot_type_characteristics[key] = value
 
         # remove mode keys
