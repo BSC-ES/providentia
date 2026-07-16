@@ -2675,8 +2675,6 @@ class Plotting:
         else:
             bias = False
 
-        plot_options = ["multispecies"]
-
         # if statistical dataframe is not provided then create it
         if not isinstance(stats_df, pd.DataFrame):
             stats_table = {}
