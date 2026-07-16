@@ -152,7 +152,7 @@ It is also possible your cache file is out-of-date; it may help to try:
 </section>
 <section id="could-not-load-the-qt-platform-plugin-xcb-on-hpc">
 <h2>Could not load the Qt platform plugin “xcb” on HPC<a class="headerlink" href="#could-not-load-the-qt-platform-plugin-xcb-on-hpc" title="Link to this heading"></a></h2>
-<p>When testing new machines and attempting to opening the dashboard for the first time, for example Grace and the operational runs machine, we encountered this error:</p>
+<p>When testing new machines, such as Grace and the operational runs machine, and attempting to open the dashboard for the first time we encountered this error:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">qt</span><span class="o">.</span><span class="n">qpa</span><span class="o">.</span><span class="n">plugin</span><span class="p">:</span> <span class="n">Could</span> <span class="ow">not</span> <span class="n">load</span> <span class="n">the</span> <span class="n">Qt</span> <span class="n">platform</span> <span class="n">plugin</span> <span class="s2">&quot;xcb&quot;</span> <span class="ow">in</span> <span class="s2">&quot;&quot;</span> <span class="n">even</span> <span class="n">though</span> <span class="n">it</span> <span class="n">was</span> <span class="n">found</span><span class="o">.</span>
 <span class="n">This</span> <span class="n">application</span> <span class="n">failed</span> <span class="n">to</span> <span class="n">start</span> <span class="n">because</span> <span class="n">no</span> <span class="n">Qt</span> <span class="n">platform</span> <span class="n">plugin</span> <span class="n">could</span> <span class="n">be</span> <span class="n">initialized</span><span class="o">.</span> <span class="n">Reinstalling</span> <span class="n">the</span> <span class="n">application</span> <span class="n">may</span> <span class="n">fix</span> <span class="n">this</span> <span class="n">problem</span><span class="o">.</span>
 
@@ -166,6 +166,7 @@ It is also possible your cache file is out-of-date; it may help to try:
 </pre></div>
 </div>
 <p>These are the module names for Rocky Linux.</p>
+<p>This error has also appeared multiple times on MN5 and went away on its own. After doing some research (explained in https://github.com/BSC-ES/providentia/issues/920) the issue was solved by updating the bin/providentia file to contain <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">LD_LIBRARY_PATH=&quot;$CONDA_PREFIX/lib:$LD_LIBRARY_PATH&quot;</span></code> to ensure that the conda environment libraries are always loaded first.</p>
 </section>
 <section id="could-not-load-the-qt-platform-plugin-xcb-on-local-machine">
 <h2>Could not load the Qt platform plugin “xcb” on local machine<a class="headerlink" href="#could-not-load-the-qt-platform-plugin-xcb-on-local-machine" title="Link to this heading"></a></h2>
