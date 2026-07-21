@@ -93,9 +93,11 @@ if [[ $? -ne 0 ]]; then
 fi
 
 # define default number of cpus
-# 12 for interpolation and download modes
-if [[ $PARSED =~ "--interp" || $PARSED =~ "--interpolation" || $PARSED =~ "--interpolate" ||
-      $PARSED =~ "--download" || $PARSED =~ "--dl" ]]; then
+# 24 for interpolation mode
+if [[ $PARSED =~ "--interp" || $PARSED =~ "--interpolation" || $PARSED =~ "--interpolate"  ]]; then
+    n_cpus=24
+# 12 for download mode
+elif [[ $PARSED =~ "--download" || $PARSED =~ "--dl" ]]; then
     n_cpus=12
 # 1 for dashboard and report modes
 else

@@ -50,9 +50,11 @@ sconch2s:
   - vmrh2s
 od550aero:
   - od550du
+  - od550_dust
 od500aerocoarse:
-  - duaod550
+  - duaod550  
   - od550du
+  - od550_dust
   - od550ducoarse
 od500aero:
   - aod550

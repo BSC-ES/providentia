@@ -65,6 +65,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#could-not-load-the-qt-platform-plugin-xcb-on-local-machine">Could not load the Qt platform plugin “xcb” on local machine</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#segmentation-fault-on-nord4">Segmentation fault on Nord4</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#why-is-data-that-i-have-already-downloaded-being-redownloaded-after-upgrading-to-3-0-0">Why is data that I have already downloaded being redownloaded after upgrading to 3.0.0?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#some-of-the-step-tasks-have-been-oom-killed-during-the-interpolation-on-mn5-or-nord4">Some of the step tasks have been OOM Killed during the interpolation on MN5 or Nord4</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
@@ -187,6 +188,18 @@ It is also possible your cache file is out-of-date; it may help to try:
 <p>If you are currently working with the latest version of Providentia locally, you may be downloading data you already had, because <code class="docutils literal notranslate"><span class="pre">exp</span></code> and <code class="docutils literal notranslate"><span class="pre">exp_to_interp</span></code> are no longer used and data is now downloaded into <code class="docutils literal notranslate"><span class="pre">mod</span></code> and <code class="docutils literal notranslate"><span class="pre">mod_to_interp</span></code>.</p>
 <p>To automatically handle this, we added the option, <code class="docutils literal notranslate"><span class="pre">--dir_merge</span></code>, which detects whether a rename or a merge of directories needs to be done.</p>
 <p>So, if you are working with the new version of Providentia, we highly recommend running this command <code class="docutils literal notranslate"><span class="pre">./bin/providentia</span> <span class="pre">--dir_merge</span></code></p>
+</section>
+<section id="some-of-the-step-tasks-have-been-oom-killed-during-the-interpolation-on-mn5-or-nord4">
+<h2>Some of the step tasks have been OOM Killed during the interpolation on MN5 or Nord4<a class="headerlink" href="#some-of-the-step-tasks-have-been-oom-killed-during-the-interpolation-on-mn5-or-nord4" title="Link to this heading"></a></h2>
+<p>Since we made multiprocessing the default method to submit jobs to slurm, we encounter this error at times. By default the number of CPUs is 24 using medium memory nodes. You might want to change the memory constraint:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">conf</span><span class="o">=</span><span class="n">debug</span><span class="o">.</span><span class="n">conf</span> <span class="o">--</span><span class="n">constraint</span><span class="o">=</span><span class="n">highmem</span>
+</pre></div>
+</div>
+<p>Or increasing the number of cpus, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">conf</span><span class="o">=</span><span class="n">debug</span><span class="o">.</span><span class="n">conf</span> <span class="o">--</span><span class="n">n_cpus</span><span class="o">=</span><span class="mi">36</span>
+</pre></div>
+</div>
+<p>You can also combine both options for testing.</p>
 </section>
 </section>
 
