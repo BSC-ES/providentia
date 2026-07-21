@@ -13,6 +13,7 @@ import time
 from netCDF4 import Dataset
 import numpy as np
 import psutil
+from pprint import pprint
 import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join
@@ -342,7 +343,10 @@ class SubmitInterpolation(object):
                 )
 
                 # iterate through resolutions_to_keep until find one for which have speci_to_process (or mapped speci)
+                searched_paths = {}
                 for model_temporal_resolution in resolutions_to_keep:
+                    searched_paths[model_temporal_resolution] = {}
+
                     # get all species in case the asterisk was used
                     species = (
                         self.get_all_species(
@@ -354,8 +358,10 @@ class SubmitInterpolation(object):
 
                     # iterate through species to process
                     for speci_ii, speci_to_process in enumerate(species):
+                        
                         have_valid_resolution = False
                         original_speci_to_process = copy.deepcopy(speci_to_process)
+                        searched_paths[model_temporal_resolution][original_speci_to_process] = []
 
                         # before proceeding check if have already processed jobs for the model-grid_type/species/temporal_resolution_to_output pairing before
                         # if so, continue to next species
@@ -377,22 +383,24 @@ class SubmitInterpolation(object):
                             continue
 
                         # test if have directory for current speci_to_process
-                        if os.path.isdir(
-                            "{}/{}/{}/{}".format(
+                        current_speci_path = "{}/{}/{}/{}".format(
                                 self.mod_dir,
                                 grid_type,
                                 model_temporal_resolution,
                                 speci_to_process,
                             )
-                        ):
+                        searched_paths[model_temporal_resolution][original_speci_to_process].append(current_speci_path)
+
+                        ensemble_stat_path = "{}/{}/{}/ensemble-stats".format(
+                            self.mod_dir, grid_type, model_temporal_resolution
+                        )
+                        searched_paths[model_temporal_resolution][original_speci_to_process].append(ensemble_stat_path)
+
+                        if os.path.isdir(current_speci_path):
                             have_valid_resolution = True
 
                         # test if have speci directory in ensemble-stats
-                        elif os.path.isdir(
-                            "{}/{}/{}/ensemble-stats".format(
-                                self.mod_dir, grid_type, model_temporal_resolution
-                            )
-                        ):
+                        elif os.path.isdir(ensemble_stat_path):
                             # get all ensemble-stats species
                             model_species_ensemblestat = list(
                                 np.unique(
@@ -476,14 +484,15 @@ class SubmitInterpolation(object):
                                 # if it can be then check then if the variable to map to exists for the model/grid_type/resolution
                                 # (these can be multiple, list order sets the priority)
                                 for speci_to_map in mapping_species[speci_to_process]:
-                                    if os.path.isdir(
-                                        "{}/{}/{}/{}".format(
+                                    speci_to_map_path = "{}/{}/{}/{}".format(
                                             self.mod_dir,
                                             grid_type,
                                             model_temporal_resolution,
                                             speci_to_map,
                                         )
-                                    ):
+                                    searched_paths[model_temporal_resolution][original_speci_to_process].append(speci_to_map_path)
+
+                                    if os.path.isdir(speci_to_map_path):
                                         # if have a binned size distribution variable to map, first check if bin radius is within model's bin extents
                                         # if not, do not process species
                                         if ("vconcaerobin" in speci_to_process) or (
@@ -557,7 +566,7 @@ class SubmitInterpolation(object):
                                         )
                                     )
                                     obs_files = np.sort(glob.glob(obs_path))
-
+                                
                                 # if have no observational files then continue
                                 if len(obs_files) == 0:
                                     print(
@@ -847,6 +856,9 @@ class SubmitInterpolation(object):
             # if list is empty or have no arguments after iteration, return message stating that
             if len(self.arguments) == 0 or not new_arguments:
                 msg = "\nNO INTERSECTING OBSERVATIONAL AND EXPERIMENT DATA FOR INTERPOLATION. \n"
+                if not have_valid_resolution:
+                    # show paths where we have searched for data
+                    msg += f"\nSearched paths for model data: {pprint(searched_paths, width=120)}"
             else:
                 msg = "\n***INTERSECTING OBSERVATIONAL AND EXPERIMENTAL DATA IS AVAILABLE FOR INTERPOLATION.***"
 
@@ -862,7 +874,7 @@ class SubmitInterpolation(object):
 
         # if have no arguments for all models, return message stating that
         if len(self.arguments) == 0:
-            error = "INTERPOLATION CANNOT BE DONE FOR ANY EXPERIMENT"
+            error = "\nINTERPOLATION CANNOT BE DONE FOR ANY EXPERIMENT"
             sys.exit(error)
 
         # randomise the order of the arguments list
