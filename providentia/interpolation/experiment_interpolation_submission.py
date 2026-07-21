@@ -194,36 +194,39 @@ class SubmitInterpolation(object):
             # get all unique arguments to process interpolation tasks
             self.gather_arguments()
 
-            # create greasy arguments file
-            self.create_greasy_arguments_file()
-
-            # check if Greasy is installed
-            is_greasy_installed = False
-            try:
-                result = subprocess.run(
-                    ["greasy", "-V"], stdout=subprocess.PIPE, text=True
-                )
-                if "greasy" in result.stdout:
-                    is_greasy_installed = True
-            except:
-                pass
-
             # submit interpolation jobs
-            if self.interp_multiprocessing:
-                print("\nUsing multiprocessing to manage the job submission.")
-                self.submit_job_multiprocessing()
-            else:
+            if not self.interp_multiprocessing:
+
+                # check if Greasy is installed
+                is_greasy_installed = False
+                try:
+                    result = subprocess.run(
+                        ["greasy", "-V"], stdout=subprocess.PIPE, text=True
+                    )
+                    if "greasy" in result.stdout:
+                        is_greasy_installed = True
+                except:
+                    print("\nGreasy is not installed.")
+                    pass
+                
                 if is_greasy_installed:
+                    
                     print("\nUsing Greasy to manage the job submission.")
+
+                    # create greasy arguments file
+                    self.create_greasy_arguments_file()
+
                     # create submission script according to machine
-                    if self.machine == "nord3":
-                        self.create_lsf_submission_script()
-                    else:
-                        self.create_slurm_submission_script()
+                    self.create_slurm_submission_script()
                     self.submit_job_greasy()
+
                 else:
                     print("Using multiprocessing to manage the job submission.")
                     self.submit_job_multiprocessing()
+
+            else:
+                print("\nUsing multiprocessing to manage the job submission.")
+                self.submit_job_multiprocessing()
 
             # remove section variables from memory
             for k in self.section_opts:
@@ -1055,69 +1058,6 @@ class SubmitInterpolation(object):
         # close submit file
         submit_file.close()
 
-    def create_lsf_submission_script(self):
-        """Write a lsf submission shell script that submits a greasy job."""
-
-        # create job_fname (unique_ID + 'sh.')
-        self.job_fname = self.slurm_job_id + ".sh"
-
-        # get all argument files
-        argument_files = sorted(
-            glob.glob("{}/{}_*.txt".format(self.arguments_dir, self.slurm_job_id))
-        )
-
-        # read how many lines are in first arguments file
-        with open(argument_files[0]) as f:
-            for ii, line in enumerate(f):
-                pass
-            N_arguments = ii + 1
-
-        # cap the number of simultaneously running tasks to be the defined CPU chunk size
-        max_tasks = copy.deepcopy(int(self.interp_chunk_size))
-
-        # if the number of arguments is > capped max tasks,
-        # then set N simultaneous tasks to be the max tasks permitted
-        if N_arguments > max_tasks:
-            n_simultaneous_tasks = copy.deepcopy(max_tasks)
-            # else, if the number of arguments is <= capped max tasks,
-            # then set N simultaneous tasks to be N arguments
-        else:
-            n_simultaneous_tasks = copy.deepcopy(N_arguments)
-
-        # create slurm submission script
-        submit_file = open(self.submit_dir + "/" + self.job_fname, "w")
-
-        submit_file.write("#!/bin/bash\n")
-        submit_file.write("\n")
-        submit_file.write("#BSUB -n {}\n".format(n_simultaneous_tasks))
-        submit_file.write("#BSUB -W 01:00\n")
-        submit_file.write(
-            "#BSUB -J PRVI_{}[1-{}]\n".format(self.slurm_job_id, len(argument_files))
-        )
-        submit_file.write("#BSUB -q {}\n".format(self.qos))
-        submit_file.write("#BSUB -oo /dev/null\n")
-        submit_file.write("#BSUB -eo /dev/null\n")
-        submit_file.write("\n")
-
-        submit_file.write("source {}/bin/load_modules.sh\n".format(PROVIDENTIA_ROOT))
-        submit_file.write("export GREASY_NWORKERS=$LSB_DJOB_NUMPROC\n")
-        submit_file.write(
-            "export GREASY_LOGFILE={}/{}_$LSB_JOBINDEX.log\n".format(
-                self.submit_dir, self.slurm_job_id
-            )
-        )
-        submit_file.write(
-            "arguments_store={}/{}.grz\n".format(self.arguments_dir, self.slurm_job_id)
-        )
-        submit_file.write(
-            "argument_file=$(cat $arguments_store | awk -v var=$LSB_JOBINDEX 'NR==var {print $1}')\n"
-        )
-        submit_file.write("\n")
-        submit_file.write("greasy $argument_file")
-
-        # close submit file
-        submit_file.close()
-
     def submit_job_greasy(self):
         """Submit and monitor interpolation jobs using Greasy/SLURM."""
 
@@ -1127,18 +1067,11 @@ class SubmitInterpolation(object):
         # submit slurm script
         submit_complete = False
         while not submit_complete:
-            if self.machine == "nord3":
-                submit_process = subprocess.Popen(
-                    ["bsub"],
-                    stdout=subprocess.PIPE,
-                    stdin=open("{}/{}".format(self.submit_dir, self.job_fname), "r"),
-                )
-            else:
-                submit_process = subprocess.Popen(
-                    ["sbatch", self.job_fname],
-                    cwd=self.submit_dir,
-                    stdout=subprocess.PIPE,
-                )
+            submit_process = subprocess.Popen(
+                ["sbatch", self.job_fname],
+                cwd=self.submit_dir,
+                stdout=subprocess.PIPE,
+            )
             submit_return_code = submit_process.returncode
 
             # if sbatch fails, time out for 60 seconds and then try again
@@ -1157,11 +1090,7 @@ class SubmitInterpolation(object):
         job_entered = False
 
         while not all_tasks_finished:
-            if self.machine == "nord3":
-                # cmd = ['bjobs', '-noheader', '-J', 'PRVI_{}[1]'.format(self.slurm_job_id)]
-                cmd = ["bjobs", "-noheader"]
-            else:
-                cmd = ["squeue", "-h", "-n", "PRVI_{}".format(self.slurm_job_id)]
+            cmd = ["squeue", "-h", "-n", "PRVI_{}".format(self.slurm_job_id)]
             squeue_process = subprocess.Popen(
                 cmd, stdout=subprocess.PIPE, encoding="utf8"
             )
@@ -1172,21 +1101,6 @@ class SubmitInterpolation(object):
             if (self.machine in ("mn5", "nord4")) and (n_jobs_in_queue > 0):
                 time.sleep(10)
                 continue
-            elif self.machine == "nord3":
-                # has submitted jobs entered the queue?
-                if self.slurm_job_id[1:] in squeue_status.split("\n")[1:][0]:
-                    job_entered = True
-                    time.sleep(10)
-                    continue
-                # if not, then wait
-                if not job_entered:
-                    time.sleep(10)
-                    continue
-                else:
-                    # if submitted job entered but still running, wait
-                    if n_jobs_in_queue > 1:
-                        time.sleep(10)
-                        continue
 
             # if no more jobs in the squeue, then now check the outcome of all the jobs
             # if any jobs have failed/not finished, write them out to file
