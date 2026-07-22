@@ -320,7 +320,7 @@ setup_providentia_env() {
         conda create -n "$ENV_NAME" python=3.11.5 -c conda-forge --override-channels -y
         conda activate "$ENV_NAME"
         export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
-        conda install -c conda-forge cartopy==0.25.0 jupyterlab==4.5.3 ghostscript==10.06.0 dask==2026.1.2 nco==5.3.6 pyproj=3.7.2 proj=9.7.1 --override-channels -y
+        conda install -c conda-forge cartopy==0.25.0 jupyterlab==4.5.3 ghostscript==10.06.0 dask==2026.1.2 nco==5.3.6 pyproj==3.7.2 proj==9.7.1 --override-channels -y
         if [ -f requirements.txt ]; then
             pip install --no-user -r requirements.txt
         fi

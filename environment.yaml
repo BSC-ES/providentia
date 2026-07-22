@@ -10,7 +10,7 @@ dependencies:
   - dask==2026.1.2
   - nco==5.3.6
   - pyproj==3.7.2 
-  - proj=9.7.1
+  - proj==9.7.1
   - pip
   - pip:
     - -r requirements.txt
