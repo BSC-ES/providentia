@@ -4,7 +4,7 @@ channels:
   - nodefaults
 dependencies:
   - python==3.11.5
-  - cartopy=0.25.0
+  - cartopy==0.25.0
   - jupyterlab==4.5.3
   - ghostscript==10.06.0
   - dask==2026.1.2
