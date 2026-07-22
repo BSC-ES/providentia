@@ -1197,9 +1197,7 @@ class SubmitInterpolation(object):
 
         # set run commands
         self.commands = [
-            "python -u {}/interpolation/experiment_interpolation.py {}".format(
-                self.working_directory, argument
-            )
+            f'{sys.executable} -u {self.working_directory}/interpolation/experiment_interpolation.py {argument}'
             for argument in self.arguments
         ]
 
