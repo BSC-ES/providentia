@@ -955,8 +955,8 @@ class SubmitInterpolation(object):
 
             # write arguments str to current file
             command = (
-                "python -u {}/interpolation/experiment_interpolation.py {}\n".format(
-                    self.working_directory, str_to_write
+                "{} -u {}/interpolation/experiment_interpolation.py {}\n".format(
+                   sys.executable, self.working_directory, str_to_write
                 )
             )
             if self.machine == "nord4":
