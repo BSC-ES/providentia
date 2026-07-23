@@ -103,3 +103,19 @@ If you are currently working with the latest version of Providentia locally, you
 To automatically handle this, we added the option, `--dir_merge`, which detects whether a rename or a merge of directories needs to be done.
 
 So, if you are working with the new version of Providentia, we highly recommend running this command `./bin/providentia --dir_merge`
+
+## Some of the step tasks have been OOM Killed during the interpolation on MN5 or Nord4
+
+Since we made multiprocessing the default method to submit jobs to slurm, we encounter this error at times. By default the number of CPUs is 24 using medium memory nodes. You might want to change the memory constraint:
+
+```
+./bin/providentia --conf=debug.conf --constraint=highmem
+```
+
+Or increasing the number of cpus, for example:
+
+```
+./bin/providentia --conf=debug.conf --n_cpus=36
+```
+
+You can also combine both options for testing.

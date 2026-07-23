@@ -13,6 +13,7 @@ import time
 from netCDF4 import Dataset
 import numpy as np
 import psutil
+from pprint import pprint
 import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join
@@ -200,36 +201,39 @@ class SubmitInterpolation(object):
             # get all unique arguments to process interpolation tasks
             self.gather_arguments()
 
-            # create greasy arguments file
-            self.create_greasy_arguments_file()
-
-            # check if Greasy is installed
-            is_greasy_installed = False
-            try:
-                result = subprocess.run(
-                    ["greasy", "-V"], stdout=subprocess.PIPE, text=True
-                )
-                if "greasy" in result.stdout:
-                    is_greasy_installed = True
-            except:
-                pass
-
             # submit interpolation jobs
-            if self.interp_multiprocessing:
-                print("\nUsing multiprocessing to manage the job submission.")
-                self.submit_job_multiprocessing()
-            else:
+            if not self.interp_multiprocessing:
+
+                # check if Greasy is installed
+                is_greasy_installed = False
+                try:
+                    result = subprocess.run(
+                        ["greasy", "-V"], stdout=subprocess.PIPE, text=True
+                    )
+                    if "greasy" in result.stdout:
+                        is_greasy_installed = True
+                except:
+                    print("\nGreasy is not installed.")
+                    pass
+                
                 if is_greasy_installed:
+                    
                     print("\nUsing Greasy to manage the job submission.")
+
+                    # create greasy arguments file
+                    self.create_greasy_arguments_file()
+
                     # create submission script according to machine
-                    if self.machine == "nord3":
-                        self.create_lsf_submission_script()
-                    else:
-                        self.create_slurm_submission_script()
+                    self.create_slurm_submission_script()
                     self.submit_job_greasy()
+
                 else:
                     print("Using multiprocessing to manage the job submission.")
                     self.submit_job_multiprocessing()
+
+            else:
+                print("\nUsing multiprocessing to manage the job submission.")
+                self.submit_job_multiprocessing()
 
             # remove section variables from memory
             for k in self.section_opts:
@@ -345,7 +349,10 @@ class SubmitInterpolation(object):
                 )
 
                 # iterate through resolutions_to_keep until find one for which have speci_to_process (or mapped speci)
+                searched_paths = {}
                 for model_temporal_resolution in resolutions_to_keep:
+                    searched_paths[model_temporal_resolution] = {}
+
                     # get all species in case the asterisk was used
                     species = (
                         self.get_all_species(
@@ -357,8 +364,10 @@ class SubmitInterpolation(object):
 
                     # iterate through species to process
                     for speci_ii, speci_to_process in enumerate(species):
+                        
                         have_valid_resolution = False
                         original_speci_to_process = copy.deepcopy(speci_to_process)
+                        searched_paths[model_temporal_resolution][original_speci_to_process] = []
 
                         # before proceeding check if have already processed jobs for the model-grid_type/species/temporal_resolution_to_output pairing before
                         # if so, continue to next species
@@ -380,22 +389,24 @@ class SubmitInterpolation(object):
                             continue
 
                         # test if have directory for current speci_to_process
-                        if os.path.isdir(
-                            "{}/{}/{}/{}".format(
+                        current_speci_path = "{}/{}/{}/{}".format(
                                 self.mod_dir,
                                 grid_type,
                                 model_temporal_resolution,
                                 speci_to_process,
                             )
-                        ):
+                        searched_paths[model_temporal_resolution][original_speci_to_process].append(current_speci_path)
+
+                        ensemble_stat_path = "{}/{}/{}/ensemble-stats".format(
+                            self.mod_dir, grid_type, model_temporal_resolution
+                        )
+                        searched_paths[model_temporal_resolution][original_speci_to_process].append(ensemble_stat_path)
+
+                        if os.path.isdir(current_speci_path):
                             have_valid_resolution = True
 
                         # test if have speci directory in ensemble-stats
-                        elif os.path.isdir(
-                            "{}/{}/{}/ensemble-stats".format(
-                                self.mod_dir, grid_type, model_temporal_resolution
-                            )
-                        ):
+                        elif os.path.isdir(ensemble_stat_path):
                             # get all ensemble-stats species
                             model_species_ensemblestat = list(
                                 np.unique(
@@ -479,14 +490,15 @@ class SubmitInterpolation(object):
                                 # if it can be then check then if the variable to map to exists for the model/grid_type/resolution
                                 # (these can be multiple, list order sets the priority)
                                 for speci_to_map in mapping_species[speci_to_process]:
-                                    if os.path.isdir(
-                                        "{}/{}/{}/{}".format(
+                                    speci_to_map_path = "{}/{}/{}/{}".format(
                                             self.mod_dir,
                                             grid_type,
                                             model_temporal_resolution,
                                             speci_to_map,
                                         )
-                                    ):
+                                    searched_paths[model_temporal_resolution][original_speci_to_process].append(speci_to_map_path)
+
+                                    if os.path.isdir(speci_to_map_path):
                                         # if have a binned size distribution variable to map, first check if bin radius is within model's bin extents
                                         # if not, do not process species
                                         if ("vconcaerobin" in speci_to_process) or (
@@ -560,7 +572,7 @@ class SubmitInterpolation(object):
                                         )
                                     )
                                     obs_files = np.sort(glob.glob(obs_path))
-
+                                
                                 # if have no observational files then continue
                                 if len(obs_files) == 0:
                                     print(
@@ -850,6 +862,9 @@ class SubmitInterpolation(object):
             # if list is empty or have no arguments after iteration, return message stating that
             if len(self.arguments) == 0 or not new_arguments:
                 msg = "\nNO INTERSECTING OBSERVATIONAL AND EXPERIMENT DATA FOR INTERPOLATION. \n"
+                if not have_valid_resolution:
+                    # show paths where we have searched for data
+                    msg += f"\nSearched paths for model data: {pprint(searched_paths, width=120)}"
             else:
                 msg = "\n***INTERSECTING OBSERVATIONAL AND EXPERIMENTAL DATA IS AVAILABLE FOR INTERPOLATION.***"
 
@@ -865,7 +880,7 @@ class SubmitInterpolation(object):
 
         # if have no arguments for all models, return message stating that
         if len(self.arguments) == 0:
-            error = "INTERPOLATION CANNOT BE DONE FOR ANY EXPERIMENT"
+            error = "\nINTERPOLATION CANNOT BE DONE FOR ANY EXPERIMENT"
             sys.exit(error)
 
         # randomise the order of the arguments list
@@ -946,8 +961,8 @@ class SubmitInterpolation(object):
 
             # write arguments str to current file
             command = (
-                "python -u {}/interpolation/experiment_interpolation.py {}\n".format(
-                    self.working_directory, str_to_write
+                "{} -u {}/interpolation/experiment_interpolation.py {}\n".format(
+                   sys.executable, self.working_directory, str_to_write
                 )
             )
             if self.machine == "nord4":
@@ -1061,69 +1076,6 @@ class SubmitInterpolation(object):
         # close submit file
         submit_file.close()
 
-    def create_lsf_submission_script(self):
-        """Write a lsf submission shell script that submits a greasy job."""
-
-        # create job_fname (unique_ID + 'sh.')
-        self.job_fname = self.slurm_job_id + ".sh"
-
-        # get all argument files
-        argument_files = sorted(
-            glob.glob("{}/{}_*.txt".format(self.arguments_dir, self.slurm_job_id))
-        )
-
-        # read how many lines are in first arguments file
-        with open(argument_files[0]) as f:
-            for ii, line in enumerate(f):
-                pass
-            N_arguments = ii + 1
-
-        # cap the number of simultaneously running tasks to be the defined CPU chunk size
-        max_tasks = copy.deepcopy(int(self.interp_chunk_size))
-
-        # if the number of arguments is > capped max tasks,
-        # then set N simultaneous tasks to be the max tasks permitted
-        if N_arguments > max_tasks:
-            n_simultaneous_tasks = copy.deepcopy(max_tasks)
-            # else, if the number of arguments is <= capped max tasks,
-            # then set N simultaneous tasks to be N arguments
-        else:
-            n_simultaneous_tasks = copy.deepcopy(N_arguments)
-
-        # create slurm submission script
-        submit_file = open(self.submit_dir + "/" + self.job_fname, "w")
-
-        submit_file.write("#!/bin/bash\n")
-        submit_file.write("\n")
-        submit_file.write("#BSUB -n {}\n".format(n_simultaneous_tasks))
-        submit_file.write("#BSUB -W 01:00\n")
-        submit_file.write(
-            "#BSUB -J PRVI_{}[1-{}]\n".format(self.slurm_job_id, len(argument_files))
-        )
-        submit_file.write("#BSUB -q {}\n".format(self.qos))
-        submit_file.write("#BSUB -oo /dev/null\n")
-        submit_file.write("#BSUB -eo /dev/null\n")
-        submit_file.write("\n")
-
-        submit_file.write("source {}/bin/load_modules.sh\n".format(PROVIDENTIA_ROOT))
-        submit_file.write("export GREASY_NWORKERS=$LSB_DJOB_NUMPROC\n")
-        submit_file.write(
-            "export GREASY_LOGFILE={}/{}_$LSB_JOBINDEX.log\n".format(
-                self.submit_dir, self.slurm_job_id
-            )
-        )
-        submit_file.write(
-            "arguments_store={}/{}.grz\n".format(self.arguments_dir, self.slurm_job_id)
-        )
-        submit_file.write(
-            "argument_file=$(cat $arguments_store | awk -v var=$LSB_JOBINDEX 'NR==var {print $1}')\n"
-        )
-        submit_file.write("\n")
-        submit_file.write("greasy $argument_file")
-
-        # close submit file
-        submit_file.close()
-
     def submit_job_greasy(self):
         """Submit and monitor interpolation jobs using Greasy/SLURM."""
 
@@ -1133,18 +1085,11 @@ class SubmitInterpolation(object):
         # submit slurm script
         submit_complete = False
         while not submit_complete:
-            if self.machine == "nord3":
-                submit_process = subprocess.Popen(
-                    ["bsub"],
-                    stdout=subprocess.PIPE,
-                    stdin=open("{}/{}".format(self.submit_dir, self.job_fname), "r"),
-                )
-            else:
-                submit_process = subprocess.Popen(
-                    ["sbatch", self.job_fname],
-                    cwd=self.submit_dir,
-                    stdout=subprocess.PIPE,
-                )
+            submit_process = subprocess.Popen(
+                ["sbatch", self.job_fname],
+                cwd=self.submit_dir,
+                stdout=subprocess.PIPE,
+            )
             submit_return_code = submit_process.returncode
 
             # if sbatch fails, time out for 60 seconds and then try again
@@ -1163,11 +1108,7 @@ class SubmitInterpolation(object):
         job_entered = False
 
         while not all_tasks_finished:
-            if self.machine == "nord3":
-                # cmd = ['bjobs', '-noheader', '-J', 'PRVI_{}[1]'.format(self.slurm_job_id)]
-                cmd = ["bjobs", "-noheader"]
-            else:
-                cmd = ["squeue", "-h", "-n", "PRVI_{}".format(self.slurm_job_id)]
+            cmd = ["squeue", "-h", "-n", "PRVI_{}".format(self.slurm_job_id)]
             squeue_process = subprocess.Popen(
                 cmd, stdout=subprocess.PIPE, encoding="utf8"
             )
@@ -1178,21 +1119,6 @@ class SubmitInterpolation(object):
             if (self.machine in ("mn5", "nord4")) and (n_jobs_in_queue > 0):
                 time.sleep(10)
                 continue
-            elif self.machine == "nord3":
-                # has submitted jobs entered the queue?
-                if self.slurm_job_id[1:] in squeue_status.split("\n")[1:][0]:
-                    job_entered = True
-                    time.sleep(10)
-                    continue
-                # if not, then wait
-                if not job_entered:
-                    time.sleep(10)
-                    continue
-                else:
-                    # if submitted job entered but still running, wait
-                    if n_jobs_in_queue > 1:
-                        time.sleep(10)
-                        continue
 
             # if no more jobs in the squeue, then now check the outcome of all the jobs
             # if any jobs have failed/not finished, write them out to file
@@ -1277,9 +1203,7 @@ class SubmitInterpolation(object):
 
         # set run commands
         self.commands = [
-            "python -u {}/interpolation/experiment_interpolation.py {}".format(
-                self.working_directory, argument
-            )
+            f'{sys.executable} -u {self.working_directory}/interpolation/experiment_interpolation.py {argument}'
             for argument in self.arguments
         ]
 

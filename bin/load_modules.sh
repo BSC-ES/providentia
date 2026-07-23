@@ -11,7 +11,7 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
 elif [ "${BSC_MACHINE}" = "nord4" ]; then
     module load intel/2021.4 impi/2017.4
     module load greasy/2.2.4
-    module load mkl/2017.4 netcdf/4.4.1.1 udunits/2.2.28 gsl/2.7
+    module load mkl/2017.4 netcdf/4.4.1.1 udunits/2.2.25 gsl/2.7
     module load singularity
         
 # Workstations
