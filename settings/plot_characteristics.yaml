@@ -1483,7 +1483,7 @@
       "ylabel": { "ylabel": "[measurement_units]" },
       "xtick_params": { "rotation": 45 },
       "dashboard": {
-          "plot_options": ["annotate", "logy", "threshold"],
+          "plot_options": ["annotate", "logy", "threshold", "multispecies"],
           "remove_spines": ["top", "right"],
           "axis_title": { "fontsize": 8.5, "loc": "left" },
           "xlabel": { "fontsize": 8 },
@@ -1635,7 +1635,7 @@
       "cb_label": { "label": "" },
       "dashboard":
         {
-          "plot_options": ["annotate", "bias"],
+          "plot_options": ["annotate", "bias", "multispecies"],
           "axis_title": { "fontsize": 8.5, "loc": "left" },
           "xtick_params": { "labelsize": 7 },
           "ytick_params": { "labelsize": 7 },

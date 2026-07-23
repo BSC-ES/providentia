@@ -552,19 +552,6 @@ class Dashboard(QtWidgets.QWidget):
             QtWidgets.QLabel(self, text="General"),
             self.formatting_dict["menu_title"],
         )
-        self.cb_resolution = set_formatting(
-            ComboBox(self), self.formatting_dict["menu_combobox"]
-        )
-        self.cb_resolution.setToolTip("Select temporal resolution of data")
-        self.cb_matrix = set_formatting(
-            ComboBox(self), self.formatting_dict["menu_combobox"]
-        )
-        self.cb_matrix.setToolTip("Select data matrix")
-        self.cb_species = set_formatting(
-            CheckableComboBox(self), self.formatting_dict["menu_combobox"]
-        )
-        self.cb_species.setToolTip("Select species")
-
         self.le_start_date = set_formatting(
             QtWidgets.QLineEdit(self), self.formatting_dict["menu_lineedit"]
         )
@@ -573,6 +560,20 @@ class Dashboard(QtWidgets.QWidget):
             QtWidgets.QLineEdit(self), self.formatting_dict["menu_lineedit"]
         )
         self.le_end_date.setToolTip("Set data end date: YYYYMMDD")
+
+        self.cb_resolution = set_formatting(
+            ComboBox(self), self.formatting_dict["menu_combobox"]
+        )
+        self.cb_resolution.setToolTip("Select temporal resolution of data")
+
+        self.cb_matrix = set_formatting(
+            ComboBox(self), self.formatting_dict["menu_combobox"]
+        )
+        self.cb_matrix.setToolTip("Select data matrix")
+        self.cb_species = set_formatting(
+            CheckableComboBox(self), self.formatting_dict["menu_combobox"]
+        )
+        self.cb_species.setToolTip("Select species")
 
         self.vertical_splitter_1 = QVLine()
         self.vertical_splitter_1.setMaximumWidth(20)
@@ -769,11 +770,11 @@ class Dashboard(QtWidgets.QWidget):
         # position objects on gridded configuration bar
         # data selection section
         config_bar.addWidget(self.lb_general_selection, 0, 0, 1, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_matrix, 1, 0, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_species, 1, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_resolution, 2, 0, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.le_start_date, 2, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.le_end_date, 2, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.le_start_date, 1, 0, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.le_end_date, 1, 1, QtCore.Qt.AlignLeft)        
+        config_bar.addWidget(self.cb_resolution, 1, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_matrix, 2, 0, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_species, 2, 1, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.vertical_splitter_1, 0, 4, 3, 1, QtCore.Qt.AlignLeft)
 
         # observations
@@ -1219,7 +1220,7 @@ class Dashboard(QtWidgets.QWidget):
                 if species.strip()
             ]
 
-        # check which species are missing
+        # get species that are not available in data directories
         missing_species = [
             species
             for species in self.selected_species
@@ -1234,16 +1235,10 @@ class Dashboard(QtWidgets.QWidget):
             else:
                 msg = (
                     f"Species {', '.join(missing_species)} is not available. "
-                    "Removing unavailable species."
+                    f"Choosing {self.cb_species.currentText()} as it is the first option in the dropdown."
                 )
                 show_message(self, msg)
-
-                # keep only available species
-                self.selected_species = [
-                    species
-                    for species in self.selected_species
-                    if species in available_species
-                ]
+                self.selected_species = [self.cb_species.currentText()]
 
         # populate checkable combobox
         self.cb_species.clear()

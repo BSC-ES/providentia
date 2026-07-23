@@ -79,6 +79,7 @@ def get_selected_station_data(
 
     # iterate through networks / species
     for networkspeci_ii, networkspeci in enumerate(networkspecies):
+        print('iterate per networkpeci', networkspeci)
         # initialise data labels
         canvas_instance.selected_station_data_labels[networkspeci] = []
 
@@ -138,6 +139,7 @@ def get_selected_station_data(
 
             # get which data labels have some valid data
             valid_data_labels_mask = ~np.all(np.all(nan_data_array, axis=-1), axis=-1)
+            print('valid data', valid_data_labels_mask)
             canvas_instance.selected_station_data_labels[networkspeci] = list(
                 np.array(read_instance.data_labels)[valid_data_labels_mask]
             )

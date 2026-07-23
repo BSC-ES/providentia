@@ -2675,15 +2675,15 @@ class Plotting:
         else:
             bias = False
 
-        # if statistical dataframe is not provided then create it
+        # in the dashboard we need to create statistical dataframe as it is not provided in function arguments
         if not isinstance(stats_df, pd.DataFrame):
             stats_table = {}
 
-            for networkspeci in self.read_instance.networkspecies:
+            for selected_networkspeci in self.read_instance.networkspecies:
                 valid_data_labels = self.canvas_instance.selected_station_data_labels[
-                    networkspeci
+                    selected_networkspeci
                 ]
-                print(valid_data_labels)
+                print('inside make table', valid_data_labels)
 
                 cut_data_labels = [
                     data_label
@@ -2764,6 +2764,7 @@ class Plotting:
 
         # get relevant data
         if "multispecies" not in plot_options:
+            # if not multispecies, get data for the current / first networkspeci only
             stats_df = stats_df.iloc[
                 stats_df.index.get_level_values("networkspecies") == networkspeci
             ]
