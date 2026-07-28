@@ -1706,9 +1706,6 @@ class DataReader:
                             network
                         ][resolution][speci][data_label_raw]
                     except KeyError:
-                        print(
-                            file_root, self.read_instance.available_model_data[network]
-                        )
                         continue
 
                     # get intersection of yearmonths_to_read and available_yearmonths

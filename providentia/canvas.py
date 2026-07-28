@@ -4066,29 +4066,6 @@ class Canvas(FigureCanvas):
                             self.current_plot_options[plot_type],
                         )
 
-                    # option 'multispecies'
-                    elif option == "multispecies":
-                        # clear all previously plotted artists for plot type
-                        self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
-
-                        # make plot again considering plot option
-                        if plot_type in ["statsummary", "table"]:
-                            if "bias" in self.current_plot_options[plot_type]:
-                                relevant_zstats = self.active_statsummary_stats["modbias"]
-                            else:
-                                relevant_zstats = self.active_statsummary_stats["basic"]
-                            func = getattr(self.plotting, "make_table")
-                            func(
-                                    self.plot_axes[plot_type],
-                                    self.read_instance.networkspeci,
-                                    self.read_instance.data_labels,
-                                    self.plot_characteristics[plot_type],
-                                    self.current_plot_options[plot_type],
-                                    zstats=relevant_zstats,
-                                    statsummary=True if plot_type in "statsummary" else False,
-                                )
-                        # TODO: ADD BOXPLOT AND HEATMAP
-
                     # option 'threshold'
                     elif option == "threshold":
                         if not undo:

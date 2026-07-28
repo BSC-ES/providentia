@@ -2160,6 +2160,10 @@ class Plotting:
         if "obs" in plot_options:
             data_labels = [self.read_instance.observations_data_label]
 
+        # always make multispecies plot if there is more than one networkspeci and plot can be multispecies
+        if (len(self.read_instance.networkspecies) > 1) and (self.read_instance.mode == "dashboard"):
+            plot_options.append('multispecies')
+
         # if multispecies in plot options then make plot for all networkspecies
         if "multispecies" in plot_options:
             networkspecies = self.read_instance.networkspecies
@@ -2675,6 +2679,10 @@ class Plotting:
         else:
             bias = False
 
+        # always make multispecies plot if there is more than one networkspeci and plot can be multispecies
+        if (len(self.read_instance.networkspecies) > 1) and (self.read_instance.mode == "dashboard"):
+            plot_options.append('multispecies')
+        
         # in the dashboard we need to create statistical dataframe as it is not provided in function arguments
         if not isinstance(stats_df, pd.DataFrame):
             if "multispecies" in plot_options:
@@ -2693,7 +2701,7 @@ class Plotting:
                                     self.canvas_instance,
                                     selected_networkspeci,
                                     zstats,
-                                    [self.observations_data_label],
+                                    [self.read_instance.observations_data_label],
                                     [dl],
                                 )
                         else:

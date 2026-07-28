@@ -1483,7 +1483,7 @@
       "ylabel": { "ylabel": "[measurement_units]" },
       "xtick_params": { "rotation": 45 },
       "dashboard": {
-          "plot_options": ["annotate", "logy", "threshold", "multispecies"],
+          "plot_options": ["annotate", "logy", "threshold"],
           "remove_spines": ["top", "right"],
           "axis_title": { "fontsize": 8.5, "loc": "left" },
           "xlabel": { "fontsize": 8 },
@@ -1635,7 +1635,7 @@
       "cb_label": { "label": "" },
       "dashboard":
         {
-          "plot_options": ["annotate", "bias", "multispecies"],
+          "plot_options": ["annotate", "bias"],
           "axis_title": { "fontsize": 8.5, "loc": "left" },
           "xtick_params": { "labelsize": 7 },
           "ytick_params": { "labelsize": 7 },
@@ -1909,7 +1909,7 @@
       "axis_title": { "label": "" },
       "dashboard":
         {
-          "plot_options": ["bias", "multispecies"],
+          "plot_options": ["bias"],
           "basic": ["Mean", "StdDev", "p5", "Median", "p95"],
           "model_bias":
             ["Mean_bias", "StdDev_bias", "NMB", "NME", "RMSE", "r"],
@@ -2002,7 +2002,6 @@
         },
       "tests":
         {
-          "plot_options": ["bias", "multispecies"],
           "basic":
             [
               "Mean",
