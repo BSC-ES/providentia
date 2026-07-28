@@ -139,11 +139,9 @@ def get_selected_station_data(
 
             # get which data labels have some valid data
             valid_data_labels_mask = ~np.all(np.all(nan_data_array, axis=-1), axis=-1)
-            print('valid data', valid_data_labels_mask)
             canvas_instance.selected_station_data_labels[networkspeci] = list(
                 np.array(read_instance.data_labels)[valid_data_labels_mask]
             )
-
             # cut data array for valid data labels
             data_array = data_array[valid_data_labels_mask]
 

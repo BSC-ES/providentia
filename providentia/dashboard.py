@@ -1450,12 +1450,20 @@ class Dashboard(QtWidgets.QWidget):
                 )
 
         # update available models for selected fields
+        # 1 network?
+        if len([self.selected_network]) == 1:
+            # duplicate network to match species len
+            selected_networks_to_get_valid_models = [self.selected_network] * len(
+                self.selected_species
+            )
+        else:
+            selected_networks_to_get_valid_models = [self.selected_network]
         get_valid_models(
             self,
             self.le_start_date.text(),
             self.le_end_date.text(),
             self.selected_resolution,
-            [self.selected_network],
+            selected_networks_to_get_valid_models,
             self.selected_species,
         )
 
@@ -1536,10 +1544,8 @@ class Dashboard(QtWidgets.QWidget):
             self.experiments = copy.deepcopy(selected_models)
 
         # update default qa
-        default_qa = {
-            speci: get_default_qa(self, speci)
-            for speci in self.selected_species
-        }
+        # TODO: Have different selections of qa per species
+        default_qa = get_default_qa(self, self.selected_species[0])
         previous_default_qa = copy.deepcopy(
             self.qa_menu["checkboxes"]["remove_default"]
         )
@@ -2297,10 +2303,7 @@ class Dashboard(QtWidgets.QWidget):
             self.active_resolution = self.resolution
         self.species = self.selected_species
         self.qa = copy.deepcopy(self.qa_menu["checkboxes"]["remove_selected"])
-        self.qa_per_species = {
-            speci: copy.deepcopy(self.qa)
-            for speci in self.selected_species
-        }
+        self.qa_per_species = copy.deepcopy(self.qa)
         self.flags = copy.deepcopy(self.flag_menu["checkboxes"]["remove_selected"])
         self.networkspecies = [
             "{}|{}".format(network, species)

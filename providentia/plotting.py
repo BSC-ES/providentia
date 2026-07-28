@@ -2677,68 +2677,58 @@ class Plotting:
 
         # in the dashboard we need to create statistical dataframe as it is not provided in function arguments
         if not isinstance(stats_df, pd.DataFrame):
-            stats_table = {}
-
-            for selected_networkspeci in self.read_instance.networkspecies:
-                valid_data_labels = self.canvas_instance.selected_station_data_labels[
-                    selected_networkspeci
-                ]
-                print('inside make table', valid_data_labels)
-
-                cut_data_labels = [
-                    data_label
-                    for data_label in data_labels
-                    if data_label in valid_data_labels
-                ]
-
-                # calculate statistics
-                if bias:
-                    if self.read_instance.observations_data_label in cut_data_labels:
-                        cut_data_labels.remove(
-                            self.read_instance.observations_data_label
-                        )
-
-                    stats_calc = calculate_statistic(
-                        self.read_instance,
-                        self.canvas_instance,
-                        networkspeci,
-                        zstats,
-                        [self.read_instance.observations_data_label] * len(cut_data_labels),
-                        cut_data_labels,
-                    )
-                else:
-                    stats_calc = calculate_statistic(
-                        self.read_instance,
-                        self.canvas_instance,
-                        networkspeci,
-                        zstats,
-                        cut_data_labels,
-                        [],
-                    )
-
-                for label in cut_data_labels:
-                    stats_table[(networkspeci, label)] = {
-                        key: value[0]
-                        for key, value in stats_calc.items()
-                    }
-                    
-            # create stats dataframe
-            index = pd.MultiIndex.from_product(
-                [self.read_instance.networkspecies, cut_data_labels],
-                names=["networkspecies", "labels"],
-            )
-            if len(stats_calc) == 0:
-                stats_df = pd.DataFrame(index=index, dtype=np.float64)
+            if "multispecies" in plot_options:
+                networkspecies = self.read_instance.networkspecies
             else:
-                stats_df = pd.DataFrame.from_dict(
-                    stats_table,
-                    orient="index"
-                )
+                networkspecies = [networkspeci]
 
-                stats_df.index = pd.MultiIndex.from_tuples(
-                    stats_df.index,
-                    names=["networkspecies", "labels"]
-                )
+            rows = []
+            for selected_networkspeci in networkspecies:
+                for dl in data_labels:
+                    # calculate statistic
+                    if dl in self.canvas_instance.selected_station_data_labels[selected_networkspeci]:
+                        if bias:
+                            stat_per_data_labels = calculate_statistic(
+                                    self.read_instance,
+                                    self.canvas_instance,
+                                    selected_networkspeci,
+                                    zstats,
+                                    [self.observations_data_label],
+                                    [dl],
+                                )
+                        else:
+                            stat_per_data_labels = calculate_statistic(
+                                    self.read_instance,
+                                    self.canvas_instance, 
+                                    selected_networkspeci, 
+                                    zstats, 
+                                    [dl], 
+                                    [])
+                        if len(zstats) == 1:
+                            stat_per_data_labels = {zstats[0]: stat_per_data_labels}
+                    else:
+                        stat_per_data_labels = {stat: np.nan for stat in zstats}
+
+                    # get floats instead of arrays with 1 element each and save
+                    # convert arrays([x]) -> x
+                    stat_values = {
+                        stat: (
+                            float(value[0])
+                            if isinstance(value, np.ndarray)
+                            else float(value)
+                        )
+                        for stat, value in stat_per_data_labels.items()
+                    }
+                    rows.append({
+                        "networkspecies": selected_networkspeci,
+                        "labels": dl,
+                        **stat_values,
+                    })
+
+            stats_df = (
+                pd.DataFrame(rows)
+                .set_index(["networkspecies", "labels"])
+            )
 
         # when we have 1 stat in the statsummary, the column name is 0
         # we need to rename it to the stat name
@@ -2923,7 +2913,6 @@ class Plotting:
                     ] * empty_cells + col_colours
 
         # make table
-        print(stats_df)
         table = relevant_axis.table(
             cellText=stats_df.values,
             colLabels=col_labels,
