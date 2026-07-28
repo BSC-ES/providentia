@@ -330,7 +330,7 @@ initialise_conda() {
         fi
         unset __conda_setup
     else
-        if ! type conda 2>/dev/null | grep -q "function"; then
+        if type conda 2>/dev/null | grep -q "function"; then
             echo "Conda not initialised. Running conda init..."
             conda init bash
             source ~/.bashrc
