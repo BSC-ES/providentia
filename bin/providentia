@@ -334,7 +334,10 @@ initialise_conda() {
             echo "Conda not initialised. Running conda init..."
             conda init bash
             source ~/.bashrc
+        else 
+            echo "Conda initialszed"; 
         fi
+
     fi
 }
 
