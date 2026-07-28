@@ -39,25 +39,6 @@ else
     exit 1
 fi
 
-# initialize conda in windows
-if [ "${OS}" == "Windows" ] ; then 
-    CONDA_PATH="$HOME/anaconda3"
-
-    __conda_setup="$("$CONDA_PATH/condabin/conda" 'shell.bash' 'hook' 2> /dev/null)"
-    
-    if [ $? -eq 0 ]; then
-        eval "$__conda_setup"
-        echo "Conda initialized successfully"
-    else
-        if [ -f "$CONDA_PATH/etc/profile.d/conda.sh" ]; then
-            . "$CONDA_PATH/etc/profile.d/conda.sh"
-        else
-            export PATH="$CONDA_PATH/condabin:$PATH"
-        fi
-    fi
-    unset __conda_setup
-fi
-
 # bash strict mode: see http://redsymbol.net/articles/unofficial-bash-strict-mode/ for info
 set -eo pipefail
 IFS=$'\n\t'
@@ -295,7 +276,7 @@ fi
 
 # activate or create the conda environment for local and operational machines
 ENV_NAME="providentia-env_v3.1.0"
-setup_providentia_env() {
+setup_providentia_env_locally() {
     active_env=false
     eval "$(conda shell.bash hook)"
 
@@ -328,11 +309,44 @@ setup_providentia_env() {
     fi
 }
 
+# function to initialize conda if not already initialised
+initialise_conda() {
+
+    # initialize conda in windows
+    if [ "${OS}" == "Windows" ] ; then 
+        CONDA_PATH="$HOME/anaconda3"
+
+        __conda_setup="$("$CONDA_PATH/condabin/conda" 'shell.bash' 'hook' 2> /dev/null)"
+        
+        if [ $? -eq 0 ]; then
+            eval "$__conda_setup"
+            echo "Conda initialised successfully"
+        else
+            if [ -f "$CONDA_PATH/etc/profile.d/conda.sh" ]; then
+                . "$CONDA_PATH/etc/profile.d/conda.sh"
+            else
+                export PATH="$CONDA_PATH/condabin:$PATH"
+            fi
+        fi
+        unset __conda_setup
+    else
+        if ! type conda 2>/dev/null | grep -q "function"; then
+            echo "Conda not initialised. Running conda init..."
+            conda init bash
+            source ~/.bashrc
+        fi
+    fi
+}
+
 # execution
 # Marenostrum5
 if [ "${BSC_MACHINE}" == "mn5" ]; then
 
     echo "INFO: Running on MN5..."
+
+    module load anaconda
+    # initialize conda if not already initialised
+    initialise_conda
 
     if $interpolation; then
         echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
@@ -345,16 +359,15 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
     else
         # load modules from conda environment
         active_env=false
-        module load anaconda
         sanitise_python_environment
         eval "$(conda shell.bash hook)"
         conda config --set env_prompt '($(basename {default_env})) '
         if ! { conda config --show-sources | grep '/gpfs/projects/bsc32/repository/apps/conda_envs/'; } >/dev/null 2>&1; then
             conda config --append envs_dirs /gpfs/projects/bsc32/repository/apps/conda_envs/
         fi
-        if { conda env list | grep 'providentia-env_v3.1.0'; } >/dev/null 2>&1; then 
-            echo "Activating conda environment in /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.1.0..."
-            conda activate providentia-env_v3.1.0
+        if { conda env list | grep $ENV_NAME; } >/dev/null 2>&1; then 
+            echo "Activating conda environment in /gpfs/projects/bsc32/repository/apps/conda_envs/$ENV_NAME..."
+            conda activate $ENV_NAME
             export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
             active_env=true
         else 
@@ -400,12 +413,16 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
 # storage5
 elif [[ "${BSC_MACHINE}" == "stg" ]]; then
     echo "INFO: Running on the storage5..."
+
+    # initialize conda if not already initialised
+    initialise_conda
+
     # load modules from conda environment
     active_env=false
     eval "$(conda shell.bash hook)"
-    if { conda env list | grep 'providentia-env_v3.1.0'; } >/dev/null 2>&1; then 
+    if { conda env list | grep $ENV_NAME; } >/dev/null 2>&1; then 
         echo "Activating environment..."
-        conda activate providentia-env_v3.1.0
+        conda activate $ENV_NAME
         export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
         active_env=true
     else 
@@ -424,6 +441,10 @@ elif [[ "${BSC_MACHINE}" == "stg" ]]; then
 elif [ "${BSC_MACHINE}" == "nord4" ]; then
     echo "INFO: Running on ${BSC_MACHINE}..."
 
+    module load Miniconda3/24.7.1-0
+    # initialize conda if not already initialised
+    initialise_conda
+
     if $interpolation; then
         echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
         echo "Loading dependencies..."
@@ -435,16 +456,15 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
     else
         # load modules from conda environment
         active_env=false
-        module load Miniconda3/24.7.1-0
         sanitise_python_environment
         eval "$(conda shell.bash hook)"
         conda config --set env_prompt '($(basename {default_env})) '
         if ! { conda config --show-sources | grep '/gpfs/projects/bsc32/repository/apps/conda_envs/'; } >/dev/null 2>&1; then
             conda config --append envs_dirs /gpfs/projects/bsc32/repository/apps/conda_envs/
         fi
-        if { conda env list | grep 'providentia-env_v3.1.0-nord4'; } >/dev/null 2>&1; then 
-            echo "Activating conda environment in /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.1.0-nord4..."
-            conda activate providentia-env_v3.1.0-nord4
+        if { conda env list | grep "$ENV_NAME-nord4"; } >/dev/null 2>&1; then 
+            echo "Activating conda environment in /gpfs/projects/bsc32/repository/apps/conda_envs/$ENV_NAME-nord4..."
+            conda activate $ENV_NAME-nord4
             export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
             active_env=true
         else 
@@ -491,10 +511,11 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
 elif [ "${ip}" == "84.88.185.205" ]; then
     echo "INFO: Running on operational machine..."
     
-    # load modules from conda environment
     module load Miniconda3/24.7.1-0
+    # initialize conda if not already initialised
+    initialise_conda
     sanitise_python_environment
-    setup_providentia_env
+    setup_providentia_env_locally
 
     if $notebook; then
         echo "Starting Jupyter session."
@@ -517,8 +538,11 @@ else
         exit 1
     fi
 
+    # initialize conda if not already initialised
+    initialise_conda
+
     # load modules from conda environment
-    setup_providentia_env
+    setup_providentia_env_locally
 
     # merge exp and exp_to_interp directories to mod and mod_to_interp       
     if [[ $PARSED =~ "--dir_merge" ]]; then
