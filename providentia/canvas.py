@@ -124,6 +124,7 @@ class Canvas(FigureCanvas):
             "fairmode-target",
             "fairmode-statsummary",
             "contingencytable",
+            "heatmap"
         ]
 
         # define all possible plots in layout options
@@ -141,6 +142,7 @@ class Canvas(FigureCanvas):
             "fairmode-target",
             "fairmode-statsummary",
             "contingencytable",
+            "heatmap"
         ]
 
         # stop running if plot type in active_dashboard_plots does not exist
@@ -1334,7 +1336,7 @@ class Canvas(FigureCanvas):
                 self.reset_ax_navigation_toolbar_stack(ax)
 
                 # update plot options, except for plots with no options in dashboard
-                if plot_type not in ["metadata", "fairmode-statsummary"]:
+                if plot_type not in ["fairmode-statsummary"]:
                     self.update_plot_options(plot_types=[plot_type])
 
     def get_plot_type_position(self, plot_type):
@@ -2385,6 +2387,9 @@ class Canvas(FigureCanvas):
             elif plot_type == "fairmode-statsummary":
                 self.remove_axis_objects(ax_to_remove.lines)
 
+            elif plot_type == "heatmap":
+                self.remove_axis_objects(ax_to_remove.texts)
+
         # remove tracked plot elements
         if plot_type in self.plot_elements:
             self.plot_elements[plot_type]["absolute"] = {}
@@ -2411,6 +2416,15 @@ class Canvas(FigureCanvas):
         for plot_type in plot_types:
             all_plot_options = self.plot_characteristics[plot_type]["plot_options"]
             checked_options = self.current_plot_options[plot_type]
+            # There are certain plots ('heatmap', 'statsummary', 'boxplot', 'table') 
+            # that have multispecies in current_plot_options because the plot option has been forced 
+            # in the functions to create each plot inside the Plotting object (e.g. make_heatmap)
+            # so that when we have multiple species read into memory we always show multispecies plots.
+            # However, these plots do not have multispecies as an option in the burger menus
+            # and we do not need to check or uncheck them in the dropdown menus
+            if plot_type in ['heatmap', 'statsummary', 'boxplot', 'table']:
+                if 'multispecies' in checked_options:
+                    checked_options.drop('multispecies')
             if plot_type in [
                 "periodic-violin",
                 "fairmode-target",
@@ -3499,6 +3513,15 @@ class Canvas(FigureCanvas):
         # get contingency table interactive dictionary
         self.interactive_elements["contingencytable"] = {"hidden": True}
 
+        # HEATMAP PLOT SETTINGS MENU #
+        # create heatmap settings menu
+        self.heatmap_menu = SettingsMenu(plot_type="heatmap", canvas_instance=self)
+        self.heatmap_options = self.heatmap_menu.checkable_comboboxes["options"]
+        self.heatmap_elements = self.heatmap_menu.get_elements()
+
+        # get heatmap interactive dictionary
+        self.interactive_elements["heatmap"] = {"hidden": True}
+
         # create array with buttons and elements to edit when the canvas is resized or the plots are changed
         self.menu_buttons = []
         self.save_buttons = []
@@ -3951,16 +3974,49 @@ class Canvas(FigureCanvas):
                                         )
                                         break
                             else:
-                                annotation(
-                                    self.read_instance,
-                                    self,
+                                if plot_type == 'heatmap':
+                                    # clear all previously plotted artists for plot type
+                                    self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
+
+                                    print('######### do', self.current_plot_options[plot_type])
+                                    # make plot again considering plot option
+                                    func = getattr(self.plotting, "make_heatmap")
+                                    func(
+                                        self.plot_axes[plot_type],
+                                        self.read_instance.networkspeci,
+                                        self.read_instance.data_labels,
+                                        self.plot_characteristics[plot_type],
+                                        self.current_plot_options[plot_type],
+                                        # zstat
+                                    )
+                                else:
+                                    # TODO: If we have multiple species, show annotations for all of them
+                                    annotation(
+                                        self.read_instance,
+                                        self,
+                                        self.plot_axes[plot_type],
+                                        self.read_instance.networkspeci,
+                                        self.read_instance.data_labels,
+                                        plot_type,
+                                        self.plot_characteristics[plot_type],
+                                        self.current_plot_options[plot_type],
+                                        plot_z_statistic_sign=z_statistic_sign,
+                                    )
+                        else:
+                            if plot_type == 'heatmap':
+                                # clear all previously plotted artists for plot type
+                                self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
+
+                                print('######### undo', self.current_plot_options[plot_type])
+                                # make plot again considering plot option
+                                func = getattr(self.plotting, "make_heatmap")
+                                func(
                                     self.plot_axes[plot_type],
                                     self.read_instance.networkspeci,
                                     self.read_instance.data_labels,
-                                    plot_type,
                                     self.plot_characteristics[plot_type],
                                     self.current_plot_options[plot_type],
-                                    plot_z_statistic_sign=z_statistic_sign,
+                                    # zstat
                                 )
 
                     # option 'smooth'

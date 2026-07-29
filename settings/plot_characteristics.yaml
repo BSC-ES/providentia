@@ -1641,8 +1641,10 @@
           "ytick_params": { "labelsize": 7 },
           "cb_tick_params": { "labelsize": 8 },
           "cb_label": { "fontsize": 8 },
-          "xticklabels": { "rotation": 0, "fontsize": 9 },
-          "yticklabels": { "rotation": 0, "fontsize": 9, "labelrotation": 90 },
+          "xtick_params": { "labelsize": 7 },
+          "ytick_params": { "labelsize": 7, "labelrotation": 0 },
+          "xticklabels": { "ha": "right", "rotation_mode": "anchor", "fontsize": 9 },
+          "yticklabels": { "rotation": 0, "fontsize": 9 },
           "multispecies":
             { "yticklabels": { "fontsize": 10, "fontweight": 600 } },
         },
