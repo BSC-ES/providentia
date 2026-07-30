@@ -978,7 +978,7 @@ class HoverAnnotation(object):
         # corr stat
         text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(
             hex_colour,
-            self.canvas_instance.plot_characteristics["taylor"]["corr_stat"],
+            self.canvas_instance.taylor_corr_stat.currentText(),
             np.cos(corr_stat),
             self.canvas_instance.plot_characteristics["taylor"][
                 "marker_annotate_rounding"

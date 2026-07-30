@@ -447,7 +447,8 @@ class Canvas(FigureCanvas):
 
             # disable MDA8 stat where neccessary
             self.handle_statsummary_statistics_update()
-            self.handle_periodic_statistic_update()
+            self.handle_statistic_update("periodic")
+            self.handle_statistic_update("heatmap")
             self.update_timeseries_chunk_statistics()
 
             # restore block_MPL_canvas_updates
@@ -715,7 +716,8 @@ class Canvas(FigureCanvas):
             # update plot statistics
             self.handle_map_z_statistic_update()
             self.handle_timeseries_chunk_statistic_update()
-            self.handle_periodic_statistic_update()
+            self.handle_statistic_update("periodic")
+            self.handle_statistic_update("heatmap")
             self.handle_statsummary_statistics_update()
             self.handle_statsummary_cycle_update()
             self.handle_statsummary_periodic_aggregation_update()
@@ -1210,7 +1212,7 @@ class Canvas(FigureCanvas):
                 # create structure to store data for Taylor diagram
                 elif plot_type == "taylor":
                     # get r or r2 as correlation statistic
-                    corr_stat = self.plot_characteristics[plot_type]["corr_stat"]
+                    corr_stat = self.taylor_menu.comboboxes["corr_stat"].currentText()
                     relevant_zstats = [corr_stat, "StdDev"]
 
                 # setup xlabel / ylabel for other plot_types
@@ -1278,17 +1280,27 @@ class Canvas(FigureCanvas):
                     )
                 # make taylor diagram
                 elif plot_type == "taylor":
-                    corr_stat = self.plot_characteristics["taylor"]["corr_stat"]
                     func(
                         ax,
                         self.read_instance.networkspeci,
                         self.read_instance.data_labels,
                         self.plot_characteristics[plot_type],
                         plot_options,
-                        corr_stat,
+                        self.taylor_corr_stat.currentText()
+                    )
+                # make heatmap diagram
+                elif plot_type == "heatmap":
+                    func(
+                        ax,
+                        self.read_instance.networkspeci,
+                        self.read_instance.data_labels,
+                        self.plot_characteristics[plot_type],
+                        plot_options,
+                        self.heatmap_stat.currentText()
                     )
                 # other plots
                 else:
+                    print('other plots')
                     func(
                         ax,
                         self.read_instance.networkspeci,
@@ -1752,74 +1764,77 @@ class Canvas(FigureCanvas):
         # allow handling updates to the configuration bar again
         self.read_instance.block_config_bar_handling_updates = False
 
-    def handle_periodic_statistic_update(self):
+    def handle_statistic_update(self, plot_type):
         """
-        Function that handles update of plotted periodic statistic
-        upon interaction with periodic statistic combobox
+        Function that handles update of plotted statistic
+        upon interaction with statistic combobox in heatmap / periodic plots
         """
 
         if not self.read_instance.block_config_bar_handling_updates:
             # update mouse cursor to a waiting cursor
             self.read_instance.cursor_function = set_cursor(
-                self.read_instance.cursor_function, "handle_periodic_statistic_update"
+                self.read_instance.cursor_function, f"handle_{plot_type}_statistic_update"
             )
 
             # set variable that blocks configuration bar handling updates until all changes
-            # to the periodic statistic combobox are made
+            # to the statistic combobox are made
             self.read_instance.block_config_bar_handling_updates = True
 
             # get currently selected statistic
-            zstat = self.periodic_stat.currentText()
+            plot_stat = getattr(self, f"{plot_type}_stat")
+            stat = plot_stat.currentText()
 
-            # update periodic statistics, to all basic stats
+            # update statistics, to all basic stats
             # if colocation not-active, and basic+bias stats if colocation active
             if (not self.read_instance.temporal_colocation) or (
                 len(self.read_instance.data_labels) == 1
             ):
-                available_periodic_stats = copy.deepcopy(
+                available_stats = copy.deepcopy(
                     self.read_instance.basic_z_stats
                 )
             else:
-                available_periodic_stats = copy.deepcopy(
+                available_stats = copy.deepcopy(
                     self.read_instance.basic_and_bias_z_stats
                 )
 
             # remove MDA8 from available stats
-            if "MDA8" in available_periodic_stats:
-                available_periodic_stats = np.delete(
-                    available_periodic_stats,
-                    np.where(available_periodic_stats == "MDA8")[0],
+            # TODO: Check this, I don't understand why we are removing it here 
+            # without checking temporal resolution
+            if "MDA8" in available_stats:
+                available_stats = np.delete(
+                    available_stats,
+                    np.where(available_stats == "MDA8")[0],
                 )
 
-            # if base_zstat is empty string, it is because fields are being initialised for the first time
-            if zstat == "":
+            # if stat is empty string, it is because fields are being initialised for the first time
+            if stat == "":
                 # set periodic stat to be first available stat
-                zstat = available_periodic_stats[0]
+                stat = available_stats[0]
 
             # update periodic statistic combobox (clear, then add items)
-            self.periodic_stat.clear()
-            self.periodic_stat.addItems(available_periodic_stats)
+            plot_stat.clear()
+            plot_stat.addItems(available_stats)
 
-            # maintain currently selected periodic statistic (if exists in new item list)
-            if zstat in available_periodic_stats:
-                self.periodic_stat.setCurrentText(zstat)
-            elif zstat == "MDA8":
-                msg = f"Periodic statistic is being reset to {self.periodic_stat.currentText()}. MDA8 can only be calculated when the active resolution is hourly."
+            # maintain currently selected statistic (if exists in new item list)
+            if stat in available_stats:
+                plot_stat.setCurrentText(stat)
+            elif stat == "MDA8":
+                msg = f"{plot_type.capitalize()} statistic is being reset to {plot_stat.currentText()}. MDA8 can only be calculated when the active resolution is hourly."
                 show_message(self.read_instance, msg)
 
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
 
-            # update plotted periodic statistic
+            # update plotted statistic
             if not self.read_instance.block_MPL_canvas_updates:
-                self.update_associated_active_dashboard_plot("periodic")
+                self.update_associated_active_dashboard_plot(plot_type)
 
             # draw changes
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
             unset_cursor(
-                self.read_instance.cursor_function, "handle_periodic_statistic_update"
+                self.read_instance.cursor_function, f"handle_{plot_type}_statistic_update"
             )
 
         return None
@@ -1859,9 +1874,6 @@ class Canvas(FigureCanvas):
             # maintain currently selected statistic
             self.taylor_corr_stat.setCurrentText(corr_stat)
 
-            # update dictionary
-            self.plot_characteristics["taylor"]["corr_stat"] = corr_stat
-
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
 
@@ -1879,7 +1891,7 @@ class Canvas(FigureCanvas):
             )
 
         return None
-
+    
     def get_active_statsummary_stats(self, statistic_type):
         """
         Get active statistics from dictionary of statsummary statistics in list
@@ -2424,7 +2436,7 @@ class Canvas(FigureCanvas):
             # and we do not need to check or uncheck them in the dropdown menus
             if plot_type in ['heatmap', 'statsummary', 'boxplot', 'table']:
                 if 'multispecies' in checked_options:
-                    checked_options.drop('multispecies')
+                    checked_options.remove('multispecies')
             if plot_type in [
                 "periodic-violin",
                 "fairmode-target",
@@ -3519,6 +3531,10 @@ class Canvas(FigureCanvas):
         self.heatmap_options = self.heatmap_menu.checkable_comboboxes["options"]
         self.heatmap_elements = self.heatmap_menu.get_elements()
 
+        # get stats
+        print(self.heatmap_menu.comboboxes)
+        self.heatmap_stat = self.heatmap_menu.comboboxes["stat"]
+
         # get heatmap interactive dictionary
         self.interactive_elements["heatmap"] = {"hidden": True}
 
@@ -3977,8 +3993,7 @@ class Canvas(FigureCanvas):
                                 if plot_type == 'heatmap':
                                     # clear all previously plotted artists for plot type
                                     self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
-
-                                    print('######### do', self.current_plot_options[plot_type])
+                                    
                                     # make plot again considering plot option
                                     func = getattr(self.plotting, "make_heatmap")
                                     func(
@@ -3987,7 +4002,7 @@ class Canvas(FigureCanvas):
                                         self.read_instance.data_labels,
                                         self.plot_characteristics[plot_type],
                                         self.current_plot_options[plot_type],
-                                        # zstat
+                                        self.heatmap_stat.currentText()
                                     )
                                 else:
                                     # TODO: If we have multiple species, show annotations for all of them
@@ -4007,7 +4022,6 @@ class Canvas(FigureCanvas):
                                 # clear all previously plotted artists for plot type
                                 self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
 
-                                print('######### undo', self.current_plot_options[plot_type])
                                 # make plot again considering plot option
                                 func = getattr(self.plotting, "make_heatmap")
                                 func(
@@ -4016,7 +4030,7 @@ class Canvas(FigureCanvas):
                                     self.read_instance.data_labels,
                                     self.plot_characteristics[plot_type],
                                     self.current_plot_options[plot_type],
-                                    # zstat
+                                    self.heatmap_stat.currentText()
                                 )
 
                     # option 'smooth'
@@ -4336,6 +4350,16 @@ class Canvas(FigureCanvas):
                                         zstats=relevant_zstats,
                                         statsummary=True,
                                     )
+                                # make heatmap plot
+                                elif plot_type == "heatmap":
+                                    func(
+                                        self.plot_axes[plot_type],
+                                        self.read_instance.networkspeci,
+                                        bias_labels_to_plot,
+                                        self.plot_characteristics[plot_type],
+                                        self.current_plot_options[plot_type],
+                                        self.heatmap_stat.currentText()
+                                    )
                                 # other plots
                                 else:
                                     func(
@@ -4467,6 +4491,16 @@ class Canvas(FigureCanvas):
                                         zstats=relevant_zstats,
                                         statsummary=True,
                                     )
+                                # make heatmap plot
+                                elif plot_type == "heatmap":
+                                    func(
+                                        self.plot_axes[plot_type],
+                                        self.read_instance.networkspeci,
+                                        absolute_labels_to_plot,
+                                        self.plot_characteristics[plot_type],
+                                        self.current_plot_options[plot_type],
+                                        self.heatmap_stat.currentText()
+                                    )
                                 # other plots
                                 else:
                                     func(
@@ -4576,17 +4610,32 @@ class Canvas(FigureCanvas):
                             )
                             break
                 else:
-                    annotation(
-                        self.read_instance,
-                        self,
-                        self.plot_axes[plot_type],
-                        self.read_instance.networkspeci,
-                        data_labels,
-                        plot_type,
-                        self.plot_characteristics[plot_type],
-                        plot_options,
-                        plot_z_statistic_sign=z_statistic_sign,
-                    )
+                    if plot_type == 'heatmap':
+                        # clear all previously plotted artists for plot type
+                        self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
+                        
+                        # make plot again considering plot option
+                        func = getattr(self.plotting, "make_heatmap")
+                        func(
+                            self.plot_axes[plot_type],
+                            self.read_instance.networkspeci,
+                            self.read_instance.data_labels,
+                            self.plot_characteristics[plot_type],
+                            self.current_plot_options[plot_type],
+                            self.heatmap_stat.currentText()
+                        )
+                    else:
+                        annotation(
+                            self.read_instance,
+                            self,
+                            self.plot_axes[plot_type],
+                            self.read_instance.networkspeci,
+                            data_labels,
+                            plot_type,
+                            self.plot_characteristics[plot_type],
+                            plot_options,
+                            plot_z_statistic_sign=z_statistic_sign,
+                        )
 
             elif plot_option == "smooth":
                 smooth(

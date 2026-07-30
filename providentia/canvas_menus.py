@@ -52,6 +52,7 @@ class SettingsMenu(object):
         self.checkable_comboboxes = {}
         self.sliders = {}
         self.checkboxes = {}
+        self.plot_type = plot_type
 
         for element_name in self.elements:
             element_settings = settings_dict[plot_type][element_name]
@@ -334,6 +335,11 @@ class SettingsMenu(object):
         if hasattr(self.canvas_instance, "interactive_elements"):
             # Call function only after all elements have been added
             if self.canvas_instance.interactive_elements.keys() == settings_dict.keys():
-                getattr(self.canvas_instance, function)()
+                # some plots share the same function (heatmap, periodic) 
+                # but we need to pass the plot type
+                if function == "handle_statistic_update":
+                    getattr(self.canvas_instance, function)(self.plot_type)
+                else:
+                    getattr(self.canvas_instance, function)()
 
         return None

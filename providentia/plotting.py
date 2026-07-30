@@ -2161,7 +2161,9 @@ class Plotting:
             data_labels = [self.read_instance.observations_data_label]
 
         # always make multispecies plot if there is more than one networkspeci and plot can be multispecies
-        if (len(self.read_instance.networkspecies) > 1) and (self.read_instance.mode == "dashboard"):
+        if ((len(self.read_instance.networkspecies) > 1) 
+            and (self.read_instance.mode == "dashboard")
+            and ('multispecies' not in plot_options)):
             plot_options.append('multispecies')
 
         # if multispecies in plot options then make plot for all networkspecies
@@ -2409,9 +2411,7 @@ class Plotting:
         stats_df : pandas dataframe, optional
             Dataframe of previously calculated statistics.
         """
-
-        zstat = 'Mean'
-
+        print('heatmap', zstat)
         # bias plot?
         if "bias" in plot_options:
             bias = True
@@ -2419,7 +2419,9 @@ class Plotting:
             bias = False
 
         # always make multispecies plot if there is more than one networkspeci and plot can be multispecies
-        if (len(self.read_instance.networkspecies) > 1) and (self.read_instance.mode == "dashboard"):
+        if ((len(self.read_instance.networkspecies) > 1) 
+            and (self.read_instance.mode == "dashboard")
+            and ('multispecies' not in plot_options)):
             plot_options.append('multispecies')
         
         print('plot_options', plot_options)
@@ -2577,6 +2579,7 @@ class Plotting:
         relevant_axis.set_xticklabels(
             stats_df.columns, **plot_characteristics["xticklabels"]
         )
+        print('xticks', stats_df.columns)        
 
         # axis cuts off due to bug in matplotlib 3.1.1 - hack fix
         if Version(matplotlib.__version__) <= Version("3.1.1"):
@@ -2702,7 +2705,9 @@ class Plotting:
             bias = False
 
         # always make multispecies plot if there is more than one networkspeci and plot can be multispecies
-        if (len(self.read_instance.networkspecies) > 1) and (self.read_instance.mode == "dashboard"):
+        if ((len(self.read_instance.networkspecies) > 1) 
+            and (self.read_instance.mode == "dashboard")
+            and ('multispecies' not in plot_options)):
             plot_options.append('multispecies')
 
         # in the dashboard we need to create statistical dataframe as it is not provided in function arguments
