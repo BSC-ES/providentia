@@ -2547,15 +2547,6 @@ class Plotting:
                         else networkspeci
                         for networkspeci in stats_df.index
                     ]
-            # for non multispecies, remove subsection names from labels
-            elif ("multispecies" not in plot_options) and (
-                not plot_characteristics["parent_section_names"]
-            ):
-                yticklabels = []
-                for subsection_label in stats_df.index.get_level_values(1):
-                    if "·" in subsection_label:
-                        subsection_label = subsection_label.split("·")[1]
-                    yticklabels.append(subsection_label)
             # keep original labels
             else:
                 yticklabels = stats_df.index

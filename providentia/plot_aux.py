@@ -1190,10 +1190,21 @@ def handle_test_or_save_df(
         if "time" in generated_output.columns:
             parse_dates.append("time")
         expected_output = pd.read_csv(f"{path}/{filename}.csv", parse_dates=parse_dates)
+
+        # when we read the expected output file, Unnamed: appears in columns that do not have values, keep emtpy for comparison
+        expected_output.columns = [
+            "" if col.startswith("Unnamed:") else col
+            for col in expected_output.columns
+        ]
         read_instance.logger.info(f'Expected_output ({f"{path}/{filename}.csv"})')
         read_instance.logger.info(expected_output)
+
+        read_instance.logger.info(f'Expected_dtypes {expected_output.dtypes}')
+        read_instance.logger.info(f'Generated_dtypes {generated_output.dtypes}')
+
         if "metadata" in filename:
             expected_output["value"] = expected_output["value"].astype(str)
+
         assert assert_frame_equal(generated_output, expected_output, atol=1e-5) is None
 
     else:
@@ -1419,13 +1430,30 @@ def download_plot_data_to_csv(
                                 else value,
                             }
                         )
-
+                    
                     df = (
                         pd.DataFrame(data, columns=["x", "y", "z"])
                         .pivot(index="x", columns="y", values="z")
                         .sort_index()
                         .rename_axis(index=None, columns=None)
                     )
+
+                    # in heatmap set data labels as columns
+                    if base_plot_type == 'heatmap':
+                        df.columns = canvas_instance.selected_station_data_labels[
+                            networkspeci
+                        ]
+                    # in statsummary
+                    elif base_plot_type == 'statsummary':
+                        # remove first row (column names made of numbers like 0, 1, 2, etc.) 
+                        # and set stats in second row as column names
+                        df.columns = df.iloc[0].to_list()
+                        df = df.iloc[1:].reset_index(drop=True)
+                        
+                        # make columns numeric
+                        n_empty = sum(col == "" for col in df.columns)
+                        numeric_cols = df.columns[n_empty:]
+                        df[numeric_cols] = df[numeric_cols].apply(pd.to_numeric)
 
                     df.columns = df.columns.astype(str)
 
@@ -1562,18 +1590,16 @@ def download_plot_data_to_csv(
                             # for other plot types save data per data label
                             else:
                                 if base_plot_type == "fairmode-statsummary":
-                                    plot_element_str = canvas_instance.plotting.fairmode_statsummary_row_titles[
-                                        data_label
-                                    ][
-                                        plot_element_i
-                                    ]
+                                    plot_element_str =(
+                                        f"_{canvas_instance.plotting.fairmode_statsummary_row_titles[data_label][plot_element_i]}"
+                                    )
                                 else:
                                     plot_element_str = (
-                                        f"{plot_element_i}"
+                                        f"_{plot_element_i}"
                                         if len(plot_elements) > 1
                                         else ""
                                     )
-                                filename = f"{plot_type}_{data_label}_{element_type}_{plot_element_str}"
+                                filename = f"{plot_type}_{data_label}_{element_type}{plot_element_str}"
                                 msgs = handle_test_or_save_df(
                                     read_instance,
                                     df,
