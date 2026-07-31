@@ -595,7 +595,7 @@ class Dashboard(QtWidgets.QWidget):
         self.cb_ghost_features.setToolTip("Select GHOST features")
 
         self.cb_network = set_formatting(
-            ComboBox(self), self.formatting_dict["menu_combobox"]
+            CheckableComboBox(self), self.formatting_dict["menu_combobox"]
         )
         self.cb_network.setToolTip(
             "Select providing observational data network. "
@@ -999,6 +999,44 @@ class Dashboard(QtWidgets.QWidget):
 
         self.pop_up_window = PopUpWindow(self, menu_root, [], self.full_window_geometry)
 
+    def set_combobox_options(self, available_options, combobox_type):
+        """
+        Set the available options in a combobox and synchronise the selected values.
+
+        Parameters
+        ----------
+        available_options : list
+            List of available options (e.g. ['3hourly'] for resolution) in checkable combobox
+        combobox_type : str
+            Combobox type (resolution, matrix, ghost_version, ghost_features)
+        """
+
+        selected_cb = getattr(self, f"cb_{combobox_type}")
+        selected_values = getattr(self, f"selected_{combobox_type}")
+
+        selected_cb.addItems(available_options)
+        if selected_values in available_options:
+            selected_cb.setCurrentText(selected_values)
+        else:
+            if combobox_type == "ghost_version":
+                combobox_str = 'GHOST version'
+            elif combobox_type == "ghost_features":
+                combobox_str = 'GHOST features'
+            else:
+                combobox_str = combobox_type.capitalize()
+            if self.from_conf:
+                msg = f"{combobox_str} {selected_values} is not available."
+                self.logger.error(msg)
+                sys.exit(1)
+            else:
+                msg = f"{combobox_str} {selected_values} is not available. Choosing {selected_cb.currentText()} as it is the first option in the dropdown."
+                show_message(self, msg)
+                setattr(
+                    self,
+                    f"selected_{combobox_type}",
+                    selected_cb.currentText()
+                )
+
     def set_checkable_combobox_options(self, available_options, combobox_type):
         """
         Set the available options in a checkable combobox and synchronise the selected values.
@@ -1006,7 +1044,7 @@ class Dashboard(QtWidgets.QWidget):
         Parameters
         ----------
         available_options : list
-            List of available options (e.g. species) in checkable combobox
+            List of available options (e.g. ['sconco3', 'sconcno2'] for species) in checkable combobox
         combobox_type : str
             Combobox type (e.g. species, network)
         """
@@ -1035,15 +1073,15 @@ class Dashboard(QtWidgets.QWidget):
             for value in selected_values
             if value not in available_options
         ]
-
         if missing_values:
+            combobox_str = combobox_type.capitalize()
             if self.from_conf:
-                msg = f"{combobox_type.capitalize()} {', '.join(missing_values)} is not available."
+                msg = f"{combobox_str} {', '.join(missing_values)} is not available."
                 self.logger.error(msg)
                 sys.exit(1)
             else:
                 msg = (
-                    f"{combobox_type.capitalize()} {', '.join(missing_values)} is not available. "
+                    f"{combobox_str} {', '.join(missing_values)} is not available. "
                     f"Choosing {selected_cb.currentText()} as it is the first option in the dropdown."
                 )
                 show_message(self, msg)
@@ -1105,7 +1143,7 @@ class Dashboard(QtWidgets.QWidget):
             self.station_references = {}
 
             # set initial selected config variables as set .conf files or defaults
-            self.selected_network = copy.deepcopy(self.network[0])
+            self.selected_network = copy.deepcopy(self.network)
             self.selected_resolution = copy.deepcopy(self.resolution)
             self.selected_matrix = self.parameter_dictionary[self.species[0]]["matrix"]
             self.selected_species = copy.deepcopy(self.species)
@@ -1188,84 +1226,62 @@ class Dashboard(QtWidgets.QWidget):
 
         # update network field
         available_networks = list(self.available_observation_data.keys())
-        self.cb_network.addItems(available_networks)
-        if self.selected_network in available_networks:
-            self.cb_network.setCurrentText(self.selected_network)
-        else:
-            if self.from_conf:
-                msg = f"Network {self.selected_network} is not available."
-                self.logger.error(msg)
-                sys.exit(1)
-            else:
-                msg = f"Network {self.selected_network} is not available. Choosing {self.cb_network.currentText()} as it is the first option in the dropdown."
-                show_message(self, msg)
-                self.selected_network = self.cb_network.currentText()
+        self.set_checkable_combobox_options(available_options=available_networks, combobox_type='network')
+
+        print('selected network', self.selected_network)
 
         # update buttons
         self.update_ghost_buttons("update_configuration_bar_fields")
 
-        # update resolution field
-        available_resolutions = list(
-            self.available_observation_data[self.selected_network].keys()
-        )
+        # get available resolutions for all selected networks
+        resolution_sets = [
+            set(self.available_observation_data[network].keys())
+            for network in self.selected_network
+        ]
+        available_resolutions = set.intersection(*resolution_sets)
+
         # set order of available resolutions
         available_resolutions = sorted(
             available_resolutions, key=get_temporal_resolution_order().__getitem__
         )
-        self.cb_resolution.addItems(available_resolutions)
-        if self.selected_resolution in available_resolutions:
-            self.cb_resolution.setCurrentText(self.selected_resolution)
-        else:
-            if self.from_conf:
-                msg = f"Resolution {self.selected_resolution} is not available."
-                self.logger.error(msg)
-                sys.exit(1)
-            else:
-                msg = f"Resolution {self.selected_resolution} is not available. Choosing {self.cb_resolution.currentText()} as it is the first option in the dropdown."
-                show_message(self, msg)
-                self.selected_resolution = self.cb_resolution.currentText()
+
+        # update resolution field
+        self.set_combobox_options(available_options=available_resolutions, combobox_type='resolution')
+
+        # get matrices for all selected networks and current resolution
+        matrix_sets = [
+            set(
+                self.available_observation_data[network][
+                    self.selected_resolution
+                ].keys()
+            )
+            for network in self.selected_network
+        ]
+        available_matrices = sorted(set.intersection(*matrix_sets))
 
         # update matrix field
-        available_matrices = sorted(
-            self.available_observation_data[self.selected_network][
-                self.selected_resolution
-            ]
-        )
-        self.cb_matrix.addItems(available_matrices)
-        if self.selected_matrix in available_matrices:
-            self.cb_matrix.setCurrentText(self.selected_matrix)
-        else:
-            self.selected_matrix = self.cb_matrix.currentText()
+        self.set_combobox_options(available_options=available_matrices, combobox_type='matrix')
 
         # update GHOST version field
         available_ghost_versions = self.available_ghost_versions
-        self.cb_ghost_version.addItems(available_ghost_versions)
-        if self.selected_ghost_version in available_ghost_versions:
-            self.cb_ghost_version.setCurrentText(self.selected_ghost_version)
-        else:
-            if self.from_conf:
-                msg = f"GHOST version {self.selected_ghost_version} is not available."
-                self.logger.error(msg)
-                sys.exit(1)
-            else:
-                msg = f"GHOST version {self.selected_ghost_version} is not available. Choosing {self.cb_ghost_version.currentText()} as it is the first option in the dropdown."
-                show_message(self, msg)
-                self.selected_resolution = self.cb_resolution.currentText()
+        self.set_combobox_options(available_options=available_ghost_versions, combobox_type='ghost_version')
 
         # update GHOST features field
         available_ghost_features = self.available_ghost_features
-        self.cb_ghost_features.addItems(available_ghost_features)
-        if self.selected_ghost_features in available_ghost_features:
-            self.cb_ghost_features.setCurrentText(self.selected_ghost_features)
-        else:
-            self.selected_ghost_features = self.cb_ghost_features.currentText()
+        self.set_combobox_options(available_options=available_ghost_features, combobox_type='ghost_features')
+
+        # get species for all selected networks, current resolution and current matrix
+        species_sets = [
+            set(
+                self.available_observation_data[network][
+                    self.selected_resolution
+                ][self.selected_matrix]
+            )
+            for network in self.selected_network
+        ]
+        available_species = sorted(set.intersection(*species_sets))
 
         # update species field
-        available_species = sorted(
-            self.available_observation_data[self.selected_network][
-                self.selected_resolution
-            ][self.selected_matrix]
-        )
         self.set_checkable_combobox_options(available_options=available_species, combobox_type='species')
 
         print('selected species', self.selected_species)
@@ -1273,7 +1289,7 @@ class Dashboard(QtWidgets.QWidget):
         # update networkspecies field
         self.selected_networkspecies = self.networkspecies = [
             "{}|{}".format(network, species)
-            for network in [self.selected_network] # TODO: Remove [] when it becomes a list
+            for network in self.selected_network
             for species in self.selected_species
         ]
         print('selected networkspecies', self.selected_networkspecies)
@@ -1316,18 +1332,7 @@ class Dashboard(QtWidgets.QWidget):
             "Spatial|Temporal",
             "Temporal|Spatial",
         ]
-        self.cb_statistic_mode.addItems(available_statistic_modes)
-        if self.selected_statistic_mode in available_statistic_modes:
-            self.cb_statistic_mode.setCurrentText(self.selected_statistic_mode)
-        else:
-            if self.from_conf:
-                msg = f"Statistic mode {self.selected_statistic_mode} is not available."
-                self.logger.error(msg)
-                sys.exit(1)
-            else:
-                msg = f"Statistic mode {self.selected_statistic_mode} is not available. Choosing {self.cb_statistic_mode.currentText()} as it is the first option in the dropdown."
-                show_message(self, msg)
-                self.selected_statistic_mode = self.cb_statistic_mode.currentText()
+        self.set_combobox_options(available_options=available_statistic_modes, combobox_type='statistic_mode')
 
         # update statistic aggregation field
         if self.selected_statistic_mode == "Flattened":
@@ -1459,13 +1464,13 @@ class Dashboard(QtWidgets.QWidget):
 
         # update available models for selected fields
         # 1 network?
-        if len([self.selected_network]) == 1:
+        if len(self.selected_network) == 1:
             # duplicate network to match species len
-            selected_networks_to_get_valid_models = [self.selected_network] * len(
+            selected_networks_to_get_valid_models = self.selected_network * len(
                 self.selected_species
             )
         else:
-            selected_networks_to_get_valid_models = [self.selected_network]
+            selected_networks_to_get_valid_models = self.selected_network
         get_valid_models(
             self,
             self.le_start_date.text(),
@@ -1712,7 +1717,7 @@ class Dashboard(QtWidgets.QWidget):
             # if network, resolution, matrix, species, aggregation mode or resampling resolution have changed
             # then alter respective current selection for the changed param
             if event_source == self.cb_network:
-                self.selected_network = changed_param
+                self.selected_network = self.cb_network.currentData()
                 # ensure that QA defaults have been updated if network has changed (i.e. to or from ACTRIS)
                 update_qa(self)
 
@@ -1721,12 +1726,17 @@ class Dashboard(QtWidgets.QWidget):
 
             elif event_source == self.cb_matrix:
                 self.selected_matrix = changed_param
-                self.selected_species = sorted(
-                    list(
-                        self.available_observation_data[self.selected_network][
+                species_sets = [
+                    set(
+                        self.available_observation_data[network][
                             self.selected_resolution
                         ][self.selected_matrix].keys()
                     )
+                    for network in self.selected_network
+                ]
+
+                self.selected_species = sorted(
+                    set.intersection(*species_sets)
                 )[0]
 
             elif event_source == self.cb_species:
@@ -2301,7 +2311,7 @@ class Dashboard(QtWidgets.QWidget):
         # set new active variables as selected variables from menu
         self.start_date = int(self.le_start_date.text())
         self.end_date = int(self.le_end_date.text())
-        self.network = [self.selected_network]
+        self.network = self.selected_network
         self.resolution = self.selected_resolution
         self.resampling_resolution = self.cb_resampling_resolution.currentText()
         # set active resolution, resampling_resolution when set, otherwise resolution
@@ -2423,7 +2433,7 @@ class Dashboard(QtWidgets.QWidget):
         # (network, resolution, species, qa, flags, filter_species, ghost_features)
         # if any have changed, observations and any selected models have to be re-read entirely
         elif (
-            (self.network[0] != self.previous_network[0])
+            (self.network != self.previous_network)
             or (self.resolution != self.previous_resolution)
             or (self.species != self.previous_species)
             or (self.ghost_features != self.previous_ghost_features)

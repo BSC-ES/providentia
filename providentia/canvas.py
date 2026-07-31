@@ -5067,8 +5067,8 @@ class Canvas(FigureCanvas):
         """
 
         default_filename = "{0}-{1}-{2}-{3}-{4}-{5}-{6}.png".format(
-            self.read_instance.network[0],
-            self.read_instance.species[0],
+            str(self.read_instance.network),
+            str(self.read_instance.species),
             self.read_instance.resolution,
             self.read_instance.start_date,
             self.read_instance.end_date,
