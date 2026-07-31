@@ -999,6 +999,68 @@ class Dashboard(QtWidgets.QWidget):
 
         self.pop_up_window = PopUpWindow(self, menu_root, [], self.full_window_geometry)
 
+    def set_checkable_combobox_options(self, available_options, combobox_type):
+        """
+        Set the available options in a checkable combobox and synchronise the selected values.
+
+        Parameters
+        ----------
+        available_options : list
+            List of available options (e.g. species) in checkable combobox
+        combobox_type : str
+            Combobox type (e.g. species, network)
+        """
+
+        selected_cb = getattr(self, f"cb_{combobox_type}")
+        selected_values = getattr(self, f"selected_{combobox_type}")
+
+        # update field
+        selected_cb.addItems(available_options)
+
+        # convert string to list if needed
+        # for species: "sconcno2, sconco3" -> ["sconcno2", "sconco3"]
+        if isinstance(selected_values, str):
+            setattr(
+                self,
+                f"selected_{combobox_type}",
+                [
+                    value.strip()
+                    for value in selected_values.split(",")
+                ],
+            )
+
+        # get options that are not available in data directories
+        missing_values = [
+            value
+            for value in selected_values
+            if value not in available_options
+        ]
+
+        if missing_values:
+            if self.from_conf:
+                msg = f"{combobox_type.capitalize()} {', '.join(missing_values)} is not available."
+                self.logger.error(msg)
+                sys.exit(1)
+            else:
+                msg = (
+                    f"{combobox_type.capitalize()} {', '.join(missing_values)} is not available. "
+                    f"Choosing {selected_cb.currentText()} as it is the first option in the dropdown."
+                )
+                show_message(self, msg)
+                setattr(
+                    self,
+                    f"selected_{combobox_type}",
+                    [selected_cb.currentText()]
+                )
+
+        # check in available values if there is any value that needs to be selected
+        for i, species in enumerate(available_options):
+            selected_cb.model().item(i).setCheckState(
+                QtCore.Qt.Checked
+                if species in selected_values
+                else QtCore.Qt.Unchecked
+            )
+        
     def update_configuration_bar_fields(self):
         """Initialise or synchronise all configuration bar widgets and their available options."""
 
@@ -1204,44 +1266,7 @@ class Dashboard(QtWidgets.QWidget):
                 self.selected_resolution
             ][self.selected_matrix]
         )
-        self.cb_species.addItems(available_species)
-
-        # convert species string to list if needed
-        # "sconcno2, sconco3" -> ["sconcno2", "sconco3"]
-        if isinstance(self.selected_species, str):
-            self.selected_species = [
-                species.strip()
-                for species in self.selected_species.split(",")
-            ]
-
-        # get species that are not available in data directories
-        missing_species = [
-            species
-            for species in self.selected_species
-            if species not in available_species
-        ]
-
-        if missing_species:
-            if self.from_conf:
-                msg = f"Species {', '.join(missing_species)} is not available."
-                self.logger.error(msg)
-                sys.exit(1)
-            else:
-                msg = (
-                    f"Species {', '.join(missing_species)} is not available. "
-                    f"Choosing {self.cb_species.currentText()} as it is the first option in the dropdown."
-                )
-                show_message(self, msg)
-                self.selected_species = [self.cb_species.currentText()]
-
-        # check in available species if there is any that needs to be checked
-        # selected from a configuration file
-        for i, species in enumerate(available_species):
-            self.cb_species.model().item(i).setCheckState(
-                QtCore.Qt.Checked
-                if species in self.selected_species
-                else QtCore.Qt.Unchecked
-            )
+        self.set_checkable_combobox_options(available_options=available_species, combobox_type='species')
 
         print('selected species', self.selected_species)
 
