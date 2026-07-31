@@ -1204,20 +1204,14 @@ class Dashboard(QtWidgets.QWidget):
                 self.selected_resolution
             ][self.selected_matrix]
         )
-        for species in available_species:
-            self.cb_species.addItem(species)
-            item = self.cb_species.model().item(
-                self.cb_species.count() - 1, 0
-            )
-            item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
-            item.setCheckState(QtCore.Qt.Unchecked)
+        self.cb_species.addItems(available_species)
 
-        # convert selected_species string to list if needed
+        # convert species string to list if needed
+        # "sconcno2, sconco3" -> ["sconcno2", "sconco3"]
         if isinstance(self.selected_species, str):
             self.selected_species = [
                 species.strip()
                 for species in self.selected_species.split(",")
-                if species.strip()
             ]
 
         # get species that are not available in data directories
@@ -1240,21 +1234,10 @@ class Dashboard(QtWidgets.QWidget):
                 show_message(self, msg)
                 self.selected_species = [self.cb_species.currentText()]
 
-        # populate checkable combobox
-        self.cb_species.clear()
-
-        for species in available_species:
-            self.cb_species.addItem(species)
-
-            item = self.cb_species.model().item(
-                self.cb_species.count() - 1, 0
-            )
-
-            item.setFlags(
-                item.flags() | QtCore.Qt.ItemIsUserCheckable
-            )
-
-            item.setCheckState(
+        # check in available species if there is any that needs to be checked
+        # selected from a configuration file
+        for i, species in enumerate(available_species):
+            self.cb_species.model().item(i).setCheckState(
                 QtCore.Qt.Checked
                 if species in self.selected_species
                 else QtCore.Qt.Unchecked
@@ -1722,7 +1705,7 @@ class Dashboard(QtWidgets.QWidget):
                 )[0]
 
             elif event_source == self.cb_species:
-                self.selected_species = changed_param
+                self.selected_species = self.cb_species.currentData()
 
             elif event_source == self.cb_statistic_mode:
                 self.selected_statistic_mode = changed_param
