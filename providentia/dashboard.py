@@ -1024,12 +1024,16 @@ class Dashboard(QtWidgets.QWidget):
                 combobox_str = 'GHOST features'
             else:
                 combobox_str = combobox_type.capitalize()
-            if self.from_conf:
+            if selected_values:
                 msg = f"{combobox_str} {selected_values} is not available."
+            else:
+                msg = f"{combobox_str} is empty."
+            if self.from_conf:
                 self.logger.error(msg)
                 sys.exit(1)
             else:
-                msg = f"{combobox_str} {selected_values} is not available. Choosing {selected_cb.currentText()} as it is the first option in the dropdown."
+                if selected_cb.currentText():
+                    msg += f" Choosing {selected_cb.currentText()} as it is the first option in the dropdown."
                 show_message(self, msg)
                 setattr(
                     self,
@@ -1075,15 +1079,16 @@ class Dashboard(QtWidgets.QWidget):
         ]
         if missing_values:
             combobox_str = combobox_type.capitalize()
-            if self.from_conf:
+            if any(missing_values):
                 msg = f"{combobox_str} {', '.join(missing_values)} is not available."
+            else:
+                msg = f"{combobox_str} is empty."
+            if self.from_conf:
                 self.logger.error(msg)
                 sys.exit(1)
             else:
-                msg = (
-                    f"{combobox_str} {', '.join(missing_values)} is not available. "
-                    f"Choosing {selected_cb.currentText()} as it is the first option in the dropdown."
-                )
+                if selected_cb.currentText():
+                    msg += f" Choosing {selected_cb.currentText()} as it is the first option in the dropdown."
                 show_message(self, msg)
                 setattr(
                     self,
@@ -1228,8 +1233,6 @@ class Dashboard(QtWidgets.QWidget):
         available_networks = list(self.available_observation_data.keys())
         self.set_checkable_combobox_options(available_options=available_networks, combobox_type='network')
 
-        print('selected network', self.selected_network)
-
         # update buttons
         self.update_ghost_buttons("update_configuration_bar_fields")
 
@@ -1271,20 +1274,20 @@ class Dashboard(QtWidgets.QWidget):
         self.set_combobox_options(available_options=available_ghost_features, combobox_type='ghost_features')
 
         # get species for all selected networks, current resolution and current matrix
-        species_sets = [
-            set(
-                self.available_observation_data[network][
-                    self.selected_resolution
-                ][self.selected_matrix]
-            )
-            for network in self.selected_network
-        ]
-        available_species = sorted(set.intersection(*species_sets))
+        available_species = []
+        if self.selected_matrix:
+            species_sets = [
+                set(
+                    self.available_observation_data[network][
+                        self.selected_resolution
+                    ][self.selected_matrix]
+                )
+                for network in self.selected_network
+            ]
+            available_species = sorted(set.intersection(*species_sets))
 
         # update species field
         self.set_checkable_combobox_options(available_options=available_species, combobox_type='species')
-
-        print('selected species', self.selected_species)
 
         # update networkspecies field
         self.selected_networkspecies = self.networkspecies = [
@@ -1292,7 +1295,6 @@ class Dashboard(QtWidgets.QWidget):
             for network in self.selected_network
             for species in self.selected_species
         ]
-        print('selected networkspecies', self.selected_networkspecies)
 
         # check if have filter species data
         for filter_networkspeci in copy.deepcopy(self.selected_filter_species).keys():
@@ -1558,17 +1560,18 @@ class Dashboard(QtWidgets.QWidget):
 
         # update default qa
         # TODO: Have different selections of qa per species
-        default_qa = get_default_qa(self, self.selected_species[0])
-        previous_default_qa = copy.deepcopy(
-            self.qa_menu["checkboxes"]["remove_default"]
-        )
-        self.qa_menu["checkboxes"]["remove_default"] = default_qa
+        if any(self.selected_species):
+            default_qa = get_default_qa(self, self.selected_species[0])
+            previous_default_qa = copy.deepcopy(
+                self.qa_menu["checkboxes"]["remove_default"]
+            )
+            self.qa_menu["checkboxes"]["remove_default"] = default_qa
 
-        # update selected qa if previous selected qa was default (to new default)
-        if set(self.qa_menu["checkboxes"]["remove_selected"]) == set(
-            previous_default_qa
-        ):
-            self.qa_menu["checkboxes"]["remove_selected"] = default_qa
+            # update selected qa if previous selected qa was default (to new default)
+            if set(self.qa_menu["checkboxes"]["remove_selected"]) == set(
+                previous_default_qa
+            ):
+                self.qa_menu["checkboxes"]["remove_selected"] = default_qa
 
         # update layout fields
         self.update_layout_fields(self.mpl_canvas)
@@ -2321,7 +2324,8 @@ class Dashboard(QtWidgets.QWidget):
             self.active_resolution = self.resolution
         self.species = self.selected_species
         self.qa = copy.deepcopy(self.qa_menu["checkboxes"]["remove_selected"])
-        self.qa_per_species = copy.deepcopy(self.qa)
+        for speci in self.species:
+            self.qa_per_species[speci] = copy.deepcopy(self.qa)
         self.flags = copy.deepcopy(self.flag_menu["checkboxes"]["remove_selected"])
         self.networkspecies = [
             "{}|{}".format(network, species)
