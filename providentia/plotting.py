@@ -2138,6 +2138,7 @@ class Plotting:
         data_labels,
         plot_characteristics,
         plot_options,
+        plot_networkspecies=None
     ):
         """
         Renders box-and-whisker plots to visualise data distributions across observations and models.
@@ -2154,21 +2155,30 @@ class Plotting:
             Plot characteristics.
         plot_options : list
             Options to configure plot.
+        plot_networkspecies : list
+            Selected networkspecies from plot settings.
         """
+
+        # if no selection has been made, get networkspecies from top menu (read into memory)
+        if not plot_networkspecies:
+            networkspecies = copy.deepcopy(self.read_instance.networkspecies)
+        # get networkspecies from burger menu
+        else:
+            networkspecies = plot_networkspecies
 
         # if 'obs' in plot_options, set data labels to just observations data label
         if "obs" in plot_options:
             data_labels = [self.read_instance.observations_data_label]
 
         # always make multispecies plot if there is more than one networkspeci and plot can be multispecies
-        if ((len(self.read_instance.networkspecies) > 1) 
+        if ((len(networkspecies) > 1) 
             and (self.read_instance.mode == "dashboard")
             and ('multispecies' not in plot_options)):
             plot_options.append('multispecies')
 
         # if multispecies in plot options then make plot for all networkspecies
         if "multispecies" in plot_options:
-            networkspecies = self.read_instance.networkspecies
+            networkspecies = networkspecies
             species = self.read_instance.species
         else:
             networkspecies = [networkspeci]
@@ -2246,7 +2256,7 @@ class Plotting:
                 if (
                     ("individual" in plot_options)
                     or ("obs" in plot_options)
-                    or (len(self.read_instance.networkspecies) == 1)
+                    or (len(networkspecies) == 1)
                     or (len(cut_data_labels) == 1)
                 ):
                     widths = plot_characteristics["group_widths"]["singlespecies"]
@@ -2268,7 +2278,7 @@ class Plotting:
                     or (len(cut_data_labels) == 1)
                 ):
                     positions = [ns_current]
-                elif len(self.read_instance.networkspecies) == 1:
+                elif len(networkspecies) == 1:
                     positions = np.arange(len(cut_data_labels))
                 else:
                     positions = [
@@ -2343,16 +2353,18 @@ class Plotting:
         xtick_params = copy.deepcopy(plot_characteristics["xtick_params"])
         xticklabel_params = copy.deepcopy(plot_characteristics["xticklabels"])
         if ("multispecies" in plot_options) & (
-            len(self.read_instance.networkspecies) > 1
+            len(networkspecies) > 1
         ):
-            xticks = np.arange(len(self.read_instance.networkspecies))
+            xticks = np.arange(len(networkspecies))
             # if all networks or species are same, drop them from xtick label
-            if len(np.unique(self.read_instance.network)) == 1:
-                xtick_labels = copy.deepcopy(self.read_instance.species)
-            elif len(np.unique(self.read_instance.species)) == 1:
-                xtick_labels = copy.deepcopy(self.read_instance.network)
+            networks = [ns.split("|")[0] for ns in networkspecies]
+            species = [ns.split("|")[1] for ns in networkspecies]
+            if len(np.unique(networks)) == 1:
+                xtick_labels = copy.deepcopy(species)
+            elif len(np.unique(species)) == 1:
+                xtick_labels = copy.deepcopy(networks)
             else:
-                xtick_labels = copy.deepcopy(self.read_instance.networkspecies)
+                xtick_labels = copy.deepcopy(networkspecies)
             # get aliases for multispecies (if have any)
             xtick_labels, xlabel = get_multispecies_aliases(xtick_labels)
 
@@ -2386,7 +2398,7 @@ class Plotting:
         subsection=None,
         plotting_paradigm=None,
         stats_df=None,
-        heatmap_networkspecies=None,
+        plot_networkspecies=None,
     ):
         """
         Renders a statistical heatmap using Seaborn to visualise performance metrics across observations and models.
@@ -2411,6 +2423,8 @@ class Plotting:
             Plotting paradigm (summary or station report).
         stats_df : pandas dataframe, optional
             Dataframe of previously calculated statistics.
+        plot_networkspecies : list
+            Selected networkspecies from plot settings
         """
 
         # bias plot?
@@ -2420,11 +2434,11 @@ class Plotting:
             bias = False
 
         # if no selection has been made, get networkspecies from top menu (read into memory)
-        if not heatmap_networkspecies:
+        if not plot_networkspecies:
             networkspecies = copy.deepcopy(self.read_instance.networkspecies)
         # get networkspecies from burger menu
         else:
-            networkspecies = heatmap_networkspecies
+            networkspecies = plot_networkspecies
 
         # always make multispecies plot if there is more than one networkspeci and plot can be multispecies
         if ((len(networkspecies) > 1) 
@@ -2489,7 +2503,6 @@ class Plotting:
             # order labels in the same order as iteration, pivot does not preserve original order
             stats_df = stats_df.reindex(columns=cut_data_labels)
 
-        print(stats_df)
         # get subsections
         subsections = list(np.unique(stats_df.index.get_level_values(1)))
 
@@ -2579,8 +2592,7 @@ class Plotting:
         # set xticklabels
         relevant_axis.set_xticklabels(
             stats_df.columns, **plot_characteristics["xticklabels"]
-        )
-        print('xticks', stats_df.columns)        
+        )     
 
         # axis cuts off due to bug in matplotlib 3.1.1 - hack fix
         if Version(matplotlib.__version__) <= Version("3.1.1"):
@@ -2668,6 +2680,7 @@ class Plotting:
         subsection=None,
         plotting_paradigm=None,
         stats_df=None,
+        plot_networkspecies=None
     ):
         """
         Constructs a formatted table of statistical metrics, featuring merged cells and dynamic colour-coding.
@@ -2694,6 +2707,8 @@ class Plotting:
             Plotting paradigm (summary or station report).
         stats_df : pandas dataframe, optional
             Dataframe of previously calculated statistics.
+        plot_networkspecies : list
+            Selected networkspecies from plot settings.
         """
 
         # turn off axis to make table
@@ -2705,8 +2720,15 @@ class Plotting:
         else:
             bias = False
 
+        # if no selection has been made, get networkspecies from top menu (read into memory)
+        if not plot_networkspecies:
+            networkspecies = copy.deepcopy(self.read_instance.networkspecies)
+        # get networkspecies from burger menu
+        else:
+            networkspecies = plot_networkspecies
+        
         # always make multispecies plot if there is more than one networkspeci and plot can be multispecies
-        if ((len(self.read_instance.networkspecies) > 1) 
+        if ((len(networkspecies) > 1) 
             and (self.read_instance.mode == "dashboard")
             and ('multispecies' not in plot_options)):
             plot_options.append('multispecies')
@@ -2714,7 +2736,7 @@ class Plotting:
         # in the dashboard we need to create statistical dataframe as it is not provided in function arguments
         if not isinstance(stats_df, pd.DataFrame):
             if "multispecies" in plot_options:
-                networkspecies = self.read_instance.networkspecies
+                networkspecies = networkspecies
             else:
                 networkspecies = [networkspeci]
 
@@ -2766,7 +2788,7 @@ class Plotting:
                 pd.DataFrame(rows)
                 .set_index(["networkspecies", "labels"])
             )
-
+        
         # when we have 1 stat in the statsummary, the column name is 0
         # we need to rename it to the stat name
         if (len(stats_df.columns) == 1) and (stats_df.columns[0] == 0):

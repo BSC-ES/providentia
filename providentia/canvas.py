@@ -1292,11 +1292,10 @@ class Canvas(FigureCanvas):
                         self.plot_characteristics[plot_type],
                         plot_options,
                         self.heatmap_stat.currentText(),
-                        heatmap_networkspecies=self.heatmap_networkspecies.currentData()
+                        plot_networkspecies=self.heatmap_networkspecies.currentData()
                     )
                 # other plots
                 else:
-                    print('other plots')
                     func(
                         ax,
                         self.read_instance.networkspeci,
@@ -3465,6 +3464,7 @@ class Canvas(FigureCanvas):
             plot_type="statsummary", canvas_instance=self, read_instance=self.read_instance
         )
         self.statsummary_options = self.statsummary_menu.checkable_comboboxes["options"]
+        self.statsummary_networkspecies = self.statsummary_menu.checkable_comboboxes["networkspecies"]
         self.statsummary_elements = self.statsummary_menu.get_elements()
 
         # get stats and add items to cycle
@@ -3486,6 +3486,7 @@ class Canvas(FigureCanvas):
         self.boxplot_menu = SettingsMenu(plot_type="boxplot", canvas_instance=self,
                                          read_instance=self.read_instance)
         self.boxplot_options = self.boxplot_menu.checkable_comboboxes["options"]
+        self.boxplot_networkspecies = self.boxplot_menu.checkable_comboboxes["networkspecies"]
         self.boxplot_elements = self.boxplot_menu.get_elements()
 
         # get boxplot interactive dictionary
@@ -3537,7 +3538,6 @@ class Canvas(FigureCanvas):
         self.heatmap_elements = self.heatmap_menu.get_elements()
 
         # get stats
-        print(self.heatmap_menu.comboboxes)
         self.heatmap_stat = self.heatmap_menu.comboboxes["stat"]
 
         # get heatmap interactive dictionary
@@ -3998,7 +3998,7 @@ class Canvas(FigureCanvas):
                                         self.plot_characteristics[plot_type],
                                         self.current_plot_options[plot_type],
                                         self.heatmap_stat.currentText(),
-                                        heatmap_networkspecies=self.heatmap_networkspecies.currentData()
+                                        plot_networkspecies=self.plot_networkspecies.currentData()
                                     )
                                 else:
                                     # TODO: If we have multiple species, show annotations for all of them
@@ -4027,7 +4027,7 @@ class Canvas(FigureCanvas):
                                     self.plot_characteristics[plot_type],
                                     self.current_plot_options[plot_type],
                                     self.heatmap_stat.currentText(),
-                                    heatmap_networkspecies=self.heatmap_networkspecies.currentData()
+                                    plot_networkspecies=self.heatmap_networkspecies.currentData()
                                 )
 
                     # option 'smooth'
@@ -4356,7 +4356,7 @@ class Canvas(FigureCanvas):
                                         self.plot_characteristics[plot_type],
                                         self.current_plot_options[plot_type],
                                         self.heatmap_stat.currentText(),
-                                        heatmap_networkspecies=self.heatmap_networkspecies.currentData()
+                                        plot_networkspecies=self.heatmap_networkspecies.currentData()
                                     )
                                 # other plots
                                 else:
@@ -4498,7 +4498,7 @@ class Canvas(FigureCanvas):
                                         self.plot_characteristics[plot_type],
                                         self.current_plot_options[plot_type],
                                         self.heatmap_stat.currentText(),
-                                        heatmap_networkspecies=self.heatmap_networkspecies.currentData()
+                                        plot_networkspecies=self.heatmap_networkspecies.currentData()
                                     )
                                 # other plots
                                 else:
@@ -4589,6 +4589,7 @@ class Canvas(FigureCanvas):
             self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
 
             # make plot again considering plot option
+            plot_options = self.current_plot_options[plot_type]
             if plot_type == 'heatmap':
                 func = getattr(self.plotting, "make_heatmap")
                 func(
@@ -4596,10 +4597,55 @@ class Canvas(FigureCanvas):
                     self.read_instance.networkspeci,
                     self.read_instance.data_labels,
                     self.plot_characteristics[plot_type],
-                    self.current_plot_options[plot_type],
+                    plot_options,
                     self.heatmap_stat.currentText(),
-                    heatmap_networkspecies=self.heatmap_networkspecies.currentData()
+                    plot_networkspecies=self.heatmap_networkspecies.currentData()
                 )
+            elif plot_type in ['statsummary', 'table']:
+                func = getattr(self.plotting, "make_table")
+                if "bias" in plot_options:
+                    relevant_zstats = self.active_statsummary_stats["modbias"]
+                else:
+                    relevant_zstats = self.active_statsummary_stats["basic"]
+                if plot_type == 'statsummary':
+                    statsummary = True
+                    plot_networkspecies = self.statsummary_networkspecies.currentData()
+                else:
+                    statsummary = False
+                    plot_networkspecies = self.table_networkspecies.currentData()
+                func(
+                    self.plot_axes[plot_type],
+                    self.read_instance.networkspeci,
+                    self.read_instance.data_labels,
+                    self.plot_characteristics[plot_type],
+                    plot_options,
+                    zstats=relevant_zstats,
+                    statsummary=statsummary,
+                    plot_networkspecies=plot_networkspecies
+                )
+            elif plot_type == 'boxplot':
+                func = getattr(self.plotting, "make_boxplot")
+                func(
+                    self.plot_axes[plot_type],
+                    self.read_instance.networkspeci,
+                    self.read_instance.data_labels,
+                    self.plot_characteristics[plot_type],
+                    plot_options,
+                    plot_networkspecies=self.boxplot_networkspecies.currentData()
+                )
+                harmonise_xy_lims_paradigm(
+                    self.read_instance,
+                    self,
+                    self.plot_axes[plot_type],
+                    plot_type,
+                    self.plot_characteristics[plot_type],
+                    plot_options,
+                    relim=True,
+                    autoscale=True,
+                )
+
+            # draw changes
+            self.figure.canvas.draw_idle()
 
             self.read_instance.block_MPL_canvas_updates = False
         
@@ -4668,7 +4714,7 @@ class Canvas(FigureCanvas):
                             self.plot_characteristics[plot_type],
                             self.current_plot_options[plot_type],
                             self.heatmap_stat.currentText(),
-                            heatmap_networkspecies=self.heatmap_networkspecies.currentData()
+                            plot_networkspecies=self.heatmap_networkspecies.currentData()
                         )
                     else:
                         annotation(
