@@ -286,12 +286,10 @@ def legend_picker_func(canvas_instance, event):
                         "table",
                         "statsummary",
                     ]:
-                        # get currently selected options for plot
-                        plot_options = canvas_instance.current_plot_options[plot_type]
-
                         # get active (absolute / bias)
                         active = canvas_instance.plot_elements[plot_type]["active"]
 
+                        print(plot_type, data_label, data_label in canvas_instance.plot_elements[plot_type][active])
                         # change visibility of plot elements (if data label in plot elements dictionary)
                         if (
                             data_label
@@ -307,6 +305,23 @@ def legend_picker_func(canvas_instance, event):
                                         plot_element.set_visible(True)
                                     else:
                                         plot_element.set_visible(False)
+                        
+                        # remake plot if data label is not within active
+                        # example of when this happens:
+                        # 1. User picks label to remove and plots update
+                        # 2. User changes plot type in one position
+                        # 3. User picks label to add back and plots update
+                        # 4. New plot from change in step 2 does not have data label in active
+                        elif visible:
+                            canvas_instance.update_associated_active_dashboard_plot(
+                                plot_type
+                            )
+
+                    # plots that are entirely remade on legend interaction
+                    elif plot_type in ["statsummary", "heatmap"]:
+                        canvas_instance.update_associated_active_dashboard_plot(
+                            plot_type
+                        )
 
             # change font weight of label
             legend_label._fontproperties = canvas_instance.legend.get_texts()[
@@ -324,7 +339,6 @@ def legend_picker_func(canvas_instance, event):
             canvas_instance.lock_legend_pick = False
 
     return None
-
 
 class HoverAnnotation(object):
     def __init__(self, canvas_instance):

@@ -2345,7 +2345,7 @@ class Plotting:
                     # track plot elements
                     if self.read_instance.mode not in ["report"]:
                         self.track_plot_elements(
-                            data_label, "boxplot", "plot", boxplot, bias=False
+                            data_label, "boxplot", "plot_{}".format(ns), boxplot, bias=False
                         )
 
         # set xticklabels
