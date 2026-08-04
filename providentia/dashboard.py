@@ -2648,9 +2648,7 @@ class Dashboard(QtWidgets.QWidget):
         unset_cursor(self.cursor_function, "handle_data_selection_update")
 
         # add networkspecies as items to networkspecies combobox
-        # TODO: Replace when we have other plot types
-        # multispecies_plot_types = ["heatmap", "boxplot", "table", "statsummary"]
-        multispecies_plot_types = ["heatmap", "statsummary", "boxplot"]
+        multispecies_plot_types = ["heatmap", "boxplot", "table", "statsummary"]
         networkspecies_elements = [getattr(self.mpl_canvas, f"{plot_type}_networkspecies") 
                                 for plot_type in multispecies_plot_types]
         for element in networkspecies_elements:

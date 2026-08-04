@@ -1653,4 +1653,110 @@
           "function": "update_plot_option",
         },
     },
+
+    "table":
+    {
+      "settings_button":
+        {
+          "element_type": "button",
+          "formatting_dict": "settings_icon",
+          "size": [31, 37],
+          "path": "resources/menu_icon.png",
+          "object_name": "table_menu_button",
+          "function": "interactive_elements_button_func",
+        },
+
+      "save_button":
+        {
+          "element_type": "button",
+          "formatting_dict": "save_icon",
+          "size": [20, 20],
+          "path": "resources/save_fig_icon.png",
+          "object_name": "table_save_button",
+          "function": "save_axis_figure_func",
+        },
+
+      "save_data_button":
+        {
+          "element_type": "button",
+          "formatting_dict": "save_icon",
+          "size": [20, 20],
+          "path": "resources/save_data_icon.png",
+          "object_name": "table_save_data_button",
+          "function": "save_axis_figure_data_func",
+        },
+
+      "container":
+        {
+          "element_type": "container",
+          "formatting_dict": "settings_container",
+          "size": [250, 180],
+          "relative_position": [-230, 25],
+        },
+
+      "settings_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_label",
+          "size": [230, 20],
+          "relative_position": [-220, 30],
+          "text": "SETTINGS",
+        },
+
+      "stat_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_sublabel",
+          "size": [230, 20],
+          "relative_position": [-220, 50],
+          "text": "Statistic",
+        },
+
+      "stat":
+        {
+          "element_type": "combobox",
+          "formatting_dict": "menu_combobox",
+          "fixed_width": 105,
+          "relative_position": [-220, 75],
+          "function": "handle_statistic_update",
+        },
+
+      "networkspecies_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_sublabel",
+          "size": [230, 20],
+          "relative_position": [-220, 100],
+          "text": "Networkspecies",
+        },
+
+      "networkspecies":
+        {
+          "element_type": "checkable_combobox",
+          "formatting_dict": "menu_checkable_combobox",
+          "size": [230, 20],
+          "relative_position": [-220, 125],
+          "object_name": "table_networkspecies",
+          "function": "update_networkspecies_in_multispecies_plot",
+        },
+
+      "options_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_sublabel",
+          "size": [230, 20],
+          "relative_position": [-220, 150],
+          "text": "Options",
+        },
+
+      "options":
+        {
+          "element_type": "checkable_combobox",
+          "formatting_dict": "menu_checkable_combobox",
+          "size": [230, 20],
+          "relative_position": [-220, 175],
+          "object_name": "table_options",
+          "function": "update_plot_option",
+        },
+    },
 }

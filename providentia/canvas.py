@@ -124,7 +124,8 @@ class Canvas(FigureCanvas):
             "fairmode-target",
             "fairmode-statsummary",
             "contingencytable",
-            "heatmap"
+            "heatmap",
+            "table"
         ]
 
         # define all possible plots in layout options
@@ -142,7 +143,8 @@ class Canvas(FigureCanvas):
             "fairmode-target",
             "fairmode-statsummary",
             "contingencytable",
-            "heatmap"
+            "heatmap",
+            "table"
         ]
 
         # stop running if plot type in active_dashboard_plots does not exist
@@ -442,8 +444,8 @@ class Canvas(FigureCanvas):
 
             # disable MDA8 stat where neccessary
             self.handle_statsummary_statistics_update()
-            self.handle_statistic_update("periodic")
-            self.handle_statistic_update("heatmap")
+            for plot_type in ["periodic", "heatmap", "table"]:
+                self.handle_statistic_update(plot_type)
             self.update_timeseries_chunk_statistics()
 
             # restore block_MPL_canvas_updates
@@ -711,8 +713,8 @@ class Canvas(FigureCanvas):
             # update plot statistics
             self.handle_map_z_statistic_update()
             self.handle_timeseries_chunk_statistic_update()
-            self.handle_statistic_update("periodic")
-            self.handle_statistic_update("heatmap")
+            for plot_type in ["periodic", "heatmap", "table"]:
+                self.handle_statistic_update(plot_type)
             self.handle_statsummary_statistics_update()
             self.handle_statsummary_cycle_update()
             self.handle_statsummary_periodic_aggregation_update()
@@ -1017,6 +1019,12 @@ class Canvas(FigureCanvas):
 
         if hasattr(self, "relative_selected_station_inds"):
             if len(self.relative_selected_station_inds) > 0:
+
+                # get active labels (the ones selected from legend picker)
+                # this is relevant to tables, heatmaps and statsummaries that are entirely remade 
+                # on interaction with legend picker
+                data_labels = self.plot_elements["data_labels_active"]
+
                 # get numeric position of plot type in dashboard
                 plot_type_position = self.get_plot_type_position(plot_type)
 
@@ -1041,7 +1049,7 @@ class Canvas(FigureCanvas):
                 ]:
                     if (not self.read_instance.temporal_colocation) or (
                         (self.read_instance.temporal_colocation)
-                        and (len(self.read_instance.data_labels) == 1)
+                        and (len(data_labels) == 1)
                     ):
                         if not self.read_instance.temporal_colocation:
                             msg = f"It is not possible to make {plot_type} plots without activating the temporal colocation."
@@ -1056,7 +1064,7 @@ class Canvas(FigureCanvas):
                 speci = self.read_instance.networkspeci.split("|")[1]
                 if plot_type == "contingencytable":
                     # if we have more than one model, skip contingency table
-                    if len(self.read_instance.data_labels) > 2:
+                    if len(data_labels) > 2:
                         msg = f"It is not possible to make {plot_type} plots with more than 1 model."
                         show_message(self.read_instance, msg)
                         self.read_instance.handle_layout_update(
@@ -1119,11 +1127,6 @@ class Canvas(FigureCanvas):
 
                 # get options defined to configure plot
                 plot_options = copy.deepcopy(self.current_plot_options[plot_type])
-
-                # get active labels (the ones selected from legend picker)
-                # this is relevant to tables, heatmaps and statsummaries that are entirely remade 
-                # on interaction with legend picker
-                data_labels = self.plot_elements["data_labels_active"]
 
                 # get plotting function for specific plot
                 if plot_type in ['table', 'statsummary']:
@@ -1264,16 +1267,18 @@ class Canvas(FigureCanvas):
                     )
                 # make statsummary plot
                 elif plot_type in ['statsummary', 'table']:
-                    if "bias" in plot_options:
-                        relevant_zstats = self.active_statsummary_stats["modbias"]
-                    else:
-                        relevant_zstats = self.active_statsummary_stats["basic"]
                     if plot_type == 'statsummary':
                         statsummary = True
                         plot_networkspecies = self.statsummary_networkspecies.currentData()
+                        if "bias" in plot_options:
+                            relevant_zstats = self.active_statsummary_stats["modbias"]
+                        else:
+                            relevant_zstats = self.active_statsummary_stats["basic"]
                     else:
                         statsummary = False
                         plot_networkspecies = self.table_networkspecies.currentData()
+                        # TODO: Get bias stat if bias in plot options
+                        relevant_zstats = [self.table_stat.currentText()]
                     func(
                         ax,
                         self.read_instance.networkspeci,
@@ -1787,6 +1792,7 @@ class Canvas(FigureCanvas):
         """
 
         if not self.read_instance.block_config_bar_handling_updates:
+
             # update mouse cursor to a waiting cursor
             self.read_instance.cursor_function = set_cursor(
                 self.read_instance.cursor_function, f"handle_{plot_type}_statistic_update"
@@ -3564,6 +3570,20 @@ class Canvas(FigureCanvas):
         # get heatmap interactive dictionary
         self.interactive_elements["heatmap"] = {"hidden": True}
 
+        # TABLE PLOT SETTINGS MENU #
+        # create table settings menu
+        self.table_menu = SettingsMenu(plot_type="table", canvas_instance=self,
+                                         read_instance=self.read_instance)
+        self.table_options = self.table_menu.checkable_comboboxes["options"]
+        self.table_networkspecies = self.table_menu.checkable_comboboxes["networkspecies"]
+        self.table_elements = self.table_menu.get_elements()
+
+        # get stats
+        self.table_stat = self.table_menu.comboboxes["stat"]
+
+        # get heatmap interactive dictionary
+        self.interactive_elements["table"] = {"hidden": True}
+
         # create array with buttons and elements to edit when the canvas is resized or the plots are changed
         self.menu_buttons = []
         self.save_buttons = []
@@ -4354,11 +4374,17 @@ class Canvas(FigureCanvas):
                                         self.current_plot_options[plot_type],
                                         zstat=zstat,
                                     )
-                                # make statsummary plot
-                                elif plot_type == "statsummary":
-                                    relevant_zstats = self.active_statsummary_stats[
-                                        "modbias"
-                                    ]
+                                # make table / statsummary plot
+                                elif plot_type in ['statsummary', 'table']:
+                                    if plot_type == 'statsummary':
+                                        statsummary = True
+                                        plot_networkspecies = self.statsummary_networkspecies.currentData()
+                                        relevant_zstats = self.active_statsummary_stats["modbias"]
+                                    else:
+                                        statsummary = False
+                                        plot_networkspecies = self.table_networkspecies.currentData()
+                                        # TODO: Get bias stat if bias in plot options
+                                        relevant_zstats = [self.table_stat.currentText()]
                                     func(
                                         self.plot_axes[plot_type],
                                         self.read_instance.networkspeci,
@@ -4366,8 +4392,8 @@ class Canvas(FigureCanvas):
                                         self.plot_characteristics[plot_type],
                                         self.current_plot_options[plot_type],
                                         zstats=relevant_zstats,
-                                        statsummary=True,
-                                        plot_networkspecies=self.statsummary_networkspecies.currentData()
+                                        statsummary=statsummary,
+                                        plot_networkspecies=plot_networkspecies
                                     )
                                 # make heatmap plot
                                 elif plot_type == "heatmap":
@@ -4497,11 +4523,17 @@ class Canvas(FigureCanvas):
                                         self.current_plot_options[plot_type],
                                         zstat=zstat,
                                     )
-                                # make statsummary plot
-                                elif plot_type == "statsummary":
-                                    relevant_zstats = self.active_statsummary_stats[
-                                        "basic"
-                                    ]
+                                # make table / statsummary plot
+                                elif plot_type in ['statsummary', 'table']:
+                                    if plot_type == 'statsummary':
+                                        statsummary = True
+                                        plot_networkspecies = self.statsummary_networkspecies.currentData()
+                                        relevant_zstats = self.active_statsummary_stats["basic"]
+                                    else:
+                                        statsummary = False
+                                        plot_networkspecies = self.table_networkspecies.currentData()
+                                        # TODO: Get bias stat if bias in plot options
+                                        relevant_zstats = [self.table_stat.currentText()]
                                     func(
                                         self.plot_axes[plot_type],
                                         self.read_instance.networkspeci,
@@ -4509,8 +4541,8 @@ class Canvas(FigureCanvas):
                                         self.plot_characteristics[plot_type],
                                         self.current_plot_options[plot_type],
                                         zstats=relevant_zstats,
-                                        statsummary=True,
-                                        plot_networkspecies=self.statsummary_networkspecies.currentData()
+                                        statsummary=statsummary,
+                                        plot_networkspecies=plot_networkspecies
                                     )
                                 # make heatmap plot
                                 elif plot_type == "heatmap":
@@ -4626,16 +4658,18 @@ class Canvas(FigureCanvas):
                 )
             elif plot_type in ['statsummary', 'table']:
                 func = getattr(self.plotting, "make_table")
-                if "bias" in plot_options:
-                    relevant_zstats = self.active_statsummary_stats["modbias"]
-                else:
-                    relevant_zstats = self.active_statsummary_stats["basic"]
                 if plot_type == 'statsummary':
                     statsummary = True
                     plot_networkspecies = self.statsummary_networkspecies.currentData()
+                    if "bias" in plot_options:
+                        relevant_zstats = self.active_statsummary_stats["modbias"]
+                    else:
+                        relevant_zstats = self.active_statsummary_stats["basic"]
                 else:
                     statsummary = False
                     plot_networkspecies = self.table_networkspecies.currentData()
+                    # TODO: Get bias stat if bias in plot options
+                    relevant_zstats = [self.table_stat.currentText()]
                 func(
                     self.plot_axes[plot_type],
                     self.read_instance.networkspeci,

@@ -2488,15 +2488,15 @@ class Plotting:
                                 []
                         )
                     rows.append({
+                        "subsections": "Unique",
                         "networkspecies": selected_networkspeci,
                         "labels": dl,
-                        "subsections": "Unique",
                         zstat: float(stats_calc[0]),
                     })
 
             stats_df = pd.DataFrame(rows)
             stats_df = stats_df.pivot(
-                index=["networkspecies", "subsections"],
+                index=["subsections", "networkspecies"],
                 columns="labels",
                 values=zstat,
             )
@@ -2554,6 +2554,7 @@ class Plotting:
         relevant_axis.set_ylabel("")
 
         # if there is only one subsection or station data
+        yticklabels = stats_df.index.get_level_values(1)
         if (plotting_paradigm == "station") or (len(subsections) == 1):
             # for multispecies, remove network names from labels
             # only when there is one network and requested by user in plot_characteristics
@@ -2570,9 +2571,6 @@ class Plotting:
                         else networkspeci
                         for networkspeci in stats_df.index
                     ]
-            # keep original labels
-            else:
-                yticklabels = stats_df.index
         # if there is summary data for more than one subsection
         elif (plotting_paradigm == "summary") and (len(subsections) > 1):
             # remove parent names from subsections
@@ -2582,9 +2580,7 @@ class Plotting:
                     if "·" in subsection_label:
                         subsection_label = subsection_label.split("·")[1]
                     yticklabels.append(subsection_label)
-            # keep original labels
-            else:
-                yticklabels = stats_df.index.get_level_values(1)
+        
         relevant_axis.set_yticklabels(
             yticklabels, **plot_characteristics["yticklabels"]
         )
@@ -2726,7 +2722,8 @@ class Plotting:
         # get networkspecies from burger menu
         else:
             networkspecies = plot_networkspecies
-        
+
+        print('stats', zstats)
         # always make multispecies plot if there is more than one networkspeci and plot can be multispecies
         if ((len(networkspecies) > 1) 
             and (self.read_instance.mode == "dashboard")
@@ -2768,6 +2765,10 @@ class Plotting:
                                 zstats, 
                                 [dl], 
                                 [])
+
+                    if len(zstats) == 1:
+                        stat_per_data_labels = {zstats[0]: stat_per_data_labels}
+
                     # get floats instead of arrays with 1 element each and save
                     # convert arrays([x]) -> x
                     stat_values = {
@@ -2779,6 +2780,7 @@ class Plotting:
                         for stat, value in stat_per_data_labels.items()
                     }
                     rows.append({
+                        "subsections": "Unique",
                         "networkspecies": selected_networkspeci,
                         "labels": dl,
                         **stat_values,
@@ -2786,9 +2788,18 @@ class Plotting:
 
             stats_df = (
                 pd.DataFrame(rows)
-                .set_index(["networkspecies", "labels"])
+                .set_index(["subsections", "networkspecies", "labels"])
             )
-        
+            
+            # for table, set data labels as column and one row per networkspeci
+            if not statsummary:
+                stats_df = stats_df[zstats[0]].unstack("labels")
+                stats_df = stats_df.reindex(networkspecies, level="networkspecies")
+                stats_df = stats_df.reindex(
+                    columns=[dl for dl in data_labels if dl in stats_df.columns]
+                )
+
+        print(stats_df)
         # when we have 1 stat in the statsummary, the column name is 0
         # we need to rename it to the stat name
         if (len(stats_df.columns) == 1) and (stats_df.columns[0] == 0):
@@ -2824,135 +2835,88 @@ class Plotting:
                 self.read_instance, stats_df, zstats, base_plot_type
             )
 
-        # reports
-        if self.read_instance.mode in ["report", "library"]:
+        if plotting_paradigm == "station":
+            stats_df = stats_df.iloc[
+                stats_df.index.get_level_values("subsections") == subsection
+            ]
 
-            if plotting_paradigm == "station":
-                stats_df = stats_df.iloc[
-                    stats_df.index.get_level_values("subsections") == subsection
-                ]
-
-            # round dataframe
-            decimal_places = plot_characteristics["round_decimal_places"]["table"]
-            if Version(pd.__version__) >= Version("2.1.0"):
-                stats_df = stats_df.map(
-                    lambda x: round_decimal_places(x, decimal_places)
-                )
-            else:
-                stats_df = stats_df.applymap(
-                    lambda x: round_decimal_places(x, decimal_places)
-                )
-
-            # get labels
-            networkspecies = list(stats_df.index.get_level_values("networkspecies"))
-            subsections = list(stats_df.index.get_level_values("subsections"))
-            if statsummary:
-                data_labels = list(stats_df.index.get_level_values("labels"))
-                stats = list(stats_df.columns)
-            else:
-                data_labels = list(stats_df.columns)
-
-            # reset index after filtering
-            stats_df = stats_df.reset_index()
-
-            # hide subsections from station plots or if there is only 1 section
-            if self.read_instance.mode in ["report", "library"]:
-                if plotting_paradigm == "station" or len(np.unique(subsections)) == 1:
-                    stats_df = stats_df.drop(columns="subsections")
-
-            # hide networkspecies from plots that are not multispecies
-            if "multispecies" not in plot_options:
-                stats_df = stats_df.drop(columns="networkspecies")
-
-            # remove parent names from subsections
-            if ("subsections" in stats_df.columns) and (
-                not plot_characteristics["parent_section_names"]
-            ):
-                stats_df["subsections"] = [
-                    subsection_label.split("·")[1]
-                    if "·" in subsection_label
-                    else subsection_label
-                    for subsection_label in subsections
-                ]
-
-            # remove network names from networkspecies
-            if (
-                ("multispecies" in plot_options)
-                and ("networkspecies" in stats_df.columns)
-                and (not plot_characteristics["multispecies"]["network_names"])
-            ):
-                stats_df["networkspecies"] = [
-                    networkspeci_label.split("|")[1]
-                    for networkspeci_label in networkspecies
-                ]
-
-            # get number of "empty" cells (without stats) and
-            # column labels (hide networkspecies, subsections and data labels)
-            if statsummary:
-                empty_cells = len(stats_df.columns) - len(stats)
-                col_labels = [""] * empty_cells + stats
-            else:
-                empty_cells = len(stats_df.columns) - len(data_labels)
-                col_labels = [""] * empty_cells + data_labels
-
-        # dashboard
+        # round dataframe
+        decimal_places = plot_characteristics["round_decimal_places"]["table"]
+        if Version(pd.__version__) >= Version("2.1.0"):
+            stats_df = stats_df.map(
+                lambda x: round_decimal_places(x, decimal_places)
+            )
         else:
-            # round dataframe
-            decimal_places = plot_characteristics["round_decimal_places"]["table"]
-            if Version(pd.__version__) >= Version("2.1.0"):
-                stats_df = stats_df.map(
-                    lambda x: round_decimal_places(x, decimal_places)
-                )
-            else:
-                stats_df = stats_df.applymap(
-                    lambda x: round_decimal_places(x, decimal_places)
-                )
+            stats_df = stats_df.applymap(
+                lambda x: round_decimal_places(x, decimal_places)
+            )
 
-            # there is only statsummary
-            if statsummary:
-                # get labels
-                data_labels = list(stats_df.index.get_level_values("labels"))
-                stats = list(stats_df.columns)
+        # get labels
+        networkspecies = list(stats_df.index.get_level_values("networkspecies"))
+        subsections = list(stats_df.index.get_level_values("subsections"))
 
-                # reset index
-                stats_df = stats_df.reset_index()
+        # reset index after filtering
+        stats_df = stats_df.reset_index()
+        
+        # hide subsections from station plots or if there is only 1 section
+        if plotting_paradigm == "station" or len(np.unique(subsections)) == 1:
+            stats_df = stats_df.drop(columns="subsections")
 
-                # get number of "empty" cells (without stats)
-                empty_cells = 2
-                col_labels = [""] * empty_cells + stats
+        # hide networkspecies from plots that are not multispecies
+        if "multispecies" not in plot_options:
+            stats_df = stats_df.drop(columns="networkspecies")
+
+        # remove parent names from subsections
+        if ("subsections" in stats_df.columns) and (
+            not plot_characteristics["parent_section_names"]
+        ):
+            stats_df["subsections"] = [
+                subsection_label.split("·")[1]
+                if "·" in subsection_label
+                else subsection_label
+                for subsection_label in subsections
+            ]
+
+        # remove network names from networkspecies
+        if (
+            ("multispecies" in plot_options)
+            and ("networkspecies" in stats_df.columns)
+            and (not plot_characteristics["multispecies"]["network_names"])
+        ):
+            stats_df["networkspecies"] = [
+                networkspeci_label.split("|")[1]
+                for networkspeci_label in networkspecies
+            ]
+        
+        # get number of "empty" cells (without stats) and
+        # column labels (hide networkspecies, subsections and data labels)
+        if statsummary:
+            empty_cells = len(stats_df.columns) - len(zstats)
+            col_labels = [""] * empty_cells + zstats
+        else:
+            empty_cells = len(stats_df.columns) - len(data_labels)
+            col_labels = [""] * empty_cells + data_labels
 
         # set cell colors
         if statsummary:
             if "cell_colours" in plot_characteristics:
                 if plot_characteristics["cell_colours"]:
-                    cell_colours = [[]] * (stats_df.shape[1])
-                    for col in range(stats_df.shape[1]):
-                        # custom colors for data labels cells
-                        if col == (empty_cells - 1):
-                            for data_label in data_labels:
-                                # observations in white
-                                if (
-                                    data_label
-                                    == self.read_instance.observations_data_label
-                                ):
-                                    color = "white"
-                                # models in legend colors
-                                else:
-                                    color = self.read_instance.plotting_params[
-                                        data_label
-                                    ]["colour"]
-                                cell_colours[col].append(color)
-                        # white for other cells
+                    # colour rows
+                    label_col = empty_cells - 1
+                    cell_colours = []
+                    for data_label in stats_df.iloc[:, label_col]:
+                        # observations in white background
+                        if data_label == self.read_instance.observations_data_label:
+                            colour = "white"
+                        # models in legend colour background
                         else:
-                            cell_colours[col] = ["white"] * stats_df.shape[0]
-                    if stats_df.shape == (1, 1):
-                        plot_characteristics["plot"]["cellColours"] = np.array(
-                            cell_colours, dtype=object
-                        )
-                    else:
-                        plot_characteristics["plot"]["cellColours"] = np.array(
-                            cell_colours, dtype=object
-                        ).T
+                            colour = self.read_instance.plotting_params[data_label]["colour"]
+                        row_colours = ["white"] * stats_df.shape[1]
+                        row_colours[label_col] = colour
+                        cell_colours.append(row_colours)
+                    plot_characteristics["plot"]["cellColours"] = np.array(
+                        cell_colours, dtype=object
+                    )
         else:
             if "col_colours" in plot_characteristics:
                 if plot_characteristics["col_colours"]:
@@ -2960,13 +2924,13 @@ class Plotting:
                     for data_label in data_labels:
                         # observations in white
                         if data_label == self.read_instance.observations_data_label:
-                            color = "white"
+                            colour = "white"
                         # models in legend colors
                         else:
-                            color = self.read_instance.plotting_params[data_label][
+                            colour = self.read_instance.plotting_params[data_label][
                                 "colour"
                             ]
-                        col_colours.extend([color])
+                        col_colours.extend([colour])
                     plot_characteristics["plot"]["colColours"] = [
                         "white"
                     ] * empty_cells + col_colours

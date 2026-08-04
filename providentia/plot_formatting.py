@@ -74,9 +74,15 @@ def set_equal_axes(ax, plot_options, plot_characteristics, base_plot_type):
         else:
             axmax = ymax
 
+        # in scatter when model data is not loaded or not selected in legend picker
+        # the lims are not finite and therefore cannot be set
+        if not (np.isfinite(axmin) and np.isfinite(axmax)):
+            return None
+        
         # set equal lims
         ax.set_xlim(axmin, axmax)
         ax.set_ylim(axmin, axmax)
+
     elif ("xlim" not in plot_characteristics) and ("ylim" in plot_characteristics):
         # set xlim as ylim if ylim is passed
         if isinstance(plot_characteristics["ylim"], dict):
