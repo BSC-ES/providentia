@@ -1645,6 +1645,11 @@
           "ytick_params": { "labelsize": 7, "labelrotation": 0 },
           "xticklabels": { "ha": "right", "rotation_mode": "anchor", "fontsize": 9 },
           "yticklabels": { "rotation": 0, "fontsize": 9 },
+          "plot":
+            {
+              "annot_kws":
+                { "fontsize": 10, "fontstyle": "italic", "color": "black" },
+            },
           "multispecies":
             { "yticklabels": { "fontsize": 10, "fontweight": 600 } },
         },

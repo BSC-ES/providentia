@@ -2386,6 +2386,7 @@ class Plotting:
         subsection=None,
         plotting_paradigm=None,
         stats_df=None,
+        heatmap_networkspecies=None,
     ):
         """
         Renders a statistical heatmap using Seaborn to visualise performance metrics across observations and models.
@@ -2411,25 +2412,30 @@ class Plotting:
         stats_df : pandas dataframe, optional
             Dataframe of previously calculated statistics.
         """
-        print('heatmap', zstat)
+
         # bias plot?
         if "bias" in plot_options:
             bias = True
         else:
             bias = False
 
+        # if no selection has been made, get networkspecies from top menu (read into memory)
+        if not heatmap_networkspecies:
+            networkspecies = copy.deepcopy(self.read_instance.networkspecies)
+        # get networkspecies from burger menu
+        else:
+            networkspecies = heatmap_networkspecies
+
         # always make multispecies plot if there is more than one networkspeci and plot can be multispecies
-        if ((len(self.read_instance.networkspecies) > 1) 
+        if ((len(networkspecies) > 1) 
             and (self.read_instance.mode == "dashboard")
             and ('multispecies' not in plot_options)):
             plot_options.append('multispecies')
         
-        print('plot_options', plot_options)
-        
         # if statistical dataframe is not provided then create it
         if not isinstance(stats_df, pd.DataFrame):
             if "multispecies" in plot_options:
-                networkspecies = self.read_instance.networkspecies
+                networkspecies = networkspecies
             else:
                 networkspecies = [networkspeci]
 
@@ -2537,8 +2543,12 @@ class Plotting:
         # if there is only one subsection or station data
         if (plotting_paradigm == "station") or (len(subsections) == 1):
             # for multispecies, remove network names from labels
-            if ("multispecies" in plot_options) and (
-                not plot_characteristics["multispecies"]["network_names"]
+            # only when there is one network and requested by user in plot_characteristics
+            # by defining network_names as False
+            networks = [ns.split("|")[0] for ns in networkspecies]
+            if (("multispecies" in plot_options)
+                and (not plot_characteristics["multispecies"]["network_names"])
+                and (len(set(networks)) == 1 )
             ):
                 if not plot_characteristics["multispecies"]["network_names"]:
                     yticklabels = [

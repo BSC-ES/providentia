@@ -6,7 +6,7 @@ import platform
 from PyQt5 import QtCore, QtGui, QtWidgets
 import yaml
 
-from providentia.auxiliar import CURRENT_PATH, join
+from providentia.auxiliar import CURRENT_PATH, join, correct_plot_type_name
 from .dashboard_elements import CheckableComboBox, ComboBox
 from .dashboard_elements import set_formatting
 
@@ -31,7 +31,7 @@ elif operating_system in ["Windows", "MINGW32_NT", "MINGW64_NT"]:
 
 
 class SettingsMenu(object):
-    def __init__(self, plot_type, canvas_instance):
+    def __init__(self, plot_type, canvas_instance, read_instance):
         """
         Initialise object to create plot settings menu
 
@@ -44,6 +44,7 @@ class SettingsMenu(object):
         """
 
         self.canvas_instance = canvas_instance
+        self.read_instance = read_instance
 
         self.elements = list(settings_dict[plot_type].keys())
         self.buttons = {}
@@ -71,16 +72,9 @@ class SettingsMenu(object):
 
                 # Add options as items to options combobox
                 if element_name == "options":
-                    if plot_type in [
-                        "periodic_violin",
-                        "fairmode_target",
-                        "fairmode_statsummary",
-                    ]:
-                        plot_type_corr = plot_type.replace("_", "-")
-                    else:
-                        plot_type_corr = plot_type
+                    plot_type = correct_plot_type_name(plot_type)
                     element.addItems(
-                        self.canvas_instance.plot_characteristics[plot_type_corr][
+                        self.canvas_instance.plot_characteristics[plot_type][
                             "plot_options"
                         ]
                     )
@@ -117,7 +111,7 @@ class SettingsMenu(object):
 
             else:
                 error = f"Error: Unknown element type: {element_type}"
-                self.canvas_instance.read_instance.logger.error(error)
+                self.read_instance.logger.error(error)
 
     def add_button(self, element_settings):
         """
@@ -266,7 +260,7 @@ class SettingsMenu(object):
             CheckableComboBox(self.canvas_instance),
             formatting_dict[element_settings["formatting_dict"]],
         )
-        checkable_combobox.currentTextChanged.connect(
+        checkable_combobox.checkedItemsChanged.connect(
             partial(self.connect, element_settings["function"])
         )
 

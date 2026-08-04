@@ -20,7 +20,7 @@ import pandas as pd
 from pandas.plotting import register_matplotlib_converters
 from PyQt5 import QtCore, QtWidgets
 
-from providentia.auxiliar import CURRENT_PATH, join
+from providentia.auxiliar import CURRENT_PATH, join, correct_plot_type_name
 from .canvas_menus import SettingsMenu
 from .dashboard_elements import ComboBox
 from .dashboard_elements import set_formatting, set_cursor, unset_cursor
@@ -212,12 +212,7 @@ class Canvas(FigureCanvas):
                 self.menu_buttons, self.save_buttons, self.save_data_buttons
             ):
                 menu_plot_type = menu_button.objectName().split("_menu")[0]
-                if plot_type in [
-                    "periodic_violin",
-                    "fairmode_target",
-                    "fairmode_statsummary",
-                ]:
-                    plot_type = plot_type.replace("_", "-")
+                plot_type = correct_plot_type_name(plot_type)
                 # proceed once have objects for plot type
                 if plot_type == menu_plot_type:
                     menu_button.show()
@@ -1296,7 +1291,8 @@ class Canvas(FigureCanvas):
                         self.read_instance.data_labels,
                         self.plot_characteristics[plot_type],
                         plot_options,
-                        self.heatmap_stat.currentText()
+                        self.heatmap_stat.currentText(),
+                        heatmap_networkspecies=self.heatmap_networkspecies.currentData()
                     )
                 # other plots
                 else:
@@ -1310,7 +1306,7 @@ class Canvas(FigureCanvas):
                     )
 
                 # reset axes limits (harmonising across subplots for periodic plots)
-                if plot_type not in ["map", "taylor", "fairmode-statsummary"]:
+                if plot_type not in ["map", "taylor", "fairmode-statsummary", "heatmap"]:
                     if plot_type == "scatter":
                         harmonise_xy_lims_paradigm(
                             self.read_instance,
@@ -2400,7 +2396,11 @@ class Canvas(FigureCanvas):
                 self.remove_axis_objects(ax_to_remove.lines)
 
             elif plot_type == "heatmap":
-                self.remove_axis_objects(ax_to_remove.texts)
+                for objects in [
+                    ax_to_remove.texts,
+                    ax_to_remove.collections
+                ]:
+                    self.remove_axis_objects(objects)
 
         # remove tracked plot elements
         if plot_type in self.plot_elements:
@@ -3153,7 +3153,7 @@ class Canvas(FigureCanvas):
 
         # MAP SETTINGS MENU #
         # create map settings menu
-        self.map_menu = SettingsMenu(plot_type="map", canvas_instance=self)
+        self.map_menu = SettingsMenu(plot_type="map", canvas_instance=self, read_instance=self.read_instance)
         self.map_options = self.map_menu.checkable_comboboxes["options"]
         self.map_elements = self.map_menu.get_elements()
 
@@ -3190,7 +3190,7 @@ class Canvas(FigureCanvas):
         # TIMESERIES PLOT SETTINGS MENU #
         # create timeseries settings menu
         self.timeseries_menu = SettingsMenu(
-            plot_type="timeseries", canvas_instance=self
+            plot_type="timeseries", canvas_instance=self, read_instance=self.read_instance
         )
         self.timeseries_options = self.timeseries_menu.checkable_comboboxes["options"]
         self.timeseries_elements = self.timeseries_menu.get_elements()
@@ -3250,7 +3250,8 @@ class Canvas(FigureCanvas):
 
         # PERIODIC PLOT SETTINGS MENU #
         # create periodic settings menu
-        self.periodic_menu = SettingsMenu(plot_type="periodic", canvas_instance=self)
+        self.periodic_menu = SettingsMenu(plot_type="periodic", canvas_instance=self, 
+                                          read_instance=self.read_instance)
         self.periodic_options = self.periodic_menu.checkable_comboboxes["options"]
         self.periodic_elements = self.periodic_menu.get_elements()
 
@@ -3283,7 +3284,7 @@ class Canvas(FigureCanvas):
         # PERIODIC VIOLIN PLOT SETTINGS MENU #
         # create periodic violin settings menu
         self.periodic_violin_menu = SettingsMenu(
-            plot_type="periodic_violin", canvas_instance=self
+            plot_type="periodic_violin", canvas_instance=self, read_instance=self.read_instance
         )
         self.periodic_violin_options = self.periodic_violin_menu.checkable_comboboxes[
             "options"
@@ -3338,7 +3339,8 @@ class Canvas(FigureCanvas):
 
         # METADATA PLOT SETTINGS MENU #
         # create metadata settings menu
-        self.metadata_menu = SettingsMenu(plot_type="metadata", canvas_instance=self)
+        self.metadata_menu = SettingsMenu(plot_type="metadata", canvas_instance=self, 
+                                          read_instance=self.read_instance)
         self.metadata_elements = self.metadata_menu.get_elements()
 
         # get metadata interactive dictionary
@@ -3347,7 +3349,7 @@ class Canvas(FigureCanvas):
         # DISTRIBUTION PLOT SETTINGS MENU #
         # create distribution settings menu
         self.distribution_menu = SettingsMenu(
-            plot_type="distribution", canvas_instance=self
+            plot_type="distribution", canvas_instance=self, read_instance=self.read_instance
         )
         self.distribution_options = self.distribution_menu.checkable_comboboxes[
             "options"
@@ -3371,7 +3373,7 @@ class Canvas(FigureCanvas):
 
         # SCATTER PLOT SETTINGS MENU #
         # create scatter settings menu
-        self.scatter_menu = SettingsMenu(plot_type="scatter", canvas_instance=self)
+        self.scatter_menu = SettingsMenu(plot_type="scatter", canvas_instance=self, read_instance=self.read_instance)
         self.scatter_options = self.scatter_menu.checkable_comboboxes["options"]
         self.scatter_elements = self.scatter_menu.get_elements()
 
@@ -3403,7 +3405,7 @@ class Canvas(FigureCanvas):
         # FAIRMODE TARGET PLOT SETTINGS MENU #
         # create fairmode target settings menu
         self.fairmode_target_menu = SettingsMenu(
-            plot_type="fairmode_target", canvas_instance=self
+            plot_type="fairmode_target", canvas_instance=self, read_instance=self.read_instance
         )
         self.fairmode_target_options = self.fairmode_target_menu.checkable_comboboxes[
             "options"
@@ -3434,7 +3436,7 @@ class Canvas(FigureCanvas):
         # FAIRMODE STATSUMMARY PLOT SETTINGS MENU #
         # create fairmode statsummary settings menu
         self.fairmode_statsummary_menu = SettingsMenu(
-            plot_type="fairmode_statsummary", canvas_instance=self
+            plot_type="fairmode_statsummary", canvas_instance=self, read_instance=self.read_instance
         )
         self.fairmode_statsummary_elements = (
             self.fairmode_statsummary_menu.get_elements()
@@ -3460,7 +3462,7 @@ class Canvas(FigureCanvas):
         # STATSUMMARY PLOT SETTINGS MENU #
         # create statsummary settings menu
         self.statsummary_menu = SettingsMenu(
-            plot_type="statsummary", canvas_instance=self
+            plot_type="statsummary", canvas_instance=self, read_instance=self.read_instance
         )
         self.statsummary_options = self.statsummary_menu.checkable_comboboxes["options"]
         self.statsummary_elements = self.statsummary_menu.get_elements()
@@ -3481,7 +3483,8 @@ class Canvas(FigureCanvas):
 
         # BOXPLOT PLOT SETTINGS MENU #
         # create boxplot settings menu
-        self.boxplot_menu = SettingsMenu(plot_type="boxplot", canvas_instance=self)
+        self.boxplot_menu = SettingsMenu(plot_type="boxplot", canvas_instance=self,
+                                         read_instance=self.read_instance)
         self.boxplot_options = self.boxplot_menu.checkable_comboboxes["options"]
         self.boxplot_elements = self.boxplot_menu.get_elements()
 
@@ -3490,7 +3493,7 @@ class Canvas(FigureCanvas):
 
         # TAYLOR DIAGRAM SETTINGS MENU #
         # create taylor diagram settings menu
-        self.taylor_menu = SettingsMenu(plot_type="taylor", canvas_instance=self)
+        self.taylor_menu = SettingsMenu(plot_type="taylor", canvas_instance=self, read_instance=self.read_instance)
         self.taylor_options = self.taylor_menu.checkable_comboboxes["options"]
         self.taylor_elements = self.taylor_menu.get_elements()
 
@@ -3515,7 +3518,7 @@ class Canvas(FigureCanvas):
         # CONTINGENCY TABLE SETTINGS MENU #
         # create contingency table settings menu
         self.contingencytable_menu = SettingsMenu(
-            plot_type="contingencytable", canvas_instance=self
+            plot_type="contingencytable", canvas_instance=self, read_instance=self.read_instance
         )
         self.contingencytable_options = self.contingencytable_menu.checkable_comboboxes[
             "options"
@@ -3527,8 +3530,10 @@ class Canvas(FigureCanvas):
 
         # HEATMAP PLOT SETTINGS MENU #
         # create heatmap settings menu
-        self.heatmap_menu = SettingsMenu(plot_type="heatmap", canvas_instance=self)
+        self.heatmap_menu = SettingsMenu(plot_type="heatmap", canvas_instance=self,
+                                         read_instance=self.read_instance)
         self.heatmap_options = self.heatmap_menu.checkable_comboboxes["options"]
+        self.heatmap_networkspecies = self.heatmap_menu.checkable_comboboxes["networkspecies"]
         self.heatmap_elements = self.heatmap_menu.get_elements()
 
         # get stats
@@ -3627,9 +3632,8 @@ class Canvas(FigureCanvas):
                     ].value()
                     break
 
-        # correct perodic-violin and fairmode plots names
-        if key in ["periodic_violin", "fairmode_target", "fairmode_statsummary"]:
-            key = key.replace("_", "-")
+        # correct plots names
+        key = correct_plot_type_name(key)
 
         self.update_markersize(self.plot_axes[key], key, markersize, event_source)
 
@@ -3722,17 +3726,8 @@ class Canvas(FigureCanvas):
         if not self.read_instance.block_MPL_canvas_updates:
             # get source
             event_source = self.sender()
-            plot_type_alt = event_source.objectName().split("_options")[0]
-
-            # correct perodic-violin name
-            if plot_type_alt in [
-                "periodic_violin",
-                "fairmode_target",
-                "fairmode_statsummary",
-            ]:
-                plot_type = plot_type_alt.replace("_", "-")
-            else:
-                plot_type = copy.deepcopy(plot_type_alt)
+            plot_type = event_source.objectName().split("_options")[0]
+            plot_type = correct_plot_type_name(plot_type)
 
             # force Taylor diagram to show bias statistics
             if "taylor" in plot_type:
@@ -4002,7 +3997,8 @@ class Canvas(FigureCanvas):
                                         self.read_instance.data_labels,
                                         self.plot_characteristics[plot_type],
                                         self.current_plot_options[plot_type],
-                                        self.heatmap_stat.currentText()
+                                        self.heatmap_stat.currentText(),
+                                        heatmap_networkspecies=self.heatmap_networkspecies.currentData()
                                     )
                                 else:
                                     # TODO: If we have multiple species, show annotations for all of them
@@ -4030,7 +4026,8 @@ class Canvas(FigureCanvas):
                                     self.read_instance.data_labels,
                                     self.plot_characteristics[plot_type],
                                     self.current_plot_options[plot_type],
-                                    self.heatmap_stat.currentText()
+                                    self.heatmap_stat.currentText(),
+                                    heatmap_networkspecies=self.heatmap_networkspecies.currentData()
                                 )
 
                     # option 'smooth'
@@ -4358,7 +4355,8 @@ class Canvas(FigureCanvas):
                                         bias_labels_to_plot,
                                         self.plot_characteristics[plot_type],
                                         self.current_plot_options[plot_type],
-                                        self.heatmap_stat.currentText()
+                                        self.heatmap_stat.currentText(),
+                                        heatmap_networkspecies=self.heatmap_networkspecies.currentData()
                                     )
                                 # other plots
                                 else:
@@ -4499,7 +4497,8 @@ class Canvas(FigureCanvas):
                                         absolute_labels_to_plot,
                                         self.plot_characteristics[plot_type],
                                         self.current_plot_options[plot_type],
-                                        self.heatmap_stat.currentText()
+                                        self.heatmap_stat.currentText(),
+                                        heatmap_networkspecies=self.heatmap_networkspecies.currentData()
                                     )
                                 # other plots
                                 else:
@@ -4527,7 +4526,7 @@ class Canvas(FigureCanvas):
                         self.read_instance.block_config_bar_handling_updates = False
 
                     # reset axes limits (harmonising across subplots for periodic plots)
-                    if plot_type not in ["map", "taylor", "fairmode-statsummary"]:
+                    if plot_type not in ["map", "taylor", "fairmode-statsummary", "heatmap"]:
                         if plot_type == "scatter":
                             harmonise_xy_lims_paradigm(
                                 self.read_instance,
@@ -4560,6 +4559,52 @@ class Canvas(FigureCanvas):
 
         return None
 
+    def update_networkspecies_in_multispecies_plot(self):
+        """
+        Update networkspecies (not in memory) in plot
+        """
+        
+        if not self.read_instance.block_MPL_canvas_updates:
+            
+            self.read_instance.block_MPL_canvas_updates = True
+
+            # get source
+            event_source = self.sender()            
+            plot_type = event_source.objectName().split("_networkspecies")[0]
+
+            # return if do not have selected station_station_data in memory, then no data plotted yet
+            if not hasattr(self, "selected_station_data"):
+                self.read_instance.block_MPL_canvas_updates = False
+                return None
+
+            # return from function if selected_station_data has not been updated for new species yet
+            if (
+                self.read_instance.networkspeci
+                not in self.selected_station_data
+            ):
+                self.read_instance.block_MPL_canvas_updates = False
+                return None
+            
+            # clear all previously plotted artists for plot type
+            self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
+
+            # make plot again considering plot option
+            if plot_type == 'heatmap':
+                func = getattr(self.plotting, "make_heatmap")
+                func(
+                    self.plot_axes[plot_type],
+                    self.read_instance.networkspeci,
+                    self.read_instance.data_labels,
+                    self.plot_characteristics[plot_type],
+                    self.current_plot_options[plot_type],
+                    self.heatmap_stat.currentText(),
+                    heatmap_networkspecies=self.heatmap_networkspecies.currentData()
+                )
+
+            self.read_instance.block_MPL_canvas_updates = False
+        
+        return None
+    
     def redraw_active_options(
         self, data_labels, plot_type, active, plot_options, z_statistic_sign="absolute"
     ):
@@ -4622,7 +4667,8 @@ class Canvas(FigureCanvas):
                             self.read_instance.data_labels,
                             self.plot_characteristics[plot_type],
                             self.current_plot_options[plot_type],
-                            self.heatmap_stat.currentText()
+                            self.heatmap_stat.currentText(),
+                            heatmap_networkspecies=self.heatmap_networkspecies.currentData()
                         )
                     else:
                         annotation(
@@ -5099,8 +5145,7 @@ class Canvas(FigureCanvas):
         # get option and plot names
         event_source = self.sender()
         plot_type = event_source.objectName().split("_save")[0]
-        if plot_type in ["periodic_violin", "fairmode_target", "fairmode_statsummary"]:
-            plot_type = plot_type.replace("_", "-")
+        plot_type = correct_plot_type_name(plot_type)
 
         # set extent expansion
         for i, position in enumerate(
@@ -5244,8 +5289,7 @@ class Canvas(FigureCanvas):
         # get option and plot names
         event_source = self.sender()
         plot_type = event_source.objectName().split("_save")[0]
-        if plot_type in ["periodic_violin", "fairmode_target", "fairmode_statsummary"]:
-            plot_type = plot_type.replace("_", "-")
+        plot_type = correct_plot_type_name(plot_type)
         plot_options = copy.deepcopy(self.current_plot_options[plot_type])
 
         tests_generate_output = False

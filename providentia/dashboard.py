@@ -16,7 +16,7 @@ from packaging.version import Version
 from PyQt5 import QtCore, QtWidgets, QtGui
 import yaml
 
-from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
+from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics, correct_plot_type_name
 from .canvas import Canvas
 from .configuration import load_conf
 from .configuration import ProvConfiguration
@@ -1291,9 +1291,9 @@ class Dashboard(QtWidgets.QWidget):
 
         # update networkspecies field
         self.selected_networkspecies = self.networkspecies = [
-            "{}|{}".format(network, species)
-            for network in self.selected_network
-            for species in self.selected_species
+            f"{network}|{species}"
+            for network in set(self.selected_network)
+            for species in set(self.selected_species)
         ]
 
         # check if have filter species data
@@ -1872,12 +1872,7 @@ class Dashboard(QtWidgets.QWidget):
                     self.mpl_canvas.elements,
                 ):
                     menu_plot_type = menu_button.objectName().split("_menu")[0]
-                    if menu_plot_type in [
-                        "periodic_violin",
-                        "fairmode_target",
-                        "fairmode_statsummary",
-                    ]:
-                        menu_plot_type = menu_plot_type.replace("_", "-")
+                    menu_plot_type = correct_plot_type_name(menu_plot_type)
 
                     if previous_plot_type == menu_plot_type:
                         menu_button.hide()
@@ -1928,7 +1923,7 @@ class Dashboard(QtWidgets.QWidget):
             if changed_plot_type != "None":
                 # format axis
                 format_axis(
-                    self.mpl_canvas.read_instance,
+                    self,
                     self.mpl_canvas,
                     self.mpl_canvas.plot_axes[changed_plot_type],
                     changed_plot_type,
@@ -2328,10 +2323,11 @@ class Dashboard(QtWidgets.QWidget):
             self.qa_per_species[speci] = copy.deepcopy(self.qa)
         self.flags = copy.deepcopy(self.flag_menu["checkboxes"]["remove_selected"])
         self.networkspecies = [
-            "{}|{}".format(network, species)
-            for network in self.network
-            for species in self.species
+            f"{network}|{species}"
+            for network in set(self.network)
+            for species in set(self.species)
         ]
+        
         
         self.networkspeci = self.networkspecies[0]
         self.filter_species = copy.deepcopy(self.selected_filter_species)
@@ -2424,7 +2420,7 @@ class Dashboard(QtWidgets.QWidget):
         if (self.filter_species) and (not self.spatial_colocation):
             self.filter_species = {}
             msg = '"spatial_colocation" must be set to True if wanting to use "filter_species" option.'
-            show_message(self.read_instance, msg)
+            show_message(self, msg)
 
         # set read operations to be empty list initially
         read_operations = []
@@ -2643,7 +2639,7 @@ class Dashboard(QtWidgets.QWidget):
 
             # update MPL canvas
             self.mpl_canvas.update_MPL_canvas()
-
+            
             # if first read, then set this now to be False
             if self.first_read:
                 self.first_read = False
@@ -2651,6 +2647,16 @@ class Dashboard(QtWidgets.QWidget):
         # restore mouse cursor to normal
         unset_cursor(self.cursor_function, "handle_data_selection_update")
 
+        # add networkspecies as items to networkspecies combobox
+        # TODO: Replace when we have other plot types
+        # multispecies_plot_types = ["heatmap", "boxplot", "table", "statsummary"]
+        multispecies_plot_types = ["heatmap"]
+        networkspecies_elements = [getattr(self.mpl_canvas, f"{plot_type}_networkspecies") 
+                                for plot_type in multispecies_plot_types]
+        for element in networkspecies_elements:
+            element.clear()
+            element.addItems(self.networkspecies)
+   
         # update performing read variable to false
         self.performing_read = False
 

@@ -19,6 +19,31 @@ def join(*args):
     return os.path.join(*args).replace("\\", "/")
 
 
+def correct_plot_type_name(plot_type):
+    """
+    Correct plot type name by replacing underscores with dashes for specific plot types.
+
+    Parameters
+    ----------
+    plot_type : str
+        Plot type
+
+    Returns
+    -------
+    str
+        Corrected plot type
+    """
+    
+    # correct names
+    if plot_type in [
+        "periodic_violin",
+        "fairmode_target",
+        "fairmode_statsummary",
+    ]:
+        return plot_type.replace("_", "-")
+    else:
+        return plot_type
+    
 def deep_merge(dict1, dict2):
     """
     Merge dictionaries recursively to avoid values getting replaced

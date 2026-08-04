@@ -294,6 +294,9 @@ class ComboBox(QtWidgets.QComboBox):
         return [self.itemText(i) for i in range(self.count())]
     
 class CheckableComboBox(QtWidgets.QComboBox):
+
+    checkedItemsChanged = QtCore.pyqtSignal()
+
     def __init__(self, *args, **kwargs):
         """
         Initialise class
@@ -314,7 +317,7 @@ class CheckableComboBox(QtWidgets.QComboBox):
         self.lineEdit().setPalette(palette)
 
         # update the text when an item is toggled
-        self.model().dataChanged.connect(self.updateText)
+        self.model().dataChanged.connect(self.handleDataChanged)
 
         # hide and show popup when clicking the line edit
         self.lineEdit().installEventFilter(self)
@@ -322,6 +325,31 @@ class CheckableComboBox(QtWidgets.QComboBox):
 
         # prevent popup from closing when clicking on an item
         self.view().viewport().installEventFilter(self)
+
+    def handleDataChanged(self, topLeft, bottomRight, roles):
+        """
+        Detect when an item is checked or unchecked and update the text accordingly.
+
+        Parameters
+        ----------
+        topLeft : QtCore.QModelIndex
+            Model index of the block's top-left corner
+        bottomRight : QtCore.QModelIndex
+            Model index of the block's bottom-right corner
+        roles : list, int
+            Data roles that changed for those items, e.g.
+            QtCore.Qt.CheckStateRole for a check toggle
+        """
+
+        # dataChanged also fires for colors/flags, only react to check toggles
+        if roles and QtCore.Qt.CheckStateRole not in roles:
+            return
+        
+        # display the checked items as a string
+        self.updateText()
+
+        # emit a signal to notify that the checked items have changed
+        self.checkedItemsChanged.emit()
 
     def fixCursorPosition(self):
         """
