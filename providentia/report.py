@@ -258,8 +258,7 @@ class Report:
                 self.start_date,
                 self.end_date,
                 self.resolution,
-                self.network,
-                self.species,
+                self.networkspecies
             )
 
             # read data

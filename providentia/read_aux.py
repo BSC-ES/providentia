@@ -1099,7 +1099,7 @@ def get_valid_obs_files_in_date_range(instance, start_date, end_date):
                         ][speci] = valid_file_yearmonths
 
 
-def get_valid_models(instance, start_date, end_date, resolution, networks, species):
+def get_valid_models(instance, start_date, end_date, resolution, networkspecies):
     """
     Identifies models within a given date range and chosen networks and species.
 
@@ -1113,10 +1113,8 @@ def get_valid_models(instance, start_date, end_date, resolution, networks, speci
         The end date in 'YYYYMMDD' format.
     resolution : str
         The temporal resolution (e.g. 'hourly', 'daily').
-    networks : list of str
-        The monitoring networks to match against model data.
-    species : list of str
-        The chemical species or parameters to match against model data.
+    networkspecies : list of str
+        The monitoring networks|species to match against model data.
     """
 
     # get all different model names (from providentia-interpolation output dir)
@@ -1132,11 +1130,20 @@ def get_valid_models(instance, start_date, end_date, resolution, networks, speci
     # list for saving models to add to models pop-up
     models_to_add = []
 
+    # track which networkspecies each model has been interpolated for
+    models_per_networkspeci = {
+        networkspeci: set() for networkspeci in networkspecies
+    }
+
     # get start date on first of month
     start_date_firstdayofmonth = int(str(start_date)[:6] + "01")
 
     # iterate through networks and species
-    for network, speci in zip(networks, species):
+    for networkspeci in networkspecies:
+        network = networkspeci.split("|")[0]
+        speci = networkspeci.split("|")[1]
+        print(network, speci)
+
         # iterate through available models
         for model in available_models:
             # get folder where interpolated models are saved
@@ -1188,7 +1195,7 @@ def get_valid_models(instance, start_date, end_date, resolution, networks, speci
                 # if have valid files, then add model to pop-up menu,
                 # and add yearmonths to available model data
                 if len(valid_file_yearmonths) > 0:
-                    models_to_add.append(model)
+                    models_per_networkspeci[networkspeci].add(model)
 
                     if network not in instance.available_model_data:
                         instance.available_model_data[network] = {}
@@ -1204,12 +1211,19 @@ def get_valid_models(instance, start_date, end_date, resolution, networks, speci
                             model
                         ] = valid_file_yearmonths
 
-    # set list of model names to add on models pop-up
+    # set list of model names to add on models pop-up:
+    # only models interpolated for ALL selected networkspecies
     if instance.mode not in ["report", "library"]:
-        models_to_add = np.array(sorted(models_to_add))
+        if networkspecies:
+            models_to_add = sorted(
+                set.intersection(*models_per_networkspeci.values())
+            )
+        else:
+            models_to_add = []
+        models_to_add = np.array(models_to_add)
         instance.models_menu["models"]["labels"] = models_to_add
         instance.models_menu["models"]["map_vars"] = models_to_add
-
+        
 
 def get_possible_temporal_resolutions():
     """

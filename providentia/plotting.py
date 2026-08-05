@@ -2171,6 +2171,9 @@ class Plotting:
             data_labels = [self.read_instance.observations_data_label]
 
         # always make multispecies plot if there is more than one networkspeci and plot can be multispecies
+        # remove first to make sure we don't use a previous appended multispecies  
+        if 'multispecies' in plot_options:
+            plot_options.remove('multispecies')
         if ((len(networkspecies) > 1) 
             and (self.read_instance.mode == "dashboard")
             and ('multispecies' not in plot_options)):
@@ -2441,6 +2444,9 @@ class Plotting:
             networkspecies = plot_networkspecies
 
         # always make multispecies plot if there is more than one networkspeci and plot can be multispecies
+        # remove first to make sure we don't use a previous appended multispecies  
+        if 'multispecies' in plot_options:
+            plot_options.remove('multispecies')
         if ((len(networkspecies) > 1) 
             and (self.read_instance.mode == "dashboard")
             and ('multispecies' not in plot_options)):
@@ -2723,8 +2729,11 @@ class Plotting:
         else:
             networkspecies = plot_networkspecies
 
-        print('stats', zstats)
+        print(networkspecies, plot_options)
         # always make multispecies plot if there is more than one networkspeci and plot can be multispecies
+        # remove first to make sure we don't use a previous appended multispecies  
+        if 'multispecies' in plot_options:
+            plot_options.remove('multispecies')
         if ((len(networkspecies) > 1) 
             and (self.read_instance.mode == "dashboard")
             and ('multispecies' not in plot_options)):
@@ -2799,7 +2808,6 @@ class Plotting:
                     columns=[dl for dl in data_labels if dl in stats_df.columns]
                 )
 
-        print(stats_df)
         # when we have 1 stat in the statsummary, the column name is 0
         # we need to rename it to the stat name
         if (len(stats_df.columns) == 1) and (stats_df.columns[0] == 0):
@@ -2823,11 +2831,15 @@ class Plotting:
         col_labels = stats_df.columns.tolist()
 
         # get relevant data
+        print('networkspecies', networkspecies)
+        print('plot_options', plot_options)
+        print(stats_df)
         if "multispecies" not in plot_options:
             # if not multispecies, get data for the current / first networkspeci only
             stats_df = stats_df.iloc[
                 stats_df.index.get_level_values("networkspecies") == networkspeci
             ]
+            print('drop networkspecies')
         elif self.read_instance.multispecies_units is not None:
             # convert units
             base_plot_type = "statsummary" if statsummary else "table"

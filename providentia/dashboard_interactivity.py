@@ -318,7 +318,7 @@ def legend_picker_func(canvas_instance, event):
                             )
 
                     # plots that are entirely remade on legend interaction
-                    elif plot_type in ["statsummary", "heatmap"]:
+                    elif plot_type in ["statsummary", "heatmap", "table"]:
                         canvas_instance.update_associated_active_dashboard_plot(
                             plot_type
                         )

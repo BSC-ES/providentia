@@ -2394,7 +2394,7 @@ class Canvas(FigureCanvas):
                 for objects in [ax_to_remove.lines, ax_to_remove.artists]:
                     self.remove_axis_objects(objects)
 
-            elif plot_type in ["statsummary", "contingencytable"]:
+            elif plot_type in ["statsummary", "contingencytable", "table"]:
                 self.remove_axis_objects(ax_to_remove.tables)
 
             elif plot_type in ["taylor", "scatter"]:

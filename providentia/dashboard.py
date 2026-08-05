@@ -1465,21 +1465,12 @@ class Dashboard(QtWidgets.QWidget):
                 )
 
         # update available models for selected fields
-        # 1 network?
-        if len(self.selected_network) == 1:
-            # duplicate network to match species len
-            selected_networks_to_get_valid_models = self.selected_network * len(
-                self.selected_species
-            )
-        else:
-            selected_networks_to_get_valid_models = self.selected_network
         get_valid_models(
             self,
             self.le_start_date.text(),
             self.le_end_date.text(),
             self.selected_resolution,
-            selected_networks_to_get_valid_models,
-            self.selected_species,
+            self.selected_networkspecies,
         )
 
         # update models -- keeping previously selected models if available

@@ -2159,8 +2159,7 @@ class Providentia:
             self.start_date,
             self.end_date,
             self.resolution,
-            self.network,
-            self.species,
+            self.networkspecies
         )
 
         # reset configuration variables in case new data has been downloaded
