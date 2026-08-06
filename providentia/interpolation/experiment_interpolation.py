@@ -535,7 +535,7 @@ class ModelInterpolation(object):
                     self.log_file_str += f"Missing 'grid_mapping' attribute for variable '{self.mod_speci_to_process}' in file {model_file}\n"
                     create_output_logfile(1, self.log_file_str)
 
-                # get indivudual dimension variable names
+                # get individual dimension variable names
                 # standard (no vertical dimension)
                 self.have_vertical_dimension = False
                 self.have_bin_dimension = False
@@ -993,9 +993,10 @@ class ModelInterpolation(object):
         # if are interpolating between species, and have an observational file to get units from, 
         # then take it from that
         elif self.obs_file != self.obs_file_units:
-            obs_nc_root_units = Dataset(self.original_mod_speci_to_process)
+            obs_nc_root_units = Dataset(self.obs_file_units)
             obs_measured_var_obj = obs_nc_root_units[self.original_mod_speci_to_process]
             self.obs_units = obs_measured_var_obj.units
+            obs_nc_root_units.close()
         # otherwise take from standard observational file
         else:
             # get measured observational variable object 
@@ -1811,10 +1812,10 @@ class ModelInterpolation(object):
                     measured_var.units = self.obs_units
                     if '@' in self.speci_to_process:
                         measured_var.description = 'Interpolated value of {} from the model {} with reference to {} measurement stations in the {} network'.format(
-                                                  self.speci_to_process, self.experiment_to_process, self.obs_speci_to_process, self.network_to_interpolate_against)
+                                                  self.original_mod_speci_to_process, self.experiment_to_process, self.obs_speci_to_process, self.network_to_interpolate_against)
                     else:
                         measured_var.description = 'Interpolated value of {} from the model {} with reference to the measurement stations in the {} network'.format(
-                                                  self.speci_to_process, self.experiment_to_process, self.network_to_interpolate_against)
+                                                  self.original_mod_speci_to_process, self.experiment_to_process, self.network_to_interpolate_against)
 
                     # write to variables
                     time_var[:] = self.yearmonth_time

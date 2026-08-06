@@ -1544,11 +1544,14 @@ class ProvConfiguration:
                             sys.exit(1)
 
         # remove species that are not in the current ghost version
+        # if have species to interpolate between then just check the first one
+        species_to_check = [speci.split('@')[0] if '@' in speci else speci for speci in self.read_instance.species]
         invalid_species = (
-            set(self.read_instance.species)
+            set(species_to_check)
             - set(self.read_instance.available_species)
             - {"*"}
         )
+
         if invalid_species:
             msg = f'Removing invalid species {", ".join(invalid_species)} for the current GHOST version ({self.read_instance.ghost_version})'
             show_message(

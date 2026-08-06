@@ -367,7 +367,7 @@ class SubmitInterpolation(object):
                             obs_speci_to_process = speci_to_process_split[1]
                         else:
                             mod_speci_to_process = copy.deepcopy(speci_to_process)
-                            obs_speci_to_process = None
+                            obs_speci_to_process = copy.deepcopy(speci_to_process)
                         searched_paths[model_temporal_resolution][mod_speci_to_process] = []
 
                         # before proceeding check if have already processed jobs for the model-grid_type/species/temporal_resolution_to_output pairing before
@@ -394,7 +394,7 @@ class SubmitInterpolation(object):
                                 self.mod_dir,
                                 grid_type,
                                 model_temporal_resolution,
-                                speci_to_process,
+                                mod_speci_to_process,
                             )
                         searched_paths[model_temporal_resolution][mod_speci_to_process].append(current_speci_path)
 
@@ -577,12 +577,12 @@ class SubmitInterpolation(object):
                                 # if have no observational files then continue
                                 if len(obs_files) == 0:
                                     print(
-                                        f"Observation files for {network_to_interpolate_against} cannot be found for {temporal_resolution_to_output} resolution in {os.path.dirname(obs_path)}."
+                                        f"Observational files for {network_to_interpolate_against} cannot be found for {temporal_resolution_to_output} resolution in {os.path.dirname(obs_path)}."
                                     )
                                     continue
                                 else:
                                     print(
-                                        f"{len(obs_files)} observation file(s) for {network_to_interpolate_against} and {temporal_resolution_to_output} resolution were found in {os.path.dirname(obs_path)}."
+                                        f"{len(obs_files)} observational file(s) for {network_to_interpolate_against} and {temporal_resolution_to_output} resolution were found in {os.path.dirname(obs_path)}."
                                     )
 
                                 # determine if ensemble is member or emsemble stat
