@@ -1501,7 +1501,7 @@ class ProvConfiguration:
                 mapped_species = multispecies_map[speci]
                 del new_species[speci_ii]
                 new_species[speci_ii:speci_ii] = mapped_species
-                # in download mode is not necessary to duplicate the networks
+                # in download mode it is not necessary to duplicate the networks
                 if self.read_instance.mode != "download":
                     network_to_duplicate = self.read_instance.network[speci_ii]
                     del self.read_instance.network[speci_ii]
@@ -1544,8 +1544,8 @@ class ProvConfiguration:
                             sys.exit(1)
 
         # remove species that are not in the current ghost version
-        # if have species to interpolate between then just check the first one
-        species_to_check = [speci.split('@')[0] if '@' in speci else speci for speci in self.read_instance.species]
+        # if have species to interpolate between then check have 2 species and that both are valid
+        species_to_check = [part for speci in self.read_instance.species for part in (speci.split('@') if '@' in speci and len(speci.split('@')) == 2 and all(speci.split('@')) else ([speci] if '@' not in speci else []))]
         invalid_species = (
             set(species_to_check)
             - set(self.read_instance.available_species)

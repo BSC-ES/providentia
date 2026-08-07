@@ -275,7 +275,8 @@ class Download(object):
 
                     # download network observations with species and filter_species
                     for network, filter_species in combined_networks:
-                        # change species when turn of filter species
+
+                        # change species when turn on filter species
                         if filter_species is not None:
                             self.species = [filter_species]
 
@@ -300,7 +301,7 @@ class Download(object):
                                     files_to_download=files_to_download,
                                 )
 
-                    # get orignal species back
+                    # get original species back
                     self.species = main_species
 
             # when one of those symbols is passed, get all models
@@ -729,6 +730,9 @@ class Download(object):
                 show_message(self, msg, deactivate=initial_check)
                 continue
             for species in sftp_species:
+                # if are interpolating between species, then only get observational part.
+                if '@' in species:
+                    species = species.split("@")[1]
                 res_spec_dir.append(
                     join(self.nonghost_remote_obs_path, network, resolution, species)
                 )
@@ -903,6 +907,9 @@ class Download(object):
 
                         # iterate the different species
                         for species in species_list:
+                            # if are interpolating between species, then only get observational part.
+                            if '@' in species:
+                                species = species.split("@")[1]
                             # look for valid nc files in the date range
                             try:
                                 nc_files = self.sftp.listdir(
@@ -955,6 +962,9 @@ class Download(object):
                 show_message(self, msg, deactivate=initial_check)
                 continue
             for species in sftp_species:
+                # if are interpolating between species, then only get observational part.
+                if '@' in species:
+                    species = species.split("@")[1]
                 res_spec_dir.append(join(remote_dir, resolution, species))
 
         # print the species, resolution and network combinations that are going to be downloaded
@@ -1165,6 +1175,9 @@ class Download(object):
 
                         # iterate the different species
                         for species in species_list:
+                            # if are interpolating between species, then only get model part.
+                            if '@' in species:
+                                species = species.split("@")[0]
                             try:
                                 network_list = (
                                     self.network
@@ -1234,6 +1247,9 @@ class Download(object):
                 show_message(self, msg, deactivate=initial_check)
                 continue
             for species in sftp_species:
+                # if are interpolating between species, then only get model part.
+                if '@' in species:
+                    species = species.split("@")[0]
                 try:
                     sftp_network = (
                         self.network
@@ -1537,6 +1553,10 @@ class Download(object):
                 # initialize boolean that saves whether species was found
                 species_exists = False
                 species = speci_to_process
+
+                # if are interpolating between species, then only get model part.
+                if '@' in species:
+                    species = species.split("@")[0]
 
                 # if it is an ensemble member
                 if ensemble.isdigit() or ensemble == "allmembers":

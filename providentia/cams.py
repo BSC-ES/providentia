@@ -1064,6 +1064,9 @@ class Cams(object):
         for resolution in resolution_list:
             # iterate through the species
             for species in self.download_instance.species:
+                # if are interpolating between species, then only get model part.
+                if '@' in species:
+                    species = species.split("@")[0]
                 # check if species is in the ghost_cams_variables file
                 if species not in ghost_cams_variables:
                     msg = f"The species '{species}' is not available in CAMS."

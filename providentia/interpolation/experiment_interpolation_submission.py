@@ -1530,7 +1530,7 @@ class SubmitInterpolation(object):
         print(
             "Submitting job with arguments: [{} {} {} {} {}]".format(
                 arguments_list[3],
-                arguments_list[5],
+                arguments_list[9],
                 arguments_list[6],
                 arguments_list[7],
                 arguments_list[8],
