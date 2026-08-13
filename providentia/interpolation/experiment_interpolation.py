@@ -154,6 +154,7 @@ class ModelInterpolation(object):
             "interp_model_upsampling",
             "interp_n_neighbours",
             "interp_reverse_vertical_orientation",
+            "interp_cleanup",
             "mod_root",
             "ghost_root",
             "mod_to_interp_root",
@@ -1939,6 +1940,23 @@ class ModelInterpolation(object):
                     )
                     create_output_logfile(1, self.log_file_str)
 
+    def cleanup(self):
+        """
+        Remove non-inteprolated model files used for interpolation.
+        """
+
+        self.log_file_str += "\nRemoving non-interpolated model files:\n"
+
+        for model_file in self.model_files:
+            try:
+                os.remove(model_file)
+                self.log_file_str += "Model file {} removed.\n".format(model_file)
+                
+            except Exception as e:
+                self.log_file_str += "Model file {} could not be removed. Error: {}.\n".format(
+                    model_file, e
+                )
+                create_output_logfile(1, self.log_file_str)
 
 def create_output_logfile(process_code, log_file_str):
     """
@@ -2027,6 +2045,10 @@ if __name__ == "__main__":
 
         # write out netCDF for yearmonth, interpolating model data to surface observational stations
         EI.write_netCDF()
+
+        # remove non-inteprolated model files used for interpolation
+        if EI.interp_cleanup:
+            EI.cleanup()
 
         # get total time of interpolation
         interpolation_time = time.time() - interpolation_start

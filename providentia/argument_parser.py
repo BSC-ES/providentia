@@ -440,6 +440,11 @@ class ProvArgumentParser(object):
                 help="maximum number of chunks in job array for interpolation",
             )
             self.parser.add_argument(
+                "--interp_cleanup",
+                dest="interp_cleanup",
+                help="cleanup by removing non-interpolated model files after interpolation is complete",
+            )
+            self.parser.add_argument(
                 "--interp_multiprocessing",
                 dest="interp_multiprocessing",
                 help="use multiprocessing instead of greasy to interpolate in HPC machines",

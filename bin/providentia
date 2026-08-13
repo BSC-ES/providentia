@@ -54,14 +54,51 @@ sanitise_python_environment() {
     export PYTHONNOUSERSITE=1
 }
 
+# install shell tab-completion for --conf=/--config=/--config_dir= once, self-healing
+# if the repo is deleted and re-cloned to a different path
+install_completion() {
+    local marker="# providentia-completion (auto-added)"
+    local comp_script="${script_dir}/completion/providentia-completion.sh"
+    local rc_file="$HOME/.bashrc"
+    [[ "$(basename "${SHELL:-}")" == "zsh" ]] && rc_file="$HOME/.zshrc"
+
+    [[ -f "$comp_script" ]] || return 0   # nothing to install
+    [[ -f "$rc_file" ]] || touch "$rc_file"
+
+    local line="source \"$comp_script\" $marker"
+
+    if grep -qF "$marker" "$rc_file" 2>/dev/null; then
+        # already installed and path unchanged - stay completely silent
+        if ! grep -qF "$comp_script" "$rc_file"; then
+            # repo was moved/re-cloned to a new path - refresh silently except for this notice
+            grep -vF "$marker" "$rc_file" > "${rc_file}.tmp" && mv "${rc_file}.tmp" "$rc_file"
+            echo "$line" >> "$rc_file"
+            echo "INFO: Providentia tab-completion path changed. To use it in this terminal, run:"
+            echo "source \"$rc_file\""
+        fi
+    else
+        echo "$line" >> "$rc_file"
+        echo "INFO: Providentia tab-completion (--conf=<TAB>, --config=<TAB>) installed in $rc_file."
+        echo "It will be active automatically in any new terminal."
+        echo "To use it in this terminal right now, run:"
+        echo "source \"$rc_file\""
+    fi
+}
+
+# resolve repo root early so install_completion (and later uses) can rely on it
+script_dir=$(dirname $(realpath $(dirname $0)))
+
 # sanitise python environment to avoid conflicts
 sanitise_python_environment
+
+# install/refresh shell tab-completion for conf file arguments (no-op after first run)
+install_completion
 
 # An option followed by a single colon ':' means that it *needs* an argument.
 # An option followed by double colons '::' means that its argument is optional.
 # See `man getopt'.
 SHORT=uc:t:J:q:m:V
-LONG=usage,n_cpus:,time:,jobname:,queue:,mem:,constraint:,help,version,debug,clean,section:,ghost_version:,ghost_features:,conf:,config:,config_dir:,cartopy_data_dir:,ghost_root:,nonghost_root:,exp_root:,exp_to_interp_root:,generate_file_tree,gft,disable_file_tree,dft,report,reports,offline,download,dl,interpolation,interp,interpolate,notebook,nb,jupyter,dir_merge,slurm_job_id:,network:,framework:,observation:,species:,resolution:,model_resolution:,start_date:,end_date:,observations_data_label:,experiments:,experiment:,model:,models:,domain:,ensemble:,forecast:,qa:,flags:,add_qa:,subtract_qa:,add_flags:,subtract_flags:,temporal_colocation:,spatial_colocation:,spatial_colocation_tolerance:,spatial_colocation_station_reference:,spatial_colocation_station_name:,spatial_colocation_longitude_latitude:,spatial_colocation_measurement_altitude:,spatial_colocation_validation:,spatial_colocation_validation_tolerance:,map_extent:,filter_species:,calibration_factor:,lower_bound:,upper_bound:,remove_extreme_stations:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,harmonise_summary:,harmonise_stations:,active_dashboard_plots:,resampling_resolution:,statistic_mode:,statistic_aggregation:,periodic_statistic_mode:,periodic_statistic_aggregation:,timeseries_statistic_aggregation:,plot_characteristics_filename:,dl_overwrite:,dl_ghost_source:,dl_interpolated:,dl_mode:,dl_timeout:,dl_thredds_update:,interp_multiprocessing:,interp_n_neighbours:,interp_reverse_vertical_orientation:,interp_chunk_size:,interp_job_array_limit:,interp_spinup_timesteps:,z:,interp_model_downsampling:,interp_model_upsampling:,logfile::,multispecies_units:
+LONG=usage,n_cpus:,time:,jobname:,queue:,mem:,constraint:,help,version,debug,clean,section:,ghost_version:,ghost_features:,conf:,config:,config_dir:,cartopy_data_dir:,ghost_root:,nonghost_root:,exp_root:,exp_to_interp_root:,generate_file_tree,gft,disable_file_tree,dft,report,reports,offline,download,dl,interpolation,interp,interpolate,notebook,nb,jupyter,dir_merge,slurm_job_id:,network:,framework:,observation:,species:,resolution:,model_resolution:,start_date:,end_date:,observations_data_label:,experiments:,experiment:,model:,models:,domain:,ensemble:,forecast:,qa:,flags:,add_qa:,subtract_qa:,add_flags:,subtract_flags:,temporal_colocation:,spatial_colocation:,spatial_colocation_tolerance:,spatial_colocation_station_reference:,spatial_colocation_station_name:,spatial_colocation_longitude_latitude:,spatial_colocation_measurement_altitude:,spatial_colocation_validation:,spatial_colocation_validation_tolerance:,map_extent:,filter_species:,calibration_factor:,lower_bound:,upper_bound:,remove_extreme_stations:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,harmonise_summary:,harmonise_stations:,active_dashboard_plots:,resampling_resolution:,statistic_mode:,statistic_aggregation:,periodic_statistic_mode:,periodic_statistic_aggregation:,timeseries_statistic_aggregation:,plot_characteristics_filename:,dl_overwrite:,dl_ghost_source:,dl_interpolated:,dl_mode:,dl_timeout:,dl_thredds_update:,interp_multiprocessing:,interp_n_neighbours:,interp_reverse_vertical_orientation:,interp_chunk_size:,interp_job_array_limit:,interp_cleanup:,interp_spinup_timesteps:,z:,interp_model_downsampling:,interp_model_upsampling:,logfile::,multispecies_units:
 
 # parse arguments
 PARSED=$(getopt --options ${SHORT} \
@@ -160,7 +197,6 @@ n_cpus_explicit_option="--n_cpus_explicit=$n_cpus_explicit"
 constraint_option="--constraint=$constraint"
 load_command="source bin/load_modules.sh"
 notebook_alloc_command="sbatch -t $time -c $n_cpus -J $jobname"
-script_dir=$(dirname $(realpath $(dirname $0)))
 
 # use python 3 if not in windows
 if [[ "${OS}" != "Windows" ]] ; then 
