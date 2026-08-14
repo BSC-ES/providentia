@@ -1,9 +1,20 @@
 url: https://nrlgodae1.nrlmry.navy.mil/ftp/outgoing/nrl/ICAP-MME/
+mod_id:
+  - icap_ensemble
+  - icap_ensemble_C4
 domain: global
 resolution: 6hourly
 species: od550du
-start_date: 2014-11-28
+start_date: 
+  icap_ensemble : 2014-11-28
+  icap_ensemble_C4 : 2022-09-01
 end_date: today
+species_request_name:
+  icap_ensemble : 
+    before: MME_totaldust
+    after: MMC_dust
+    transition_date: 2022-09-01
+  icap_ensemble_C4 : C4_dust
 unavailable_dates: # only affects MME_totaldustaod550 files
   - 2015-04-20
   - 2015-10-21

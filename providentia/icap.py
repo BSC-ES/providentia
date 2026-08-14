@@ -40,12 +40,77 @@ class ICAP(object):
         # transform dates into datetime
         for k, v in self.icap_fixed_values.items():
             if "date" in k:
-                if isinstance(v, date):
-                    self.icap_fixed_values[k] = datetime.combine(v, time(0, 0))
-                elif isinstance(v, str):
-                    self.icap_fixed_values[k] = datetime.today() if v == "today" else None
-                elif isinstance(v, list):
-                    self.icap_fixed_values[k] = [datetime.combine(date, time(0, 0)) for date in v]
+                self.icap_fixed_values[k] = self.convert_date_to_datetime(v)
+    
+    def convert_date_to_datetime(self, dt):
+        """
+        Convert dates to datetimes.
+
+        Supports individual dates, lists of dates, dictionaries containing
+        dates and the string ``today``.
+
+        Parameters
+        ----------
+        dt : datetime.date, str, list, dict
+            Value to convert. A string equal to ``today`` is converted to
+            the current datetime. Other strings are converted to ``None``.
+
+        Returns
+        -------
+        datetime.datetime, list, dict or None
+            The converted value.
+        """
+
+        if isinstance(dt, date) and not isinstance(dt, datetime):
+            return datetime.combine(dt, time(0, 0))
+
+        if isinstance(dt, str):
+            return datetime.today() if dt == "today" else None
+
+        if isinstance(dt, list):
+            return [
+                datetime.combine(d, time(0, 0))
+                for d in dt
+            ]
+
+        if isinstance(dt, dict):
+            return {
+                model: datetime.combine(d, time(0, 0))
+                for model, d in dt.items()
+            }
+
+    def control_mod_id(self, mod_id):
+        """
+        Validate the requested model id for ICAP-MME.
+
+        Unsupported model id is reported to the user.
+
+        Parameters
+        ----------
+        mod_id : str
+            Model ID requested by the user.
+
+        Returns
+        -------
+        bool
+            ``True`` if the requested model ID is supported by ICAP-MME,
+            otherwise ``False``.
+        """
+
+        # get the model ID from the yaml file
+        correct_mod_id = self.icap_fixed_values["mod_id"]
+        
+        # check if the model ID is the correct one for the dataset
+        if mod_id not in correct_mod_id:
+            msg = (
+                f"The current model ID '{mod_id}' is not valid for the ICAP-MME dataset. "
+                f"It must be '{', '.join(correct_mod_id)}'."
+            )
+            show_message(self.download_instance, msg)
+
+            return False
+        
+        return True
 
     def control_domain(self, domain):
         """
@@ -160,7 +225,7 @@ class ICAP(object):
 
         return final_species_list
         
-    def control_dates(self):
+    def control_dates(self, mod_id):
         """
         Adjust the requested date range to the ICAP limits.
 
@@ -169,6 +234,11 @@ class ICAP(object):
 
         If the requested period partially falls outside the ICAP availability
         period, the dates are clipped to the supported range.
+
+        Parameters
+        ----------
+        mod_id : str
+            Model ID requested by the user.
 
         Returns
         -------
@@ -181,7 +251,7 @@ class ICAP(object):
         """
 
         # get the start and end dates from the yaml file
-        min_start_date = self.icap_fixed_values["start_date"]
+        min_start_date = self.icap_fixed_values["start_date"][mod_id]
         max_end_date = self.icap_fixed_values["end_date"]
 
         end_date = datetime.strptime(self.download_instance.end_date, "%Y%m%d") - timedelta(days=1)
@@ -296,12 +366,14 @@ class ICAP(object):
 
         return species, date
         
-    def download(self, temp_dir, date):
+    def download(self, mod_id, temp_dir, date):
         """
         Download the ICAP NetCDF file for the given date to a temporary directory.
 
         Parameters
         ----------
+        mod_id : str
+            Model ID requested by the user.
         temp_dir : str
             Directory where the downloaded ICAP NetCDF file will be stored.
         date : datetime.datetime
@@ -313,7 +385,17 @@ class ICAP(object):
             Path to the downloaded ICAP NetCDF file.
         """
 
-        species_name = "MME_totaldust" if date <= datetime(2022, 8, 31) else "MMC_dust"
+        # get the species name to request depending on the mod ID asked by the user
+        species_request_name = self.icap_fixed_values["species_request_name"][mod_id]
+
+        if isinstance(species_request_name, dict):
+            species_name = (
+                species_request_name["before"]
+                if date < datetime.combine(species_request_name["transition_date"], time(0, 0))
+                else species_request_name["after"]
+            )
+        else:
+            species_name = species_request_name
 
         # build the ICAP filename using the date and product name
         filename = f"icap_{date.strftime('%Y%m%d')}00_{species_name}aod550.nc"
@@ -460,6 +542,11 @@ class ICAP(object):
                 f"\nDownloading {model} model data from the U.S. Naval Research Laboratory..."
             )
 
+            correct_mod_id = self.control_mod_id(mod_id)
+
+            if not correct_mod_id:
+                return
+
             correct_domain = self.control_domain(domain)
 
             if not correct_domain:
@@ -475,7 +562,7 @@ class ICAP(object):
             if not species_list:
                 return
             
-            start_date, end_date = self.control_dates()
+            start_date, end_date = self.control_dates(mod_id)
 
             if start_date is None and end_date is None:
                 return
@@ -507,7 +594,7 @@ class ICAP(object):
                     # peform de download and formatting only if the date is available
                     if date not in self.icap_fixed_values["unavailable_dates"]:
                                 
-                        temp_path = self.download(files_to_download_dict["temp_dir"], date)
+                        temp_path = self.download(mod_id, files_to_download_dict["temp_dir"], date)
                 
                         self.format_data(temp_path, local_dir, nc_file, species)
 
