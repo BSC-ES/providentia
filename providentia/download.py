@@ -564,9 +564,11 @@ class Download(object):
         not_downloaded_paths = []
 
         if nc_filepaths_to_download:
-            # TODO clean when the dictionary is implemented in all modes
             if type(nc_filepaths_to_download) is dict:
+                # check whether any of the expected files already exist and were
+                # downloaded before the current execution and select overwriting
                 for dir, dir_dict in nc_filepaths_to_download.items():
+
                     downloaded_files = list(
                         filter(
                             lambda x: os.path.exists(join(dir, x)), dir_dict["nc_files"]
@@ -584,47 +586,63 @@ class Download(object):
 
                     # if there was any file downloaded before the execution
                     if downloaded_before_execution_files:
+
+                        # ask the user whether existing files should be overwritten
+                        # if this option has not already been passed through the configuration 
                         if not isinstance(self.dl_overwrite, bool):
-                            # ask if user wants to overwrite
                             while True:
                                 dl_overwrite = input(
-                                    "\nThere are some files that were already downloaded in a previous download, do you want to overwrite them ([y]/n)? "
+                                    "\nThere are some files that were already "
+                                    "downloaded in a previous download, do you "
+                                    "want to overwrite them ([y]/n)? "
                                 ).lower()
+
                                 if dl_overwrite in ["y", "n", ""]:
                                     break
 
                             # get the boolean value
                             self.dl_overwrite = dl_overwrite != "n"
 
-                        # indicate that some files are going to be skipped
+                        # keep track of whether existing files will be skipped
                         if self.dl_overwrite is False:
                             self.overwritten_files_flag = True
 
+                        # only one existing file is enough to determine whether
+                        # the overwrite option needs to be handled
                         break
 
                 not_downloaded_paths = {}
 
                 if self.overwritten_files_flag is True:
+                    # build a new dictionary with the files that need to be downloaded.
                     for dir, dir_dict in nc_filepaths_to_download.items():
-                        # get the downloaded and not downloaded files
+
+                        # keep only the expected files that do not already exist locally.
                         dir_not_downloaded_paths = list(
                             filter(
-                                lambda x: not os.path.exists(join(dir, x)),
+                                lambda x: not os.path.exists(
+                                    join(dir, x)
+                                ),
                                 dir_dict["nc_files"],
                             )
                         )
 
+                        # add the directory only if there are files that still need
+                        # to be downloaded.
                         if dir_not_downloaded_paths:
                             not_downloaded_paths[dir] = {
-                                    "nc_files": dir_not_downloaded_paths,
-                                }
-                            if "remote_dir" in nc_filepaths_to_download:
-                                not_downloaded_paths["remote_dir"] = dir_dict["remote_dir"]
-                                
+                                "nc_files": dir_not_downloaded_paths,
+                            }
+
+                            # preserve any additional information on the new dictionary
+                            for key, value in dir_dict.items():
+                                if key != "nc_files":
+                                    not_downloaded_paths[dir][key] = value
 
                 else:
                     not_downloaded_paths = nc_filepaths_to_download
 
+            # TODO REMOVE when the dictionary is implemented in all modes
             else:
                 # get the downloaded and not downloaded files
                 not_downloaded_paths = list(
@@ -1969,12 +1987,12 @@ class Download(object):
                 if file.startswith("dtrsync_"):
                     os.remove(join(PROVIDENTIA_ROOT, file))
 
-        # delete Zenodo and CAMS temp dirs if necessary
-        for root in ["mod_to_interp_root", "ghost_root"]:
-            temp_dir = join(getattr(self, root), ".temp")
-            if os.path.exists(temp_dir):
-                self.logger.info(f"\nDeleting {temp_dir}")
-                shutil.rmtree(temp_dir)
+        # # delete Zenodo and CAMS temp dirs if necessary
+        # for root in ["mod_to_interp_root", "ghost_root"]:
+        #     temp_dir = join(getattr(self, root), ".temp")
+        #     if os.path.exists(temp_dir):
+        #         self.logger.info(f"\nDeleting {temp_dir}")
+        #         shutil.rmtree(temp_dir)
 
         self.logger.info("\nExiting...")
         sys.exit()

@@ -1,11 +1,10 @@
-from datetime import datetime, timedelta, time
+from datetime import date, datetime, timedelta, time
 import requests
 import os
 from tqdm import tqdm
 import yaml
 from netCDF4 import Dataset
 import numpy as np
-import shutil
 import pandas as pd
 
 from .warnings_prv import show_message
@@ -41,7 +40,12 @@ class ICAP(object):
         # transform dates into datetime
         for k, v in self.icap_fixed_values.items():
             if "date" in k:
-                self.icap_fixed_values[k] = datetime.today() if v == "today" else datetime.combine(v, time(0, 0))
+                if isinstance(v, date):
+                    self.icap_fixed_values[k] = datetime.combine(v, time(0, 0))
+                elif isinstance(v, str):
+                    self.icap_fixed_values[k] = datetime.today() if v == "today" else None
+                elif isinstance(v, list):
+                    self.icap_fixed_values[k] = [datetime.combine(date, time(0, 0)) for date in v]
 
     def control_domain(self, domain):
         """
@@ -305,7 +309,7 @@ class ICAP(object):
 
         Returns
         -------
-        str
+        temp_path : str
             Path to the downloaded ICAP NetCDF file.
         """
 
@@ -330,24 +334,23 @@ class ICAP(object):
 
         return temp_path     
 
-    def format_data(self, input_dir, output_dir, nc_file, species):
+    def format_data(self, input_filepath, output_dir, nc_file, species):
         """
         Reformat a raw ICAP NetCDF file into a standardized
         Providentia-compatible NetCDF.
 
         Parameters
         ----------
-        input_dir : str
-            Directory where the input ICAP NetCDF file is located.
+        input_filepath : str
+            Path where the input ICAP NetCDF file is located.
         output_dir : str
-            Path where the formatted NetCDF file will be written.
+            Directory where the formatted NetCDF file will be written.
         nc_file : str
             Final name of the ICAP NetCDF file.
         species : str
             Providentia species name.
         """
 
-        input_filepath = os.path.join(input_dir, nc_file)
         output_filepath = join(output_dir, nc_file)
 
         # get last downloaded file in case there was a keyboard interrupt
@@ -500,10 +503,13 @@ class ICAP(object):
                             ):
 
                     species, date = self.extract_info_from_ncfile(nc_file)
+
+                    # peform de download and formatting only if the date is available
+                    if date not in self.icap_fixed_values["unavailable_dates"]:
                                 
-                    self.download(files_to_download_dict["temp_dir"], date)
-            
-                    self.format_data(files_to_download_dict["temp_dir"], local_dir, nc_file, species)
+                        temp_path = self.download(files_to_download_dict["temp_dir"], date)
+                
+                        self.format_data(temp_path, local_dir, nc_file, species)
 
         else:
             # tell the user if not valid resolution specie date combinations
