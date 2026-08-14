@@ -1,0 +1,6 @@
+url: https://nrlgodae1.nrlmry.navy.mil/ftp/outgoing/nrl/ICAP-MME/
+domain: global
+resolution: 6hourly
+species: od550du
+start_date: 2014-11-28
+end_date: today

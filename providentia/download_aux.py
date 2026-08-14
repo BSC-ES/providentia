@@ -411,3 +411,6 @@ def download_non_interpolated_sftp(download_instance, files_to_download_info):
             download_instance.sftp.get(
                 remote_path, local_path, callback=download_instance.check_time
             )
+
+            # change the last downloaded file
+            download_instance.latest_nc_file_path = "/path/to/file"

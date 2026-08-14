@@ -355,7 +355,7 @@ class Download(object):
                                 files_to_download=files_to_download,
                             )
 
-                    elif model.startswith("cams_icap"):
+                    elif model.startswith("icap_ensemble"):
                         self.icap = ICAP(self)
                         initial_check_nc_files = (
                             self.icap.download_ICAP_model(
