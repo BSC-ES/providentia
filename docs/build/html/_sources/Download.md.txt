@@ -51,6 +51,11 @@ Providentia supports four types of downloads. For detailed instructions, please 
    - How to get this type of download: specify the model as `era5_reanalysis` or `era5_tropopause` in your configuration, and set `dl_interpolated` to `False`.
    - To see more information, check the [ERA5 download page](ERA5-download).
 
+5. **Download of ICAP non-interpolated model data from the  U.S. Navy / Naval Research Laboratory (NRL)**  
+   - Downloads ICAP model output from the [U.S. Navy / Naval Research Laboratory](https://nrlgodae1.nrlmry.navy.mil/cgi-bin/datalist.pl?generate=summary).
+   - How to get this type of download: specify the model as `icap_ensemble` or `icap_ensemble_C4` in your configuration, and set `dl_interpolated` to `False`.
+   - To see more information, check the [ICAP download page](ICAP-download).
+
 ## Download configuration fields
 
 All parameters that can be used in the download configuration files can be found in the [Shared Parameters](shared-parameters) or [Download Parameters](download-parameters) sections of the Configuration Fields page.
