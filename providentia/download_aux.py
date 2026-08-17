@@ -135,25 +135,25 @@ def find_available_resolutions(
                 if sorted_resolutions:
                     while True:
                         user_resolution = input(
-                            f"\nNo non-interpolated model data is available for {resolution} resolution. "
-                            f"Available temporal resolutions for this model: {', '.join(sorted_resolutions)}. "
-                            f"If no resolution is specified, the first available option ({sorted_resolutions[0]}) will be selected automatically. "
-                        ).lower()
+                        f"\nNo non-interpolated model data is available for {resolution} resolution. "
+                        f"Available temporal resolutions for this model: {', '.join(sorted_resolutions)}. "
+                        f"Please specify the desired resolution. Press Enter to automatically select "
+                        f"the first available option ({sorted_resolutions[0]}). "
+                        f"Enter 'n' if you do not want to download this model at another resolution. "
+                    ).lower()
 
-                        if (
-                            user_resolution in possible_resolutions
-                            or user_resolution == ""
-                        ):
-                            if user_resolution != "":
-                                possible_resolutions = [user_resolution]
+                        if (user_resolution in possible_resolutions or user_resolution in ["", "n"]):
+                            if user_resolution == "":
+                                valid_resolutions.append(sorted_resolutions[0])
+                            elif user_resolution != "n":
+                                valid_resolutions.append(user_resolution)
+
+                            # block input from the user happening again
+                            resolution_not_found = True
+
                             break
 
-                    # add resolution to the return list
-                    valid_resolutions.append(possible_resolutions[0])
-
-                    # block input from the user happening again
-                    resolution_not_found = True
-                else:
+                if not sorted_resolutions or user_resolution == "n":
                     msg = (
                         f"There is no data available in {download_instance.remote_machine} for the {mod_id} model "
                         f"with the {domain} domain at {resolution} resolution."
