@@ -47,6 +47,7 @@ When all jobs have been completed (or there is a failure) the `PRVI` job will ex
 
 Providentia is highly flexible when handling interpolation between model and observational data, for example in mapping species, adjusting for different temporal resolutions and using wildcards to select multiple values at once.
 
+(interpolation-mapping-species)=
 #### Mapping species
 
 When checking if an model is stored in a location with the corresponding domain, resolution, and species, consider that the species might not always be listed under the same name.
