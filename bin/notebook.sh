@@ -15,7 +15,7 @@ fi
 
 # print tunneling instructions jupyter-log
 echo -e "
-Create an SSH tunnel via terminal on your local machine:
+INFO: Create an SSH tunnel via terminal on your local machine:
 ssh -N -L ${port}:${node}:${port} ${user}@${bsc_hostname}.bsc.es
 "
 export PYTHONPATH=$(pwd):${PYTHONPATH}

@@ -14,6 +14,7 @@
 - interp_reverse_vertical_orientation
 - interp_chunk_size
 - interp_job_array_limit
+- interp_cleanup 
 - mod_root
 - ghost_root
 - nonghost_root

@@ -14,13 +14,13 @@ conda config --set env_prompt '($(basename {default_env})) '
 if ! { conda config --show-sources | grep '/gpfs/projects/bsc32/repository/apps/conda_envs/'; } >/dev/null 2>&1; then
     conda config --append envs_dirs /gpfs/projects/bsc32/repository/apps/conda_envs/
 fi
-if { conda env list | grep 'providentia-env_v3.0.2-nord4'; } >/dev/null 2>&1; then 
-    echo "Activating conda environment in /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.2-nord4..."
-    conda activate providentia-env_v3.0.2-nord4
+if { conda env list | grep 'providentia-env_v3.1.0-nord4'; } >/dev/null 2>&1; then 
+    echo "INFO: Activating conda environment in /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.1.0-nord4..."
+    conda activate providentia-env_v3.1.0-nord4
 else 
-    echo "Environment not found in /gpfs/projects/bsc32/repository/apps/conda_envs/"
+    echo "ERROR: Environment not found in /gpfs/projects/bsc32/repository/apps/conda_envs/, contact the developers."
 fi
 
 JOB_ID="--slurm_job_id=$SLURM_JOB_ID"
 
-srun --output=logs/interpolation/management_logs/$SLURM_JOB_ID.out python -u -c "from providentia.main import main; main()" $@ $JOB_ID
+srun --output=logs/interpolation/management_logs/$SLURM_JOB_ID.out python3 -u -c "from providentia.main import main; main()" $@ $JOB_ID

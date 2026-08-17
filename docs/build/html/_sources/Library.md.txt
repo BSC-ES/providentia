@@ -19,7 +19,7 @@ You will also need to load the necessary modules for it to function, for this yo
 conda activate providentia-env_v[version]
 ```
 
-where `version` is the relevant version of Providentia, e.g. `3.0.2`.
+where `version` is the relevant version of Providentia, e.g. `3.1.0`.
 
 Then the Providentia library can be used in any script, through simply importing it as a module:
 
@@ -146,7 +146,7 @@ If wanting to apply a filter not set in the configuration file, this can be done
 provi.filter(field, ...)
 ```
 
-where `field` is the field to filter by. The fields to filter by can be coverage fields, period fields or metadata fields.
+where `field` is the field to filter by. The fields to filter by can be bounds, coverage fields, period fields or metadata fields.
 
 If the field is numeric, lower and upper limits to retain data between can be set as follows:
 

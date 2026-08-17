@@ -86,7 +86,7 @@ class ProvConfiguration:
 
         # set the parameters required at the initisialization
         self.required_init = init["required_init"] 
-        
+
         for k, val in self.required_init.items():
             val = kwargs.get(k, val)
             setattr(self.read_instance, k, self.parse_parameter(k, val))
@@ -189,6 +189,12 @@ class ProvConfiguration:
                     return value
             else:
                 return value
+            
+        elif key == "config_dir":
+            if  os.path.isabs(value):
+                return value
+            else:
+                return join(PROVIDENTIA_ROOT, value)
 
         elif key == "operating_system":
             # get operating system
@@ -1276,13 +1282,14 @@ class ProvConfiguration:
                     except FileNotFoundError:
                         msg += f"2. Remote HPC path: '{mod_to_interp_path}'\n"
 
+                msg = (
+                f"Model ID '{modid}' not found. Checked in:\n{msg}"
+                + "\nPlease, add the model ID to the file or ensure it exists on the HPC path.\n"
+                )
+
         # if model does not exist, exit
         # supressed warning deactivation
         if model_exists is False:
-            msg = (
-                f"Model ID '{modid}' not found. Checked in:\n{msg}"
-                + "Please, add the model ID to the file or ensure it exists on the HPC path.\n"
-            )
             show_message(
                 self.read_instance, msg, from_conf=self.read_instance.from_conf
             )
@@ -1491,7 +1498,7 @@ class ProvConfiguration:
                 mapped_species = multispecies_map[speci]
                 del new_species[speci_ii]
                 new_species[speci_ii:speci_ii] = mapped_species
-                # in download mode is not necessary to duplicate the networks
+                # in download mode it is not necessary to duplicate the networks
                 if self.read_instance.mode != "download":
                     network_to_duplicate = self.read_instance.network[speci_ii]
                     del self.read_instance.network[speci_ii]
@@ -1534,11 +1541,24 @@ class ProvConfiguration:
                             sys.exit(1)
 
         # remove species that are not in the current ghost version
-        invalid_species = (
-            set(self.read_instance.species)
+        # if have species to interpolate between then check have 2 species and that both are valid
+        species_to_check = [part for speci in self.read_instance.species for part in (speci.split('@') if '@' in speci and len(speci.split('@')) == 2 and all(speci.split('@')) else ([speci] if '@' not in speci else []))]
+        invalid_species = list(
+            set(species_to_check)
             - set(self.read_instance.available_species)
             - {"*"}
         )
+
+        # if invalid species is in an interpolation pair, remove the whole pair
+        for inv_speci_ii, inv_speci in enumerate(copy.deepcopy(invalid_species)):
+            for speci_ii, speci in enumerate(self.read_instance.species):
+                if '@' in speci:
+                    split_speci = speci.split('@')
+                    if (inv_speci in split_speci) & (speci not in invalid_species):
+                        invalid_species.append(speci)
+                        if (inv_speci not in self.read_instance.species) & (inv_speci in invalid_species):
+                            invalid_species.remove(inv_speci)
+
         if invalid_species:
             msg = f'Removing invalid species {", ".join(invalid_species)} for the current GHOST version ({self.read_instance.ghost_version})'
             show_message(
@@ -1547,8 +1567,9 @@ class ProvConfiguration:
                 from_conf=self.read_instance.from_conf,
                 deactivate=deactivate_warning,
             )
-            for inv_species in invalid_species:
-                self.read_instance.species.remove(inv_species)
+            for inv_speci in invalid_species:
+                self.read_instance.species.remove(inv_speci) 
+
             # exit if there are no valid species left
             if not self.read_instance.species:
                 error = f"Error: No valid species for the current GHOST version ({self.read_instance.ghost_version})"
@@ -1906,8 +1927,9 @@ class ProvConfiguration:
                 )
 
             # create variable for all unique species (plus filter species)
+            # if are interpolating between species keep only observational species 
             filter_species = []
-            species_plus_filter_species = copy.deepcopy(self.read_instance.species)
+            species_plus_filter_species = [speci.split('@')[1] if '@' in speci else speci for speci in self.read_instance.species]
             if self.read_instance.filter_species:
                 for networkspeci in self.read_instance.filter_species:
                     speci = networkspeci.split("|")[1]

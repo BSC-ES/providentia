@@ -224,6 +224,9 @@ class Tropopause(object):
 
             # iterate through the species
             for ghost_species in self.download_instance.species:
+                # if are interpolating between species, then only get model part.
+                if '@' in ghost_species:
+                    ghost_species = ghost_species.split("@")[0]
                 # check if species is in the ghost_cams_variables file
                 if ghost_species not in ghost_tropopause_variables.keys():
                     msg = f"The species '{ghost_species}' is not available in the ERA5 tropopause dataset."

@@ -81,7 +81,8 @@ interpolation:
   interp_reverse_vertical_orientation: False
   interp_chunk_size: 16
   interp_job_array_limit: 100
-  interp_multiprocessing: False
+  interp_cleanup: False
+  interp_multiprocessing: True
   interp_spinup_timesteps: 0
   interp_model_downsampling: mean
   interp_model_upsampling: fill

@@ -109,6 +109,7 @@ These parameters are used only in the [Interpolation mode](Interpolation). All o
 | `interp_reverse_vertical_orientation` | Reverse vertical order of model levels | `False` |
 | `interp_chunk_size` | Minimum number of jobs per interpolation chunk | `16` |
 | `interp_job_array_limit` | Maximum number of chunks in the job array | `100` |
+| `interp_cleanup` | Cleanup by removing non-interpolated model files after interpolation is complete | `False` |
 | `interp_multiprocessing` | Use multiprocessing instead of Greasy on HPC systems | `False` |
 | `interp_spinup_timesteps` | Number of initial timesteps skipped for model spin-up | `0` |
 | `interp_model_downsampling` | Statistic for the downsampling of the model resolution to the observational resolution: `mean`, `median`. | `mean` |

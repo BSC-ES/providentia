@@ -1,6 +1,6 @@
 # Tested using a conda environment with Python=3.11.5
-# Before using pip install -r requirements.txt, we need to install some modules using conda:
-# conda install -c conda-forge cartopy=0.25.0 jupyterlab==4.5.3 ghostscript==10.06.0 dask==2026.1.2 nco==5.3.6 pyproj=3.7.2 proj=9.7.1 --override-channels
+# Before using pip install --no-user -r requirements.txt, we need to install some modules using conda:
+# conda install -c conda-forge cartopy==0.25.0 jupyterlab==4.5.3 ghostscript==10.06.0 dask==2026.1.2 nco==5.3.6 pyproj==3.7.2 proj==9.7.1 --override-channels
 
 matplotlib==3.10.7
 netCDF4==1.7.2

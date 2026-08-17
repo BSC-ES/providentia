@@ -2410,13 +2410,16 @@ class Dashboard(QtWidgets.QWidget):
 
             # if species has changed, or first read, update species specific lower/upper limits
             if (self.first_read) or (self.species[0] != self.previous_species[0]):
-                # get default GHOST limits
-                self.lower_bound[self.species[0]] = np.float32(
-                    self.parameter_dictionary[self.species[0]]["extreme_lower_limit"]
-                )
-                self.upper_bound[self.species[0]] = np.float32(
-                    self.parameter_dictionary[self.species[0]]["extreme_upper_limit"]
-                )
+                # on first read set bounds on boxes, but do not update from parameter_dictionary again 
+                # they might have been updated in a configuration file
+                if self.species[0] != self.previous_species[0]:
+                    # get default GHOST limits
+                    self.lower_bound[self.species[0]] = np.float32(
+                        self.parameter_dictionary[self.species[0]]["extreme_lower_limit"]
+                    )
+                    self.upper_bound[self.species[0]] = np.float32(
+                        self.parameter_dictionary[self.species[0]]["extreme_upper_limit"]
+                    )
                 self.le_minimum_value.setText(str(self.lower_bound[self.species[0]]))
                 self.le_maximum_value.setText(str(self.upper_bound[self.species[0]]))
 

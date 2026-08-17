@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>providentia.library &mdash; Providentia 3.0.1 documentation</title>
+  <title>providentia.library &mdash; Providentia 3.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=7ae09063" />
@@ -13,7 +13,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=08bfcbec"></script>
+      <script src="../../_static/documentation_options.js?v=dd1205ac"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -371,6 +371,26 @@
                         <span class="n">new_remove</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">period_menu</span><span class="p">[</span><span class="s2">&quot;checkboxes&quot;</span><span class="p">][</span><span class="s2">&quot;remove_selected&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_remove</span>
 
+        <span class="c1"># field is bounds?</span>
+        <span class="k">elif</span> <span class="n">field</span> <span class="o">==</span> <span class="s1">&#39;bounds&#39;</span><span class="p">:</span>
+            <span class="c1"># if neither lower or upper are defined, filtering cannot be done</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">lower</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">upper</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;When filtering by a numeric metadata field, &#39;lower&#39; or &#39;upper&#39; must be passed as arguments.&quot;</span>
+                <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+                <span class="k">return</span>
+                    
+            <span class="n">do_filter</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">lower</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="n">speci</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">lower</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">speci</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">species</span>
+                <span class="p">}</span>
+            <span class="k">if</span> <span class="n">upper</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">upper_bound</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="n">speci</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">upper</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">speci</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">species</span>
+                <span class="p">}</span>
+        
         <span class="c1"># fields is a metadata field?</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">menu_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_types</span><span class="p">:</span>

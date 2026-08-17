@@ -17,7 +17,7 @@ However, there are some parameters that can only be set through the command line
 | `conf`, `config` | Configuration file path or configuration file name if the file is stored in `providentia/configurations`. | — |
 | `section` | Section within configuration file. | — |
 | `logfile` | Redirects output to a file. More info in the [Redirecting output to a file](Redirecting-output-to-a-file)  page. | — |
-| `n_cpus` | Number of CPUs. | `12` for interpolation and download, `1` for dashboard, library and report |
+| `n_cpus` | Number of CPUs. | `24` for interpolation, `12` for download, `1` for dashboard, library and report |
 | `time` | Requested time. | `02:00:00` |
 | `jobname` | Job name. | `PRV` |
 | `queue` | Job queue. | `debug` |

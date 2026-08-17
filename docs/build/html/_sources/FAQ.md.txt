@@ -60,7 +60,7 @@ To avoid this issue, remember that your .bashrc file in /home/bsc/{username} nee
 
 ## Could not load the Qt platform plugin "xcb" on HPC
 
-When testing new machines and attempting to opening the dashboard for the first time, for example Grace and the operational runs machine, we encountered this error:
+When testing new machines, such as Grace and the operational runs machine, and attempting to open the dashboard for the first time we encountered this error:
 
 ```
 qt.qpa.plugin: Could not load the Qt platform plugin "xcb" in "" even though it was found.
@@ -78,6 +78,7 @@ sudo dnf libxcb xcb-util xcb-util-image xcb-util-keysyms xcb-util-renderutil xcb
 
 These are the module names for Rocky Linux.
 
+This error has also appeared multiple times on MN5 and went away on its own. After doing some research (explained in https://github.com/BSC-ES/providentia/issues/920) the issue was solved by updating the bin/providentia file to contain `export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"` to ensure that the conda environment libraries are always loaded first.
 
 ## Could not load the Qt platform plugin "xcb" on local machine
 
@@ -102,3 +103,19 @@ If you are currently working with the latest version of Providentia locally, you
 To automatically handle this, we added the option, `--dir_merge`, which detects whether a rename or a merge of directories needs to be done.
 
 So, if you are working with the new version of Providentia, we highly recommend running this command `./bin/providentia --dir_merge`
+
+## Some of the step tasks have been OOM Killed during the interpolation on MN5 or Nord4
+
+Since we made multiprocessing the default method to submit jobs to slurm, we encounter this error at times. By default the number of CPUs is 24 using medium memory nodes. You might want to change the memory constraint:
+
+```
+./bin/providentia --conf=debug.conf --constraint=highmem
+```
+
+Or increasing the number of cpus, for example:
+
+```
+./bin/providentia --conf=debug.conf --n_cpus=36
+```
+
+You can also combine both options for testing.
