@@ -48,6 +48,7 @@ cams_analysis:
     stream: false
     split: false
     lookahead_days: 0
+    area: true
 
 cams_forecast:
   regional:
@@ -102,6 +103,8 @@ cams_forecast:
     dated_file_format: ENS_FORECAST_yyyy-mm-dd.nc
     split: false
     lookahead_days: 5
+    area: true
+
   global:
     dataset: cams-global-atmospheric-composition-forecasts
     resolution: 
@@ -194,6 +197,7 @@ cams_forecast:
     dated_file_format: data_mlev_yyyy-mm-dd.nc
     split: true
     lookahead_days: 5
+    area: true
 
 cams_reanalysis:
   regional:
@@ -239,6 +243,8 @@ cams_reanalysis:
     stream: true
     split: false
     lookahead_days: 0
+    area: false
+
   global:
     dataset: cams-global-reanalysis-eac4
     resolution: 3hourly
@@ -295,6 +301,7 @@ cams_reanalysis:
     stream: false
     split: false
     lookahead_days: 0
+    area: true
 
 era5_reanalysis:
   global:
@@ -336,6 +343,7 @@ era5_reanalysis:
     stream: false
     split: false
     lookahead_days: 0
+    area: true
     product_type: reanalysis
     data_format: netcdf
     download_format: zip 
