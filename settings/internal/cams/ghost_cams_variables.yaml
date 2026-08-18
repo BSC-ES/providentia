@@ -11,11 +11,10 @@ aswindir: total_sky_direct_solar_radiation_at_surface
 aswindircs: clear_sky_direct_solar_radiation_at_surface
 aswtoa: toa_incident_solar_radiation
 auvin: downward_uv_radiation_at_the_surface
-blh: boundary_layer_height # new GHOST variable
 cfracmax: []
   # - fraction_of_cloud_cover
   # - total_cloud_cover
-cld :  # new GHOST variable
+cldaf :  # new GHOST variable
   - aswin
   - aswincs
 cldbot: cloud_base_height

@@ -843,7 +843,7 @@ class Cams(object):
             if input_var_name == var1:
                 if species == "dir10":
                     output_var.setncattr("units", "degrees")
-                elif species in ["cld", "clddf", "photi"]:
+                elif species in ["cldaf", "clddf", "photi"]:
                     output_var.setncattr("units", "unitless")
 
             # add the data to the variable
@@ -1087,7 +1087,7 @@ class Cams(object):
                     cams_ghost_species_list = [[mapped_cams_species, species]]
 
                 for cams_species, ghost_species in cams_ghost_species_list:
-                    if ghost_species not in ["dir10", "spd10", "cld", "clddf", "photi"]:
+                    if ghost_species not in ["dir10", "spd10", "cldaf", "clddf", "photi"]:
                         # check if the mapped species are available in the dataset
                         if cams_species not in cams_dict["variable"]:
                             msg = f"Mapped species '{cams_species}' for input species '{ghost_species}' is not available in the CAMS '{dataset}' dataset."
@@ -1169,7 +1169,7 @@ class Cams(object):
                         if ghost_species not in [
                             "dir10",
                             "spd10",
-                            "cld",
+                            "cldaf",
                             "clddf",
                             "photi",
                         ]:
@@ -1311,7 +1311,7 @@ class Cams(object):
                         if ghost_species not in [
                             "dir10",
                             "spd10",
-                            "cld",
+                            "cldaf",
                             "clddf",
                             "photi",
                         ]:
@@ -1332,7 +1332,7 @@ class Cams(object):
                         for date in all_dates:
                             if (
                                 ghost_species
-                                not in ["dir10", "spd10", "cld", "clddf", "photi"]
+                                not in ["dir10", "spd10", "cldaf", "clddf", "photi"]
                                 and not initial_check
                             ):
                                 # get the file format
@@ -1363,7 +1363,7 @@ class Cams(object):
                             elif ghost_species in [
                                 "dir10",
                                 "spd10",
-                                "cld",
+                                "cldaf",
                                 "clddf",
                                 "photi",
                             ]:

@@ -68,8 +68,9 @@ These are the available species:
 * `aswindir`
 * `aswindircs`
 * `aswtoa`
+* `auvin`
 * `blh`
-* `cld`
+* `cldaf`
 * `cldbot`
 * `clddf`
 * `cldtop`
@@ -98,14 +99,14 @@ Providentia assumes the following fixed values when downloading data:
 
 There are five derived variables computed from two ERA5 variables. When downloading one of these, the two original variables are also downloaded, formatted and saved together with the final result.
 
-#### cld
+#### cldaf
 
-**cld** is computed from **aswin** and **aswincs**, which in CDS are:
+**cldaf** is computed from **aswin** and **aswincs**, which in CDS are:
 
 - surface_solar_radiation_downwards  
 - surface_solar_radiation_downward_clear_sky  
 
-When creating **cld**, both variables are also downloaded and saved.
+When creating **cldaf**, both variables are also downloaded and saved.
 
 **Formula:**
 
@@ -235,8 +236,9 @@ aswincs : surface_solar_radiation_downward_clear_sky
 aswindir : total_sky_direct_solar_radiation_at_surface
 aswindircs : clear_sky_direct_solar_radiation_at_surface
 aswtoa : toa_incident_solar_radiation
+auvin: downward_uv_radiation_at_the_surface
 blh : boundary_layer_height
-cld : [aswin, aswincs]
+cldaf : [aswin, aswincs]
 cldbot : cloud_base_height
 clddf : [aswindir, aswindircs]
 cldtop : high_cloud_cover
