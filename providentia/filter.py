@@ -52,6 +52,7 @@ class DataFilter:
         """
 
         self.reset_data_filter()
+        self.order_stations()
         self.filter_by_species()
         self.filter_data_limits()
         self.filter_by_period()
@@ -62,6 +63,7 @@ class DataFilter:
         self.forecast_daily_switch()
         self.temporally_colocate_data()
         self.get_valid_stations()
+        self.cap_stations()
 
         # save time index after filter in case it is overwritten later and can be reset
         self.read_instance.time_index_after_filter = copy.deepcopy(
@@ -77,6 +79,12 @@ class DataFilter:
         self.read_instance.data_in_memory_filtered = copy.deepcopy(
             self.read_instance.data_in_memory
         )
+
+        # reset metadata in memory
+        self.read_instance.metadata_in_memory_filtered = copy.deepcopy(
+            self.read_instance.metadata_in_memory
+        )
+
         self.read_instance.temporal_colocation_nans = {}
         self.read_instance.valid_station_inds = {}
         self.read_instance.valid_station_inds_temporal_colocation = {}
@@ -622,7 +630,7 @@ class DataFilter:
                     if len(current_keep) > 0:
                         invalid_keep = np.repeat(
                             np.isin(
-                                self.read_instance.metadata_in_memory[networkspeci][
+                                self.read_instance.metadata_in_memory_filtered[networkspeci][
                                     meta_var
                                 ][:, :],
                                 current_keep,
@@ -637,7 +645,7 @@ class DataFilter:
                         for current_keep_value in current_keep:
                             invalid_keep_value = np.repeat(
                                 np.isin(
-                                    self.read_instance.metadata_in_memory[networkspeci][
+                                    self.read_instance.metadata_in_memory_filtered[networkspeci][
                                         meta_var
                                     ][:, :],
                                     current_keep_value,
@@ -648,7 +656,7 @@ class DataFilter:
                             )
                             if np.all(invalid_keep_value):
                                 available_values = np.unique(
-                                    self.read_instance.metadata_in_memory[networkspeci][
+                                    self.read_instance.metadata_in_memory_filtered[networkspeci][
                                         meta_var
                                     ].astype(str)
                                 )
@@ -665,7 +673,7 @@ class DataFilter:
                     if len(current_remove) > 0:
                         invalid_remove = np.repeat(
                             np.isin(
-                                self.read_instance.metadata_in_memory[networkspeci][
+                                self.read_instance.metadata_in_memory_filtered[networkspeci][
                                     meta_var
                                 ][:, :],
                                 current_remove,
@@ -679,7 +687,7 @@ class DataFilter:
                         for current_remove_value in current_remove:
                             invalid_remove_value = np.repeat(
                                 np.isin(
-                                    self.read_instance.metadata_in_memory[networkspeci][
+                                    self.read_instance.metadata_in_memory_filtered[networkspeci][
                                         meta_var
                                     ][:, :],
                                     current_remove_value,
@@ -689,7 +697,7 @@ class DataFilter:
                             )
                             if not np.any(invalid_remove_value):
                                 available_values = np.unique(
-                                    self.read_instance.metadata_in_memory[networkspeci][
+                                    self.read_instance.metadata_in_memory_filtered[networkspeci][
                                         meta_var
                                     ].astype(str)
                                 )
@@ -734,7 +742,7 @@ class DataFilter:
                                 )
                                 if current_lower >= lower_default:
                                     invalid_below = np.repeat(
-                                        self.read_instance.metadata_in_memory[
+                                        self.read_instance.metadata_in_memory_filtered[
                                             networkspeci
                                         ][meta_var][:, :]
                                         < current_lower,
@@ -756,7 +764,7 @@ class DataFilter:
                                 )
                                 if current_upper <= upper_default:
                                     invalid_above = np.repeat(
-                                        self.read_instance.metadata_in_memory[
+                                        self.read_instance.metadata_in_memory_filtered[
                                             networkspeci
                                         ][meta_var][:, :]
                                         > current_upper,
@@ -770,7 +778,7 @@ class DataFilter:
                             # remove nans
                             invalid_nan = np.repeat(
                                 pd.isnull(
-                                    self.read_instance.metadata_in_memory[networkspeci][
+                                    self.read_instance.metadata_in_memory_filtered[networkspeci][
                                         meta_var
                                     ][:, :]
                                 ),
@@ -1310,6 +1318,96 @@ class DataFilter:
                 self.read_instance.temporal_colocation_nans[networkspeci] = np.any(
                     [obs_all_nan, mods_all_nan], axis=0
                 )
+
+    def order_stations(self):
+        """
+        Orders stations based on a specified metadata variable and direction (ascending or descending).
+        The station order is defined in the configuration file as 'station_order' in the format 'metadata_variable||direction'.
+        """
+
+        if self.read_instance.station_order:
+
+            station_order_split = self.read_instance.station_order.split("||")
+            station_order_var = station_order_split[0].strip()
+            if len(station_order_split) > 1:
+                station_order_dir = station_order_split[1].strip()
+            else:
+                station_order_dir = "asc"
+
+            # check station order field is valid metadata variable
+            #if self.read_instance.station_order not in self.read_instance.metadata_vars_to_read:
+            #    msg = "Error: station_order metadata variable '{}' does not exist.".format(
+            #        self.read_instance.station_order
+            #    )
+            #    show_message(
+            #        self.read_instance, msg, from_conf=self.read_instance.from_conf
+            #    )
+            #    sys.exit(1)
+
+
+            for networkspeci in self.read_instance.networkspecies:
+
+                # get indices of stations ordered by station_order_var
+                # this handles ascending and descending order for both numerical and string metadata variables
+                station_order_inds = np.argsort(
+                    self.read_instance.metadata_in_memory_filtered[networkspeci][
+                        station_order_var
+                    ][:, 0]
+                )      
+
+                if station_order_dir in ["desc","des","descending"]:
+                    station_order_inds = station_order_inds[::-1]
+
+                # reorder data_in_memory_filtered and metadata_in_memory_filtered according to station_order_inds
+                self.read_instance.data_in_memory_filtered[networkspeci] = (
+                    self.read_instance.data_in_memory_filtered[networkspeci][
+                        :, station_order_inds, :
+                    ]
+                )
+                for meta_var in self.read_instance.metadata_vars_to_read:
+                    self.read_instance.metadata_in_memory_filtered[networkspeci][meta_var] = (
+                        self.read_instance.metadata_in_memory_filtered[networkspeci][meta_var][
+                            station_order_inds, :
+                        ]
+                    )
+
+
+                self.read_instance.station_references[networkspeci] = (
+                    self.read_instance.station_references[networkspeci][station_order_inds]
+                )
+                self.read_instance.station_names[networkspeci] = (
+                    self.read_instance.station_names[networkspeci][station_order_inds]
+                )
+                self.read_instance.station_longitudes[networkspeci] = (
+                    self.read_instance.station_longitudes[networkspeci][station_order_inds]
+                )
+                self.read_instance.station_latitudes[networkspeci] = (
+                    self.read_instance.station_latitudes[networkspeci][station_order_inds]
+                )
+                self.read_instance.station_measurement_altitudes[networkspeci] = (
+                    self.read_instance.station_measurement_altitudes[networkspeci][station_order_inds]
+                )
+
+    def cap_stations(self):
+        """"""
+
+        if self.read_instance.station_cap:
+
+            for networkspeci in self.read_instance.networkspecies:
+
+                for data_label in self.read_instance.data_labels:
+
+                    self.read_instance.valid_station_inds[networkspeci][data_label] = (
+                        self.read_instance.valid_station_inds[networkspeci][
+                            data_label
+                        ][:self.read_instance.station_cap]
+                    )
+
+                    self.read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label] = (
+                        self.read_instance.valid_station_inds_temporal_colocation[networkspeci][
+                            data_label
+                        ][:self.read_instance.station_cap]
+                    )
 
     def get_valid_stations(self):
         """

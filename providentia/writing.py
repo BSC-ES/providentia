@@ -132,7 +132,7 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
         # save data / metadata
         save_data_dict["{}_data".format(networkspeci)] = data_array
         save_data_dict["{}_metadata".format(networkspeci)] = np.take(
-            prv.metadata_in_memory[networkspeci], valid_station_inds, axis=0
+            prv.metadata_in_memory_filtered[networkspeci], valid_station_inds, axis=0
         )
         # save GHOST specific variables
         if prv.reading_ghost:
@@ -606,7 +606,7 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
 
         # save metadata (as individual variables)
         metadata_arr = np.take(
-            prv.metadata_in_memory[networkspeci], valid_station_inds, axis=0
+            prv.metadata_in_memory_filtered[networkspeci], valid_station_inds, axis=0
         )
         for metadata_var in metadata_arr.dtype.names:
             current_data_type = type_map[
