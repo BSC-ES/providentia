@@ -85,7 +85,7 @@ class DataFilter:
             self.read_instance.metadata_in_memory
         )
 
-        if hasattr(self.read_instance, 'read_instance.station_order_inds_invert'):
+        if hasattr(self.read_instance, 'station_order_inds_invert'):
             for networkspeci in self.read_instance.networkspecies:
                 self.read_instance.station_references[networkspeci] = (
                     self.read_instance.station_references[networkspeci][self.read_instance.station_order_inds_invert]
