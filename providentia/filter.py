@@ -85,6 +85,25 @@ class DataFilter:
             self.read_instance.metadata_in_memory
         )
 
+        if hasattr(self.read_instance, 'read_instance.station_order_inds_invert'):
+            for networkspeci in self.read_instance.networkspecies:
+                self.read_instance.station_references[networkspeci] = (
+                    self.read_instance.station_references[networkspeci][self.read_instance.station_order_inds_invert]
+                )
+                self.read_instance.station_names[networkspeci] = (
+                    self.read_instance.station_names[networkspeci][self.read_instance.station_order_inds_invert]
+                )
+                self.read_instance.station_longitudes[networkspeci] = (
+                    self.read_instance.station_longitudes[networkspeci][self.read_instance.station_order_inds_invert]
+                )
+                self.read_instance.station_latitudes[networkspeci] = (
+                    self.read_instance.station_latitudes[networkspeci][self.read_instance.station_order_inds_invert]
+                )
+                self.read_instance.station_measurement_altitudes[networkspeci] = (
+                    self.read_instance.station_measurement_altitudes[networkspeci][self.read_instance.station_order_inds_invert]
+                )
+            del self.read_instance.station_order_inds_invert
+        
         self.read_instance.temporal_colocation_nans = {}
         self.read_instance.valid_station_inds = {}
         self.read_instance.valid_station_inds_temporal_colocation = {}
@@ -1355,6 +1374,8 @@ class DataFilter:
                     ][:, 0]
                 )      
 
+                self.read_instance.station_order_inds_invert = np.argsort(station_order_inds)
+
                 if station_order_dir in ["desc","des","descending"]:
                     station_order_inds = station_order_inds[::-1]
 
@@ -1370,7 +1391,6 @@ class DataFilter:
                             station_order_inds, :
                         ]
                     )
-
 
                 self.read_instance.station_references[networkspeci] = (
                     self.read_instance.station_references[networkspeci][station_order_inds]
