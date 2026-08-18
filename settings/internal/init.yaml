@@ -72,7 +72,7 @@
         "interp_model_upsampling",
         "multispecies_units",
       ],
-    "non_writing_vars": # to stop the variable from being written  when saving a configuration file
+    "non_writing_vars": # to stop the variable from being written when saving a configuration file
       [
         "conf",
         "config",
@@ -218,6 +218,8 @@
     "interp_model_downsampling": "",
     "interp_model_upsampling": "",
     "multispecies_units": null,
+    "station_order": null,
+    "station_cap": null,
     "logfile": null,
     },
 }

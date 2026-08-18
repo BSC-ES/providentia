@@ -475,7 +475,16 @@ class ProvArgumentParser(object):
                 dest="multispecies_units",
                 help="Units of data in multispecies plots",
             )
-
+            self.parser.add_argument(
+                "--station_order",
+                dest="station_order",
+                help="Order in which to display stations",
+            )
+            self.parser.add_argument(
+                "--station_cap",
+                dest="station_cap",
+                help="Maximum number of stations to display",
+            )
         except Exception as error:
             log.error("Unhandled exception on Providentia: %s" % error, exc_info=True)
 
