@@ -47,9 +47,9 @@ Using this dataset you can download **Global Reanalysis data**.
 
 This dataset contains single-level data.
 
-### Mandatory fields
-
 Only hourly global data is available in this dataset. You must set `resolution = hourly` and `domain = global` in your configuration file; otherwise, the download will not work.
+
+### Mandatory fields
 
 ```ini
 model = era5_reanalysis
@@ -191,6 +191,18 @@ $$
 \end{aligned}
 $$
 
+## Example configuration file
+
+```ini
+[ERA5-CDS] 
+start_date = 20220101
+end_date = 20220201
+species = t2
+model = era5_reanalysis-global
+resolution = hourly
+dl_interpolated = False
+```
+
 ## 2. Reanalysis Tropopause Data Repository
 
 [Dataset Link](https://datapub.fz-juelich.de/slcs/tropopause/index.html)
@@ -199,9 +211,9 @@ Using this dataset you can download **Global Tropopause Reanalysis data**.
 
 This dataset contains single-level data.
 
-### Mandatory fields
-
 Only hourly global data is available in this dataset. You must set `resolution = hourly` and `domain = global` in your configuration file; otherwise, the download will not work.
+
+### Mandatory fields
 
 ```ini
 model = era5_tropopause
@@ -223,6 +235,18 @@ These are the available species:
 ### Fixed Download Settings
 
 Providentia downloads tropopause data from the `v2/` directory.
+
+## Example configuration file
+
+```ini
+[ERA5-SDL] 
+start_date = 20220101
+end_date = 20220201
+species = tphclp
+model = era5_tropopause-global
+resolution = hourly
+dl_interpolated = False
+```
 
 ## CDS ERA5-GHOST species mapping
 

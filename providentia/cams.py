@@ -655,8 +655,7 @@ class Cams(object):
                 output_var.setncattr(
                     "calendar", cams_options[prefix][domain]["calendar"]
                 )
-                time_units = f"hours since {date_str}"
-                output_var.setncattr("units", time_units)
+                output_var.setncattr("units", f"hours since {date_str}")
 
             # add to level the priority of the level
             elif output_var_name == "level":
@@ -678,13 +677,7 @@ class Cams(object):
 
             # add the data to the variable
             output_var[:] = data
-
-        # add grid_mapping
-        output_file[species].setncattr("grid_mapping", "crs")
-
-        # add coordinates
-        output_file[species].setncattr("coordinates", "latitude longitude")
-
+            
         # add crs
         crs_var = output_file.createVariable("crs", "u1")
         crs_var.setncatts(

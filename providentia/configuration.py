@@ -27,9 +27,6 @@ defaults = yaml.safe_load(
 multispecies_map = yaml.safe_load(
     open(join(PROVIDENTIA_ROOT, "settings", "multispecies_shortcuts.yaml"))
 )
-mapping_species = yaml.safe_load(
-    open(join(PROVIDENTIA_ROOT, "settings", "mapping_species.yaml"))
-)
 interp_models = yaml.safe_load(
     open(join(PROVIDENTIA_ROOT, "settings", "interp_models.yaml"))
 )
@@ -1249,7 +1246,7 @@ class ProvConfiguration:
             # TODO Hardcoded ERA5
             # cams model is directly valid
             if model.startswith(tuple(model_options.keys())) or model.startswith(
-                "era5_tropopause"
+                "era5_tropopause") or model.startswith("icap_ensemble"
             ):
                 return [model]
 
@@ -2298,7 +2295,7 @@ def read_conf(self, fpath=None):
                         all_sections_modified.append(section_modified)
                     else:
                         error = "Error: It is not possible to have two sections with the same name."
-                        self.read_instance.logger.error(error)
+                        self.logger.error(error)
                         sys.exit(1)
             elif "[[" in line and "]]" in line:
                 subsection = line.strip()
