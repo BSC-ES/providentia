@@ -65,6 +65,10 @@ The only available species is:
 
 You may also specify related species in the [mapping_species.yaml](interpolation-mapping-species) file (e.g. `od550aero`, `od500aerocoarse` or other mapped aliases). Regardless of the requested alias, the downloaded data will always correspond to `od550du`.
 
+### Dataset temporal coverage
+
+The dataset covers the period from November 2014 to the present.
+
 ### Product availability
 
 The ICAP MME archive changes its naming convention over time.
