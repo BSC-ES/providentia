@@ -388,6 +388,11 @@ class CheckableComboBox(QtWidgets.QComboBox):
             Event
         """
 
+        # filters run before Qt's own enabled check, so without this a
+        # disabled combo still opens its popup
+        if not self.isEnabled():
+            return False
+    
         if obj == self.lineEdit():
             if event.type() == QtCore.QEvent.MouseButtonRelease:
                 if self.closeOnLineEditClick:
@@ -670,6 +675,108 @@ class Switch(QtWidgets.QPushButton):
         # add label (ON / OFF)
         painter.setPen(QtGui.QPen(text_colour))
         painter.drawText(sw_rect, QtCore.Qt.AlignCenter, label)
+
+class MultiSwitch(QtWidgets.QPushButton):
+    """Switch button that selects between multiple labelled options."""
+
+    stateChanged = QtCore.pyqtSignal(int)
+
+    def __init__(self, parent=None, options=None):
+        """
+        Initialise class
+
+        Parameters
+        ----------
+        parent : object
+            Dashboard instance
+        options : list
+            Labels of the selectable options, in display order
+        """
+
+        super(MultiSwitch, self).__init__(parent)
+        if not options:
+            raise ValueError(
+                "MultiSwitch requires a list of options"
+            )
+        self.options = options
+        self.state = 0
+        self.setCursor(QtCore.Qt.PointingHandCursor)
+
+    def currentOption(self):
+        """
+        Return label of selected option.
+        """
+        
+        return self.options[self.state]
+
+    def setState(self, state, emit=True):
+        """
+        Select option by index, optionally without emitting stateChanged.
+        """
+        
+        state = int(state)
+        if not (0 <= state < len(self.options)):
+            raise ValueError(f"state must be in 0..{len(self.options) - 1}")
+        if state != self.state:
+            self.state = state
+            self.update()
+            if emit:
+                self.stateChanged.emit(self.state)
+
+    def mousePressEvent(self, event):
+        """
+        Select the option whose segment was clicked.
+        """
+
+        if event.button() == QtCore.Qt.LeftButton:
+            segment_width = self.rect().width() / len(self.options)
+            self.setState(int(event.pos().x() // segment_width))
+        super(MultiSwitch, self).mousePressEvent(event)
+
+    def paintEvent(self, event):
+        """
+        Draw flat segmented switch matching menu widget styling.
+        """
+
+        painter = QtGui.QPainter(self)
+
+        # half-pixel inset so 1px strokes sit crisply on the pixel grid
+        rect = QtCore.QRectF(self.rect()).adjusted(0.5, 0.5, -0.5, -0.5)
+        segment_width = rect.width() / len(self.options)
+
+        # white background for all combobox which is seen in unselected options
+        painter.setPen(QtGui.QPen(QtGui.QColor("lightgrey")))
+        painter.setBrush(QtGui.QColor("white"))
+        painter.drawRect(rect)
+
+        for option_ii, option in enumerate(self.options):
+            segment = QtCore.QRectF(
+                rect.x() + option_ii * segment_width,
+                rect.y(),
+                segment_width,
+                rect.height(),
+            )
+
+            # selected option in blue background with white text
+            if option_ii == self.state:
+                fill = segment.adjusted(0, 0, 0, 0)
+                painter.setPen(QtGui.QPen(QtCore.Qt.NoPen))
+                painter.setBrush(QtGui.QBrush(QtGui.QColor("steelblue")))
+                painter.drawRect(fill)
+                painter.setPen(QtGui.QPen(QtCore.Qt.white))
+            else:
+                painter.setPen(QtGui.QPen(QtGui.QColor("black")))
+
+            # add each option text
+            painter.drawText(segment, QtCore.Qt.AlignCenter, option)
+
+            # add separator between options
+            if option_ii > 0:
+                painter.setPen(QtGui.QPen(QtGui.QColor("lightgrey")))
+                painter.drawLine(
+                    QtCore.QPointF(segment.left(), rect.top()),
+                    QtCore.QPointF(segment.left(), rect.bottom()),
+                )
 
 
 class MessageBox(QtWidgets.QWidget):

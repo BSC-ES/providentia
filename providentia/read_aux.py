@@ -1142,7 +1142,6 @@ def get_valid_models(instance, start_date, end_date, resolution, networkspecies)
     for networkspeci in networkspecies:
         network = networkspeci.split("|")[0]
         speci = networkspeci.split("|")[1]
-        print(network, speci)
 
         # iterate through available models
         for model in available_models:

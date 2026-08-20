@@ -25,6 +25,7 @@ from .dashboard_elements import (
     ComboBox,
     QVLine,
     InputDialog,
+    MultiSwitch,
     set_cursor,
     unset_cursor,
 )
@@ -265,6 +266,9 @@ class Dashboard(QtWidgets.QWidget):
                 ),
             )
 
+        self.mod_active = True
+        self.obs_active = True
+        
         # initialise UI
         self.init_ui()
 
@@ -552,6 +556,14 @@ class Dashboard(QtWidgets.QWidget):
             QtWidgets.QLabel(self, text="General"),
             self.formatting_dict["menu_title"],
         )
+        self.switch = set_formatting(
+            MultiSwitch(self, ["BOTH", "OBS", "MODEL"]),
+            self.formatting_dict["menu_multiswitch"],
+        )
+        self.switch.setToolTip("See observations, models or both")
+        two_row_height = (20 * 2 + config_bar.spacing())
+        self.switch.setFixedHeight(two_row_height)
+
         self.le_start_date = set_formatting(
             QtWidgets.QLineEdit(self), self.formatting_dict["menu_lineedit"]
         )
@@ -770,68 +782,70 @@ class Dashboard(QtWidgets.QWidget):
         # position objects on gridded configuration bar
         # data selection section
         config_bar.addWidget(self.lb_general_selection, 0, 0, 1, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.le_start_date, 1, 0, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.le_end_date, 1, 1, QtCore.Qt.AlignLeft)        
-        config_bar.addWidget(self.cb_resolution, 1, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_matrix, 2, 0, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_species, 2, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_1, 0, 4, 3, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.switch, 1, 0, 2, 1, QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        config_bar.addWidget(self.le_start_date, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.le_end_date, 1, 2, QtCore.Qt.AlignLeft)        
+        config_bar.addWidget(self.cb_resolution, 1, 3, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_matrix, 2, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_species, 2, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_1, 0, 5, 3, 1, QtCore.Qt.AlignLeft)
 
         # observations
-        config_bar.addWidget(self.lb_obs_selection, 0, 5, 1, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_network, 1, 5, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_ghost_version, 1, 6, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_ghost_features, 1, 7, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_QA, 2, 5, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_flags, 2, 6, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_multispecies, 2, 7, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_2, 0, 8, 3, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_obs_selection, 0, 6, 1, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_network, 1, 6, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_ghost_version, 1, 7, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_ghost_features, 1, 8, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_QA, 2, 6, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_flags, 2, 7, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_multispecies, 2, 8, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_2, 0, 9, 3, 1, QtCore.Qt.AlignLeft)
 
         # models
-        config_bar.addWidget(self.lb_mod_selection, 0, 9, 1, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_models, 1, 9, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_read, 3, 9, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_3, 0, 10, 4, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_mod_selection, 0, 10, 1, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_models, 1, 10, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_read, 3, 10, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_3, 0, 11, 4, 1, QtCore.Qt.AlignLeft)
 
         # filters section
-        config_bar.addWidget(self.lb_data_filter, 0, 11, 1, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.lb_data_bounds, 1, 11, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.le_minimum_value, 1, 12, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.le_maximum_value, 1, 13, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_rep, 2, 11, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_period, 2, 12, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_meta, 2, 13, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_reset, 3, 12, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_filter, 3, 13, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_4, 0, 14, 4, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_data_filter, 0, 12, 1, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_data_bounds, 1, 12, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.le_minimum_value, 1, 13, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.le_maximum_value, 1, 14, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_rep, 2, 12, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_period, 2, 13, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_meta, 2, 14, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_reset, 3, 13, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_filter, 3, 14, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_4, 0, 15, 4, 1, QtCore.Qt.AlignLeft)
 
         # station aggregation section
-        config_bar.addWidget(self.lb_statistic, 0, 15, 1, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.lb_statistic_mode, 1, 15, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.lb_statistic_aggregation, 2, 15, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_statistic_mode, 1, 16, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_statistic_aggregation, 2, 16, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_5, 0, 17, 4, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_statistic, 0, 16, 1, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_statistic_mode, 1, 16, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_statistic_aggregation, 2, 16, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_statistic_mode, 1, 17, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_statistic_aggregation, 2, 17, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_5, 0, 18, 4, 1, QtCore.Qt.AlignLeft)
 
         # colocation section
-        config_bar.addWidget(self.lb_colocate, 0, 18, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_colocate, 1, 18, 1, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_6, 0, 19, 4, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_colocate, 0, 19, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_colocate, 1, 19, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_6, 0, 20, 4, 1, QtCore.Qt.AlignLeft)
 
         # resampling section
-        config_bar.addWidget(self.lb_resampling, 0, 20, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_resampling, 0, 21, 1, 1, QtCore.Qt.AlignLeft)
         config_bar.addWidget(
-            self.cb_resampling_resolution, 1, 20, 1, 1, QtCore.Qt.AlignLeft
+            self.cb_resampling_resolution, 1, 21, 1, 1, QtCore.Qt.AlignLeft
         )
-        config_bar.addWidget(self.vertical_splitter_7, 0, 21, 4, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_7, 0, 22, 4, 1, QtCore.Qt.AlignLeft)
 
         # station selection section
-        config_bar.addWidget(self.lb_station_selection, 0, 22, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_select_all, 1, 22, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_intersect, 2, 22, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_extent, 3, 22, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_station_selection, 0, 23, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_select_all, 1, 23, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_intersect, 2, 23, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_extent, 3, 23, QtCore.Qt.AlignLeft)
 
         # enable dynamic updating of specific configuration bar fields
+        self.switch.stateChanged.connect(self.handle_switch_option_change)
         self.cb_network.currentTextChanged.connect(self.handle_config_bar_params_change)
         self.cb_resolution.currentTextChanged.connect(
             self.handle_config_bar_params_change
@@ -1692,6 +1706,98 @@ class Dashboard(QtWidgets.QWidget):
 
         # unset variable to allow interactive handling from now
         self.block_config_bar_handling_updates = False
+
+    def enable_element(self, element, element_type):
+        """
+        Make element active and update its formatting.
+
+        Parameters
+        ----------
+        element : QtWidget (QtWidgets.QPushButton, QtWidgets.QComboBox)
+            PyQt object
+        element_type : str
+            PyQt object type (button, combobox, )
+
+        Returns
+        -------
+        QtWidget (QtWidgets.QPushButton, QtWidgets.QComboBox)
+            Updated PyQt object
+        """
+
+        element = set_formatting(element, self.formatting_dict[f"menu_{element_type}"])
+        element.setEnabled(True)
+
+        return element
+    
+    def disable_element(self, element, element_type):
+        """
+        Make element inactive and update its formatting.
+
+        Parameters
+        ----------
+        element : QtWidget (QtWidgets.QPushButton, QtWidgets.QComboBox)
+            PyQt object
+        element_type : str
+            PyQt object type (button, combobox, )
+
+        Returns
+        -------
+        QtWidget (QtWidgets.QPushButton, QtWidgets.QComboBox)
+            Updated PyQt object
+        """
+
+        element = set_formatting(
+            element,
+            self.formatting_dict[f"menu_{element_type}_disabled"],
+            disabled=True,
+        )
+        element.setEnabled(False)
+
+        return element
+    
+    def handle_switch_option_change(self, option_index):
+        """
+        Handle clicks on BOTH, OBS and MODEL
+
+        Parameters
+        ----------
+        option_index : int
+            Index of selected option in switch
+        """
+
+        option = self.switch.currentOption()
+
+        self.mod_active = True
+        self.obs_active = True
+        if option == "OBS":
+            self.mod_active = False
+        elif option == "MODEL":
+            self.obs_active = False
+        
+        if self.obs_active:
+            self.bu_QA = self.enable_element(self.bu_QA, "button")
+            self.bu_flags = self.enable_element(self.bu_flags, "button")
+            self.bu_multispecies = self.enable_element(self.bu_multispecies, "button")
+            self.cb_network = self.enable_element(self.cb_network, "combobox")
+            self.cb_ghost_version = self.enable_element(self.cb_ghost_version, "combobox")
+            self.cb_ghost_features = self.enable_element(self.cb_ghost_features, "combobox")
+        else:
+            self.bu_QA = self.disable_element(self.bu_QA, "button")
+            self.bu_flags = self.disable_element(self.bu_flags, "button")
+            self.bu_multispecies = self.disable_element(self.bu_multispecies, "button")
+            self.cb_network = self.disable_element(self.cb_network, "combobox")
+            self.cb_ghost_version = self.disable_element(self.cb_ghost_version, "combobox")
+            self.cb_ghost_features = self.disable_element(self.cb_ghost_features, "combobox")
+
+        if self.mod_active:
+            self.bu_models = self.enable_element(self.bu_models, "button")
+        else:
+            self.bu_models = self.disable_element(self.bu_models, "button")
+            # remove experiments from selected models if switching to OBS
+            self.models_menu["models"]["keep_selected"] = []
+
+        # read and filter
+        self.handle_data_selection_update()
 
     def handle_config_bar_params_change(self, changed_param):
         """
@@ -2718,83 +2824,44 @@ class Dashboard(QtWidgets.QWidget):
 
         # if have a GHOST network then QA and flags are active
         # also GHOST features are not set to min then period is also active
-        if check_for_ghost(self.selected_network):
-            qa_active = True
-            flags_active = True
-            if self.ghost_features != "min":
-                period_active = True
-            ghost_version_active = True
-            ghost_features_active = True
-        # if are reading ACTRIS network then QA and flags are active
-        elif self.selected_network == "actris/actris":
-            qa_active = True
-            flags_active = True
+        for network in self.selected_network:
+            if check_for_ghost(network):
+                qa_active = True
+                flags_active = True
+                if self.ghost_features != "min":
+                    period_active = True
+                ghost_version_active = True
+                ghost_features_active = True
+                break
+            # if are reading ACTRIS network then QA and flags are active
+            elif network == "actris/actris":
+                qa_active = True
+                flags_active = True
+                break
 
         # update buttons
         if event_source == "update_configuration_bar_fields":
             if qa_active:
-                self.bu_QA = set_formatting(
-                    self.bu_QA, self.formatting_dict["menu_button"]
-                )
-                self.bu_QA.setEnabled(True)
+                self.bu_QA = self.enable_element(self.bu_QA, "button")
             else:
-                self.bu_QA = set_formatting(
-                    self.bu_QA,
-                    self.formatting_dict["menu_button_disabled"],
-                    disabled=True,
-                )
-                self.bu_QA.setEnabled(False)
+                self.bu_QA = self.disable_element(self.bu_QA, "button")
             if flags_active:
-                self.bu_flags = set_formatting(
-                    self.bu_flags, self.formatting_dict["menu_button"]
-                )
-                self.bu_flags.setEnabled(True)
+                self.bu_flags = self.enable_element(self.bu_flags, "button")
             else:
-                self.bu_flags = set_formatting(
-                    self.bu_flags,
-                    self.formatting_dict["menu_button_disabled"],
-                    disabled=True,
-                )
-                self.bu_flags.setEnabled(False)
+                self.bu_flags = self.disable_element(self.bu_flags, "button")
             if ghost_version_active:
-                self.cb_ghost_version = set_formatting(
-                    self.cb_ghost_version, 
-                    self.formatting_dict["menu_combobox"], 
-                )
-                self.cb_ghost_version.setEnabled(True)
+                self.cb_ghost_version = self.enable_element(self.cb_ghost_version, "combobox")
             else:
-                self.cb_ghost_version = set_formatting(
-                    self.cb_ghost_version, 
-                    self.formatting_dict["menu_combobox_disabled"],
-                    disabled=True
-                )
-                self.cb_ghost_version.setEnabled(False)
+                self.cb_ghost_version = self.disable_element(self.cb_ghost_version, "combobox")
             if ghost_features_active:
-                self.cb_ghost_features = set_formatting(
-                    self.cb_ghost_features, 
-                    self.formatting_dict["menu_combobox"], 
-                )
-                self.cb_ghost_features.setEnabled(True)
+                self.cb_ghost_features = self.enable_element(self.cb_ghost_features, "combobox")
             else:
-                self.cb_ghost_features = set_formatting(
-                    self.cb_ghost_features, 
-                    self.formatting_dict["menu_combobox_disabled"],
-                    disabled=True
-                )
-                self.cb_ghost_features.setEnabled(False)
+                self.cb_ghost_features = self.disable_element(self.cb_ghost_features, "combobox")
         elif event_source == "handle_data_selection_update":
             if period_active:
-                self.bu_period = set_formatting(
-                    self.bu_period, self.formatting_dict["menu_button"]
-                )
-                self.bu_period.setEnabled(True)
+                self.bu_period = self.enable_element(self.bu_period, "button")
             else:
-                self.bu_period = set_formatting(
-                    self.bu_period,
-                    self.formatting_dict["menu_button_disabled"],
-                    disabled=True,
-                )
-                self.bu_period.setEnabled(False)
+                self.bu_period = self.disable_element(self.bu_period, "button")
 
 
 # generate Providentia dashboard
