@@ -132,7 +132,7 @@ def get_selected_station_data(
             # set metadata cut for relevant stations
             canvas_instance.selected_station_metadata[
                 networkspeci
-            ] = read_instance.metadata_in_memory[networkspeci][
+            ] = read_instance.metadata_in_memory_filtered[networkspeci][
                 canvas_instance.station_inds[networkspeci], :
             ]
 

@@ -4,6 +4,8 @@ Metadata fields can be used to filter data.
 
 These fields affect behavior only in the visualization and analysis modes (Dashboard, Report and Library) and must be specified in the [subsections](configuration-files-subsections).
 
+The Download mode also supports `latitude` and `longitude`. For more information on specific area download, see the [CAMS](download-a-specific-area-cams) and [ERA5](download-a-specific-area-era5) pages.
+
 For the latest release of GHOST, the following metadata fields are supported:
 
 | Parameter | Description | Default |

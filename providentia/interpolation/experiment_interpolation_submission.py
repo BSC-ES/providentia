@@ -366,8 +366,15 @@ class SubmitInterpolation(object):
                     for speci_ii, speci_to_process in enumerate(species):
                         
                         have_valid_resolution = False
-                        original_speci_to_process = copy.deepcopy(speci_to_process)
-                        searched_paths[model_temporal_resolution][original_speci_to_process] = []
+                        # determine if are interpolating to another species (e.g. sconco3@t2) or not
+                        if '@' in speci_to_process:
+                            speci_to_process_split = speci_to_process.split('@')
+                            mod_speci_to_process = speci_to_process_split[0]
+                            obs_speci_to_process = speci_to_process_split[1]
+                        else:
+                            mod_speci_to_process = copy.deepcopy(speci_to_process)
+                            obs_speci_to_process = copy.deepcopy(speci_to_process)
+                        searched_paths[model_temporal_resolution][mod_speci_to_process] = []
 
                         # before proceeding check if have already processed jobs for the model-grid_type/species/temporal_resolution_to_output pairing before
                         # if so, continue to next species
@@ -379,9 +386,9 @@ class SubmitInterpolation(object):
                                     "-".join(arg_list[0].split("-")[:2])
                                     == "{}-{}".format(model_to_process, grid_type)
                                 )
-                                & (arg_list[2] == speci_to_process)
+                                & (arg_list[2] == mod_speci_to_process)
                                 & (arg_list[4] == temporal_resolution_to_output)
-                                & (arg_list[6] == original_speci_to_process)
+                                & (arg_list[6] == speci_to_process)
                             ):
                                 processed_species = True
                                 break
@@ -393,14 +400,14 @@ class SubmitInterpolation(object):
                                 self.mod_dir,
                                 grid_type,
                                 model_temporal_resolution,
-                                speci_to_process,
+                                mod_speci_to_process,
                             )
-                        searched_paths[model_temporal_resolution][original_speci_to_process].append(current_speci_path)
+                        searched_paths[model_temporal_resolution][mod_speci_to_process].append(current_speci_path)
 
                         ensemble_stat_path = "{}/{}/{}/ensemble-stats".format(
                             self.mod_dir, grid_type, model_temporal_resolution
                         )
-                        searched_paths[model_temporal_resolution][original_speci_to_process].append(ensemble_stat_path)
+                        searched_paths[model_temporal_resolution][mod_speci_to_process].append(ensemble_stat_path)
 
                         if os.path.isdir(current_speci_path):
                             have_valid_resolution = True
@@ -431,22 +438,22 @@ class SubmitInterpolation(object):
                                 )
                             )
 
-                            # test if have speci_to_process in model_species_ensemblestat
-                            if speci_to_process in model_species_ensemblestat:
+                            # test if have mod_speci_to_process in model_species_ensemblestat
+                            if mod_speci_to_process in model_species_ensemblestat:
                                 have_valid_resolution = True
-                            # test if have mapped speci_to_process in model_species_ensemblestat
-                            elif speci_to_process in mapping_species:
-                                for speci_to_map in mapping_species[speci_to_process]:
+                            # test if have mapped mod_speci_to_process in model_species_ensemblestat
+                            elif mod_speci_to_process in mapping_species:
+                                for speci_to_map in mapping_species[mod_speci_to_process]:
                                     if speci_to_map in model_species_ensemblestat:
                                         # if have a binned size distribution variable to map, first check if bin radius is within model's bin extents
                                         # if not, do not process species
-                                        if ("vconcaerobin" in speci_to_process) or (
+                                        if ("vconcaerobin" in mod_speci_to_process) or (
                                             "vconcaerobin" in speci_to_map
                                         ):
                                             # check if bin radius is within model's bin extents
-                                            if "vconcaerobin" in speci_to_process:
+                                            if "vconcaerobin" in mod_speci_to_process:
                                                 speci_to_check = copy.deepcopy(
-                                                    speci_to_process
+                                                    mod_speci_to_process
                                                 )
                                             elif "vconcaerobin" in speci_to_map:
                                                 speci_to_check = copy.deepcopy(
@@ -458,21 +465,21 @@ class SubmitInterpolation(object):
                                             if (bin_radius >= r_edges[0]) & (
                                                 bin_radius <= r_edges[-1]
                                             ):
-                                                speci_to_process = copy.deepcopy(
+                                                mod_speci_to_process = copy.deepcopy(
                                                     speci_to_map
                                                 )
                                                 print(
                                                     "Found speci to process on mapping",
-                                                    speci_to_process,
+                                                    mod_speci_to_process,
                                                 )
                                                 have_valid_resolution = True
                                         else:
-                                            speci_to_process = copy.deepcopy(
+                                            mod_speci_to_process = copy.deepcopy(
                                                 speci_to_map
                                             )
                                             print(
                                                 "Found speci to process on mapping",
-                                                speci_to_process,
+                                                mod_speci_to_process,
                                             )
                                             have_valid_resolution = True
 
@@ -480,34 +487,34 @@ class SubmitInterpolation(object):
                         # this currently is implemented for 2 cases:
                         # -- 4D binned size distribution
                         # -- 4D gas variables
-                        # first check if speci_to_process can be mapped
+                        # first check if mod_speci_to_process can be mapped
                         # then check if the variable to map to exists for the model/grid_type/resolution (these can be multiple, list order sets the priority)
                         else:
                             # get species that can do mapping for
                             available_species_to_map_from = list(mapping_species.keys())
-                            # check if speci_to_process can be mapped
-                            if speci_to_process in available_species_to_map_from:
+                            # check if mod_speci_to_process can be mapped
+                            if mod_speci_to_process in available_species_to_map_from:
                                 # if it can be then check then if the variable to map to exists for the model/grid_type/resolution
                                 # (these can be multiple, list order sets the priority)
-                                for speci_to_map in mapping_species[speci_to_process]:
+                                for speci_to_map in mapping_species[mod_speci_to_process]:
                                     speci_to_map_path = "{}/{}/{}/{}".format(
                                             self.mod_dir,
                                             grid_type,
                                             model_temporal_resolution,
                                             speci_to_map,
                                         )
-                                    searched_paths[model_temporal_resolution][original_speci_to_process].append(speci_to_map_path)
+                                    searched_paths[model_temporal_resolution][mod_speci_to_process].append(speci_to_map_path)
 
                                     if os.path.isdir(speci_to_map_path):
                                         # if have a binned size distribution variable to map, first check if bin radius is within model's bin extents
                                         # if not, do not process species
-                                        if ("vconcaerobin" in speci_to_process) or (
+                                        if ("vconcaerobin" in mod_speci_to_process) or (
                                             "vconcaerobin" in speci_to_map
                                         ):
                                             # check if bin radius is within model's bin extents
-                                            if "vconcaerobin" in speci_to_process:
+                                            if "vconcaerobin" in mod_speci_to_process:
                                                 speci_to_check = copy.deepcopy(
-                                                    speci_to_process
+                                                    mod_speci_to_process
                                                 )
                                             elif "vconcaerobin" in speci_to_map:
                                                 speci_to_check = copy.deepcopy(
@@ -519,21 +526,21 @@ class SubmitInterpolation(object):
                                             if (bin_radius >= r_edges[0]) & (
                                                 bin_radius <= r_edges[-1]
                                             ):
-                                                speci_to_process = copy.deepcopy(
+                                                mod_speci_to_process = copy.deepcopy(
                                                     speci_to_map
                                                 )
                                                 print(
                                                     "Found speci to process on mapping",
-                                                    speci_to_process,
+                                                    mod_speci_to_process,
                                                 )
                                                 have_valid_resolution = True
                                         else:
-                                            speci_to_process = copy.deepcopy(
+                                            mod_speci_to_process = copy.deepcopy(
                                                 speci_to_map
                                             )
                                             print(
                                                 "Found speci to process on mapping",
-                                                speci_to_process,
+                                                mod_speci_to_process,
                                             )
                                             have_valid_resolution = True
 
@@ -555,8 +562,8 @@ class SubmitInterpolation(object):
                                             network_to_interpolate_against,
                                             self.ghost_version,
                                             temporal_resolution_to_output,
-                                            original_speci_to_process,
-                                            original_speci_to_process,
+                                            obs_speci_to_process,
+                                            obs_speci_to_process,
                                         )
                                     )
                                     obs_files = np.sort(glob.glob(obs_path))
@@ -567,8 +574,8 @@ class SubmitInterpolation(object):
                                         + "/{}/{}/{}/{}*.nc".format(
                                             network_to_interpolate_against,
                                             temporal_resolution_to_output,
-                                            original_speci_to_process,
-                                            original_speci_to_process,
+                                            obs_speci_to_process,
+                                            obs_speci_to_process,
                                         )
                                     )
                                     obs_files = np.sort(glob.glob(obs_path))
@@ -576,12 +583,12 @@ class SubmitInterpolation(object):
                                 # if have no observational files then continue
                                 if len(obs_files) == 0:
                                     print(
-                                        f"Observation files for {network_to_interpolate_against} cannot be found for {temporal_resolution_to_output} resolution in {os.path.dirname(obs_path)}."
+                                        f"Observational files for {network_to_interpolate_against} cannot be found for {temporal_resolution_to_output} resolution in {os.path.dirname(obs_path)}."
                                     )
                                     continue
                                 else:
                                     print(
-                                        f"{len(obs_files)} observation file(s) for {network_to_interpolate_against} and {temporal_resolution_to_output} resolution were found in {os.path.dirname(obs_path)}."
+                                        f"{len(obs_files)} observational file(s) for {network_to_interpolate_against} and {temporal_resolution_to_output} resolution were found in {os.path.dirname(obs_path)}."
                                     )
 
                                 # determine if ensemble is member or emsemble stat
@@ -595,9 +602,9 @@ class SubmitInterpolation(object):
                                             self.mod_dir,
                                             grid_type,
                                             model_temporal_resolution,
-                                            speci_to_process,
+                                            mod_speci_to_process,
                                             ensemble,
-                                            speci_to_process,
+                                            mod_speci_to_process,
                                             ensemble,
                                         )
                                     )
@@ -608,8 +615,8 @@ class SubmitInterpolation(object):
                                         self.mod_dir,
                                         grid_type,
                                         model_temporal_resolution,
-                                        speci_to_process,
-                                        speci_to_process,
+                                        mod_speci_to_process,
+                                        mod_speci_to_process,
                                     )
                                     mod_files_all = np.sort(glob.glob(mod_path))
 
@@ -642,14 +649,14 @@ class SubmitInterpolation(object):
                                         mod_files_all[0]
                                         .split("/")[-1]
                                         .rsplit("_", 1)[0]
-                                        != speci_to_process
+                                        != mod_speci_to_process
                                     ):
                                         have_ensemble_members = True
                                         # if have ensemble members in filename, get all unique numbers
                                         unique_ensemble_members = np.unique(
                                             [
                                                 f.split(
-                                                    "/{}-".format(speci_to_process)
+                                                    "/{}-".format(mod_speci_to_process)
                                                 )[-1][:3]
                                                 for f in mod_files_all
                                             ]
@@ -679,12 +686,12 @@ class SubmitInterpolation(object):
                                 for available_ens in available_ensemble:
                                     # limit model files to be just those for specific ensemble member
                                     # (where neccessary)
-                                    mod_file_speci = copy.deepcopy(speci_to_process)
+                                    mod_file_speci = copy.deepcopy(mod_speci_to_process)
                                     mod_files = copy.deepcopy(mod_files_all)
                                     if not ensemble_stat:
                                         if have_ensemble_members:
                                             mod_file_speci = "{}-{}".format(
-                                                speci_to_process, available_ens
+                                                mod_speci_to_process, available_ens
                                             )
                                             mod_files = np.sort(
                                                 [
@@ -699,7 +706,7 @@ class SubmitInterpolation(object):
                                     for obs_file in obs_files:
                                         obs_file_date = (
                                             obs_file.split(
-                                                "{}_".format(original_speci_to_process)
+                                                "{}_".format(obs_speci_to_process)
                                             )[-1]
                                             .split("_")[0]
                                             .split(".nc")[0]
@@ -798,7 +805,7 @@ class SubmitInterpolation(object):
                                         "{}/{}/{}/{}/{}".format(
                                             self.interpolation_log_dir,
                                             prov_mod_code,
-                                            original_speci_to_process,
+                                            speci_to_process,
                                             network_to_interpolate_against,
                                             temporal_resolution_to_output,
                                         )
@@ -807,7 +814,7 @@ class SubmitInterpolation(object):
                                             "{}/{}/{}/{}/{}".format(
                                                 self.interpolation_log_dir,
                                                 prov_mod_code,
-                                                original_speci_to_process,
+                                                speci_to_process,
                                                 network_to_interpolate_against,
                                                 temporal_resolution_to_output,
                                             )
@@ -821,11 +828,11 @@ class SubmitInterpolation(object):
                                             "{} {} {} {} {} {} {} {}".format(
                                                 prov_mod_code,
                                                 model_temporal_resolution,
-                                                speci_to_process,
+                                                mod_speci_to_process,
                                                 network_to_interpolate_against,
                                                 temporal_resolution_to_output,
                                                 yearmonth,
-                                                original_speci_to_process,
+                                                speci_to_process,
                                                 self.slurm_job_id,
                                             )
                                         )
@@ -835,7 +842,7 @@ class SubmitInterpolation(object):
                                             "{}/{}/{}/{}/{}/{}".format(
                                                 self.interpolation_log_dir,
                                                 prov_mod_code,
-                                                original_speci_to_process,
+                                                speci_to_process,
                                                 network_to_interpolate_against,
                                                 temporal_resolution_to_output,
                                                 yearmonth,
@@ -847,7 +854,7 @@ class SubmitInterpolation(object):
                                             "{}/{}/{}/{}/{}/{}*".format(
                                                 self.interpolation_log_dir,
                                                 prov_mod_code,
-                                                original_speci_to_process,
+                                                speci_to_process,
                                                 network_to_interpolate_against,
                                                 temporal_resolution_to_output,
                                                 yearmonth,
@@ -1326,7 +1333,7 @@ class SubmitInterpolation(object):
             argument = argument.split(" ")
             prov_mod_code = argument[0]
             model_temporal_resolution = argument[1]
-            speci_to_process = argument[2]
+            mod_speci_to_process = argument[2]
             yearmonth = argument[5]
             model_to_process, grid_type, ensemble = prov_mod_code.split("-")
             ensemble_member = ensemble.isdigit()
@@ -1335,12 +1342,12 @@ class SubmitInterpolation(object):
                 all_model_files = np.sort(
                     glob.glob(
                         f"{self.mod_dir}/{grid_type}/{model_temporal_resolution}/"
-                        f"{speci_to_process}/{speci_to_process}*{yearmonth}*.nc"
+                        f"{mod_speci_to_process}/{mod_speci_to_process}*{yearmonth}*.nc"
                     )
                 )
                 all_model_files = [f for f in all_model_files if "_an.nc" not in f]
                 model_files = [
-                    f for f in all_model_files if f"{speci_to_process}-{ensemble}_" in f
+                    f for f in all_model_files if f"{mod_speci_to_process}-{ensemble}_" in f
                 ]
                 if not model_files:
                     model_files = all_model_files
@@ -1348,14 +1355,14 @@ class SubmitInterpolation(object):
                 model_files = np.sort(
                     glob.glob(
                         f"{self.mod_dir}/{grid_type}/{model_temporal_resolution}/"
-                        f"ensemble-stats/{speci_to_process}_{ensemble}/"
-                        f"{speci_to_process}*{yearmonth}*{ensemble}.nc"
+                        f"ensemble-stats/{mod_speci_to_process}_{ensemble}/"
+                        f"{mod_speci_to_process}*{yearmonth}*{ensemble}.nc"
                     )
                 )
 
             for model_file in model_files:
                 with Dataset(model_file, "r") as nc:
-                    var = nc.variables[speci_to_process]
+                    var = nc.variables[mod_speci_to_process]
                     dims = [nc.dimensions[d].size for d in var.dimensions]
                     n_elements = math.prod(dims)
                     dtype_size = np.dtype(var.dtype).itemsize
@@ -1529,7 +1536,7 @@ class SubmitInterpolation(object):
         print(
             "Submitting job with arguments: [{} {} {} {} {}]".format(
                 arguments_list[3],
-                arguments_list[5],
+                arguments_list[9],
                 arguments_list[6],
                 arguments_list[7],
                 arguments_list[8],

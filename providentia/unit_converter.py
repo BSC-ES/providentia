@@ -1557,6 +1557,12 @@ class UnitConverter:
                 "standard_units": "lx",
                 "equiv_units": ["lx", "lux", "luxes"],
             },
+           "irradiance": {
+                "unit_name": "watt per square metre",
+                "base_units": "kg s-3",
+                "standard_units": "kg s-3",
+                "equiv_units": ["none"],
+            },
             "jerk": {
                 "unit_name": "metre per second cubed",
                 "base_units": "m s-3",
@@ -1688,6 +1694,12 @@ class UnitConverter:
                 "base_units": "kg m-1 s−2",
                 "standard_units": "Pa",
                 "equiv_units": ["Pa", "pascal", "pascals"],
+            },
+            "radiant_exposure": {
+                "unit_name": "joule per square metre",
+                "base_units": "kg s-2",
+                "standard_units": "kg s-2",
+                "equiv_units": ["none"],
             },
             "radioactivity": {
                 "unit_name": "becquerel",

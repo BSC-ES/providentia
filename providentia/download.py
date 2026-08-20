@@ -19,6 +19,7 @@ from .actris import Actris
 from .cams import Cams, cams_options
 from providentia.auxiliar import CURRENT_PATH, join
 from .configuration import ProvConfiguration, load_conf
+from .icap import ICAP
 from .read_aux import check_for_ghost
 from .tropopause import Tropopause
 from .warnings_prv import show_message
@@ -277,7 +278,8 @@ class Download(object):
 
                     # download network observations with species and filter_species
                     for network, filter_species in combined_networks:
-                        # change species when turn of filter species
+
+                        # change species when turn on filter species
                         if filter_species is not None:
                             self.species = [filter_species]
 
@@ -302,7 +304,7 @@ class Download(object):
                                     files_to_download=files_to_download,
                                 )
 
-                    # get orignal species back
+                    # get original species back
                     self.species = main_species
 
             # when one of those symbols is passed, get all models
@@ -351,6 +353,23 @@ class Download(object):
                         )
                         if not initial_check_nc_files or files_to_download:
                             self.tropopause.download_tropopause_model(
+                                model,
+                                initial_check=False,
+                                files_to_download=files_to_download,
+                            )
+
+                    elif model.startswith("icap_ensemble"):
+                        self.icap = ICAP(self)
+                        initial_check_nc_files = (
+                            self.icap.download_ICAP_model(
+                                model, initial_check=True
+                            )
+                        )
+                        files_to_download = self.select_files_to_download(
+                            initial_check_nc_files
+                        )
+                        if not initial_check_nc_files or files_to_download:
+                            self.icap.download_ICAP_model(
                                 model,
                                 initial_check=False,
                                 files_to_download=files_to_download,
@@ -548,9 +567,11 @@ class Download(object):
         not_downloaded_paths = []
 
         if nc_filepaths_to_download:
-            # TODO clean when the dictionary is implemented in all modes
             if type(nc_filepaths_to_download) is dict:
+                # check whether any of the expected files already exist and were
+                # downloaded before the current execution and select overwriting
                 for dir, dir_dict in nc_filepaths_to_download.items():
+
                     downloaded_files = list(
                         filter(
                             lambda x: os.path.exists(join(dir, x)), dir_dict["nc_files"]
@@ -568,45 +589,63 @@ class Download(object):
 
                     # if there was any file downloaded before the execution
                     if downloaded_before_execution_files:
+
+                        # ask the user whether existing files should be overwritten
+                        # if this option has not already been passed through the configuration 
                         if not isinstance(self.dl_overwrite, bool):
-                            # ask if user wants to overwrite
                             while True:
                                 dl_overwrite = input(
-                                    "\nThere are some files that were already downloaded in a previous download, do you want to overwrite them ([y]/n)? "
+                                    "\nThere are some files that were already "
+                                    "downloaded in a previous download, do you "
+                                    "want to overwrite them ([y]/n)? "
                                 ).lower()
+
                                 if dl_overwrite in ["y", "n", ""]:
                                     break
 
                             # get the boolean value
                             self.dl_overwrite = dl_overwrite != "n"
 
-                        # indicate that some files are going to be skipped
+                        # keep track of whether existing files will be skipped
                         if self.dl_overwrite is False:
                             self.overwritten_files_flag = True
 
+                        # only one existing file is enough to determine whether
+                        # the overwrite option needs to be handled
                         break
 
                 not_downloaded_paths = {}
 
                 if self.overwritten_files_flag is True:
+                    # build a new dictionary with the files that need to be downloaded.
                     for dir, dir_dict in nc_filepaths_to_download.items():
-                        # get the downloaded and not downloaded files
+
+                        # keep only the expected files that do not already exist locally.
                         dir_not_downloaded_paths = list(
                             filter(
-                                lambda x: not os.path.exists(join(dir, x)),
+                                lambda x: not os.path.exists(
+                                    join(dir, x)
+                                ),
                                 dir_dict["nc_files"],
                             )
                         )
 
+                        # add the directory only if there are files that still need
+                        # to be downloaded.
                         if dir_not_downloaded_paths:
                             not_downloaded_paths[dir] = {
-                                "remote_dir": dir_dict["remote_dir"],
                                 "nc_files": dir_not_downloaded_paths,
                             }
+
+                            # preserve any additional information on the new dictionary
+                            for key, value in dir_dict.items():
+                                if key != "nc_files":
+                                    not_downloaded_paths[dir][key] = value
 
                 else:
                     not_downloaded_paths = nc_filepaths_to_download
 
+            # TODO REMOVE when the dictionary is implemented in all modes
             else:
                 # get the downloaded and not downloaded files
                 not_downloaded_paths = list(
@@ -731,6 +770,9 @@ class Download(object):
                 show_message(self, msg, deactivate=initial_check)
                 continue
             for species in sftp_species:
+                # if are interpolating between species, then only get observational part.
+                if '@' in species:
+                    species = species.split("@")[1]
                 res_spec_dir.append(
                     join(self.nonghost_remote_obs_path, network, resolution, species)
                 )
@@ -905,6 +947,9 @@ class Download(object):
 
                         # iterate the different species
                         for species in species_list:
+                            # if are interpolating between species, then only get observational part.
+                            if '@' in species:
+                                species = species.split("@")[1]
                             # look for valid nc files in the date range
                             try:
                                 nc_files = self.sftp.listdir(
@@ -957,6 +1002,9 @@ class Download(object):
                 show_message(self, msg, deactivate=initial_check)
                 continue
             for species in sftp_species:
+                # if are interpolating between species, then only get observational part.
+                if '@' in species:
+                    species = species.split("@")[1]
                 res_spec_dir.append(join(remote_dir, resolution, species))
 
         # print the species, resolution and network combinations that are going to be downloaded
@@ -1167,6 +1215,9 @@ class Download(object):
 
                         # iterate the different species
                         for species in species_list:
+                            # if are interpolating between species, then only get model part.
+                            if '@' in species:
+                                species = species.split("@")[0]
                             try:
                                 network_list = (
                                     self.network
@@ -1236,6 +1287,9 @@ class Download(object):
                 show_message(self, msg, deactivate=initial_check)
                 continue
             for species in sftp_species:
+                # if are interpolating between species, then only get model part.
+                if '@' in species:
+                    species = species.split("@")[0]
                 try:
                     sftp_network = (
                         self.network
@@ -1539,6 +1593,10 @@ class Download(object):
                 # initialize boolean that saves whether species was found
                 species_exists = False
                 species = speci_to_process
+
+                # if are interpolating between species, then only get model part.
+                if '@' in species:
+                    species = species.split("@")[0]
 
                 # if it is an ensemble member
                 if ensemble.isdigit() or ensemble == "allmembers":
@@ -1951,12 +2009,12 @@ class Download(object):
                 if file.startswith("dtrsync_"):
                     os.remove(join(PROVIDENTIA_ROOT, file))
 
-        # delete Zenodo and CAMS temp dirs if necessary
-        for root in ["mod_to_interp_root", "ghost_root"]:
-            temp_dir = join(getattr(self, root), ".temp")
-            if os.path.exists(temp_dir):
-                self.logger.info(f"\nDeleting {temp_dir}")
-                shutil.rmtree(temp_dir)
+        # # delete Zenodo and CAMS temp dirs if necessary
+        # for root in ["mod_to_interp_root", "ghost_root"]:
+        #     temp_dir = join(getattr(self, root), ".temp")
+        #     if os.path.exists(temp_dir):
+        #         self.logger.info(f"\nDeleting {temp_dir}")
+        #         shutil.rmtree(temp_dir)
 
         self.logger.info("\nExiting...")
         sys.exit()

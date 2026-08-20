@@ -65,13 +65,14 @@
         "interp_reverse_vertical_orientation",
         "interp_chunk_size",
         "interp_job_array_limit",
+        "interp_cleanup",
         "interp_multiprocessing",
         "interp_spinup_timesteps",
         "interp_model_downsampling",
         "interp_model_upsampling",
         "multispecies_units",
       ],
-    "non_writing_vars": # to stop the variable from being written  when saving a configuration file
+    "non_writing_vars": # to stop the variable from being written when saving a configuration file
       [
         "conf",
         "config",
@@ -211,11 +212,14 @@
     "interp_reverse_vertical_orientation": null,
     "interp_chunk_size": null,
     "interp_job_array_limit": null,
+    "interp_cleanup": null,
     "interp_multiprocessing": null,
     "interp_spinup_timesteps": null,
     "interp_model_downsampling": "",
     "interp_model_upsampling": "",
     "multispecies_units": null,
+    "station_order": null,
+    "station_cap": null,
     "logfile": null,
     },
 }

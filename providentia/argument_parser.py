@@ -440,6 +440,11 @@ class ProvArgumentParser(object):
                 help="maximum number of chunks in job array for interpolation",
             )
             self.parser.add_argument(
+                "--interp_cleanup",
+                dest="interp_cleanup",
+                help="cleanup by removing non-interpolated model files after interpolation is complete",
+            )
+            self.parser.add_argument(
                 "--interp_multiprocessing",
                 dest="interp_multiprocessing",
                 help="use multiprocessing instead of greasy to interpolate in HPC machines",
@@ -470,7 +475,16 @@ class ProvArgumentParser(object):
                 dest="multispecies_units",
                 help="Units of data in multispecies plots",
             )
-
+            self.parser.add_argument(
+                "--station_order",
+                dest="station_order",
+                help="Order in which to display stations",
+            )
+            self.parser.add_argument(
+                "--station_cap",
+                dest="station_cap",
+                help="Maximum number of stations to display",
+            )
         except Exception as error:
             log.error("Unhandled exception on Providentia: %s" % error, exc_info=True)
 

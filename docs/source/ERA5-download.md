@@ -39,6 +39,27 @@ Answer `n` to the prompt:
 
 _"Model data was detected in the configuration file. Do you want to download the interpolated version? (Otherwise, the non-interpolated model data will be downloaded)"_
 
+(download-a-specific-area-era5)=
+## Download a specific area
+If you do not want to download the entire NetCDF file, you can download data for a specific geographic area by including `longitude` and `latitude` as configuration fields.
+
+For example, to download data covering Europe in Providentia:
+
+```ini
+longitude = -28, 53
+latitude = 35, 72
+```
+
+The equivalent area for the request would be the following:
+
+```
+{
+    ...
+    "area": [72, -28, 35, 53],
+    ...
+}
+```
+
 ## 1. ERA5 hourly data on single levels from 1940 to present
 
 [Dataset Link](https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels?tab=overview)
@@ -47,9 +68,9 @@ Using this dataset you can download **Global Reanalysis data**.
 
 This dataset contains single-level data.
 
-### Mandatory fields
-
 Only hourly global data is available in this dataset. You must set `resolution = hourly` and `domain = global` in your configuration file; otherwise, the download will not work.
+
+### Mandatory fields
 
 ```ini
 model = era5_reanalysis
@@ -68,8 +89,9 @@ These are the available species:
 * `aswindir`
 * `aswindircs`
 * `aswtoa`
+* `auvin`
 * `blh`
-* `cld`
+* `cldaf`
 * `cldbot`
 * `clddf`
 * `cldtop`
@@ -88,6 +110,10 @@ These are the available species:
 
 > Providentia can only read species in GHOST format. If you want to know the mapping from CDS ERA5 variables to GHOST species, please refer to the [CDS ERA5-GHOST species mapping](#cds-era5-ghost-species-mapping) section.
 
+### Dataset temporal coverage
+
+The dataset covers the period from January 1940 to the present.
+
 ### Fixed Download Settings
 
 Providentia assumes the following fixed values when downloading data:
@@ -98,14 +124,14 @@ Providentia assumes the following fixed values when downloading data:
 
 There are five derived variables computed from two ERA5 variables. When downloading one of these, the two original variables are also downloaded, formatted and saved together with the final result.
 
-#### cld
+#### cldaf
 
-**cld** is computed from **aswin** and **aswincs**, which in CDS are:
+**cldaf** is computed from **aswin** and **aswincs**, which in CDS are:
 
 - surface_solar_radiation_downwards  
 - surface_solar_radiation_downward_clear_sky  
 
-When creating **cld**, both variables are also downloaded and saved.
+When creating **cldaf**, both variables are also downloaded and saved.
 
 **Formula:**
 
@@ -190,6 +216,18 @@ $$
 \end{aligned}
 $$
 
+## Example configuration file
+
+```ini
+[ERA5-CDS] 
+start_date = 20220101
+end_date = 20220201
+species = t2
+model = era5_reanalysis-global
+resolution = hourly
+dl_interpolated = False
+```
+
 ## 2. Reanalysis Tropopause Data Repository
 
 [Dataset Link](https://datapub.fz-juelich.de/slcs/tropopause/index.html)
@@ -198,9 +236,9 @@ Using this dataset you can download **Global Tropopause Reanalysis data**.
 
 This dataset contains single-level data.
 
-### Mandatory fields
-
 Only hourly global data is available in this dataset. You must set `resolution = hourly` and `domain = global` in your configuration file; otherwise, the download will not work.
+
+### Mandatory fields
 
 ```ini
 model = era5_tropopause
@@ -219,9 +257,25 @@ These are the available species:
 
 > Providentia can only read species in GHOST format. If you want to know the mapping from SDL ERA5 variables to GHOST species, please refer to the [SDL ERA5-GHOST species mapping](#sdl-era5-ghost-species-mapping) section.
 
+### Dataset temporal coverage
+
+The dataset covers the period from January 2000 to the present.
+
 ### Fixed Download Settings
 
-Providentia downloads tropopause data from the `v2/` directory.
+Providentia downloads tropopause data from the `v2/era5` directory.
+
+## Example configuration file
+
+```ini
+[ERA5-SDL] 
+start_date = 20220101
+end_date = 20220201
+species = tphclp
+model = era5_tropopause-global
+resolution = hourly
+dl_interpolated = False
+```
 
 ## CDS ERA5-GHOST species mapping
 
@@ -235,8 +289,9 @@ aswincs : surface_solar_radiation_downward_clear_sky
 aswindir : total_sky_direct_solar_radiation_at_surface
 aswindircs : clear_sky_direct_solar_radiation_at_surface
 aswtoa : toa_incident_solar_radiation
+auvin: downward_uv_radiation_at_the_surface
 blh : boundary_layer_height
-cld : [aswin, aswincs]
+cldaf : [aswin, aswincs]
 cldbot : cloud_base_height
 clddf : [aswindir, aswindircs]
 cldtop : high_cloud_cover

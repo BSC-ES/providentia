@@ -40,6 +40,33 @@ Answer `n` to the prompt:
 
 _"Model data was detected in the configuration file. Do you want to download the interpolated version? (Otherwise, the non-interpolated model data will be downloaded)"_
 
+(download-a-specific-area-cams)=
+## Download a specific area
+If you do not want to download the entire NetCDF file, you can download data for a specific geographic area by including `longitude` and `latitude` as configuration fields.
+
+For example, to download data covering Europe in Providentia:
+
+```ini
+longitude = -28, 53
+latitude = 35, 72
+```
+
+The equivalent area for the request would be the following:
+
+```
+{
+    ...
+    "area": [72, -28, 35, 53],
+    ...
+}
+```
+
+This option is available for:
+
+1. CAMS European Air Quality Forecasts
+2. CAMS Global Atmospheric Composition Forecasts
+3. CAMS Global Reanalysis (EAC4)
+
 ## 1. CAMS European Air Quality Forecasts
 
 [Dataset Link](https://ads.atmosphere.copernicus.eu/datasets/cams-europe-air-quality-forecasts?tab=overview)
@@ -111,6 +138,10 @@ These are the available species:
 * `sconcso2`
 
 > Providentia can only read species in GHOST format. If you want to know the mapping from CAMS variables to GHOST species, please refer to the [CAMS-GHOST species mapping](#cams-ghost-species-mapping) section.
+
+### Dataset temporal coverage
+
+The dataset covers the most recent three years relative to each update. The archive is updated daily.
 
 ### Fixed Download Settings
 
@@ -280,6 +311,10 @@ Whether the data is single or multi depends on the selected species. These are t
 
 > Providentia can only read species in GHOST format. If you want to know the mapping from CAMS variables to GHOST species, please refer to the [CAMS-GHOST species mapping](#cams-ghost-species-mapping) section.
 
+### Dataset temporal coverage
+
+The dataset covers the period from January 2015 to the present.
+
 ### Fixed Download Settings
 
 Providentia assumes the following fixed values when downloading data:
@@ -417,6 +452,10 @@ These are the available species:
 
 > Providentia can only read species in GHOST format. If you want to know the mapping from CAMS variables to GHOST species, please refer to the [CAMS-GHOST species mapping](#cams-ghost-species-mapping) section.
 
+### Dataset temporal coverage
+
+The dataset covers the period from January 2013 to December 2025.
+
 ### Fixed Download Settings
 
 Providentia assumes the following fixed values when downloading data:
@@ -539,6 +578,10 @@ Whether the data is single or multi depends on the selected species. These are t
 * `sconcso4`
 
 > Providentia can only read species in GHOST format. If you want to know the mapping from CAMS variables to GHOST species, please refer to the [CAMS-GHOST species mapping](#cams-ghost-species-mapping) section.
+
+### Dataset temporal coverage
+
+The dataset covers the period from January 2003 to December 2025.
 
 ### Fixed Download Settings
 

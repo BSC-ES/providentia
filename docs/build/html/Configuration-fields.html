@@ -420,27 +420,31 @@
 <td><p>Maximum number of chunks in the job array</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">100</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">interp_multiprocessing</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">interp_cleanup</span></code></p></td>
+<td><p>Cleanup by removing non-interpolated model files after interpolation is complete</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">interp_multiprocessing</span></code></p></td>
 <td><p>Use multiprocessing instead of Greasy on HPC systems</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">interp_spinup_timesteps</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">interp_spinup_timesteps</span></code></p></td>
 <td><p>Number of initial timesteps skipped for model spin-up</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">interp_model_downsampling</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">interp_model_downsampling</span></code></p></td>
 <td><p>Statistic for the downsampling of the model resolution to the observational resolution: <code class="docutils literal notranslate"><span class="pre">mean</span></code>, <code class="docutils literal notranslate"><span class="pre">median</span></code>.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">mean</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">interp_model_upsampling</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">interp_model_upsampling</span></code></p></td>
 <td><p>Method for the upsampling of the model resolution to the observational resolution: <code class="docutils literal notranslate"><span class="pre">fill</span></code>, <code class="docutils literal notranslate"><span class="pre">gaps</span></code>. <code class="docutils literal notranslate"><span class="pre">fill</span></code> linearly fills between measurements, and <code class="docutils literal notranslate"><span class="pre">gaps</span></code> sets NaN values for times that the model does not have.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">fill</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">network_type</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">network_type</span></code></p></td>
 <td><p>Determines whether to use all GHOST or all non-GHOST networks when the <code class="docutils literal notranslate"><span class="pre">observation</span></code> field uses the <code class="docutils literal notranslate"><span class="pre">*</span></code> wildcard.</p></td>
 <td><p>—</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">model_resolution</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">model_resolution</span></code></p></td>
 <td><p>Model resolution if different from observations.</p></td>
 <td><p>Same as <code class="docutils literal notranslate"><span class="pre">resolution</span></code></p></td>
 </tr>

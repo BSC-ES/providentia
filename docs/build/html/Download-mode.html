@@ -65,6 +65,7 @@
 <li class="toctree-l3"><a class="reference internal" href="Zenodo-download.html">Zenodo</a></li>
 <li class="toctree-l3"><a class="reference internal" href="CAMS-download.html">CAMS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ERA5-download.html">ERA5</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ICAP-download.html">ICAP</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Library-mode.html">Library</a></li>
@@ -170,6 +171,13 @@ or set <code class="docutils literal notranslate"><span class="pre">dl_ghost_sou
 <li><p>Downloads ERA5 model output from the <a class="reference external" href="https://cds.climate.copernicus.eu/datasets">Climate Data Store</a>. An ECMWF account is required to access this feature. Alternatively, data can be downloaded from the <a class="reference external" href="https://datapub.fz-juelich.de/slcs/">Simulation and Data Laboratory ‘Climate Science’</a>, which does not require an account.</p></li>
 <li><p>How to get this type of download: specify the model as <code class="docutils literal notranslate"><span class="pre">era5_reanalysis</span></code> or <code class="docutils literal notranslate"><span class="pre">era5_tropopause</span></code> in your configuration, and set <code class="docutils literal notranslate"><span class="pre">dl_interpolated</span></code> to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
 <li><p>To see more information, check the <a class="reference internal" href="ERA5-download.html"><span class="doc std std-doc">ERA5 download page</span></a>.</p></li>
+</ul>
+</li>
+<li><p><strong>Download of ICAP non-interpolated model data from the  U.S. Navy / Naval Research Laboratory (NRL)</strong></p>
+<ul class="simple">
+<li><p>Downloads ICAP model output from the <a class="reference external" href="https://nrlgodae1.nrlmry.navy.mil/cgi-bin/datalist.pl?generate=summary">U.S. Navy / Naval Research Laboratory</a>.</p></li>
+<li><p>How to get this type of download: specify the model as <code class="docutils literal notranslate"><span class="pre">icap_ensemble</span></code> or <code class="docutils literal notranslate"><span class="pre">icap_ensemble_C4</span></code> in your configuration, and set <code class="docutils literal notranslate"><span class="pre">dl_interpolated</span></code> to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+<li><p>To see more information, check the <a class="reference internal" href="ICAP-download.html"><span class="doc std std-doc">ICAP download page</span></a>.</p></li>
 </ul>
 </li>
 </ol>
@@ -289,6 +297,7 @@ or set <code class="docutils literal notranslate"><span class="pre">dl_ghost_sou
 <li class="toctree-l1"><a class="reference internal" href="CAMS-download.html">CAMS</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="CAMS-download.html#available-cams-datasets">Available CAMS datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CAMS-download.html#how-to-enable-atmosphere-data-store-download">How to enable Atmosphere Data Store download</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CAMS-download.html#download-a-specific-area">Download a specific area</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CAMS-download.html#cams-european-air-quality-forecasts">1. CAMS European Air Quality Forecasts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CAMS-download.html#cams-global-atmospheric-composition-forecasts">2. CAMS Global Atmospheric Composition Forecasts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CAMS-download.html#cams-european-air-quality-reanalyses">3. CAMS European Air Quality Reanalyses</a></li>
@@ -299,10 +308,20 @@ or set <code class="docutils literal notranslate"><span class="pre">dl_ghost_sou
 <li class="toctree-l1"><a class="reference internal" href="ERA5-download.html">ERA5</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="ERA5-download.html#available-era5-datasets">Available ERA5 datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ERA5-download.html#how-to-enable-era5-download">How to enable ERA5 download</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ERA5-download.html#download-a-specific-area">Download a specific area</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ERA5-download.html#era5-hourly-data-on-single-levels-from-1940-to-present">1. ERA5 hourly data on single levels from 1940 to present</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ERA5-download.html#example-configuration-file">Example configuration file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ERA5-download.html#reanalysis-tropopause-data-repository">2. Reanalysis Tropopause Data Repository</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ERA5-download.html#id6">Example configuration file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ERA5-download.html#cds-era5-ghost-species-mapping">CDS ERA5-GHOST species mapping</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ERA5-download.html#sdl-era5-ghost-species-mapping">SDL ERA5-GHOST species mapping</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ICAP-download.html">ICAP</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ICAP-download.html#available-cams-datasets">Available CAMS datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ICAP-download.html#how-to-enable-icap-download">How to enable ICAP download</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ICAP-download.html#icap-mme-the-international-cooperative-for-aerosol-prediction-icap-multi-model-ensemble-mme">ICAP MME - The International Cooperative for Aerosol Prediction (ICAP) Multi-Model Ensemble (MME)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ICAP-download.html#example-configuration-files">Example configuration files</a></li>
 </ul>
 </li>
 </ul>

@@ -72,11 +72,11 @@ class ModelInterpolation(object):
         submit_args : dict
             Dictionary of job submission parameters, including:
             - model_temporal_resolution : str
-            - speci_to_process : str
+            - mod_speci_to_process : str
             - network_to_interpolate_against : str
             - temporal_resolution_to_output : str
             - yearmonth : str
-            - original_speci_to_process : str
+            - speci_to_process : str
             - job_id : str
             - prov_mod_code : str
         """
@@ -89,7 +89,7 @@ class ModelInterpolation(object):
 
         # set variables from input keywords
         self.model_temporal_resolution = submit_args["model_temporal_resolution"]
-        self.speci_to_process = submit_args["speci_to_process"]
+        self.mod_speci_to_process = submit_args["mod_speci_to_process"]
         self.network_to_interpolate_against = submit_args[
             "network_to_interpolate_against"
         ]
@@ -97,7 +97,7 @@ class ModelInterpolation(object):
             "temporal_resolution_to_output"
         ]
         self.yearmonth = submit_args["yearmonth"]
-        self.original_speci_to_process = submit_args["original_speci_to_process"]
+        self.speci_to_process = submit_args["speci_to_process"]
         self.unique_id = submit_args["job_id"]
         self.prov_mod_code = submit_args["prov_mod_code"]
         (
@@ -105,6 +105,15 @@ class ModelInterpolation(object):
             self.grid_type,
             self.ensemble,
         ) = self.prov_mod_code.split("-")
+
+        # determine if are interpolating to another species (e.g. sconco3@t2) or not
+        if '@' in self.speci_to_process:
+            speci_to_process_split = self.speci_to_process.split('@')
+            self.original_mod_speci_to_process = speci_to_process_split[0]
+            self.obs_speci_to_process = speci_to_process_split[1]
+        else:
+            self.original_mod_speci_to_process = copy.deepcopy(self.speci_to_process)
+            self.obs_speci_to_process = copy.deepcopy(self.speci_to_process)
 
         # get year/month string
         self.year = self.yearmonth[:4]
@@ -145,6 +154,7 @@ class ModelInterpolation(object):
             "interp_model_upsampling",
             "interp_n_neighbours",
             "interp_reverse_vertical_orientation",
+            "interp_cleanup",
             "mod_root",
             "ghost_root",
             "mod_to_interp_root",
@@ -160,7 +170,7 @@ class ModelInterpolation(object):
 
         # import GHOST standards
         self.standard_parameter_speci = get_standard_parameters_by_speci(
-            self.original_speci_to_process, self.ghost_version
+            self.original_mod_speci_to_process, self.ghost_version
         )
 
         # get GHOST lower/upper limits for variable
@@ -205,8 +215,8 @@ class ModelInterpolation(object):
                     self.network_to_interpolate_against,
                     self.ghost_version,
                     self.temporal_resolution_to_output,
-                    self.original_speci_to_process,
-                    self.original_speci_to_process,
+                    self.obs_speci_to_process,
+                    self.obs_speci_to_process,
                     self.yearmonth,
                 )
             )[0]
@@ -217,11 +227,34 @@ class ModelInterpolation(object):
                 + "/{}/{}/{}/{}_{}*.nc".format(
                     self.network_to_interpolate_against,
                     self.temporal_resolution_to_output,
-                    self.original_speci_to_process,
-                    self.original_speci_to_process,
+                    self.obs_speci_to_process,
+                    self.obs_speci_to_process,
                     self.yearmonth,
                 )
             )[0]
+
+        # set obs file for getting units and boolean setting if can convert units or not
+        self.obs_file_units = copy.deepcopy(self.obs_file)
+           
+        # get relevant observational file for unit conversion if are interpolating between species (e.g. sconco3@t2)
+        if '@' in self.speci_to_process:
+            # GHOST
+            if self.reading_ghost:
+                obs_files = glob.glob(self.ghost_root + '/{}/{}/{}/{}/{}_{}*.nc'\
+                              .format(self.network_to_interpolate_against, self.ghost_version,
+                                      self.temporal_resolution_to_output, self.original_mod_speci_to_process,
+                                      self.original_mod_speci_to_process, self.yearmonth))
+            # non-GHOST
+            else:
+                obs_files = glob.glob(self.nonghost_root + '/{}/{}/{}/{}_{}*.nc'\
+                             .format(self.network_to_interpolate_against, self.temporal_resolution_to_output,
+                                     self.original_mod_speci_to_process, self.original_mod_speci_to_process, self.yearmonth))
+                
+            # if have valid obs file then take it
+            if len(obs_files) > 0:
+                self.obs_file_units = obs_files[0]
+            else:
+                self.obs_file_units = None
 
         # get relevant model files
         if self.ensemble_member:
@@ -231,8 +264,8 @@ class ModelInterpolation(object):
                         mod_dir,
                         self.grid_type,
                         self.model_temporal_resolution,
-                        self.speci_to_process,
-                        self.speci_to_process,
+                        self.mod_speci_to_process,
+                        self.mod_speci_to_process,
                         self.yearmonth,
                     )
                 )
@@ -246,7 +279,7 @@ class ModelInterpolation(object):
                 [
                     f
                     for f in all_model_files
-                    if "{}-{}_".format(self.speci_to_process, self.ensemble) in f
+                    if "{}-{}_".format(self.mod_speci_to_process, self.ensemble) in f
                 ]
             )
 
@@ -262,9 +295,9 @@ class ModelInterpolation(object):
                         mod_dir,
                         self.grid_type,
                         self.model_temporal_resolution,
-                        self.speci_to_process,
+                        self.mod_speci_to_process,
                         self.ensemble,
-                        self.speci_to_process,
+                        self.mod_speci_to_process,
                         self.yearmonth,
                         self.ensemble,
                     )
@@ -384,8 +417,8 @@ class ModelInterpolation(object):
                                 mod_dir,
                                 self.grid_type,
                                 self.model_temporal_resolution,
-                                self.speci_to_process,
-                                self.speci_to_process,
+                                self.mod_speci_to_process,
+                                self.mod_speci_to_process,
                                 prev_yearmonth,
                             )
                         )
@@ -397,9 +430,9 @@ class ModelInterpolation(object):
                                 mod_dir,
                                 self.grid_type,
                                 self.model_temporal_resolution,
-                                self.speci_to_process,
+                                self.mod_speci_to_process,
                                 self.ensemble,
-                                self.speci_to_process,
+                                self.mod_speci_to_process,
                                 prev_yearmonth,
                                 self.ensemble,
                             )
@@ -417,7 +450,7 @@ class ModelInterpolation(object):
                         [
                             f
                             for f in prev_month_files
-                            if "{}-{}_".format(self.speci_to_process, self.ensemble)
+                            if "{}-{}_".format(self.mod_speci_to_process, self.ensemble)
                             in f
                         ]
                     )
@@ -487,23 +520,23 @@ class ModelInterpolation(object):
                 mod_nc_root = Dataset(model_file)
 
                 # get instance of species variable
-                mod_speci_obj = mod_nc_root[self.speci_to_process]
+                mod_speci_obj = mod_nc_root[self.mod_speci_to_process]
 
                 # get species units
                 if hasattr(mod_speci_obj, "units"):
                     self.mod_speci_units = mod_speci_obj.units
                 else:
-                    self.log_file_str += f"Missing 'units' attribute for variable '{self.speci_to_process}' in file {model_file}\n"
+                    self.log_file_str += f"Missing 'units' attribute for variable '{self.mod_speci_to_process}' in file {model_file}\n"
                     create_output_logfile(1, self.log_file_str)
 
                 # get model grid type
                 if hasattr(mod_speci_obj, "grid_mapping"):
                     self.mod_grid_type = mod_speci_obj.grid_mapping
                 else:
-                    self.log_file_str += f"Missing 'grid_mapping' attribute for variable '{self.speci_to_process}' in file {model_file}\n"
+                    self.log_file_str += f"Missing 'grid_mapping' attribute for variable '{self.mod_speci_to_process}' in file {model_file}\n"
                     create_output_logfile(1, self.log_file_str)
 
-                # get indivudual dimension variable names
+                # get individual dimension variable names
                 # standard (no vertical dimension)
                 self.have_vertical_dimension = False
                 self.have_bin_dimension = False
@@ -512,7 +545,7 @@ class ModelInterpolation(object):
                     self.y_varname = mod_speci_obj.dimensions[1]
                 # mapped size distribution variable, with bin dimension
                 elif (len(mod_speci_obj.shape) == 4) and (
-                    "vconcaerobin" in self.original_speci_to_process
+                    "vconcaerobin" in self.original_mod_speci_to_process
                 ):
                     self.have_bin_dimension = True
                     self.x_varname = mod_speci_obj.dimensions[3]
@@ -590,7 +623,7 @@ class ModelInterpolation(object):
                 if hasattr(mod_speci_obj, "coordinates"):
                     grid_centre_coordinates = mod_speci_obj.coordinates.split(" ")
                 else:
-                    self.log_file_str += f"Missing 'coordinates' attribute for variable '{self.speci_to_process}' in file {model_file}\n"
+                    self.log_file_str += f"Missing 'coordinates' attribute for variable '{self.mod_speci_to_process}' in file {model_file}\n"
                     create_output_logfile(1, self.log_file_str)
 
                 lon_centre_varname = grid_centre_coordinates[1]
@@ -953,14 +986,23 @@ class ModelInterpolation(object):
         # get observational file netCDF root
         obs_nc_root = Dataset(self.obs_file)
 
-        # get measured observational variable object
-        obs_measured_var_obj = obs_nc_root[self.original_speci_to_process]
-
-        # get the metadata
-        self.obs_units = obs_measured_var_obj.units
-        if self.reading_ghost:
-            self.obs_long_name = obs_measured_var_obj.long_name
-            self.obs_standard_name = obs_measured_var_obj.standard_name
+        # get measured observational variable units
+        # if are interpolating between species, and have no observational file to get units from, 
+        # then take from GHOST standards
+        if self.obs_file_units is None:
+            self.obs_units = self.standard_parameter_speci['standard_units']
+        # if are interpolating between species, and have an observational file to get units from, 
+        # then take it from that
+        elif self.obs_file != self.obs_file_units:
+            obs_nc_root_units = Dataset(self.obs_file_units)
+            obs_measured_var_obj = obs_nc_root_units[self.original_mod_speci_to_process]
+            self.obs_units = obs_measured_var_obj.units
+            obs_nc_root_units.close()
+        # otherwise take from standard observational file
+        else:
+            # get measured observational variable object 
+            obs_measured_var_obj = obs_nc_root[self.obs_speci_to_process]
+            self.obs_units = obs_measured_var_obj.units
 
         # station object
         # for GHOST always is "station_reference"
@@ -1190,7 +1232,7 @@ class ModelInterpolation(object):
         # -- get transform factor to go between model bin and aeronet bin
         if self.have_bin_dimension:
             aeronet_bin_radius = get_aeronet_bin_radius_from_bin_variable(
-                self.original_speci_to_process
+                self.original_mod_speci_to_process
             )
             bin_index, rmin, rmax, rho_bin = get_aeronet_model_bin(
                 self.model_name, aeronet_bin_radius
@@ -1351,7 +1393,7 @@ class ModelInterpolation(object):
                     # read valid data from file for valid indices
                     # have bin dimension?
                     if self.have_bin_dimension:
-                        read_data = mod_nc_root[self.speci_to_process][
+                        read_data = mod_nc_root[self.mod_speci_to_process][
                             valid_file_time_inds[forecast_day_ii], bin_index, :, :
                         ]
 
@@ -1362,12 +1404,12 @@ class ModelInterpolation(object):
                         read_data = read_data * bin_transform_factor
                     # has vertical dimension
                     elif self.have_vertical_dimension:
-                        read_data = mod_nc_root[self.speci_to_process][
+                        read_data = mod_nc_root[self.mod_speci_to_process][
                             valid_file_time_inds[forecast_day_ii], self.z_index, :, :
                         ]
                     # has no vertical dimension?
                     else:
-                        read_data = mod_nc_root[self.speci_to_process][
+                        read_data = mod_nc_root[self.mod_speci_to_process][
                             valid_file_time_inds[forecast_day_ii], :, :
                         ]
 
@@ -1596,7 +1638,7 @@ class ModelInterpolation(object):
             self.ghost_version,
             self.prov_mod_code,
             self.temporal_resolution_to_output,
-            self.original_speci_to_process,
+            self.speci_to_process,
             network_name,
         )
 
@@ -1605,7 +1647,7 @@ class ModelInterpolation(object):
 
         # create netCDF dataset
         netCDF_fname = "{}/{}_{}.nc".format(
-            output_dir, self.original_speci_to_process, self.yearmonth
+            output_dir, self.speci_to_process, self.yearmonth
         )
         root_grp = Dataset(netCDF_fname, "w", format="NETCDF4")
 
@@ -1617,9 +1659,12 @@ class ModelInterpolation(object):
             self.interp_n_neighbours
         )
         msg += "{} model data for the component {} ".format(
-            self.experiment_to_process, self.original_speci_to_process
+            self.experiment_to_process, self.original_mod_speci_to_process
         )
-        msg += "with reference to the measurement stations in the "
+        if '@' in self.speci_to_process:
+            msg += 'with reference to {} measurement stations in the '.format(self.obs_speci_to_process)
+        else:
+            msg += 'with reference to the measurement stations in the '
         msg += "{} network ".format(self.network_to_interpolate_against)
         msg += "in {}-{}.".format(self.year, self.month)
         root_grp.title = msg
@@ -1755,35 +1800,23 @@ class ModelInterpolation(object):
                     # create measured variable
                     if self.forecast:
                         measured_var = root_grp.createVariable(
-                            self.original_speci_to_process,
+                            self.speci_to_process,
                             "f4",
                             ("station", "time", "forecast_day"),
                         )
                     else:
                         measured_var = root_grp.createVariable(
-                            self.original_speci_to_process, "f4", ("station", "time")
+                            self.speci_to_process, "f4", ("station", "time")
                         )
-                    # GHOST
-                    if self.reading_ghost:
-                        measured_var.long_name = self.obs_long_name
-                        measured_var.units = self.obs_units
-                        measured_var.standard_name = self.obs_standard_name
-                        measured_var.description = (
-                            "Interpolated value of {} from the model {} "
-                            "with reference to the measurement stations in the {} network".format(
-                                self.obs_standard_name,
-                                self.experiment_to_process,
-                                self.network_to_interpolate_against,
-                            )
-                        )
-                    # non-GHOST
+                    # add attributes
+                    measured_var.standard_name = self.speci_to_process
+                    measured_var.units = self.obs_units
+                    if '@' in self.speci_to_process:
+                        measured_var.description = 'Interpolated value of {} from the model {} with reference to {} measurement stations in the {} network'.format(
+                                                  self.original_mod_speci_to_process, self.experiment_to_process, self.obs_speci_to_process, self.network_to_interpolate_against)
                     else:
-                        measured_var.standard_name = self.original_speci_to_process
-                        measured_var.description = "Interpolated value of {} from the model {} with reference to the measurement stations in the {} network".format(
-                            self.original_speci_to_process,
-                            self.experiment_to_process,
-                            self.network_to_interpolate_against,
-                        )
+                        measured_var.description = 'Interpolated value of {} from the model {} with reference to the measurement stations in the {} network'.format(
+                                                  self.original_mod_speci_to_process, self.experiment_to_process, self.network_to_interpolate_against)
 
                     # write to variables
                     time_var[:] = self.yearmonth_time
@@ -1907,6 +1940,23 @@ class ModelInterpolation(object):
                     )
                     create_output_logfile(1, self.log_file_str)
 
+    def cleanup(self):
+        """
+        Remove non-inteprolated model files used for interpolation.
+        """
+
+        self.log_file_str += "\nRemoving non-interpolated model files:\n"
+
+        for model_file in self.model_files:
+            try:
+                os.remove(model_file)
+                self.log_file_str += "Model file {} removed.\n".format(model_file)
+                
+            except Exception as e:
+                self.log_file_str += "Model file {} could not be removed. Error: {}.\n".format(
+                    model_file, e
+                )
+                create_output_logfile(1, self.log_file_str)
 
 def create_output_logfile(process_code, log_file_str):
     """
@@ -1927,7 +1977,7 @@ def create_output_logfile(process_code, log_file_str):
     output_logfile_dir = (
         f"{join(PROVIDENTIA_ROOT, 'logs/interpolation/interpolation_logs/')}"
         f"{submit_args['prov_mod_code']}/"
-        f"{submit_args['original_speci_to_process']}/"
+        f"{submit_args['speci_to_process']}/"
         f"{submit_args['network_to_interpolate_against']}/"
         f"{submit_args['temporal_resolution_to_output']}/"
         f"{submit_args['yearmonth']}"
@@ -1950,11 +2000,11 @@ if __name__ == "__main__":
         submit_args = {
             "prov_mod_code": sys.argv[1],
             "model_temporal_resolution": sys.argv[2],
-            "speci_to_process": sys.argv[3],
+            "mod_speci_to_process": sys.argv[3],
             "network_to_interpolate_against": sys.argv[4],
             "temporal_resolution_to_output": sys.argv[5],
             "yearmonth": sys.argv[6],
-            "original_speci_to_process": sys.argv[7],
+            "speci_to_process": sys.argv[7],
             "job_id": sys.argv[8],
         }
 
@@ -1995,6 +2045,10 @@ if __name__ == "__main__":
 
         # write out netCDF for yearmonth, interpolating model data to surface observational stations
         EI.write_netCDF()
+
+        # remove non-inteprolated model files used for interpolation
+        if EI.interp_cleanup:
+            EI.cleanup()
 
         # get total time of interpolation
         interpolation_time = time.time() - interpolation_start

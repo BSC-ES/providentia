@@ -27,9 +27,6 @@ defaults = yaml.safe_load(
 multispecies_map = yaml.safe_load(
     open(join(PROVIDENTIA_ROOT, "settings", "multispecies_shortcuts.yaml"))
 )
-mapping_species = yaml.safe_load(
-    open(join(PROVIDENTIA_ROOT, "settings", "mapping_species.yaml"))
-)
 interp_models = yaml.safe_load(
     open(join(PROVIDENTIA_ROOT, "settings", "interp_models.yaml"))
 )
@@ -1247,7 +1244,7 @@ class ProvConfiguration:
             # TODO Hardcoded ERA5
             # cams model is directly valid
             if model.startswith(tuple(model_options.keys())) or model.startswith(
-                "era5_tropopause"
+                "era5_tropopause") or model.startswith("icap_ensemble"
             ):
                 return [model]
 
@@ -1499,7 +1496,7 @@ class ProvConfiguration:
                 mapped_species = multispecies_map[speci]
                 del new_species[speci_ii]
                 new_species[speci_ii:speci_ii] = mapped_species
-                # in download mode is not necessary to duplicate the networks
+                # in download mode it is not necessary to duplicate the networks
                 if self.read_instance.mode != "download":
                     network_to_duplicate = self.read_instance.network[speci_ii]
                     del self.read_instance.network[speci_ii]
@@ -1542,11 +1539,24 @@ class ProvConfiguration:
                             sys.exit(1)
 
         # remove species that are not in the current ghost version
-        invalid_species = (
-            set(self.read_instance.species)
+        # if have species to interpolate between then check have 2 species and that both are valid
+        species_to_check = [part for speci in self.read_instance.species for part in (speci.split('@') if '@' in speci and len(speci.split('@')) == 2 and all(speci.split('@')) else ([speci] if '@' not in speci else []))]
+        invalid_species = list(
+            set(species_to_check)
             - set(self.read_instance.available_species)
             - {"*"}
         )
+
+        # if invalid species is in an interpolation pair, remove the whole pair
+        for inv_speci_ii, inv_speci in enumerate(copy.deepcopy(invalid_species)):
+            for speci_ii, speci in enumerate(self.read_instance.species):
+                if '@' in speci:
+                    split_speci = speci.split('@')
+                    if (inv_speci in split_speci) & (speci not in invalid_species):
+                        invalid_species.append(speci)
+                        if (inv_speci not in self.read_instance.species) & (inv_speci in invalid_species):
+                            invalid_species.remove(inv_speci)
+
         if invalid_species:
             msg = f'Removing invalid species {", ".join(invalid_species)} for the current GHOST version ({self.read_instance.ghost_version})'
             show_message(
@@ -1555,8 +1565,9 @@ class ProvConfiguration:
                 from_conf=self.read_instance.from_conf,
                 deactivate=deactivate_warning,
             )
-            for inv_species in invalid_species:
-                self.read_instance.species.remove(inv_species)
+            for inv_speci in invalid_species:
+                self.read_instance.species.remove(inv_speci) 
+
             # exit if there are no valid species left
             if not self.read_instance.species:
                 error = f"Error: No valid species for the current GHOST version ({self.read_instance.ghost_version})"
@@ -1899,8 +1910,9 @@ class ProvConfiguration:
                 )
 
             # create variable for all unique species (plus filter species)
+            # if are interpolating between species keep only observational species 
             filter_species = []
-            species_plus_filter_species = copy.deepcopy(self.read_instance.species)
+            species_plus_filter_species = [speci.split('@')[1] if '@' in speci else speci for speci in self.read_instance.species]
             if self.read_instance.filter_species:
                 for networkspeci in self.read_instance.filter_species:
                     speci = networkspeci.split("|")[1]
@@ -2266,7 +2278,7 @@ def read_conf(self, fpath=None):
                         all_sections_modified.append(section_modified)
                     else:
                         error = "Error: It is not possible to have two sections with the same name."
-                        self.read_instance.logger.error(error)
+                        self.logger.error(error)
                         sys.exit(1)
             elif "[[" in line and "]]" in line:
                 subsection = line.strip()

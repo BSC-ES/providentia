@@ -22,7 +22,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Library" href="Library-mode.html" />
+    <link rel="next" title="ICAP" href="ICAP-download.html" />
     <link rel="prev" title="CAMS" href="CAMS-download.html" /> 
 </head>
 
@@ -61,12 +61,16 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">ERA5</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#available-era5-datasets">Available ERA5 datasets</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#how-to-enable-era5-download">How to enable ERA5 download</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#download-a-specific-area">Download a specific area</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#era5-hourly-data-on-single-levels-from-1940-to-present">1. ERA5 hourly data on single levels from 1940 to present</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#example-configuration-file">Example configuration file</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#reanalysis-tropopause-data-repository">2. Reanalysis Tropopause Data Repository</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">Example configuration file</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#cds-era5-ghost-species-mapping">CDS ERA5-GHOST species mapping</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#sdl-era5-ghost-species-mapping">SDL ERA5-GHOST species mapping</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="ICAP-download.html">ICAP</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Library-mode.html">Library</a></li>
@@ -143,14 +147,31 @@
 <p>Answer <code class="docutils literal notranslate"><span class="pre">n</span></code> to the prompt:</p>
 <p><em>“Model data was detected in the configuration file. Do you want to download the interpolated version? (Otherwise, the non-interpolated model data will be downloaded)”</em></p>
 </section>
+<section id="download-a-specific-area">
+<span id="download-a-specific-area-era5"></span><h2>Download a specific area<a class="headerlink" href="#download-a-specific-area" title="Link to this heading"></a></h2>
+<p>If you do not want to download the entire NetCDF file, you can download data for a specific geographic area by including <code class="docutils literal notranslate"><span class="pre">longitude</span></code> and <code class="docutils literal notranslate"><span class="pre">latitude</span></code> as configuration fields.</p>
+<p>For example, to download data covering Europe in Providentia:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">longitude</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">-28, 53</span>
+<span class="na">latitude</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">35, 72</span>
+</pre></div>
+</div>
+<p>The equivalent area for the request would be the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="o">...</span>
+    <span class="s2">&quot;area&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">72</span><span class="p">,</span> <span class="o">-</span><span class="mi">28</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">53</span><span class="p">],</span>
+    <span class="o">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
 <section id="era5-hourly-data-on-single-levels-from-1940-to-present">
 <h2>1. ERA5 hourly data on single levels from 1940 to present<a class="headerlink" href="#era5-hourly-data-on-single-levels-from-1940-to-present" title="Link to this heading"></a></h2>
 <p><a class="reference external" href="https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels?tab=overview">Dataset Link</a></p>
 <p>Using this dataset you can download <strong>Global Reanalysis data</strong>.</p>
 <p>This dataset contains single-level data.</p>
+<p>Only hourly global data is available in this dataset. You must set <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">hourly</span></code> and <code class="docutils literal notranslate"><span class="pre">domain</span> <span class="pre">=</span> <span class="pre">global</span></code> in your configuration file; otherwise, the download will not work.</p>
 <section id="mandatory-fields">
 <h3>Mandatory fields<a class="headerlink" href="#mandatory-fields" title="Link to this heading"></a></h3>
-<p>Only hourly global data is available in this dataset. You must set <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">hourly</span></code> and <code class="docutils literal notranslate"><span class="pre">domain</span> <span class="pre">=</span> <span class="pre">global</span></code> in your configuration file; otherwise, the download will not work.</p>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">era5_reanalysis</span>
 <span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">global</span>
 <span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
@@ -168,8 +189,9 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">aswindir</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">aswindircs</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">aswtoa</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">auvin</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">blh</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">cld</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cldaf</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">cldbot</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">clddf</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">cldtop</span></code></p></li>
@@ -190,6 +212,10 @@
 <div><p>Providentia can only read species in GHOST format. If you want to know the mapping from CDS ERA5 variables to GHOST species, please refer to the <a class="reference internal" href="#cds-era5-ghost-species-mapping">CDS ERA5-GHOST species mapping</a> section.</p>
 </div></blockquote>
 </section>
+<section id="dataset-temporal-coverage">
+<h3>Dataset temporal coverage<a class="headerlink" href="#dataset-temporal-coverage" title="Link to this heading"></a></h3>
+<p>The dataset covers the period from January 1940 to the present.</p>
+</section>
 <section id="fixed-download-settings">
 <h3>Fixed Download Settings<a class="headerlink" href="#fixed-download-settings" title="Link to this heading"></a></h3>
 <p>Providentia assumes the following fixed values when downloading data:</p>
@@ -200,14 +226,14 @@
 <section id="product-species">
 <h3>Product Species<a class="headerlink" href="#product-species" title="Link to this heading"></a></h3>
 <p>There are five derived variables computed from two ERA5 variables. When downloading one of these, the two original variables are also downloaded, formatted and saved together with the final result.</p>
-<section id="cld">
-<h4>cld<a class="headerlink" href="#cld" title="Link to this heading"></a></h4>
-<p><strong>cld</strong> is computed from <strong>aswin</strong> and <strong>aswincs</strong>, which in CDS are:</p>
+<section id="cldaf">
+<h4>cldaf<a class="headerlink" href="#cldaf" title="Link to this heading"></a></h4>
+<p><strong>cldaf</strong> is computed from <strong>aswin</strong> and <strong>aswincs</strong>, which in CDS are:</p>
 <ul class="simple">
 <li><p>surface_solar_radiation_downwards</p></li>
 <li><p>surface_solar_radiation_downward_clear_sky</p></li>
 </ul>
-<p>When creating <strong>cld</strong>, both variables are also downloaded and saved.</p>
+<p>When creating <strong>cldaf</strong>, both variables are also downloaded and saved.</p>
 <p><strong>Formula:</strong></p>
 <div class="math notranslate nohighlight">
 \[
@@ -289,14 +315,26 @@
 </section>
 </section>
 </section>
+<section id="example-configuration-file">
+<h2>Example configuration file<a class="headerlink" href="#example-configuration-file" title="Link to this heading"></a></h2>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[ERA5-CDS]</span><span class="w"> </span>
+<span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20220101</span>
+<span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20220201</span>
+<span class="na">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">t2</span>
+<span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">era5_reanalysis-global</span>
+<span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
+<span class="na">dl_interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
+</pre></div>
+</div>
+</section>
 <section id="reanalysis-tropopause-data-repository">
 <h2>2. Reanalysis Tropopause Data Repository<a class="headerlink" href="#reanalysis-tropopause-data-repository" title="Link to this heading"></a></h2>
 <p><a class="reference external" href="https://datapub.fz-juelich.de/slcs/tropopause/index.html">Dataset Link</a></p>
 <p>Using this dataset you can download <strong>Global Tropopause Reanalysis data</strong>.</p>
 <p>This dataset contains single-level data.</p>
+<p>Only hourly global data is available in this dataset. You must set <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">hourly</span></code> and <code class="docutils literal notranslate"><span class="pre">domain</span> <span class="pre">=</span> <span class="pre">global</span></code> in your configuration file; otherwise, the download will not work.</p>
 <section id="id2">
 <h3>Mandatory fields<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
-<p>Only hourly global data is available in this dataset. You must set <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">hourly</span></code> and <code class="docutils literal notranslate"><span class="pre">domain</span> <span class="pre">=</span> <span class="pre">global</span></code> in your configuration file; otherwise, the download will not work.</p>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">era5_tropopause</span>
 <span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">global</span>
 <span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
@@ -317,9 +355,25 @@
 </div></blockquote>
 </section>
 <section id="id4">
-<h3>Fixed Download Settings<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
-<p>Providentia downloads tropopause data from the <code class="docutils literal notranslate"><span class="pre">v2/</span></code> directory.</p>
+<h3>Dataset temporal coverage<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<p>The dataset covers the period from January 2000 to the present.</p>
 </section>
+<section id="id5">
+<h3>Fixed Download Settings<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<p>Providentia downloads tropopause data from the <code class="docutils literal notranslate"><span class="pre">v2/era5</span></code> directory.</p>
+</section>
+</section>
+<section id="id6">
+<h2>Example configuration file<a class="headerlink" href="#id6" title="Link to this heading"></a></h2>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[ERA5-SDL]</span><span class="w"> </span>
+<span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20220101</span>
+<span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20220201</span>
+<span class="na">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">tphclp</span>
+<span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">era5_tropopause-global</span>
+<span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
+<span class="na">dl_interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
+</pre></div>
+</div>
 </section>
 <section id="cds-era5-ghost-species-mapping">
 <h2>CDS ERA5-GHOST species mapping<a class="headerlink" href="#cds-era5-ghost-species-mapping" title="Link to this heading"></a></h2>
@@ -331,8 +385,9 @@
 <span class="n">aswindir</span> <span class="p">:</span> <span class="n">total_sky_direct_solar_radiation_at_surface</span>
 <span class="n">aswindircs</span> <span class="p">:</span> <span class="n">clear_sky_direct_solar_radiation_at_surface</span>
 <span class="n">aswtoa</span> <span class="p">:</span> <span class="n">toa_incident_solar_radiation</span>
+<span class="n">auvin</span><span class="p">:</span> <span class="n">downward_uv_radiation_at_the_surface</span>
 <span class="n">blh</span> <span class="p">:</span> <span class="n">boundary_layer_height</span>
-<span class="n">cld</span> <span class="p">:</span> <span class="p">[</span><span class="n">aswin</span><span class="p">,</span> <span class="n">aswincs</span><span class="p">]</span>
+<span class="n">cldaf</span> <span class="p">:</span> <span class="p">[</span><span class="n">aswin</span><span class="p">,</span> <span class="n">aswincs</span><span class="p">]</span>
 <span class="n">cldbot</span> <span class="p">:</span> <span class="n">cloud_base_height</span>
 <span class="n">clddf</span> <span class="p">:</span> <span class="p">[</span><span class="n">aswindir</span><span class="p">,</span> <span class="n">aswindircs</span><span class="p">]</span>
 <span class="n">cldtop</span> <span class="p">:</span> <span class="n">high_cloud_cover</span>
@@ -368,7 +423,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="CAMS-download.html" class="btn btn-neutral float-left" title="CAMS" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Library-mode.html" class="btn btn-neutral float-right" title="Library" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="ICAP-download.html" class="btn btn-neutral float-right" title="ICAP" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
