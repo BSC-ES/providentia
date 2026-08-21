@@ -1501,67 +1501,8 @@ class Dashboard(QtWidgets.QWidget):
             if previous_selected_model in self.models_menu["models"]["map_vars"]
         ]
 
-        # set all and selected models
-        all_models = {}
-        for mod in self.models_menu["models"]["map_vars"]:
-            if mod in self.experiments:
-                all_models[mod] = self.experiments[mod]
-            elif mod in self.init_models:
-                all_models[mod] = self.init_models[mod]
-            else:
-                all_models[mod] = mod
-
-        selected_models = {}
-        for mod in self.models_menu["models"]["keep_selected"]:
-            if mod in self.experiments:
-                selected_models[mod] = self.experiments[mod]
-            elif mod in self.init_models:
-                selected_models[mod] = self.init_models[mod]
-            else:
-                selected_models[mod] = mod
-
-        # set selected data labels
-        all_data_labels = [self.observations_data_label] + list(all_models.values())
-        all_data_labels_raw = [self.observations_data_label] + list(all_models.keys())
-        selected_data_labels = [self.observations_data_label] + list(
-            selected_models.values()
-        )
-        selected_data_labels_raw = [self.observations_data_label] + list(
-            selected_models.keys()
-        )
-
-        # save intial models if loading from .conf file to keep alias
-        if self.from_conf:
-            self.init_models = copy.deepcopy(selected_models)
-
-        # check N available forecast days for model
-        self.datareader.check_forecast(
-            data_labels=all_data_labels,
-            data_labels_raw=all_data_labels_raw,
-            networkspecies=self.selected_networkspecies,
-            resolution=self.selected_resolution,
-            ghost_version=self.ghost_version,
-        )
-
-        # update forecast indices and data labels based on selected forecast data
-        (
-            selected_data_labels,
-            selected_data_labels_raw,
-            selected_models,
-        ) = self.datareader.update_forecast_indices(
-            data_labels=all_data_labels,
-            data_labels_raw=all_data_labels_raw,
-            selected_data_labels=selected_data_labels,
-            selected_data_labels_raw=selected_data_labels_raw,
-            networkspecies=self.selected_networkspecies,
-            init=True,
-        )
-
-        # if are loading from a .conf file then set data labels and models
-        if self.from_conf:
-            self.data_labels = copy.deepcopy(selected_data_labels)
-            self.data_labels_raw = copy.deepcopy(selected_data_labels_raw)
-            self.experiments = copy.deepcopy(selected_models)
+        # update forecast menus
+        self.update_models_menu()
 
         # update default qa
         # TODO: Have different selections of qa per species
@@ -1707,6 +1648,73 @@ class Dashboard(QtWidgets.QWidget):
         # unset variable to allow interactive handling from now
         self.block_config_bar_handling_updates = False
 
+    def update_models_menu(self):
+        """
+        Update internal self.read_instance.models_menu after checking if models have forecast options
+        """
+        
+        # set all and selected models
+        all_models = {}
+        for mod in self.models_menu["models"]["map_vars"]:
+            if mod in self.experiments:
+                all_models[mod] = self.experiments[mod]
+            elif mod in self.init_models:
+                all_models[mod] = self.init_models[mod]
+            else:
+                all_models[mod] = mod
+
+        selected_models = {}
+        for mod in self.models_menu["models"]["keep_selected"]:
+            if mod in self.experiments:
+                selected_models[mod] = self.experiments[mod]
+            elif mod in self.init_models:
+                selected_models[mod] = self.init_models[mod]
+            else:
+                selected_models[mod] = mod
+
+        # set selected data labels
+        all_data_labels = [self.observations_data_label] + list(all_models.values())
+        all_data_labels_raw = [self.observations_data_label] + list(all_models.keys())
+        selected_data_labels = [self.observations_data_label] + list(
+            selected_models.values()
+        )
+        selected_data_labels_raw = [self.observations_data_label] + list(
+            selected_models.keys()
+        )
+
+        # save intial models if loading from .conf file to keep alias
+        if self.from_conf:
+            self.init_models = copy.deepcopy(selected_models)
+
+        # check N available forecast days for model
+        self.datareader.check_forecast(
+            data_labels=all_data_labels,
+            data_labels_raw=all_data_labels_raw,
+            networkspecies=self.selected_networkspecies,
+            resolution=self.selected_resolution,
+            ghost_version=self.ghost_version,
+        )
+
+        # update forecast indices and data labels based on selected forecast data
+        (
+            selected_data_labels,
+            selected_data_labels_raw,
+            selected_models,
+        ) = self.datareader.update_forecast_indices(
+            data_labels=all_data_labels,
+            data_labels_raw=all_data_labels_raw,
+            selected_data_labels=selected_data_labels,
+            selected_data_labels_raw=selected_data_labels_raw,
+            networkspecies=self.selected_networkspecies,
+            init=True,
+        )
+
+        # if are loading from a .conf file then set data labels and models
+        if self.from_conf:
+            self.data_labels = copy.deepcopy(selected_data_labels)
+            self.data_labels_raw = copy.deepcopy(selected_data_labels_raw)
+            self.experiments = copy.deepcopy(selected_models)
+
     def enable_element(self, element, element_type):
         """
         Make element active and update its formatting.
@@ -1790,14 +1798,21 @@ class Dashboard(QtWidgets.QWidget):
             self.cb_ghost_features = self.disable_element(self.cb_ghost_features, "combobox")
 
         if self.mod_active:
+            # update available models for selected fields
+            get_valid_models(
+                self,
+                self.start_date,
+                self.end_date,
+                self.resolution,
+                self.networkspecies
+            )
+            # update forecast menus
+            self.update_models_menu()
             self.bu_models = self.enable_element(self.bu_models, "button")
         else:
-            self.bu_models = self.disable_element(self.bu_models, "button")
             # remove experiments from selected models if switching to OBS
             self.models_menu["models"]["keep_selected"] = []
-
-        # read and filter
-        self.handle_data_selection_update()
+            self.bu_models = self.disable_element(self.bu_models, "button")
 
     def handle_config_bar_params_change(self, changed_param):
         """

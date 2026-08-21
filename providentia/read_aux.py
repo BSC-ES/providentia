@@ -1117,12 +1117,23 @@ def get_valid_models(instance, start_date, end_date, resolution, networkspecies)
         The monitoring networks|species to match against model data.
     """
 
-    # get all different model names (from providentia-interpolation output dir)
+    if not instance.obs_active:
+        models_path = join(instance.mod_root, instance.ghost_version)
+    else:
+        models_path = instance.mod_to_interp_root
+
+    # get all different model names
     available_models = []
-    if os.path.exists(join(instance.mod_root, instance.ghost_version)):
-        available_models = os.listdir(
-            "%s/%s" % (instance.mod_root, instance.ghost_version)
-        )
+    if os.path.exists(models_path):
+        if not instance.obs_active:
+            available_models = os.listdir(instance.mod_to_interp_root)
+        else:
+            available_models = os.listdir(
+                "%s/%s" % (instance.mod_root, instance.ghost_version)
+            )
+
+    # get start date on first of month
+    start_date_firstdayofmonth = int(str(start_date)[:6] + "01")
 
     # create dictionary to store available model data
     instance.available_model_data = {}
@@ -1130,93 +1141,161 @@ def get_valid_models(instance, start_date, end_date, resolution, networkspecies)
     # list for saving models to add to models pop-up
     models_to_add = []
 
-    # track which networkspecies each model has been interpolated for
-    models_per_networkspeci = {
-        networkspeci: set() for networkspeci in networkspecies
-    }
+    if not instance.obs_active:
+        # track which species each model has data for
+        species = np.unique([networkspeci.split('|')[1] for networkspeci in networkspecies])
+        models_per_speci = {
+            speci: set() for speci in species
+        }
 
-    # get start date on first of month
-    start_date_firstdayofmonth = int(str(start_date)[:6] + "01")
+        # iterate through species
+        for speci in species:
+            # iterate through available models
+            for model in available_models:
+                for domain in instance.available_domains:
+                    files_directory = "%s/%s/%s/%s/%s" % (
+                                instance.mod_to_interp_root,
+                                model,
+                                domain,
+                                resolution,
+                                speci,
+                            )
+                
+                    # test if non interpolated directory exists for model
+                    # if it does not exit, continue
+                    if not os.path.exists(files_directory):
+                        continue
+                    else:
+                        # get all available netCDF files (handling potential permissions issues)
+                        try:
+                            available_files = os.listdir(files_directory)
+                        except PermissionError:
+                            continue
 
-    # iterate through networks and species
-    for networkspeci in networkspecies:
-        network = networkspeci.split("|")[0]
-        speci = networkspeci.split("|")[1]
+                    # get monthly start date (YYYYMM) of all files
+                    file_yearmonths = sorted([f.split("_")[-1][:6] for f in available_files])
 
-        # iterate through available models
-        for model in available_models:
-            # get folder where interpolated models are saved
-            if "/" not in network:
-                files_directory = "%s/%s/%s/%s/%s/%s" % (
-                    instance.mod_root,
-                    instance.ghost_version,
-                    model,
-                    resolution,
-                    speci,
-                    network,
-                )
-            else:
-                files_directory = "%s/%s/%s/%s/%s/%s" % (
-                    instance.mod_root,
-                    instance.ghost_version,
-                    model,
-                    resolution,
-                    speci,
-                    network.replace("/", "-"),
-                )
+                    # write nested dictionary for model, with associated file yearmonths
+                    if len(file_yearmonths) > 0:
+                        # get file yearmonths within date range
+                        valid_file_yearmonths = sorted(
+                            [
+                                ym
+                                for ym in file_yearmonths
+                                if (int("{}01".format(ym)) >= start_date_firstdayofmonth)
+                                & (int("{}01".format(ym)) < int(end_date))
+                            ]
+                        )
 
-            # test if interpolated directory exists for model
-            # if it does not exit, continue
-            if not os.path.exists(files_directory):
-                continue
-            else:
-                # get all available netCDF files (handling potential permissions issues)
-                try:
-                    available_files = os.listdir(files_directory)
-                except PermissionError:
+                        # if have valid files, then add model to pop-up menu,
+                        # and add yearmonths to available model data
+                        if len(valid_file_yearmonths) > 0:
+                            models_per_speci[speci].add(f"{model}-{domain}")
+
+                            if domain not in instance.available_model_data:
+                                instance.available_model_data[domain] = {}
+                            if resolution not in instance.available_model_data[domain]:
+                                instance.available_model_data[domain][resolution] = {}
+                            if speci not in instance.available_model_data[domain][resolution]:
+                                instance.available_model_data[domain][resolution][speci] = {}
+                            if (
+                                model
+                                not in instance.available_model_data[domain][resolution][speci]
+                            ):
+                                instance.available_model_data[domain][resolution][speci][
+                                    model
+                                ] = valid_file_yearmonths
+                                
+    else:
+        # track which networkspecies each model has been interpolated for
+        models_per_networkspeci = {
+            networkspeci: set() for networkspeci in networkspecies
+        }
+
+        # iterate through networks and species
+        for networkspeci in networkspecies:
+            network = networkspeci.split("|")[0]
+            speci = networkspeci.split("|")[1]
+
+            # iterate through available models
+            for model in available_models:
+                # get folder where interpolated models are saved
+                if "/" not in network:
+                    files_directory = "%s/%s/%s/%s/%s/%s" % (
+                        instance.mod_root,
+                        instance.ghost_version,
+                        model,
+                        resolution,
+                        speci,
+                        network,
+                    )
+                else:
+                    files_directory = "%s/%s/%s/%s/%s/%s" % (
+                        instance.mod_root,
+                        instance.ghost_version,
+                        model,
+                        resolution,
+                        speci,
+                        network.replace("/", "-"),
+                    )
+
+                # test if interpolated directory exists for model
+                # if it does not exit, continue
+                if not os.path.exists(files_directory):
                     continue
+                else:
+                    # get all available netCDF files (handling potential permissions issues)
+                    try:
+                        available_files = os.listdir(files_directory)
+                    except PermissionError:
+                        continue
 
-            # get monthly start date (YYYYMM) of all files
-            file_yearmonths = sorted([f.split("_")[-1][:6] for f in available_files])
+                # get monthly start date (YYYYMM) of all files
+                file_yearmonths = sorted([f.split("_")[-1][:6] for f in available_files])
 
-            # write nested dictionary for model, with associated file yearmonths
-            if len(file_yearmonths) > 0:
-                # get file yearmonths within date range
-                valid_file_yearmonths = sorted(
-                    [
-                        ym
-                        for ym in file_yearmonths
-                        if (int("{}01".format(ym)) >= start_date_firstdayofmonth)
-                        & (int("{}01".format(ym)) < int(end_date))
-                    ]
-                )
+                # write nested dictionary for model, with associated file yearmonths
+                if len(file_yearmonths) > 0:
+                    # get file yearmonths within date range
+                    valid_file_yearmonths = sorted(
+                        [
+                            ym
+                            for ym in file_yearmonths
+                            if (int("{}01".format(ym)) >= start_date_firstdayofmonth)
+                            & (int("{}01".format(ym)) < int(end_date))
+                        ]
+                    )
 
-                # if have valid files, then add model to pop-up menu,
-                # and add yearmonths to available model data
-                if len(valid_file_yearmonths) > 0:
-                    models_per_networkspeci[networkspeci].add(model)
+                    # if have valid files, then add model to pop-up menu,
+                    # and add yearmonths to available model data
+                    if len(valid_file_yearmonths) > 0:
+                        models_per_networkspeci[networkspeci].add(model)
 
-                    if network not in instance.available_model_data:
-                        instance.available_model_data[network] = {}
-                    if resolution not in instance.available_model_data[network]:
-                        instance.available_model_data[network][resolution] = {}
-                    if speci not in instance.available_model_data[network][resolution]:
-                        instance.available_model_data[network][resolution][speci] = {}
-                    if (
-                        model
-                        not in instance.available_model_data[network][resolution][speci]
-                    ):
-                        instance.available_model_data[network][resolution][speci][
+                        if network not in instance.available_model_data:
+                            instance.available_model_data[network] = {}
+                        if resolution not in instance.available_model_data[network]:
+                            instance.available_model_data[network][resolution] = {}
+                        if speci not in instance.available_model_data[network][resolution]:
+                            instance.available_model_data[network][resolution][speci] = {}
+                        if (
                             model
-                        ] = valid_file_yearmonths
+                            not in instance.available_model_data[network][resolution][speci]
+                        ):
+                            instance.available_model_data[network][resolution][speci][
+                                model
+                            ] = valid_file_yearmonths
 
     # set list of model names to add on models pop-up:
     # only models interpolated for ALL selected networkspecies
     if instance.mode not in ["report", "library"]:
         if networkspecies:
-            models_to_add = sorted(
-                set.intersection(*models_per_networkspeci.values())
-            )
+            if not instance.obs_active:
+                models_to_add = sorted(
+                    set.intersection(*models_per_speci.values())
+                )
+            else:
+                models_to_add = sorted(
+                    set.intersection(*models_per_networkspeci.values())
+                )
         else:
             models_to_add = []
         models_to_add = np.array(models_to_add)

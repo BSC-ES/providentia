@@ -1680,33 +1680,51 @@ class DataReader:
             for data_label, data_label_raw in zip(data_labels, data_labels_raw):
                 # only check model data labels
                 if data_label != self.read_instance.observations_data_label:
-                    if "/" in network:
-                        file_root = "%s/%s/%s/%s/%s/%s/%s_" % (
-                            self.read_instance.mod_root,
-                            ghost_version,
-                            data_label_raw,
-                            resolution,
-                            speci,
-                            network.replace("/", "-"),
-                            speci,
-                        )
+                    if not self.read_instance.obs_active:
+                        experiment = data_label_raw.split('-')[0] # experiment name without domain
+                        domain = data_label_raw.split('-')[1]
+                        file_root = "%s/%s/%s/%s/%s/%s_" % (
+                                self.read_instance.mod_to_interp_root,
+                                experiment,
+                                domain,
+                                resolution,
+                                speci,
+                                speci,
+                            )
+                        try:  
+                            available_yearmonths = self.read_instance.available_model_data[
+                                domain
+                            ][resolution][speci][experiment]
+                        except KeyError:
+                            continue
                     else:
-                        file_root = "%s/%s/%s/%s/%s/%s/%s_" % (
-                            self.read_instance.mod_root,
-                            ghost_version,
-                            data_label_raw,
-                            resolution,
-                            speci,
-                            network,
-                            speci,
-                        )
+                        if "/" in network:
+                            file_root = "%s/%s/%s/%s/%s/%s/%s_" % (
+                                self.read_instance.mod_root,
+                                ghost_version,
+                                data_label_raw,
+                                resolution,
+                                speci,
+                                network.replace("/", "-"),
+                                speci,
+                            )
+                        else:
+                            file_root = "%s/%s/%s/%s/%s/%s/%s_" % (
+                                self.read_instance.mod_root,
+                                ghost_version,
+                                data_label_raw,
+                                resolution,
+                                speci,
+                                network,
+                                speci,
+                            )
 
-                    try:
-                        available_yearmonths = self.read_instance.available_model_data[
-                            network
-                        ][resolution][speci][data_label_raw]
-                    except KeyError:
-                        continue
+                        try:
+                            available_yearmonths = self.read_instance.available_model_data[
+                                network
+                            ][resolution][speci][data_label_raw]
+                        except KeyError:
+                            continue
 
                     # get intersection of yearmonths_to_read and available_yearmonths
                     yearmonths_to_read_intersect = list(
