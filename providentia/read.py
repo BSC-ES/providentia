@@ -1304,6 +1304,7 @@ class DataReader:
         self.read_instance.station_latitudes = {}
         self.read_instance.station_measurement_altitudes = {}
         self.read_instance.nonghost_units = {}
+        self.read_instance.station_order_inds_invert = None
 
         # iterate through network, speci pairs
         for networkspeci in (

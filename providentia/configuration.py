@@ -781,6 +781,51 @@ class ProvConfiguration:
             if value is not None:
                 return float(value)
 
+        elif key == 'station_order':
+            # parse station order
+
+            if isinstance(value, str):
+
+                # get station order variable                 
+                station_order_split = value.split("||")
+                station_order = station_order_split[0].strip()
+
+                # get station order direction
+                if len(station_order_split) > 1:
+                    self.read_instance.station_order_direction = station_order_split[1].strip()
+                    if self.read_instance.station_order_direction in ["d","desc","des","descending"]:
+                        self.read_instance.station_order_direction = "descending"
+                    elif self.read_instance.station_order_direction in ["a","asc","ascending"]:
+                         self.read_instance.station_order_direction = "ascending"
+                    else:
+                        error = ( 
+                           "Error: station_order direction '{}' is not valid.".format(
+                           self.read_instance.station_order_direction 
+                           )
+                        )
+                        self.read_instance.logger.error(error)
+                        sys.exit(1)
+                else:
+                    self.read_instance.station_order_direction = "ascending"
+
+                return station_order
+
+        elif key == 'station_cap':
+            # parse station cap
+
+            if (isinstance(value, float)) or ((isinstance(value, str))):
+                try:
+                    value = int(value)
+                except:
+                    error = ( 
+                            "Error: station_cap '{}' is not valid. It must be an integer.".format(
+                            value
+                            )
+                        )
+                    self.read_instance.logger.error(error)
+                    sys.exit(1)
+
+
         # if no special parsing treatment for variable, simply return value
         return value
 

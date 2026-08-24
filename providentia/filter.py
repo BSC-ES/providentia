@@ -16,6 +16,7 @@ from providentia.auxiliar import (
 )
 from .calculate import Stats, ModBias
 from .configuration import split_options
+from .fields_menus import update_metadata_fields
 from .plot_aux import update_plotting_parameters
 from .statistics import merge_forecast_days, get_z_statistic_info, exceedance_lim
 from .warnings_prv import show_message
@@ -85,7 +86,8 @@ class DataFilter:
             self.read_instance.metadata_in_memory
         )
 
-        if hasattr(self.read_instance, 'station_order_inds_invert'):
+        # reset basic metadata order
+        if self.read_instance.station_order_inds_invert is not None:
             for networkspeci in self.read_instance.networkspecies:
                 self.read_instance.station_references[networkspeci] = (
                     self.read_instance.station_references[networkspeci][self.read_instance.station_order_inds_invert]
@@ -102,7 +104,7 @@ class DataFilter:
                 self.read_instance.station_measurement_altitudes[networkspeci] = (
                     self.read_instance.station_measurement_altitudes[networkspeci][self.read_instance.station_order_inds_invert]
                 )
-            del self.read_instance.station_order_inds_invert
+            self.read_instance.station_order_inds_invert = None
         
         self.read_instance.temporal_colocation_nans = {}
         self.read_instance.valid_station_inds = {}
@@ -129,6 +131,76 @@ class DataFilter:
             self.read_instance.plotting_params = copy.deepcopy(
                 self.read_instance.original_plotting_params
             )
+
+    def order_stations(self):
+        """
+        Orders stations based on a specified metadata variable and direction (ascending or descending).
+        The station order is defined in the configuration file as 'station_order' in the format 'metadata_variable||direction'.
+        """
+
+        if self.read_instance.station_order:
+
+            # check station_order is valid metadata variable or random
+            if ((self.read_instance.station_order not in self.read_instance.metadata_vars_to_read)
+                and (self.read_instance.station_order != 'random')):
+                error = ( 
+                    "Error: station_order metadata variable '{}' does not exist.".format(
+                    self.read_instance.station_order
+                    )
+                )
+                self.read_instance.logger.error(error)
+                sys.exit(1)
+
+            for networkspeci in self.read_instance.networkspecies:
+
+                # get indices of stations ordered by station_order variable
+                # this handles ascending and descending order for both numerical and string metadata variables,
+                # as well as random sort
+                if self.read_instance.station_order == 'random':
+                    station_order_inds = np.random.permutation(
+                        self.read_instance.metadata_in_memory_filtered[networkspeci].shape[0]
+                    )
+                else:
+                    station_order_inds = np.argsort(
+                        self.read_instance.metadata_in_memory_filtered[networkspeci][
+                            self.read_instance.station_order
+                        ][:, 0]
+                    )      
+                    if self.read_instance.station_order_direction == "descending":
+                        station_order_inds = station_order_inds[::-1]
+
+                # get indices to reorder stations to how they originally were
+                self.read_instance.station_order_inds_invert = np.argsort(station_order_inds)
+
+                # reorder data_in_memory_filtered and metadata_in_memory_filtered according to station_order_inds
+                self.read_instance.data_in_memory_filtered[networkspeci] = (
+                    self.read_instance.data_in_memory_filtered[networkspeci][
+                        :, station_order_inds, :
+                    ]
+                )
+                for meta_var in self.read_instance.metadata_vars_to_read:
+                    self.read_instance.metadata_in_memory_filtered[networkspeci][meta_var] = (
+                        self.read_instance.metadata_in_memory_filtered[networkspeci][meta_var][
+                            station_order_inds, :
+                        ]
+                    )
+
+                # reorder basic metadata according to station_order_inds
+                self.read_instance.station_references[networkspeci] = (
+                    self.read_instance.station_references[networkspeci][station_order_inds]
+                )
+                self.read_instance.station_names[networkspeci] = (
+                    self.read_instance.station_names[networkspeci][station_order_inds]
+                )
+                self.read_instance.station_longitudes[networkspeci] = (
+                    self.read_instance.station_longitudes[networkspeci][station_order_inds]
+                )
+                self.read_instance.station_latitudes[networkspeci] = (
+                    self.read_instance.station_latitudes[networkspeci][station_order_inds]
+                )
+                self.read_instance.station_measurement_altitudes[networkspeci] = (
+                    self.read_instance.station_measurement_altitudes[networkspeci][station_order_inds]
+                )
 
     def filter_by_species(self):
         """
@@ -1338,97 +1410,6 @@ class DataFilter:
                     [obs_all_nan, mods_all_nan], axis=0
                 )
 
-    def order_stations(self):
-        """
-        Orders stations based on a specified metadata variable and direction (ascending or descending).
-        The station order is defined in the configuration file as 'station_order' in the format 'metadata_variable||direction'.
-        """
-
-        if self.read_instance.station_order:
-
-            station_order_split = self.read_instance.station_order.split("||")
-            station_order_var = station_order_split[0].strip()
-            if len(station_order_split) > 1:
-                station_order_dir = station_order_split[1].strip()
-            else:
-                station_order_dir = "asc"
-
-            # check station order field is valid metadata variable
-            #if self.read_instance.station_order not in self.read_instance.metadata_vars_to_read:
-            #    msg = "Error: station_order metadata variable '{}' does not exist.".format(
-            #        self.read_instance.station_order
-            #    )
-            #    show_message(
-            #        self.read_instance, msg, from_conf=self.read_instance.from_conf
-            #    )
-            #    sys.exit(1)
-
-
-            for networkspeci in self.read_instance.networkspecies:
-
-                # get indices of stations ordered by station_order_var
-                # this handles ascending and descending order for both numerical and string metadata variables
-                station_order_inds = np.argsort(
-                    self.read_instance.metadata_in_memory_filtered[networkspeci][
-                        station_order_var
-                    ][:, 0]
-                )      
-
-                self.read_instance.station_order_inds_invert = np.argsort(station_order_inds)
-
-                if station_order_dir in ["desc","des","descending"]:
-                    station_order_inds = station_order_inds[::-1]
-
-                # reorder data_in_memory_filtered and metadata_in_memory_filtered according to station_order_inds
-                self.read_instance.data_in_memory_filtered[networkspeci] = (
-                    self.read_instance.data_in_memory_filtered[networkspeci][
-                        :, station_order_inds, :
-                    ]
-                )
-                for meta_var in self.read_instance.metadata_vars_to_read:
-                    self.read_instance.metadata_in_memory_filtered[networkspeci][meta_var] = (
-                        self.read_instance.metadata_in_memory_filtered[networkspeci][meta_var][
-                            station_order_inds, :
-                        ]
-                    )
-
-                self.read_instance.station_references[networkspeci] = (
-                    self.read_instance.station_references[networkspeci][station_order_inds]
-                )
-                self.read_instance.station_names[networkspeci] = (
-                    self.read_instance.station_names[networkspeci][station_order_inds]
-                )
-                self.read_instance.station_longitudes[networkspeci] = (
-                    self.read_instance.station_longitudes[networkspeci][station_order_inds]
-                )
-                self.read_instance.station_latitudes[networkspeci] = (
-                    self.read_instance.station_latitudes[networkspeci][station_order_inds]
-                )
-                self.read_instance.station_measurement_altitudes[networkspeci] = (
-                    self.read_instance.station_measurement_altitudes[networkspeci][station_order_inds]
-                )
-
-    def cap_stations(self):
-        """"""
-
-        if self.read_instance.station_cap:
-
-            for networkspeci in self.read_instance.networkspecies:
-
-                for data_label in self.read_instance.data_labels:
-
-                    self.read_instance.valid_station_inds[networkspeci][data_label] = (
-                        self.read_instance.valid_station_inds[networkspeci][
-                            data_label
-                        ][:self.read_instance.station_cap]
-                    )
-
-                    self.read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label] = (
-                        self.read_instance.valid_station_inds_temporal_colocation[networkspeci][
-                            data_label
-                        ][:self.read_instance.station_cap]
-                    )
-
     def get_valid_stations(self):
         """
         Get valid station indices before and after all filtering has been performed.
@@ -1557,3 +1538,30 @@ class DataFilter:
                             len(station_data_availability_number), dtype=np.int32
                         )[station_data_availability_number > 1]
                     ]
+
+    def cap_stations(self):
+        """Cap stations to a maximum number of stations"""
+
+        if self.read_instance.station_cap:
+
+            for networkspeci in self.read_instance.networkspecies:
+
+                # cap metadata_in_memory
+                self.read_instance.metadata_in_memory_filtered[networkspeci] = self.read_instance.metadata_in_memory_filtered[networkspeci][:self.read_instance.station_cap, :]
+
+                for data_label in self.read_instance.data_labels:
+
+                    # cap valid station inds (colocated and not)
+                    self.read_instance.valid_station_inds[networkspeci][data_label] = (
+                        self.read_instance.valid_station_inds[networkspeci][
+                            data_label
+                        ][:self.read_instance.station_cap]
+                    )
+                    self.read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label] = (
+                        self.read_instance.valid_station_inds_temporal_colocation[networkspeci][
+                            data_label
+                        ][:self.read_instance.station_cap]
+                    )
+
+            # update available metadata fields for capped metadata
+            update_metadata_fields(self.read_instance, cap=True)
