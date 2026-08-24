@@ -4,7 +4,6 @@ from base64 import decodebytes
 import copy
 from getpass import getpass
 import os
-import shutil
 import signal
 import subprocess
 import sys
@@ -21,6 +20,7 @@ from providentia.auxiliar import CURRENT_PATH, join
 from .configuration import ProvConfiguration, load_conf
 from .icap import ICAP
 from .read_aux import check_for_ghost
+from .bdrc import BDRC
 from .tropopause import Tropopause
 from .warnings_prv import show_message
 from .zenodo import Zenodo
@@ -373,6 +373,23 @@ class Download(object):
                                 files_to_download=files_to_download,
                             )
 
+                    elif model.startswith("bdrc_"):
+                        self.bdrc = BDRC(self)
+                        initial_check_nc_files = (
+                            self.bdrc.download_BDRC_model(
+                                model, initial_check=True
+                            )
+                        )
+                        files_to_download = self.select_files_to_download(
+                            initial_check_nc_files
+                        )
+                        if not initial_check_nc_files or files_to_download:
+                            self.bdrc.download_BDRC_model(
+                                model,
+                                initial_check=False,
+                                files_to_download=files_to_download,
+                            )
+                    
                     # BSC machines
                     else:
                         # iterate the models download

@@ -1247,7 +1247,7 @@ class ProvConfiguration:
             # cams model is directly valid
             if model.startswith(tuple(model_options.keys())) or model.startswith(
                 "era5_tropopause") or model.startswith("icap_ensemble"
-            ):
+            ) or model.startswith("bdrc_"):
                 return [model]
 
             # local interpolation

@@ -1,0 +1,11 @@
+url: https://dust.aemet.es/thredds/fileServer/restrictedDataRoot/MULTI-MODEL/
+mod_id: sdswas_ensemble
+domain: regional
+resolution: 6hourly
+species: 
+  - od550du
+  - sconcdu
+start_date: 2021-12-01 ## ??
+end_date: today ## ??
+species_request_name: C4_dust
+models :

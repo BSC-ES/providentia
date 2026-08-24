@@ -1,0 +1,17 @@
+zamg_wrf_chem: ZAMG-WRF-CHEM
+wrf_nemo: WRF-NEMO
+silam: SILAM
+noa: NOA
+ncep_gefs: NCEP-GEFS
+nasa_geos: NASA-GEOS
+metoffice_um: MetOffice-UM
+multi_model: MULTI-MODEL
+monarch: MONARCH
+mocage: MOCAGE
+lotos_euros: LOTOS-EUROS
+icon_art: ICON-ART
+ema_regcm4: EMA-RegCM4
+dream8_cams: DREAM8-CAMS
+cams_ifs: CAMS-IFS
+bsc_dream8b: BSC-DREAM8b
+aladin: ALADIN
