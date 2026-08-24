@@ -25,42 +25,12 @@ from .warnings_prv import show_message
 
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 
-# load ACTRIS mapping files
-ghost_actris_variables = yaml.safe_load(
-    open(
-        join(
-            PROVIDENTIA_ROOT,
-            "settings",
-            "internal",
-            "actris",
-            "ghost_actris_variables.yaml",
-        )
-    )
-)
-metadata_dict = yaml.safe_load(
-    open(join(PROVIDENTIA_ROOT, "settings", "internal", "actris", "metadata.yaml"))
-)
-coverages_dict = yaml.safe_load(
-    open(join(PROVIDENTIA_ROOT, "settings", "internal", "actris", "coverages.yaml"))
-)
-variable_mapping = yaml.safe_load(
-    open(
-        join(
-            PROVIDENTIA_ROOT, "settings", "internal", "actris", "variable_mapping.yaml"
-        )
-    )
-)
-variable_mapping = {k: v for k, v in variable_mapping.items() if k.strip() and v}
-flags_dict = yaml.safe_load(
-    open(join(PROVIDENTIA_ROOT, "settings", "internal", "actris", "flags.yaml"))
-)
-
 # initialise dictionary for storing pointers to shared memory variables in read step
 shared_memory_vars = {}
 
 
 class Actris:
-    def __init__(self, download_instance, resolution):
+    def __init__(self, download_instance):
         """
         Initialise the object
 
@@ -68,12 +38,39 @@ class Actris:
         ----------
         download_instance : object
             Instance used to download data
-        resolution : str
-            Desired output resolution
         """
 
         self.download_instance = download_instance
-        self.resolution = resolution
+
+        # load ACTRIS mapping files
+        self.ghost_actris_variables = yaml.safe_load(
+            open(
+                join(
+                    PROVIDENTIA_ROOT,
+                    "settings",
+                    "internal",
+                    "actris",
+                    "ghost_actris_variables.yaml",
+                )
+            )
+        )
+        self.metadata_dict = yaml.safe_load(
+            open(join(PROVIDENTIA_ROOT, "settings", "internal", "actris", "metadata.yaml"))
+        )
+        self.coverages_dict = yaml.safe_load(
+            open(join(PROVIDENTIA_ROOT, "settings", "internal", "actris", "coverages.yaml"))
+        )
+        self.variable_mapping = yaml.safe_load(
+            open(
+                join(
+                    PROVIDENTIA_ROOT, "settings", "internal", "actris", "variable_mapping.yaml"
+                )
+            )
+        )
+        self.variable_mapping = {k: v for k, v in self.variable_mapping.items() if k.strip() and v}
+        self.flags_dict = yaml.safe_load(
+            open(join(PROVIDENTIA_ROOT, "settings", "internal", "actris", "flags.yaml"))
+        )
 
     def get_files_per_var(self, base_url, var):
         """
@@ -101,7 +98,7 @@ class Actris:
         page = 0
         while True:
             # set up URL with pagination
-            url = f"{base_url}/{ghost_actris_variables[var]}/page/{page}"
+            url = f"{base_url}/{self.ghost_actris_variables[var]}/page/{page}"
             try:
                 response = requests.get(url)
             except:
@@ -210,7 +207,7 @@ class Actris:
         GHOST_decreed_validities = []
         for flag in flags:
             # get standard flag name from GHOST standards
-            flag_info = flags_dict[str(int(flag))] if flag != 0 else flags_dict["000"]
+            flag_info = self.flags_dict[str(int(flag))] if flag != 0 else self.flags_dict["000"]
             standard_flag_name = flag_info["standard_data_flag_name"][0]
             standard_flag = standard_data_flag_name_to_data_flag_code[
                 standard_flag_name
@@ -623,7 +620,7 @@ class Actris:
 
         return wavelength_var
 
-    def get_files_info(self, files, var, path):
+    def get_files_info_dict(self, files, var, path):
         """
         Read variables, resolution, start date and end date from all files in ACTRIS server
         per variable
@@ -667,7 +664,7 @@ class Actris:
             # get resolution
             coverage = ds.time_coverage_resolution
             try:
-                file_resolution = coverages_dict[coverage]
+                file_resolution = self.coverages_dict[coverage]
             except:
                 file_resolution = f"Unrecognised ({coverage})"
 
@@ -936,10 +933,8 @@ class Actris:
             files_info,
             var,
             actris_parameter,
-            target_start_date,
-            target_end_date,
-            variable_mapping,
-            metadata_dict,
+            start_date,
+            end_date,
             standard_time_pairs,
             vfunc,
             ghost_version,
@@ -978,7 +973,7 @@ class Actris:
         ds = ds.sel(time=~ds["time"].to_index().duplicated())
 
         # select data in period range
-        ds = ds.sel(time=slice(target_start_date, target_end_date))
+        ds = ds.sel(time=slice(start_date, end_date))
         if ds.time.size == 0:
             local_warnings += "No data available after filtering by time."
             return url, station, local_errors, local_warnings
@@ -1042,10 +1037,10 @@ class Actris:
             return url, station, local_errors, local_warnings
 
         # avoid datasets that do not have the same units as in variable mapping
-        if da_var.attrs["ebas_unit"] != variable_mapping[actris_parameter]["units"]:
+        if da_var.attrs["ebas_unit"] != self.variable_mapping[actris_parameter]["units"]:
             local_errors = f"Units {da_var.attrs['ebas_unit']} do not match those in variable mapping "
             local_errors += (
-                f"dictionary ({variable_mapping[actris_parameter]['units']})."
+                f"dictionary ({self.variable_mapping[actris_parameter]['units']})."
             )
             return url, station, local_errors, local_warnings
 
@@ -1121,7 +1116,7 @@ class Actris:
 
         # save metadata
         metadata_np = {}
-        for ghost_key, actris_key in metadata_dict.items():
+        for ghost_key, actris_key in self.metadata_dict.items():
             metadata_np[ghost_key] = np.frombuffer(
                 shared_memory_vars["metadata"][ghost_key], dtype="S75"
             ).reshape(metadata_shape)
@@ -1230,7 +1225,7 @@ class Actris:
         shared_memory_vars["flag"] = shared_flag_data
         shared_memory_vars["qa"] = shared_qa_data
         shared_memory_vars["metadata"] = {}
-        for ghost_key in metadata_dict.keys():
+        for ghost_key in self.metadata_dict.keys():
             shared_memory_vars["metadata"][ghost_key] = shared_metadata[ghost_key]
 
     def ghost_validity_flag_mapper(self, flag):
@@ -1250,9 +1245,9 @@ class Actris:
         if np.isnan(flag):
             return np.nan
         elif flag == 0:
-            return flags_dict["000"]["GHOST_decreed_validity"][0]
+            return self.flags_dict["000"]["GHOST_decreed_validity"][0]
         else:
-            return flags_dict[str(int(flag))]["GHOST_decreed_validity"][0]
+            return self.flags_dict[str(int(flag))]["GHOST_decreed_validity"][0]
 
     def get_metadata(self, doi):
         """
@@ -1285,8 +1280,9 @@ class Actris:
         files,
         var,
         actris_parameter,
-        target_start_date,
-        target_end_date,
+        start_date,
+        end_date,
+        resolution,
         files_info,
     ):
         """
@@ -1300,10 +1296,12 @@ class Actris:
             Variable
         actris_parameter : str
             ACTRIS parameter
-        target_start_date : datetime.datetime
-            Target start date (defined from configuration file)
-        target_end_date : datetime.datetime
-            Target end date (defined from configuration file)
+        start_date : datetime.datetime
+            Start date (defined from configuration file)
+        end_date : datetime.datetime
+            end date (defined from configuration file)
+        resolution : str
+            resolution
         files_info : dict
             Dictionary with information of all files in Thredds for one variable
 
@@ -1316,18 +1314,18 @@ class Actris:
         # start = time.time()
 
         # get valid dates frequency
-        if self.resolution == "hourly":
+        if resolution == "hourly":
             frequency = "h"
-        elif self.resolution == "3hourly":
+        elif resolution == "3hourly":
             frequency = "3h"
-        elif self.resolution == "daily":
+        elif resolution == "daily":
             frequency = "D"
         # TODO: Review this
-        elif self.resolution == "monthly":
+        elif resolution == "monthly":
             frequency = "MS"
 
         standard_time = pd.date_range(
-            start=target_start_date, end=target_end_date, freq=frequency
+            start=start_date, end=end_date, freq=frequency
         ).to_pydatetime()
 
         # get dimension of new arrays
@@ -1358,15 +1356,15 @@ class Actris:
             ctypes.c_float, int(np.prod(qa_shape))
         )
         shared_metadata = {}
-        for ghost_key in metadata_dict.keys():
+        for ghost_key in self.metadata_dict.keys():
             shared_metadata[ghost_key] = multiprocessing.RawArray(
                 ctypes.c_char, int(np.prod(metadata_shape) * 75)
             )
 
         # get possible variable names
-        unformatted_units = variable_mapping[actris_parameter]["units"]
+        unformatted_units = self.variable_mapping[actris_parameter]["units"]
         units = unformatted_units.replace("/", "_per_").replace(" ", "_")
-        ebas_component = variable_mapping[actris_parameter]["var"]
+        ebas_component = self.variable_mapping[actris_parameter]["var"]
         units_var = f"{ebas_component}_{units}"
         possible_vars = [
             ebas_component,
@@ -1393,10 +1391,8 @@ class Actris:
                 files_info,
                 var,
                 actris_parameter,
-                target_start_date,
-                target_end_date,
-                variable_mapping,
-                metadata_dict,
+                start_date,
+                end_date,
                 standard_time_pairs,
                 vfunc,
                 self.download_instance.ghost_version,
@@ -1459,13 +1455,13 @@ class Actris:
             qa_shape
         )
         metadata = {}
-        for ghost_key in metadata_dict.keys():
+        for ghost_key in self.metadata_dict.keys():
             metadata[ghost_key] = np.frombuffer(
                 shared_metadata[ghost_key], dtype="S75"
             ).reshape(metadata_shape)
 
         # create dataset with averaged data
-        units = variable_mapping[actris_parameter]["units"]
+        units = self.variable_mapping[actris_parameter]["units"]
 
         # case for temperature (t2), unit converter assumes multiple units when there is a space
         if units == "deg C":
@@ -1561,45 +1557,63 @@ class Actris:
 
         return combined_ds
 
-    def get_files_to_download(self, target_start_date, target_end_date, var):
+    def build_nc_file_paths_in_range(self, start_date, end_date, resolutions_list, species_list):
         """
-        Get filenames that should be downloaded
+        Build the expected NetCDF file paths for a given date range.
+
+        For each combination of resolution and species, this method creates
+        the corresponding local output directory and temporary directory.
+        It also generates the expected NetCDF filenames for every day in
+        the requested date range.
 
         Parameters
         ----------
-        nonghost_root : str
-            Directory where non-GHOST data is saved
-        target_start_date : datetime.datetime
-            Target start date (defined from configuration file)
-        target_end_date : datetime.datetime
-            Target end date (defined from configuration file)
-        resolution : str
-            Resolution
-        var : str
-            Variable
+        start_date : datetime.datetime
+            Start date of the requested period.
+        end_date : datetime.datetime
+            End date of the requested period.
+        resolutions_list : list of str
+            List of spatial resolutions to process.
+        species_list : list of str
+            List of species to process.
 
         Returns
         -------
-        list
-            Filenames that should be downloaded
+        dict
+            Dictionary keyed by the local directory path. Each entry contains:
+            - nc_files : list of str
+                NetCDF filenames, one for each day in the date range.
+            - temp_dir : str
+                Directory where temporary NetCDF files are stored.
         """
+            
+        # create list with all the MONTHS in the date range
+        date_list = pd.date_range(start=start_date, end=end_date, freq="MS")
 
-        base_dir = join(
-            self.download_instance.nonghost_root, "actris/actris", self.resolution, var
-        )
-        paths = []
-        current_date = copy.deepcopy(target_start_date)
-        while current_date <= target_end_date:
-            # save path
-            path = f"{base_dir}/{var}_{current_date.strftime('%Y%m')}.nc"
-            paths.append(path)
+        initial_check_nc_files = {}
 
-            # get following month
-            next_month = current_date.month % 12 + 1
-            next_year = current_date.year + (current_date.month // 12)
-            current_date = current_date.replace(year=next_year, month=next_month)
+        # create dictionary with the paths and files
+        for resolution in resolutions_list:
+            for species in species_list:
 
-        return paths
+                dir_tail = join(
+                                    resolution,
+                                    species,
+                                )
+
+                local_dir = join(
+                                    self.download_instance.nonghost_root,
+                                    "actris/actris",
+                                    dir_tail
+                                )
+                
+                initial_check_nc_files[local_dir] = {
+                        "nc_files" : [f"{species}_{date}.nc" for date in date_list.strftime("%Y%m")],
+                        "species": species,
+                        "resolution": resolution
+                    }
+        
+        return initial_check_nc_files
 
     def get_date_as_datetime(self, date):
         """Get string date as datetime
@@ -1621,289 +1635,395 @@ class Actris:
                 pass
         return None
 
-    def download_actris_data(self):
+    def control_resolutions(self):
         """
-        Download ACTRIS data
+        Validate the requested resolutions for ACTRIS.
+
+        Unsupported resolutions are reported to the user and are not included
+        in the returned list.
+
+        Returns
+        -------
+        list of str
+            List of valid resolutions supported by the ACTRIS dataset.
         """
 
-        target_start_date = datetime.datetime(
-            int(self.download_instance.start_date[:4]),
-            int(self.download_instance.start_date[4:6]),
-            int(self.download_instance.start_date[6:8]),
-            0,
+        # priorize model resolution in case user passed it
+        resolution_list = (
+            self.download_instance.model_resolution
+            if self.download_instance.model_resolution
+            else self.download_instance.resolution
         )
-        target_end_date = datetime.datetime(
-            int(self.download_instance.end_date[:4]),
-            int(self.download_instance.end_date[4:6]),
-            int(self.download_instance.end_date[6:8]),
-            23,
-            59,
-            59,
-        ) - datetime.timedelta(days=1)
+        
+        # get the resolutions from the yaml file
+        correct_resolutions = list(self.coverages_dict.values())
 
-        for var in self.download_instance.species:
-            # check if variable name is available
-            if var not in ghost_actris_variables.keys():
-                self.download_instance.logger.error(
-                    f"Data for {var} cannot be downloaded because it was not mapped in 'settings/internal/actris/ghost_actris_variables.yaml'."
-                )
-                continue
+        final_resolution_list = []
+
+        # check if the resolution is the correct one for the dataset
+        for resolution in resolution_list:
+            if resolution in correct_resolutions:
+                final_resolution_list.append(resolution)
             else:
-                actris_parameter = ghost_actris_variables[var]
+                msg = f"The current resolution '{resolution}' is not valid. It must be one of '{correct_resolutions}'."
+                show_message(
+                    self.download_instance, msg
+                )
 
-            # get files that were already downloaded
-            initial_check_nc_files = self.get_files_to_download(
-                target_start_date, target_end_date, var
-            )
-            files_to_download = self.download_instance.select_files_to_download(
-                initial_check_nc_files
-            )
-            if not files_to_download:
-                msg = f"Files were already downloaded for {var} at {self.resolution} "
-                msg += f"resolution between {target_start_date} and {target_end_date}."
-                show_message(self.download_instance, msg, deactivate=False)
-                continue
+        return final_resolution_list
 
-            # get files info path
-            info_path = self.get_files_path(var)
+    def control_species(self):
+        """
+        Validate the requested species for ACTRIS.
+
+        Unsupported species are reported to the user and are not included
+        in the returned list.
+
+        Returns
+        -------
+        list of str
+            List of unique ACTRIS species name for the requested
+            species.
+        """
+
+        # get the species from the yaml file
+        correct_species = list(self.ghost_actris_variables.keys()) + list(self.ghost_actris_variables.values())
+
+        final_species_list = []
+ 
+        for species in self.download_instance.species:
+            if species in correct_species:
+                final_species_list.append(species)
+            else:
+                msg = f"The species '{species}' is not available in ACTRIS."
+                show_message(
+                    self.download_instance, msg
+                )
+        
+        # remove duplicates
+        final_species_list = list(set(final_species_list))
+
+        return final_species_list
+
+    def get_var_filetree(self, var, actris_parameter, base_url):
+        """
+        Create or read file with information of each file in Thredds.
+
+        Parameters
+        ----------
+        var : str
+            Variable
+        actris_parameter : str
+            ACTRIS parameter
+        base_url : str
+            URL to NILU Thredds where data is stored
+
+        Returns
+        -------
+        dict
+            Dictionary with information of all files in Thredds for one variable
+        """
+
+        # get files info path
+        info_path = self.get_files_path(var)
+
+        # if file does not exist
+        if not os.path.isfile(info_path):
+            # get files information
+            self.download_instance.logger.info(
+                f"\nFile containing information of the files available in Thredds for {var} ({info_path}) does not exist, creating."
+            )
+            combined_data = self.get_files_per_var(base_url, var)
+            all_files = combined_data[var]["files"]
+            files_info = self.get_files_info_dict(all_files, var, info_path)
+
+        # if file exists
+        else:
+            # make the user wants to update file information from NILU Thredds
+            if not isinstance(self.download_instance.dl_thredds_update, bool):
+                # ask if user wants to update
+                while True:
+                    dl_thredds_update = input(
+                        f"\nFile containing information of the files available in Thredds for {actris_parameter} ({info_path}) already exists. Do you want to update it (y/[n])? "
+                    ).lower()
+                    if dl_thredds_update in ["y", "n", ""]:
+                        break
+
+                # get the boolean value
+                self.download_instance.dl_thredds_update = (
+                    dl_thredds_update not in ["n", ""]
+                )
+
+            if self.download_instance.dl_thredds_update:
+                # get files information
+                combined_data = self.get_files_per_var(base_url, var)
+                all_files = combined_data[var]["files"]
+                files_info = self.get_files_info(all_files, var, info_path)
+            else:
+                # get files information
+                files_info = yaml.safe_load(open(join(CURRENT_PATH, info_path)))
+                files_info = {
+                    k: v for k, v in files_info.items() if k.strip() and v
+                }
+
+        return files_info
+    
+    def download_actris_data(self, initial_check, files_to_download=None):
+        """
+        Download ACTRIS observational data from NILU Thredds.
+
+        Parameters
+        ----------
+        initial_check : bool
+            If True, only performs a check of available files without downloading.
+            If False, downloads files and displays progress.
+        files_to_download : list of str, optional
+            Specific file paths to download. Only files in this list are considered.
+
+        Returns
+        -------
+        initial_check_nc_files : list of str
+            A list of file paths intended for download.
+        """
+
+        end_date = datetime.datetime.strptime(self.download_instance.end_date, "%Y%m%d") - datetime.timedelta(days=1)
+        start_date = datetime.datetime.strptime(self.download_instance.start_date, "%Y%m%d")
+
+        if initial_check:
+
+            species_list = self.control_species()
+            if not species_list:
+                return
+            
+            resolutions_list = self.control_resolutions()
+            if not resolutions_list:
+                return
+
+            initial_check_nc_files = self.build_nc_file_paths_in_range(start_date, end_date, resolutions_list, species_list)
+
+            return initial_check_nc_files
+        
+        elif files_to_download:
+
+            self.download_instance.logger.info(
+                f"\nACTRIS observational data to download ({len(files_to_download)}):"
+            )
 
             # define NILU path
             base_url = "https://prod-actris-md2.nilu.no/metadata/content"
 
-            # if file does not exist
-            if not os.path.isfile(info_path):
-                # get files information
-                self.download_instance.logger.info(
-                    f"\nFile containing information of the files available in Thredds for {var} ({info_path}) does not exist, creating."
-                )
-                combined_data = self.get_files_per_var(base_url, var)
-                all_files = combined_data[var]["files"]
-                files_info = self.get_files_info(all_files, var, info_path)
+            for local_dir, files_to_download_dict in files_to_download.items():
+                
+                # create directory
+                os.makedirs(local_dir, exist_ok=True)
 
-            # if file exists
-            else:
-                # make the user wants to update file information from NILU Thredds
-                if not isinstance(self.download_instance.dl_thredds_update, bool):
-                    # ask if user wants to update
-                    while True:
-                        dl_thredds_update = input(
-                            f"\nFile containing information of the files available in Thredds for {actris_parameter} ({info_path}) already exists. Do you want to update it (y/[n])? "
-                        ).lower()
-                        if dl_thredds_update in ["y", "n", ""]:
-                            break
+                # get species and resolution
+                var = files_to_download_dict['species']
+                resolution = files_to_download_dict['resolution']
 
-                    # get the boolean value
-                    self.download_instance.dl_thredds_update = (
-                        dl_thredds_update not in ["n", ""]
-                    )
+                # get ACTRIS parameter name
+                actris_parameter = self.ghost_actris_variables[var]
 
-                if self.download_instance.dl_thredds_update:
-                    # get files information
-                    combined_data = self.get_files_per_var(base_url, var)
-                    all_files = combined_data[var]["files"]
-                    files_info = self.get_files_info(all_files, var, info_path)
+                # get filetree
+                files_info = self.get_var_filetree(var, actris_parameter, base_url)
+
+                # go to next variable if no data is found
+                if files_info is not None:
+                    if len(files_info) == 0:
+                        print(f"Warning: No files found for {var}.")
+                        continue
                 else:
-                    # get files information
-                    files_info = yaml.safe_load(open(join(CURRENT_PATH, info_path)))
-                    files_info = {
-                        k: v for k, v in files_info.items() if k.strip() and v
-                    }
-
-            # go to next variable if no data is found
-            if files_info is not None:
-                if len(files_info) == 0:
                     print(f"Warning: No files found for {var}.")
                     continue
-            else:
-                print(f"Warning: No files found for {var}.")
-                continue
 
-            # get wavelength
-            wavelength_var = self.is_wavelength_var(actris_parameter)
-            if wavelength_var:
-                # select most common wavelength for black carbon (name does not provide it)
-                if var == "sconcbc":
-                    wavelength = 880
-                    self.download_instance.logger.info(
-                        f"Wavelength appears in dimensions. Selected wavelength: {wavelength}."
-                    )
-                # get wavelength from variable name for other variables
+                # get wavelength
+                wavelength_var = self.is_wavelength_var(actris_parameter)
+                if wavelength_var:
+                    # select most common wavelength for black carbon (name does not provide it)
+                    if var == "sconcbc":
+                        wavelength = 880
+                        self.download_instance.logger.info(
+                            f"Wavelength appears in dimensions. Selected wavelength: {wavelength}."
+                        )
+                    # get wavelength from variable name for other variables
+                    else:
+                        wavelength = float(re.findall(r"\d+", var)[0])
                 else:
-                    wavelength = float(re.findall(r"\d+", var)[0])
-            else:
-                wavelength = None
+                    wavelength = None
 
-            # filter files by resolution and dates
-            self.download_instance.logger.info("\n" + "-" * 40)
-            self.download_instance.logger.info(
-                "\nDownloading ACTRIS framework data from EBAS DOI..."
-            )
-            path = join(
-                self.download_instance.nonghost_root,
-                f"actris/actris/{self.resolution}/{var}",
-            )
-            self.download_instance.logger.info(
-                f"\n  - {path}, source: {base_url}/{ghost_actris_variables[var]}"
-            )
-            files = {}
-            for file, attributes in files_info.items():
-                if attributes["resolution"] == self.resolution:
-                    # read start date
-                    start_date = self.get_date_as_datetime(
-                        attributes["time_coverage_start"]
-                    )
-                    if start_date is None:
-                        self.download_instance.logger.error(
-                            f'Unsupported start date format: {attributes["time_coverage_start"]} for file {file}.'
+                # filter files by resolution and dates
+                self.download_instance.logger.info("\n" + "-" * 40)
+                self.download_instance.logger.info(
+                    "\nDownloading ACTRIS framework data from EBAS DOI..."
+                )
+                path = join(
+                    self.download_instance.nonghost_root,
+                    f"actris/actris/{resolution}/{var}",
+                )
+                self.download_instance.logger.info(
+                    f"\n  - {path}, source: {base_url}/{actris_parameter}"
+                )
+
+                files = {}
+                for file, attributes in files_info.items():
+                    if attributes["resolution"] == resolution:
+                        # read start date
+                        file_start_date = self.get_date_as_datetime(
+                            attributes["time_coverage_start"]
                         )
+                        if file_start_date is None:
+                            self.download_instance.logger.error(
+                                f'Unsupported start date format: {attributes["time_coverage_start"]} for file {file}.'
+                            )
+                            continue
+
+                        # read end date
+                        file_end_date = self.get_date_as_datetime(
+                            attributes["time_coverage_end"]
+                        )
+                        if file_end_date is None:
+                            self.download_instance.logger.error(
+                                f'Unsupported end date format: {attributes["time_coverage_end"]} for file {file}.'
+                            )
+                            continue
+
+                        for file_to_download in files_to_download_dict['nc_files']:
+                            file_to_download_yearmonth = file_to_download.split(f"{var}_")[
+                                1
+                            ].split(".nc")[0]
+                            file_to_download_start_date = datetime.datetime.strptime(
+                                file_to_download_yearmonth, "%Y%m"
+                            )
+                            file_to_download_end_date = datetime.datetime(
+                                file_to_download_start_date.year,
+                                file_to_download_start_date.month,
+                                1,
+                            ) + relativedelta(months=1, seconds=-1)
+                            if (
+                                file_to_download_start_date <= file_end_date
+                                and file_to_download_end_date >= file_start_date
+                            ):
+                                if "wavelengths" in attributes:
+                                    if wavelength is None:
+                                        self.download_instance.logger.error(
+                                            f"Dataset has wavelength in its dimensions but wavelength is None. Revise if ACTRIS parameter ({actris_parameter}) is included in is_wavelength_var function."
+                                        )
+                                        break
+                                    if wavelength not in attributes["wavelengths"]:
+                                        continue
+                                # from filtered files, save those that are provided multiple times
+                                station = attributes["ebas_station_code"]
+                                if station not in files:
+                                    files[station] = []
+                                if file not in files[station]:
+                                    files[station].append(file)
+
+                if len(files) != 0:
+                    # get data for each file within period and temporally average to standard times
+                    combined_ds = self.get_data(
+                        files,
+                        var,
+                        actris_parameter,
+                        start_date,
+                        end_date,
+                        resolution,
+                        files_info,
+                    )
+                    if combined_ds is None:
                         continue
 
-                    # read end date
-                    end_date = self.get_date_as_datetime(
-                        attributes["time_coverage_end"]
-                    )
-                    if end_date is None:
-                        self.download_instance.logger.error(
-                            f'Unsupported end date format: {attributes["time_coverage_end"]} for file {file}.'
-                        )
-                        continue
+                    # save data per year and month
+                    if not os.path.isdir(path):
+                        os.makedirs(path, exist_ok=True)
 
-                    for file_to_download in files_to_download:
-                        file_to_download_yearmonth = file_to_download.split(f"{var}_")[
-                            1
-                        ].split(".nc")[0]
-                        file_to_download_start_date = datetime.datetime.strptime(
-                            file_to_download_yearmonth, "%Y%m"
-                        )
-                        file_to_download_end_date = datetime.datetime(
-                            file_to_download_start_date.year,
-                            file_to_download_start_date.month,
-                            1,
-                        ) + relativedelta(months=1, seconds=-1)
-                        if (
-                            file_to_download_start_date <= end_date
-                            and file_to_download_end_date >= start_date
-                        ):
-                            if "wavelengths" in attributes:
-                                if wavelength is None:
-                                    self.download_instance.logger.error(
-                                        f"Dataset has wavelength in its dimensions but wavelength is None. Revise if ACTRIS parameter ({actris_parameter}) is included in is_wavelength_var function."
-                                    )
-                                    break
-                                if wavelength not in attributes["wavelengths"]:
+                    valid_nc_files = []
+                    for year, ds_year in combined_ds.groupby("time.year"):
+                        for month, ds_month in ds_year.groupby("time.month"):
+                            filename = f"{var}_{year}{month:02d}.nc"
+                            filepath = f"{path}/{filename}"
+                            if filename in files_to_download_dict['nc_files']:
+                                combined_ds_yearmonth = combined_ds.sel(
+                                    time=f"{year}-{month:02d}"
+                                )
+
+                                # add title to attrs
+                                extra_info = ""
+                                if wavelength_var and wavelength is not None:
+                                    extra_info = f" at {wavelength}nm"
+                                combined_ds_yearmonth.attrs[
+                                    "title"
+                                ] = f"Surface {actris_parameter}{extra_info} in the ACTRIS network in {year}-{month:02d}."
+
+                                # order attrs
+                                custom_order = [
+                                    "title",
+                                    "institution",
+                                    "creator_name",
+                                    "creator_email",
+                                    "source",
+                                    "application_area",
+                                    "domain",
+                                    "observed_layer",
+                                    "data_license",
+                                ]
+                                ordered_attrs = {
+                                    key: combined_ds_yearmonth.attrs[key]
+                                    for key in custom_order
+                                    if key in combined_ds_yearmonth.attrs
+                                }
+                                combined_ds_yearmonth.attrs = ordered_attrs
+
+                                # remove stations if all variable data is nan
+                                # previous_n_stations = len(combined_ds_yearmonth.station)
+                                combined_ds_yearmonth = combined_ds_yearmonth.dropna(
+                                    dim="station", subset=[var], how="all"
+                                )
+                                combined_ds_yearmonth = combined_ds_yearmonth.assign_coords(
+                                    station=range(len(combined_ds_yearmonth.station))
+                                )
+                                # current_n_stations = len(combined_ds_yearmonth.station)
+                                # n_stations_diff = previous_n_stations - current_n_stations
+                                # if n_stations_diff > 0:
+                                #     self.download_instance.logger.info(f'Data for {n_stations_diff} stations was removed because all data was NaN during {month}-{year}.')
+
+                                # add acknowledgements
+                                dois = ", ".join(
+                                    x
+                                    for x in combined_ds_yearmonth.doi.values
+                                    if x not in ("", "[", "]")
+                                )
+                                combined_ds_yearmonth.attrs[
+                                    "acknowledgements"
+                                ] = f"This data is compiled by measurements from these DOI: {dois}"
+
+                                # remove file if it exists
+                                if os.path.isfile(filepath):
+                                    os.system("rm {}".format(filepath))
+
+                                # do not save if empty
+                                if len(combined_ds_yearmonth[var].values) == 0:
                                     continue
-                            # from filtered files, save those that are provided multiple times
-                            station = attributes["ebas_station_code"]
-                            if station not in files:
-                                files[station] = []
-                            if file not in files[station]:
-                                files[station].append(file)
 
-            if len(files) != 0:
-                # get data for each file within period and temporally average to standard times
-                combined_ds = self.get_data(
-                    files,
-                    var,
-                    actris_parameter,
-                    target_start_date,
-                    target_end_date,
-                    files_info,
-                )
-                if combined_ds is None:
-                    continue
+                                # get last downloaded file in case there was a keyboard interrupt
+                                self.download_instance.latest_nc_file_path = filepath
 
-                # save data per year and month
-                if not os.path.isdir(path):
-                    os.makedirs(path, exist_ok=True)
+                                # save file
+                                combined_ds_yearmonth.to_netcdf(filepath)
 
-                valid_nc_files = []
-                for year, ds_year in combined_ds.groupby("time.year"):
-                    for month, ds_month in ds_year.groupby("time.month"):
-                        filename = f"{var}_{year}{month:02d}.nc"
-                        filepath = f"{path}/{filename}"
-                        if filepath in files_to_download:
-                            combined_ds_yearmonth = combined_ds.sel(
-                                time=f"{year}-{month:02d}"
-                            )
+                                # change permissions
+                                os.system("chmod 777 {}".format(filepath))
+                                valid_nc_files.append(filename)
 
-                            # add title to attrs
-                            extra_info = ""
-                            if wavelength_var and wavelength is not None:
-                                extra_info = f" at {wavelength}nm"
-                            combined_ds_yearmonth.attrs[
-                                "title"
-                            ] = f"Surface {ghost_actris_variables[var]}{extra_info} in the ACTRIS network in {year}-{month:02d}."
+                    # print download of valid files
+                    valid_nc_files_iter = tqdm(
+                        valid_nc_files,
+                        bar_format="{l_bar}{bar}|{n_fmt}/{total_fmt}",
+                        desc=f"    Downloading files ({len(valid_nc_files)})",
+                    )
+                    for filename in valid_nc_files_iter:
+                        pass
 
-                            # order attrs
-                            custom_order = [
-                                "title",
-                                "institution",
-                                "creator_name",
-                                "creator_email",
-                                "source",
-                                "application_area",
-                                "domain",
-                                "observed_layer",
-                                "data_license",
-                            ]
-                            ordered_attrs = {
-                                key: combined_ds_yearmonth.attrs[key]
-                                for key in custom_order
-                                if key in combined_ds_yearmonth.attrs
-                            }
-                            combined_ds_yearmonth.attrs = ordered_attrs
-
-                            # remove stations if all variable data is nan
-                            # previous_n_stations = len(combined_ds_yearmonth.station)
-                            combined_ds_yearmonth = combined_ds_yearmonth.dropna(
-                                dim="station", subset=[var], how="all"
-                            )
-                            combined_ds_yearmonth = combined_ds_yearmonth.assign_coords(
-                                station=range(len(combined_ds_yearmonth.station))
-                            )
-                            # current_n_stations = len(combined_ds_yearmonth.station)
-                            # n_stations_diff = previous_n_stations - current_n_stations
-                            # if n_stations_diff > 0:
-                            #     self.download_instance.logger.info(f'Data for {n_stations_diff} stations was removed because all data was NaN during {month}-{year}.')
-
-                            # add acknowledgements
-                            dois = ", ".join(
-                                x
-                                for x in combined_ds_yearmonth.doi.values
-                                if x not in ("", "[", "]")
-                            )
-                            combined_ds_yearmonth.attrs[
-                                "acknowledgements"
-                            ] = f"This data is compiled by measurements from these DOI: {dois}"
-
-                            # remove file if it exists
-                            if os.path.isfile(filepath):
-                                os.system("rm {}".format(filepath))
-
-                            # do not save if empty
-                            if len(combined_ds_yearmonth[var].values) == 0:
-                                continue
-
-                            # get last downloaded file in case there was a keyboard interrupt
-                            self.download_instance.latest_nc_file_path = filepath
-
-                            # save file
-                            combined_ds_yearmonth.to_netcdf(filepath)
-
-                            # change permissions
-                            os.system("chmod 777 {}".format(filepath))
-                            valid_nc_files.append(filename)
-
-                # print download of valid files
-                valid_nc_files_iter = tqdm(
-                    valid_nc_files,
-                    bar_format="{l_bar}{bar}|{n_fmt}/{total_fmt}",
-                    desc=f"    Downloading files ({len(valid_nc_files)})",
-                )
-                for filename in valid_nc_files_iter:
-                    pass
-
-            else:
-                self.download_instance.logger.error(
-                    f"No files were found at {self.resolution} resolution for {var}. You can check what is available at {info_path}."
-                )
+                else:
+                    self.download_instance.logger.error(
+                        f"No files were found at {resolution} resolution for {var}. You can check what is available at {info_path}."
+                    )

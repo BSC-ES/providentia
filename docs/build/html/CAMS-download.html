@@ -58,6 +58,7 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">CAMS</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#available-cams-datasets">Available CAMS datasets</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#how-to-enable-atmosphere-data-store-download">How to enable Atmosphere Data Store download</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#download-a-specific-area">Download a specific area</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#cams-european-air-quality-forecasts">1. CAMS European Air Quality Forecasts</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#cams-global-atmospheric-composition-forecasts">2. CAMS Global Atmospheric Composition Forecasts</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#cams-european-air-quality-reanalyses">3. CAMS European Air Quality Reanalyses</a></li>
@@ -146,6 +147,29 @@
 <p>Answer <code class="docutils literal notranslate"><span class="pre">n</span></code> to the prompt:</p>
 <p><em>“Model data was detected in the configuration file. Do you want to download the interpolated version? (Otherwise, the non-interpolated model data will be downloaded)”</em></p>
 </section>
+<section id="download-a-specific-area">
+<span id="download-a-specific-area-cams"></span><h2>Download a specific area<a class="headerlink" href="#download-a-specific-area" title="Link to this heading"></a></h2>
+<p>If you do not want to download the entire NetCDF file, you can download data for a specific geographic area by including <code class="docutils literal notranslate"><span class="pre">longitude</span></code> and <code class="docutils literal notranslate"><span class="pre">latitude</span></code> as configuration fields.</p>
+<p>For example, to download data covering Europe in Providentia:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">longitude</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">-28, 53</span>
+<span class="na">latitude</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">35, 72</span>
+</pre></div>
+</div>
+<p>The equivalent area for the request would be the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="o">...</span>
+    <span class="s2">&quot;area&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">72</span><span class="p">,</span> <span class="o">-</span><span class="mi">28</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">53</span><span class="p">],</span>
+    <span class="o">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>This option is available for:</p>
+<ol class="arabic simple">
+<li><p>CAMS European Air Quality Forecasts</p></li>
+<li><p>CAMS Global Atmospheric Composition Forecasts</p></li>
+<li><p>CAMS Global Reanalysis (EAC4)</p></li>
+</ol>
+</section>
 <section id="cams-european-air-quality-forecasts">
 <h2>1. CAMS European Air Quality Forecasts<a class="headerlink" href="#cams-european-air-quality-forecasts" title="Link to this heading"></a></h2>
 <p><a class="reference external" href="https://ads.atmosphere.copernicus.eu/datasets/cams-europe-air-quality-forecasts?tab=overview">Dataset Link</a></p>
@@ -218,6 +242,10 @@
 <blockquote>
 <div><p>Providentia can only read species in GHOST format. If you want to know the mapping from CAMS variables to GHOST species, please refer to the <a class="reference internal" href="#cams-ghost-species-mapping">CAMS-GHOST species mapping</a> section.</p>
 </div></blockquote>
+</section>
+<section id="dataset-temporal-coverage">
+<h3>Dataset temporal coverage<a class="headerlink" href="#dataset-temporal-coverage" title="Link to this heading"></a></h3>
+<p>The dataset covers the most recent three years relative to each update. The archive is updated daily.</p>
 </section>
 <section id="fixed-download-settings">
 <h3>Fixed Download Settings<a class="headerlink" href="#fixed-download-settings" title="Link to this heading"></a></h3>
@@ -391,7 +419,11 @@
 </section>
 </section>
 <section id="id2">
-<h3>Fixed Download Settings<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<h3>Dataset temporal coverage<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<p>The dataset covers the period from January 2015 to the present.</p>
+</section>
+<section id="id3">
+<h3>Fixed Download Settings<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
 <p>Providentia assumes the following fixed values when downloading data:</p>
 <section id="for-single-level-data">
 <h4>For single-level data:<a class="headerlink" href="#for-single-level-data" title="Link to this heading"></a></h4>
@@ -414,8 +446,8 @@
 </div></blockquote>
 </section>
 </section>
-<section id="id3">
-<h3>Example configuration files and corresponding API requests<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<section id="id4">
+<h3>Example configuration files and corresponding API requests<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
 <section id="example-1-cams-global-forecast-sst-single-level-hourly">
 <h4>Example 1: CAMS Global Forecast (sst, Single-level, hourly)<a class="headerlink" href="#example-1-cams-global-forecast-sst-single-level-hourly" title="Link to this heading"></a></h4>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[cams_forecast-global-hourly]</span>
@@ -484,8 +516,8 @@
 <div><p>Replace <code class="docutils literal notranslate"><span class="pre">&lt;model&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;stream&gt;</span></code> with one of the available model names and streams listed below.</p>
 </div></blockquote>
 </section>
-<section id="id4">
-<h3>Available models<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<section id="id5">
+<h3>Available models<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
 <p>Use the following model names (same as in the API):</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">ensemble</span></code></p></li>
@@ -510,8 +542,8 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">interim</span></code> available for the period <strong>2021–2024 (inclusive)</strong></p></li>
 </ul>
 </section>
-<section id="id5">
-<h3>Available variables (Species)<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<section id="id6">
+<h3>Available variables (Species)<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
 <p>These are the available species:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">pm10</span></code></p></li>
@@ -533,8 +565,12 @@
 <div><p>Providentia can only read species in GHOST format. If you want to know the mapping from CAMS variables to GHOST species, please refer to the <a class="reference internal" href="#cams-ghost-species-mapping">CAMS-GHOST species mapping</a> section.</p>
 </div></blockquote>
 </section>
-<section id="id6">
-<h3>Fixed Download Settings<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<section id="id7">
+<h3>Dataset temporal coverage<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<p>The dataset covers the period from January 2013 to December 2025.</p>
+</section>
+<section id="id8">
+<h3>Fixed Download Settings<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
 <p>Providentia assumes the following fixed values when downloading data:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">level</span> <span class="pre">=</span> <span class="pre">0</span></code></p></li>
@@ -543,8 +579,8 @@
 <div><p>All available data in this dataset is multi-level, but Providentia retrieves only the ground level.</p>
 </div></blockquote>
 </section>
-<section id="id7">
-<h3>Example configuration files and corresponding API requests<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<section id="id9">
+<h3>Example configuration files and corresponding API requests<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
 <section id="example-1-cams-regional-reanalysis-ensemble-model-sconcno2-interim-reanalysis">
 <h4>Example 1: CAMS Regional Reanalysis (Ensemble Model, sconcno2, Interim Reanalysis)<a class="headerlink" href="#example-1-cams-regional-reanalysis-ensemble-model-sconcno2-interim-reanalysis" title="Link to this heading"></a></h4>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[cams_reanalysis_ensemble_interim-regional]</span>
@@ -600,8 +636,8 @@
 <p><a class="reference external" href="https://ads.atmosphere.copernicus.eu/datasets/cams-global-reanalysis-eac4?tab=overview">Dataset Link</a></p>
 <p>Using this dataset you can download <strong>Global Reanalysis data</strong>.</p>
 <p>This dataset contains both single-level and multi-level data.</p>
-<section id="id8">
-<h3>Mandatory fields<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
+<section id="id10">
+<h3>Mandatory fields<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
 <p>Only 3hourly global data is available in this dataset. You must set <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">3hourly</span></code> and <code class="docutils literal notranslate"><span class="pre">domain</span> <span class="pre">=</span> <span class="pre">global</span></code> in your configuration file; otherwise, the download will not work.</p>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_reanalysis</span>
 <span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">global</span>
@@ -609,11 +645,11 @@
 </pre></div>
 </div>
 </section>
-<section id="id9">
-<h3>Available variables (Species)<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
+<section id="id11">
+<h3>Available variables (Species)<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
 <p>Whether the data is single or multi depends on the selected species. These are the available species:</p>
-<section id="id10">
-<h4>Single-level:<a class="headerlink" href="#id10" title="Link to this heading"></a></h4>
+<section id="id12">
+<h4>Single-level:<a class="headerlink" href="#id12" title="Link to this heading"></a></h4>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">2m_dewpoint_temperature</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">2m_temperature</span></code></p></li>
@@ -629,8 +665,8 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">total_aerosol_optical_depth_550nm</span></code></p></li>
 </ul>
 </section>
-<section id="id11">
-<h4>Multi-level:<a class="headerlink" href="#id11" title="Link to this heading"></a></h4>
+<section id="id13">
+<h4>Multi-level:<a class="headerlink" href="#id13" title="Link to this heading"></a></h4>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">cfracmax</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">sconcc2h4</span></code></p></li>
@@ -659,17 +695,21 @@
 </div></blockquote>
 </section>
 </section>
-<section id="id12">
-<h3>Fixed Download Settings<a class="headerlink" href="#id12" title="Link to this heading"></a></h3>
+<section id="id14">
+<h3>Dataset temporal coverage<a class="headerlink" href="#id14" title="Link to this heading"></a></h3>
+<p>The dataset covers the period from January 2003 to December 2025.</p>
+</section>
+<section id="id15">
+<h3>Fixed Download Settings<a class="headerlink" href="#id15" title="Link to this heading"></a></h3>
 <p>Providentia assumes the following fixed values when downloading data:</p>
-<section id="id13">
-<h4>For single-level data:<a class="headerlink" href="#id13" title="Link to this heading"></a></h4>
+<section id="id16">
+<h4>For single-level data:<a class="headerlink" href="#id16" title="Link to this heading"></a></h4>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">time</span> <span class="pre">=</span> <span class="pre">00:00-21:00</span></code> (for every three hours)</p></li>
 </ul>
 </section>
-<section id="id14">
-<h4>For multi-level data:<a class="headerlink" href="#id14" title="Link to this heading"></a></h4>
+<section id="id17">
+<h4>For multi-level data:<a class="headerlink" href="#id17" title="Link to this heading"></a></h4>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">time</span> <span class="pre">=</span> <span class="pre">00:00-21:00</span></code> (for every three hours)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">model_level</span> <span class="pre">=</span> <span class="pre">60</span></code></p></li>
@@ -679,8 +719,8 @@
 </div></blockquote>
 </section>
 </section>
-<section id="id15">
-<h3>Example configuration files and corresponding API requests<a class="headerlink" href="#id15" title="Link to this heading"></a></h3>
+<section id="id18">
+<h3>Example configuration files and corresponding API requests<a class="headerlink" href="#id18" title="Link to this heading"></a></h3>
 <section id="example-1-cams-global-reanalysis-sst-single-level">
 <h4>Example 1: CAMS Global Reanalysis (sst, Single-level)<a class="headerlink" href="#example-1-cams-global-reanalysis-sst-single-level" title="Link to this heading"></a></h4>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[cams_reanalysis-global-single]</span>

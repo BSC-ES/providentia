@@ -277,6 +277,11 @@ class Cams(object):
         request = {"variable": cams_species}
         is_valid = True
 
+        # add area the request if the dataset has it and user asked for it
+        if cams_dict["area"] and hasattr(self.download_instance, "longitude") and hasattr(self.download_instance, "latitude"):
+            request["area"] = [self.download_instance.latitude[1], self.download_instance.longitude[0], 
+             self.download_instance.latitude[0], self.download_instance.longitude[1]]
+            
         # add leadtime hour to the request if the dataset has it
         if "leadtime_hour" in cams_dict and level in cams_dict["leadtime_hour"]:
             request["leadtime_hour"] = cams_dict["leadtime_hour"][level]

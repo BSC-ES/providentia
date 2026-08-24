@@ -69,6 +69,10 @@ These are the available networks for version **1.5**:
 * `US_NADP_AMoN`
 * `WMO_WDCGG`
 
+### Dataset temporal coverage
+
+The dataset covers the period from January 1971 to December 2022.
+
 ### Version 1.5.1
 
 These are the available networks for version **1.5.1**:
@@ -105,9 +109,13 @@ These are the available networks for version **1.5.1**:
 * `US_NADP_NTN`
 * `WMO_WDCPC`
 
+### Dataset temporal coverage
+
+The dataset covers the period from January 1971 to December 2024.
+
 ## Explore network contents
 
-To view the available data for each network, visit the Zenodo page for one of the versions, you can find the links in [this](#available-ghost-versions) section.
+To view the available data for each network, visit the Zenodo page for one of the versions. You can find the links in [this](#available-ghost-versions) section.
 
 When scrolling down, you will find the list of available networks, where the name and the total size for each network are shown.
 

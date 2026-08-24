@@ -283,9 +283,20 @@ class Download(object):
 
                         # ACTRIS
                         if network == "actris/actris":
-                            for resolution in self.resolution:
-                                actris = Actris(self, resolution)
-                                actris.download_actris_data()
+                            self.actris = Actris(self)
+                            initial_check_nc_files = (
+                                self.actris.download_actris_data(
+                                    initial_check=True
+                                )
+                            )
+                            files_to_download = self.select_files_to_download(
+                                initial_check_nc_files
+                            )
+                            if not initial_check_nc_files or files_to_download:
+                                self.actris.download_actris_data(
+                                    initial_check=False,
+                                    files_to_download=files_to_download,
+                                )
                         # GHOST and non-GHOST
                         else:
                             # download GHOST network
