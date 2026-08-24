@@ -168,7 +168,7 @@ class ICAP(object):
             else self.download_instance.resolution
         )
         
-        # get the domain from the yaml file
+        # get the resolution from the yaml file
         correct_resolution = self.icap_fixed_values["resolution"]
 
         final_resolution_list = []
@@ -213,6 +213,7 @@ class ICAP(object):
         # make sure that species is either od550du or related
         for species in self.download_instance.species:
             if species == correct_species or species in mapping_species_keys:
+                # add the correct one because it will always be od550du even if it is aero
                 final_species_list.append(correct_species)
             else:
                 msg = f"The species '{species}' is not available in ICAP-MME."
