@@ -446,6 +446,20 @@ class Download(object):
             f"ssh-keyscan -t ed25519 {self.remote_hostname}"
         )
 
+        # check for OpenSSL version mismatch
+        if "OpenSSL version mismatch" in output:
+            msg = (
+                "OpenSSL version mismatch detected while running ssh-keyscan.\n\n"
+                "Please activate the conda environment and install "
+                "OpenSSH from conda-forge using:\n\n"
+                "conda activate providentia-env_v3.1.0\n"
+                "conda install -c conda-forge openssh --override-channels\n\n"
+                "Then restart the download."
+            )
+
+            self.logger.error(msg)
+            sys.exit(1)
+            
         # encode the output public key if possible
         try:
             ed25519_key = output.split()[-1].encode()
