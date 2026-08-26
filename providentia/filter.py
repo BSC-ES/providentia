@@ -161,13 +161,31 @@ class DataFilter:
                         self.read_instance.metadata_in_memory_filtered[networkspeci].shape[0]
                     )
                 else:
-                    station_order_inds = np.argsort(
-                        self.read_instance.metadata_in_memory_filtered[networkspeci][
-                            self.read_instance.station_order
-                        ][:, 0]
-                    )      
-                    if self.read_instance.station_order_direction == "descending":
-                        station_order_inds = station_order_inds[::-1]
+                    # metadata array is [station, month]; a station can be NaN for a given
+                    # month if it wasn't active then, so take the first valid (non-NaN)
+                    # value per station across months, rather than just column 0
+                    station_metadata = self.read_instance.metadata_in_memory_filtered[networkspeci][
+                        self.read_instance.station_order
+                    ]
+                    n_stations = station_metadata.shape[0]
+
+                    # mask of valid (non-missing) entries per station/month
+                    valid_mask = ~(pd.isna(station_metadata) | np.vectorize(lambda x: isinstance(x, str) and x.strip().lower() == 'nan')(station_metadata))
+                    has_any_valid = valid_mask.any(axis=1)
+
+                    # index of first valid month per station (argmax finds first True;
+                    # returns 0 for all-NaN rows, but we overwrite those with NaN below)
+                    first_valid_month = np.argmax(valid_mask, axis=1)
+
+                    first_valid_values = station_metadata[np.arange(n_stations), first_valid_month]
+                    # cast to object so we can safely assign np.nan even if metadata is string dtype
+                    first_valid_values = first_valid_values.astype(object)
+                    first_valid_values[~has_any_valid] = np.nan
+
+                    # sort, always keeping NaNs at the end regardless of direction
+                    ascending = self.read_instance.station_order_direction != "descending"
+                    sorted_series = pd.Series(first_valid_values).sort_values(ascending=ascending, na_position="last")
+                    station_order_inds = sorted_series.index.to_numpy()
 
                 # get indices to reorder stations to how they originally were
                 self.read_instance.station_order_inds_invert = np.argsort(station_order_inds)
@@ -1547,7 +1565,7 @@ class DataFilter:
             for networkspeci in self.read_instance.networkspecies:
 
                 # cap metadata_in_memory
-                self.read_instance.metadata_in_memory_filtered[networkspeci] = self.read_instance.metadata_in_memory_filtered[networkspeci][:self.read_instance.station_cap, :]
+                #self.read_instance.metadata_in_memory_filtered[networkspeci] = self.read_instance.metadata_in_memory_filtered[networkspeci][:self.read_instance.station_cap, :]
 
                 for data_label in self.read_instance.data_labels:
 

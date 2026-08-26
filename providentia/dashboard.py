@@ -2433,7 +2433,10 @@ class Dashboard(QtWidgets.QWidget):
             # 0 valid measurements, to do this we need to have valid_station_inds, which is obtained
             # after filtering
             if not self.reading_ghost:
-                update_metadata_fields(self)
+                if self.station_cap:
+                    update_metadata_fields(self, cap=True)
+                else:
+                    update_metadata_fields(self)
 
             # generate list of sorted z1/z2 data arrays names in memory, putting observations
             # before models, and empty string item as first element in z2 array list
@@ -2521,7 +2524,10 @@ class Dashboard(QtWidgets.QWidget):
         # 0 valid measurements, to do this we need to have valid_station_inds, which is obtained
         # after filtering
         if not self.reading_ghost:
-            update_metadata_fields(self)
+            if self.station_cap:
+                update_metadata_fields(self, cap=True)
+            else:
+                update_metadata_fields(self)
 
         # Restore mouse cursor to normal
         unset_cursor(self.cursor_function, "reset_options")
