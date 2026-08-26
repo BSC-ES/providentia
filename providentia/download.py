@@ -508,7 +508,11 @@ class Download(object):
                     username=self.prv_user,
                     password=self.prv_password,
                 )
-                self.sftp = self.ssh.open_sftp()
+                transport = self.ssh.get_transport()
+                self.sftp = paramiko.SFTPClient.from_transport(
+                    transport,
+                    window_size=64 * 1024 * 1024,
+                )
 
                 # exit the loop when the connection was succesful
                 break
