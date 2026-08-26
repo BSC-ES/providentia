@@ -12,7 +12,7 @@ import matplotlib
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.lines as mlines
 from matplotlib.lines import Line2D
-from matplotlib.patches import Polygon
+from matplotlib.patches import Patch, Polygon
 from matplotlib.projections import PolarAxes
 import matplotlib.pyplot as plt
 import mpl_toolkits.axisartist.floating_axes as fa
@@ -474,37 +474,39 @@ class Plotting:
         # create legend elements
         legend_elements = []
 
-        # add observations element, if available, and set_obs == True
-        if (self.read_instance.observations_data_label in data_labels) and (set_obs):
-            legend_elements.append(
-                Line2D(
-                    [0],
-                    [0],
-                    marker=plot_characteristics_legend["handles"]["marker"],
-                    color=plot_characteristics_legend["handles"]["color"],
-                    markerfacecolor=self.read_instance.plotting_params[
-                        self.read_instance.observations_data_label
-                    ]["colour"],
-                    markersize=plot_characteristics_legend["handles"]["markersize"],
-                    label=self.read_instance.observations_data_label,
+        # add element for label
+        for data_label in data_labels:
+            if (data_label == self.read_instance.observations_data_label) and (not set_obs):
+                continue
+            
+            # show empty square with coloured border for gridded models
+            if 'gridded' in data_label:
+                
+                legend_elements.append(
+                    Line2D(
+                        [0], [0],
+                        marker="s",
+                        linestyle="none",
+                        markerfacecolor="none",
+                        markeredgecolor=self.read_instance.plotting_params[data_label]["colour"],
+                        markeredgewidth=1.2,
+                        markersize=plot_characteristics_legend["handles"]["markersize"] * 1.15,
+                        label=data_label,
+                    )
                 )
-            )
-
-        # add element for each model
-        for model in data_labels:
-            if model != self.read_instance.observations_data_label:
-                # add model element
+            # show filled dots for observations and interpolated models
+            else:
                 legend_elements.append(
                     Line2D(
                         [0],
                         [0],
                         marker=plot_characteristics_legend["handles"]["marker"],
                         color=plot_characteristics_legend["handles"]["color"],
-                        markerfacecolor=self.read_instance.plotting_params[model][
+                        markerfacecolor=self.read_instance.plotting_params[data_label][
                             "colour"
                         ],
                         markersize=plot_characteristics_legend["handles"]["markersize"],
-                        label=model,
+                        label=data_label,
                     )
                 )
 

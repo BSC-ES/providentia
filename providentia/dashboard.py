@@ -2873,19 +2873,20 @@ class Dashboard(QtWidgets.QWidget):
 
         # if have a GHOST network then QA and flags are active
         # also GHOST features are not set to min then period is also active
+        # everything depends on obs_active, if MODEL is selected, the fields must stay disabled
         for network in self.selected_network:
             if check_for_ghost(network):
-                qa_active = True
-                flags_active = True
+                qa_active = self.obs_active
+                flags_active = self.obs_active
                 if self.ghost_features != "min":
-                    period_active = True
+                    period_active = self.obs_active
                 ghost_version_active = True
-                ghost_features_active = True
+                ghost_features_active = self.obs_active
                 break
             # if are reading ACTRIS network then QA and flags are active
             elif network == "actris/actris":
-                qa_active = True
-                flags_active = True
+                qa_active = self.obs_active
+                flags_active = self.obs_active
                 break
 
         # update buttons

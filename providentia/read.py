@@ -3231,8 +3231,22 @@ class DataReader:
                             )
 
                             # get lat, lon and units from first readable file
-                            lat = ds.variables["lat"][:]
-                            lon = ds.variables["lon"][:]
+                            for name in ("lat", "latitude"):
+                                if name in ds.variables:
+                                    lat = ds.variables[name][:]
+                                    break
+                            else:
+                                msg = "Latitudes cannot be read, model grid won't be plotted."
+                                show_message(self.read_instance, msg)
+                                return None
+                            for name in ("lon", "longitude"):
+                                if name in ds.variables:
+                                    lon = ds.variables[name][:]
+                                    break
+                            else:
+                                msg = "Longitudes cannot be read, model grid won't be plotted."
+                                show_message(self.read_instance, msg)
+                                return None 
                             units = ds.variables[speci].units
 
                         # ignore NaNs

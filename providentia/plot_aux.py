@@ -411,6 +411,22 @@ def update_plotting_parameters(
         # If palette not in YAML, generate colors automatically
         clrs = sns.color_palette(color_palette, n_colors=len(instance.data_labels) - 1)
 
+    # assign a colour per base label (data label without the gridded tag), so that
+    # the gridded and non-gridded versions of a model share a colour
+    # sort to put non-gridded labels first, so a gridded label only takes a new colour when its
+    # non-gridded counterpart is not loaded
+    colour_per_base_label = {}
+    colour_ind = 0 if not instance.obs_active else 1
+    for data_label in sorted(
+        instance.data_labels, key=lambda label: "(gridded)" in label
+    ):
+        if data_label == instance.observations_data_label:
+            continue
+        base_label = data_label.replace(" (gridded)", "")
+        if base_label not in colour_per_base_label:
+            colour_per_base_label[base_label] = clrs[colour_ind - 1]
+            colour_ind += 1
+
     # Add colours and zorder for each model (non-observations)
     if not instance.obs_active:
         model_ind = 0
@@ -419,7 +435,9 @@ def update_plotting_parameters(
     for data_label in instance.data_labels:
         if data_label != instance.observations_data_label:
             # Define colour for model
-            instance.plotting_params[data_label]["colour"] = clrs[model_ind - 1]
+            instance.plotting_params[data_label]["colour"] = colour_per_base_label[
+                data_label.replace(" (gridded)", "")
+            ]
             # Define zorder for model relative to observations
             if instance.observations_data_label in instance.plotting_params.keys():
                 instance.plotting_params[data_label]["zorder"] = (
