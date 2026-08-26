@@ -8,7 +8,7 @@ import os
 import sys
 
 from dateutil.relativedelta import relativedelta
-from netCDF4 import Dataset, chartostring
+from netCDF4 import Dataset, chartostring, date2index
 import numpy as np
 import pandas as pd
 import yaml
@@ -1680,63 +1680,53 @@ class DataReader:
             for data_label, data_label_raw in zip(data_labels, data_labels_raw):
                 # only check model data labels
                 if data_label != self.read_instance.observations_data_label:
-                    if not self.read_instance.obs_active:
-                        experiment = data_label_raw.split('-')[0] # experiment name without domain
-                        domain = data_label_raw.split('-')[1]
-                        file_root = "%s/%s/%s/%s/%s/%s_" % (
-                                self.read_instance.mod_to_interp_root,
-                                experiment,
-                                domain,
-                                resolution,
-                                speci,
-                                speci,
-                            )
-                        try:  
-                            available_yearmonths = self.read_instance.available_model_data[
-                                domain
-                            ][resolution][speci][experiment]
-                        except KeyError:
-                            continue
-                    else:
-                        if "/" in network:
-                            file_root = "%s/%s/%s/%s/%s/%s/%s_" % (
-                                self.read_instance.mod_root,
-                                ghost_version,
-                                data_label_raw,
-                                resolution,
-                                speci,
-                                network.replace("/", "-"),
-                                speci,
-                            )
-                        else:
-                            file_root = "%s/%s/%s/%s/%s/%s/%s_" % (
-                                self.read_instance.mod_root,
-                                ghost_version,
-                                data_label_raw,
-                                resolution,
-                                speci,
-                                network,
-                                speci,
-                            )
+                    # split raw data label into model id and type
+                    # (e.g. 'cams61_emep_ph2-eu-000::interpolated')
+                    model_id, _, model_type = data_label_raw.rpartition("::")
+                    if model_type not in ["interpolated", "noninterpolated"]:
+                        model_id, model_type = data_label_raw, "interpolated"
 
-                        try:
-                            available_yearmonths = self.read_instance.available_model_data[
-                                network
-                            ][resolution][speci][data_label_raw]
-                        except KeyError:
-                            continue
+                    # non-interpolated data is stored per domain, interpolated per network
+                    if model_type == "noninterpolated":
+                        data_key = model_id.rsplit("-", 2)[1]
+                        file_root_key = (model_type, model_id, "", speci)
+                    else:
+                        data_key = network
+                        file_root_key = (model_type, model_id, network, speci)
+
+                    # get file path
+                    if (
+                        file_root_key
+                        not in self.read_instance.available_model_data_file_roots
+                    ):
+                        continue
+                    file_root = self.read_instance.available_model_data_file_roots[
+                        file_root_key
+                    ]
+
+                    try:
+                        available_yearmonths = self.read_instance.available_model_data[
+                            model_type
+                        ][data_key][resolution][speci][model_id]
+                    except KeyError:
+                        continue
 
                     # get intersection of yearmonths_to_read and available_yearmonths
                     yearmonths_to_read_intersect = list(
                         set(yearmonths_to_read) & set(available_yearmonths)
                     )
+
+                    # no files inside the date range, nothing to check
+                    if len(yearmonths_to_read_intersect) == 0:
+                        continue
+
                     files_to_read[data_label] = sorted(
                         [
                             file_root + str(yyyymm) + ".nc"
                             for yyyymm in yearmonths_to_read_intersect
                         ]
                     )[0]
-
+            
             # read forecast dimension for each model
             if len(files_to_read) == 0:
                 continue
@@ -2278,32 +2268,38 @@ class DataReader:
                     if filter_read:
                         continue
 
-                    elif "/" in network:
-                        file_root = "%s/%s/%s/%s/%s/%s/%s_" % (
-                            self.read_instance.mod_root,
-                            self.read_instance.ghost_version,
-                            base_data_label_raw,
-                            self.read_instance.resolution,
-                            speci,
-                            network.replace("/", "-"),
-                            speci,
-                        )
                     else:
-                        file_root = "%s/%s/%s/%s/%s/%s/%s_" % (
-                            self.read_instance.mod_root,
-                            self.read_instance.ghost_version,
-                            base_data_label_raw,
-                            self.read_instance.resolution,
-                            speci,
-                            network,
-                            speci,
-                        )
-                    try:
-                        available_yearmonths = self.read_instance.available_model_data[
-                            network
-                        ][self.read_instance.resolution][speci][base_data_label_raw]
-                    except KeyError:
-                        continue
+                        # split raw data label into model id and type
+                        model_id, _, model_type = base_data_label_raw.rpartition("::")
+                        if model_type not in ["interpolated", "noninterpolated"]:
+                            model_id, model_type = base_data_label_raw, "interpolated"
+
+                        # non-interpolated data has no stations, so it is not
+                        # read here, it is read per date when the gridded map is drawn
+                        if model_type == "noninterpolated":
+                            continue
+
+                        data_key = network
+                        file_root_key = (model_type, model_id, network, speci)
+
+                        # get file path
+                        if (
+                            file_root_key
+                            not in self.read_instance.available_model_data_file_roots
+                        ):
+                            continue
+                        file_root = self.read_instance.available_model_data_file_roots[
+                            file_root_key
+                        ]
+
+                        try:
+                            available_yearmonths = (
+                                self.read_instance.available_model_data[model_type][data_key][
+                                    self.read_instance.resolution
+                                ][speci][model_id]
+                            )
+                        except KeyError:
+                            continue
 
                 # get intersection of yearmonths_to_read and available_yearmonths
                 yearmonths_to_read_intersect = list(
@@ -3136,3 +3132,141 @@ class DataReader:
         ncdf_root.close()
 
         return True
+
+    def read_gridded_data(self, speci, date=None, hour=None, stat=None):
+        """
+        Read model gridded data
+
+        Parameters
+        ----------
+        speci : str
+            Current speci (e.g. sconco3)
+        date : str, optional
+            Date, by default None
+        hour : int, optional
+            Hour, by default None
+        stat : str, optional
+            Statistic (only Mean accepted), by default None
+
+        Returns
+        -------
+        np.array
+            Gridded model variable data
+        np.array
+            Gridded model latitude
+        np.array
+            Gridded model longitude
+        str
+            Gridded model variable units
+        """
+
+        # get gridded models selected on the models menu
+        selected_gridded_models = self.read_instance.models_menu["models"][
+            "keep_selected"
+        ]["noninterpolated"]
+
+        # nothing to draw if no gridded model is selected
+        if len(selected_gridded_models) == 0:
+            return
+        
+        # do not plot more than one grid at the same time
+        if len(selected_gridded_models) > 1:
+            msg = f"It is not possible to plot more than one gridded model. Plotting the first one: {selected_gridded_models[0]}"
+            show_message(self.read_instance, msg)
+            return
+        
+        # take the first selected gridded model
+        model_id = selected_gridded_models[0]
+        model = model_id.rsplit("-", 2)[0]
+        domain = model_id.rsplit("-", 2)[1]
+
+        resolution = self.read_instance.resolution
+
+        if date and hour:
+            filepath = f"{self.read_instance.mod_to_interp_root}/{model}/{domain}/{resolution}/{speci}/{speci}_{date[0:6]}.nc"
+
+            if not os.path.exists(filepath):
+                return None
+
+            with Dataset(filepath) as nc:
+
+                variables = nc.variables
+                lat = variables["lat"][:] if "lat" in variables else variables["latitude"][:]
+                lon = variables["lon"][:] if "lon" in variables else variables["longitude"][:]
+                t = date2index(datetime.datetime.strptime(date, "%Y%m%d") + datetime.timedelta(hours=hour), 
+                            variables["time"], select="exact")
+                data = variables[speci][t]
+                units = variables[speci].units
+
+        elif stat:
+            if stat not in ['Mean']:
+                msg = f"Statistic '{stat}' is not supported. Only 'Mean' is supported."
+                show_message(self.read_instance, msg)
+                return None
+
+            current_date = datetime.datetime.strptime(str(self.read_instance.start_date), "%Y%m%d")
+            end_date = datetime.datetime.strptime(str(self.read_instance.end_date), "%Y%m%d")
+
+            sum_data = None
+            count_data = None
+
+            while current_date < end_date:
+                
+                filepath = f"{self.read_instance.mod_to_interp_root}/{model}/{domain}/{resolution}/{speci}/{speci}_{current_date.strftime('%Y%m')}.nc"
+                if os.path.exists(filepath):
+
+                    with Dataset(filepath) as ds:
+                        monthly_data = ds.variables[speci][:]
+
+                        # initialise using the spatial dimensions of first file
+                        if sum_data is None:
+                            sum_data = np.zeros(
+                                monthly_data.shape[1:],
+                                dtype=np.float64
+                            )
+
+                            count_data = np.zeros(
+                                monthly_data.shape[1:],
+                                dtype=np.int64
+                            )
+
+                            # get lat, lon and units from first readable file
+                            lat = ds.variables["lat"][:]
+                            lon = ds.variables["lon"][:]
+                            units = ds.variables[speci].units
+
+                        # ignore NaNs
+                        sum_data += np.nansum(monthly_data, axis=0)
+                        count_data += np.sum(
+                            ~np.isnan(monthly_data),
+                            axis=0
+                        )
+
+                # move to next month
+                if current_date.month == 12:
+                    current_date = current_date.replace(
+                        year=current_date.year + 1,
+                        month=1
+                    )
+                else:
+                    current_date = current_date.replace(
+                        month=current_date.month + 1
+                    )
+
+            # do not calculate mean if no data files were found
+            if sum_data is None:
+                msg = "No model data files found for the specified date range: "
+                msg += f"{self.read_instance.start_date} to {self.read_instance.end_date}."
+                show_message(self.read_instance, msg)
+                return None
+
+            # calculate mean
+            data = sum_data / count_data
+
+            # set nan in grid cells where all values are nan
+            data[count_data == 0] = np.nan
+
+        else:
+            raise ValueError("Either 'date' and 'hour' or 'stat' must be provided.")
+
+        return data, lat, lon, units

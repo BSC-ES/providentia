@@ -377,13 +377,14 @@ def update_plotting_parameters(
         for data_label in data_labels_to_remove:
             del instance.plotting_params[data_label]
 
-    # Add colour and zorder for observations
-    instance.plotting_params[instance.observations_data_label][
-        "colour"
-    ] = instance.plot_characteristics_templates["general"]["obs_markerfacecolor"]
-    instance.plotting_params[instance.observations_data_label][
-        "zorder"
-    ] = instance.plot_characteristics_templates["general"]["obs_zorder"]
+    # Add colour and zorder for observations if loaded
+    if instance.observations_data_label in instance.plotting_params.keys():
+        instance.plotting_params[instance.observations_data_label][
+            "colour"
+        ] = instance.plot_characteristics_templates["general"]["obs_markerfacecolor"]
+        instance.plotting_params[instance.observations_data_label][
+            "zorder"
+        ] = instance.plot_characteristics_templates["general"]["obs_zorder"]
 
     # Generate a list of RGB tuples for the number of models
     sns.reset_orig()  # Reset seaborn to default
@@ -411,16 +412,24 @@ def update_plotting_parameters(
         clrs = sns.color_palette(color_palette, n_colors=len(instance.data_labels) - 1)
 
     # Add colours and zorder for each model (non-observations)
-    model_ind = 1
+    if not instance.obs_active:
+        model_ind = 0
+    else:
+        model_ind = 1
     for data_label in instance.data_labels:
         if data_label != instance.observations_data_label:
             # Define colour for model
             instance.plotting_params[data_label]["colour"] = clrs[model_ind - 1]
             # Define zorder for model relative to observations
-            instance.plotting_params[data_label]["zorder"] = (
-                instance.plotting_params[instance.observations_data_label]["zorder"]
-                + model_ind
-            )
+            if instance.observations_data_label in instance.plotting_params.keys():
+                instance.plotting_params[data_label]["zorder"] = (
+                    instance.plotting_params[instance.observations_data_label]["zorder"]
+                    + model_ind
+                )
+            else:
+                instance.plotting_params[data_label]["zorder"] = (
+                    model_ind
+                )
             # Update count of models
             model_ind += 1
 

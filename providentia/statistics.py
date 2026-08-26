@@ -1874,6 +1874,7 @@ def generate_colourbar_detail(
     plot_characteristics,
     speci,
     only_label=False,
+    label_units=None
 ):
     """
     Determines colourbar parameters including limits, labels, and colourmaps for a specific statistic.
@@ -1912,22 +1913,26 @@ def generate_colourbar_detail(
     """
 
     # get zstat information
-    (
-        zstat,
-        base_zstat,
-        z_statistic_type,
-        z_statistic_sign,
-        z_statistic_period,
-    ) = get_z_statistic_info(zstat=zstat)
+    if zstat is not None:
+        (
+            zstat,
+            base_zstat,
+            z_statistic_type,
+            z_statistic_sign,
+            z_statistic_period,
+        ) = get_z_statistic_info(zstat=zstat)
 
-    # get dictionary containing necessary information for calculation of selected statistic
-    if z_statistic_type == "basic":
-        stats_dict = basic_stats[base_zstat]
+        # get dictionary containing necessary information for calculation of selected statistic
+        if z_statistic_type == "basic":
+            stats_dict = basic_stats[base_zstat]
+        else:
+            stats_dict = modbias_stats[base_zstat]
+        label_units = stats_dict["units"]
+        if label_units == "[measurement_units]":
+            label_units = read_instance.measurement_units[speci]
     else:
-        stats_dict = modbias_stats[base_zstat]
-    label_units = stats_dict["units"]
-    if label_units == "[measurement_units]":
-        label_units = read_instance.measurement_units[speci]
+        stats_dict = {"label": speci}
+        z_statistic_sign = "absolute"
 
     # generate z colourbar label
     # first check if have defined label (in this order: 1. specific for z statistic 2. specific for species 3. configuration file)
@@ -2138,7 +2143,7 @@ def generate_colourbar_detail(
     return z_vmin, z_vmax, z_label, z_colourmap, n_discrete, n_ticks
 
 
-def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, speci):
+def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, speci, label_units=None):
     """
     Renders the colourbar on the specified axes and updates plot collection limits.
 
@@ -2175,7 +2180,7 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
         n_discrete,
         n_ticks,
     ) = generate_colourbar_detail(
-        read_instance, zstat, plotted_min, plotted_max, plot_characteristics, speci
+        read_instance, zstat, plotted_min, plotted_max, plot_characteristics, speci, label_units=label_units
     )
 
     # generate colourbar tick array

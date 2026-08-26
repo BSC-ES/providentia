@@ -1242,13 +1242,19 @@ class DataFilter:
 
         # Update the models dictionary
         self.read_instance.experiments = dict(new_models)
+
         # Rebuild the data_labels and raw data_labels including observations first
-        self.read_instance.data_labels = [
-            self.read_instance.observations_data_label
-        ] + list(self.read_instance.experiments.values())
-        self.read_instance.data_labels_raw = [
-            self.read_instance.observations_data_label
-        ] + list(self.read_instance.experiments.keys())
+        # if no obs are loaded (when MODEL is active), remove observations from labels
+        if not self.obs_active:
+            self.read_instance.data_labels = list(self.read_instance.experiments.values())
+            self.read_instance.data_labels_raw = list(self.read_instance.experiments.keys())
+        else:
+            self.read_instance.data_labels = [
+                self.read_instance.observations_data_label
+            ] + list(self.read_instance.experiments.values())
+            self.read_instance.data_labels_raw = [
+                self.read_instance.observations_data_label
+            ] + list(self.read_instance.experiments.keys())
 
         # Update plotting parameters to reflect changes in labels and daily forecasts
         data_labels_to_remove = [

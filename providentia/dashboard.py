@@ -1489,18 +1489,20 @@ class Dashboard(QtWidgets.QWidget):
 
         # update models -- keeping previously selected models if available
         if self.config_bar_initialisation:
-            self.models_menu["models"]["keep_selected"] = [
-                model
-                for model in self.experiments
-                if model in self.models_menu["models"]["map_vars"]
+            for model_type in ['interpolated', 'noninterpolated']:
+                self.models_menu["models"]["keep_selected"][model_type] = [
+                    model
+                    for model in self.experiments
+                    if model in self.models_menu["models"]["map_vars"]
+                ]
+
+        for model_type in ['interpolated', 'noninterpolated']:
+            self.models_menu["models"]["keep_selected"][model_type] = [
+                previous_selected_model
+                for previous_selected_model in self.models_menu["models"]["keep_selected"][model_type]
+                if previous_selected_model in self.models_menu["models"]["map_vars"]
             ]
-
-        self.models_menu["models"]["keep_selected"] = [
-            previous_selected_model
-            for previous_selected_model in self.models_menu["models"]["keep_selected"]
-            if previous_selected_model in self.models_menu["models"]["map_vars"]
-        ]
-
+        
         # update forecast menus
         self.update_models_menu()
 
@@ -1655,32 +1657,51 @@ class Dashboard(QtWidgets.QWidget):
         
         # set all and selected models
         all_models = {}
-        for mod in self.models_menu["models"]["map_vars"]:
-            if mod in self.experiments:
-                all_models[mod] = self.experiments[mod]
-            elif mod in self.init_models:
-                all_models[mod] = self.init_models[mod]
-            else:
-                all_models[mod] = mod
-
         selected_models = {}
-        for mod in self.models_menu["models"]["keep_selected"]:
-            if mod in self.experiments:
-                selected_models[mod] = self.experiments[mod]
-            elif mod in self.init_models:
-                selected_models[mod] = self.init_models[mod]
-            else:
-                selected_models[mod] = mod
+        for model_type in ['interpolated', 'noninterpolated']:
+            for mod in self.models_menu["models"]["map_vars"]:
+                # skip model types the model has no data available in
+                if not self.models_menu["models"]["enabled"][model_type].get(mod, False):
+                    continue
 
-        # set selected data labels
-        all_data_labels = [self.observations_data_label] + list(all_models.values())
-        all_data_labels_raw = [self.observations_data_label] + list(all_models.keys())
-        selected_data_labels = [self.observations_data_label] + list(
-            selected_models.values()
-        )
-        selected_data_labels_raw = [self.observations_data_label] + list(
-            selected_models.keys()
-        )
+                 # the raw data label carries the interpolation mode, so the same
+                # experiment can be read interpolated and gridded at the same time
+                data_label_raw = "{}::{}".format(mod, model_type)
+
+                # keep the alias the model was last read under
+                if data_label_raw in self.experiments:
+                    data_label = self.experiments[data_label_raw]
+                # keep the alias set in the .conf file
+                elif data_label_raw in self.init_models:
+                    data_label = self.init_models[data_label_raw]
+                # no alias, mark gridded models
+                elif model_type == "noninterpolated":
+                    data_label = "{} (gridded)".format(mod)
+                # no alias, interpolated models keep the model name
+                else:
+                    data_label = mod
+
+                all_models[data_label_raw] = data_label
+
+                # model is checked in this mode?
+                if mod in self.models_menu["models"]["keep_selected"][model_type]:
+                    selected_models[data_label_raw] = data_label
+        
+        # if no obs are loaded (when MODEL is active), remove observations from labels
+        if not self.obs_active:
+            all_data_labels = list(all_models.values())
+            all_data_labels_raw = list(all_models.keys())
+            selected_data_labels = list(selected_models.values())
+            selected_data_labels_raw = list(selected_models.keys())
+        else:
+            all_data_labels = [self.observations_data_label] + list(all_models.values())
+            all_data_labels_raw = [self.observations_data_label] + list(all_models.keys())
+            selected_data_labels = [self.observations_data_label] + list(
+                selected_models.values()
+            )
+            selected_data_labels_raw = [self.observations_data_label] + list(
+                selected_models.keys()
+            )
 
         # save intial models if loading from .conf file to keep alias
         if self.from_conf:
@@ -1786,15 +1807,11 @@ class Dashboard(QtWidgets.QWidget):
             self.bu_QA = self.enable_element(self.bu_QA, "button")
             self.bu_flags = self.enable_element(self.bu_flags, "button")
             self.bu_multispecies = self.enable_element(self.bu_multispecies, "button")
-            self.cb_network = self.enable_element(self.cb_network, "combobox")
-            self.cb_ghost_version = self.enable_element(self.cb_ghost_version, "combobox")
             self.cb_ghost_features = self.enable_element(self.cb_ghost_features, "combobox")
         else:
             self.bu_QA = self.disable_element(self.bu_QA, "button")
             self.bu_flags = self.disable_element(self.bu_flags, "button")
             self.bu_multispecies = self.disable_element(self.bu_multispecies, "button")
-            self.cb_network = self.disable_element(self.cb_network, "combobox")
-            self.cb_ghost_version = self.disable_element(self.cb_ghost_version, "combobox")
             self.cb_ghost_features = self.disable_element(self.cb_ghost_features, "combobox")
 
         if self.mod_active:
@@ -1811,7 +1828,7 @@ class Dashboard(QtWidgets.QWidget):
             self.bu_models = self.enable_element(self.bu_models, "button")
         else:
             # remove experiments from selected models if switching to OBS
-            self.models_menu["models"]["keep_selected"] = []
+            init_models(self)
             self.bu_models = self.disable_element(self.bu_models, "button")
 
     def handle_config_bar_params_change(self, changed_param):
@@ -2440,7 +2457,6 @@ class Dashboard(QtWidgets.QWidget):
             for species in set(self.species)
         ]
         
-        
         self.networkspeci = self.networkspecies[0]
         self.filter_species = copy.deepcopy(self.selected_filter_species)
         self.ghost_version = self.selected_ghost_version
@@ -2448,18 +2464,36 @@ class Dashboard(QtWidgets.QWidget):
 
         # if are not loading from conf then get data labels, models and forecast indices
         if not self.from_conf:
+            # get the models selected on the models menu, interpolated and gridded
             models = {}
-            for mod in self.models_menu["models"]["keep_selected"]:
-                if mod in self.previous_models:
-                    models[mod] = self.previous_models[mod]
-                elif mod in self.init_models:
-                    models[mod] = self.init_models[mod]
-                else:
-                    models[mod] = mod
+            for model_type in ['interpolated', 'noninterpolated']:
+                for mod in self.models_menu["models"]["keep_selected"][model_type]:
+                    # the raw data label carries the interpolation mode, so the same
+                    # experiment can be read interpolated and gridded at the same time
+                    data_label_raw = "{}::{}".format(mod, model_type)
 
-            data_labels = [self.observations_data_label] + list(models.values())
-            data_labels_raw = [self.observations_data_label] + list(models.keys())
+                    # keep the alias the model was last read under
+                    if data_label_raw in self.previous_models:
+                        models[data_label_raw] = self.previous_models[data_label_raw]
+                    # keep the alias set in the .conf file
+                    elif data_label_raw in self.init_models:
+                        models[data_label_raw] = self.init_models[data_label_raw]
+                    # no alias, mark gridded models
+                    elif model_type == "noninterpolated":
+                        models[data_label_raw] = "{} (gridded)".format(mod)
+                    # no alias, interpolated models keep the model name
+                    else:
+                        models[data_label_raw] = mod
+            
+            # if no obs are loaded (when MODEL is active), remove observations from labels
+            if not self.obs_active:
+                data_labels = list(models.values())
+                data_labels_raw = list(models.keys())
+            else:
+                data_labels = [self.observations_data_label] + list(models.values())
+                data_labels_raw = [self.observations_data_label] + list(models.keys())
             self.forecast = []
+
             for model_raw, model in models.items():
                 # get available and selected forecast options
                 selected_forecast_options = self.models_menu["models"]["forecast"][

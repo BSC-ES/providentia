@@ -99,7 +99,14 @@ def init_models(instance):
 
     # reset fields
     instance.models_menu["models"]["labels"] = []
-    instance.models_menu["models"]["keep_selected"] = []
+    instance.models_menu["models"]["keep_selected"] = {
+        "interpolated": [],
+        "noninterpolated": [],
+    }
+    instance.models_menu["models"]["enabled"] = {
+        "interpolated": {},
+        "noninterpolated": {},
+    }
     instance.models_menu["models"]["forecast"] = {}
     instance.models_menu["models"]["forecast_days"] = {}
     instance.models_menu["models"]["map_vars"] = []

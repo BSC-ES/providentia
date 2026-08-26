@@ -2164,12 +2164,18 @@ class Providentia:
 
         # reset configuration variables in case new data has been downloaded
         self.valid_config = self.set_config(**self.kwargs)
-        self.data_labels = [self.observations_data_label] + list(
-            self.experiments.values()
-        )
-        self.data_labels_raw = [self.observations_data_label] + list(
-            self.experiments.keys()
-        )
+
+        # if no obs are loaded (when MODEL is active), remove observations from labels
+        if not self.obs_active:
+            self.data_labels = list(self.experiments.values())
+            self.data_labels_raw = list(self.experiments.keys())
+        else:
+            self.data_labels = [self.observations_data_label] + list(
+                self.experiments.values()
+            )
+            self.data_labels_raw = [self.observations_data_label] + list(
+                self.experiments.keys()
+            )
         self.networkspecies = [
             "{}|{}".format(network, speci)
             for network, speci in zip(self.network, self.species)

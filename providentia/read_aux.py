@@ -1116,6 +1116,7 @@ def get_valid_interpolated_models(instance, start_date, end_date, resolution, ne
 
     # create dictionary to store available model data
     available_model_data = {}
+    file_roots = {}
 
     # iterate through networks and species
     for networkspeci in networkspecies:
@@ -1189,8 +1190,13 @@ def get_valid_interpolated_models(instance, start_date, end_date, resolution, ne
                             model
                         ] = valid_file_yearmonths
 
-    return models, available_model_data
+                    # store file root, so paths never have to be rebuilt when reading
+                    file_roots[("interpolated", model, network, speci)] = "%s/%s_" % (
+                        files_directory,
+                        speci,
+                    )
 
+    return models, available_model_data, file_roots
 def get_valid_noninterpolated_models(instance, start_date, end_date, resolution, networkspecies):
 
     # get all different model names
@@ -1209,6 +1215,7 @@ def get_valid_noninterpolated_models(instance, start_date, end_date, resolution,
 
     # create dictionary to store available model data
     available_model_data = {}
+    file_roots = {}
 
     # iterate through species
     for speci in species:
@@ -1222,7 +1229,7 @@ def get_valid_noninterpolated_models(instance, start_date, end_date, resolution,
                             resolution,
                             speci,
                         )
-            
+
                 # test if non interpolated directory exists for model
                 # if it does not exit, continue
                 if not os.path.exists(files_directory):
@@ -1252,7 +1259,11 @@ def get_valid_noninterpolated_models(instance, start_date, end_date, resolution,
                     # if have valid files, then add model to pop-up menu,
                     # and add yearmonths to available model data
                     if len(valid_file_yearmonths) > 0:
-                        models[speci].add(f"{model}-{domain}")
+                        # TODO: Get ensemble option right
+                        # model id shown on the models menu (experiment-domain-ensemble),
+                        # used as key everywhere so both modes are looked up the same way
+                        model_id = f"{model}-{domain}-000"
+                        models[speci].add(model_id)
 
                         if domain not in available_model_data:
                             available_model_data[domain] = {}
@@ -1261,14 +1272,19 @@ def get_valid_noninterpolated_models(instance, start_date, end_date, resolution,
                         if speci not in available_model_data[domain][resolution]:
                             available_model_data[domain][resolution][speci] = {}
                         if (
-                            model
+                            model_id
                             not in available_model_data[domain][resolution][speci]
                         ):
                             available_model_data[domain][resolution][speci][
-                                model
+                                model_id
                             ] = valid_file_yearmonths
-                         
-    return models, available_model_data
+
+                        # store file root, so paths never have to be rebuilt when reading
+                        file_roots[
+                            ("noninterpolated", model_id, "", speci)
+                        ] = "%s/%s_" % (files_directory, speci)
+
+    return models, available_model_data, file_roots
 
 def get_valid_models(instance, start_date, end_date, resolution, networkspecies):
     """
@@ -1288,27 +1304,46 @@ def get_valid_models(instance, start_date, end_date, resolution, networkspecies)
         The monitoring networks|species to match against model data.
     """
 
-    noninterpolated_models, available_noninterpolated_model_data = get_valid_noninterpolated_models(
+    noninterpolated_models, available_noninterpolated_model_data, noninterpolated_file_roots = get_valid_noninterpolated_models(
         instance, start_date, end_date, resolution, networkspecies)
-    interpolated_models, available_interpolated_model_data = get_valid_interpolated_models(
+    interpolated_models, available_interpolated_model_data, interpolated_file_roots = get_valid_interpolated_models(
         instance, start_date, end_date, resolution, networkspecies)
 
-    instance.available_model_data = available_noninterpolated_model_data | available_interpolated_model_data
+    instance.available_model_data = {
+        "interpolated": available_interpolated_model_data,
+        "noninterpolated": available_noninterpolated_model_data,
+    }
     
+    instance.available_model_data_file_roots = {
+        **interpolated_file_roots,
+        **noninterpolated_file_roots,
+    }
+
     # set list of model names to add on models pop-up:
     # only models interpolated for ALL selected networkspecies
     if instance.mode not in ["report", "library"]:
-        noninterpolated_common_models = sorted(set.intersection(*noninterpolated_models.values()))
-        interpolated_common_models = sorted(set.intersection(*interpolated_models.values()))
+        noninterpolated_common_models = set.intersection(*noninterpolated_models.values())
+        interpolated_common_models = set.intersection(*interpolated_models.values())
         if networkspecies:
-            models_to_add = noninterpolated_common_models + interpolated_common_models
+            models_to_add = sorted(
+                set(noninterpolated_common_models) | set(interpolated_common_models)
+            )
         else:
             models_to_add = []
-        print('models_to_add', models_to_add)
+        
         models_to_add = np.array(models_to_add)
         instance.models_menu["models"]["labels"] = models_to_add
         instance.models_menu["models"]["map_vars"] = models_to_add
-        
+        instance.models_menu["models"]["enabled"] = {
+            "interpolated": {
+                model_id: model_id in interpolated_common_models
+                for model_id in models_to_add
+            },
+            "noninterpolated": {
+                model_id: model_id in noninterpolated_common_models
+                for model_id in models_to_add
+            },
+        }
 
 def get_possible_temporal_resolutions():
     """

@@ -24,6 +24,7 @@ import pyproj
 import seaborn as sns
 import yaml
 
+
 from providentia.auxiliar import (
     CURRENT_PATH,
     join,
@@ -1177,6 +1178,29 @@ class Plotting:
                 [self.stations_scatter],
                 bias=False,
             )
+
+    def make_gridded_map(
+        self,
+        relevant_axis,
+        networkspeci,
+        plot_characteristics,
+        plot_options,
+        var, 
+        lat, 
+        lon
+    ):
+        # TODO: Improve this function, committing for temporal changes
+
+        if "s" in plot_characteristics["plot"].keys():
+            del plot_characteristics["plot"]["s"]
+
+        relevant_axis.pcolormesh(
+            lon,
+            lat,
+            var,
+            transform=self.canvas_instance.datacrs,
+            **plot_characteristics["plot"],
+        )
 
     def make_timeseries(
         self,

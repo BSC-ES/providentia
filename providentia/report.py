@@ -238,12 +238,17 @@ class Report:
             self.periodic_nonrelevant_temporal_resolutions = (
                 get_periodic_nonrelevant_temporal_resolutions(self.resolution)
             )
-            self.data_labels = [self.observations_data_label] + list(
-                self.experiments.values()
-            )
-            self.data_labels_raw = [self.observations_data_label] + list(
-                self.experiments.keys()
-            )
+            # if no obs are loaded (when MODEL is active), remove observations from labels
+            if not self.obs_active:
+                self.data_labels = list(self.experiments.values())
+                self.data_labels_raw = list(self.experiments.keys())
+            else:
+                self.data_labels = [self.observations_data_label] + list(
+                    self.experiments.values()
+                )
+                self.data_labels_raw = [self.observations_data_label] + list(
+                    self.experiments.keys()
+                )
             self.networkspecies = [
                 "{}|{}".format(network, speci)
                 for network, speci in zip(self.network, self.species)
@@ -2270,17 +2275,24 @@ class Report:
                 if z_statistic_sign == "bias":
                     data_labels = list(self.experiments.values())
                 else:
-                    data_labels = [self.observations_data_label] + list(
-                        self.experiments.values()
-                    )
+                    if not self.obs_active:
+                        data_labels = list(self.experiments.values())
+                    else:
+                        data_labels = [self.observations_data_label] + list(
+                            self.experiments.values()
+                        )
 
             elif base_plot_type == "statsummary":
                 if "bias" in plot_options:
                     data_labels = list(self.experiments.values())
                 else:
-                    data_labels = [self.observations_data_label] + list(
-                        self.experiments.values()
-                    )
+                    # if no obs are loaded (when MODEL is active), remove observations from labels
+                    if not self.obs_active:
+                        data_labels = list(self.experiments.values())
+                    else:
+                        data_labels = [self.observations_data_label] + list(
+                            self.experiments.values()
+                        )
 
         elif "multispecies" in plot_options:
             data_labels = []

@@ -313,8 +313,8 @@ class Canvas(FigureCanvas):
         # update legend
         self.update_legend()
 
-        # update plotted map z statistic
-        self.update_map_z_statistic()
+        # update plotted map z statistic and grid
+        self.update_map()
 
         # uncover map, but hide plotting axes
         self.canvas_cover.hide()
@@ -458,8 +458,8 @@ class Canvas(FigureCanvas):
 
             # update plots?
             if not self.read_instance.block_MPL_canvas_updates:
-                # update plotted map z statistic
-                self.update_map_z_statistic()
+                # update plotted map z statistic and grid
+                self.update_map()
 
                 # if have selected stations on map, then now remake plots
                 if hasattr(self, "relative_selected_station_inds"):
@@ -558,7 +558,7 @@ class Canvas(FigureCanvas):
 
     def update_active_map(self):
         """
-        Function that updates plotted map z statistic and updates associated plots
+        Function that updates plotted map z statistic and grid and updates associated plots
         """
 
         if not self.read_instance.block_MPL_canvas_updates:
@@ -567,8 +567,8 @@ class Canvas(FigureCanvas):
                 self.relative_selected_station_inds
             )
 
-            # update plotted map z statistic
-            self.update_map_z_statistic()
+            # update plotted map z statistic and grid
+            self.update_map()
 
             # update associated plots
             self.update_associated_active_dashboard_plots()
@@ -726,8 +726,8 @@ class Canvas(FigureCanvas):
 
             # if not performing read then update plots
             if not self.read_instance.performing_read:
-                # update plotted map z statistic
-                self.update_map_z_statistic()
+                # update plotted map z statistic and grid
+                self.update_map()
 
                 # update associated plots with selected stations
                 self.update_associated_active_dashboard_plots()
@@ -763,14 +763,82 @@ class Canvas(FigureCanvas):
 
         self.read_instance.block_MPL_canvas_updates = False
 
-    def update_map_z_statistic(self):
+    def update_map(self):
         """
-        Function that updates plotted z statistic on map, with colourbar
+        Update map grid and z statistic and update map station selection
         """
 
         # remove axis elements from map/cb
         self.remove_axis_elements(self.plot_axes["map"], "map")
         self.remove_axis_elements(self.plot_axes["cb"], "cb")
+
+        # get speci
+        networkspeci = self.read_instance.networkspeci
+        speci = networkspeci.split('|')[1]
+
+        # update grid
+        self.update_map_grid(speci)
+
+        # update plotted map z statistic
+        self.update_map_z_statistic(speci)
+
+        # redraw plot (needed to update plotted colours before update_map_station_selection)
+        self.figure.canvas.draw()
+        self.figure.canvas.flush_events()
+
+        # update map selection appropriately for z statistic
+        self.update_map_station_selection()
+
+    def update_map_grid(self, speci):
+        """
+        Function that updates plotted grid on map, with colourbar
+        """
+        
+        # TODO: Pass another speci that is not first from new cb
+        networkspeci = self.read_instance.networkspeci
+        speci = networkspeci.split('|')[1]
+        stat = 'Mean'
+        results = self.read_instance.datareader.read_gridded_data(
+            speci, stat=stat)
+
+        # if there is grid data, get min and max from grid and scatter and compare 
+        # to get norm for colourbar
+        if results:
+            grid_data, grid_lat, grid_lon, grid_units = results
+        else:
+            return
+        
+        # plot model grid on map
+        self.plotting.make_gridded_map(
+            self.plot_axes["map"],
+            speci,
+            self.plot_characteristics["map"],
+            self.current_plot_options["map"],
+            grid_data, 
+            grid_lat, 
+            grid_lon
+        )
+
+        # generate colourbar
+        generate_colourbar(
+            self.read_instance,
+            [self.plot_axes["map"]],
+            [self.plot_axes["cb"]],
+            stat,
+            self.plot_characteristics["map"],
+            speci,
+            label_units=grid_units
+        )
+
+        # update plot options
+        self.update_plot_options(plot_types=["map"])
+
+        return None
+        
+    def update_map_z_statistic(self, speci):
+        """
+        Function that updates plotted z statistic on map, with colourbar
+        """
 
         # check if labels that have set for map exist in current data labels
         # if not then reset map plot
@@ -879,18 +947,11 @@ class Canvas(FigureCanvas):
                 [self.plot_axes["cb"]],
                 zstat,
                 self.plot_characteristics["map"],
-                self.read_instance.species[0],
+                speci,
             )
 
         # update plot options
         self.update_plot_options(plot_types=["map"])
-
-        # redraw plot (needed to update plotted colours before update_map_station_selection)
-        self.figure.canvas.draw()
-        self.figure.canvas.flush_events()
-
-        # update map selection appropriately for z statistic
-        self.update_map_station_selection()
 
         return None
 
@@ -1550,9 +1611,9 @@ class Canvas(FigureCanvas):
             self.map_z1.setCurrentText(selected_z1_array)
             self.map_z2.setCurrentText(selected_z2_array)
 
-            # update plotted map z statistic
+            # update plotted map z statistic and grid
             if not self.read_instance.block_MPL_canvas_updates:
-                self.update_map_z_statistic()
+                self.update_map()
 
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
@@ -2359,9 +2420,12 @@ class Canvas(FigureCanvas):
                 self.remove_axis_objects(
                     ax_to_remove.artists, types_to_remove=[AnchoredOffsetbox]
                 )
+                # PathCollection corresponds to the scatter
+                # QuadMesh corresponds to the pcolormesh from the gridded model
                 self.remove_axis_objects(
                     ax_to_remove.collections,
-                    types_to_remove=[matplotlib.collections.PathCollection],
+                    types_to_remove=[matplotlib.collections.PathCollection,
+                                     matplotlib.collections.QuadMesh],
                 )
                 # # TODO: Put line collection back into place when we turn on the auto_update in gridlines
                 # self.remove_axis_objects(ax_to_remove.collections, types_to_remove=[matplotlib.collections.PathCollection],

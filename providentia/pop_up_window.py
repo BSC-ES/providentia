@@ -406,16 +406,28 @@ class PopUpWindow(QtWidgets.QWidget):
                 }
 
             elif menu_type == "models":
-                format_type = ["popup_checkbox", "popup_combobox", "popup_combobox"]
+                format_type = [
+                    "popup_checkbox",
+                    "popup_checkbox",
+                    "popup_combobox",
+                    "popup_combobox",
+                ]
                 obj_height = formatting_dict["popup_checkbox"]["QCheckBox"]["height"]
                 grid_vertical_spacing = 3
                 self.page_memory["models"] = {
-                    "keep_selected": [],
+                    "interpolated": [],
+                    "noninterpolated": [],
                     "forecast": [],
                     "forecast_days": [],
-                    "n_column_consumed": 3,
-                    "ordered_elements": ["keep_selected", "forecast", "forecast_days"],
+                    "n_column_consumed": 4,
+                    "ordered_elements": [
+                        "interpolated",
+                        "noninterpolated",
+                        "forecast",
+                        "forecast_days",
+                    ],
                     "widget": [
+                        QtWidgets.QCheckBox,
                         QtWidgets.QCheckBox,
                         CheckableComboBox,
                         CheckableComboBox,
@@ -665,21 +677,39 @@ class PopUpWindow(QtWidgets.QWidget):
 
                     # if menu type == models
                     elif menu_type == "models":
-                        # check if model checkbox is currently selected, if so select it again
-                        if element == "keep_selected":
-                            self.page_memory[menu_type][element][
+                        if element in ['interpolated', 'noninterpolated']:
+                            model_checkbox = self.page_memory[menu_type][element][
                                 label_ii
-                            ].setObjectName("expcheckboxes_" + str(label_ii))
-                            var_to_check = menu_current_type["map_vars"][label_ii]
-                            if var_to_check in menu_current_type[element]:
-                                self.page_memory[menu_type][element][
-                                    label_ii
-                                ].setCheckState(QtCore.Qt.Checked)
-                            # connect checkbox to handle model being checked
-                            self.page_memory[menu_type][element][
-                                label_ii
-                            ].stateChanged.connect(self.handle_model_checked)
+                            ]
+                            model_id = menu_current_type["map_vars"][label_ii]
 
+                            model_checkbox.setObjectName(
+                                "expcheckboxes_" + element + "_" + str(label_ii)
+                            )
+                            model_checkbox.setEnabled(
+                                menu_current_type["enabled"][element].get(
+                                    model_id, False
+                                )
+                            )
+                            if not model_checkbox.isEnabled():
+                                # fade the box so it is obvious it cannot be clicked
+                                fade = QtWidgets.QGraphicsOpacityEffect(model_checkbox)
+                                fade.setOpacity(0.5)
+                                model_checkbox.setGraphicsEffect(fade)
+                                model_checkbox.setToolTip(
+                                    wrap_tooltip_text(
+                                        "Unavailable",
+                                        self.full_window_geometry.width(),
+                                        "popup_label",
+                                    )
+                                )
+                            elif model_id in menu_current_type["keep_selected"][element]:
+                                model_checkbox.setCheckState(QtCore.Qt.Checked)
+
+                            # connect checkbox to handle model being checked
+                            model_checkbox.stateChanged.connect(
+                                self.handle_model_checked
+                            )
                         # update forecast options combobox back to previously available and selected values
                         elif element == "forecast":
                             # gather all forecast options, selected options and disabled options
@@ -714,11 +744,14 @@ class PopUpWindow(QtWidgets.QWidget):
                                     label_ii
                                 ].addItems(all_forecast_vars)
                                 # if model is checked and have available forecast options, then show combobox
-                                if (
-                                    self.page_memory[menu_type]["keep_selected"][
+                                row_checked = False
+                                for row_mode in ["interpolated", "noninterpolated"]:
+                                    if self.page_memory[menu_type][row_mode][
                                         label_ii
-                                    ].isChecked()
-                                ) & (len(all_forecast_vars) > 0):
+                                    ].isChecked():
+                                        row_checked = True
+                                        break
+                                if (row_checked) & (len(all_forecast_vars) > 0):
                                     self.page_memory[menu_type]["forecast"][
                                         label_ii
                                     ].show()
@@ -799,15 +832,20 @@ class PopUpWindow(QtWidgets.QWidget):
                                 self.page_memory[menu_type]["forecast_days"][
                                     label_ii
                                 ].addItems(all_forecast_day_vars)
+
                                 # if model is checked and have selected forecast options, then show combobox
-                                if (
-                                    self.page_memory[menu_type]["keep_selected"][
+                                row_checked = False
+                                for row_mode in ["interpolated", "noninterpolated"]:
+                                    if self.page_memory[menu_type][row_mode][
                                         label_ii
-                                    ].isChecked()
-                                ) & (len(selected_forecast_vars) > 0):
+                                    ].isChecked():
+                                        row_checked = True
+                                        break
+                                if (row_checked) & (len(selected_forecast_vars) > 0):
                                     self.page_memory[menu_type]["forecast_days"][
                                         label_ii
                                     ].show()
+
                                 # otherwise hide combobox
                                 else:
                                     self.page_memory[menu_type]["forecast_days"][
@@ -887,6 +925,19 @@ class PopUpWindow(QtWidgets.QWidget):
                             )
                     elif menu_type == "rangeboxes":
                         texts = ["Min", "Max", "A"]
+                        for i, text in enumerate(texts):
+                            column_label = set_formatting(
+                                QtWidgets.QLabel(self, text=text),
+                                formatting_dict["popup_label_column_header"],
+                            )
+                            self.grid.addWidget(
+                                column_label,
+                                0,
+                                column_number + i + 1,
+                                QtCore.Qt.AlignCenter,
+                            )
+                    elif menu_type == "models":
+                        texts = ["Interpolated", "Gridded"]
                         for i, text in enumerate(texts):
                             column_label = set_formatting(
                                 QtWidgets.QLabel(self, text=text),
@@ -1761,7 +1812,6 @@ class PopUpWindow(QtWidgets.QWidget):
                 networkspeci not in self.read_instance.selected_filter_species.keys()
             ):
                 del self.read_instance.qa_per_species[speci]
-
     def handle_model_checked(self, event):
         """
         Manages the visibility and population of forecast-related widgets when a model checkbox is toggled.
@@ -1775,15 +1825,34 @@ class PopUpWindow(QtWidgets.QWidget):
         # Get the source widget that triggered the event (the checkbox)
         event_source = self.sender()
 
-        # Extract the numeric index from the checkbox object name (e.g., 'model_2' → 2)
-        label_ii = int(event_source.objectName().split("_")[1])
-        model = self.menu_current["models"]["map_vars"][label_ii]
+        # Extract the model type and the numeric index from the checkbox object
+        # name (e.g., 'expcheckboxes_interpolated_2' -> 'interpolated', 2)
+        object_name = event_source.objectName().split("_")
+        model_type = object_name[1]
+        label_ii = int(object_name[-1])
+
+        # Get the model on the row, and the data label its forecast options are stored
+        # under (the alias set in the .conf file when there is one)
+        model_id = self.menu_current["models"]["map_vars"][label_ii]
+        model = "{}::{}".format(model_id, model_type)
         if model not in self.menu_current["models"]["forecast"]:
             if model in self.read_instance.init_models:
                 model = self.read_instance.init_models[model]
+            elif model_type == "noninterpolated":
+                model = "{} (gridded)".format(model_id)
+            else:
+                model = model_id
 
-        # --- CASE 1: Model is checked ---
-        if event_source.isChecked():
+        # The forecast comboboxes are shared by both modes of the row, so they stay
+        # visible while the model is still checked in the other mode
+        row_checked = False
+        for row_mode in ["interpolated", "noninterpolated"]:
+            if self.page_memory["models"][row_mode][label_ii].isChecked():
+                row_checked = True
+                break
+
+        # --- CASE 1: Model is checked for at least one model type ---
+        if row_checked:
             # Check if this model has forecast options defined
             if model in self.menu_current["models"]["forecast"]:
                 # Get all available forecast variable options and forecast day options
@@ -1803,7 +1872,7 @@ class PopUpWindow(QtWidgets.QWidget):
                     for i in range(forecast_model.rowCount())
                 ]
 
-                # If the combobox doesn’t already contain the correct items, populate it
+                # If the combobox doesn't already contain the correct items, populate it
                 if all_forecast_vars != forecast_vars:
                     self.page_memory["models"]["forecast"][label_ii].addItems(
                         all_forecast_vars
@@ -1850,7 +1919,7 @@ class PopUpWindow(QtWidgets.QWidget):
                             self.page_memory["models"]["forecast_days"][label_ii].show()
                             break
 
-        # --- CASE 2: Model is unchecked ---
+        # --- CASE 2: Model is unchecked for both model types ---
         else:
             # Hide both forecast options and forecast day widgets
             self.page_memory["models"]["forecast"][label_ii].hide()
@@ -2065,87 +2134,97 @@ class PopUpWindow(QtWidgets.QWidget):
                                 )
 
                 elif menu_type == "models":
-                    if element == "keep_selected":
+                    # save the models checked for each model type
+                    if element in ["interpolated", "noninterpolated"]:
                         selected_vars = []
+
                         # iterate through models
                         for checkbox_ii, checkbox in enumerate(
                             self.page_memory[menu_type][element]
                         ):
-                            # get model name
-                            model_raw = self.menu_current[menu_type]["map_vars"][
+                            # model is not checked in this mode, nothing to save
+                            if checkbox.checkState() != QtCore.Qt.Checked:
+                                continue
+
+                            # get model name on the row
+                            model_id = self.menu_current[menu_type]["map_vars"][
                                 checkbox_ii
                             ]
-                            model = copy.deepcopy(model_raw)
+                            selected_vars.append(model_id)
+
+                            # get the data label the forecast options are stored under
+                            model = "{}::{}".format(model_id, element)
                             if model not in self.menu_current[menu_type]["forecast"]:
                                 if model in self.read_instance.init_models:
                                     model = self.read_instance.init_models[model]
+                                elif element == "noninterpolated":
+                                    model = "{} (gridded)".format(model_id)
+                                else:
+                                    model = model_id
 
-                            # check if model is checked
-                            if checkbox.checkState() == QtCore.Qt.Checked:
-                                # append checked model
-                                selected_vars.append(model_raw)
-                                # get current selected and disabled forecast variables for model
-                                if model in self.menu_current[menu_type]["forecast"]:
-                                    all_forecast_vars = self.menu_current[menu_type][
-                                        "forecast"
-                                    ][model][0]
-                                    all_forecast_day_vars = self.menu_current[
-                                        menu_type
-                                    ]["forecast_days"][model][0]
-                                    selected_forecast_vars = []
-                                    disabled_forecast_vars = []
-                                    selected_forecast_day_vars = []
-                                    # iterate through forecast options
-                                    for forecast_ii, forecast_var in enumerate(
-                                        all_forecast_vars
+                            # model has no forecast options initialised, nothing to save
+                            if model not in self.menu_current[menu_type]["forecast"]:
+                                continue
+
+                            # get current selected and disabled forecast variables for model
+                            all_forecast_vars = self.menu_current[menu_type][
+                                "forecast"
+                            ][model][0]
+                            all_forecast_day_vars = self.menu_current[menu_type][
+                                "forecast_days"
+                            ][model][0]
+                            selected_forecast_vars = []
+                            disabled_forecast_vars = []
+                            selected_forecast_day_vars = []
+
+                            # iterate through forecast options
+                            for forecast_ii, forecast_var in enumerate(
+                                all_forecast_vars
+                            ):
+                                item = (
+                                    self.page_memory[menu_type]["forecast"][checkbox_ii]
+                                    .model()
+                                    .item(forecast_ii, 0)
+                                )
+                                # check if forecast option is checked
+                                if item.checkState() == QtCore.Qt.Checked:
+                                    # append forecast option
+                                    selected_forecast_vars.append(forecast_var)
+                                    # iterate through forecast days
+                                    for forecast_day_ii, forecast_day_var in enumerate(
+                                        all_forecast_day_vars
                                     ):
-                                        item = (
-                                            self.page_memory[menu_type]["forecast"][
-                                                checkbox_ii
-                                            ]
+                                        item_day = (
+                                            self.page_memory[menu_type][
+                                                "forecast_days"
+                                            ][checkbox_ii]
                                             .model()
-                                            .item(forecast_ii, 0)
+                                            .item(forecast_day_ii, 0)
                                         )
-                                        # check if forecast option is checked
-                                        if item.checkState() == QtCore.Qt.Checked:
-                                            # append forecast option
-                                            selected_forecast_vars.append(forecast_var)
-                                            # iterate through forecast days
-                                            for (
-                                                forecast_day_ii,
-                                                forecast_day_var,
-                                            ) in enumerate(all_forecast_day_vars):
-                                                item_day = (
-                                                    self.page_memory[menu_type][
-                                                        "forecast_days"
-                                                    ][checkbox_ii]
-                                                    .model()
-                                                    .item(forecast_day_ii, 0)
-                                                )
-                                                # check if forecast day is checked
-                                                if (
-                                                    item_day.checkState()
-                                                    == QtCore.Qt.Checked
-                                                ):
-                                                    # append forecast day
-                                                    selected_forecast_day_vars.append(
-                                                        forecast_day_var
-                                                    )
+                                        # check if forecast day is checked
+                                        if item_day.checkState() == QtCore.Qt.Checked:
+                                            # append forecast day
+                                            selected_forecast_day_vars.append(
+                                                forecast_day_var
+                                            )
 
-                                        if not (item.flags() & QtCore.Qt.ItemIsEnabled):
-                                            disabled_forecast_vars.append(forecast_var)
-                                    # save selected forecast variables
-                                    self.menu_current[menu_type]["forecast"][model][
-                                        1
-                                    ] = selected_forecast_vars
-                                    # save disabled forecast variables
-                                    self.menu_current[menu_type]["forecast"][model][
-                                        2
-                                    ] = disabled_forecast_vars
-                                    # save selected forecast day variables
-                                    self.menu_current[menu_type]["forecast_days"][
-                                        model
-                                    ][1] = selected_forecast_day_vars
+                                if not (item.flags() & QtCore.Qt.ItemIsEnabled):
+                                    disabled_forecast_vars.append(forecast_var)
 
-                        # save selected models
-                        self.menu_current[menu_type][element] = selected_vars
+                            # save selected forecast variables
+                            self.menu_current[menu_type]["forecast"][model][
+                                1
+                            ] = selected_forecast_vars
+                            # save disabled forecast variables
+                            self.menu_current[menu_type]["forecast"][model][
+                                2
+                            ] = disabled_forecast_vars
+                            # save selected forecast day variables
+                            self.menu_current[menu_type]["forecast_days"][model][
+                                1
+                            ] = selected_forecast_day_vars
+
+                        # save selected models for this mode
+                        self.menu_current[menu_type]["keep_selected"][
+                            element
+                        ] = selected_vars
