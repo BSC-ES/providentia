@@ -765,80 +765,16 @@ class Canvas(FigureCanvas):
 
     def update_map(self):
         """
-        Update map grid and z statistic and update map station selection
+        Function that updates plotted z statistic on map, with colourbar
         """
 
         # remove axis elements from map/cb
         self.remove_axis_elements(self.plot_axes["map"], "map")
         self.remove_axis_elements(self.plot_axes["cb"], "cb")
-
+        
         # get speci
         networkspeci = self.read_instance.networkspeci
         speci = networkspeci.split('|')[1]
-
-        # update grid
-        self.update_map_grid(speci)
-
-        # update plotted map z statistic
-        self.update_map_z_statistic(speci)
-
-        # redraw plot (needed to update plotted colours before update_map_station_selection)
-        self.figure.canvas.draw()
-        self.figure.canvas.flush_events()
-
-        # update map selection appropriately for z statistic
-        self.update_map_station_selection()
-
-    def update_map_grid(self, speci):
-        """
-        Function that updates plotted grid on map, with colourbar
-        """
-        
-        # TODO: Pass another speci that is not first from new cb
-        networkspeci = self.read_instance.networkspeci
-        speci = networkspeci.split('|')[1]
-        stat = 'Mean'
-        results = self.read_instance.datareader.read_gridded_data(
-            speci, stat=stat)
-
-        # if there is grid data, get min and max from grid and scatter and compare 
-        # to get norm for colourbar
-        if results:
-            grid_data, grid_lat, grid_lon, grid_units = results
-        else:
-            return
-        
-        # plot model grid on map
-        self.plotting.make_gridded_map(
-            self.plot_axes["map"],
-            speci,
-            self.plot_characteristics["map"],
-            self.current_plot_options["map"],
-            grid_data, 
-            grid_lat, 
-            grid_lon
-        )
-
-        # generate colourbar
-        generate_colourbar(
-            self.read_instance,
-            [self.plot_axes["map"]],
-            [self.plot_axes["cb"]],
-            stat,
-            self.plot_characteristics["map"],
-            speci,
-            label_units=grid_units
-        )
-
-        # update plot options
-        self.update_plot_options(plot_types=["map"])
-
-        return None
-        
-    def update_map_z_statistic(self, speci):
-        """
-        Function that updates plotted z statistic on map, with colourbar
-        """
 
         # check if labels that have set for map exist in current data labels
         # if not then reset map plot
@@ -858,6 +794,14 @@ class Canvas(FigureCanvas):
         else:
             zstat = get_z_statistic_comboboxes(base_zstat, bias=True)
 
+        # if there is grid data, get it
+        results = self.read_instance.datareader.read_gridded_data(
+            speci, zstat=zstat)
+        if results:
+            grid_data, grid_lat, grid_lon, grid_units = results
+        else:
+            grid_data, grid_lat, grid_lon, grid_units = None, None, None, None
+        
         # ensure label that have in memory still exists
 
         # plot map for zstat --> updating active map valid station indices and setting up plot picker
@@ -869,6 +813,9 @@ class Canvas(FigureCanvas):
             zstat=zstat,
             labela=self.map_z1.currentText(),
             labelb=self.map_z2.currentText(),
+            var=grid_data,
+            lat=grid_lat,
+            lon=grid_lon
         )
 
         # update absolute selected plotted station indices with respect to new active map valid station indices
@@ -952,6 +899,13 @@ class Canvas(FigureCanvas):
 
         # update plot options
         self.update_plot_options(plot_types=["map"])
+
+        # redraw plot (needed to update plotted colours before update_map_station_selection)
+        self.figure.canvas.draw()
+        self.figure.canvas.flush_events()
+
+        # update map selection appropriately for z statistic
+        self.update_map_station_selection()
 
         return None
 
@@ -1541,6 +1495,12 @@ class Canvas(FigureCanvas):
             # changes to the z statistic comboboxes are made
             self.read_instance.block_config_bar_handling_updates = True
 
+            # update mouse cursor to a waiting cursor
+            self.read_instance.cursor_function = set_cursor(
+                self.read_instance.cursor_function,
+                "handle_map_z_statistic_update",
+            )
+
             # get currently selected items
             selected_z_stat = self.map_z_stat.currentText()
             selected_z1_array = self.map_z1.currentText()
@@ -1617,6 +1577,11 @@ class Canvas(FigureCanvas):
 
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
+
+            # restore mouse cursor to normal
+            unset_cursor(
+                self.read_instance.cursor_function, "handle_map_z_statistic_update"
+            )
 
         return None
 

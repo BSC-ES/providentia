@@ -433,7 +433,11 @@
           "marker_zero_stations_selected": { "s": 4, "alpha": 1.0 },
           "marker_selected": { "s": 8, "alpha": 1.0 },
           "marker_unselected": { "s": 4, "alpha": 0.4 },
-          "plot": { "s": 4, "picker": 1 },
+          "plot":
+            {
+              "stations": { "s": 20, "picker": 1, "zorder": 5 },
+              "grid":     { "zorder": 2, "alpha": null },
+            },
           "marker_annotate_rounding": 2,
         },
       "report":

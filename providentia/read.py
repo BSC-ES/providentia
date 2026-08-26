@@ -3134,7 +3134,7 @@ class DataReader:
 
         return True
 
-    def read_gridded_data(self, speci, date=None, hour=None, stat=None):
+    def read_gridded_data(self, speci, date=None, hour=None, zstat=None):
         """
         Read model gridded data
 
@@ -3168,13 +3168,12 @@ class DataReader:
 
         # nothing to draw if no gridded model is selected
         if len(selected_gridded_models) == 0:
-            return
+            return None
         
         # do not plot more than one grid at the same time
         if len(selected_gridded_models) > 1:
             msg = f"It is not possible to plot more than one gridded model. Plotting the first one: {selected_gridded_models[0]}"
             show_message(self.read_instance, msg)
-            return
         
         # take the first selected gridded model
         model_id = selected_gridded_models[0]
@@ -3199,9 +3198,9 @@ class DataReader:
                 data = variables[speci][t]
                 units = variables[speci].units
 
-        elif stat:
-            if stat not in ['Mean']:
-                msg = f"Statistic '{stat}' is not supported. Only 'Mean' is supported."
+        elif zstat:
+            if zstat not in ['Mean']:
+                msg = f"Statistic '{zstat}' is not supported. Only 'Mean' is supported."
                 show_message(self.read_instance, msg)
                 return None
 

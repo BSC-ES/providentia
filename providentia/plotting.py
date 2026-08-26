@@ -546,6 +546,9 @@ class Plotting:
                     "grid_edge_latitude"
                     not in self.read_instance.plotting_params[model]
                 ):
+                    # grid domain might be plotted from interpolated data label if loaded
+                    if 'gridded' in model:
+                        continue
                     msg = f"There is no model data for {model}, domain grid cannot be added on map."
                     show_message(self.read_instance, msg)
                     continue
@@ -1107,6 +1110,9 @@ class Plotting:
         zstat=None,
         labela="",
         labelb="",
+        var=None, 
+        lat=None, 
+        lon=None
     ):
         """
         Renders a geospatial scatter plot of stations onto a map axis, coloured by a calculated statistical metric.
@@ -1155,6 +1161,19 @@ class Plotting:
             self.canvas_instance.active_map_valid_station_inds = (
                 active_map_valid_station_inds
             )
+        
+        # plot model gridded data
+        if var is not None and lon is not None and lat is not None:
+            relevant_axis.pcolormesh(
+                lon,
+                lat,
+                var,
+                transform=self.canvas_instance.datacrs,
+                **plot_characteristics["plot"]["grid"],
+            )
+
+            plot_characteristics["plot"]["stations"]["edgecolor"] = "black"
+            plot_characteristics["plot"]["stations"]["linewidth"] = 0.4
 
         # plot new station points on map - coloured by currently active z statisitic
         self.stations_scatter = relevant_axis.scatter(
@@ -1166,7 +1185,7 @@ class Plotting:
             ],
             c=z_statistic,
             transform=self.canvas_instance.datacrs,
-            **plot_characteristics["plot"],
+            **plot_characteristics["plot"]["stations"],
         )
 
         # track plot elements
@@ -1178,29 +1197,6 @@ class Plotting:
                 [self.stations_scatter],
                 bias=False,
             )
-
-    def make_gridded_map(
-        self,
-        relevant_axis,
-        networkspeci,
-        plot_characteristics,
-        plot_options,
-        var, 
-        lat, 
-        lon
-    ):
-        # TODO: Improve this function, committing for temporal changes
-
-        if "s" in plot_characteristics["plot"].keys():
-            del plot_characteristics["plot"]["s"]
-
-        relevant_axis.pcolormesh(
-            lon,
-            lat,
-            var,
-            transform=self.canvas_instance.datacrs,
-            **plot_characteristics["plot"],
-        )
 
     def make_timeseries(
         self,
