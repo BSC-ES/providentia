@@ -162,8 +162,8 @@ class ModelInterpolation(object):
         ]:
             variable_val_idx = submission_file_txt_joined.index(variable_key + ":") + 1
             variable_val = submission_file_txt_joined[variable_val_idx]
-            # make sure that boolean and None values are set correctly
-            literals = {"true": True, "false": False, "none": None}
+            # make sure that boolean, None and lists are set correctly
+            literals = {"true": True, "false": False, "none": None, "[]": []}
             if variable_val.lower() in literals:
                 setattr(self, variable_key, literals[variable_val.lower()])
             else:
