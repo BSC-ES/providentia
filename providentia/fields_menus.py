@@ -547,7 +547,7 @@ def update_period_fields(instance):
                 instance.period_menu["checkboxes"]["remove_selected"].remove(label)
 
 
-def update_metadata_fields(instance):
+def update_metadata_fields(instance, cap=False):
     """
     Update metadata menu fields using metadata values currently loaded in memory.
 
@@ -569,6 +569,8 @@ def update_metadata_fields(instance):
         active network/species configuration, station-validity information, and
         standard metadata definitions. The function updates
         ``instance.metadata_menu`` in place.
+    cap: boolean, optional
+        optional boolean indicating that have capped stations. 
 
     Returns
     -------
@@ -580,8 +582,11 @@ def update_metadata_fields(instance):
     metadata_menu = instance.metadata_menu
     metadata_vars = instance.metadata_vars_to_read
     standard_metadata = instance.standard_metadata
-    metadata_in_memory = instance.metadata_in_memory
     networkspecies = instance.networkspecies
+    if cap:
+        metadata_in_memory = instance.metadata_in_memory_filtered
+    else:
+        metadata_in_memory = instance.metadata_in_memory
 
     # ------------------------------------------------------------------
     # Local helper: clean object metadata values.
