@@ -1013,7 +1013,7 @@ class Dashboard(QtWidgets.QWidget):
 
         self.pop_up_window = PopUpWindow(self, menu_root, [], self.full_window_geometry)
 
-    def set_combobox_options(self, available_options, combobox_type):
+    def set_combobox_options(self, available_options, combobox_type, recovery_hint=None):
         """
         Set the available options in a combobox and synchronise the selected values.
 
@@ -1029,6 +1029,23 @@ class Dashboard(QtWidgets.QWidget):
         selected_values = getattr(self, f"selected_{combobox_type}")
 
         selected_cb.addItems(available_options)
+
+        # no options at all
+        if not available_options and recovery_hint is not None:
+            setattr(self, f"selected_{combobox_type}", "")
+            msg = f"No {combobox_type.lower()} is available for the current selection."
+            msg += f" {recovery_hint}"
+            if self.from_conf:
+                self.logger.error(msg)
+                sys.exit(1)
+            else:
+                show_message(self, msg)
+                self.no_data_to_read = True
+                self.disable_element(self.bu_read, "button")
+                self.block_config_bar_handling_updates = False
+                self.block_MPL_canvas_updates = False
+                return False
+        
         if selected_values in available_options:
             selected_cb.setCurrentText(selected_values)
         else:
@@ -1054,8 +1071,10 @@ class Dashboard(QtWidgets.QWidget):
                     f"selected_{combobox_type}",
                     selected_cb.currentText()
                 )
+        
+        return True
 
-    def set_checkable_combobox_options(self, available_options, combobox_type):
+    def set_checkable_combobox_options(self, available_options, combobox_type, recovery_hint):
         """
         Set the available options in a checkable combobox and synchronise the selected values.
 
@@ -1073,6 +1092,22 @@ class Dashboard(QtWidgets.QWidget):
         # update field
         selected_cb.addItems(available_options)
 
+        # no options at all
+        if not available_options:
+            setattr(self, f"selected_{combobox_type}", "")
+            msg = f"No {combobox_type.lower()} is available for the current selection."
+            msg += f" {recovery_hint}"
+            if self.from_conf:
+                self.logger.error(msg)
+                sys.exit(1)
+            else:
+                show_message(self, msg)
+                self.no_data_to_read = True
+                self.disable_element(self.bu_read, "button")
+                self.block_config_bar_handling_updates = False
+                self.block_MPL_canvas_updates = False
+                return False
+    
         # convert string to list if needed
         # for species: "sconcno2, sconco3" -> ["sconcno2", "sconco3"]
         if isinstance(selected_values, str):
@@ -1117,6 +1152,8 @@ class Dashboard(QtWidgets.QWidget):
                 if species in selected_values
                 else QtCore.Qt.Unchecked
             )
+
+        return True
         
     def update_configuration_bar_fields(self):
         """Initialise or synchronise all configuration bar widgets and their available options."""
@@ -1245,7 +1282,9 @@ class Dashboard(QtWidgets.QWidget):
 
         # update network field
         available_networks = list(self.available_observation_data.keys())
-        self.set_checkable_combobox_options(available_options=available_networks, combobox_type='network')
+        self.set_checkable_combobox_options(available_options=available_networks, 
+                                            combobox_type='network', 
+                                            recovery_hint='Please select a different network or change the date range to include available data.')
 
         # update buttons
         self.update_ghost_buttons("update_configuration_bar_fields")
@@ -1263,7 +1302,12 @@ class Dashboard(QtWidgets.QWidget):
         )
 
         # update resolution field
-        self.set_combobox_options(available_options=available_resolutions, combobox_type='resolution')
+        if not self.set_combobox_options(available_options=available_resolutions, 
+                                         combobox_type='resolution', 
+                                         recovery_hint='Please select a different resolution or change the date range to include available data.'):
+            self.block_config_bar_handling_updates = False
+            self.block_MPL_canvas_updates = False
+            return
 
         # get matrices for all selected networks and current resolution
         matrix_sets = [
@@ -1277,15 +1321,24 @@ class Dashboard(QtWidgets.QWidget):
         available_matrices = sorted(set.intersection(*matrix_sets))
 
         # update matrix field
-        self.set_combobox_options(available_options=available_matrices, combobox_type='matrix')
+        if not self.set_combobox_options(available_options=available_matrices, 
+                                         combobox_type='matrix',
+                                         recovery_hint='Please select a different matrix or change the date range to include available data.'):
+            return
 
         # update GHOST version field
         available_ghost_versions = self.available_ghost_versions
-        self.set_combobox_options(available_options=available_ghost_versions, combobox_type='ghost_version')
+        if not self.set_combobox_options(available_options=available_ghost_versions, 
+                                         combobox_type='ghost_version',
+                                         recovery_hint='Please select a different GHOST version or change the date range to include available data.'):
+            return
 
         # update GHOST features field
         available_ghost_features = self.available_ghost_features
-        self.set_combobox_options(available_options=available_ghost_features, combobox_type='ghost_features')
+        if not self.set_combobox_options(available_options=available_ghost_features, 
+                                         combobox_type='ghost_features',
+                                         recovery_hint='Please select a different GHOST features or change the date range to include available data.'):
+            return
 
         # get species for all selected networks, current resolution and current matrix
         available_species = []
@@ -1301,7 +1354,9 @@ class Dashboard(QtWidgets.QWidget):
             available_species = sorted(set.intersection(*species_sets))
 
         # update species field
-        self.set_checkable_combobox_options(available_options=available_species, combobox_type='species')
+        self.set_checkable_combobox_options(available_options=available_species, 
+                                            combobox_type='species',
+                                            recovery_hint='Please select a different species or change the date range to include available data.')
 
         # update networkspecies field
         self.selected_networkspecies = self.networkspecies = [
@@ -1349,7 +1404,9 @@ class Dashboard(QtWidgets.QWidget):
             "Spatial|Temporal",
             "Temporal|Spatial",
         ]
-        self.set_combobox_options(available_options=available_statistic_modes, combobox_type='statistic_mode')
+        if not self.set_combobox_options(available_options=available_statistic_modes, 
+                                         combobox_type='statistic_mode'):
+            return
 
         # update statistic aggregation field
         if self.selected_statistic_mode == "Flattened":
@@ -1524,6 +1581,9 @@ class Dashboard(QtWidgets.QWidget):
 
         # update layout fields
         self.update_layout_fields(self.mpl_canvas)
+
+        self.no_data_to_read = False
+        self.enable_element(self.bu_read, "button", {"color": "green"})
 
         # unset variable to allow interactive handling from now
         self.block_config_bar_handling_updates = False
@@ -1737,7 +1797,7 @@ class Dashboard(QtWidgets.QWidget):
             self.data_labels_raw = copy.deepcopy(selected_data_labels_raw)
             self.experiments = copy.deepcopy(selected_models)
 
-    def enable_element(self, element, element_type):
+    def enable_element(self, element, element_type, extra_arguments={}):
         """
         Make element active and update its formatting.
 
@@ -1754,7 +1814,8 @@ class Dashboard(QtWidgets.QWidget):
             Updated PyQt object
         """
 
-        element = set_formatting(element, self.formatting_dict[f"menu_{element_type}"])
+        element = set_formatting(element, self.formatting_dict[f"menu_{element_type}"],
+                                 extra_arguments=extra_arguments)
         element.setEnabled(True)
 
         return element
@@ -1867,10 +1928,7 @@ class Dashboard(QtWidgets.QWidget):
                     )
                     for network in self.selected_network
                 ]
-
-                self.selected_species = sorted(
-                    set.intersection(*species_sets)
-                )[0]
+                self.selected_species = [sorted(set.intersection(*species_sets))[0]]
 
             elif event_source == self.cb_species:
                 self.selected_species = self.cb_species.currentData()
