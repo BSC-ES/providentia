@@ -1524,22 +1524,30 @@ class Canvas(FigureCanvas):
                     self.read_instance.observations_data_label
                 )
 
-            # update z statistic field to all basic stats if colocation not-active OR z2
-            # array not selected, else select basic+bias stats
-            if (
-                (not self.read_instance.temporal_colocation)
-                or (selected_z2_array == "")
-                or (len(self.read_instance.data_labels) == 1)
-            ):
-                z_stat_items = copy.deepcopy(self.read_instance.basic_z_stats)
+            # check if we have any gridded dataset
+            has_gridded = False
+            for data_label in self.read_instance.data_labels:
+                if 'gridded' in data_label:
+                    has_gridded = True
+            if has_gridded:
+                z_stat_items = ['Mean', 'Median']
             else:
-                z_stat_items = copy.deepcopy(self.read_instance.basic_and_bias_z_stats)
+                # update z statistic field to all basic stats if colocation not-active OR z2
+                # array not selected, else select basic+bias stats
+                if (
+                    (not self.read_instance.temporal_colocation)
+                    or (selected_z2_array == "")
+                    or (len(self.read_instance.data_labels) == 1)
+                ):
+                    z_stat_items = copy.deepcopy(self.read_instance.basic_z_stats)
+                else:
+                    z_stat_items = copy.deepcopy(self.read_instance.basic_and_bias_z_stats)
 
-            # remove nonsensical available map stats
-            nonsensical_map_stats = ["NStations", "NUniqueStations", "MDA8"]
-            for nonsensical_map_stat in nonsensical_map_stats:
-                if nonsensical_map_stat in z_stat_items:
-                    z_stat_items = z_stat_items[z_stat_items != nonsensical_map_stat]
+                # remove nonsensical available map stats
+                nonsensical_map_stats = ["NStations", "NUniqueStations", "MDA8"]
+                for nonsensical_map_stat in nonsensical_map_stats:
+                    if nonsensical_map_stat in z_stat_items:
+                        z_stat_items = z_stat_items[z_stat_items != nonsensical_map_stat]
 
             # remove selected z1/z2 items from opposite z2/z1 comboboxes (if have value
             # selected, i.e. z2 array not empty string)

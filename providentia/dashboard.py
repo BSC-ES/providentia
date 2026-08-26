@@ -1308,6 +1308,7 @@ class Dashboard(QtWidgets.QWidget):
             f"{network}|{species}"
             for network in set(self.selected_network)
             for species in set(self.selected_species)
+            if network and species
         ]
 
         # check if have filter species data
@@ -2455,6 +2456,7 @@ class Dashboard(QtWidgets.QWidget):
             f"{network}|{species}"
             for network in set(self.network)
             for species in set(self.species)
+            if network and species
         ]
         
         self.networkspeci = self.networkspecies[0]
@@ -2768,7 +2770,8 @@ class Dashboard(QtWidgets.QWidget):
             if len(self.data_labels) == 1:
                 self.z1_arrays = np.array([self.observations_data_label])
             else:
-                self.z1_arrays = np.array(self.data_labels)
+                # do not include gridded data labels as options
+                self.z1_arrays = np.array([label for label in self.data_labels if "gridded" not in label])
             self.z2_arrays = np.append([""], self.z1_arrays)
 
             # update temporal colocation
