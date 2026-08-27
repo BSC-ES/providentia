@@ -1,0 +1,26 @@
+url: https://dust.aemet.es/thredds/fileServer/restrictedDataRoot/
+domain: regional
+resolution: 6hourly
+species: ## ??
+  - od550du
+  - sconcdu
+start_date: 
+  bdrc_aladin: 2020-09-28
+  bdrc_bsc_dream8b: 2010-03-30
+  bdrc_cams_ifs: 2010-10-12
+  bdrc_dream8_cams: 2011-11-14
+  bdrc_ema_regcm4: 2014-05-04
+  bdrc_icon_art: 2019-06-28
+  bdrc_lotos_euros: 2016-09-28
+  bdrc_metoffice_um: 2012-05-22
+  bdrc_mocage: 2022-05-11
+  bdrc_monarch: 2013-11-06
+  bdrc_multi_model: 2011-04-11
+  bdrc_nasa_geos: 2012-07-01
+  bdrc_ncep_gefs: 2012-10-08
+  bdrc_noa: 2015-10-12
+  bdrc_silam: 2016-03-14
+  bdrc_wrf_nemo: 2020-10-03
+  bdrc_zamg_wrf_chem: 2022-05-21
+end_date: today 
+species_request_name: C4_dust

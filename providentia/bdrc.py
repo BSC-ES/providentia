@@ -16,6 +16,7 @@ PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 mapping_species = yaml.safe_load(
     open(join(PROVIDENTIA_ROOT, "settings", "mapping_species.yaml"))
 )
+
 class BDRC(object):
     """
     Class that manages the interaction with Juelich
@@ -34,12 +35,16 @@ class BDRC(object):
         self.download_instance = download_instance
 
         self.bdrc_fixed_values = yaml.safe_load(    
-                                    open(join(PROVIDENTIA_ROOT, "settings", "internal",  "bdrc.yaml"))
+                                    open(join(PROVIDENTIA_ROOT, "settings", "internal",  "bdrc", "bdrc.yaml"))
                                     )
 
         self.bdrc_password = yaml.safe_load(    
-                                    open(join(PROVIDENTIA_ROOT, "settings", "internal",  "bdrc_password.yaml"))
+                                    open(join(PROVIDENTIA_ROOT, "settings", "internal",  "bdrc", "bdrc_password.yaml"))
                                     )
+
+        self.bdrc_model = yaml.safe_load(
+                                    open(join(PROVIDENTIA_ROOT, "settings", "internal",  "bdrc", "bdrc_model.yaml"))
+                                )
 
         # transform dates into datetime
         for k, v in self.bdrc_fixed_values.items():
@@ -85,7 +90,7 @@ class BDRC(object):
 
     def control_mod_id(self, mod_id):
         """
-        Validate the requested model id for ICAP-MME.
+        Validate the requested model id for BDRC.
 
         Unsupported model id is reported to the user.
 
@@ -97,18 +102,18 @@ class BDRC(object):
         Returns
         -------
         bool
-            ``True`` if the requested model ID is supported by ICAP-MME,
+            ``True`` if the requested model ID is supported by BDRC,
             otherwise ``False``.
         """
 
-        # get the model ID from the yaml file
-        correct_mod_id = self.bdrc_fixed_values["mod_id"]
+        # get model IDs from the yaml file
+        available_models = self.bdrc_model.keys()
         
         # check if the model ID is the correct one for the dataset
-        if mod_id not in correct_mod_id:
+        if mod_id not in available_models:
             msg = (
-                f"The current model ID '{mod_id}' is not valid for the ICAP-MME dataset. "
-                f"It must be '{', '.join(correct_mod_id)}'."
+                f"The current model ID '{mod_id}' is not valid for the BDRC dataset. "
+                f"It must be '{', '.join(available_models)}'."
             )
             show_message(self.download_instance, msg)
 
@@ -118,7 +123,7 @@ class BDRC(object):
 
     def control_domain(self, domain):
         """
-        Validate the requested domain for ICAP-MME.
+        Validate the requested domain for BDRC.
 
         Unsupported domain is reported to the user.
 
@@ -130,7 +135,7 @@ class BDRC(object):
         Returns
         -------
         bool
-            ``True`` if the requested domain is supported by ICAP-MME,
+            ``True`` if the requested domain is supported by BDRC,
             otherwise ``False``.
         """
 
@@ -140,7 +145,7 @@ class BDRC(object):
         # check if the domain is the correct one for the dataset
         if domain != correct_domain:
             msg = (
-                f"The current domain '{domain}' is not valid for the ICAP-MME dataset. "
+                f"The current domain '{domain}' is not valid for the Barcelona Dust Regional Center."
                 f"It must be '{correct_domain}'."
             )
             show_message(self.download_instance, msg)
@@ -151,7 +156,7 @@ class BDRC(object):
 
     def control_resolutions(self):
         """
-        Validate the requested resolutions for ICAP-MME.
+        Validate the requested resolutions for BDRC.
 
         If a model-specific resolution is provided, it takes priority over the
         general resolution requested by the user. 
@@ -162,7 +167,7 @@ class BDRC(object):
         Returns
         -------
         list of str
-            List of valid resolutions supported by the ICAP-MME dataset.
+            List of valid resolutions supported by the BDRC dataset.
         """
 
         # priorize model resolution in case user passed it
@@ -182,7 +187,7 @@ class BDRC(object):
             if correct_resolution == resolution:
                 final_resolution_list.append(resolution)
             else:
-                msg = f"The current resolution '{resolution}' is not valid. It must be '{correct_resolution}'."
+                msg = f"The current resolution '{resolution}' is not valid for the Barcelona Dust Regional Center. It must be '{correct_resolution}'."
                 show_message(
                     self.download_instance, msg
                 )
@@ -191,10 +196,10 @@ class BDRC(object):
 
     def control_species(self):
         """
-        Validate and normalize the requested species for ICAP-MME.
+        Validate and normalize the requested species for BDRC.
 
         Some model species may be mapped using ``mapping_species`` 
-        and are converted to yaml file ICAP species name.
+        and are converted to yaml file BDRC species name.
 
         Unsupported species are reported to the user and are not included
         in the returned list.
@@ -202,26 +207,31 @@ class BDRC(object):
         Returns
         -------
         list of str
-            List of unique ICAP species name for the requested
+            List of unique BDRC species name for the requested
             species.
         """
 
-        # get the species from the yaml file
-        correct_species = self.bdrc_fixed_values["species"]
+        # create dictionary with possible species and its mappings
+        correct_species = {}
+        for species in self.bdrc_fixed_values["species"]:
+            correct_species[species] = mapping_species.get(species, [])
 
-        # get keys related to od550du
-        mapping_species_keys = [k for k, v in mapping_species.items() if correct_species in v]
+            correct_species[species].extend(
+                k for k, v in mapping_species.items()
+                if species in v
+            )
 
+        # make sure that species is either the exact species or mapped
         final_species_list = []
-
-        # make sure that species is either od550du or related
         for species in self.download_instance.species:
-            if species == correct_species or species in mapping_species_keys:
-                final_species_list.append(correct_species)
+            for correct_s, species_list in correct_species.items():
+                if species == correct_s or species in species_list:
+                    final_species_list.append(correct_s)
+                    break
             else:
-                msg = f"The species '{species}' is not available in ICAP-MME."
                 show_message(
-                    self.download_instance, msg
+                    self.download_instance,
+                    f"The species '{species}' is not available in the Barcelona Dust Regional Center."
                 )
 
         # remove duplicates
@@ -229,28 +239,33 @@ class BDRC(object):
 
         return final_species_list
         
-    def control_dates(self):
+    def control_dates(self, mod_id):
         """
-        Adjust the requested date range to the ICAP limits.
+        Adjust the requested date range to the BDRC limits.
 
-        If the requested period does not overlap with the available ICAP
+        If the requested period does not overlap with the available BDRC
         period, an error message is displayed and ``(None, None)`` is returned.
 
-        If the requested period partially falls outside the ICAP availability
+        If the requested period partially falls outside the BDRC availability
         period, the dates are clipped to the supported range.
+
+        Parameters
+        ----------
+        mod_id : str
+            Model ID requested by the user.
 
         Returns
         -------
         start_date : datetime or None
-            Validated start date, adjusted to the minimum ICAP date if
+            Validated start date, adjusted to the minimum BDRC date if
             necessary.
         end_date : datetime or None
-            Validated end date, adjusted to the maximum ICAP date if
+            Validated end date, adjusted to the maximum BDRC date if
             necessary.
         """
 
         # get the start and end dates from the yaml file
-        min_start_date = self.bdrc_fixed_values["start_date"]
+        min_start_date = self.bdrc_fixed_values["start_date"][mod_id]
         max_end_date = self.bdrc_fixed_values["end_date"]
 
         end_date = datetime.strptime(self.download_instance.end_date, "%Y%m%d") - timedelta(days=1)
@@ -342,12 +357,12 @@ class BDRC(object):
 
     def extract_info_from_ncfile(self, nc_file):
         """
-        Extract the species name and date from an ICAP NetCDF filename.
+        Extract the species name and date from an BDRC NetCDF filename.
 
         Parameters
         ----------
         nc_file : str
-            ICAP NetCDF filename containing the species and date information.
+            BDRC NetCDF filename containing the species and date information.
 
         Returns
         -------
@@ -366,6 +381,10 @@ class BDRC(object):
         return species, date
 
     def get_session(self):
+        """
+        Create and configure an authenticated HTTP session
+        using the BDRC username and password.
+        """
 
         USERNAME = self.bdrc_password["USERNAME"]
         PASSWORD = self.bdrc_password["PASSWORD"]
@@ -373,41 +392,50 @@ class BDRC(object):
         self.session = requests.Session()
         self.session.auth = (USERNAME, PASSWORD)
         
-    def download(self, temp_dir, date):
+    def download(self, temp_dir, date, mod_id):
         """
-        Download the ICAP NetCDF file for the given date to a temporary directory.
+        Download the BDRC NetCDF file for the given date to a temporary directory.
 
         Parameters
         ----------
         temp_dir : str
-            Directory where the downloaded ICAP NetCDF file will be stored.
+            Directory where the downloaded BDRC NetCDF file will be stored.
         date : datetime.datetime
-            Date and time used to determine the ICAP file to download.
+            Date and time used to determine the BDRC file to download.
+        mod_id : str
+            Model ID requested by the user.
 
         Returns
         -------
         temp_path : str
-            Path to the downloaded ICAP NetCDF file.
+            Path to the downloaded BDRC NetCDF file.
         """
 
-        # build the ICAP filename using the date and product name
-        filename = f"{date.strftime('%Y%m%d')}_3H_MEDIAN.nc"
+        # build the BDRC filename using the date and product name
+        filename = f"{date.strftime('%Y%m%d')}{self.bdrc_model[mod_id]['ending']}_{self.bdrc_model[mod_id]['format']}"
+
+        # get model ID with the capitalization of the url
+        url_mod_id = self.bdrc_model[mod_id]["url"]
 
         # download source file
         temp_path = os.path.join(temp_dir, filename)
 
-        # ICAP files are organised on the server by year and year/month
-        url = f"{self.bdrc_fixed_values['url']}{date.year}/{date.month:02d}/{filename}"
+        # BDRC files are organised on the server by year and year/month
+        url = f"{self.bdrc_fixed_values['url']}{url_mod_id}/{date.year}/{date.month:02d}/{filename}"
 
-        response = self.session.get(
-                    url,
-                    verify=False,
-                    stream=True,
-                    timeout=300,
-                )
-
-        response = requests.get(url, stream=True)
-        response.raise_for_status()
+        # control not available dates
+        try:
+            response = self.session.get(
+                        url,
+                        verify=False,
+                        stream=True,
+                        timeout=300,
+                    )
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as exc:
+            if response.status_code == 404:
+                self.download_instance.logger.warning("No data available for day %s", date)
+                return None
 
         # write the downloaded content to the temporary file in chunks
         with open(temp_path, "wb") as f:
@@ -418,17 +446,17 @@ class BDRC(object):
 
     def format_data(self, input_filepath, output_dir, nc_file, species):
         """
-        Reformat a raw ICAP NetCDF file into a standardized
+        Reformat a raw BDRC NetCDF file into a standardized
         Providentia-compatible NetCDF.
 
         Parameters
         ----------
         input_filepath : str
-            Path where the input ICAP NetCDF file is located.
+            Path where the input BDRC NetCDF file is located.
         output_dir : str
             Directory where the formatted NetCDF file will be written.
         nc_file : str
-            Final name of the ICAP NetCDF file.
+            Final name of the BDRC NetCDF file.
         species : str
             Providentia species name.
         """
@@ -450,11 +478,22 @@ class BDRC(object):
             output_file.createDimension(input_dim_name, output_dim_name.size)
 
         name_map = {
-        "lat": "lat",
-        "lon": "lon",
+        "latitude": "latitude",
+        "longitude": "longitude",
         "time": "time",
-        "dust_aod_mean": "od550du",
         }
+
+        species_map = {
+                        "od550du" : {"OD550_DUST": "od550du"},
+                        "sconcdu" : {"SCONC_DUST": "sconcdu"}
+                                    }
+
+        unit_map = {
+                    "od550du" : "unitless",
+                    "sconcdu" : "ug m-3"
+                                }
+
+        name_map.update(species_map[species])
 
         # copy variables
         for input_var_name in input_file.variables:
@@ -480,8 +519,8 @@ class BDRC(object):
 
             elif output_var_name == species:
                 output_file[species].setncattr("grid_mapping", "crs")
-                output_file[species].setncattr("coordinates", "lat lon")
-                output_file[species].setncattr("units", "unitless")
+                output_file[species].setncattr("coordinates", "latitude longitude")
+                output_file[species].setncattr("units", unit_map[species])
 
             # get the data from
             if output_var_name == "time":
@@ -539,7 +578,7 @@ class BDRC(object):
             # print current model
             self.download_instance.logger.info("\n" + "-" * 40)
             self.download_instance.logger.info(
-                f"\nDownloading {model} model data from the U.S. Naval Research Laboratory..."
+                f"\nDownloading {model} model data from the Barcelona Dust Regional Center..."
             )
 
             correct_mod_id = self.control_mod_id(mod_id)
@@ -562,7 +601,7 @@ class BDRC(object):
             if not species_list:
                 return
             
-            start_date, end_date = self.control_dates()
+            start_date, end_date = self.control_dates(mod_id)
 
             if start_date is None and end_date is None:
                 return
@@ -584,6 +623,10 @@ class BDRC(object):
 
                 # obtain request session
                 self.get_session()
+
+                self.download_instance.logger.info(
+                                f"\n  - {local_dir}"
+                            )
         
                 # iterate through each individual nc file
                 for nc_file in tqdm(
@@ -595,7 +638,11 @@ class BDRC(object):
                     species, date = self.extract_info_from_ncfile(nc_file)
 
                     # peform de download and formatting only if the date is available      
-                    temp_path = self.download(files_to_download_dict["temp_dir"], date)
+                    temp_path = self.download(files_to_download_dict["temp_dir"], date, mod_id)
+
+                    # continue with loop if day is not available
+                    if not temp_path:
+                        continue
             
                     self.format_data(temp_path, local_dir, nc_file, species)
 
