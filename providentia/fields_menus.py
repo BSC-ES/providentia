@@ -5,7 +5,6 @@ import copy
 import numpy as np
 import pandas as pd
 
-
 def init_flags(instance):
     """
     Initialise the internal dictionary structure and default values for network quality assurance flags.
@@ -689,7 +688,7 @@ def update_metadata_fields(instance, cap=False):
 
     valid_indices_by_netspec = {}
 
-    if use_valid_station_inds:
+    if (use_valid_station_inds) or (cap):
         obs_label = instance.observations_data_label
 
         if instance.temporal_colocation:
@@ -734,7 +733,10 @@ def update_metadata_fields(instance, cap=False):
             unique_chunks = []
 
             for netspec in networkspecies:
-                arr = metadata_in_memory[netspec][meta_var]
+                if cap:
+                    arr = metadata_in_memory[netspec][valid_indices_by_netspec[netspec], :][meta_var]
+                else:
+                    arr = metadata_in_memory[netspec][meta_var]
 
                 if use_valid_station_inds:
                     vals = _get_metadata_values(arr, valid_indices_by_netspec[netspec])
@@ -798,8 +800,11 @@ def update_metadata_fields(instance, cap=False):
         current_max = None
 
         for netspec in networkspecies:
-            arr = metadata_in_memory[netspec][meta_var]
-
+            if cap:
+                arr = metadata_in_memory[netspec][valid_indices_by_netspec[netspec], :][meta_var]
+            else:
+                arr = metadata_in_memory[netspec][meta_var]
+            
             if use_valid_station_inds:
                 vals = _get_metadata_values(arr, valid_indices_by_netspec[netspec])
             else:

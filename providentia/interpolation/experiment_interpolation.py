@@ -1610,8 +1610,9 @@ class ModelInterpolation(object):
         dists[dists < 1.0] = 1.0
 
         # get nearest neighbour indices
+        mod_n_cols = self.mod_lons_centre.shape[1]
         self.nearest_neighbour_inds = np.column_stack(
-            np.unravel_index(idx, self.mod_lons_centre.shape)
+            (idx // mod_n_cols, idx % mod_n_cols)
         )
 
         # take the reciprocals of the nearest neighbours distances from the observational points
@@ -1834,6 +1835,7 @@ class ModelInterpolation(object):
                 # if all station weights are 0, station is outside model grid domain
                 # set all values to be NaN
                 station_weights = self.inverse_dists[ii, :]
+
                 if np.all(station_weights == 0):
                     if self.forecast:
                         interp_vals = np.full(

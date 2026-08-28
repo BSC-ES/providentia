@@ -466,7 +466,10 @@ class Providentia:
         # 0 valid measurements, to do this we need to have valid_station_inds, which is obtained
         # after filtering
         if not self.reading_ghost:
-            update_metadata_fields(self)
+            if self.station_cap:
+                update_metadata_fields(self, cap=True)
+            else:
+                update_metadata_fields(self)
 
         # set variable to know if data is in intial state or not
         if initialise:

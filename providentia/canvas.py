@@ -30,6 +30,7 @@ from .dashboard_interactivity import (
     picker_block_func,
     zoom_map_func,
 )
+from .fields_menus import update_metadata_fields
 from .filter import DataFilter
 from .plotting import Plotting
 from .plot_aux import get_map_extent, download_plot_data_to_csv
@@ -703,6 +704,12 @@ class Canvas(FigureCanvas):
             else:
                 update_plots = False
             self.read_instance.temporal_colocation_active = False
+
+        # update metadata fields
+        if self.read_instance.station_cap:
+            update_metadata_fields(self.read_instance, cap=True)
+        else:
+            update_metadata_fields(self.read_instance)
 
         # update layout fields
         self.read_instance.update_layout_fields(self)

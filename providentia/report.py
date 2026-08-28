@@ -1336,7 +1336,10 @@ class Report:
             # 0 valid measurements, to do this we need to have valid_station_inds, which is obtained
             # after filtering
             if not self.reading_ghost:
-                update_metadata_fields(self)
+                if self.station_cap:
+                    update_metadata_fields(self, cap=True)
+                else:
+                    update_metadata_fields(self)
 
             # iterate through networks and species, creating plots
             self.n_total_pages = len(self.plot_dictionary)
