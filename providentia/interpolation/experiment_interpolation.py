@@ -1610,10 +1610,6 @@ class ModelInterpolation(object):
         dists[dists < 1.0] = 1.0
 
         # get nearest neighbour indices
-        #self.nearest_neighbour_inds = np.column_stack(
-        #    np.unravel_index(idx, self.mod_lons_centre.shape)
-        #)
-
         mod_n_cols = self.mod_lons_centre.shape[1]
         self.nearest_neighbour_inds = np.column_stack(
             (idx // mod_n_cols, idx % mod_n_cols)
