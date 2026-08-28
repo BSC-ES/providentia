@@ -1598,7 +1598,7 @@ class ModelInterpolation(object):
             dists, idx = tree.query(obs_lonlat, k=int(self.interp_n_neighbours))
         else:
             dists, idx = tree.query(
-                obs_lonlat, k=int(self.interp_n_neighbours), workers=1
+                obs_lonlat, k=int(self.interp_n_neighbours), workers=-1
             )
 
         # for n neighbours == 1, do reshaping of array so doesn't break
