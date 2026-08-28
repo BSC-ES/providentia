@@ -2,7 +2,6 @@
 
 import copy
 import glob
-import math
 import multiprocessing
 import os
 import random
@@ -28,6 +27,7 @@ from interpolation.aux_interp import (
     get_aeronet_bin_radius_from_bin_variable,
     get_model_bin_radii,
     check_for_ghost,
+    get_read_chunk_timesteps,
 )
 from configuration import ProvConfiguration, load_conf
 
@@ -1306,7 +1306,16 @@ class SubmitInterpolation(object):
                 )
 
     def guess_peak_RSS_per_worker(self):
-        """Get conservative estimate of peak RSS per worker in GB."""
+        """
+        Get conservative estimate of peak RSS per worker in GB.
+
+        experiment_interpolation.py reads/holds at most one memory-bounded chunk of one model
+        file's (y, x) grid at a time (see get_read_chunk_timesteps() in aux_interp.py), rather
+        than every model file for the whole job at once. So a job's payload is estimated as the
+        largest single chunk read across its model files, not their sum, and that chunk is
+        itself capped independent of file size (except for upsampling, which is read unchunked -
+        see get_read_chunk_timesteps()).
+        """
 
         # define conservative factors for estimation for peak RSS in GB
         array_overhead_factor = 1.5
@@ -1328,6 +1337,7 @@ class SubmitInterpolation(object):
             prov_mod_code = argument[0]
             model_temporal_resolution = argument[1]
             mod_speci_to_process = argument[2]
+            temporal_resolution_to_output = argument[4]
             yearmonth = argument[5]
             model_to_process, grid_type, ensemble = prov_mod_code.split("-")
             ensemble_member = ensemble.isdigit()
@@ -1358,9 +1368,29 @@ class SubmitInterpolation(object):
                 with Dataset(model_file, "r") as nc:
                     var = nc.variables[mod_speci_to_process]
                     dims = [nc.dimensions[d].size for d in var.dimensions]
-                    n_elements = math.prod(dims)
                     dtype_size = np.dtype(var.dtype).itemsize
-                    worker_payload_gb += (n_elements * dtype_size) / (1024**3)
+                    # by convention (see experiment_interpolation.py's get_model_information())
+                    # the raw variable's first dimension is time, and the last two are (y, x) -
+                    # any bin/vertical dimension in between is dropped down to a single index
+                    # before a chunk's grid slab is ever held in memory
+                    n_raw_timesteps, y_N, x_N = dims[0], dims[-2], dims[-1]
+
+                    read_chunk_timesteps = get_read_chunk_timesteps(
+                        y_N, x_N, model_temporal_resolution, temporal_resolution_to_output,
+                        dtype_size,
+                    )
+                    # None means unbounded/unchunked (upsampling): the whole file's raw
+                    # timesteps are read in one go
+                    if read_chunk_timesteps is None:
+                        chunk_timesteps = n_raw_timesteps
+                    else:
+                        chunk_timesteps = min(read_chunk_timesteps, n_raw_timesteps)
+
+                    chunk_payload_gb = (chunk_timesteps * y_N * x_N * dtype_size) / (1024**3)
+
+                    # only one file's chunk is ever resident at a time, so the job's payload is
+                    # the largest single chunk across its model files, not their sum
+                    worker_payload_gb = max(worker_payload_gb, chunk_payload_gb)
 
             # Inflate to peak RSS
             peak_worker_gb = (

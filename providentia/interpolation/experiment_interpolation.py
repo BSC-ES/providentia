@@ -35,6 +35,8 @@ from aux_interp import (
     get_aeronet_bin_radius_from_bin_variable,
     get_aeronet_model_bin,
     get_model_to_aeronet_bin_transform_factor,
+    get_resampling_direction,
+    get_read_chunk_timesteps,
 )
 
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[2]))
@@ -558,6 +560,24 @@ class ModelInterpolation(object):
                     self.y_varname = mod_speci_obj.dimensions[2]
                     self.z_varname = mod_speci_obj.dimensions[1]
 
+                    # check if species Z dimension is named correctly, and in correct BSC standard order
+                    # if not terminate process
+                    # this is checked here, before the Z dimension is first dereferenced below, so a
+                    # misnamed (or attribute-less) Z dimension gives this clean error instead of an
+                    # uncaught exception being raised when accessing it
+                    # Z dimension is valid if == 'z' or 'lev' or 'alt' or 'height' or 'level'
+                    if (
+                        (self.z_varname != "lev")
+                        and (self.z_varname != "z")
+                        and (self.z_varname != "alt")
+                        and (self.z_varname != "height")
+                        and (self.z_varname != "level")
+                    ):
+                        self.log_file_str += (
+                            "Z dimension incorrectly named. Terminating process."
+                        )
+                        create_output_logfile(1, self.log_file_str)
+
                     # check if vertical dimension goes up or down to get correct index for surface
                     mod_vert_obj = mod_nc_root[self.z_varname]
                     direction = mod_vert_obj.positive
@@ -594,19 +614,8 @@ class ModelInterpolation(object):
                         "Y dimension incorrectly named. Terminating process."
                     )
                     create_output_logfile(1, self.log_file_str)
-                # Z dimension is valid if == 'z' or 'lev' or 'alt' or 'height'
-                if self.have_vertical_dimension:
-                    if (
-                        (self.z_varname != "lev")
-                        and (self.z_varname != "z")
-                        and (self.z_varname != "alt")
-                        and (self.z_varname != "height")
-                        and (self.z_varname != "level")
-                    ):
-                        self.log_file_str += (
-                            "Z dimension incorrectly named. Terminating process."
-                        )
-                        create_output_logfile(1, self.log_file_str)
+                # (Z dimension naming, when present, is validated above where z_varname is set,
+                # before it is first dereferenced)
 
                 # get instances of x/y grid dimension variables
                 mod_lon_obj = mod_nc_root[self.x_varname]
@@ -666,8 +675,18 @@ class ModelInterpolation(object):
                 # need to shift coordinates
                 # longitudes are 0-360? (0 centred over Greenwich)
                 self.shift_lon = lon_max > 180
-                # latitudes are 0-180? (0 = South Pole, 90 = Equator, 180 = North Pole)
-                self.shift_lat = (lat_min >= 0) and (lat_max > 90)
+
+                # latitudes in a 0-180 range look like colatitude, but which pole is 0 vs. 180
+                # is a convention that varies by source and cannot be safely inferred from the
+                # value range alone - so rather than guess a shift direction that could silently
+                # flip the hemisphere, terminate and require this to be resolved by hand
+                if (lat_min >= 0) and (lat_max > 90):
+                    self.log_file_str += (
+                        "Latitude range ({}, {}) looks like a 0-180 colatitude format, which "
+                        "cannot be safely converted to -90-90 without knowing the pole "
+                        "orientation. Terminating process.".format(lat_min, lat_max)
+                    )
+                    create_output_logfile(1, self.log_file_str)
 
                 # shift coordinates
                 if self.shift_lon:
@@ -677,79 +696,77 @@ class ModelInterpolation(object):
                     self.mod_lons_centre = ((self.mod_lons_centre + 180) % 360) - 180
                     if self.mod_grid_type == "crs":
                         self.x = ((self.x + 180) % 360) - 180
-                if self.shift_lat:
-                    self.log_file_str += "Shifting latitudes from 0-180 to -90-90. \n"
-                    self.mod_lats_centre = self.mod_lats_centre - 90
-                    if self.mod_grid_type == "crs":
-                        self.y = self.y - 90
 
-                # initialise tolerance    
+                # initialise tolerance for the monotonicity comparisons below, scaled to the
+                # coordinate arrays' floating-point precision - a fixed 1e-10 is tighter than
+                # the rounding error of float32 coordinates (common for grid dimension
+                # variables), which could make a genuinely monotonic float32 grid spuriously
+                # fail these checks
                 tol = 1e-10
+                for coord in (self.x, self.y):
+                    if np.issubdtype(coord.dtype, np.floating):
+                        tol = max(tol, np.finfo(coord.dtype).eps * 10)
 
                 # need to order coordinates?
-                # geographic grid?
-                if self.mod_grid_type == "crs":
-                    x_diff = np.diff(self.x)
-                    y_diff = np.diff(self.y)
-                    increasing_x = np.all(x_diff > tol)
-                    increasing_y = np.all(y_diff > tol)
-                    self.order_lon = not increasing_x
-                    self.order_lat = not increasing_y
-                # projected grid?
-                else:
-                    lon_test = self.mod_lons_centre[0, :]
-                    lat_test = self.mod_lats_centre[:, 0]
-                    lon_diff = np.diff(lon_test)
-                    lat_diff = np.diff(lat_test)
-                    increasing_lon = np.all(lon_diff > tol)
-                    increasing_lat = np.all(lat_diff > tol)
-                    self.order_lon = not increasing_lon
-                    self.order_lat = not increasing_lat
+                # this is determined from the native grid dimension coordinates (self.x/self.y),
+                # for both geographic and projected/curvilinear grids, rather than from the
+                # derived geographic centre coordinates (self.mod_lons_centre/mod_lats_centre).
+                # the native coordinates vary monotonically along a single axis by construction
+                # (e.g. a projected grid's native x/y, or a regular geographic grid's lon/lat),
+                # whereas a single row/column of a curvilinear grid's geographic centre
+                # coordinates (e.g. rotated pole, Lambert conformal) can appear non-monotonic
+                # purely from the domain spanning +/-180 longitude, even when the native grid
+                # itself is perfectly regular - using them to decide/derive the sort order could
+                # wrongly reorder (or fail to reorder) a valid grid
+                x_diff = np.diff(self.x)
+                y_diff = np.diff(self.y)
+                increasing_x = np.all(x_diff > tol)
+                increasing_y = np.all(y_diff > tol)
+                self.order_lon = not increasing_x
+                self.order_lat = not increasing_y
 
                 # order longitude
                 if self.order_lon:
                     self.log_file_str += "Ordering longitudes. \n"
+                    self.x_idx = np.argsort(self.x)
+                    self.x = self.x[self.x_idx]
                     # geographic grid?
                     if self.mod_grid_type == "crs":
-                        self.x_idx = np.argsort(self.x)
-                        self.x = self.x[self.x_idx]
                         self.mod_lons_centre = self.mod_lons_centre[self.x_idx]
                     # projected grid?
                     else:
-                        self.x_idx = np.argsort(self.mod_lons_centre[0, :])
                         self.mod_lons_centre = self.mod_lons_centre[:, self.x_idx]
                         self.mod_lats_centre = self.mod_lats_centre[:, self.x_idx]
-                        self.x = self.x[self.x_idx]
 
                 # order latitude
                 if self.order_lat:
                     self.log_file_str += "Ordering latitudes. \n"
+                    self.y_idx = np.argsort(self.y)
+                    self.y = self.y[self.y_idx]
                     # geographic grid?
                     if self.mod_grid_type == "crs":
-                        self.y_idx = np.argsort(self.y)
-                        self.y = self.y[self.y_idx]
                         self.mod_lats_centre = self.mod_lats_centre[self.y_idx]
                     # projected grid?
                     else:
-                        self.y_idx = np.argsort(self.mod_lats_centre[:, 0])
                         self.mod_lons_centre = self.mod_lons_centre[self.y_idx, :]
                         self.mod_lats_centre = self.mod_lats_centre[self.y_idx, :]
-                        self.y = self.y[self.y_idx]
 
-                # Check for monotonicity before ordering coordinates if needed (with tolerance for small numerical issues)
-                # TODO: Review if there was any reason why prior to this commit the monotonicity check was done before shift of coordinates
-                # There are cases (as seen in interpolation of cams_forecast_ensemble) where we need to shift the coordinates
-                # before the monotonicity check, as the original coordinates are in 0-360 format and therefore not monotonic,
-                # but once shifted to -180-180 they are monotonic.
-                
+                # final sanity check that longitude/latitude are now strictly monotonically
+                # increasing (within tolerance). this runs after the shift and order steps
+                # above (shift must happen first, as e.g. cams_forecast_ensemble's original
+                # 0-360 coordinates are not monotonic, but become so once shifted to -180-180;
+                # ordering must then happen before this check, since a decreasing or unordered
+                # input is expected and corrected there). by this point self.x/self.y are
+                # always increasing whenever ordering was actually possible (np.argsort always
+                # sorts ascending), so this check exists to catch what ordering cannot fix on
+                # its own - duplicate or NaN coordinate values, which no permutation can turn
+                # into a strictly monotonic sequence
                 x_diff = np.diff(self.x)
                 y_diff = np.diff(self.y)
                 increasing_x = np.all(x_diff > tol)
-                decreasing_x = np.all(x_diff < -tol)
                 increasing_y = np.all(y_diff > tol)
-                decreasing_y = np.all(y_diff < -tol)
-                
-                if not (increasing_x or decreasing_x):
+
+                if not increasing_x:
                     # remove scientific notation
                     np.set_printoptions(suppress=True)
                     self.log_file_str += (
@@ -761,7 +778,7 @@ class ModelInterpolation(object):
                         )
                     )
                     create_output_logfile(1, self.log_file_str)
-                if not (increasing_y or decreasing_y):
+                if not increasing_y:
                     # remove scientific notation
                     np.set_printoptions(suppress=True)
                     self.log_file_str += (
@@ -1091,47 +1108,15 @@ class ModelInterpolation(object):
         # close the nc file
         obs_nc_root.close()
 
-    def get_resampling_direction(self):
-        """
-        Determine the resampling direction between model input and output temporal resolutions.
-
-        Returns
-        -------
-        str or None
-            'downsampling' if input is finer than output,
-            'upsampling' if input is coarser than output,
-            None if input and output resolutions are equal.
-        """
-
-        freq_map = {
-            "hourly": 1,
-            "hourly_instantaneous": 1,
-            "3hourly": 3,
-            "3hourly_instantaneous": 3,
-            "6hourly": 6,
-            "6hourly_instantaneous": 6,
-            "daily": 24,
-            "monthly": 24 * 30,
-        }
-
-        in_freq = freq_map[self.model_temporal_resolution]
-        out_freq = freq_map[self.temporal_resolution_to_output]
-
-        # input resolution finer than output resolution (downsampling)
-        if in_freq < out_freq:
-            return "downsampling"
-        # input resolution coarser than output resolution (upsampling)
-        elif in_freq > out_freq:
-            return "upsampling"
-        # no resampling
-        else:
-            return
-
     def get_monthly_model_data(self):
         """Read all relevant model data in yearmonth into memory."""
 
         # determine resampling direction (upsampling, downsampling or None)
-        resampling_direction = self.get_resampling_direction()
+        # (shared with experiment_interpolation_submission.py's resource estimator, so that
+        # estimator automatically tracks this file's actual chunked-read memory behaviour)
+        resampling_direction = get_resampling_direction(
+            self.model_temporal_resolution, self.temporal_resolution_to_output
+        )
 
         # get number of days in month processing
         self.days_in_month = monthrange(int(self.year), int(self.month))[1]
@@ -1215,16 +1200,37 @@ class ModelInterpolation(object):
             self.temporal_resolution_to_output_code = "MS"
 
         # create array for storing daily monthly model data
+        # rather than storing the full model grid (which for a big global model can spike memory
+        # usage massively), only the gridcells needed as nearest neighbours of observational
+        # stations are stored, per station. This relies on 'self.subset_rows'/'self.subset_cols'
+        # (set in n_nearest_neighbour_inverse_distance_weights(), which must therefore be called
+        # beforehand) to know which gridcells to pull out of each file as it is read.
+        n_stations = len(self.obs_lons)
+        n_neighbours = int(self.interp_n_neighbours)
+
+        # work out how many raw file timesteps to read from a model file at a time.
+        # even after subsetting to nearest-neighbour gridcells, a single file's raw read
+        # (before subsetting) is still a full model-grid slab, and for a model stored as
+        # one file per month (rather than e.g. one file per day) that slab alone can be
+        # as large as the previous full-month array was. so, independent of the spatial
+        # subsetting above, cap how many raw timesteps are read from a file in one go to
+        # a memory budget. None means unbounded (upsampling - see get_read_chunk_timesteps).
+        # this is shared with experiment_interpolation_submission.py's resource estimator,
+        # which relies on it to predict this function's actual peak memory use per job.
+        self.read_chunk_timesteps = get_read_chunk_timesteps(
+            self.y_N, self.x_N, self.model_temporal_resolution, self.temporal_resolution_to_output
+        )
+
         # if have forecast data, then have an extra dimension for the number of forecast days
         if self.forecast:
             self.monthly_model_data = np.full(
-                (len(self.yearmonth_time), self.forecast_days, self.y_N, self.x_N),
+                (len(self.yearmonth_time), self.forecast_days, n_stations, n_neighbours),
                 np.nan,
                 dtype=np.float32,
             )
         else:
             self.monthly_model_data = np.full(
-                (len(self.yearmonth_time), self.y_N, self.x_N), np.nan, dtype=np.float32
+                (len(self.yearmonth_time), n_stations, n_neighbours), np.nan, dtype=np.float32
             )
 
         # if have mapped size distribution variable:
@@ -1387,131 +1393,163 @@ class ModelInterpolation(object):
 
                 # iterate through forecast days
                 for forecast_day_ii in range(self.forecast_days):
-                    # cut file time dt for only valid times
-                    # for forecast data ensure that this is the refers to the first day of forecast to get the correct time indices
-                    valid_file_time_dt = file_time_dt[valid_file_time_inds[0]]
+                    # positions (not values) of the valid timesteps for this forecast day, and
+                    # the matching day-0 template times (see comment above on why day-0's times
+                    # are used as a stand-in for every forecast day's time-of-day pattern)
+                    data_inds_full = valid_file_time_inds[forecast_day_ii]
+                    template_time_full = file_time_dt[valid_file_time_inds[0]]
+                    n_valid = len(data_inds_full)
 
-                    # read valid data from file for valid indices
-                    # have bin dimension?
-                    if self.have_bin_dimension:
-                        read_data = mod_nc_root[self.mod_speci_to_process][
-                            valid_file_time_inds[forecast_day_ii], bin_index, :, :
-                        ]
-
-                        # convert model units from kg m-2 to um3/um2
-                        read_data = 1e6 * read_data / rho_bin
-
-                        # transform model bin data to aeronet bin
-                        read_data = read_data * bin_transform_factor
-                    # has vertical dimension
-                    elif self.have_vertical_dimension:
-                        read_data = mod_nc_root[self.mod_speci_to_process][
-                            valid_file_time_inds[forecast_day_ii], self.z_index, :, :
-                        ]
-                    # has no vertical dimension?
+                    # split this forecast day's read into memory-bounded chunks of at most
+                    # 'self.read_chunk_timesteps' raw file timesteps, so only a bounded slab of
+                    # the full model grid is ever held in memory at once, rather than a whole
+                    # file's worth (which, for a model stored as one file per month, can be as
+                    # large as the previous full-month array was).
+                    # 'self.read_chunk_timesteps' is None for upsampling, meaning the read is
+                    # unbounded/unchunked (see get_read_chunk_timesteps()). an empty day still
+                    # gets a single (empty) pass through the pipeline below, to preserve existing
+                    # logging/bookkeeping behaviour for that case.
+                    if n_valid == 0:
+                        chunk_bounds = [(0, 0)]
+                    elif self.read_chunk_timesteps is None:
+                        chunk_bounds = [(0, n_valid)]
                     else:
-                        read_data = mod_nc_root[self.mod_speci_to_process][
-                            valid_file_time_inds[forecast_day_ii], :, :
+                        chunk_bounds = [
+                            (chunk_start, min(chunk_start + self.read_chunk_timesteps, n_valid))
+                            for chunk_start in range(0, n_valid, self.read_chunk_timesteps)
                         ]
 
-                    # convert model units to observational units
-                    read_data = read_data * self.conversion_factor
+                    for chunk_start, chunk_end in chunk_bounds:
+                        data_inds = data_inds_full[chunk_start:chunk_end]
+                        valid_file_time_dt = template_time_full[chunk_start:chunk_end]
 
-                    # set any model values outside GHOST extreme limits for variable to be NaN
-                    read_data[
-                        (read_data < self.GHOST_speci_lower_limit)
-                        | (read_data > self.GHOST_speci_upper_limit)
-                    ] = np.nan
+                        # read valid data from file for valid indices
+                        # have bin dimension?
+                        if self.have_bin_dimension:
+                            read_data = mod_nc_root[self.mod_speci_to_process][
+                                data_inds, bin_index, :, :
+                            ]
 
-                    # reorder data coordinates if needed
-                    if self.order_lon:
-                        read_data = np.take(read_data, self.x_idx, axis=-1)
-                    if self.order_lat:
-                        read_data = np.take(read_data, self.y_idx, axis=-2)
+                            # convert model units from kg m-2 to um3/um2
+                            read_data = 1e6 * read_data / rho_bin
 
-                    # create xarray for resampling
-                    xr_data = xr.DataArray(
-                        dims=("time", "latitude", "longitude"),
-                        data=read_data,
-                        coords=dict(
-                            time=valid_file_time_dt, latitude=self.y, longitude=self.x
-                        ),
-                    )
+                            # transform model bin data to aeronet bin
+                            read_data = read_data * bin_transform_factor
+                        # has vertical dimension
+                        elif self.have_vertical_dimension:
+                            read_data = mod_nc_root[self.mod_speci_to_process][
+                                data_inds, self.z_index, :, :
+                            ]
+                        # has no vertical dimension?
+                        else:
+                            read_data = mod_nc_root[self.mod_speci_to_process][
+                                data_inds, :, :
+                            ]
 
-                    # do resampling
-                    if resampling_direction:
-                        # downsampling (finer to coarser)
-                        if resampling_direction == "downsampling":
-                            # mean
-                            if self.interp_model_downsampling == "mean":
-                                xr_data = xr_data.resample(
-                                    time=self.temporal_resolution_to_output_code
-                                ).mean()
+                        # convert model units to observational units
+                        read_data = read_data * self.conversion_factor
 
-                            # median
-                            elif self.interp_model_downsampling == "median":
-                                xr_data = xr_data.resample(
-                                    time=self.temporal_resolution_to_output_code
-                                ).median()
+                        # set any model values outside GHOST extreme limits for variable to be NaN
+                        read_data[
+                            (read_data < self.GHOST_speci_lower_limit)
+                            | (read_data > self.GHOST_speci_upper_limit)
+                        ] = np.nan
 
-                        # upsampling (coarser to finer)
-                        elif resampling_direction == "upsampling":
-                            # convert original data frequency code to pandas offset
-                            offset = pd.tseries.frequencies.to_offset(
-                                pd.infer_freq(xr_data.time.to_index())
-                            )
+                        # reorder data coordinates if needed
+                        if self.order_lon:
+                            read_data = np.take(read_data, self.x_idx, axis=-1)
+                        if self.order_lat:
+                            read_data = np.take(read_data, self.y_idx, axis=-2)
 
-                            # extend the last timestamp to cover the full final period
-                            start_time = pd.Timestamp(xr_data.time.values[0])
-                            last_time = pd.Timestamp(xr_data.time.values[-1])
-                            end_extended = last_time + offset - pd.Timedelta(seconds=1)
+                        # subset to only the gridcells needed as nearest neighbours of observational
+                        # stations, collapsing the (y, x) grid dimensions down to a single small
+                        # 'point' dimension, well before this data ever reaches the persistent
+                        # monthly array
+                        read_data = read_data[..., self.subset_rows, self.subset_cols]
 
-                            # create new continuous index at frequency to output
-                            new_index = pd.date_range(
-                                start=start_time,
-                                end=end_extended,
-                                freq=self.temporal_resolution_to_output_code,
-                            )
+                        # create xarray for resampling
+                        xr_data = xr.DataArray(
+                            dims=("time", "point"),
+                            data=read_data,
+                            coords=dict(time=valid_file_time_dt),
+                        )
 
-                            # fill gaps (repeating values between measurements)
-                            if self.interp_model_upsampling == "fill":
-                                xr_data = xr_data.reindex(
-                                    time=new_index, method="ffill"
+                        # do resampling
+                        if resampling_direction:
+                            # downsampling (finer to coarser)
+                            if resampling_direction == "downsampling":
+                                # mean
+                                if self.interp_model_downsampling == "mean":
+                                    xr_data = xr_data.resample(
+                                        time=self.temporal_resolution_to_output_code
+                                    ).mean()
+
+                                # median
+                                elif self.interp_model_downsampling == "median":
+                                    xr_data = xr_data.resample(
+                                        time=self.temporal_resolution_to_output_code
+                                    ).median()
+
+                            # upsampling (coarser to finer)
+                            elif resampling_direction == "upsampling":
+                                # convert original data frequency code to pandas offset
+                                offset = pd.tseries.frequencies.to_offset(
+                                    pd.infer_freq(xr_data.time.to_index())
                                 )
 
-                            # leave gaps (setting nans between measurements)
-                            elif self.interp_model_upsampling == "gaps":
-                                xr_data = xr_data.reindex(time=new_index)
+                                # extend the last timestamp to cover the full final period
+                                start_time = pd.Timestamp(xr_data.time.values[0])
+                                last_time = pd.Timestamp(xr_data.time.values[-1])
+                                end_extended = last_time + offset - pd.Timedelta(seconds=1)
 
-                    # get indices in yearmonth to fill with read data. Adjust for forecast day if neccessary.
-                    if (self.forecast) and (forecast_day_ii != 0):
-                        file_time = xr_data.time.values + pd.Timedelta(
-                            days=forecast_day_ii
-                        )
-                    else:
-                        file_time = xr_data.time.values
-                    inds_to_fill = np.isin(self.yearmonth_dt, file_time)
+                                # create new continuous index at frequency to output
+                                new_index = pd.date_range(
+                                    start=start_time,
+                                    end=end_extended,
+                                    freq=self.temporal_resolution_to_output_code,
+                                )
 
-                    # check if any file fimes are not in monthly yearmonth time array
-                    # this should not be the case unless time format is bad, or forecast data is being read
-                    if (not any(inds_to_fill)) and (self.forecast):
-                        continue
-                    elif (not any(inds_to_fill)) and (not self.forecast):
-                        if not bad_time_format:
-                            self.log_file_str += "Time in model dataset {} is not in standard format: \n {}".format(
-                                model_file, file_time
+                                # fill gaps (repeating values between measurements)
+                                if self.interp_model_upsampling == "fill":
+                                    xr_data = xr_data.reindex(
+                                        time=new_index, method="ffill"
+                                    )
+
+                                # leave gaps (setting nans between measurements)
+                                elif self.interp_model_upsampling == "gaps":
+                                    xr_data = xr_data.reindex(time=new_index)
+
+                        # get indices in yearmonth to fill with read data. Adjust for forecast day if neccessary.
+                        if (self.forecast) and (forecast_day_ii != 0):
+                            file_time = xr_data.time.values + pd.Timedelta(
+                                days=forecast_day_ii
                             )
-                            failed_files += 1
-                            bad_time_format = True
-                        continue
+                        else:
+                            file_time = xr_data.time.values
+                        inds_to_fill = np.isin(self.yearmonth_dt, file_time)
 
-                    # fill in data array
-                    if self.forecast:
-                        self.monthly_model_data[
-                            inds_to_fill, forecast_day_ii, :, :
-                        ] = xr_data.values
-                    else:
-                        self.monthly_model_data[inds_to_fill, :, :] = xr_data.values
+                        # check if any file fimes are not in monthly yearmonth time array
+                        # this should not be the case unless time format is bad, or forecast data is being read
+                        if (not any(inds_to_fill)) and (self.forecast):
+                            continue
+                        elif (not any(inds_to_fill)) and (not self.forecast):
+                            if not bad_time_format:
+                                self.log_file_str += "Time in model dataset {} is not in standard format: \n {}".format(
+                                    model_file, file_time
+                                )
+                                failed_files += 1
+                                bad_time_format = True
+                            continue
+
+                        # fill in data array, reshaping the flat 'point' dimension back out into
+                        # (station, neighbour)
+                        fill_values = xr_data.values.reshape(-1, n_stations, n_neighbours)
+                        if self.forecast:
+                            self.monthly_model_data[
+                                inds_to_fill, forecast_day_ii, :, :
+                            ] = fill_values
+                        else:
+                            self.monthly_model_data[inds_to_fill, :, :] = fill_values
 
                 # close model netCDF root
                 mod_nc_root.close()
@@ -1620,6 +1658,14 @@ class ModelInterpolation(object):
 
         # set reciprocal distances for all observational points outside model grid extent to be 0
         self.inverse_dists[~obs_inside_model_grid, :] = 0.0
+
+        # flatten the (row, col) grid indices of every neighbour needed by every station into
+        # two parallel 1D arrays. These are the only model gridcells that are ever read from
+        # a monthly file, meaning the full model grid never needs to be held in memory - only
+        # the (small) set of gridcells surrounding observational stations.
+        n_neighbours = int(self.interp_n_neighbours)
+        self.subset_rows = self.nearest_neighbour_inds[:, :n_neighbours].ravel()
+        self.subset_cols = self.nearest_neighbour_inds[:, n_neighbours:].ravel()
 
     def write_netCDF(self):
         """
@@ -1849,27 +1895,12 @@ class ModelInterpolation(object):
                         )
                 else:
                     # get reciprocal model data at N nearest neighbours to observational station
+                    # (self.monthly_model_data is already stored per-station, per-neighbour, so
+                    # no further indexing into the model grid is needed here)
                     if self.forecast:
-                        cut_model_data = self.monthly_model_data[
-                            :,
-                            :,
-                            self.nearest_neighbour_inds[
-                                ii, : int(self.interp_n_neighbours)
-                            ],
-                            self.nearest_neighbour_inds[
-                                ii, int(self.interp_n_neighbours) :
-                            ],
-                        ]
+                        cut_model_data = self.monthly_model_data[:, :, ii, :]
                     else:
-                        cut_model_data = self.monthly_model_data[
-                            :,
-                            self.nearest_neighbour_inds[
-                                ii, : int(self.interp_n_neighbours)
-                            ],
-                            self.nearest_neighbour_inds[
-                                ii, int(self.interp_n_neighbours) :
-                            ],
-                        ]
+                        cut_model_data = self.monthly_model_data[:, ii, :]
                     # create mask where data == NaN or infinite
                     invalid_mask = ~np.isfinite(cut_model_data)
 
@@ -2039,12 +2070,15 @@ if __name__ == "__main__":
             EI.log_file_str += EI.conversion_factor
             create_output_logfile(1, EI.log_file_str)
 
-        # read relevant monthly model data into memory
-        EI.get_monthly_model_data()
-
         # get interpolation weights of model grid to observational stations
         # (using inverse distance weighting interpolation)
+        # this must be done before get_monthly_model_data(), as it determines which
+        # (small) subset of model gridcells need to be read/stored per month, avoiding
+        # holding the full model grid in memory
         EI.n_nearest_neighbour_inverse_distance_weights()
+
+        # read relevant monthly model data into memory
+        EI.get_monthly_model_data()
 
         # write out netCDF for yearmonth, interpolating model data to surface observational stations
         EI.write_netCDF()
