@@ -173,15 +173,33 @@ class ICAP(object):
 
         final_resolution_list = []
 
+        resolution_not_found = False
+
         # check if the resolution is the correct one for the dataset
         for resolution in resolution_list:
             if correct_resolution == resolution:
                 final_resolution_list.append(resolution)
             else:
-                msg = f"The current resolution '{resolution}' is not valid. It must be '{correct_resolution}'."
-                show_message(
-                    self.download_instance, msg
-                )
+                if not resolution_not_found:
+                    while True:
+                        user_resolution = input(
+                        f"\nNo non-interpolated model data is available for {resolution} resolution. "
+                        f"Available temporal resolution for this model: {correct_resolution}. "
+                        f"Please specify the desired resolution or press Enter to automatically select "
+                        f"'{correct_resolution}'. "
+                        f"Otherwise enter 'n' if you do not want to download this model at another resolution. "
+                        ).lower()
+
+                        if (user_resolution == correct_resolution or user_resolution in ["", "n"]):
+                            if user_resolution == "":
+                                final_resolution_list.append(correct_resolution)
+                            elif user_resolution != "n":
+                                final_resolution_list.append(user_resolution)
+
+                            # block input from the user happening again
+                            resolution_not_found = True
+
+                            break  
 
         return final_resolution_list
 
