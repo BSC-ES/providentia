@@ -1358,13 +1358,18 @@ class Dashboard(QtWidgets.QWidget):
                                             combobox_type='species',
                                             recovery_hint='Please select a different species or change the date range to include available data.')
 
-        # update networkspecies field
-        self.selected_networkspecies = self.networkspecies = [
+        # update selected networkspecies field
+        self.selected_networkspecies = [
             f"{network}|{species}"
             for network in set(self.selected_network)
             for species in set(self.selected_species)
             if network and species
         ]
+
+        # only sync it with the menu selection before the first read has taken place
+        # (afterwards it is updated in handle_data_selection_update)
+        if self.first_read:
+            self.networkspecies = copy.deepcopy(self.selected_networkspecies)
 
         # check if have filter species data
         for filter_networkspeci in copy.deepcopy(self.selected_filter_species).keys():
@@ -1880,10 +1885,10 @@ class Dashboard(QtWidgets.QWidget):
             # update available models for selected fields
             get_valid_models(
                 self,
-                self.start_date,
-                self.end_date,
-                self.resolution,
-                self.networkspecies
+                self.le_start_date.text(),
+                self.le_end_date.text(),
+                self.selected_resolution,
+                self.selected_networkspecies
             )
             # update forecast menus
             self.update_models_menu()
