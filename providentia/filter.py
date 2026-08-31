@@ -77,14 +77,20 @@ class DataFilter:
         """
 
         # reset data in memory
-        self.read_instance.data_in_memory_filtered = copy.deepcopy(
-            self.read_instance.data_in_memory
-        )
+        # (plain .copy() is safe and much faster than deepcopy here: data_in_memory
+        # values are pure float32 ndarrays, with no nested mutable objects to deep-copy)
+        self.read_instance.data_in_memory_filtered = {
+            networkspeci: data_array.copy()
+            for networkspeci, data_array in self.read_instance.data_in_memory.items()
+        }
 
         # reset metadata in memory
-        self.read_instance.metadata_in_memory_filtered = copy.deepcopy(
-            self.read_instance.metadata_in_memory
-        )
+        # (plain .copy() is safe here too: the only object-dtype metadata fields hold
+        # immutable strings, so a shallow array copy is exactly as independent as deepcopy)
+        self.read_instance.metadata_in_memory_filtered = {
+            networkspeci: metadata_array.copy()
+            for networkspeci, metadata_array in self.read_instance.metadata_in_memory.items()
+        }
 
         # reset basic metadata order
         if self.read_instance.station_order_inds_invert is not None:
@@ -1445,11 +1451,12 @@ class DataFilter:
                 # check if data array is observational data array
                 if data_label == self.read_instance.observations_data_label:
                     # get obs data array
-                    obs_data = copy.deepcopy(
-                        self.read_instance.data_in_memory_filtered[networkspeci][
-                            self.read_instance.data_labels.index(data_label), :, :
-                        ]
-                    )
+                    # (.copy() suffices: pure float32 data, and it is mutated in place
+                    # below via the temporal colocation NaN mask, so a copy is required,
+                    # but does not need to be a deepcopy)
+                    obs_data = self.read_instance.data_in_memory_filtered[networkspeci][
+                        self.read_instance.data_labels.index(data_label), :, :
+                    ].copy()
 
                     # get absolute data availability number per station in observational data array
                     if obs_data.size == 0:
@@ -1497,20 +1504,16 @@ class DataFilter:
                 # check if data array is not an observational data array
                 if data_label != self.read_instance.observations_data_label:
                     # get indices of valid observational data array stations
-                    valid_station_inds = copy.deepcopy(
-                        self.read_instance.valid_station_inds[networkspeci][
-                            self.read_instance.observations_data_label
-                        ]
-                    )
+                    valid_station_inds = self.read_instance.valid_station_inds[
+                        networkspeci
+                    ][self.read_instance.observations_data_label].copy()
 
                     # get model data array (first subset by valid observational stations)
-                    mod_data = copy.deepcopy(
-                        self.read_instance.data_in_memory_filtered[networkspeci][
-                            self.read_instance.data_labels.index(data_label),
-                            valid_station_inds,
-                            :,
-                        ]
-                    )
+                    mod_data = self.read_instance.data_in_memory_filtered[networkspeci][
+                        self.read_instance.data_labels.index(data_label),
+                        valid_station_inds,
+                        :,
+                    ].copy()
 
                     # get absolute data availability number per station in model data array
                     if mod_data.size == 0:
@@ -1530,11 +1533,9 @@ class DataFilter:
                     ]
 
                     # get colocated model data array
-                    mod_data = copy.deepcopy(
-                        self.read_instance.data_in_memory_filtered[networkspeci][
-                            self.read_instance.data_labels.index(data_label), :, :
-                        ]
-                    )
+                    mod_data = self.read_instance.data_in_memory_filtered[networkspeci][
+                        self.read_instance.data_labels.index(data_label), :, :
+                    ].copy()
                     mod_data[
                         self.read_instance.temporal_colocation_nans[networkspeci]
                     ] = np.nan

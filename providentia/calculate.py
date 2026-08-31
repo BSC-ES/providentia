@@ -803,7 +803,8 @@ class ModBias(object):
             return np.nan
         else:
             # to avoid ZeroDivisionError, replace all obs of 0 with NaN
-            obs_nan = copy.deepcopy(obs)
+            # (.copy() suffices: obs is a plain float array, mutated in place next line)
+            obs_nan = obs.copy()
             obs_nan[obs_nan == 0.0] = np.nan
             mnb = np.nanmean((mod - obs_nan) / obs_nan, axis=-1) * 100.0
             return mnb
@@ -834,7 +835,8 @@ class ModBias(object):
             return np.nan
         else:
             # to avoid ZeroDivisionError, replace all obs of 0 with NaN
-            obs_nan = copy.deepcopy(obs)
+            # (.copy() suffices: obs is a plain float array, mutated in place next line)
+            obs_nan = obs.copy()
             obs_nan[obs_nan == 0.0] = np.nan
             mne = np.nanmean((np.abs(mod - obs_nan)) / obs_nan, axis=-1) * 100.0
             return mne
@@ -1071,7 +1073,8 @@ class ModBias(object):
             return np.nan
         else:
             # to avoid ZeroDivisionError, replace all obs of 0 with NaN
-            obs_nan = copy.deepcopy(obs)
+            # (.copy() suffices: obs is a plain float array, mutated in place next line)
+            obs_nan = obs.copy()
             obs_nan[obs_nan == 0.0] = np.nan
             frac = mod / obs_nan
             n = np.count_nonzero(~np.isnan(frac), axis=-1)

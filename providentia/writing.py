@@ -83,14 +83,19 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
                 networkspeci
             ][prv.observations_data_label]
 
-            # get filtered data array
-            data_array = copy.deepcopy(prv.data_in_memory_filtered[networkspeci])
+            # get filtered data array, cut immediately for valid station inds
+            # (subsetting first avoids allocating a full-size copy of the whole
+            # networkspeci array: np.take() already returns an independent
+            # array, and the temporal colocation NaN mask below only needs to
+            # be computed over the selected stations, not the whole array)
+            data_array = np.take(
+                prv.data_in_memory_filtered[networkspeci], valid_station_inds, axis=1
+            )
 
             # apply NaNs for temporal colocation
-            data_array[:, prv.temporal_colocation_nans[networkspeci]] = np.nan
-
-            # cut data array for valid station inds
-            data_array = np.take(data_array, valid_station_inds, axis=1)
+            data_array[
+                :, prv.temporal_colocation_nans[networkspeci][valid_station_inds]
+            ] = np.nan
 
             # do resampling (if set)
             if prv.resampling_resolution != "None":
@@ -109,7 +114,9 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
             )
 
             # get unfiltered data array
-            data_array = copy.deepcopy(prv.data_in_memory[networkspeci])
+            # (.copy() suffices: pure float32 data; kept independent from prv.data_in_memory
+            # since this array is handed back to the caller / written out)
+            data_array = prv.data_in_memory[networkspeci].copy()
 
             # if daily or combined forecast need to merge forecast days separated as different models in 1 tiled dimension
             if (prv.daily_forecast) or (prv.combined_forecast):
@@ -320,14 +327,19 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
                 networkspeci
             ][prv.observations_data_label]
 
-            # get filtered data array
-            data_array = copy.deepcopy(prv.data_in_memory_filtered[networkspeci])
+            # get filtered data array, cut immediately for valid station inds
+            # (subsetting first avoids allocating a full-size copy of the whole
+            # networkspeci array: np.take() already returns an independent
+            # array, and the temporal colocation NaN mask below only needs to
+            # be computed over the selected stations, not the whole array)
+            data_array = np.take(
+                prv.data_in_memory_filtered[networkspeci], valid_station_inds, axis=1
+            )
 
             # apply NaNs for temporal colocation
-            data_array[:, prv.temporal_colocation_nans[networkspeci]] = np.nan
-
-            # cut data array for valid station inds
-            data_array = np.take(data_array, valid_station_inds, axis=1)
+            data_array[
+                :, prv.temporal_colocation_nans[networkspeci][valid_station_inds]
+            ] = np.nan
 
             # do resampling (if set)
             if prv.resampling_resolution != "None":
@@ -346,7 +358,9 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
             )
 
             # get unfiltered data array
-            data_array = copy.deepcopy(prv.data_in_memory[networkspeci])
+            # (.copy() suffices: pure float32 data; kept independent from prv.data_in_memory
+            # since this array is handed back to the caller / written out)
+            data_array = prv.data_in_memory[networkspeci].copy()
 
             # if daily or combined forecast need to merge forecast days separated as different models in 1 tiled dimension
             if (prv.daily_forecast) or (prv.combined_forecast):
