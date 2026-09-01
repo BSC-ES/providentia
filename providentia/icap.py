@@ -6,6 +6,7 @@ import yaml
 from netCDF4 import Dataset
 import numpy as np
 import pandas as pd
+import shutil
 
 from .warnings_prv import show_message
 
@@ -616,6 +617,10 @@ class ICAP(object):
                         temp_path = self.download(mod_id, files_to_download_dict["temp_dir"], date)
                 
                         self.format_data(temp_path, local_dir, nc_file, species)
+
+                # remove the temp directory tail
+                if os.path.exists(files_to_download_dict["temp_dir"]):
+                    shutil.rmtree(files_to_download_dict["temp_dir"])
 
         else:
             # tell the user if not valid resolution specie date combinations
