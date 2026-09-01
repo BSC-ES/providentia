@@ -71,6 +71,7 @@
         "interp_model_downsampling",
         "interp_model_upsampling",
         "multispecies_units",
+        "obs_active"
       ],
     "non_writing_vars": # to stop the variable from being written when saving a configuration file
       [
@@ -129,6 +130,7 @@
         "plot_characteristics_filename",
         "report_summary",
         "report_stations",
+        "obs_active"
       ],
     "tests": False,
     },
@@ -221,5 +223,6 @@
     "station_order": null,
     "station_cap": null,
     "logfile": null,
+    "obs_active": null
     },
 }

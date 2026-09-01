@@ -265,9 +265,6 @@ class Dashboard(QtWidgets.QWidget):
                     ).keys()
                 ),
             )
-
-        self.mod_active = True
-        self.obs_active = True
         
         # initialise UI
         self.init_ui()
@@ -1862,26 +1859,20 @@ class Dashboard(QtWidgets.QWidget):
         """
 
         option = self.switch.currentOption()
-
-        self.mod_active = True
-        self.obs_active = True
-        if option == "OBS":
-            self.mod_active = False
-        elif option == "MODEL":
-            self.obs_active = False
         
-        if self.obs_active:
+        if option in ["OBS", "BOTH"]:
             self.bu_QA = self.enable_element(self.bu_QA, "button")
             self.bu_flags = self.enable_element(self.bu_flags, "button")
             self.bu_multispecies = self.enable_element(self.bu_multispecies, "button")
             self.cb_ghost_features = self.enable_element(self.cb_ghost_features, "combobox")
+        # option = "MODEL"
         else:
             self.bu_QA = self.disable_element(self.bu_QA, "button")
             self.bu_flags = self.disable_element(self.bu_flags, "button")
             self.bu_multispecies = self.disable_element(self.bu_multispecies, "button")
             self.cb_ghost_features = self.disable_element(self.cb_ghost_features, "combobox")
 
-        if self.mod_active:
+        if option in ["MODEL", "BOTH"]:
             # update available models for selected fields
             get_valid_models(
                 self,
@@ -1893,6 +1884,7 @@ class Dashboard(QtWidgets.QWidget):
             # update forecast menus
             self.update_models_menu()
             self.bu_models = self.enable_element(self.bu_models, "button")
+        # option = "OBS"
         else:
             # remove experiments from selected models if switching to OBS
             init_models(self)
@@ -2467,6 +2459,7 @@ class Dashboard(QtWidgets.QWidget):
             self.mpl_canvas.current_plot_options
         )
         self.previous_ghost_features = self.ghost_features
+        self.previous_obs_active = self.obs_active
 
         # if previous data labels contain daily or combined forecast data, then ensure data labels, models and plotting params
         # refer to the data labels per day, not the summary label
@@ -2521,7 +2514,8 @@ class Dashboard(QtWidgets.QWidget):
             for species in set(self.species)
             if network and species
         ]
-        
+        self.obs_active = True if self.switch.currentOption() in ['OBS', 'BOTH'] else False
+
         self.networkspeci = self.networkspecies[0]
         self.filter_species = copy.deepcopy(self.selected_filter_species)
         self.ghost_version = self.selected_ghost_version
@@ -2648,6 +2642,7 @@ class Dashboard(QtWidgets.QWidget):
             or (self.resolution != self.previous_resolution)
             or (self.species != self.previous_species)
             or (self.ghost_features != self.previous_ghost_features)
+            or (self.obs_active != self.previous_obs_active)
             or (not np.array_equal(self.qa, self.previous_qa))
             or (not np.array_equal(self.flags, self.previous_flags))
             or (
@@ -2831,15 +2826,49 @@ class Dashboard(QtWidgets.QWidget):
                     update_metadata_fields(self)
 
             # generate list of sorted z1/z2 data arrays names in memory, putting observations
-            # before models, and empty string item as first element in z2 array list
+            # before models if they are loaded, and empty string item as first element in z2 array list
             # (for changing from 'difference' statistics to 'absolute')
-            if len(self.data_labels) == 1:
-                self.z1_arrays = np.array([self.observations_data_label])
-            else:
-                # do not include gridded data labels as options
-                self.z1_arrays = np.array([label for label in self.data_labels if "gridded" not in label])
+            # do not include gridded data labels as options
+            label_options = [label for label in self.data_labels if "gridded" not in label]
+            if self.observations_data_label in label_options:
+                label_options.remove(self.observations_data_label)
+                label_options.insert(0, self.observations_data_label)
+            self.z1_arrays = np.array(label_options)
             self.z2_arrays = np.append([""], self.z1_arrays)
 
+            # get elements whose abilities depend on having or not only gridded model data
+            elements = {self.mpl_canvas.map_z1: "combobox", 
+                        self.mpl_canvas.map_z2: "combobox", 
+                        self.ch_select_all: "checkbox",
+                        self.ch_intersect: "checkbox",
+                        self.ch_extent: "checkbox"}
+            if hasattr(self, 'navi_toolbar'):
+                toolbar_actions = self.navi_toolbar.actions()
+
+            # only gridded model data is loaded?
+            if all("gridded" in label for label in self.data_labels):
+                # disable statistic comboboxes and station selection options on menu
+                for element, element_type in elements.items():
+                    self.disable_element(element, element_type)
+
+                # disable lasso
+                if hasattr(self, 'navi_toolbar'):
+                    for action in toolbar_actions:
+                        if action.text() == "Lasso":
+                            action.setEnabled(False)
+                            break
+            else:
+                # enable statistic comboboxes and station selection options on menu
+                for element, element_type in elements.items():
+                    self.enable_element(element, element_type)
+
+                # enable lasso
+                if hasattr(self, 'navi_toolbar'):
+                    for action in toolbar_actions:
+                        if action.text() == "Lasso":
+                            action.setEnabled(True)
+                            break
+                    
             # update temporal colocation
             self.mpl_canvas.handle_temporal_colocate_update()
 

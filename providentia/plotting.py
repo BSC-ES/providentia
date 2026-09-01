@@ -1137,32 +1137,34 @@ class Plotting:
             Label of second dataset (if defined then a bias plot is made).
         """
 
-        # calculate statistic
-        z_statistic, active_map_valid_station_inds = calculate_statistic(
-            self.read_instance,
-            self.canvas_instance,
-            networkspeci,
-            zstat,
-            [labela],
-            [labelb],
-            map=True,
-        )
-
-        # get marker size (for report and library)
-        if self.read_instance.mode in ["report", "library"]:
-            self.get_markersize(
-                relevant_axis,
-                "map",
+        # if not only model gridded data is loaded
+        if labela or labelb:
+            # calculate statistic
+            z_statistic, active_map_valid_station_inds = calculate_statistic(
+                self.read_instance,
+                self.canvas_instance,
                 networkspeci,
-                plot_characteristics,
-                active_map_valid_station_inds=active_map_valid_station_inds,
+                zstat,
+                [labela],
+                [labelb],
+                map=True,
             )
-        # if using dashboard make z_statistic and active_map_valid_station_inds class variables
-        else:
-            self.canvas_instance.z_statistic = z_statistic
-            self.canvas_instance.active_map_valid_station_inds = (
-                active_map_valid_station_inds
-            )
+
+            # get marker size (for report and library)
+            if self.read_instance.mode in ["report", "library"]:
+                self.get_markersize(
+                    relevant_axis,
+                    "map",
+                    networkspeci,
+                    plot_characteristics,
+                    active_map_valid_station_inds=active_map_valid_station_inds,
+                )
+            # if using dashboard make z_statistic and active_map_valid_station_inds class variables
+            else:
+                self.canvas_instance.z_statistic = z_statistic
+                self.canvas_instance.active_map_valid_station_inds = (
+                    active_map_valid_station_inds
+                )
         
         # plot model gridded data
         if var is not None and lon is not None and lat is not None:
@@ -1177,28 +1179,30 @@ class Plotting:
             plot_characteristics["plot"]["stations"]["edgecolor"] = "black"
             plot_characteristics["plot"]["stations"]["linewidth"] = 0.4
 
-        # plot new station points on map - coloured by currently active z statisitic
-        self.stations_scatter = relevant_axis.scatter(
-            self.read_instance.station_longitudes[networkspeci][
-                active_map_valid_station_inds
-            ],
-            self.read_instance.station_latitudes[networkspeci][
-                active_map_valid_station_inds
-            ],
-            c=z_statistic,
-            transform=self.canvas_instance.datacrs,
-            **plot_characteristics["plot"]["stations"],
-        )
-
-        # track plot elements
-        if self.read_instance.mode not in ["report"]:
-            self.track_plot_elements(
-                self.read_instance.observations_data_label,
-                "map",
-                "plot",
-                [self.stations_scatter],
-                bias=False,
+        # if not only model gridded data is loaded
+        if labela or labelb: 
+            # plot new station points on map - coloured by currently active z statisitic
+            self.stations_scatter = relevant_axis.scatter(
+                self.read_instance.station_longitudes[networkspeci][
+                    active_map_valid_station_inds
+                ],
+                self.read_instance.station_latitudes[networkspeci][
+                    active_map_valid_station_inds
+                ],
+                c=z_statistic,
+                transform=self.canvas_instance.datacrs,
+                **plot_characteristics["plot"]["stations"],
             )
+
+            # track plot elements
+            if self.read_instance.mode not in ["report"]:
+                self.track_plot_elements(
+                    self.read_instance.observations_data_label,
+                    "map",
+                    "plot",
+                    [self.stations_scatter],
+                    bias=False,
+                )
 
     def make_timeseries(
         self,

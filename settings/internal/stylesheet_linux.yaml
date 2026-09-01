@@ -101,6 +101,30 @@
         },
     },
 
+  "menu_checkbox_disabled":
+    {
+      "QCheckBox":
+        {
+          "font-family": "SansSerif",
+          "font-style": "normal",
+          "font-size": "9.5pt",
+          "height": "20",
+          "width": "100",
+          "color": "black",
+        },
+      "QCheckBox::indicator":
+        {
+          "background-color": "#DCDCDC",
+        },
+      "QToolTip":
+        {
+          "font-family": "SansSerif",
+          "font-style": "normal",
+          "font-size": "9.5pt",
+          "color": "black",
+        },
+    },
+
   "menu_combobox":
     {
       "QComboBox":

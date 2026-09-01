@@ -39,13 +39,25 @@ class DataFilter:
 
         self.read_instance = read_instance
 
-        # get index of observational data array
-        self.obs_index = self.read_instance.data_labels.index(
-            self.read_instance.observations_data_label
-        )
+        if not self.read_instance.obs_active:
+            self.filter_models()
+        else:
+            # get index of observational data array
+            self.obs_index = self.read_instance.data_labels.index(
+                self.read_instance.observations_data_label
+            )
 
-        # apply filtering
-        self.filter_all()
+            # apply filtering
+            self.filter_all()
+
+    def filter_models(self):
+        """
+        Sequentially executes all data filtering procedures only to model data.
+        """
+
+        self.reset_data_filter()
+        self.temporally_colocate_model_data()
+        self.get_valid_stations()
 
     def filter_all(self):
         """
@@ -1364,6 +1376,68 @@ class DataFilter:
             daily_forecast=True,
         )
 
+    def temporally_colocate_model_data(self):
+
+        # iterate through network / species
+        for ii, networkspeci in enumerate(self.read_instance.networkspecies):
+            # initialise arrays to determine where have NaNs
+            if (ii == 0) or (not self.read_instance.spatial_colocation):
+
+                first_model = next((
+                        exp
+                        for exp in self.read_instance.experiments.values()
+                        if "gridded" not in exp
+                    ), None
+                )
+                if first_model is None:
+                    return
+                mod_index = self.read_instance.data_labels.index(
+                    first_model
+                )
+                mods_all_nan = np.full(
+                    self.read_instance.data_in_memory_filtered[networkspeci][
+                        mod_index, :, :
+                    ].shape,
+                    False,
+                )
+
+            # iterate through model data arrays in data in memory dictionary
+            # save indices for colocation with observations
+            for model in self.read_instance.experiments.values():
+                # skip gridded datasets
+                if "gridded" in model:
+                    continue
+
+                # get modid data label index
+                mod_data_index = self.read_instance.data_labels.index(model)
+
+                # get all instances model is NaN
+                nan_mod = np.isnan(
+                    self.read_instance.data_in_memory_filtered[networkspeci][
+                        mod_data_index, :, :
+                    ]
+                )
+
+                # update mods_all_nan array, making True all instances where have NaNs
+                # if all model values are nan then do not update for that model
+                if not np.all(nan_mod):
+                    mods_all_nan = np.any([mods_all_nan, nan_mod], axis=0)
+
+            # if spatial colocation is not active,
+            # get indices where one of observations and models per network /species is NaN
+            if not self.read_instance.spatial_colocation:
+                self.read_instance.temporal_colocation_nans[networkspeci] = np.any(
+                    [mods_all_nan], axis=0
+                )
+
+        # if spatial colocation is active,
+        # get indices where one of observations and models across networks / species is NaN
+        if self.read_instance.spatial_colocation:
+            for networkspeci in self.read_instance.networkspecies:
+                self.read_instance.temporal_colocation_nans[networkspeci] = np.any(
+                    [mods_all_nan], axis=0
+                )
+
     def temporally_colocate_data(self):
         """
         Temporally colocate observational and model data.
@@ -1502,12 +1576,36 @@ class DataFilter:
             for data_label in self.read_instance.data_labels:
                 # check if data array is not an observational data array
                 if data_label != self.read_instance.observations_data_label:
-                    # get indices of valid observational data array stations
-                    valid_station_inds = copy.deepcopy(
-                        self.read_instance.valid_station_inds[networkspeci][
-                            self.read_instance.observations_data_label
+                    if not self.read_instance.obs_active:
+                        if "gridded" in data_label:
+                            continue
+                        # get model data array
+                        mod_data = copy.deepcopy(
+                            self.read_instance.data_in_memory_filtered[networkspeci][
+                                self.read_instance.data_labels.index(data_label), :, :
+                            ]
+                        )
+
+                        # get absolute data availability number per station in observational data array
+                        if mod_data.size == 0:
+                            station_data_availability_number = np.array([])
+                        else:
+                            station_data_availability_number = (
+                                Stats.calculate_data_avail_number(mod_data)
+                            )
+
+                        valid_station_inds = np.arange(
+                            len(station_data_availability_number), dtype=np.int32
+                        )[
+                            station_data_availability_number > 1
                         ]
-                    )
+                    else:
+                        # get indices of valid observational data array stations
+                        valid_station_inds = copy.deepcopy(
+                            self.read_instance.valid_station_inds[networkspeci][
+                                self.read_instance.observations_data_label
+                            ]
+                        )
 
                     # get model data array (first subset by valid observational stations)
                     mod_data = copy.deepcopy(

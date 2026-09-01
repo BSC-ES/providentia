@@ -411,7 +411,10 @@ class Canvas(FigureCanvas):
             self.filter_data = DataFilter(self.read_instance)
         # if it is, update filters, and update map and associated plots
         else:
-            self.filter_data.filter_all()
+            if not self.read_instance.obs_active:
+                self.filter_data.filter_models()
+            else:
+                self.filter_data.filter_all()
             self.update_active_map()
 
         # restore mouse cursor to normal
@@ -787,11 +790,21 @@ class Canvas(FigureCanvas):
         # if not then reset map plot
         labela = self.map_z1.currentText()
         labelb = self.map_z2.currentText()
-        if labela not in self.read_instance.data_labels:
-            self.map_z1.setCurrentText(self.read_instance.observations_data_label)
-            self.map_z2.setCurrentTextText("")
-        elif (labelb not in self.read_instance.data_labels) & (labelb != ""):
-            self.map_z1.setCurrentText(self.read_instance.observations_data_label)
+        if ((labela not in self.read_instance.data_labels) 
+            or ((labelb not in self.read_instance.data_labels) & (labelb != ""))):        
+            if not self.read_instance.obs_active:
+                # get first available interpolated model
+                set_mod_label = False
+                for data_label in self.read_instance.data_labels:
+                    if "gridded" not in data_label:
+                        self.map_z1.setCurrentText(data_label)
+                        set_mod_label = True
+                    break
+                # if only gridded, set empty                
+                if not set_mod_label:
+                    self.map_z1.setCurrentText("")
+            else:
+                self.map_z1.setCurrentText(self.read_instance.observations_data_label)
             self.map_z2.setCurrentText("")
 
         # get zstat name from combobox
