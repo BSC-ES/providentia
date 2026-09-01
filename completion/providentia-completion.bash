@@ -24,9 +24,15 @@ _providentia_complete() {
         local prefix="${cur%%=*}="
         local value="${cur#*=}"
         local matches=()
+        # Two separate -name tests (ANDed by find) rather than one
+        # "${value}*.conf" pattern: once $value has already reached into the
+        # ".conf" extension (e.g. typed/completed up to "station.c"), a single
+        # concatenated pattern would require a *second* ".conf" after that,
+        # which no real filename can satisfy - completion would silently stop
+        # matching right as the user gets close to finishing the name.
         while IFS= read -r -d '' f; do
             matches+=("${prefix}$(basename "$f")")
-        done < <(find "$confdir" -maxdepth 1 -name "${value}*.conf" -print0 2>/dev/null)
+        done < <(find "$confdir" -maxdepth 1 -name "${value}*" -name "*.conf" -print0 2>/dev/null)
         COMPREPLY=("${matches[@]}")
         return
     fi

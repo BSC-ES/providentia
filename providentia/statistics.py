@@ -104,20 +104,29 @@ def get_selected_station_data(
         else:
             canvas_instance.selected_station_stddev_max[networkspeci] = 0.0
 
-        # get data array for networkspeci
-        data_array = copy.deepcopy(read_instance.data_in_memory_filtered[networkspeci])
-
-        # temporally colocate data array
-        if read_instance.temporal_colocation:
-            data_array[:, read_instance.temporal_colocation_nans[networkspeci]] = np.nan
-
         # get selected station indices
         canvas_instance.station_inds[networkspeci] = get_station_inds(
             read_instance, canvas_instance, networkspeci, station_index
         )
 
-        # get data cut for relevant stations
-        data_array = data_array[:, canvas_instance.station_inds[networkspeci], :]
+        # get data array for networkspeci, cut immediately for relevant stations
+        # (slicing to the selected stations first avoids allocating a full-size
+        # copy of the whole networkspeci array: fancy indexing on the station
+        # axis already returns an independent array, so no separate .copy() is
+        # needed, and the temporal colocation NaN mask below only needs to be
+        # computed over the selected stations, not the whole array)
+        data_array = read_instance.data_in_memory_filtered[networkspeci][
+            :, canvas_instance.station_inds[networkspeci], :
+        ]
+
+        # temporally colocate data array
+        if read_instance.temporal_colocation:
+            data_array[
+                :,
+                read_instance.temporal_colocation_nans[networkspeci][
+                    canvas_instance.station_inds[networkspeci]
+                ],
+            ] = np.nan
 
         # get NaNs in data array
         nan_data_array = np.isnan(data_array)
@@ -2540,15 +2549,24 @@ def get_fairmode_data(read_instance, canvas_instance, networkspeci, data_labels)
     speci = networkspeci.split("|")[1]
     coverage = fairmode_settings[speci]["coverage"]
 
-    # get data per station
-    data_array = copy.deepcopy(read_instance.data_in_memory_filtered[networkspeci])
+    # get data per station, cut immediately for relevant stations
+    # (slicing to the selected stations first avoids allocating a full-size
+    # copy of the whole networkspeci array: fancy indexing on the station axis
+    # already returns an independent array, so no separate .copy() is needed,
+    # and the temporal colocation NaN mask below only needs to be computed
+    # over the selected stations, not the whole array)
+    data_array = read_instance.data_in_memory_filtered[networkspeci][
+        :, canvas_instance.station_inds[networkspeci], :
+    ]
 
     # temporally colocate data (if active)
     if read_instance.temporal_colocation:
-        data_array[:, read_instance.temporal_colocation_nans[networkspeci]] = np.nan
-
-    # get data cut for relevant stations
-    data_array = data_array[:, canvas_instance.station_inds[networkspeci], :]
+        data_array[
+            :,
+            read_instance.temporal_colocation_nans[networkspeci][
+                canvas_instance.station_inds[networkspeci]
+            ],
+        ] = np.nan
 
     # if hourly data then make sure days with less than 75% coverage are nan
     if read_instance.active_resolution == "hourly":

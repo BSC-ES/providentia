@@ -22,10 +22,18 @@ _providentia_zsh_complete() {
     done
 
     if [[ "$cur" == --conf=* || "$cur" == --config=* ]]; then
+        local -a all
         prefix="${cur%%=*}="
         value="${cur#*=}"
-        # (N) = nullglob (no error if nothing matches), (:t) = basename only
-        matches=("${confdir}"/"${value}"*.conf(N:t))
+        # (N) = nullglob (no error if nothing matches), (:t) = basename only.
+        # List by prefix first, then filter for the ".conf" suffix separately
+        # (rather than a single "${value}*.conf" pattern): once $value has
+        # already reached into the extension itself (e.g. "station.c"), a
+        # concatenated pattern would require a *second* ".conf" after that,
+        # which no real filename can satisfy - completion would silently
+        # stop matching right as the user gets close to finishing the name.
+        all=("${confdir}"/"${value}"*(N:t))
+        matches=(${(M)all:#*.conf})
         compadd -P "$prefix" -- "${matches[@]}"
     fi
 }
