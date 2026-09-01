@@ -1108,14 +1108,11 @@ class Dashboard(QtWidgets.QWidget):
         # convert string to list if needed
         # for species: "sconcno2, sconco3" -> ["sconcno2", "sconco3"]
         if isinstance(selected_values, str):
-            setattr(
-                self,
-                f"selected_{combobox_type}",
-                [
-                    value.strip()
-                    for value in selected_values.split(",")
-                ],
-            )
+            selected_values = [
+                value.strip()
+                for value in selected_values.split(",")
+            ]
+            setattr(self, f"selected_{combobox_type}", selected_values)
 
         # get options that are not available in data directories
         missing_values = [
@@ -1151,7 +1148,40 @@ class Dashboard(QtWidgets.QWidget):
             )
 
         return True
-        
+
+    def get_species_per_ghost_version(self, matrix=None, version="1.5"):
+        """
+        Get the list of GHOST standard species (bsc_parameter_name),
+        optionally filtered to those belonging to a given matrix.
+
+        Parameters
+        ----------
+        matrix : str, optional
+            If given, only species whose GHOST standard matrix matches this value
+            are returned.
+        version : str
+            GHOST version
+
+        Returns
+        -------
+        list
+            Sorted list of species.
+        """
+
+        sys.path = [
+            path for path in sys.path if "dependencies/GHOST_standards/" not in path
+        ]
+        sys.path.insert(1, join(CURRENT_PATH, f"dependencies/GHOST_standards/{version}"))
+        if "GHOST_standards" in sys.modules:
+            del sys.modules["GHOST_standards"]
+        from GHOST_standards import standard_parameters
+
+        return sorted(
+            param_dict["bsc_parameter_name"]
+            for param_dict in standard_parameters.values()
+            if (matrix is None) or (param_dict["matrix"] == matrix)
+        )
+
     def update_configuration_bar_fields(self):
         """Initialise or synchronise all configuration bar widgets and their available options."""
 
@@ -1277,12 +1307,49 @@ class Dashboard(QtWidgets.QWidget):
             # if we clear it earlier we are not able to change the version if we find no data for a specific version
             self.cb_ghost_version.clear()
 
-        # update network field
-        available_networks = list(self.available_observation_data.keys())
-        self.set_checkable_combobox_options(available_options=available_networks, 
-                                            combobox_type='network', 
-                                            recovery_hint='Please select a different network or change the date range to include available data.')
+        # get matrices for all selected networks and current resolution
+        matrix_sets = [
+            set(
+                self.available_observation_data[network][
+                    self.selected_resolution
+                ].keys()
+            )
+            for network in self.selected_network
+        ]
+        available_matrices = sorted(set.intersection(*matrix_sets)) if matrix_sets else []
 
+        # update matrix field
+        if not self.set_combobox_options(available_options=available_matrices, 
+                                         combobox_type='matrix',
+                                         recovery_hint='Please select a different matrix or change the date range to include available data.'):
+            return
+        
+        # get species for GHOST version 1.5
+        available_species = self.get_species_per_ghost_version(self.selected_matrix)
+
+        # update species field
+        self.set_checkable_combobox_options(available_options=available_species,
+                                            combobox_type='species',
+                                            recovery_hint='Please select a different species or change the date range to include available data.')
+
+        # get networks that have data for at least one of the selected species,
+        # for the current resolution and matrix
+        available_networks = sorted(
+            network for network in self.available_observation_data.keys()
+            if self.selected_matrix
+            and self.selected_resolution in self.available_observation_data[network]
+            and self.selected_matrix in self.available_observation_data[network][self.selected_resolution]
+            and set(self.selected_species)
+                & set(self.available_observation_data[network][self.selected_resolution][self.selected_matrix])
+        )
+
+        if not self.set_checkable_combobox_options(available_options=available_networks,
+                                                   combobox_type='network',
+                                                   recovery_hint='Please select a different network or change the date range to include available data.'):
+            self.block_config_bar_handling_updates = False
+            self.block_MPL_canvas_updates = False
+            return
+        
         # update buttons
         self.update_ghost_buttons("update_configuration_bar_fields")
 
@@ -1291,7 +1358,7 @@ class Dashboard(QtWidgets.QWidget):
             set(self.available_observation_data[network].keys())
             for network in self.selected_network
         ]
-        available_resolutions = set.intersection(*resolution_sets)
+        available_resolutions = set.intersection(*resolution_sets) if resolution_sets else set()
 
         # set order of available resolutions
         available_resolutions = sorted(
@@ -1306,22 +1373,6 @@ class Dashboard(QtWidgets.QWidget):
             self.block_MPL_canvas_updates = False
             return
 
-        # get matrices for all selected networks and current resolution
-        matrix_sets = [
-            set(
-                self.available_observation_data[network][
-                    self.selected_resolution
-                ].keys()
-            )
-            for network in self.selected_network
-        ]
-        available_matrices = sorted(set.intersection(*matrix_sets))
-
-        # update matrix field
-        if not self.set_combobox_options(available_options=available_matrices, 
-                                         combobox_type='matrix',
-                                         recovery_hint='Please select a different matrix or change the date range to include available data.'):
-            return
 
         # update GHOST version field
         available_ghost_versions = self.available_ghost_versions
@@ -1336,24 +1387,6 @@ class Dashboard(QtWidgets.QWidget):
                                          combobox_type='ghost_features',
                                          recovery_hint='Please select a different GHOST features or change the date range to include available data.'):
             return
-
-        # get species for all selected networks, current resolution and current matrix
-        available_species = []
-        if self.selected_matrix:
-            species_sets = [
-                set(
-                    self.available_observation_data[network][
-                        self.selected_resolution
-                    ][self.selected_matrix]
-                )
-                for network in self.selected_network
-            ]
-            available_species = sorted(set.intersection(*species_sets))
-
-        # update species field
-        self.set_checkable_combobox_options(available_options=available_species, 
-                                            combobox_type='species',
-                                            recovery_hint='Please select a different species or change the date range to include available data.')
 
         # update selected networkspecies field
         self.selected_networkspecies = [
@@ -1917,18 +1950,22 @@ class Dashboard(QtWidgets.QWidget):
 
             elif event_source == self.cb_matrix:
                 self.selected_matrix = changed_param
-                species_sets = [
-                    set(
-                        self.available_observation_data[network][
-                            self.selected_resolution
-                        ][self.selected_matrix].keys()
-                    )
-                    for network in self.selected_network
-                ]
-                self.selected_species = [sorted(set.intersection(*species_sets))[0]]
+                species_options_for_matrix = self.get_species_per_ghost_version(matrix=self.selected_matrix)
+                if species_options_for_matrix:
+                    self.selected_species = [species_options_for_matrix[0]]
 
             elif event_source == self.cb_species:
-                self.selected_species = self.cb_species.currentData()
+                self.selected_species = changed_param
+                available_networks = [
+                    network for network in self.available_observation_data.keys()
+                    if self.selected_matrix
+                    and self.selected_resolution in self.available_observation_data[network]
+                    and self.selected_matrix in self.available_observation_data[network][self.selected_resolution]
+                    and set(self.selected_species)
+                       & set(self.available_observation_data[network][self.selected_resolution][self.selected_matrix])
+                ]
+                if available_networks:
+                    self.selected_network = sorted(available_networks)
 
             elif event_source == self.cb_statistic_mode:
                 self.selected_statistic_mode = changed_param
@@ -2793,6 +2830,10 @@ class Dashboard(QtWidgets.QWidget):
             if self.invalid_read:
                 unset_cursor(self.cursor_function, "handle_data_selection_update")
                 return
+
+            # the active map networkspeci may have just been dropped (0 stations for it)
+            if self.networkspeci not in self.networkspecies:
+               self.networkspeci = self.networkspecies[0]
 
             # if species has changed, or first read, update species specific lower/upper limits
             if (self.first_read) or (self.species != self.previous_species):
