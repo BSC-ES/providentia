@@ -2185,8 +2185,9 @@ class Plotting:
             Selected networkspecies from plot settings.
         """
 
-        # if no selection has been made, get networkspecies from top menu (read into memory)
-        if not plot_networkspecies:
+        # if no selection has been made in dashboard, get networkspecies from top menu (read into memory)
+        # in report and library get all
+        if (not plot_networkspecies) or (self.read_instance.mode in ["report", "library"]):
             networkspecies = copy.deepcopy(self.read_instance.networkspecies)
         # get networkspecies from burger menu
         else:
@@ -2198,12 +2199,12 @@ class Plotting:
 
         # always make multispecies plot if there is more than one networkspeci and plot can be multispecies
         # remove first to make sure we don't use a previous appended multispecies  
-        if 'multispecies' in plot_options:
-            plot_options.remove('multispecies')
-        if ((len(networkspecies) > 1) 
-            and (self.read_instance.mode == "dashboard")
-            and ('multispecies' not in plot_options)):
-            plot_options.append('multispecies')
+        if self.read_instance.mode == "dashboard":
+            if 'multispecies' in plot_options:
+                plot_options.remove('multispecies')
+            if ((len(networkspecies) > 1) 
+                and ('multispecies' not in plot_options)):
+                plot_options.append('multispecies')
 
         # if multispecies in plot options then make plot for all networkspecies
         if "multispecies" in plot_options:
@@ -2462,21 +2463,22 @@ class Plotting:
         else:
             bias = False
 
-        # if no selection has been made, get networkspecies from top menu (read into memory)
-        if not plot_networkspecies:
+        # if no selection has been made in dashboard, get networkspecies from top menu (read into memory)
+        # in report and library get all
+        if (not plot_networkspecies) or (self.read_instance.mode in ["report", "library"]):
             networkspecies = copy.deepcopy(self.read_instance.networkspecies)
         # get networkspecies from burger menu
         else:
             networkspecies = plot_networkspecies
-
+        
         # always make multispecies plot if there is more than one networkspeci and plot can be multispecies
         # remove first to make sure we don't use a previous appended multispecies  
-        if 'multispecies' in plot_options:
-            plot_options.remove('multispecies')
-        if ((len(networkspecies) > 1) 
-            and (self.read_instance.mode == "dashboard")
-            and ('multispecies' not in plot_options)):
-            plot_options.append('multispecies')
+        if self.read_instance.mode == "dashboard":
+            if 'multispecies' in plot_options:
+                plot_options.remove('multispecies')
+            if ((len(networkspecies) > 1) 
+                and ('multispecies' not in plot_options)):
+                plot_options.append('multispecies')
         
         # if statistical dataframe is not provided then create it
         if not isinstance(stats_df, pd.DataFrame):
@@ -2544,9 +2546,11 @@ class Plotting:
                 stats_df.index.get_level_values("subsections") == subsection
             ]
         if "multispecies" not in plot_options:
+            print(stats_df, plot_options)
             stats_df = stats_df.iloc[
                 stats_df.index.get_level_values("networkspecies") == networkspeci
             ]
+            print(stats_df)
         else:
             # convert units
             if self.read_instance.multispecies_units is not None:
@@ -2586,7 +2590,8 @@ class Plotting:
         relevant_axis.set_ylabel("")
 
         # if there is only one subsection or station data
-        yticklabels = stats_df.index.get_level_values(1)
+        print(stats_df)
+        yticklabels = stats_df.index.get_level_values(0)
         if (plotting_paradigm == "station") or (len(subsections) == 1):
             # for multispecies, remove network names from labels
             # only when there is one network and requested by user in plot_characteristics
@@ -2748,8 +2753,9 @@ class Plotting:
         else:
             bias = False
 
-        # if no selection has been made, get networkspecies from top menu (read into memory)
-        if not plot_networkspecies:
+        # if no selection has been made in dashboard, get networkspecies from top menu (read into memory)
+        # in report and library get all
+        if (not plot_networkspecies) or (self.read_instance.mode in ["report", "library"]):
             networkspecies = copy.deepcopy(self.read_instance.networkspecies)
         # get networkspecies from burger menu
         else:
@@ -2757,12 +2763,12 @@ class Plotting:
 
         # always make multispecies plot if there is more than one networkspeci and plot can be multispecies
         # remove first to make sure we don't use a previous appended multispecies  
-        if 'multispecies' in plot_options:
-            plot_options.remove('multispecies')
-        if ((len(networkspecies) > 1) 
-            and (self.read_instance.mode == "dashboard")
-            and ('multispecies' not in plot_options)):
-            plot_options.append('multispecies')
+        if self.read_instance.mode == "dashboard":
+            if 'multispecies' in plot_options:
+                plot_options.remove('multispecies')
+            if ((len(networkspecies) > 1) 
+                and ('multispecies' not in plot_options)):
+                plot_options.append('multispecies')
 
         # in the dashboard we need to create statistical dataframe as it is not provided in function arguments
         if not isinstance(stats_df, pd.DataFrame):
@@ -4434,7 +4440,7 @@ class Plotting:
                 plot_characteristics["plot"]["markersize"] = markersize
 
         elif base_plot_type == "map":
-            if plot_characteristics["plot"]["s"] == "":
+            if plot_characteristics["plot"]["stations"]["s"] == "":
                 # calculate marker size considering points density
                 n_points = len(
                     self.read_instance.station_longitudes[networkspeci][
@@ -4450,4 +4456,4 @@ class Plotting:
                 # marker size is calculated using an exponential equation
                 # the maximum size is 40 (very low densities)
                 # see https://github.com/BSC-ES/providentia/issues/199
-                plot_characteristics["plot"]["s"] = 1.2 ** (-density) * 40
+                plot_characteristics["plot"]["stations"]["s"] = 1.2 ** (-density) * 40

@@ -1099,15 +1099,37 @@ def get_valid_obs_files_in_date_range(instance, start_date, end_date):
                         ][speci] = valid_file_yearmonths
 
 def get_valid_interpolated_models(instance, start_date, end_date, resolution, networkspecies):
+    """
+    Get interpolated models in mod_root for current GHOST version
 
-    models_path = join(instance.mod_root, instance.ghost_version)
-    if os.path.exists(models_path):
-        available_models = os.listdir(
-                "%s/%s" % (instance.mod_root, instance.ghost_version)
-            )
+    Parameters
+    ----------
+    instance : object
+        An instance of the application class containing directory roots and menu configurations.
+    start_date : str
+        The start date in 'YYYYMMDD' format.
+    end_date : str
+        The end date in 'YYYYMMDD' format.
+    resolution : str
+        The temporal resolution (e.g. 'hourly', 'daily').
+    networkspecies : list of str
+        The monitoring networks|species to match against model data.
     
-    # get start date on first of month
-    start_date_firstdayofmonth = int(str(start_date)[:6] + "01")
+    Returns
+    -------
+    models : dict
+        Dictionary mapping each networkspeci (str, "network|speci") to a set of
+        model names that have valid interpolated data available for it within
+        the given date range and resolution.
+    available_model_data : dict
+        Nested dictionary of available interpolated model data, structured as
+        {network: {resolution: {speci: {model: valid_file_yearmonths}}}}, where
+        valid_file_yearmonths is a sorted list of 'YYYYMM' strings.
+    file_roots : dict
+        Dictionary mapping (type, model, network, speci) tuples, with type
+        fixed as "interpolated", to the file root path prefix (str) used to
+        build the netCDF file paths for that model/network/speci combination.
+    """
 
     # track which networkspecies each model has been interpolated for
     models = {
@@ -1117,6 +1139,21 @@ def get_valid_interpolated_models(instance, start_date, end_date, resolution, ne
     # create dictionary to store available model data
     available_model_data = {}
     file_roots = {}
+
+    models_path = join(instance.mod_root, instance.ghost_version)
+    if os.path.exists(models_path):
+        available_models = os.listdir(
+                "%s/%s" % (instance.mod_root, instance.ghost_version)
+            )      
+    else:
+        msg = (
+            f"Cannot access noninterpolated model path, mod_to_interp_root defined as {models_path} in data_paths.yaml."
+        )
+        show_message(instance, msg, print=True)
+        return models, available_model_data, file_roots
+    
+    # get start date on first of month
+    start_date_firstdayofmonth = int(str(start_date)[:6] + "01")
 
     # iterate through networks and species
     for networkspeci in networkspecies:
@@ -1197,12 +1234,40 @@ def get_valid_interpolated_models(instance, start_date, end_date, resolution, ne
                     )
 
     return models, available_model_data, file_roots
-def get_valid_noninterpolated_models(instance, start_date, end_date, resolution, networkspecies):
 
-    # get all different model names
-    models_path = instance.mod_to_interp_root
-    if os.path.exists(models_path):
-        available_models = os.listdir(models_path)
+def get_valid_noninterpolated_models(instance, start_date, end_date, resolution, networkspecies):
+    """
+    Get noninterpolated models in mod_to_interp_root
+
+    Parameters
+    ----------
+    instance : object
+        An instance of the application class containing directory roots and menu configurations.
+    start_date : str
+        The start date in 'YYYYMMDD' format.
+    end_date : str
+        The end date in 'YYYYMMDD' format.
+    resolution : str
+        The temporal resolution (e.g. 'hourly', 'daily').
+    networkspecies : list of str
+        The monitoring networks|species to match against model data.
+
+    Returns
+    -------
+    models : dict
+        Dictionary mapping each speci (str) to a set of model_id strings
+        (formatted as "experiment-domain-ensemble") that have valid
+        non-interpolated data available for it within the given date range
+        and resolution.
+    available_model_data : dict
+        Nested dictionary of available non-interpolated model data, structured
+        as {domain: {resolution: {speci: {model_id: valid_file_yearmonths}}}},
+        where valid_file_yearmonths is a sorted list of 'YYYYMM' strings.
+    file_roots : dict
+        Dictionary mapping ("noninterpolated", model_id, "", speci) tuples to
+        the file root path prefix (str) used to build the netCDF file paths
+        for that model/speci combination.
+    """
 
     # track which species each model has data for
     species = np.unique([networkspeci.split('|')[1] for networkspeci in networkspecies])
@@ -1210,12 +1275,23 @@ def get_valid_noninterpolated_models(instance, start_date, end_date, resolution,
         speci: set() for speci in species
     }
 
-    # get start date on first of month
-    start_date_firstdayofmonth = int(str(start_date)[:6] + "01")
-
     # create dictionary to store available model data
     available_model_data = {}
     file_roots = {}
+
+    # get all different model names
+    models_path = instance.mod_to_interp_root
+    if os.path.exists(models_path):
+        available_models = os.listdir(models_path)
+    else:
+        msg = (
+            f"Cannot access noninterpolated model path, mod_to_interp_root defined as {models_path} in data_paths.yaml."
+        )
+        show_message(instance, msg, print=True)
+        return models, available_model_data, file_roots
+
+    # get start date on first of month
+    start_date_firstdayofmonth = int(str(start_date)[:6] + "01")
 
     # iterate through species
     for speci in species:

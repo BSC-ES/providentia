@@ -1353,7 +1353,7 @@ class DataFilter:
 
         # Rebuild the data_labels and raw data_labels including observations first
         # if no obs are loaded (when MODEL is active), remove observations from labels
-        if not self.obs_active:
+        if not self.read_instance.obs_active:
             self.read_instance.data_labels = list(self.read_instance.experiments.values())
             self.read_instance.data_labels_raw = list(self.read_instance.experiments.keys())
         else:

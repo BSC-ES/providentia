@@ -435,7 +435,7 @@
           "marker_unselected": { "s": 4, "alpha": 0.4 },
           "plot":
             {
-              "stations": { "s": 20, "picker": 1, "zorder": 5 },
+              "stations": { "s": "", "picker": 1, "zorder": 5 },
               "grid":     { "zorder": 2, "alpha": null },
             },
           "marker_annotate_rounding": 2,
@@ -474,7 +474,11 @@
           "cb_label": { "label": "", "fontsize": 8 },
           "cb_tick_params": { "labelsize": 8 },
           "annotate_text": { "fontsize": 6 },
-          "plot": { "s": "" },
+          "plot":
+            {
+              "stations": { "s": "", "picker": 1, "zorder": 5 },
+              "grid":     { "zorder": 2, "alpha": null },
+            },
         },
       "library":
         {
@@ -522,7 +526,11 @@
               "handles": { "markersize": 14, "marker": "o", "color": "white" },
             },
           "annotate_text": { "fontsize": 13 },
-          "plot": { "s": "" },
+          "plot":
+            {
+              "stations": { "s": "", "picker": 1, "zorder": 5 },
+              "grid":     { "zorder": 2, "alpha": null },
+            },
           "main_gs": {
             "height_ratios": [5, 1], 
             "hspace": 0.1
@@ -532,7 +540,11 @@
         {
           "plot_options": ["annotate", "domain"],
           "figsize": [14, 7],
-          "plot": { "s": "" },
+          "plot":
+            {
+              "stations": { "s": "", "picker": 1, "zorder": 5 },
+              "grid":     { "zorder": 2, "alpha": null },
+            },
           "main_gs": {
             "height_ratios": [5, 1], 
             "hspace": 0.1
