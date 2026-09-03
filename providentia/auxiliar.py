@@ -18,7 +18,7 @@ def join(*args):
     """
     return os.path.join(*args).replace("\\", "/")
 
-
+    
 def correct_plot_type_name(plot_type):
     """
     Correct plot type name by replacing underscores with dashes for specific plot types.
@@ -35,12 +35,14 @@ def correct_plot_type_name(plot_type):
     """
     
     # correct names
-    if plot_type in [
-        "periodic_violin",
-        "fairmode_target",
-        "fairmode_statsummary",
-    ]:
-        return plot_type.replace("_", "-")
+    if '_' in plot_type:
+        from_format = '_'
+        to_format = '-'
+        return plot_type.replace(from_format, to_format)
+    elif '-' in plot_type:
+        from_format = '-'
+        to_format = '_'
+        return plot_type.replace(from_format, to_format)
     else:
         return plot_type
     

@@ -2201,7 +2201,6 @@ class Plotting:
         data_labels,
         plot_characteristics,
         plot_options,
-        plot_networkspecies=None
     ):
         """
         Renders box-and-whisker plots to visualise data distributions across observations and models.
@@ -2218,17 +2217,16 @@ class Plotting:
             Plot characteristics.
         plot_options : list
             Options to configure plot.
-        plot_networkspecies : list
-            Selected networkspecies from plot settings.
         """
 
-        # if no selection has been made in dashboard, get networkspecies from top menu (read into memory)
-        # in report and library get all
-        if (not plot_networkspecies) or (self.read_instance.mode in ["report", "library"]):
-            networkspecies = copy.deepcopy(self.read_instance.networkspecies)
-        # get networkspecies from burger menu
+        # normalise networkspeci argument - it may be a single networkspeci (str)
+        # or a list of networkspecies to show together (multispecies plots), e.g.
+        # from a plot's checkable networkspecies combobox selection
+        if isinstance(networkspeci, (list, tuple)):
+            all_networkspecies = list(networkspeci)
+            networkspeci = all_networkspecies[0]
         else:
-            networkspecies = plot_networkspecies
+            all_networkspecies = [networkspeci]
 
         # if 'obs' in plot_options, set data labels to just observations data label
         if "obs" in plot_options:
@@ -2239,13 +2237,13 @@ class Plotting:
         if self.read_instance.mode == "dashboard":
             if 'multispecies' in plot_options:
                 plot_options.remove('multispecies')
-            if ((len(networkspecies) > 1) 
+            if ((len(all_networkspecies) > 1) 
                 and ('multispecies' not in plot_options)):
                 plot_options.append('multispecies')
 
         # if multispecies in plot options then make plot for all networkspecies
         if "multispecies" in plot_options:
-            networkspecies = networkspecies
+            networkspecies = all_networkspecies
             species = self.read_instance.species
         else:
             networkspecies = [networkspeci]
@@ -2465,7 +2463,6 @@ class Plotting:
         subsection=None,
         plotting_paradigm=None,
         stats_df=None,
-        plot_networkspecies=None,
     ):
         """
         Renders a statistical heatmap using Seaborn to visualise performance metrics across observations and models.
@@ -2490,37 +2487,36 @@ class Plotting:
             Plotting paradigm (summary or station report).
         stats_df : pandas dataframe, optional
             Dataframe of previously calculated statistics.
-        plot_networkspecies : list
-            Selected networkspecies from plot settings
         """
+
+        # normalise networkspeci argument - it may be a single networkspeci (str)
+        # or a list of networkspecies to show together (multispecies plots), e.g.
+        # from a plot's checkable networkspecies combobox selection
+        if isinstance(networkspeci, (list, tuple)):
+            all_networkspecies = list(networkspeci)
+            networkspeci = all_networkspecies[0]
+        else:
+            all_networkspecies = [networkspeci]
 
         # bias plot?
         if "bias" in plot_options:
             bias = True
         else:
             bias = False
-
-        # if no selection has been made in dashboard, get networkspecies from top menu (read into memory)
-        # in report and library get all
-        if (not plot_networkspecies) or (self.read_instance.mode in ["report", "library"]):
-            networkspecies = copy.deepcopy(self.read_instance.networkspecies)
-        # get networkspecies from burger menu
-        else:
-            networkspecies = plot_networkspecies
         
         # always make multispecies plot if there is more than one networkspeci and plot can be multispecies
         # remove first to make sure we don't use a previous appended multispecies  
         if self.read_instance.mode == "dashboard":
             if 'multispecies' in plot_options:
                 plot_options.remove('multispecies')
-            if ((len(networkspecies) > 1) 
+            if ((len(all_networkspecies) > 1) 
                 and ('multispecies' not in plot_options)):
                 plot_options.append('multispecies')
         
         # if statistical dataframe is not provided then create it
         if not isinstance(stats_df, pd.DataFrame):
             if "multispecies" in plot_options:
-                networkspecies = networkspecies
+                networkspecies = all_networkspecies
             else:
                 networkspecies = [networkspeci]
 
@@ -2583,11 +2579,9 @@ class Plotting:
                 stats_df.index.get_level_values("subsections") == subsection
             ]
         if "multispecies" not in plot_options:
-            print(stats_df, plot_options)
             stats_df = stats_df.iloc[
                 stats_df.index.get_level_values("networkspecies") == networkspeci
             ]
-            print(stats_df)
         else:
             # convert units
             if self.read_instance.multispecies_units is not None:
@@ -2627,7 +2621,6 @@ class Plotting:
         relevant_axis.set_ylabel("")
 
         # if there is only one subsection or station data
-        print(stats_df)
         yticklabels = stats_df.index.get_level_values("networkspecies")
         if (plotting_paradigm == "station") or (len(subsections) == 1):
             # for multispecies, remove network names from labels
@@ -2750,7 +2743,6 @@ class Plotting:
         subsection=None,
         plotting_paradigm=None,
         stats_df=None,
-        plot_networkspecies=None
     ):
         """
         Constructs a formatted table of statistical metrics, featuring merged cells and dynamic colour-coding.
@@ -2777,12 +2769,19 @@ class Plotting:
             Plotting paradigm (summary or station report).
         stats_df : pandas dataframe, optional
             Dataframe of previously calculated statistics.
-        plot_networkspecies : list
-            Selected networkspecies from plot settings.
         """
 
         # turn off axis to make table
         relevant_axis.axis("off")
+
+        # normalise networkspeci argument - it may be a single networkspeci (str)
+        # or a list of networkspecies to show together (multispecies plots), e.g.
+        # from a plot's checkable networkspecies combobox selection
+        if isinstance(networkspeci, (list, tuple)):
+            all_networkspecies = list(networkspeci)
+            networkspeci = all_networkspecies[0]
+        else:
+            all_networkspecies = [networkspeci]
 
         # bias plot?
         if "bias" in plot_options:
@@ -2790,27 +2789,19 @@ class Plotting:
         else:
             bias = False
 
-        # if no selection has been made in dashboard, get networkspecies from top menu (read into memory)
-        # in report and library get all
-        if (not plot_networkspecies) or (self.read_instance.mode in ["report", "library"]):
-            networkspecies = copy.deepcopy(self.read_instance.networkspecies)
-        # get networkspecies from burger menu
-        else:
-            networkspecies = plot_networkspecies
-
         # always make multispecies plot if there is more than one networkspeci and plot can be multispecies
         # remove first to make sure we don't use a previous appended multispecies  
         if self.read_instance.mode == "dashboard":
             if 'multispecies' in plot_options:
                 plot_options.remove('multispecies')
-            if ((len(networkspecies) > 1) 
+            if ((len(all_networkspecies) > 1) 
                 and ('multispecies' not in plot_options)):
                 plot_options.append('multispecies')
 
         # in the dashboard we need to create statistical dataframe as it is not provided in function arguments
         if not isinstance(stats_df, pd.DataFrame):
             if "multispecies" in plot_options:
-                networkspecies = networkspecies
+                networkspecies = all_networkspecies
             else:
                 networkspecies = [networkspeci]
 

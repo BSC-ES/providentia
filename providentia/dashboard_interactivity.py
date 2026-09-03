@@ -289,7 +289,6 @@ def legend_picker_func(canvas_instance, event):
                         # get active (absolute / bias)
                         active = canvas_instance.plot_elements[plot_type]["active"]
 
-                        print(plot_type, data_label, data_label in canvas_instance.plot_elements[plot_type][active])
                         # change visibility of plot elements (if data label in plot elements dictionary)
                         if (
                             data_label

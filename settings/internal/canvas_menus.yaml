@@ -35,7 +35,7 @@
         {
           "element_type": "container",
           "formatting_dict": "settings_container",
-          "size": [250, 430],
+          "size": [250, 480],
           "relative_position": [-230, 25],
         },
 
@@ -48,12 +48,31 @@
           "text": "SETTINGS",
         },
 
-      "z_stat_label":
+      "networkspecies_label":
         {
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 50],
+          "text": "Networkspecies",
+        },
+
+      "networkspecies":
+        {
+          "element_type": "combobox",
+          "formatting_dict": "menu_combobox",
+          "fixed_width": 105,
+          "relative_position": [-220, 75],
+          "object_name": "map_networkspecies",
+          "function": "handle_networkspeci_update",
+        },
+
+      "z_stat_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_sublabel",
+          "size": [230, 20],
+          "relative_position": [-220, 100],
           "text": "Statistic",
         },
 
@@ -62,7 +81,7 @@
           "element_type": "combobox",
           "formatting_dict": "menu_combobox",
           "fixed_width": 105,
-          "relative_position": [-220, 75],
+          "relative_position": [-220, 125],
           "function": "handle_map_z_statistic_update",
         },
 
@@ -71,7 +90,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 100],
+          "relative_position": [-220, 150],
           "text": "Dataset 1",
         },
 
@@ -80,7 +99,7 @@
           "element_type": "combobox",
           "formatting_dict": "menu_combobox",
           "fixed_width": 105,
-          "relative_position": [-220, 125],
+          "relative_position": [-220, 175],
           "function": "handle_map_z_statistic_update",
         },
 
@@ -89,7 +108,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-95, 100],
+          "relative_position": [-95, 150],
           "text": "Dataset 2",
         },
 
@@ -98,7 +117,7 @@
           "element_type": "combobox",
           "formatting_dict": "menu_combobox",
           "fixed_width": 105,
-          "relative_position": [-95, 125],
+          "relative_position": [-95, 175],
           "function": "handle_map_z_statistic_update",
         },
 
@@ -107,7 +126,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 150],
+          "relative_position": [-220, 200],
           "text": "Unselected stations",
         },
 
@@ -116,7 +135,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel_slider",
           "size": [230, 20],
-          "relative_position": [-220, 175],
+          "relative_position": [-220, 225],
           "text": "Size",
         },
 
@@ -124,7 +143,7 @@
         {
           "element_type": "slider",
           "size": [230, 20],
-          "relative_position": [-220, 200],
+          "relative_position": [-220, 250],
           "object_name": "map_markersize_unsel_sl",
           "minimum": 0,
           "maximum": 80,
@@ -138,7 +157,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel_slider",
           "size": [230, 20],
-          "relative_position": [-220, 225],
+          "relative_position": [-220, 275],
           "text": "Opacity",
         },
 
@@ -146,7 +165,7 @@
         {
           "element_type": "slider",
           "size": [230, 20],
-          "relative_position": [-220, 250],
+          "relative_position": [-220, 300],
           "object_name": "map_opacity_unsel_sl",
           "minimum": 0,
           "maximum": 10,
@@ -160,7 +179,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 275],
+          "relative_position": [-220, 325],
           "text": "Selected stations",
         },
 
@@ -169,7 +188,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel_slider",
           "size": [230, 20],
-          "relative_position": [-220, 300],
+          "relative_position": [-220, 350],
           "text": "Size",
         },
 
@@ -177,7 +196,7 @@
         {
           "element_type": "slider",
           "size": [230, 20],
-          "relative_position": [-220, 325],
+          "relative_position": [-220, 375],
           "object_name": "map_markersize_sel_sl",
           "minimum": 0,
           "maximum": 80,
@@ -191,7 +210,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel_slider",
           "size": [230, 20],
-          "relative_position": [-220, 350],
+          "relative_position": [-220, 400],
           "text": "Opacity",
         },
 
@@ -199,7 +218,7 @@
         {
           "element_type": "slider",
           "size": [230, 20],
-          "relative_position": [-220, 375],
+          "relative_position": [-220, 425],
           "object_name": "map_opacity_sel_sl",
           "minimum": 0,
           "maximum": 10,
@@ -213,7 +232,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 400],
+          "relative_position": [-220, 450],
           "text": "Options",
         },
 
@@ -222,7 +241,7 @@
           "element_type": "checkable_combobox",
           "formatting_dict": "menu_checkable_combobox",
           "size": [230, 20],
-          "relative_position": [-220, 425],
+          "relative_position": [-220, 475],
           "object_name": "map_options",
           "function": "update_plot_option",
         },
@@ -264,7 +283,7 @@
         {
           "element_type": "container",
           "formatting_dict": "settings_container",
-          "size": [250, 380],
+          "size": [250, 430],
           "relative_position": [-230, 25],
         },
 
@@ -277,12 +296,31 @@
           "text": "SETTINGS",
         },
 
-      "stat_label":
+      "networkspecies_label":
         {
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 50],
+          "text": "Networkspecies",
+        },
+
+      "networkspecies":
+        {
+          "element_type": "combobox",
+          "formatting_dict": "menu_combobox",
+          "fixed_width": 105,
+          "relative_position": [-220, 75],
+          "object_name": "timeseries_networkspecies",
+          "function": "handle_networkspeci_update",
+        },
+
+      "stat_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_sublabel",
+          "size": [230, 20],
+          "relative_position": [-220, 100],
           "text": "Spatial aggregation statistic",
         },
 
@@ -291,7 +329,7 @@
           "element_type": "combobox",
           "formatting_dict": "menu_combobox",
           "fixed_width": 105,
-          "relative_position": [-220, 75],
+          "relative_position": [-220, 125],
           "function": "handle_timeseries_aggregation_statistic_update",
         },
 
@@ -300,7 +338,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 100],
+          "relative_position": [-220, 150],
           "text": "Chunk statistic",
         },
 
@@ -309,7 +347,7 @@
           "element_type": "combobox",
           "formatting_dict": "menu_combobox",
           "fixed_width": 105,
-          "relative_position": [-220, 125],
+          "relative_position": [-220, 175],
           "function": "handle_timeseries_chunk_statistic_update",
         },
 
@@ -318,7 +356,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-95, 100],
+          "relative_position": [-95, 150],
           "text": "Chunk resolution",
         },
 
@@ -327,7 +365,7 @@
           "element_type": "combobox",
           "formatting_dict": "menu_combobox",
           "fixed_width": 105,
-          "relative_position": [-95, 125],
+          "relative_position": [-95, 175],
           "function": "handle_timeseries_chunk_statistic_update",
         },
 
@@ -336,7 +374,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 150],
+          "relative_position": [-220, 200],
           "text": "Size",
         },
 
@@ -344,7 +382,7 @@
         {
           "element_type": "slider",
           "size": [230, 20],
-          "relative_position": [-220, 175],
+          "relative_position": [-220, 225],
           "object_name": "timeseries_markersize_sl",
           "minimum": 0,
           "tick_interval": 2,
@@ -357,7 +395,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 200],
+          "relative_position": [-220, 250],
           "text": "Smooth window",
         },
 
@@ -365,7 +403,7 @@
         {
           "element_type": "slider",
           "size": [230, 20],
-          "relative_position": [-220, 225],
+          "relative_position": [-220, 275],
           "object_name": "timeseries_smooth_window_sl",
           "minimum": 0,
           "value": 0,
@@ -379,7 +417,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 250],
+          "relative_position": [-220, 300],
           "text": "Smooth min. points (%)",
         },
 
@@ -387,7 +425,7 @@
         {
           "element_type": "slider",
           "size": [230, 20],
-          "relative_position": [-220, 275],
+          "relative_position": [-220, 325],
           "object_name": "timeseries_smooth_min_points_sl",
           "minimum": 0,
           "maximum": 100,
@@ -402,7 +440,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 300],
+          "relative_position": [-220, 350],
           "text": "Line width",
         },
 
@@ -410,7 +448,7 @@
         {
           "element_type": "slider",
           "size": [230, 20],
-          "relative_position": [-220, 325],
+          "relative_position": [-220, 375],
           "object_name": "timeseries_smooth_linewidth_sl",
           "minimum": 0,
           "tick_interval": 2,
@@ -423,7 +461,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 350],
+          "relative_position": [-220, 400],
           "text": "Options",
         },
 
@@ -432,7 +470,7 @@
           "element_type": "checkable_combobox",
           "formatting_dict": "menu_checkable_combobox",
           "size": [230, 20],
-          "relative_position": [-220, 375],
+          "relative_position": [-220, 425],
           "object_name": "timeseries_options",
           "function": "update_plot_option",
         },
@@ -474,7 +512,7 @@
         {
           "element_type": "container",
           "formatting_dict": "settings_container",
-          "size": [250, 230],
+          "size": [250, 280],
           "relative_position": [-230, 25],
         },
 
@@ -487,12 +525,31 @@
           "text": "SETTINGS",
         },
 
-      "stat_label":
+      "networkspecies_label":
         {
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 50],
+          "text": "Networkspecies",
+        },
+
+      "networkspecies":
+        {
+          "element_type": "combobox",
+          "formatting_dict": "menu_combobox",
+          "fixed_width": 105,
+          "relative_position": [-220, 75],
+          "object_name": "periodic_networkspecies",
+          "function": "handle_networkspeci_update",
+        },
+
+      "stat_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_sublabel",
+          "size": [230, 20],
+          "relative_position": [-220, 100],
           "text": "Statistic",
         },
 
@@ -501,7 +558,7 @@
           "element_type": "combobox",
           "formatting_dict": "menu_combobox",
           "fixed_width": 105,
-          "relative_position": [-220, 75],
+          "relative_position": [-220, 125],
           "function": "handle_statistic_update",
         },
 
@@ -510,7 +567,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 100],
+          "relative_position": [-220, 150],
           "text": "Size",
         },
 
@@ -518,7 +575,7 @@
         {
           "element_type": "slider",
           "size": [230, 20],
-          "relative_position": [-220, 125],
+          "relative_position": [-220, 175],
           "object_name": "periodic_markersize_sl",
           "minimum": 0,
           "tick_interval": 2,
@@ -531,7 +588,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 150],
+          "relative_position": [-220, 200],
           "text": "Line width",
         },
 
@@ -539,7 +596,7 @@
         {
           "element_type": "slider",
           "size": [230, 20],
-          "relative_position": [-220, 175],
+          "relative_position": [-220, 225],
           "object_name": "periodic_linewidth_sl",
           "minimum": 0,
           "tick_interval": 2,
@@ -552,7 +609,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 200],
+          "relative_position": [-220, 250],
           "text": "Options",
         },
 
@@ -561,7 +618,7 @@
           "element_type": "checkable_combobox",
           "formatting_dict": "menu_checkable_combobox",
           "size": [230, 20],
-          "relative_position": [-220, 225],
+          "relative_position": [-220, 275],
           "object_name": "periodic_options",
           "function": "update_plot_option",
         },
@@ -603,7 +660,7 @@
         {
           "element_type": "container",
           "formatting_dict": "settings_container",
-          "size": [250, 180],
+          "size": [250, 230],
           "relative_position": [-230, 25],
         },
 
@@ -616,12 +673,31 @@
           "text": "SETTINGS",
         },
 
-      "markersize_sl_label":
+      "networkspecies_label":
         {
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 50],
+          "text": "Networkspecies",
+        },
+
+      "networkspecies":
+        {
+          "element_type": "combobox",
+          "formatting_dict": "menu_combobox",
+          "fixed_width": 105,
+          "relative_position": [-220, 75],
+          "object_name": "periodic_violin_networkspecies",
+          "function": "handle_networkspeci_update",
+        },
+
+      "markersize_sl_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_sublabel",
+          "size": [230, 20],
+          "relative_position": [-220, 100],
           "text": "Size",
         },
 
@@ -629,7 +705,7 @@
         {
           "element_type": "slider",
           "size": [230, 20],
-          "relative_position": [-220, 75],
+          "relative_position": [-220, 125],
           "object_name": "periodic_violin_markersize_sl",
           "minimum": 0,
           "tick_interval": 2,
@@ -642,7 +718,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 100],
+          "relative_position": [-220, 150],
           "text": "Line width",
         },
 
@@ -650,7 +726,7 @@
         {
           "element_type": "slider",
           "size": [230, 20],
-          "relative_position": [-220, 125],
+          "relative_position": [-220, 175],
           "object_name": "periodic_violin_linewidth_sl",
           "minimum": 0,
           "tick_interval": 2,
@@ -663,7 +739,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 150],
+          "relative_position": [-220, 200],
           "text": "Options",
         },
 
@@ -672,7 +748,7 @@
           "element_type": "checkable_combobox",
           "formatting_dict": "menu_checkable_combobox",
           "size": [230, 20],
-          "relative_position": [-220, 175],
+          "relative_position": [-220, 225],
           "object_name": "periodic_violin_options",
           "function": "update_plot_option",
         },
@@ -714,7 +790,7 @@
         {
           "element_type": "container",
           "formatting_dict": "settings_container",
-          "size": [250, 80],
+          "size": [250, 130],
           "relative_position": [-230, 25],
         },
 
@@ -727,12 +803,31 @@
           "text": "SETTINGS",
         },
 
-      "options_label":
+      "networkspecies_label":
         {
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 50],
+          "text": "Networkspecies",
+        },
+
+      "networkspecies":
+        {
+          "element_type": "combobox",
+          "formatting_dict": "menu_combobox",
+          "fixed_width": 105,
+          "relative_position": [-220, 75],
+          "object_name": "metadata_networkspecies",
+          "function": "handle_networkspeci_update",
+        },
+
+      "options_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_sublabel",
+          "size": [230, 20],
+          "relative_position": [-220, 100],
           "text": "Options",
         },
 
@@ -741,7 +836,7 @@
           "element_type": "checkable_combobox",
           "formatting_dict": "menu_checkable_combobox",
           "size": [230, 20],
-          "relative_position": [-220, 75],
+          "relative_position": [-220, 125],
           "object_name": "metadata_options",
           "function": "update_plot_option",
         },
@@ -783,7 +878,7 @@
         {
           "element_type": "container",
           "formatting_dict": "settings_container",
-          "size": [250, 130],
+          "size": [250, 180],
           "relative_position": [-230, 25],
         },
 
@@ -796,12 +891,31 @@
           "text": "SETTINGS",
         },
 
-      "linewidth_sl_label":
+      "networkspecies_label":
         {
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 50],
+          "text": "Networkspecies",
+        },
+
+      "networkspecies":
+        {
+          "element_type": "combobox",
+          "formatting_dict": "menu_combobox",
+          "fixed_width": 105,
+          "relative_position": [-220, 75],
+          "object_name": "distribution_networkspecies",
+          "function": "handle_networkspeci_update",
+        },
+
+      "linewidth_sl_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_sublabel",
+          "size": [230, 20],
+          "relative_position": [-220, 100],
           "text": "Line width",
         },
 
@@ -809,7 +923,7 @@
         {
           "element_type": "slider",
           "size": [230, 20],
-          "relative_position": [-220, 75],
+          "relative_position": [-220, 125],
           "object_name": "distribution_linewidth_sl",
           "minimum": 0,
           "tick_interval": 2,
@@ -822,7 +936,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 100],
+          "relative_position": [-220, 150],
           "text": "Options",
         },
 
@@ -831,7 +945,7 @@
           "element_type": "checkable_combobox",
           "formatting_dict": "menu_checkable_combobox",
           "size": [230, 20],
-          "relative_position": [-220, 125],
+          "relative_position": [-220, 175],
           "object_name": "distribution_options",
           "function": "update_plot_option",
         },
@@ -873,7 +987,7 @@
         {
           "element_type": "container",
           "formatting_dict": "settings_container",
-          "size": [250, 180],
+          "size": [250, 230],
           "relative_position": [-230, 25],
         },
 
@@ -886,12 +1000,31 @@
           "text": "SETTINGS",
         },
 
-      "markersize_sl_label":
+      "networkspecies_label":
         {
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 50],
+          "text": "Networkspecies",
+        },
+
+      "networkspecies":
+        {
+          "element_type": "combobox",
+          "formatting_dict": "menu_combobox",
+          "fixed_width": 105,
+          "relative_position": [-220, 75],
+          "object_name": "scatter_networkspecies",
+          "function": "handle_networkspeci_update",
+        },
+
+      "markersize_sl_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_sublabel",
+          "size": [230, 20],
+          "relative_position": [-220, 100],
           "text": "Size",
         },
 
@@ -899,7 +1032,7 @@
         {
           "element_type": "slider",
           "size": [230, 20],
-          "relative_position": [-220, 75],
+          "relative_position": [-220, 125],
           "object_name": "scatter_markersize_sl",
           "minimum": 0,
           "tick_interval": 2,
@@ -912,7 +1045,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 100],
+          "relative_position": [-220, 150],
           "text": "Regression line width",
         },
 
@@ -920,7 +1053,7 @@
         {
           "element_type": "slider",
           "size": [230, 20],
-          "relative_position": [-220, 125],
+          "relative_position": [-220, 175],
           "object_name": "scatter_regression_linewidth_sl",
           "minimum": 0,
           "tick_interval": 2,
@@ -933,7 +1066,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 150],
+          "relative_position": [-220, 200],
           "text": "Options",
         },
 
@@ -942,7 +1075,7 @@
           "element_type": "checkable_combobox",
           "formatting_dict": "menu_checkable_combobox",
           "size": [230, 20],
-          "relative_position": [-220, 175],
+          "relative_position": [-220, 225],
           "object_name": "scatter_options",
           "function": "update_plot_option",
         },
@@ -1085,7 +1218,7 @@
           "size": [230, 20],
           "relative_position": [-240, 175],
           "object_name": "statsummary_networkspecies",
-          "function": "update_networkspecies_in_multispecies_plot",
+          "function": "handle_networkspeci_update",
         },
 
       "options_label":
@@ -1173,7 +1306,7 @@
           "size": [230, 20],
           "relative_position": [-220, 75],
           "object_name": "boxplot_networkspecies",
-          "function": "update_networkspecies_in_multispecies_plot",
+          "function": "handle_networkspeci_update",
         },
 
       "options_label":
@@ -1232,7 +1365,7 @@
         {
           "element_type": "container",
           "formatting_dict": "settings_container",
-          "size": [250, 180],
+          "size": [250, 230],
           "relative_position": [-230, 25],
         },
 
@@ -1245,12 +1378,31 @@
           "text": "SETTINGS",
         },
 
+      "networkspecies_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_sublabel",
+          "size": [230, 20],
+          "relative_position": [-220, 50],
+          "text": "Networkspecies",
+        },
+
+      "networkspecies":
+        {
+          "element_type": "combobox",
+          "formatting_dict": "menu_combobox",
+          "fixed_width": 105,
+          "relative_position": [-220, 75],
+          "object_name": "taylor_networkspecies",
+          "function": "handle_networkspeci_update",
+        },
+
       "corr_stat_label":
         {
           "element_type": "label",
           "formatting_dict": "settings_label",
           "size": [230, 20],
-          "relative_position": [-220, 50],
+          "relative_position": [-220, 100],
           "text": "Correlation statistic",
         },
 
@@ -1259,7 +1411,7 @@
           "element_type": "combobox",
           "formatting_dict": "menu_combobox",
           "fixed_width": 105,
-          "relative_position": [-220, 75],
+          "relative_position": [-220, 125],
           "function": "handle_taylor_correlation_statistic_update",
         },
 
@@ -1268,7 +1420,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 100],
+          "relative_position": [-220, 150],
           "text": "Size",
         },
 
@@ -1276,7 +1428,7 @@
         {
           "element_type": "slider",
           "size": [230, 20],
-          "relative_position": [-220, 125],
+          "relative_position": [-220, 175],
           "object_name": "taylor_markersize_sl",
           "minimum": 0,
           "tick_interval": 2,
@@ -1289,7 +1441,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 150],
+          "relative_position": [-220, 200],
           "text": "Options",
         },
 
@@ -1298,7 +1450,7 @@
           "element_type": "checkable_combobox",
           "formatting_dict": "menu_checkable_combobox",
           "size": [230, 20],
-          "relative_position": [-220, 175],
+          "relative_position": [-220, 225],
           "object_name": "taylor_options",
           "function": "update_plot_option",
         },
@@ -1340,7 +1492,7 @@
         {
           "element_type": "container",
           "formatting_dict": "settings_container",
-          "size": [250, 180],
+          "size": [250, 230],
           "relative_position": [-230, 25],
         },
 
@@ -1353,12 +1505,31 @@
           "text": "SETTINGS",
         },
 
-      "markersize_sl_label":
+      "networkspecies_label":
         {
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 50],
+          "text": "Networkspecies",
+        },
+
+      "networkspecies":
+        {
+          "element_type": "combobox",
+          "formatting_dict": "menu_combobox",
+          "fixed_width": 105,
+          "relative_position": [-220, 75],
+          "object_name": "fairmode_target_networkspecies",
+          "function": "handle_networkspeci_update",
+        },
+
+      "markersize_sl_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_sublabel",
+          "size": [230, 20],
+          "relative_position": [-220, 100],
           "text": "Size",
         },
 
@@ -1366,7 +1537,7 @@
         {
           "element_type": "slider",
           "size": [230, 20],
-          "relative_position": [-220, 75],
+          "relative_position": [-220, 125],
           "object_name": "fairmode_target_markersize_sl",
           "minimum": 0,
           "tick_interval": 2,
@@ -1379,7 +1550,7 @@
           "element_type": "label",
           "formatting_dict": "settings_label",
           "size": [230, 20],
-          "relative_position": [-220, 100],
+          "relative_position": [-220, 150],
           "text": "Classification type",
         },
 
@@ -1388,7 +1559,7 @@
           "element_type": "combobox",
           "formatting_dict": "menu_combobox",
           "fixed_width": 105,
-          "relative_position": [-220, 125],
+          "relative_position": [-220, 175],
           "function": "handle_fairmode_target_classification_update",
         },
 
@@ -1397,7 +1568,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 150],
+          "relative_position": [-220, 200],
           "text": "Options",
         },
 
@@ -1406,7 +1577,7 @@
           "element_type": "checkable_combobox",
           "formatting_dict": "menu_checkable_combobox",
           "size": [230, 20],
-          "relative_position": [-220, 175],
+          "relative_position": [-220, 225],
           "object_name": "fairmode_target_options",
           "function": "update_plot_option",
         },
@@ -1447,7 +1618,7 @@
         {
           "element_type": "container",
           "formatting_dict": "settings_container",
-          "size": [250, 80],
+          "size": [250, 130],
           "relative_position": [-230, 25],
         },
 
@@ -1460,11 +1631,30 @@
           "text": "SETTINGS",
         },
 
+      "networkspecies_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_sublabel",
+          "size": [230, 20],
+          "relative_position": [-220, 50],
+          "text": "Networkspecies",
+        },
+
+      "networkspecies":
+        {
+          "element_type": "combobox",
+          "formatting_dict": "menu_combobox",
+          "fixed_width": 105,
+          "relative_position": [-220, 75],
+          "object_name": "fairmode_statsummary_networkspecies",
+          "function": "handle_networkspeci_update",
+        },
+
       "markersize_sl_label":
         {
           "element_type": "label",
           "size": [230, 20],
-          "relative_position": [-220, 50],
+          "relative_position": [-220, 100],
           "text": "Size",
         },
 
@@ -1472,7 +1662,7 @@
         {
           "element_type": "slider",
           "size": [230, 20],
-          "relative_position": [-220, 75],
+          "relative_position": [-220, 125],
           "object_name": "fairmode_statsummary_markersize_sl",
           "minimum": 0,
           "tick_interval": 2,
@@ -1516,7 +1706,7 @@
         {
           "element_type": "container",
           "formatting_dict": "settings_container",
-          "size": [250, 80],
+          "size": [250, 130],
           "relative_position": [-230, 25],
         },
 
@@ -1529,12 +1719,31 @@
           "text": "SETTINGS",
         },
 
-      "options_label":
+      "networkspecies_label":
         {
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 50],
+          "text": "Networkspecies",
+        },
+
+      "networkspecies":
+        {
+          "element_type": "combobox",
+          "formatting_dict": "menu_combobox",
+          "fixed_width": 105,
+          "relative_position": [-220, 75],
+          "object_name": "contingencytable_networkspecies",
+          "function": "handle_networkspeci_update",
+        },
+
+      "options_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_sublabel",
+          "size": [230, 20],
+          "relative_position": [-220, 100],
           "text": "Options",
         },
 
@@ -1543,7 +1752,7 @@
           "element_type": "checkable_combobox",
           "formatting_dict": "menu_checkable_combobox",
           "size": [230, 20],
-          "relative_position": [-220, 75],
+          "relative_position": [-220, 125],
           "object_name": "contingencytable_options",
           "function": "update_plot_option",
         },
@@ -1631,7 +1840,7 @@
           "size": [230, 20],
           "relative_position": [-220, 125],
           "object_name": "heatmap_networkspecies",
-          "function": "update_networkspecies_in_multispecies_plot",
+          "function": "handle_networkspeci_update",
         },
 
       "options_label":
@@ -1737,7 +1946,7 @@
           "size": [230, 20],
           "relative_position": [-220, 125],
           "object_name": "table_networkspecies",
-          "function": "update_networkspecies_in_multispecies_plot",
+          "function": "handle_networkspeci_update",
         },
 
       "options_label":

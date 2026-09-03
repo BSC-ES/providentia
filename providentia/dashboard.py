@@ -389,12 +389,8 @@ class Dashboard(QtWidgets.QWidget):
                 self.mpl_canvas.elements,
             ):
                 menu_plot_type = menu_button.objectName().split("_menu")[0]
-                if plot_type in [
-                    "periodic-violin",
-                    "fairmode-target",
-                    "fairmode-statsummary",
-                ]:
-                    plot_type = plot_type.replace("-", "_")
+                menu_plot_type = correct_plot_type_name(menu_plot_type)
+                plot_type = correct_plot_type_name(plot_type)
 
                 # proceed once have objects for plot type
                 # if plot type is None the axes and are initalising the qt element geometry
@@ -1613,12 +1609,16 @@ class Dashboard(QtWidgets.QWidget):
         # update models -- keeping previously selected models if available
         if self.config_bar_initialisation:
             for model_type in ['interpolated', 'noninterpolated']:
-                self.models_menu["models"]["keep_selected"][model_type] = [
+                candidate_models = [
                     model
                     for model in self.experiments
                     if (model in self.models_menu["models"]["map_vars"])
                     and self.models_menu["models"]["enabled"][model_type].get(model, False)
                 ]
+                # only one gridded model can be plotted on the map at a time
+                if model_type == 'noninterpolated':
+                    candidate_models = candidate_models[:1]
+                self.models_menu["models"]["keep_selected"][model_type] = candidate_models
 
         for model_type in ['interpolated', 'noninterpolated']:
             self.models_menu["models"]["keep_selected"][model_type] = [
@@ -2125,12 +2125,7 @@ class Dashboard(QtWidgets.QWidget):
                         menu_button.hide()
                         save_button.hide()
                         save_data_button.hide()
-                        if previous_plot_type in [
-                            "periodic-violin",
-                            "fairmode-target",
-                            "fairmode-statsummary",
-                        ]:
-                            previous_plot_type = previous_plot_type.replace("-", "_")
+                        previous_plot_type = correct_plot_type_name(previous_plot_type)
                         for element in getattr(
                             self.mpl_canvas, previous_plot_type + "_elements"
                         ):
@@ -2958,13 +2953,20 @@ class Dashboard(QtWidgets.QWidget):
         unset_cursor(self.cursor_function, "handle_data_selection_update")
 
         # add networkspecies as items to networkspecies combobox
-        multispecies_plot_types = ["heatmap", "boxplot", "table", "statsummary"]
-        networkspecies_elements = [getattr(self.mpl_canvas, f"{plot_type}_networkspecies") 
-                                for plot_type in multispecies_plot_types]
-        for element in networkspecies_elements:
+        all_plot_types = ["map", "timeseries", "periodic", "periodic_violin", "metadata",
+                          "distribution", "scatter", "statsummary", "boxplot", "taylor",
+                          "fairmode_target", "fairmode_statsummary", "contingencytable",
+                          "heatmap", "table"]
+        multispecies_plot_types = ["statsummary", "boxplot", "heatmap", "table"]
+        sorted_networkspecies = sorted(self.networkspecies)
+        for plot_type in all_plot_types:
+            element = getattr(self.mpl_canvas, f"{plot_type}_networkspecies")
             element.clear()
-            element.addItems(self.networkspecies)
-   
+            element.addItems(sorted_networkspecies)
+            if plot_type in multispecies_plot_types:
+                for row in range(element.model().rowCount()):
+                    element.model().item(row).setCheckState(QtCore.Qt.Checked)
+
         # update performing read variable to false
         self.performing_read = False
 
