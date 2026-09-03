@@ -1395,14 +1395,14 @@ def get_valid_models(instance, start_date, end_date, resolution, networkspecies)
         **noninterpolated_file_roots,
     }
 
-    # set list of model names to add on models pop-up:
-    # only models interpolated for ALL selected networkspecies
+    # set list of model names to add on models pop-up
+    # models interpolated for at least one networkspeci
     if instance.mode not in ["report", "library"]:
-        noninterpolated_common_models = set.intersection(*noninterpolated_models.values())
-        interpolated_common_models = set.intersection(*interpolated_models.values())
+        noninterpolated_available_models = set.union(*noninterpolated_models.values())
+        interpolated_available_models = set.union(*interpolated_models.values())
         if networkspecies:
             models_to_add = sorted(
-                set(noninterpolated_common_models) | set(interpolated_common_models)
+                set(noninterpolated_available_models) | set(interpolated_available_models)
             )
         else:
             models_to_add = []
@@ -1412,11 +1412,11 @@ def get_valid_models(instance, start_date, end_date, resolution, networkspecies)
         instance.models_menu["models"]["map_vars"] = models_to_add
         instance.models_menu["models"]["enabled"] = {
             "interpolated": {
-                model_id: model_id in interpolated_common_models
+                model_id: model_id in interpolated_available_models
                 for model_id in models_to_add
             },
             "noninterpolated": {
-                model_id: model_id in noninterpolated_common_models
+                model_id: model_id in noninterpolated_available_models
                 for model_id in models_to_add
             },
         }

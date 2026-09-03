@@ -471,31 +471,22 @@ class Plotting:
         if data_labels is None:
             data_labels = copy.deepcopy(self.read_instance.data_labels)
 
-        # create legend elements
+        # initialise legend elements and labels
         legend_elements = []
+        legend_labels = []
 
-        # add element for label
+        # initialise labels that are already in legend
+        processed_labels = set()
+
         for data_label in data_labels:
+            if data_label in processed_labels:
+                continue
+
             if (data_label == self.read_instance.observations_data_label) and (not set_obs):
                 continue
-            
-            # show empty square with coloured border for gridded models
-            if 'gridded' in data_label:
-                
-                legend_elements.append(
-                    Line2D(
-                        [0], [0],
-                        marker="s",
-                        linestyle="none",
-                        markerfacecolor="none",
-                        markeredgecolor=self.read_instance.plotting_params[data_label]["colour"],
-                        markeredgewidth=1.2,
-                        markersize=plot_characteristics_legend["handles"]["markersize"] * 1.15,
-                        label=data_label,
-                    )
-                )
-            # show filled dots for observations and interpolated models
-            else:
+
+            # observations show as a filled dot
+            if data_label == self.read_instance.observations_data_label:
                 legend_elements.append(
                     Line2D(
                         [0],
@@ -506,11 +497,57 @@ class Plotting:
                             "colour"
                         ],
                         markersize=plot_characteristics_legend["handles"]["markersize"],
-                        label=data_label,
                     )
                 )
+                legend_labels.append(data_label)
+                processed_labels.add(data_label)
+                continue
+
+            # group the gridded/non-gridded versions of the same model together, so a
+            # model loaded both ways shows as a filled dot with a square
+            base_label = data_label.replace(" (gridded)", "")
+            gridded_label = f"{base_label} (gridded)"
+            non_gridded_label = base_label
+            has_gridded = gridded_label in data_labels
+            has_non_gridded = non_gridded_label in data_labels
+            processed_labels.update({gridded_label, non_gridded_label})
+
+            colour = self.read_instance.plotting_params[data_label]["colour"]
+
+            # empty square with coloured border, for gridded models
+            square_handle = Line2D(
+                [0], [0],
+                marker="s",
+                linestyle="none",
+                markerfacecolor="none",
+                markeredgecolor=colour,
+                markeredgewidth=1.2,
+                markersize=plot_characteristics_legend["handles"]["markersize"] * 1.15,
+            )
+            # filled dot, for interpolated models
+            dot_handle = Line2D(
+                [0], [0],
+                marker=plot_characteristics_legend["handles"]["marker"],
+                color=plot_characteristics_legend["handles"]["color"],
+                markerfacecolor=colour,
+                markersize=plot_characteristics_legend["handles"]["markersize"],
+            )
+
+            # gridded and interpolated show combined square+dot entry
+            if has_gridded and has_non_gridded:
+                legend_elements.append((square_handle, dot_handle))
+                legend_labels.append(base_label)
+            # only gridded show square only
+            elif has_gridded:
+                legend_elements.append(square_handle)
+                legend_labels.append(gridded_label)
+            # only interpolated loaded show dot only
+            else:
+                legend_elements.append(dot_handle)
+                legend_labels.append(non_gridded_label)
 
         plot_characteristics_legend["plot"]["handles"] = legend_elements
+        plot_characteristics_legend["plot"]["labels"] = legend_labels
 
         return plot_characteristics_legend
 
