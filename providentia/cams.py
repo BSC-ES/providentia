@@ -1466,7 +1466,7 @@ class Cams(object):
                             temp_path = join(files_to_download_dict["temp_dir"], "zip_file")
 
                             # get zip file from ADS / CDS
-                            # self.retrieve_request(temp_path, request_dict["dataset"], request_dict["dict_request"], cdsapirc_path)
+                            self.retrieve_request(temp_path, request_dict["dataset"], request_dict["dict_request"], cdsapirc_path)
                             
                             # extract file
                             zip_file_name = self.extract_zip(files_to_download_dict["temp_dir"], temp_path)
