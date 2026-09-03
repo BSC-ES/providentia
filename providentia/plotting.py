@@ -2538,7 +2538,7 @@ class Plotting:
             stats_df = stats_df.reindex(columns=cut_data_labels)
 
         # get subsections
-        subsections = list(np.unique(stats_df.index.get_level_values(1)))
+        subsections = list(np.unique(stats_df.index.get_level_values("subsections")))
 
         # get relevant data
         if plotting_paradigm == "station":
@@ -2591,7 +2591,7 @@ class Plotting:
 
         # if there is only one subsection or station data
         print(stats_df)
-        yticklabels = stats_df.index.get_level_values(0)
+        yticklabels = stats_df.index.get_level_values("networkspecies")
         if (plotting_paradigm == "station") or (len(subsections) == 1):
             # for multispecies, remove network names from labels
             # only when there is one network and requested by user in plot_characteristics
@@ -2613,11 +2613,11 @@ class Plotting:
             # remove parent names from subsections
             if not plot_characteristics["parent_section_names"]:
                 yticklabels = []
-                for subsection_label in stats_df.index.get_level_values(1):
+                for subsection_label in stats_df.index.get_level_values("subsections"):
                     if "·" in subsection_label:
                         subsection_label = subsection_label.split("·")[1]
                     yticklabels.append(subsection_label)
-        
+
         relevant_axis.set_yticklabels(
             yticklabels, **plot_characteristics["yticklabels"]
         )
@@ -2633,7 +2633,7 @@ class Plotting:
                 bottom, top = relevant_axis.get_ylim()
                 relevant_axis.set_ylim(bottom + 0.5, top - 0.5)
 
-        networkspecies = list(stats_df.index.get_level_values(0)[:: (len(subsections))])
+        networkspecies = list(stats_df.index.get_level_values("networkspecies")[:: (len(subsections))])
         n_rows = len(subsections) * len(networkspecies)
         n_cols = len(data_labels)
 
@@ -2982,24 +2982,23 @@ class Plotting:
         )
 
         # merge cells in networkspecies and subsections columns (if any)
-        if self.read_instance.mode in ["report", "library"]:
-            column_ii = 0
-            for column, rows in zip(
-                ["networkspecies", "subsections"], (networkspecies, subsections)
-            ):
-                if column in stats_df.columns:
-                    # count consecutive duplicates
-                    count_dups = [sum(1 for _ in group) for _, group in groupby(rows)]
+        column_ii = 0
+        for column, rows in zip(
+            ["networkspecies", "subsections"], (networkspecies, subsections)
+        ):
+            if column in stats_df.columns:
+                # count consecutive duplicates
+                count_dups = [sum(1 for _ in group) for _, group in groupby(rows)]
 
-                    # merge cells that have consecutive duplicates
-                    current_row = 0
-                    for count_ii, count in enumerate(count_dups):
-                        cells_to_merge = [
-                            (current_row + i, column_ii) for i in range(1, count + 1)
-                        ]
-                        merge_cells(table, cells_to_merge)
-                        current_row += count
-                    column_ii += 1
+                # merge cells that have consecutive duplicates
+                current_row = 0
+                for count_ii, count in enumerate(count_dups):
+                    cells_to_merge = [
+                        (current_row + i, column_ii) for i in range(1, count + 1)
+                    ]
+                    merge_cells(table, cells_to_merge)
+                    current_row += count
+                column_ii += 1
 
         # adjust cell height
         if "cell_height" in plot_characteristics:

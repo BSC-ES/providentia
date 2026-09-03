@@ -1595,7 +1595,7 @@
       "multispecies":
         {
           "xmin": "",
-          "network_names": false,
+          "network_names": true,
           "hlines": { "color": "grey", "linewidth": 0.5 },
         },
       "round_decimal_places": { "title": 2, "table": 2, "csv": 2 },
@@ -1765,7 +1765,7 @@
       "cell_pad_rowlabel": 0.03,
       "col_colours": true,
       "parent_section_names": false,
-      "multispecies": { "network_names": false },
+      "multispecies": { "network_names": true },
       "xtick_params":
         {
           "which": "both",
@@ -1904,7 +1904,7 @@
       "cell_pad_rowlabel": 0.03,
       "cell_colours": true,
       "parent_section_names": false,
-      "multispecies": { "network_names": false },
+      "multispecies": { "network_names": true },
       "xtick_params":
         {
           "which": "both",

@@ -576,9 +576,10 @@ class Dashboard(QtWidgets.QWidget):
         self.cb_resolution.setToolTip("Select temporal resolution of data")
 
         self.cb_matrix = set_formatting(
-            ComboBox(self), self.formatting_dict["menu_combobox"]
+            CheckableComboBox(self), self.formatting_dict["menu_combobox"]
         )
-        self.cb_matrix.setToolTip("Select data matrix")
+        self.cb_matrix.setToolTip("Select data matrix/es")
+
         self.cb_species = set_formatting(
             CheckableComboBox(self), self.formatting_dict["menu_combobox"]
         )
@@ -1130,13 +1131,19 @@ class Dashboard(QtWidgets.QWidget):
                 self.logger.error(msg)
                 sys.exit(1)
             else:
-                if selected_cb.currentText():
+                # keep whichever previously selected values are still valid
+                still_valid_values = [v for v in selected_values if v not in missing_values]
+                if still_valid_values:
+                    selected_values = still_valid_values
+                    msg += f" Keeping {', '.join(still_valid_values)}."
+                elif selected_cb.currentText():
                     msg += f" Choosing {selected_cb.currentText()} as it is the first option in the dropdown."
+                    selected_values = [selected_cb.currentText()]
                 show_message(self, msg)
                 setattr(
                     self,
                     f"selected_{combobox_type}",
-                    [selected_cb.currentText()]
+                    selected_values
                 )
 
         # check in available values if there is any value that needs to be selected
@@ -1149,16 +1156,17 @@ class Dashboard(QtWidgets.QWidget):
 
         return True
 
-    def get_species_per_ghost_version(self, matrix=None, version="1.5"):
+    def get_species_per_ghost_version(self, matrices=None, version="1.5"):
         """
         Get the list of GHOST standard species (bsc_parameter_name),
-        optionally filtered to those belonging to a given matrix.
+        optionally filtered to those belonging to the given matrices.
 
         Parameters
         ----------
-        matrix : str, optional
-            If given, only species whose GHOST standard matrix matches this value
-            are returned.
+        matrices : list, optional
+            If given, only species whose GHOST standard matrix is in this list
+            are returned. Selecting more than one matrix widens the list of
+            available species to the union across all of them.
         version : str
             GHOST version
 
@@ -1179,8 +1187,35 @@ class Dashboard(QtWidgets.QWidget):
         return sorted(
             param_dict["bsc_parameter_name"]
             for param_dict in standard_parameters.values()
-            if (matrix is None) or (param_dict["matrix"] == matrix)
+            if (not matrices) or (param_dict["matrix"] in matrices)
         )
+
+    def get_matrices_per_ghost_version(self, version="1.5"):
+        """
+        Get the list of GHOST standard matrices (bsc_parameter_name's
+        matrix field), independent of any network's available data.
+
+        Parameters
+        ----------
+        version : str
+            GHOST version
+
+        Returns
+        -------
+        list
+            Sorted list of unique matrices.
+        """
+
+        sys.path = [
+            path for path in sys.path if "dependencies/GHOST_standards/" not in path
+        ]
+        sys.path.insert(1, join(CURRENT_PATH, f"dependencies/GHOST_standards/{version}"))
+        if "GHOST_standards" in sys.modules:
+            del sys.modules["GHOST_standards"]
+        from GHOST_standards import standard_parameters
+
+        return sorted({param_dict["matrix"] for param_dict in standard_parameters.values()})
+
 
     def update_configuration_bar_fields(self):
         """Initialise or synchronise all configuration bar widgets and their available options."""
@@ -1228,7 +1263,7 @@ class Dashboard(QtWidgets.QWidget):
             # set initial selected config variables as set .conf files or defaults
             self.selected_network = copy.deepcopy(self.network)
             self.selected_resolution = copy.deepcopy(self.resolution)
-            self.selected_matrix = self.parameter_dictionary[self.species[0]]["matrix"]
+            self.selected_matrix = [self.parameter_dictionary[self.species[0]]["matrix"]]
             self.selected_species = copy.deepcopy(self.species)
             self.selected_statistic_mode = copy.deepcopy(self.statistic_mode)
             self.selected_statistic_aggregation = copy.deepcopy(
@@ -1306,22 +1341,14 @@ class Dashboard(QtWidgets.QWidget):
             # initialise ghost version if we have data
             # if we clear it earlier we are not able to change the version if we find no data for a specific version
             self.cb_ghost_version.clear()
-
-        # get matrices for all selected networks and current resolution
-        matrix_sets = [
-            set(
-                self.available_observation_data[network][
-                    self.selected_resolution
-                ].keys()
-            )
-            for network in self.selected_network
-        ]
-        available_matrices = sorted(set.intersection(*matrix_sets)) if matrix_sets else []
+        
+        # get matrices for GHOST version 1.5
+        available_matrices = self.get_matrices_per_ghost_version()
 
         # update matrix field
-        if not self.set_combobox_options(available_options=available_matrices, 
-                                         combobox_type='matrix',
-                                         recovery_hint='Please select a different matrix or change the date range to include available data.'):
+        if not self.set_checkable_combobox_options(available_options=available_matrices,
+                                                   combobox_type='matrix',
+                                                   recovery_hint='Please select a different matrix or change the date range to include available data.'):
             return
         
         # get species for GHOST version 1.5
@@ -1338,9 +1365,12 @@ class Dashboard(QtWidgets.QWidget):
             network for network in self.available_observation_data.keys()
             if self.selected_matrix
             and self.selected_resolution in self.available_observation_data[network]
-            and self.selected_matrix in self.available_observation_data[network][self.selected_resolution]
-            and set(self.selected_species)
-                & set(self.available_observation_data[network][self.selected_resolution][self.selected_matrix])
+            and any(
+                matrix in self.available_observation_data[network][self.selected_resolution]
+                and set(self.selected_species)
+                    & set(self.available_observation_data[network][self.selected_resolution][matrix])
+                for matrix in self.selected_matrix
+            )
         )
 
         if not self.set_checkable_combobox_options(available_options=available_networks,
@@ -1586,14 +1616,16 @@ class Dashboard(QtWidgets.QWidget):
                 self.models_menu["models"]["keep_selected"][model_type] = [
                     model
                     for model in self.experiments
-                    if model in self.models_menu["models"]["map_vars"]
+                    if (model in self.models_menu["models"]["map_vars"])
+                    and self.models_menu["models"]["enabled"][model_type].get(model, False)
                 ]
 
         for model_type in ['interpolated', 'noninterpolated']:
             self.models_menu["models"]["keep_selected"][model_type] = [
                 previous_selected_model
                 for previous_selected_model in self.models_menu["models"]["keep_selected"][model_type]
-                if previous_selected_model in self.models_menu["models"]["map_vars"]
+                if (previous_selected_model in self.models_menu["models"]["map_vars"])
+                and self.models_menu["models"]["enabled"][model_type].get(previous_selected_model, False)
             ]
         
         # update forecast menus
@@ -1898,12 +1930,18 @@ class Dashboard(QtWidgets.QWidget):
             self.bu_flags = self.enable_element(self.bu_flags, "button")
             self.bu_multispecies = self.enable_element(self.bu_multispecies, "button")
             self.cb_ghost_features = self.enable_element(self.cb_ghost_features, "combobox")
+            self.bu_rep = self.enable_element(self.bu_rep, "button")
+            self.bu_period = self.enable_element(self.bu_period, "button")
+            self.bu_meta = self.enable_element(self.bu_meta, "button")
         # option = "MODEL"
         else:
             self.bu_QA = self.disable_element(self.bu_QA, "button")
             self.bu_flags = self.disable_element(self.bu_flags, "button")
             self.bu_multispecies = self.disable_element(self.bu_multispecies, "button")
             self.cb_ghost_features = self.disable_element(self.cb_ghost_features, "combobox")
+            self.bu_rep = self.disable_element(self.bu_rep, "button")
+            self.bu_period = self.disable_element(self.bu_period, "button")
+            self.bu_meta = self.disable_element(self.bu_meta, "button")
 
         if option in ["MODEL", "BOTH"]:
             # update available models for selected fields
@@ -1949,23 +1987,10 @@ class Dashboard(QtWidgets.QWidget):
                 self.selected_resolution = changed_param
 
             elif event_source == self.cb_matrix:
-                self.selected_matrix = changed_param
-                species_options_for_matrix = self.get_species_per_ghost_version(matrix=self.selected_matrix)
-                if species_options_for_matrix:
-                    self.selected_species = [species_options_for_matrix[0]]
+                self.selected_matrix = self.cb_matrix.currentData()
 
             elif event_source == self.cb_species:
-                self.selected_species = changed_param
-                available_networks = [
-                    network for network in self.available_observation_data.keys()
-                    if self.selected_matrix
-                    and self.selected_resolution in self.available_observation_data[network]
-                    and self.selected_matrix in self.available_observation_data[network][self.selected_resolution]
-                    and set(self.selected_species)
-                       & set(self.available_observation_data[network][self.selected_resolution][self.selected_matrix])
-                ]
-                if available_networks:
-                    self.selected_network = sorted(available_networks)
+                self.selected_species = self.cb_species.currentData()
 
             elif event_source == self.cb_statistic_mode:
                 self.selected_statistic_mode = changed_param
@@ -3013,22 +3038,25 @@ class Dashboard(QtWidgets.QWidget):
         ghost_version_active = False
         ghost_features_active = False
 
+        # see if MODEL is selected
+        obs_active = self.switch.currentOption() in ['OBS', 'BOTH']
+
         # if have a GHOST network then QA and flags are active
         # also GHOST features are not set to min then period is also active
         # everything depends on obs_active, if MODEL is selected, the fields must stay disabled
         for network in self.selected_network:
             if check_for_ghost(network):
-                qa_active = self.obs_active
-                flags_active = self.obs_active
+                qa_active = obs_active
+                flags_active = obs_active
                 if self.ghost_features != "min":
-                    period_active = self.obs_active
+                    period_active = obs_active
                 ghost_version_active = True
-                ghost_features_active = self.obs_active
+                ghost_features_active = obs_active
                 break
             # if are reading ACTRIS network then QA and flags are active
             elif network == "actris/actris":
-                qa_active = self.obs_active
-                flags_active = self.obs_active
+                qa_active = obs_active
+                flags_active = obs_active
                 break
 
         # update buttons

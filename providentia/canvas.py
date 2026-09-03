@@ -1404,7 +1404,7 @@ class Canvas(FigureCanvas):
                 self.reset_ax_navigation_toolbar_stack(ax)
 
                 # update plot options, except for plots with no options in dashboard
-                if plot_type not in ["fairmode-statsummary"]:
+                if plot_type not in ["fairmode-statsummary", "metadata"]:
                     self.update_plot_options(plot_types=[plot_type])
 
     def get_plot_type_position(self, plot_type):

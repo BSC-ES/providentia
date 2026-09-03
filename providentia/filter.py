@@ -56,6 +56,7 @@ class DataFilter:
         """
 
         self.reset_data_filter()
+        self.filter_data_limits()
         self.temporally_colocate_model_data()
         self.get_valid_stations()
 
