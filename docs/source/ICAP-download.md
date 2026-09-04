@@ -12,7 +12,6 @@ Currently, only one ICAP dataset is available for download:
 
 1. [**ICAP MME - The International Cooperative for Aerosol Prediction (ICAP) Multi-Model Ensemble (MME)**](#icap-mme---the-international-cooperative-for-aerosol-prediction-icap-multi-model-ensemble-mme)
 
-(how-to-enable-icap-download)=
 ## How to enable ICAP download 
 
 To download ICAP data, include one of the following model names along with the domain:
