@@ -1,6 +1,6 @@
 url: https://dust.aemet.es/thredds/fileServer/restrictedDataRoot/
 domain: regional
-resolution: 6hourly
+resolution: 3hourly
 species: ## ??
   - od550du
   - sconcdu

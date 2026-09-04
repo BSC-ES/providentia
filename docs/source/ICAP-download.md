@@ -6,7 +6,7 @@ Providentia's download mode supports downloading model output data provided by t
 
 No account is required to download the files.
 
-## Available CAMS datasets
+## Available ICAP datasets
 
 Currently, only one ICAP dataset is available for download:
 
