@@ -763,6 +763,156 @@ def get_taylor_diagram_ghelper(reference_stddev, plot_characteristics, extend=Fa
     return ghelper
 
 
+# bounds on the automatic map marker size (see get_map_marker_size()).
+#
+# The floor is absolute: below it a point stops being visible at all, and that
+# is just as true on a large figure as a small one. It is the one bound kept
+# fixed across modes, so a dense map reads the same everywhere.
+#
+# The ceiling scales with the panel instead. Held fixed it bound far earlier on
+# the library's large figure than on a report's small panel, so the same map
+# came out relatively sparser in the library - the ceiling, not the sizing,
+# was what made the modes disagree. It is only ever scaled up, never below
+# MAP_MARKER_MAX_SIZE, so a small panel keeps a readable size, and never past
+# MAP_MARKER_ABSOLUTE_MAX_SIZE, so a near-empty map cannot produce blobs
+MAP_MARKER_MIN_SIZE = 6
+MAP_MARKER_MAX_SIZE = 60
+MAP_MARKER_ABSOLUTE_MAX_SIZE = 250
+# panel area, in pixels squared, MAP_MARKER_MAX_SIZE is the ceiling for - a
+# report map panel, the smallest of the three modes
+MAP_MARKER_REFERENCE_AREA = 175000.0
+# how much of the space each station has to itself its marker fills. The
+# marker area is set to this share of the area per station, so points keep the
+# same look however large the panel is and however many stations there are -
+# raise it to make every map's points bigger
+MAP_MARKER_AREA_FRACTION = 0.18
+
+
+def get_map_marker_size(ax, datacrs, longitudes, latitudes, map_extent=None):
+    """
+    Get the marker size for a map, from how densely the stations being shown
+    are packed into the axis. Shared by every mode, so the same map reads the
+    same way in the dashboard, a report and the library.
+
+    Counting only the stations on show is what makes this respond to zoom:
+    zooming in leaves fewer of them on the same axis, so the markers grow,
+    without needing a separate zoom term. Panel size is carried by the axis
+    area, so the report's small 2x2 panels and the library's full-width figure
+    each get a size suited to them.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        Map axis the stations are plotted on
+    datacrs : cartopy.crs.CRS
+        CRS the station coordinates are given in
+    longitudes : numpy array
+        Station longitudes
+    latitudes : numpy array
+        Station latitudes
+    map_extent : array-like, shape (4,), optional
+        Extent the map will be shown at, as [lon_min, lon_max, lat_min,
+        lat_max]. Given by report and library, which size the markers before
+        the extent has been applied to the axis, so the axis cannot be asked.
+        The dashboard leaves this as None and is counted against the axis's
+        own current view, which is always live there.
+
+    Returns
+    -------
+    float
+        Marker size, in points squared
+    """
+
+    longitudes = np.asarray(longitudes)
+    latitudes = np.asarray(latitudes)
+
+    panel_area = ax.bbox.width * ax.bbox.height
+    max_size = float(
+        np.clip(
+            MAP_MARKER_MAX_SIZE * panel_area / MAP_MARKER_REFERENCE_AREA,
+            MAP_MARKER_MAX_SIZE,
+            MAP_MARKER_ABSOLUTE_MAX_SIZE,
+        )
+    )
+
+    if longitudes.size == 0 or panel_area <= 0:
+        return max_size
+
+    if map_extent is not None and len(map_extent) == 4:
+        # count against the extent the map will be shown at, in lon/lat, which
+        # is how map_extent is given
+        lon_min, lon_max, lat_min, lat_max = map_extent
+        coords_x, coords_y = longitudes, latitudes
+        view_x = (min(lon_min, lon_max), max(lon_min, lon_max))
+        view_y = (min(lat_min, lat_max), max(lat_min, lat_max))
+    else:
+        # count against the axis's current view, in the axis's own projected
+        # coordinates rather than lon/lat, so this holds for every projection
+        projected = ax.projection.transform_points(datacrs, longitudes, latitudes)
+        coords_x, coords_y = projected[:, 0], projected[:, 1]
+        xlim, ylim = ax.get_xlim(), ax.get_ylim()
+        view_x = (min(xlim), max(xlim))
+        view_y = (min(ylim), max(ylim))
+
+    shown = (
+        (coords_x >= view_x[0])
+        & (coords_x <= view_x[1])
+        & (coords_y >= view_y[0])
+        & (coords_y <= view_y[1])
+    )
+    n_points = int(np.count_nonzero(shown))
+
+    # a lone station should always be plainly visible
+    if n_points == 1:
+        return max_size
+
+    if n_points == 0:
+        # nothing on show either means the map genuinely holds no stations, or
+        # the axis has not been given its limits yet - a fresh axis reports
+        # (0, 1) on both, which no station falls inside. Fall back to counting
+        # them all across the whole panel, rather than defaulting to the
+        # sparsest possible size
+        n_points = int(longitudes.size)
+        area = panel_area
+    else:
+        # measure the density over the part of the panel the stations actually
+        # occupy, not the whole of it - a network gathered in one region is
+        # crowded there however much empty map surrounds it, and dividing by
+        # the full panel made those points come out as large as a sparse
+        # global network's. Spans are taken between the 2nd and 98th
+        # percentile so a single distant station cannot stretch the area and
+        # hide the crowding in the rest
+        span_x = float(np.ptp(np.percentile(coords_x[shown], [2, 98])))
+        span_y = float(np.ptp(np.percentile(coords_y[shown], [2, 98])))
+        fraction_x = np.clip(span_x / (view_x[1] - view_x[0]), 0.0, 1.0)
+        fraction_y = np.clip(span_y / (view_y[1] - view_y[0]), 0.0, 1.0)
+
+        # keep a floor on the occupied area, so a very tight cluster still
+        # divides by something rather than by (near) zero
+        area = max(panel_area * fraction_x * fraction_y, 16.0)
+
+    # give each marker a fixed share of the area its own station has to
+    # itself, so the spacing between points reads the same whatever the panel
+    # size or station count. Replaces the exponential of density this used to
+    # apply (https://github.com/BSC-ES/providentia/issues/199), which fell
+    # away far too steeply once a map held a few hundred stations - a Spanish
+    # or European report map bottomed out at the floor while its points were
+    # still visibly well separated
+    area_per_station = area / n_points
+
+    # matplotlib marker sizes are in points squared, the axis area in pixels
+    dpi = ax.figure.dpi if ax.figure.dpi else 100.0
+    area_per_station *= (72.0 / dpi) ** 2
+
+    return float(
+        np.clip(
+            MAP_MARKER_AREA_FRACTION * area_per_station,
+            MAP_MARKER_MIN_SIZE,
+            max_size,
+        )
+    )
+
+
 def set_map_extent(canvas_instance, ax, map_extent):
     """
     Set map extent, done set_xlim and set_ylim rather than set_extent

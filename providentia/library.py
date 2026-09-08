@@ -1063,6 +1063,7 @@ class Providentia:
                 zstat=zstat,
                 labela=labela,
                 labelb=labelb,
+                map_extent=map_extent,
             )
         # periodic plot
         elif base_plot_type == "periodic":

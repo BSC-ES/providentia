@@ -2490,6 +2490,7 @@ class Report:
                     zstat=zstat,
                     labela=z1_label,
                     labelb=z2_label,
+                    map_extent=self.map_extent,
                 )
 
                 # save plot information for later formatting

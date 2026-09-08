@@ -44,6 +44,7 @@ from .plot_aux import (
     create_statistical_timeseries,
     get_multispecies_aliases,
     get_AERONET_sizedist_bin_radius,
+    get_map_marker_size,
     get_taylor_diagram_ghelper_info,
     kde_fft,
     merge_cells,
@@ -1153,6 +1154,7 @@ class Plotting:
         zstat=None,
         labela="",
         labelb="",
+        map_extent=None,
     ):
         """
         Renders a geospatial scatter plot of stations onto a map axis, coloured by a calculated statistical metric.
@@ -1173,6 +1175,9 @@ class Plotting:
             Label of first dataset.
         labelb : str, optional
             Label of second dataset (if defined then a bias plot is made).
+        map_extent : array-like, shape (4,), optional
+            Extent the map will be shown at, used to size the markers against
+            the stations that will actually be on show.
         """
 
         # calculate statistic
@@ -1186,7 +1191,11 @@ class Plotting:
             map=True,
         )
 
-        # get marker size (for report and library)
+        # get marker size (for report and library). The size is restored
+        # afterwards, as plot_characteristics is shared between every map a
+        # report draws - left in place, the first map's size would be reused
+        # for all the rest, whatever their own station count and extent
+        original_markersize = plot_characteristics["plot"]["s"]
         if self.read_instance.mode in ["report", "library"]:
             self.get_markersize(
                 relevant_axis,
@@ -1194,6 +1203,7 @@ class Plotting:
                 networkspeci,
                 plot_characteristics,
                 active_map_valid_station_inds=active_map_valid_station_inds,
+                map_extent=map_extent,
             )
         # if using dashboard make z_statistic and active_map_valid_station_inds class variables
         else:
@@ -1214,6 +1224,7 @@ class Plotting:
             transform=self.canvas_instance.datacrs,
             **plot_characteristics["plot"],
         )
+        plot_characteristics["plot"]["s"] = original_markersize
 
         # track plot elements
         if self.read_instance.mode not in ["report"]:
@@ -4387,6 +4398,7 @@ class Plotting:
         plot_characteristics,
         data=None,
         active_map_valid_station_inds=[],
+        map_extent=None,
     ):
         """
         Determines and updates the marker size within plot_characteristics based on data density and plot type.
@@ -4405,6 +4417,8 @@ class Plotting:
             Data array to be plotted.
         active_map_valid_station_inds : numpy array, optional
             Valid map indices to plot.
+        map_extent : array-like, shape (4,), optional
+            Extent the map will be shown at, passed to get_map_marker_size().
         """
 
         if base_plot_type in ["timeseries", "scatter"]:
@@ -4423,19 +4437,17 @@ class Plotting:
 
         elif base_plot_type == "map":
             if plot_characteristics["plot"]["s"] == "":
-                # calculate marker size considering points density
-                n_points = len(
+                # calculate marker size considering the density of the points
+                # currently in view - shared with the dashboard's automatic
+                # sizing, so the same map reads the same way in every mode
+                plot_characteristics["plot"]["s"] = get_map_marker_size(
+                    relevant_axis,
+                    self.canvas_instance.datacrs,
                     self.read_instance.station_longitudes[networkspeci][
                         active_map_valid_station_inds
-                    ]
+                    ],
+                    self.read_instance.station_latitudes[networkspeci][
+                        active_map_valid_station_inds
+                    ],
+                    map_extent=map_extent,
                 )
-
-                # calculate figure area and density
-                # divide area by 1000 so the function below makes sense
-                area = (relevant_axis.bbox.width * relevant_axis.bbox.height) / 1000
-                density = n_points / area
-
-                # marker size is calculated using an exponential equation
-                # the maximum size is 40 (very low densities)
-                # see https://github.com/BSC-ES/providentia/issues/199
-                plot_characteristics["plot"]["s"] = 1.2 ** (-density) * 40

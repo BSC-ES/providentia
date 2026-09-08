@@ -45,7 +45,11 @@ from .dashboard_interactivity import (
 from .fields_menus import update_metadata_fields
 from .filter import DataFilter
 from .plotting import Plotting
-from .plot_aux import get_map_extent, download_plot_data_to_csv
+from .plot_aux import (
+    get_map_extent,
+    get_map_marker_size,
+    download_plot_data_to_csv,
+)
 from .plot_formatting import (
     format_axis,
     harmonise_xy_lims_paradigm,
@@ -79,12 +83,9 @@ settings_dict = yaml.safe_load(
     open(join(PROVIDENTIA_ROOT, "settings/internal/canvas_menus.yaml"))
 )
 
-# tuning constants for automatic map marker size/opacity - see
-# Canvas.apply_automatic_marker_style(). Chosen so the fully-zoomed-out
-# end matches the map's own static defaults (plot_characteristics.yaml's
-# map.marker_unselected: s=4, alpha=0.4), rather than jumping on first use.
-MAP_AUTO_SIZING_MIN_SIZE = 4
-MAP_AUTO_SIZING_MAX_SIZE = 60
+# tuning constants for automatic map marker opacity - see
+# Canvas.apply_automatic_marker_style(). Size comes from the shared
+# get_map_marker_size() in plot_aux.py, so it matches report and library.
 MAP_AUTO_SIZING_MIN_OPACITY = 0.4
 MAP_AUTO_SIZING_MAX_OPACITY = 1.0
 # zoom ratio (current view's linear scale vs the projection's full global
@@ -2819,14 +2820,18 @@ class Canvas(FigureCanvas):
     def apply_automatic_marker_style(self):
         """
         Automatically set the map's unselected/selected marker size and
-        opacity from the current zoom level, so points stay identifiable
-        - big and well spaced enough to read individually when zoomed in
-        close, small enough not to overplot into an unreadable blob when
-        zoomed out to (near) the full globe - without the user having to
-        keep adjusting the manual sliders as they navigate the map.
-        Selected stations get a size/opacity boost over unselected ones,
-        which additionally dim back a little once there's an active
-        selection, so the selection reads clearly against the rest.
+        opacity as the map is navigated, so points stay identifiable - big
+        and well spaced enough to read individually when zoomed in close,
+        small enough not to overplot into an unreadable blob when zoomed
+        out to (near) the full globe - without the user having to keep
+        adjusting the manual sliders. Selected stations get a size/opacity
+        boost over unselected ones, which additionally dim back a little
+        once there's an active selection, so the selection reads clearly
+        against the rest.
+
+        Size comes from get_map_marker_size() in plot_aux.py, shared with
+        report and library so the same map reads the same way in every
+        mode. Opacity is dashboard only, and tracks the zoom ratio.
 
         A no-op if automatic sizing is off (read_instance.map_auto_marker_sizing)
         - safe to call unconditionally from every place the map's zoom or
@@ -2875,13 +2880,25 @@ class Canvas(FigureCanvas):
             zoom_factor = math.sqrt(global_area / current_area)
         zoom_factor = np.clip(zoom_factor, 1.0, MAP_AUTO_SIZING_REFERENCE_ZOOM)
 
-        # scale linearly between the fully-zoomed-out and fully-zoomed-in
-        # references, clamped so points never become invisible or
-        # oversized at the extremes
+        # size from the density of the stations currently in view, shared with
+        # report and library (get_map_marker_size()), so the same map reads the
+        # same way in every mode. Density already carries the zoom - fewer
+        # stations left in view means bigger markers - as well as how crowded
+        # the network is and how large the panel is, none of which a zoom ratio
+        # on its own can see
+        networkspeci = self.read_instance.networkspeci
+        station_inds = getattr(self, "active_map_valid_station_inds", [])
+        unsel_size = get_map_marker_size(
+            ax,
+            self.datacrs,
+            self.read_instance.station_longitudes[networkspeci][station_inds],
+            self.read_instance.station_latitudes[networkspeci][station_inds],
+        )
+
+        # opacity still tracks the zoom ratio directly, scaled between the
+        # fully-zoomed-out and fully-zoomed-in references - dashboard only,
+        # where panning and zooming makes overplotting come and go
         zoom_progress = (zoom_factor - 1.0) / (MAP_AUTO_SIZING_REFERENCE_ZOOM - 1.0)
-        unsel_size = MAP_AUTO_SIZING_MIN_SIZE + (
-            MAP_AUTO_SIZING_MAX_SIZE - MAP_AUTO_SIZING_MIN_SIZE
-        ) * zoom_progress
         unsel_opacity = MAP_AUTO_SIZING_MIN_OPACITY + (
             MAP_AUTO_SIZING_MAX_OPACITY - MAP_AUTO_SIZING_MIN_OPACITY
         ) * zoom_progress
