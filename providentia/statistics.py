@@ -1884,6 +1884,12 @@ def generate_colourbar_detail(
     plot_characteristics,
     speci,
     only_label=False,
+    cmap_override=None,
+    vmin_override=None,
+    vmax_override=None,
+    discrete_override=None,
+    n_discrete_override=None,
+    n_ticks_override=None,
 ):
     """
     Determines colourbar parameters including limits, labels, and colourmaps for a specific statistic.
@@ -1904,6 +1910,27 @@ def generate_colourbar_detail(
         The species name, used for species-specific overrides.
     only_label : bool, optional
         If True, only the generated label string is returned (default is False).
+    cmap_override : str, optional
+        If given, used as the colourmap name instead of the one resolved from
+        the per-statistic/species/configuration-file precedence chain below
+        (default is None, i.e. no override).
+    vmin_override : float, optional
+        If given, used as the colourbar's lower limit instead of the resolved
+        value (default is None, i.e. no override) - see the map settings
+        menu's colourbar limit fields.
+    vmax_override : float, optional
+        As vmin_override, for the upper limit.
+    discrete_override : bool, optional
+        If given, forces the colourbar to be discrete (True) or continuous
+        (False) instead of the resolved value (default is None, i.e. no
+        override) - see the map settings menu's colourmap scale selector.
+    n_discrete_override : int, optional
+        If given together with discrete_override=True, used as the number of
+        discrete colour levels instead of the resolved value.
+    n_ticks_override : int, optional
+        If given, used as the number of tick labels on the colourbar
+        instead of the resolved value (default is None, i.e. no override)
+        - see the map settings menu's "Labels" field.
 
     Returns
     -------
@@ -2019,6 +2046,11 @@ def generate_colourbar_detail(
         read_instance.logger.error(error)
         sys.exit(1)
 
+    # explicit override (e.g. from the map settings menu's colourmap selector)
+    # takes precedence over everything resolved above
+    if cmap_override:
+        z_colourmap = cmap_override
+
     # check if have defined vmin (in this order: 1. specific for z statistic 2. specific for species 3. configuration file)
     # if have no defined vmin, then take vmin as minimum range value of calculated statistic
     set_vmin = False
@@ -2088,6 +2120,20 @@ def generate_colourbar_detail(
         z_vmin = -limit_stat
         z_vmax = limit_stat
 
+    # explicit overrides (e.g. from the map settings menu's colourbar limit
+    # fields) take precedence over everything resolved above
+    if vmin_override is not None:
+        z_vmin = vmin_override
+    if vmax_override is not None:
+        z_vmax = vmax_override
+
+    # overriding only one of the two can invert the pair (e.g. a minimum set
+    # above the data's own maximum), which matplotlib refuses outright, part
+    # way through redrawing the map. Ordering them keeps both numbers asked
+    # for and lets the redraw finish
+    if z_vmin > z_vmax:
+        z_vmin, z_vmax = z_vmax, z_vmin
+
     # check if have defined n_discrete (in this order: 1. specific for z statistic 2. specific for species 3. configuration file)
     # if have no defined n_discrete, then take None
     set_n_discrete = False
@@ -2114,6 +2160,14 @@ def generate_colourbar_detail(
     # if have no defined n_discrete, take None
     if not set_n_discrete:
         n_discrete = None
+
+    # explicit override (e.g. from the map settings menu's colourmap scale
+    # selector) takes precedence over everything resolved above
+    if discrete_override is not None:
+        if discrete_override:
+            n_discrete = n_discrete_override if n_discrete_override else (n_discrete or 10)
+        else:
+            n_discrete = None
 
     # check if have defined n_ticks (in this order: 1. specific for z statistic 2. specific for species 3. configuration file)
     # if have no defined n_ticks, then raise error
@@ -2145,10 +2199,28 @@ def generate_colourbar_detail(
         read_instance.logger.error(error)
         sys.exit(1)
 
+    # explicit override (e.g. from the map settings menu's "Labels" field)
+    # takes precedence over everything resolved above
+    if n_ticks_override is not None:
+        n_ticks = n_ticks_override
+
     return z_vmin, z_vmax, z_label, z_colourmap, n_discrete, n_ticks
 
 
-def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, speci):
+def generate_colourbar(
+    read_instance,
+    axs,
+    cb_axs,
+    zstat,
+    plot_characteristics,
+    speci,
+    cmap_override=None,
+    vmin_override=None,
+    vmax_override=None,
+    discrete_override=None,
+    n_discrete_override=None,
+    n_ticks_override=None,
+):
     """
     Renders the colourbar on the specified axes and updates plot collection limits.
 
@@ -2166,6 +2238,33 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
         Configuration dictionary defining orientation, labels, and tick parameters.
     speci : str
         The species identifier for species-specific scaling.
+    cmap_override : str, optional
+        If given, used as the colourmap name instead of the default resolved
+        for the statistic/species/configuration (default is None).
+    vmin_override : float, optional
+        If given, used as the colourbar's lower limit instead of the resolved
+        value (default is None).
+    vmax_override : float, optional
+        As vmin_override, for the upper limit.
+    discrete_override : bool, optional
+        If given, forces the colourbar to be discrete (True) or continuous
+        (False) instead of the resolved value (default is None).
+    n_discrete_override : int, optional
+        If given together with discrete_override=True, used as the number of
+        discrete colour levels instead of the resolved value.
+    n_ticks_override : int, optional
+        If given, used as the number of tick labels on the colourbar
+        instead of the resolved value (default is None, i.e. no override)
+        - see the map settings menu's "Labels" field.
+
+    Returns
+    -------
+    z_vmin : np.float32 or None
+        The colourbar's resolved lower limit (whatever was actually applied -
+        auto-resolved or overridden), or None if there was no valid data to
+        plot a colourbar for.
+    z_vmax : np.float32 or None
+        As z_vmin, for the upper limit.
     """
 
     # get plotted vmin and vmax over relevant axes
@@ -2174,7 +2273,7 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
         for cb_ax in cb_axs:
             cb_ax.axis("off")
             cb_ax.set_visible(False)
-        return
+        return None, None
 
     # get colourbar limits/label
     (
@@ -2185,7 +2284,18 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
         n_discrete,
         n_ticks,
     ) = generate_colourbar_detail(
-        read_instance, zstat, plotted_min, plotted_max, plot_characteristics, speci
+        read_instance,
+        zstat,
+        plotted_min,
+        plotted_max,
+        plot_characteristics,
+        speci,
+        cmap_override=cmap_override,
+        vmin_override=vmin_override,
+        vmax_override=vmax_override,
+        discrete_override=discrete_override,
+        n_discrete_override=n_discrete_override,
+        n_ticks_override=n_ticks_override,
     )
 
     # generate colourbar tick array
@@ -2238,7 +2348,10 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
             # remove ticks for discrete colourbars
             # we do this because different screen resolutions slightly offset the tick position
             # https://github.com/BSC-ES/providentia/issues/159
-            if plot_characteristics["cb"]["discrete"]:
+            # n_discrete (not the static "discrete" config flag) is the
+            # source of truth here, since the map settings menu's colourmap
+            # scale selector can override it dynamically per statistic
+            if n_discrete:
                 plot_characteristics["cb_tick_params"]["size"] = 0
             cb.ax.tick_params(**plot_characteristics["cb_tick_params"])
 
@@ -2250,6 +2363,8 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
             ):
                 collection.set_clim(vmin=z_vmin, vmax=z_vmax)
                 collection.set_cmap(cmap=cmap)
+
+    return z_vmin, z_vmax
 
 
 def get_z_statistic_comboboxes(base_zstat, bias=False):

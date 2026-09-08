@@ -35,7 +35,7 @@
         {
           "element_type": "container",
           "formatting_dict": "settings_container",
-          "size": [250, 430],
+          "size": [250, 220],
           "relative_position": [-230, 25],
         },
 
@@ -102,12 +102,406 @@
           "function": "handle_map_z_statistic_update",
         },
 
-      "unsel_label":
+      # the three sub-panel nav buttons. Widths here are only a starting
+      # point - layout_map_nav_buttons() in canvas.py re-sizes each one to
+      # its own text and centres the row (wrapping "Colourbar" onto a
+      # second line if all three don't fit), so they read as three small
+      # centred buttons rather than three full-width bars
+      "map_panel_button":
+        {
+          "element_type": "button",
+          "formatting_dict": "menu_button",
+          "size": [60, 20],
+          "relative_position": [-206, 210],
+          "object_name": "map_panel_button",
+          "text": "Map",
+          "function": "handle_map_panel_toggle",
+        },
+
+      "points_panel_button":
+        {
+          "element_type": "button",
+          "formatting_dict": "menu_button",
+          "size": [70, 20],
+          "relative_position": [-140, 210],
+          "object_name": "map_points_panel_button",
+          "text": "Points",
+          "function": "handle_map_points_panel_toggle",
+        },
+
+      "colourbar_panel_button":
+        {
+          "element_type": "button",
+          "formatting_dict": "menu_button",
+          "size": [90, 20],
+          "relative_position": [-64, 210],
+          "object_name": "map_colourbar_panel_button",
+          "text": "Colourbar",
+          "function": "handle_map_colourbar_panel_toggle",
+        },
+
+      "options_label":
         {
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 150],
+          "relative_position": [-220, 155],
+          "text": "Options",
+        },
+
+      "options":
+        {
+          "element_type": "checkable_combobox",
+          "formatting_dict": "menu_checkable_combobox",
+          "size": [230, 20],
+          "relative_position": [-220, 180],
+          "object_name": "map_options",
+          "function": "update_plot_option",
+        },
+
+      # ---- "Map" sub-panel -------------------------------------------
+      "map_panel_container":
+        {
+          "element_type": "container",
+          "formatting_dict": "settings_container",
+          "size": [250, 265],
+          "relative_position": [30, 45],
+        },
+
+      "map_panel_title":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_label",
+          "size": [230, 20],
+          "relative_position": [40, 50],
+          "text": "MAP",
+        },
+
+      "map_panel_reset":
+        {
+          "element_type": "button",
+          "formatting_dict": "menu_button",
+          "size": [22, 20],
+          "fixed_width": 22,
+          "relative_position": [248, 50],
+          "object_name": "map_panel_reset",
+          "text": "↺",
+          "function": "handle_map_panel_reset",
+        },
+
+      "projection_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_sublabel",
+          "size": [230, 20],
+          "relative_position": [40, 75],
+          "text": "Projection",
+        },
+
+      "projection":
+        {
+          "element_type": "combobox",
+          "formatting_dict": "menu_combobox",
+          "fixed_width": 230,
+          "relative_position": [40, 100],
+          "object_name": "map_projection",
+          "function": "handle_map_projection_update",
+        },
+
+      "colour_preset_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_sublabel",
+          "size": [230, 20],
+          "relative_position": [40, 125],
+          "text": "Colour presets",
+        },
+
+      "colour_preset":
+        {
+          "element_type": "combobox",
+          "formatting_dict": "menu_combobox",
+          "fixed_width": 230,
+          "relative_position": [40, 150],
+          "object_name": "map_colour_preset",
+          "function": "handle_map_colour_preset_update",
+        },
+
+      "land_colour_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_sublabel",
+          "size": [230, 20],
+          "relative_position": [40, 175],
+          "text": "Land colour",
+        },
+
+      "land_colour":
+        {
+          "element_type": "combobox",
+          "formatting_dict": "menu_combobox",
+          "fixed_width": 105,
+          "relative_position": [40, 200],
+          "object_name": "map_land_colour",
+          "function": "handle_map_land_colour_update",
+        },
+
+      "ocean_colour_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_sublabel",
+          "size": [230, 20],
+          "relative_position": [165, 175],
+          "text": "Ocean colour",
+        },
+
+      "ocean_colour":
+        {
+          "element_type": "combobox",
+          "formatting_dict": "menu_combobox",
+          "fixed_width": 105,
+          "relative_position": [165, 200],
+          "object_name": "map_ocean_colour",
+          "function": "handle_map_ocean_colour_update",
+        },
+
+      "resolution_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_sublabel",
+          "size": [230, 20],
+          "relative_position": [40, 225],
+          "text": "Coastline resolution",
+        },
+
+      "resolution":
+        {
+          "element_type": "combobox",
+          "formatting_dict": "menu_combobox",
+          "fixed_width": 230,
+          "relative_position": [40, 250],
+          "object_name": "map_resolution",
+          "function": "handle_map_resolution_update",
+        },
+
+      "borders":
+        {
+          "element_type": "checkbox",
+          "formatting_dict": "menu_checkbox",
+          "fixed_width": 112,
+          "relative_position": [40, 278],
+          "object_name": "map_borders",
+          "text": "Borders",
+          "function": "handle_map_borders_update",
+        },
+
+      "gridlines":
+        {
+          "element_type": "checkbox",
+          "formatting_dict": "menu_checkbox",
+          "fixed_width": 100,
+          "relative_position": [170, 278],
+          "object_name": "map_gridlines",
+          "text": "Gridlines",
+          "function": "handle_map_gridlines_update",
+        },
+
+      # ---- "Colourbar" sub-panel -------------------------------------
+      "colourbar_panel_container":
+        {
+          "element_type": "container",
+          "formatting_dict": "settings_container",
+          "size": [250, 240],
+          "relative_position": [30, 45],
+        },
+
+      "colourbar_panel_title":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_label",
+          "size": [230, 20],
+          "relative_position": [40, 50],
+          "text": "COLOURBAR",
+        },
+
+      "colourbar_panel_reset":
+        {
+          "element_type": "button",
+          "formatting_dict": "menu_button",
+          "size": [22, 20],
+          "fixed_width": 22,
+          "relative_position": [248, 50],
+          "object_name": "map_colourbar_panel_reset",
+          "text": "↺",
+          "function": "handle_map_colourbar_panel_reset",
+        },
+
+      "cb_limits_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_sublabel",
+          "size": [230, 20],
+          "relative_position": [40, 75],
+          "text": "Limits",
+        },
+
+      "cb_min":
+        {
+          "element_type": "lineedit",
+          "formatting_dict": "menu_lineedit",
+          "fixed_width": 95,
+          "relative_position": [40, 100],
+          "object_name": "map_cb_min",
+          "placeholder": "Min (auto)",
+          "function": "handle_map_cb_limits_update",
+        },
+
+      "cb_max":
+        {
+          "element_type": "lineedit",
+          "formatting_dict": "menu_lineedit",
+          "fixed_width": 95,
+          "relative_position": [140, 100],
+          "object_name": "map_cb_max",
+          "placeholder": "Max (auto)",
+          "function": "handle_map_cb_limits_update",
+        },
+
+      "cb_reset":
+        {
+          "element_type": "button",
+          "formatting_dict": "menu_button",
+          "size": [25, 20],
+          "fixed_width": 25,
+          "relative_position": [245, 100],
+          "object_name": "map_cb_reset",
+          "text": "↺",
+          "function": "handle_map_cb_limits_reset",
+        },
+
+      "colourmap_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_sublabel",
+          "size": [230, 20],
+          "relative_position": [40, 125],
+          "text": "Colourmap",
+        },
+
+      "colourmap":
+        {
+          "element_type": "combobox",
+          "formatting_dict": "menu_combobox",
+          "fixed_width": 230,
+          "relative_position": [40, 150],
+          "object_name": "map_colourmap",
+          "function": "handle_map_colourmap_update",
+        },
+
+      "colourmap_scale_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_sublabel",
+          "size": [230, 20],
+          "relative_position": [40, 175],
+          "text": "Scale",
+        },
+
+      "colourmap_scale":
+        {
+          "element_type": "combobox",
+          "formatting_dict": "menu_combobox",
+          "fixed_width": 230,
+          "relative_position": [40, 200],
+          "object_name": "map_colourmap_scale",
+          "function": "handle_map_colourmap_scale_update",
+        },
+
+      "n_ticks_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_sublabel",
+          "size": [230, 20],
+          "relative_position": [40, 225],
+          "text": "№ Labels",
+        },
+
+      "n_ticks":
+        {
+          "element_type": "lineedit",
+          "formatting_dict": "menu_lineedit",
+          "fixed_width": 105,
+          "relative_position": [40, 250],
+          "object_name": "map_n_ticks",
+          "function": "handle_map_n_ticks_update",
+        },
+
+      "n_sections_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_sublabel",
+          "size": [230, 20],
+          "relative_position": [165, 225],
+          "text": "№ Chunks",
+        },
+
+      "n_sections":
+        {
+          "element_type": "lineedit",
+          "formatting_dict": "menu_lineedit",
+          "fixed_width": 105,
+          "relative_position": [165, 250],
+          "object_name": "map_n_sections",
+          "function": "handle_map_n_sections_update",
+        },
+
+      # ---- "Points" sub-panel ----------------------------------------
+      "sizing_container":
+        {
+          "element_type": "container",
+          "formatting_dict": "settings_container",
+          "size": [250, 365],
+          "relative_position": [30, 45],
+        },
+
+      "sizing_title":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_label",
+          "size": [230, 20],
+          "relative_position": [40, 50],
+          "text": "POINTS",
+        },
+
+      "sizing_reset":
+        {
+          "element_type": "button",
+          "formatting_dict": "menu_button",
+          "size": [22, 20],
+          "fixed_width": 22,
+          "relative_position": [248, 50],
+          "object_name": "map_points_panel_reset",
+          "text": "↺",
+          "function": "handle_map_points_panel_reset",
+        },
+
+      "auto_sizing":
+        {
+          "element_type": "checkbox",
+          "formatting_dict": "menu_checkbox",
+          "fixed_width": 230,
+          "relative_position": [40, 75],
+          "object_name": "map_auto_sizing",
+          "text": "Automatic",
+          "function": "handle_map_auto_sizing_update",
+        },
+
+      "sizing_unsel_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_sublabel",
+          "size": [230, 20],
+          "relative_position": [40, 100],
           "text": "Unselected stations",
         },
 
@@ -116,7 +510,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel_slider",
           "size": [230, 20],
-          "relative_position": [-220, 175],
+          "relative_position": [40, 125],
           "text": "Size",
         },
 
@@ -124,7 +518,7 @@
         {
           "element_type": "slider",
           "size": [230, 20],
-          "relative_position": [-220, 200],
+          "relative_position": [40, 150],
           "object_name": "map_markersize_unsel_sl",
           "minimum": 0,
           "maximum": 80,
@@ -138,7 +532,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel_slider",
           "size": [230, 20],
-          "relative_position": [-220, 225],
+          "relative_position": [40, 175],
           "text": "Opacity",
         },
 
@@ -146,7 +540,7 @@
         {
           "element_type": "slider",
           "size": [230, 20],
-          "relative_position": [-220, 250],
+          "relative_position": [40, 200],
           "object_name": "map_opacity_unsel_sl",
           "minimum": 0,
           "maximum": 10,
@@ -155,12 +549,12 @@
           "function": "update_opacity_func",
         },
 
-      "sel_label":
+      "sizing_sel_label":
         {
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 275],
+          "relative_position": [40, 225],
           "text": "Selected stations",
         },
 
@@ -169,7 +563,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel_slider",
           "size": [230, 20],
-          "relative_position": [-220, 300],
+          "relative_position": [40, 250],
           "text": "Size",
         },
 
@@ -177,7 +571,7 @@
         {
           "element_type": "slider",
           "size": [230, 20],
-          "relative_position": [-220, 325],
+          "relative_position": [40, 275],
           "object_name": "map_markersize_sel_sl",
           "minimum": 0,
           "maximum": 80,
@@ -191,7 +585,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel_slider",
           "size": [230, 20],
-          "relative_position": [-220, 350],
+          "relative_position": [40, 300],
           "text": "Opacity",
         },
 
@@ -199,32 +593,13 @@
         {
           "element_type": "slider",
           "size": [230, 20],
-          "relative_position": [-220, 375],
+          "relative_position": [40, 325],
           "object_name": "map_opacity_sel_sl",
           "minimum": 0,
           "maximum": 10,
           "tick_interval": 1,
           "tracking": false,
           "function": "update_opacity_func",
-        },
-
-      "options_label":
-        {
-          "element_type": "label",
-          "formatting_dict": "settings_sublabel",
-          "size": [230, 20],
-          "relative_position": [-220, 400],
-          "text": "Options",
-        },
-
-      "options":
-        {
-          "element_type": "checkable_combobox",
-          "formatting_dict": "menu_checkable_combobox",
-          "size": [230, 20],
-          "relative_position": [-220, 425],
-          "object_name": "map_options",
-          "function": "update_plot_option",
         },
     },
 

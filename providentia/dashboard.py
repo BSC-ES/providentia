@@ -21,6 +21,7 @@ from .canvas import Canvas
 from .configuration import load_conf
 from .configuration import ProvConfiguration
 from .dashboard_elements import ComboBox, QVLine, InputDialog, set_cursor, unset_cursor
+from .dashboard_elements import MenuEditCommitFilter
 from .dashboard_elements import set_formatting
 from .fields_menus import (
     init_models,
@@ -2399,9 +2400,11 @@ class Dashboard(QtWidgets.QWidget):
             else:
                 self.mpl_canvas.top_right_canvas_cover.show()
                 self.mpl_canvas.lower_canvas_cover.show()
-            # update to show covers immediately
+            # update to show covers immediately - repaint() rather than
+            # flush_events(), which would also deliver queued user input
+            # mid-handler (see update_map_station_selection())
             self.mpl_canvas.figure.canvas.draw_idle()
-            self.mpl_canvas.figure.canvas.flush_events()
+            self.mpl_canvas.figure.canvas.repaint()
 
             # clear all axes elements
             for plot_type, ax in self.mpl_canvas.plot_axes.items():
@@ -2659,6 +2662,10 @@ def main(**kwargs):
     p.setColor(QtGui.QPalette.Shadow, QtGui.QColor(*dcp["Shadow"]))
     p.setColor(QtGui.QPalette.Text, QtGui.QColor(*dcp["Text"]))
     q_app.setPalette(p)
+
+    # apply a settings field being edited when a click finishes anywhere
+    # else, whatever that click lands on - see MenuEditCommitFilter
+    q_app.installEventFilter(MenuEditCommitFilter(q_app))
 
     # set application name and icon
     q_app.setWindowIcon(QtGui.QIcon(join(PROVIDENTIA_ROOT, "assets/logo.icns")))

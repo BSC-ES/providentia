@@ -403,10 +403,12 @@
           "round_decimal_places": 2,
           "sep": 1,
         },
-      "gridlines": { "linestyle": "-", "alpha": 0.4 },
+      "gridlines": { "linestyle": "-", "alpha": 0.4, "visible": true },
       "plot": { "zorder": 3, "linewidth": 0.0, "alpha": null },
       "axis_title": { "label": "" },
-      "land_polygon": { "facecolor": "0.85" },
+      "land_polygon": { "facecolor": "#E8E8E8" },
+      "ocean_polygon": { "facecolor": "#FAFAFA", "edgecolor": "none", "visible": true },
+      "borders": { "edgecolor": "0.4", "linewidth": 0.4, "visible": false },
       "dashboard":
         {
           "plot_options": ["annotate", "domain"],

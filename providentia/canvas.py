@@ -1,11 +1,14 @@
 """ Class for Dashboard matplotlib canvas """
 
 import copy
+import functools
 import datetime
+import math
 import sys
 import yaml
 from weakref import WeakKeyDictionary
 
+import cartopy.crs as ccrs
 import matplotlib
 from matplotlib.backend_bases import MouseButton
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -18,12 +21,21 @@ import numpy as np
 from packaging.version import Version
 import pandas as pd
 from pandas.plotting import register_matplotlib_converters
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from providentia.auxiliar import CURRENT_PATH, join
 from .canvas_menus import SettingsMenu
 from .dashboard_elements import ComboBox
 from .dashboard_elements import set_formatting, set_cursor, unset_cursor
+from .dashboard_elements import populate_colourmap_combobox
+from .dashboard_elements import (
+    populate_projection_combobox,
+    populate_colour_combobox,
+    COLOUR_PRESETS,
+    COLOUR_PRESET_CUSTOM,
+    LAND_COLOUR_OPTIONS,
+    OCEAN_COLOUR_OPTIONS,
+)
 from .dashboard_interactivity import HoverAnnotation
 from .dashboard_interactivity import (
     legend_picker_func,
@@ -40,6 +52,9 @@ from .plot_formatting import (
     log_validity,
     set_axis_label,
     set_axis_title,
+    draw_map_features,
+    remove_map_features,
+    draw_map_gridlines,
 )
 from .plot_options import annotation, linear_regression, log_axes, smooth, threshold
 from .read_aux import get_possible_resampling_resolutions, get_frequency_code
@@ -63,6 +78,63 @@ PROVIDENTIA_ROOT = "/".join(CURRENT_PATH.split("/")[:-1])
 settings_dict = yaml.safe_load(
     open(join(PROVIDENTIA_ROOT, "settings/internal/canvas_menus.yaml"))
 )
+
+# tuning constants for automatic map marker size/opacity - see
+# Canvas.apply_automatic_marker_style(). Chosen so the fully-zoomed-out
+# end matches the map's own static defaults (plot_characteristics.yaml's
+# map.marker_unselected: s=4, alpha=0.4), rather than jumping on first use.
+MAP_AUTO_SIZING_MIN_SIZE = 4
+MAP_AUTO_SIZING_MAX_SIZE = 60
+MAP_AUTO_SIZING_MIN_OPACITY = 0.4
+MAP_AUTO_SIZING_MAX_OPACITY = 1.0
+# zoom ratio (current view's linear scale vs the projection's full global
+# extent) at which marker size/opacity reach their maximum - beyond this,
+# they're clamped rather than continuing to grow
+MAP_AUTO_SIZING_REFERENCE_ZOOM = 15.0
+# selected stations render this much bigger than unselected ones - large,
+# deliberately, since size/opacity alone (no edge/outline) now carry the
+# whole "selected vs unselected" distinction
+MAP_AUTO_SIZING_SELECTED_SIZE_BOOST = 2.9
+# once there's an active selection, unselected stations dim to this
+# fraction of their normal opacity, so the selection reads clearly
+MAP_AUTO_SIZING_UNSELECTED_OPACITY_DIM = 0.28
+
+
+def restores_settings_guard(method):
+    """
+    Decorator which guarantees a settings handler leaves the dashboard usable,
+    however it exits.
+
+    Each handler raises block_config_bar_handling_updates while it works, so the
+    controls it changes don't re-trigger each other, and every handler returns
+    immediately when it is already set. Lowering it as the last statement rather
+    than in a finally meant any exception in between left it raised for the rest
+    of the session, silently disabling the whole settings menu. It is restored
+    to whatever it was on entry, not simply cleared, so a handler called from
+    inside another cannot lower the outer one's guard on its way out.
+
+    Parameters
+    ----------
+    method : function
+        Settings handler to wrap
+
+    Returns
+    -------
+    function
+        Wrapped handler
+    """
+
+    @functools.wraps(method)
+    def wrapper(self, *args, **kwargs):
+        previous = self.read_instance.block_config_bar_handling_updates
+        try:
+            return method(self, *args, **kwargs)
+        finally:
+            self.read_instance.block_config_bar_handling_updates = previous
+            # only restores if this call is the one that set it
+            unset_cursor(self.read_instance.cursor_function, method.__name__)
+
+    return wrapper
 
 
 class Canvas(FigureCanvas):
@@ -476,6 +548,7 @@ class Canvas(FigureCanvas):
 
         return None
 
+    @restores_settings_guard
     def update_resampling_statistics(self):
         """
         Update resampling statistics
@@ -579,6 +652,7 @@ class Canvas(FigureCanvas):
 
         return None
 
+    @restores_settings_guard
     def handle_statistic_mode_update(self):
         """
         Function that handles the update of the MPL canvas
@@ -627,6 +701,7 @@ class Canvas(FigureCanvas):
 
         return None
 
+    @restores_settings_guard
     def handle_statistic_aggregation_update(self):
         """
         Function that handles the update of the MPL canvas
@@ -879,21 +954,44 @@ class Canvas(FigureCanvas):
             ).T
 
             # generate colourbar
-            generate_colourbar(
+            resolved_vmin, resolved_vmax = generate_colourbar(
                 self.read_instance,
                 [self.plot_axes["map"]],
                 [self.plot_axes["cb"]],
                 zstat,
                 self.plot_characteristics["map"],
                 self.read_instance.species[0],
+                cmap_override=getattr(self.read_instance, "map_colourmap_override", None),
+                vmin_override=getattr(self.read_instance, "map_vmin_override", None),
+                vmax_override=getattr(self.read_instance, "map_vmax_override", None),
+                discrete_override=getattr(self.read_instance, "map_discrete_override", None),
+                n_discrete_override=getattr(
+                    self.read_instance, "map_n_discrete_override", None
+                ),
+                n_ticks_override=getattr(self.read_instance, "map_n_ticks_override", None),
             )
+
+            # show the colourbar's actual resolved limits in the settings
+            # menu's limit fields, so editing one starts from the real
+            # current number rather than a blank field. Guarded, as this can
+            # run before the map settings menu exists
+            if hasattr(self, "map_cb_min") and (resolved_vmin is not None):
+                self.map_cb_min.setText(f"{resolved_vmin:.4g}")
+            if hasattr(self, "map_cb_max") and (resolved_vmax is not None):
+                self.map_cb_max.setText(f"{resolved_vmax:.4g}")
 
         # update plot options
         self.update_plot_options(plot_types=["map"])
 
-        # redraw plot (needed to update plotted colours before update_map_station_selection)
-        self.figure.canvas.draw()
-        self.figure.canvas.flush_events()
+        # resolve each collection's per-point face colours from its scalar
+        # mappable, which update_map_station_selection() reads to apply the
+        # selected/unselected styling on top of. A full draw+flush here
+        # painted that intermediate state to screen (the map appearing to
+        # flash selected then unselect) and pumped the event loop
+        # mid-handler, swallowing the click that triggered it
+        for collection in self.plot_axes["map"].collections:
+            if isinstance(collection, matplotlib.collections.PathCollection):
+                collection.update_scalarmappable()
 
         # update map selection appropriately for z statistic
         self.update_map_station_selection()
@@ -904,6 +1002,11 @@ class Canvas(FigureCanvas):
         """
         Function that updates the visual selection of stations on map
         """
+
+        # recompute automatic marker size/opacity (a no-op if automatic
+        # sizing is off) before anything below reads the marker styles -
+        # every full map redraw and selection change routes through here
+        self.apply_automatic_marker_style()
 
         # update map title
         if len(self.relative_selected_station_inds) == 1:
@@ -1010,8 +1113,11 @@ class Canvas(FigureCanvas):
         # redraw plot
         self.figure.canvas.draw()
 
-        # flush events so can see map selection immediately
-        self.figure.canvas.flush_events()
+        # repaint(), not flush_events() - the latter is processEvents() with
+        # nothing excluded, so it delivers queued user input too. Running
+        # inside a settings handler, that delivered the mouse release
+        # mid-handler and the button's clicked signal never fired
+        self.figure.canvas.repaint()
 
     def update_associated_active_dashboard_plot(self, plot_type):
         """
@@ -1448,12 +1554,18 @@ class Canvas(FigureCanvas):
 
         return None
 
+    @restores_settings_guard
     def handle_map_z_statistic_update(self):
         """
         Function which handles update of map z statistic upon interaction with map comboboxes
         """
 
         if not self.read_instance.block_config_bar_handling_updates:
+            self.read_instance.cursor_function = set_cursor(
+                self.read_instance.cursor_function, "handle_map_z_statistic_update"
+            )
+            QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
+
             # set variable that blocks configuration bar handling updates until all
             # changes to the z statistic comboboxes are made
             self.read_instance.block_config_bar_handling_updates = True
@@ -1528,6 +1640,14 @@ class Canvas(FigureCanvas):
             self.map_z1.setCurrentText(selected_z1_array)
             self.map_z2.setCurrentText(selected_z2_array)
 
+            # a manually-typed colourbar limit rarely makes sense carried
+            # over to a different statistic (a concentration range typed for
+            # "Mean" would mis-scale "Bias"), so clear it back to auto
+            self.map_cb_min.clear()
+            self.map_cb_max.clear()
+            self.read_instance.map_vmin_override = None
+            self.read_instance.map_vmax_override = None
+
             # update plotted map z statistic
             if not self.read_instance.block_MPL_canvas_updates:
                 self.update_map_z_statistic()
@@ -1535,7 +1655,1380 @@ class Canvas(FigureCanvas):
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
 
+            unset_cursor(
+                self.read_instance.cursor_function, "handle_map_z_statistic_update"
+            )
+
         return None
+
+    @restores_settings_guard
+    def handle_map_colourmap_update(self):
+        """
+        Function which handles update of the map colourbar's colourmap upon
+        interaction with the map colourmap combobox
+        """
+
+        if not self.read_instance.block_config_bar_handling_updates:
+            self.read_instance.cursor_function = set_cursor(
+                self.read_instance.cursor_function, "handle_map_colourmap_update"
+            )
+            QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
+            self.read_instance.block_config_bar_handling_updates = True
+
+            self.read_instance.map_colourmap_override = self.map_colourmap.currentText()
+            self.sync_map_colour_preset()
+
+            # update plotted map z statistic (re-generates the colourbar too)
+            if not self.read_instance.block_MPL_canvas_updates:
+                self.update_map_z_statistic()
+
+            # allow handling updates to the configuration bar again
+            self.read_instance.block_config_bar_handling_updates = False
+
+            unset_cursor(
+                self.read_instance.cursor_function, "handle_map_colourmap_update"
+            )
+
+        return None
+
+    @restores_settings_guard
+    def handle_map_colourmap_scale_update(self):
+        """
+        Function which handles update of the map colourbar's discrete/
+        continuous scale upon interaction with the map colourmap scale
+        combobox
+        """
+
+        if not self.read_instance.block_config_bar_handling_updates:
+            self.read_instance.cursor_function = set_cursor(
+                self.read_instance.cursor_function, "handle_map_colourmap_scale_update"
+            )
+            # force the cursor change to paint before the work below restores
+            # it, as the set+unset can otherwise happen within one event loop
+            # pass and never show. ExcludeUserInputEvents so this pump cannot
+            # process a fresh click mid-handler
+            QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
+            self.read_instance.block_config_bar_handling_updates = True
+
+            is_discrete = self.map_colourmap_scale.currentText() == "Discrete"
+            self.read_instance.map_discrete_override = is_discrete
+            self.sync_map_n_sections_visibility()
+
+            # update plotted map z statistic (re-generates the colourbar too)
+            if not self.read_instance.block_MPL_canvas_updates:
+                self.update_map_z_statistic()
+
+            # allow handling updates to the configuration bar again
+            self.read_instance.block_config_bar_handling_updates = False
+
+            # restore mouse cursor to normal
+            unset_cursor(
+                self.read_instance.cursor_function, "handle_map_colourmap_scale_update"
+            )
+
+        return None
+
+    @restores_settings_guard
+    def handle_map_n_sections_update(self):
+        """
+        Function which handles update of the map colourbar's number of
+        discrete sections upon interaction with the map sections combobox
+        """
+
+        if not self.read_instance.block_config_bar_handling_updates:
+            self.read_instance.cursor_function = set_cursor(
+                self.read_instance.cursor_function, "handle_map_n_sections_update"
+            )
+            # see handle_map_colourmap_scale_update() for why this is here
+            QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
+            self.read_instance.block_config_bar_handling_updates = True
+
+            self.read_instance.map_n_discrete_override = self._map_count_field_value(
+                self.map_n_sections,
+                self.read_instance.map_n_discrete_override,
+                "chunks",
+            )
+
+            # update plotted map z statistic (re-generates the colourbar too)
+            if not self.read_instance.block_MPL_canvas_updates:
+                self.update_map_z_statistic()
+
+            # allow handling updates to the configuration bar again
+            self.read_instance.block_config_bar_handling_updates = False
+
+            # restore mouse cursor to normal
+            unset_cursor(
+                self.read_instance.cursor_function, "handle_map_n_sections_update"
+            )
+
+        return None
+
+    @restores_settings_guard
+    def handle_map_n_ticks_update(self):
+        """
+        Function which handles update of the number of tick labels shown
+        on the map colourbar upon interaction with the map labels combobox
+        """
+
+        if not self.read_instance.block_config_bar_handling_updates:
+            self.read_instance.cursor_function = set_cursor(
+                self.read_instance.cursor_function, "handle_map_n_ticks_update"
+            )
+            # see handle_map_colourmap_scale_update() for why this is here
+            QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
+            self.read_instance.block_config_bar_handling_updates = True
+
+            self.read_instance.map_n_ticks_override = self._map_count_field_value(
+                self.map_n_ticks, self.read_instance.map_n_ticks_override, "labels"
+            )
+
+            # update plotted map z statistic (re-generates the colourbar too)
+            if not self.read_instance.block_MPL_canvas_updates:
+                self.update_map_z_statistic()
+
+            # allow handling updates to the configuration bar again
+            self.read_instance.block_config_bar_handling_updates = False
+
+            # restore mouse cursor to normal
+            unset_cursor(
+                self.read_instance.cursor_function, "handle_map_n_ticks_update"
+            )
+
+        return None
+
+    @restores_settings_guard
+    def handle_map_colour_preset_update(self):
+        """
+        Function which applies a ready-made land/ocean/colourmap
+        combination (see COLOUR_PRESETS) upon interaction with the map
+        colour preset combobox - one selection instead of setting the
+        three individually.
+
+        Selecting "Custom" does nothing: it isn't a preset, it's what the
+        box falls back to showing once any of the three has been changed
+        on its own, so the selector never claims a preset that no longer
+        matches what's on screen (see sync_map_colour_preset()).
+        """
+
+        if not self.read_instance.block_config_bar_handling_updates:
+            preset = COLOUR_PRESETS.get(self.map_colour_preset.currentText())
+            if preset is None:
+                return None
+
+            self.read_instance.cursor_function = set_cursor(
+                self.read_instance.cursor_function, "handle_map_colour_preset_update"
+            )
+            # see handle_map_colourmap_scale_update() for why this is here
+            QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
+            # held across all three controls, so their own handlers no-op
+            # and the map is redrawn once at the end rather than per control
+            self.read_instance.block_config_bar_handling_updates = True
+
+            map_template = self.plot_characteristics_templates["map"]
+            map_template["land_polygon"]["facecolor"] = preset["land"]
+            map_template["ocean_polygon"]["facecolor"] = preset["ocean"]
+            populate_colour_combobox(
+                self.map_land_colour, LAND_COLOUR_OPTIONS, current=preset["land"]
+            )
+            populate_colour_combobox(
+                self.map_ocean_colour, OCEAN_COLOUR_OPTIONS, current=preset["ocean"]
+            )
+            populate_colourmap_combobox(
+                self.map_colourmap, current=preset["colourmap"]
+            )
+            self.read_instance.map_colourmap_override = preset["colourmap"]
+
+            if not self.read_instance.block_MPL_canvas_updates:
+                # the colourmap change goes through the z statistic
+                # redraw, which rebuilds the colourbar; the land/ocean
+                # colours are cartopy features and need their own refresh
+                self.refresh_map_features()
+                self.refresh_map_gridlines()
+                self.update_map_z_statistic()
+
+            self.read_instance.block_config_bar_handling_updates = False
+
+            unset_cursor(
+                self.read_instance.cursor_function, "handle_map_colour_preset_update"
+            )
+
+        return None
+
+    def sync_map_colour_preset(self):
+        """
+        Function which points the colour preset selector at whichever
+        preset the current land colour, ocean colour and colourmap
+        together match, or at "Custom" when they match none of them.
+
+        Called after any of those three changes individually, so the box
+        stops naming a preset the moment the combination stops being that
+        preset.
+        """
+
+        # compare colours as resolved RGB, not as the strings they happen to
+        # be written as - the config stores the default land colour as "0.85"
+        # where the preset spells it "#D9D9D9", so a string comparison never
+        # matched and the selector opened on "Custom"
+        def same_colour(first, second):
+            try:
+                return matplotlib.colors.to_hex(
+                    first
+                ).lower() == matplotlib.colors.to_hex(second).lower()
+            except ValueError:
+                return first == second
+
+        map_template = self.plot_characteristics_templates["map"]
+        current_land = map_template["land_polygon"]["facecolor"]
+        current_ocean = map_template["ocean_polygon"]["facecolor"]
+        current_colourmap = getattr(self.read_instance, "map_colourmap_override", None)
+        matched = next(
+            (
+                name
+                for name, preset in COLOUR_PRESETS.items()
+                if same_colour(preset["land"], current_land)
+                and same_colour(preset["ocean"], current_ocean)
+                and preset["colourmap"] == current_colourmap
+            ),
+            COLOUR_PRESET_CUSTOM,
+        )
+        # setCurrentIndex(), not setCurrentText() - see the comment on
+        # map_colourmap_scale in generate_interactive_elements()
+        names = list(COLOUR_PRESETS) + [COLOUR_PRESET_CUSTOM]
+        self.map_colour_preset.setCurrentIndex(names.index(matched))
+
+        return None
+
+    def handle_map_panel_reset(self):
+        """
+        Function which returns every control in the map settings menu's
+        "Map" sub-panel (projection, land/ocean colour, coastline
+        resolution, country borders, gridlines) to the state the dashboard
+        started up in, upon clicking the reset control beside its title.
+
+        block_config_bar_handling_updates is held for the whole run rather
+        than left to the individual handlers, so setting six controls
+        redraws the map once at the end instead of once per control.
+        """
+
+        # the projection is captured before the defaults are applied, so
+        # the redraw below can tell whether it actually changed
+        projection_before = self.map_projection.currentText()
+
+        def redraw():
+            if self.map_projection.currentText() != projection_before:
+                # a different projection needs the whole axes rebuilding,
+                # which redraws the features and gridlines with it
+                self.rebuild_map_axes(self.map_projection.currentText())
+            else:
+                self.refresh_map_features()
+                self.refresh_map_gridlines()
+            # the colourmap is reset here too, so the colourbar and the
+            # points' colours need rebuilding either way
+            self.update_map_z_statistic()
+
+        self._reset_map_subpanel(
+            "handle_map_panel_reset", self._apply_map_panel_defaults, redraw
+        )
+
+        return None
+
+    def handle_map_colourbar_panel_reset(self):
+        """
+        Function which returns every control in the map settings menu's
+        "Colourbar" sub-panel (limits, colourmap, scale, number of
+        labels/chunks) to the state the dashboard started up in, upon
+        clicking the reset control beside its title. See
+        handle_map_panel_reset().
+        """
+
+        self._reset_map_subpanel(
+            "handle_map_colourbar_panel_reset",
+            self._apply_map_colourbar_defaults,
+            self.update_map_z_statistic,
+        )
+
+        return None
+
+    def handle_map_points_panel_reset(self):
+        """
+        Function which returns every control in the map settings menu's
+        "Points" sub-panel (automatic sizing, and the unselected/selected
+        marker size and opacity sliders) to the state the dashboard
+        started up in, upon clicking the reset control beside its title.
+        See handle_map_panel_reset().
+        """
+
+        def redraw():
+            if self.read_instance.map_auto_marker_sizing:
+                # hands the sliders back to the automatic computation, so
+                # they end up mirroring it rather than the config numbers
+                self.apply_automatic_marker_style()
+            self.update_map_station_selection()
+
+        self._reset_map_subpanel(
+            "handle_map_points_panel_reset", self._apply_map_points_defaults, redraw
+        )
+
+        return None
+
+    @restores_settings_guard
+    def _reset_map_subpanel(self, name, apply_defaults, redraw):
+        """
+        Shared implementation behind the three sub-panel reset controls:
+        restore that panel's startup state, then redraw once.
+
+        Parameters
+        ----------
+        name : str
+            Handler name, for the busy-cursor ownership bookkeeping.
+        apply_defaults : callable
+            Sets this panel's controls (and the read_instance overrides
+            behind them) back to their captured startup values.
+        redraw : callable
+            The single redraw to run once everything is set.
+        """
+
+        if not self.read_instance.block_config_bar_handling_updates:
+            # see handle_map_cb_limits_reset() - apply what the boxes hold
+            # before undoing it
+            self.apply_map_cb_fields()
+
+            self.read_instance.cursor_function = set_cursor(
+                self.read_instance.cursor_function, name
+            )
+            # see handle_map_colourmap_scale_update() for why this is here
+            QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
+            # held across every control this sets, so their own change
+            # handlers all no-op and the redraw happens once, below
+            self.read_instance.block_config_bar_handling_updates = True
+
+            apply_defaults()
+
+            if not self.read_instance.block_MPL_canvas_updates:
+                redraw()
+
+            self.read_instance.block_config_bar_handling_updates = False
+
+            unset_cursor(self.read_instance.cursor_function, name)
+
+        return None
+
+    def _apply_map_panel_defaults(self):
+        """Restore the "Map" sub-panel's startup control state."""
+
+        defaults = self.map_panel_startup_defaults
+        self.map_colourmap.setCurrentIndex(defaults["colourmap"])
+        self.read_instance.map_colourmap_override = self.map_colourmap.currentText()
+        self.map_projection.setCurrentIndex(defaults["projection"])
+        self.map_land_colour.setCurrentIndex(defaults["land_colour"])
+        self.map_ocean_colour.setCurrentIndex(defaults["ocean_colour"])
+        self.map_resolution.setCurrentIndex(defaults["resolution"])
+        self.map_borders.setChecked(defaults["borders"])
+        self.map_gridlines.setChecked(defaults["gridlines"])
+
+        # the controls above are the menu's view of these template values;
+        # the map itself reads them from here, so both have to be put back
+        map_template = self.plot_characteristics_templates["map"]
+        map_template["projection"] = self.map_projection.currentText()
+        map_template["land_polygon"]["facecolor"] = LAND_COLOUR_OPTIONS[
+            self.map_land_colour.currentText()
+        ]
+        map_template["ocean_polygon"]["facecolor"] = OCEAN_COLOUR_OPTIONS[
+            self.map_ocean_colour.currentText()
+        ]
+        map_template["map_coastline_resolution"] = self.map_resolution.currentText()
+        map_template["borders"]["visible"] = defaults["borders"]
+        self.plot_characteristics["map"]["gridlines"]["visible"] = defaults["gridlines"]
+        self.sync_map_colour_preset()
+
+        return None
+
+    def _apply_map_colourbar_defaults(self):
+        """Restore the "Colourbar" sub-panel's startup control state."""
+
+        defaults = self.map_colourbar_startup_defaults
+        self.map_colourmap.setCurrentIndex(defaults["colourmap"])
+        self.map_colourmap_scale.setCurrentIndex(defaults["colourmap_scale"])
+        self.map_n_ticks.setText(defaults["n_ticks"])
+        self.map_n_sections.setText(defaults["n_sections"])
+        # limits go back to automatic - they have no startup value of
+        # their own, being filled in from whatever each redraw resolves
+        self.map_cb_min.clear()
+        self.map_cb_max.clear()
+
+        self.read_instance.map_colourmap_override = self.map_colourmap.currentText()
+        self.read_instance.map_discrete_override = (
+            self.map_colourmap_scale.currentText() == "Discrete"
+        )
+        self.read_instance.map_n_discrete_override = (
+            int(defaults["n_sections"]) if defaults["n_sections"] else None
+        )
+        self.read_instance.map_n_ticks_override = (
+            int(defaults["n_ticks"]) if defaults["n_ticks"] else None
+        )
+        self.read_instance.map_vmin_override = None
+        self.read_instance.map_vmax_override = None
+        self.sync_map_n_sections_visibility()
+
+        return None
+
+    def _apply_map_points_defaults(self):
+        """
+        Restore the "Points" sub-panel's startup control state.
+
+        While automatic sizing is on, the four sliders are not user state
+        at all - apply_automatic_marker_style() rewrites them on every
+        redraw so they mirror the size and opacity it computed for the
+        current zoom and selection. Forcing them back to the captured
+        startup numbers therefore moved every slider even when nothing had
+        been changed, which is what made reset look like it was undoing
+        edits that were never made. So each control is only written when
+        it actually differs, and when automatic sizing is left on the
+        sliders are handed straight back to it to re-mirror, rather than
+        being pinned to config values it is about to overwrite anyway.
+        """
+
+        defaults = self.map_points_startup_defaults
+        automatic = defaults["auto_sizing"]
+
+        if self.map_auto_sizing.isChecked() != automatic:
+            self.map_auto_sizing.setChecked(automatic)
+        self.read_instance.map_auto_marker_sizing = automatic
+
+        if not automatic:
+            # only meaningful as user state when the sliders are the ones
+            # actually driving the look
+            for slider, value in (
+                (self.map_markersize_unsel_sl, defaults["markersize_unsel"]),
+                (self.map_opacity_unsel_sl, defaults["opacity_unsel"]),
+                (self.map_markersize_sel_sl, defaults["markersize_sel"]),
+                (self.map_opacity_sel_sl, defaults["opacity_sel"]),
+            ):
+                if slider.value() != value:
+                    slider.setValue(value)
+
+            map_characteristics = self.plot_characteristics["map"]
+            map_characteristics["marker_unselected"]["s"] = defaults["markersize_unsel"]
+            map_characteristics["marker_unselected"]["alpha"] = (
+                defaults["opacity_unsel"] / 10
+            )
+            map_characteristics["marker_selected"]["s"] = defaults["markersize_sel"]
+            map_characteristics["marker_selected"]["alpha"] = (
+                defaults["opacity_sel"] / 10
+            )
+
+        self.sync_map_sizing_sliders_enabled()
+
+        return None
+
+    def _map_count_field_value(self, lineedit, current, what):
+        """
+        Read one of the colourbar's count fields, holding it to a minimum
+        of one.
+
+        A colourbar with no chunks or no labels isn't a lesser version of
+        one, it's a broken one, so an empty or zero entry is refused and
+        the field put back to the value it had rather than being taken as
+        "automatic" - which is what an empty field used to mean here, and
+        made it impossible to tell a deliberate reset from a typo.
+
+        Parameters
+        ----------
+        lineedit : MenuLineEdit
+            The field being read.
+        current : int or None
+            The value currently in force, restored if the entry is refused.
+        what : str
+            Name of the quantity, for the message shown when refusing.
+
+        Returns
+        -------
+        int or None
+            The value to apply.
+        """
+
+        text = lineedit.text().strip()
+        value = int(text) if text.isdigit() else 0
+        if value < 1:
+            lineedit.setText(str(current) if current else "")
+            msg = f"The number of colourbar {what} must be at least 1."
+            show_message(self.read_instance, msg)
+            return current
+        return value
+
+    @restores_settings_guard
+    def handle_map_cb_limits_reset(self):
+        """
+        Function which clears both map colourbar limit fields back to
+        automatic, upon clicking the small reset control beside them.
+
+        Equivalent to emptying both fields by hand - the override is
+        dropped and each limit falls back to whatever would otherwise be
+        resolved (the plotted data's range, or a per-statistic/
+        configuration-file default) - but as one click rather than two
+        edits, since going back to automatic is much the most common
+        thing to want after trying a manual limit. The fields are
+        repopulated with the newly resolved numbers by
+        update_map_z_statistic(), so they don't stay blank.
+        """
+
+        if not self.read_instance.block_config_bar_handling_updates:
+            # whatever the boxes currently hold is applied first, so a
+            # reset always undoes a known state rather than racing the
+            # edit that prompted it - see apply_map_cb_fields()
+            self.apply_map_cb_fields()
+
+            self.read_instance.cursor_function = set_cursor(
+                self.read_instance.cursor_function, "handle_map_cb_limits_reset"
+            )
+            # see handle_map_colourmap_scale_update() for why this is here
+            QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
+            self.read_instance.block_config_bar_handling_updates = True
+
+            self.read_instance.map_vmin_override = None
+            self.read_instance.map_vmax_override = None
+            self.map_cb_min.clear()
+            self.map_cb_max.clear()
+
+            # update plotted map z statistic (re-generates the colourbar too)
+            if not self.read_instance.block_MPL_canvas_updates:
+                self.update_map_z_statistic()
+
+            # allow handling updates to the configuration bar again
+            self.read_instance.block_config_bar_handling_updates = False
+
+            # restore mouse cursor to normal
+            unset_cursor(
+                self.read_instance.cursor_function, "handle_map_cb_limits_reset"
+            )
+
+        return None
+
+    @restores_settings_guard
+    def handle_map_cb_limits_update(self):
+        """
+        Function which handles update of the map colourbar's min/max limits
+        upon editing the colourbar limit fields. Each field is kept
+        populated with the actual resolved limit (see
+        update_map_z_statistic()), so editing one starts from the real
+        current number; clearing a field back to blank falls back to
+        whichever limit would otherwise be resolved (the plotted data's
+        range, or any per-statistic/configuration-file default) - see
+        generate_colourbar_detail() in statistics.py.
+        """
+
+        if not self.read_instance.block_config_bar_handling_updates:
+            self.read_instance.cursor_function = set_cursor(
+                self.read_instance.cursor_function, "handle_map_cb_limits_update"
+            )
+            # see handle_map_colourmap_scale_update() for why this is here
+            QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
+            self.read_instance.block_config_bar_handling_updates = True
+
+            for lineedit, override_attr in (
+                (self.map_cb_min, "map_vmin_override"),
+                (self.map_cb_max, "map_vmax_override"),
+            ):
+                text = lineedit.text().strip()
+                if text == "":
+                    setattr(self.read_instance, override_attr, None)
+                    continue
+                try:
+                    value = float(text)
+                except ValueError:
+                    value = float("nan")
+                if not np.isfinite(value):
+                    setattr(self.read_instance, override_attr, None)
+                    lineedit.clear()
+                    msg = (
+                        "Colourbar limits must be numbers. "
+                        f"'{text}' will be set to automatic."
+                    )
+                    show_message(self.read_instance, msg)
+                    continue
+                setattr(self.read_instance, override_attr, value)
+
+            # limits outside the plotted data range are allowed, as showing a
+            # wider range than the data occupies is legitimate. A minimum
+            # above the maximum is not - matplotlib raises out of the colour
+            # normalisation - so only that case is refused here
+            vmin = getattr(self.read_instance, "map_vmin_override", None)
+            vmax = getattr(self.read_instance, "map_vmax_override", None)
+            if (vmin is not None) and (vmax is not None) and (vmin > vmax):
+                self.read_instance.map_vmin_override = None
+                self.read_instance.map_vmax_override = None
+                self.map_cb_min.clear()
+                self.map_cb_max.clear()
+                msg = (
+                    "The colourbar minimum cannot be greater than the "
+                    "maximum. Both limits will be set to automatic."
+                )
+                show_message(self.read_instance, msg)
+
+            # update plotted map z statistic (re-generates the colourbar too)
+            if not self.read_instance.block_MPL_canvas_updates:
+                self.update_map_z_statistic()
+
+            # allow handling updates to the configuration bar again
+            self.read_instance.block_config_bar_handling_updates = False
+
+            # restore mouse cursor to normal
+            unset_cursor(
+                self.read_instance.cursor_function, "handle_map_cb_limits_update"
+            )
+
+        return None
+
+    @restores_settings_guard
+    def handle_map_projection_update(self):
+        """
+        Function which handles update of the map's projection upon
+        interaction with the map projection combobox
+        """
+
+        if not self.read_instance.block_config_bar_handling_updates:
+            self.read_instance.cursor_function = set_cursor(
+                self.read_instance.cursor_function, "handle_map_projection_update"
+            )
+            QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
+            self.read_instance.block_config_bar_handling_updates = True
+
+            if not self.read_instance.block_MPL_canvas_updates:
+                self.rebuild_map_axes(self.map_projection.currentText())
+
+            self.read_instance.block_config_bar_handling_updates = False
+
+            unset_cursor(
+                self.read_instance.cursor_function, "handle_map_projection_update"
+            )
+
+        return None
+
+    @restores_settings_guard
+    def handle_map_land_colour_update(self):
+        """
+        Function which handles update of the map's land colour upon
+        interaction with the map land colour combobox
+        """
+
+        if not self.read_instance.block_config_bar_handling_updates:
+            self.read_instance.cursor_function = set_cursor(
+                self.read_instance.cursor_function, "handle_map_land_colour_update"
+            )
+            QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
+            self.read_instance.block_config_bar_handling_updates = True
+
+            selected_label = self.map_land_colour.currentText()
+            self.plot_characteristics_templates["map"]["land_polygon"][
+                "facecolor"
+            ] = LAND_COLOUR_OPTIONS[selected_label]
+            self.sync_map_colour_preset()
+            if not self.read_instance.block_MPL_canvas_updates:
+                self.refresh_map_features()
+                # borders and gridlines both take their colour from the
+                # basemap's brightness (see map_feature_ink()), so a
+                # land/ocean/resolution change has to redraw the
+                # gridlines as well or they keep the old contrast
+                self.refresh_map_gridlines()
+
+            self.read_instance.block_config_bar_handling_updates = False
+
+            unset_cursor(
+                self.read_instance.cursor_function, "handle_map_land_colour_update"
+            )
+
+        return None
+
+    @restores_settings_guard
+    def handle_map_ocean_colour_update(self):
+        """
+        Function which handles update of the map's ocean colour upon
+        interaction with the map ocean colour combobox
+        """
+
+        if not self.read_instance.block_config_bar_handling_updates:
+            self.read_instance.cursor_function = set_cursor(
+                self.read_instance.cursor_function, "handle_map_ocean_colour_update"
+            )
+            QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
+            self.read_instance.block_config_bar_handling_updates = True
+
+            selected_label = self.map_ocean_colour.currentText()
+            self.plot_characteristics_templates["map"]["ocean_polygon"][
+                "facecolor"
+            ] = OCEAN_COLOUR_OPTIONS[selected_label]
+            self.sync_map_colour_preset()
+            if not self.read_instance.block_MPL_canvas_updates:
+                self.refresh_map_features()
+                # borders and gridlines both take their colour from the
+                # basemap's brightness (see map_feature_ink()), so a
+                # land/ocean/resolution change has to redraw the
+                # gridlines as well or they keep the old contrast
+                self.refresh_map_gridlines()
+
+            self.read_instance.block_config_bar_handling_updates = False
+
+            unset_cursor(
+                self.read_instance.cursor_function, "handle_map_ocean_colour_update"
+            )
+
+        return None
+
+    @restores_settings_guard
+    def handle_map_borders_update(self):
+        """
+        Function which handles update of country border visibility upon
+        interaction with the map borders checkbox
+        """
+
+        if not self.read_instance.block_config_bar_handling_updates:
+            self.read_instance.cursor_function = set_cursor(
+                self.read_instance.cursor_function, "handle_map_borders_update"
+            )
+            QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
+            self.read_instance.block_config_bar_handling_updates = True
+
+            self.plot_characteristics_templates["map"]["borders"][
+                "visible"
+            ] = self.map_borders.isChecked()
+            if not self.read_instance.block_MPL_canvas_updates:
+                self.refresh_map_features()
+                # borders and gridlines both take their colour from the
+                # basemap's brightness (see map_feature_ink()), so a
+                # land/ocean/resolution change has to redraw the
+                # gridlines as well or they keep the old contrast
+                self.refresh_map_gridlines()
+
+            self.read_instance.block_config_bar_handling_updates = False
+
+            unset_cursor(
+                self.read_instance.cursor_function, "handle_map_borders_update"
+            )
+
+        return None
+
+    @restores_settings_guard
+    def handle_map_gridlines_update(self):
+        """
+        Function which handles update of gridline visibility upon
+        interaction with the map gridlines checkbox
+        """
+
+        if not self.read_instance.block_config_bar_handling_updates:
+            self.read_instance.cursor_function = set_cursor(
+                self.read_instance.cursor_function, "handle_map_gridlines_update"
+            )
+            QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
+            self.read_instance.block_config_bar_handling_updates = True
+
+            self.plot_characteristics["map"]["gridlines"][
+                "visible"
+            ] = self.map_gridlines.isChecked()
+            if not self.read_instance.block_MPL_canvas_updates:
+                self.refresh_map_gridlines()
+
+            self.read_instance.block_config_bar_handling_updates = False
+
+            unset_cursor(
+                self.read_instance.cursor_function, "handle_map_gridlines_update"
+            )
+
+        return None
+
+    @restores_settings_guard
+    def handle_map_resolution_update(self):
+        """
+        Function which handles update of coastline/land polygon resolution
+        upon interaction with the map resolution combobox
+        """
+
+        if not self.read_instance.block_config_bar_handling_updates:
+            self.read_instance.cursor_function = set_cursor(
+                self.read_instance.cursor_function, "handle_map_resolution_update"
+            )
+            QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
+            self.read_instance.block_config_bar_handling_updates = True
+
+            self.plot_characteristics_templates["map"][
+                "map_coastline_resolution"
+            ] = self.map_resolution.currentText()
+            if not self.read_instance.block_MPL_canvas_updates:
+                self.refresh_map_features()
+                # borders and gridlines both take their colour from the
+                # basemap's brightness (see map_feature_ink()), so a
+                # land/ocean/resolution change has to redraw the
+                # gridlines as well or they keep the old contrast
+                self.refresh_map_gridlines()
+
+            self.read_instance.block_config_bar_handling_updates = False
+
+            unset_cursor(
+                self.read_instance.cursor_function, "handle_map_resolution_update"
+            )
+
+        return None
+
+    def layout_map_nav_buttons(self):
+        """
+        Function which sizes each of the map settings menu's three
+        sub-panel nav buttons ("Map", "Points", "Colourbar") to its own
+        text and centres them as a row across the panel.
+
+        Sized to the text rather than stretched to the full panel width,
+        so they read as three small buttons side by side instead of three
+        stacked bars. Measured from the widget's own font rather than
+        hard-coded in canvas_menus.yaml, since the same label is a
+        different number of pixels wide on each platform's stylesheet -
+        a fixed width would either clip the text somewhere or leave one
+        button visibly padded.
+
+        All three go on one line when they fit; when they don't (a wider
+        font than the stylesheet's own, say), "Colourbar" - the widest,
+        and the odd one out of the pair that naturally belong together -
+        drops to a second line centred beneath the other two, and
+        everything below the row shifts down to make space for it.
+
+        The button text is fixed, never gaining an "open" marker: the row
+        is sized to its labels, so changing them would re-measure and
+        re-centre every button underneath the pointer on each click, and
+        could tip the row between one line and two as panels are opened
+        and closed.
+        """
+
+        settings_button = self.map_menu.buttons["settings_button"]
+        panel_left = settings_button.x() - 220
+        panel_width = 230
+        gap = 6
+        row_y = settings_button.y() + 210
+        row_height = 20
+
+        buttons = [
+            self.map_panel_button,
+            self.map_points_panel_button,
+            self.map_colourbar_panel_button,
+        ]
+        widths = []
+        for button in buttons:
+            # the text's own width plus room for the button's border and
+            # a little breathing space either side
+            text_width = button.fontMetrics().boundingRect(button.text()).width()
+            width = text_width + 16
+            widths.append(width)
+            button.setFixedWidth(width)
+            button.resize(width, row_height)
+
+        def place(row_buttons, row_widths, y):
+            total = sum(row_widths) + gap * (len(row_widths) - 1)
+            x = panel_left + max(0, (panel_width - total) // 2)
+            for button, width in zip(row_buttons, row_widths):
+                button.move(x, y)
+                x += width + gap
+
+        wrapped = sum(widths) + gap * 2 > panel_width
+        if not wrapped:
+            place(buttons, widths, row_y)
+        else:
+            place(buttons[:2], widths[:2], row_y)
+            place(buttons[2:], widths[2:], row_y + row_height + 5)
+
+        # the row is the last thing in the panel, so a wrapped second line
+        # only needs the panel itself to grow to keep it inside
+        container = self.map_menu.containers["container"]
+        container.resize(container.width(), 220 + (row_height + 5 if wrapped else 0))
+
+        return None
+
+    def handle_map_subpanel_toggle(self, name):
+        """
+        Function which shows or hides one of the map settings menu's
+        sub-panels ("Map", "Points" or "Colourbar") upon clicking its nav
+        button. Pure UI show/hide - no data changes, so unlike the other
+        map handlers this doesn't touch block_config_bar_handling_updates
+        or the busy cursor (matches interactive_elements_button_func,
+        which the main Settings toggle itself uses for the same reason).
+
+        A sub-panel's widgets are built as siblings of (not nested
+        inside) the map settings menu's own widgets, same as every other
+        settings menu control, so - unlike a real child widget, which
+        would inherit its parent's stacking automatically - each one needs
+        raising above the rest of the canvas explicitly on show, or it's
+        technically visible but painted behind other menu content and
+        never actually seen.
+
+        All three panels share the same on-screen spot (see
+        canvas_menus.yaml), so opening one closes whichever other was
+        open.
+
+        Parameters
+        ----------
+        name : str
+            Which sub-panel to toggle - a key of self.map_subpanels.
+        """
+
+        expand = self.map_open_subpanel != name
+
+        # only one panel can occupy the shared spot at a time
+        self.reset_map_subpanels()
+
+        if expand:
+            _button, elements, _label = self.map_subpanels[name]
+            for element in elements:
+                element.show()
+                element.raise_()
+
+            if name == "colourbar":
+                # the loop above just unconditionally showed the chunks
+                # field along with everything else - re-apply the "only
+                # meaningful for a discrete scale" rule on top of that,
+                # rather than special-casing it out of the element list
+                self.sync_map_n_sections_visibility()
+            elif name == "points":
+                # re-apply the enabled/disabled (manual vs automatic)
+                # state of the sliders - element.show() above only
+                # affects visibility, not whether they're interactive
+                self.sync_map_sizing_sliders_enabled()
+
+            self.map_open_subpanel = name
+
+        return None
+
+    def handle_map_panel_toggle(self):
+        """
+        Function which toggles the map settings menu's "Map" sub-panel
+        (projection, land/ocean colour, coastline resolution, country
+        borders, gridlines) - see handle_map_subpanel_toggle().
+        """
+
+        self.handle_map_subpanel_toggle("map")
+
+        return None
+
+    def handle_map_points_panel_toggle(self):
+        """
+        Function which toggles the map settings menu's "Points" sub-panel
+        (automatic sizing, plus the unselected/selected marker size and
+        opacity sliders) - see handle_map_subpanel_toggle().
+        """
+
+        self.handle_map_subpanel_toggle("points")
+
+        return None
+
+    def handle_map_colourbar_panel_toggle(self):
+        """
+        Function which toggles the map settings menu's "Colourbar"
+        sub-panel (limits, colourmap, scale, number of labels/chunks) -
+        see handle_map_subpanel_toggle().
+        """
+
+        self.handle_map_subpanel_toggle("colourbar")
+
+        return None
+
+    def sync_map_n_sections_visibility(self):
+        """
+        Function which shows or hides the map colourbar's "№ Chunks" field
+        (and its label) depending on whether the colourmap scale is
+        currently discrete - it has no effect for a continuous scale, so
+        it's hidden entirely rather than left visible but inert. Called
+        both when the scale itself changes and when the Colourbar panel is
+        (re-)expanded, since showing the whole panel would otherwise
+        unconditionally reveal it regardless of scale.
+        """
+
+        is_discrete = self.map_colourmap_scale.currentText() == "Discrete"
+        self.map_n_sections_label.setVisible(is_discrete)
+        self.map_n_sections.setVisible(is_discrete)
+
+        return None
+
+    def apply_map_cb_fields(self):
+        """
+        Function which reads the four colourbar fields and applies exactly
+        what they currently contain, with no validation messages and no
+        redraw.
+
+        Called by the reset controls before they reset, so the values in
+        the boxes are always what gets undone - whether or not the fields
+        were ever "committed" by Enter, focus or a click. The reset
+        handlers no longer depend on any of that machinery having run.
+
+        Deliberately silent: a warning box opened here would be a modal
+        dialog raised in the middle of handling the reset click, which
+        stops the click reaching the button at all. Anything invalid is
+        simply left as automatic, and the reset that follows replaces it a
+        moment later anyway.
+        """
+
+        for lineedit, override_attr in (
+            (self.map_cb_min, "map_vmin_override"),
+            (self.map_cb_max, "map_vmax_override"),
+        ):
+            text = lineedit.text().strip()
+            try:
+                value = float(text) if text else None
+            except ValueError:
+                value = None
+            if (value is not None) and (not np.isfinite(value)):
+                value = None
+            setattr(self.read_instance, override_attr, value)
+            lineedit.mark_committed()
+
+        vmin = self.read_instance.map_vmin_override
+        vmax = self.read_instance.map_vmax_override
+        if (vmin is not None) and (vmax is not None) and (vmin > vmax):
+            # matplotlib refuses to normalise this - see
+            # handle_map_cb_limits_update()
+            self.read_instance.map_vmin_override = None
+            self.read_instance.map_vmax_override = None
+
+        for lineedit, override_attr in (
+            (self.map_n_ticks, "map_n_ticks_override"),
+            (self.map_n_sections, "map_n_discrete_override"),
+        ):
+            text = lineedit.text().strip()
+            if text.isdigit() and int(text) >= 1:
+                setattr(self.read_instance, override_attr, int(text))
+            lineedit.mark_committed()
+
+        return None
+
+    def commit_map_pending_edits(self):
+        """
+        Function which applies any map settings field that has been typed
+        into but not yet confirmed - so a value takes effect whether it
+        was finished with Enter, by clicking away, by pressing another
+        control, or by closing the panel or the whole settings menu.
+
+        Each field's handler is invoked directly here rather than by
+        emitting the widget's own "committed" signal. Routing it through
+        the signal meant the value's application depended on Qt delivering
+        that signal, on SettingsMenu.connect()'s dispatch gate, and on the
+        ordering between the two - and a value typed and then abandoned by
+        clicking straight onto a reset repeatedly failed to take effect
+        somewhere along that chain. Calling the handler is the same work
+        with none of the indirection, and cannot be delivered late or out
+        of order.
+        """
+
+        for lineedit, handler in (
+            (self.map_cb_min, self.handle_map_cb_limits_update),
+            (self.map_cb_max, self.handle_map_cb_limits_update),
+            (self.map_n_ticks, self.handle_map_n_ticks_update),
+            (self.map_n_sections, self.handle_map_n_sections_update),
+        ):
+            if not lineedit.has_pending_edit():
+                continue
+            # marked before the handler runs, so a handler that writes
+            # back to the field (the limits are repopulated with whatever
+            # they resolve to) can't leave it looking pending again
+            lineedit.mark_committed()
+            handler()
+
+        return None
+
+    def reset_map_subpanels(self):
+        """
+        Function which hides every one of the map settings menu's
+        sub-panels - connected as an extra listener on the map menu's own
+        settings button (see generate_interactive_elements()), alongside
+        interactive_elements_button_func, so they always start hidden
+        whenever Settings is opened or closed, rather than staying open
+        (or left visible with the rest of the menu hidden) from however
+        they were previously left.
+
+        Unconditional, not a check-then-toggle: self.map_open_subpanel
+        only tracks which nav button has been clicked, but
+        interactive_elements_button_func (the other listener on the same
+        settings_button click, which always runs first) shows every
+        element in self.map_elements wholesale - including every
+        sub-panel's, which need to be in that list so dashboard.py's
+        layout handling keeps repositioning them (see the comment above
+        self.map_panel_elements). So the widgets can already be visible
+        here even while the flag still says nothing is open, and a
+        guard on that flag would wrongly skip re-hiding them.
+        """
+
+        # a value typed into one of the colourbar fields and left there -
+        # no Enter, no click away - is still a real edit the moment the
+        # panel goes away, so commit it before hiding rather than
+        # discarding it silently
+        self.commit_map_pending_edits()
+
+        for _name, (_button, elements, _label) in self.map_subpanels.items():
+            for element in elements:
+                element.hide()
+        self.map_open_subpanel = None
+
+        return None
+
+    def sync_map_sizing_sliders_enabled(self):
+        """
+        Function which enables or disables (greys out, non-interactive)
+        the map's manual size/opacity sliders depending on whether
+        automatic sizing is on - they have no effect while it is, since
+        apply_automatic_marker_style() overwrites whatever they're set to
+        on every redraw/zoom/selection change. They stay visible either
+        way (just disabled) rather than being hidden, and
+        apply_automatic_marker_style() keeps them showing its own current
+        values while automatic is on, so switching back to manual has an
+        obvious, always-in-place starting point. Called both when the
+        automatic-sizing checkbox itself changes and when the sizing
+        panel is (re-)expanded.
+        """
+
+        manual = not self.map_auto_sizing.isChecked()
+        for slider in (
+            self.map_markersize_unsel_sl,
+            self.map_opacity_unsel_sl,
+            self.map_markersize_sel_sl,
+            self.map_opacity_sel_sl,
+        ):
+            slider.setEnabled(manual)
+
+        return None
+
+    @restores_settings_guard
+    def handle_map_auto_sizing_update(self):
+        """
+        Function which handles toggling automatic map point size/opacity
+        upon interaction with the map sizing panel's checkbox
+        """
+
+        if not self.read_instance.block_config_bar_handling_updates:
+            self.read_instance.cursor_function = set_cursor(
+                self.read_instance.cursor_function, "handle_map_auto_sizing_update"
+            )
+            QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
+            self.read_instance.block_config_bar_handling_updates = True
+
+            self.read_instance.map_auto_marker_sizing = self.map_auto_sizing.isChecked()
+            self.sync_map_sizing_sliders_enabled()
+
+            if self.read_instance.map_auto_marker_sizing:
+                self.apply_automatic_marker_style()
+
+            self.read_instance.block_config_bar_handling_updates = False
+
+            unset_cursor(
+                self.read_instance.cursor_function, "handle_map_auto_sizing_update"
+            )
+
+        return None
+
+    def apply_automatic_marker_style(self):
+        """
+        Automatically set the map's unselected/selected marker size and
+        opacity from the current zoom level, so points stay identifiable
+        - big and well spaced enough to read individually when zoomed in
+        close, small enough not to overplot into an unreadable blob when
+        zoomed out to (near) the full globe - without the user having to
+        keep adjusting the manual sliders as they navigate the map.
+        Selected stations get a size/opacity boost over unselected ones,
+        which additionally dim back a little once there's an active
+        selection, so the selection reads clearly against the rest.
+
+        A no-op if automatic sizing is off (read_instance.map_auto_marker_sizing)
+        - safe to call unconditionally from every place the map's zoom or
+        selection can change, rather than needing each call site to check
+        the setting itself.
+
+        Called on: every map redraw (see update_map_station_selection(),
+        which every full map rebuild already routes through), scroll-
+        wheel zoom (zoom_map_func() in dashboard_interactivity.py),
+        toolbar box-zoom and the "world" reset-to-global-view button
+        (toolbar.py), and turning automatic sizing on.
+
+        Applies directly to every station on the map, rebuilt from
+        scratch each call rather than a partial in-place update -
+        deliberately not going through update_markersize()/update_opacity()
+        (which the manual sliders use), since those assume the collection
+        already has a per-point sizes/colours array to update selected
+        indices into. That's not true right after make_map() creates a
+        fresh collection (freshly plotted points start with a single
+        scalar size/colour until something gives every point its own),
+        and update_map_station_selection() - which this runs ahead of, on
+        every map rebuild - is exactly the case where that happens.
+        """
+
+        if not getattr(self.read_instance, "map_auto_marker_sizing", False):
+            return None
+
+        ax = self.plot_axes["map"]
+
+        # current view's extent, against the projection's own global
+        # extent as a "fully zoomed out" reference - both in the same
+        # (projected) coordinate space, so this ratio is meaningful
+        # regardless of which projection is currently selected
+        xlim = ax.get_xlim()
+        ylim = ax.get_ylim()
+        current_area = abs(xlim[1] - xlim[0]) * abs(ylim[1] - ylim[0])
+        x0, x1 = ax.projection.x_limits
+        y0, y1 = ax.projection.y_limits
+        global_area = abs(x1 - x0) * abs(y1 - y0)
+
+        if (current_area <= 0) or (global_area <= 0):
+            zoom_factor = 1.0
+        else:
+            # sqrt: area shrinks with the *square* of linear zoom, and
+            # marker size/opacity should track linear zoom, not area
+            zoom_factor = math.sqrt(global_area / current_area)
+        zoom_factor = np.clip(zoom_factor, 1.0, MAP_AUTO_SIZING_REFERENCE_ZOOM)
+
+        # scale linearly between the fully-zoomed-out and fully-zoomed-in
+        # references, clamped so points never become invisible or
+        # oversized at the extremes
+        zoom_progress = (zoom_factor - 1.0) / (MAP_AUTO_SIZING_REFERENCE_ZOOM - 1.0)
+        unsel_size = MAP_AUTO_SIZING_MIN_SIZE + (
+            MAP_AUTO_SIZING_MAX_SIZE - MAP_AUTO_SIZING_MIN_SIZE
+        ) * zoom_progress
+        unsel_opacity = MAP_AUTO_SIZING_MIN_OPACITY + (
+            MAP_AUTO_SIZING_MAX_OPACITY - MAP_AUTO_SIZING_MIN_OPACITY
+        ) * zoom_progress
+
+        selected = getattr(
+            self, "absolute_selected_station_inds", np.array([], dtype=np.int32)
+        )
+        any_selected = len(selected) > 0
+        sel_size = unsel_size * MAP_AUTO_SIZING_SELECTED_SIZE_BOOST
+        sel_opacity = unsel_opacity
+        if any_selected:
+            unsel_opacity = unsel_opacity * MAP_AUTO_SIZING_UNSELECTED_OPACITY_DIM
+
+        # keep the underlying config in sync too - read by anything resolving
+        # marker style from it directly, and by the manual sliders if
+        # automatic sizing is switched back off
+        for key, size, opacity in (
+            ("marker_unselected", unsel_size, unsel_opacity),
+            ("marker_selected", sel_size, sel_opacity),
+            ("marker_zero_stations_selected", unsel_size, unsel_opacity),
+        ):
+            self.plot_characteristics["map"][key]["s"] = size
+            self.plot_characteristics["map"][key]["alpha"] = opacity
+
+        # apply directly to every station currently on the map, rebuilt
+        # from scratch each call (see the docstring for why)
+        n_stations = len(getattr(self, "active_map_valid_station_inds", []))
+        if n_stations > 0:
+            sizes = np.full(n_stations, unsel_size)
+            alphas = np.full(n_stations, unsel_opacity)
+            if any_selected:
+                sizes[selected] = sel_size
+                alphas[selected] = sel_opacity
+            for collection in self.plot_axes["map"].collections:
+                if isinstance(collection, matplotlib.collections.PathCollection):
+                    collection.set_sizes(sizes)
+                    if Version(matplotlib.__version__) < Version("3.4"):
+                        colours = collection.get_facecolor()
+                        if colours.shape[0] == n_stations:
+                            colours[:, -1] = alphas
+                            collection.set_facecolor(colours)
+                    else:
+                        collection.set_alpha(alphas)
+
+        # keep the manual sliders in sync with the computed values, so
+        # switching to manual mode starts from the current look rather
+        # than wherever they were last left
+        for slider, value in (
+            (self.map_markersize_unsel_sl, unsel_size),
+            (self.map_markersize_sel_sl, sel_size),
+        ):
+            slider.blockSignals(True)
+            slider.setValue(int(round(value)))
+            slider.blockSignals(False)
+        for slider, value in (
+            (self.map_opacity_unsel_sl, unsel_opacity),
+            (self.map_opacity_sel_sl, sel_opacity),
+        ):
+            slider.blockSignals(True)
+            slider.setValue(int(round(value * 10)))
+            slider.blockSignals(False)
+
+        self.figure.canvas.draw_idle()
+
+        return None
+
+    def rebuild_map_axes(self, projection_name):
+        """
+        Recreate the map axes with a different cartopy projection.
+
+        Cartopy locks a GeoAxes' projection at creation - there's no in-place
+        way to change it - so this removes the current map axes and creates
+        a fresh one at the same gridspec position, then redraws everything
+        onto it (map features, station data, colourbar, and any toggled
+        options like domain edges). Resets the view to the new projection's
+        global extent, since a remembered pixel extent from the old
+        projection doesn't carry meaning in a new one.
+
+        Parameters
+        ----------
+        projection_name : str
+            A valid cartopy.crs projection name (see get_valid_projections()
+            in dashboard_elements.py).
+        """
+
+        self.plot_characteristics_templates["map"]["projection"] = projection_name
+        self.plotcrs = getattr(ccrs, projection_name)()
+
+        self.figure.delaxes(self.plot_axes["map"])
+        self.plot_axes["map"] = self.figure.add_subplot(
+            self.gridspec.new_subplotspec((2, 0), rowspan=44, colspan=42),
+            projection=self.plotcrs,
+        )
+
+        # re-apply the map's one-time dressing (features/gridlines) to the
+        # new axes; map_extent left at its default (False) resets to a
+        # global view rather than reusing the old projection's pixel extent
+        format_axis(
+            self.read_instance,
+            self,
+            self.plot_axes["map"],
+            "map",
+            self.plot_characteristics["map"],
+        )
+        self.read_instance.map_extent = get_map_extent(self)
+
+        # redraw station data, colourbar, and any toggled options (domain
+        # edges/annotations) onto the new axes
+        self.update_map_z_statistic()
+
+        # the toolbar's back/forward view history still references the
+        # removed axes - reset it rather than leave it holding a dead one
+        self.read_instance.navi_toolbar.update()
+
+    def refresh_map_features(self):
+        """
+        Redraws the map's ocean/land/country-border cartopy features after
+        the user changes their colour, visibility, or the coastline
+        resolution from the map settings menu. Does nothing if the map isn't
+        using the "providentia" background - a custom background image or
+        cartopy's shaded relief doesn't have these features to refresh.
+        """
+
+        if self.plot_characteristics["map"]["background"] != "providentia":
+            return
+
+        remove_map_features(self.map_feature_artists)
+        self.map_feature_artists = draw_map_features(self, self.plot_axes["map"])
+        # draw(), not draw_idle() - every caller wraps this in the Providentia
+        # busy cursor, and a deferred repaint would land after that cursor
+        # had already been restored
+        self.figure.canvas.draw()
+
+    def refresh_map_gridlines(self):
+        """
+        Redraws the map's gridlines after the user toggles them on/off from
+        the map settings menu. Applies regardless of map background, unlike
+        refresh_map_features().
+        """
+
+        if getattr(self, "map_gridliner", None) is not None:
+            self.map_gridliner.remove()
+        self.map_gridliner = draw_map_gridlines(
+            self, self.plot_axes["map"], self.plot_characteristics["map"]["gridlines"]
+        )
+        # draw(), not draw_idle() - see refresh_map_features()
+        self.figure.canvas.draw()
 
     def handle_timeseries_aggregation_statistic_update(self):
         """
@@ -1668,6 +3161,7 @@ class Canvas(FigureCanvas):
 
         return None
 
+    @restores_settings_guard
     def update_timeseries_chunk_statistics(self):
         """
         Update timeseries chunk statistic and aggregation statistic
@@ -1763,6 +3257,7 @@ class Canvas(FigureCanvas):
         # allow handling updates to the configuration bar again
         self.read_instance.block_config_bar_handling_updates = False
 
+    @restores_settings_guard
     def handle_periodic_statistic_update(self):
         """
         Function that handles update of plotted periodic statistic
@@ -1835,6 +3330,7 @@ class Canvas(FigureCanvas):
 
         return None
 
+    @restores_settings_guard
     def handle_taylor_correlation_statistic_update(self):
         """
         Function that handles update of correlation statistic
@@ -1954,6 +3450,7 @@ class Canvas(FigureCanvas):
         else:
             self.statsummary_stat.lineEdit().setText("")
 
+    @restores_settings_guard
     def handle_statsummary_statistics_update(self):
         """
         Function that handles update of plotted statsummary statistics
@@ -2093,6 +3590,7 @@ class Canvas(FigureCanvas):
                 "handle_statsummary_statistics_update",
             )
 
+    @restores_settings_guard
     def handle_statsummary_cycle_update(self):
         """
         Function that handles update of statsummary periodic cycle
@@ -2147,6 +3645,7 @@ class Canvas(FigureCanvas):
 
         return None
 
+    @restores_settings_guard
     def handle_statsummary_periodic_aggregation_update(self):
         """
         Function that handles update of plotted statsummary periodic aggregation statistic
@@ -2190,6 +3689,7 @@ class Canvas(FigureCanvas):
 
         return None
 
+    @restores_settings_guard
     def handle_statsummary_periodic_mode_update(self):
         """
         Function that handles update of plotted statsummary periodic aggregation mode
@@ -2233,6 +3733,7 @@ class Canvas(FigureCanvas):
 
         return None
 
+    @restores_settings_guard
     def handle_fairmode_target_classification_update(self):
         """
         Function that handles update of station classification on FAIRMODE target plot
@@ -3142,12 +4643,26 @@ class Canvas(FigureCanvas):
         # create map settings menu
         self.map_menu = SettingsMenu(plot_type="map", canvas_instance=self)
         self.map_options = self.map_menu.checkable_comboboxes["options"]
-        self.map_elements = self.map_menu.get_elements()
 
         # get stats
         self.map_z_stat = self.map_menu.comboboxes["z_stat"]
         self.map_z1 = self.map_menu.comboboxes["z1"]
         self.map_z2 = self.map_menu.comboboxes["z2"]
+
+        # get colourbar limit fields - populated with the actual resolved
+        # limits after each redraw (see update_map_z_statistic()), not a
+        # generic "auto" placeholder; no override until the user edits one
+        # away from that - see handle_map_cb_limits_update()
+        self.map_cb_min = self.map_menu.lineedits["cb_min"]
+        self.map_cb_max = self.map_menu.lineedits["cb_max"]
+        self.read_instance.map_vmin_override = None
+        self.read_instance.map_vmax_override = None
+
+        # MAP "POINTS" SUB-MENU #
+        # a separate floating panel for the marker size/opacity controls and
+        # automatic sizing, kept out of the main panel so opening Settings
+        # isn't a wall of controls
+        self.map_sizing_container = self.map_menu.containers["sizing_container"]
 
         # get sliders and update values
         self.map_markersize_unsel_sl = self.map_menu.sliders["markersize_unsel_sl"]
@@ -3173,6 +4688,279 @@ class Canvas(FigureCanvas):
             "markersize_sl": [self.map_markersize_unsel_sl, self.map_markersize_sel_sl],
             "opacity_sl": [self.map_opacity_unsel_sl, self.map_opacity_sel_sl],
         }
+
+        # automatic size/opacity, on by default - keeps points well spaced as
+        # the map is zoomed and boosts selected stations over unselected ones
+        # (see apply_automatic_marker_style()). The manual sliders stay
+        # functional as an override, just hidden while automatic is on
+        self.map_auto_sizing = self.map_menu.checkboxes["auto_sizing"]
+        self.map_auto_sizing.setChecked(True)
+        self.read_instance.map_auto_marker_sizing = True
+
+        self.map_sizing_elements = [
+            # container first, so raising this list in order (see
+            # handle_map_sizing_toggle()) puts it behind everything else
+            # drawn on top of it
+            self.map_sizing_container,
+            self.map_menu.labels["sizing_title"],
+            self.map_auto_sizing,
+            self.map_menu.labels["sizing_unsel_label"],
+            self.map_menu.labels["markersize_unsel_sl_label"],
+            self.map_markersize_unsel_sl,
+            self.map_menu.labels["opacity_unsel_sl_label"],
+            self.map_opacity_unsel_sl,
+            self.map_menu.labels["sizing_sel_label"],
+            self.map_menu.labels["markersize_sel_sl_label"],
+            self.map_markersize_sel_sl,
+            self.map_menu.labels["opacity_sel_sl_label"],
+            self.map_opacity_sel_sl,
+        ]
+        self.sync_map_sizing_sliders_enabled()
+
+        # MAP / COLOURBAR SUB-MENUS #
+        # the cosmetic and rarely-touched controls live in their own floating
+        # panels rather than the main one. All three share the same on-screen
+        # spot, so only one is ever open at a time
+        self.map_panel_button = self.map_menu.buttons["map_panel_button"]
+        self.map_points_panel_button = self.map_menu.buttons["points_panel_button"]
+        self.map_colourbar_panel_button = self.map_menu.buttons[
+            "colourbar_panel_button"
+        ]
+        self.map_panel_container = self.map_menu.containers["map_panel_container"]
+        self.map_colourbar_panel_container = self.map_menu.containers[
+            "colourbar_panel_container"
+        ]
+
+        # get colourmap selector - dashboard-only (report/library output still
+        # take their colourmap from the yaml config, unaffected by this).
+        # Preselect "viridis", the cmap_absolute every entry in basic_stats.yaml
+        # resolves to for the initial (non-bias) statistic the map opens on.
+        self.map_colourmap = self.map_menu.comboboxes["colourmap"]
+        populate_colourmap_combobox(self.map_colourmap, current="viridis")
+        self.read_instance.map_colourmap_override = self.map_colourmap.currentText()
+
+        # get colourmap scale (continuous/discrete) and number-of-chunks
+        # controls, preseeded from plot_characteristics.yaml's map.cb.n_discrete.
+        # The chunks field only means anything for a discrete scale, so it is
+        # hidden entirely for continuous
+        self.map_colourmap_scale = self.map_menu.comboboxes["colourmap_scale"]
+        self.map_n_sections_label = self.map_menu.labels["n_sections_label"]
+        self.map_n_sections = self.map_menu.lineedits["n_sections"]
+        self.map_colourmap_scale.addItems(["Continuous", "Discrete"])
+        default_n_discrete = self.plot_characteristics_templates["map"]["cb"].get(
+            "n_discrete"
+        )
+        is_discrete = bool(default_n_discrete)
+        # setCurrentIndex(), not setCurrentText() - on this editable ComboBox
+        # the latter updates the line edit's text without moving
+        # currentIndex, so the selection silently reverts to index 0 the next
+        # time something reads it
+        self.map_colourmap_scale.setCurrentIndex(1 if is_discrete else 0)
+        # free-text integer fields rather than a fixed dropdown of counts,
+        # so any number can be asked for; seeded with the same default the
+        # dropdown used to preselect. setText() (not placeholder) so the
+        # value is really there to be read back and edited, not just hinted
+        self.map_n_sections.setValidator(QtGui.QIntValidator(1, 256, self.map_n_sections))
+        if is_discrete:
+            self.map_n_sections.setText(str(int(default_n_discrete)))
+        self.read_instance.map_discrete_override = is_discrete
+        self.read_instance.map_n_discrete_override = (
+            int(default_n_discrete) if is_discrete else None
+        )
+
+        # get labels (tick count) control - dashboard-only, same as above.
+        # Seeded from plot_characteristics.yaml's map.cb.n_ticks (7 by
+        # default), the value every basic/bias statistic falls back to
+        # unless it defines its own.
+        self.map_n_ticks = self.map_menu.lineedits["n_ticks"]
+        default_n_ticks = self.plot_characteristics_templates["map"]["cb"].get(
+            "n_ticks"
+        )
+        self.map_n_ticks.setValidator(QtGui.QIntValidator(1, 256, self.map_n_ticks))
+        if default_n_ticks:
+            self.map_n_ticks.setText(str(int(default_n_ticks)))
+        self.read_instance.map_n_ticks_override = (
+            int(default_n_ticks) if default_n_ticks else None
+        )
+
+        # colourbar limit fields (moved here from the main panel) plus the
+        # small reset control that clears both back to automatic
+        self.map_cb_reset = self.map_menu.buttons["cb_reset"]
+
+        # get map projection selector, preselected to whatever
+        # plot_characteristics.yaml's map.projection currently resolves to
+        # (Robinson by default)
+        self.map_projection = self.map_menu.comboboxes["projection"]
+        populate_projection_combobox(
+            self.map_projection,
+            current=self.plot_characteristics_templates["map"]["projection"],
+        )
+
+        # get map detail controls (land/ocean colour, country borders,
+        # coastline resolution) - all read from plot_characteristics_templates
+        # (see draw_map_features()), same as projection above
+        map_template = self.plot_characteristics_templates["map"]
+        self.map_land_colour = self.map_menu.comboboxes["land_colour"]
+        populate_colour_combobox(
+            self.map_land_colour,
+            LAND_COLOUR_OPTIONS,
+            current=map_template["land_polygon"]["facecolor"],
+        )
+        self.map_ocean_colour = self.map_menu.comboboxes["ocean_colour"]
+        populate_colour_combobox(
+            self.map_ocean_colour,
+            OCEAN_COLOUR_OPTIONS,
+            current=map_template["ocean_polygon"]["facecolor"],
+        )
+        # colour preset selector, sitting above the individual land/ocean
+        # controls it drives - see handle_map_colour_preset_update()
+        self.map_colour_preset = self.map_menu.comboboxes["colour_preset"]
+        self.map_colour_preset.addItems(
+            list(COLOUR_PRESETS) + [COLOUR_PRESET_CUSTOM]
+        )
+        self.sync_map_colour_preset()
+
+        self.map_borders = self.map_menu.checkboxes["borders"]
+        self.map_borders.setChecked(map_template["borders"]["visible"])
+
+        # gridlines read from plot_characteristics (not _templates) - see
+        # draw_map_gridlines() for why this differs from the four above
+        self.map_gridlines = self.map_menu.checkboxes["gridlines"]
+        self.map_gridlines.setChecked(
+            self.plot_characteristics["map"]["gridlines"]["visible"]
+        )
+        self.map_resolution = self.map_menu.comboboxes["resolution"]
+        resolution_options = ["low", "medium", "high"]
+        self.map_resolution.addItems(resolution_options)
+        # setCurrentIndex(), not setCurrentText() - see the comment above
+        # on map_colourmap_scale
+        self.map_resolution.setCurrentIndex(
+            resolution_options.index(map_template["map_coastline_resolution"])
+        )
+
+        # elements belonging to each sub-panel, listed separately so
+        # handle_map_subpanel_toggle() can show/hide just one panel's worth,
+        # but also included in self.map_elements below - dashboard.py only
+        # repositions what is in that list, and anything left out never moves
+        # again from its initial position. reset_map_subpanels() re-hides
+        # these right after the settings button shows map_elements wholesale.
+        # Container first in each list, so raising in order puts it behind
+        self.map_panel_elements = [
+            self.map_panel_container,
+            self.map_menu.labels["map_panel_title"],
+            self.map_menu.labels["projection_label"],
+            self.map_projection,
+            self.map_menu.labels["colour_preset_label"],
+            self.map_colour_preset,
+            self.map_menu.labels["land_colour_label"],
+            self.map_land_colour,
+            self.map_menu.labels["ocean_colour_label"],
+            self.map_ocean_colour,
+            self.map_menu.labels["resolution_label"],
+            self.map_resolution,
+            self.map_borders,
+            self.map_gridlines,
+        ]
+        self.map_colourbar_panel_elements = [
+            self.map_colourbar_panel_container,
+            self.map_menu.labels["colourbar_panel_title"],
+            self.map_menu.labels["cb_limits_label"],
+            self.map_cb_min,
+            self.map_cb_max,
+            self.map_cb_reset,
+            self.map_menu.labels["colourmap_label"],
+            self.map_colourmap,
+            self.map_menu.labels["colourmap_scale_label"],
+            self.map_colourmap_scale,
+            self.map_menu.labels["n_ticks_label"],
+            self.map_n_ticks,
+            self.map_n_sections_label,
+            self.map_n_sections,
+        ]
+
+        # each sub-panel's own reset control, sitting beside its title -
+        # added to that panel's element list so it shows and hides with it
+        self.map_panel_reset = self.map_menu.buttons["map_panel_reset"]
+        self.map_colourbar_panel_reset = self.map_menu.buttons[
+            "colourbar_panel_reset"
+        ]
+        self.map_points_panel_reset = self.map_menu.buttons["sizing_reset"]
+        self.map_panel_elements.append(self.map_panel_reset)
+        self.map_colourbar_panel_elements.append(self.map_colourbar_panel_reset)
+        self.map_sizing_elements.append(self.map_points_panel_reset)
+
+        # the state every panel's reset control returns to: whatever each
+        # control holds at the end of construction, which is what the
+        # dashboard opens with. Captured rather than re-derived from the yaml
+        # at reset time, so the two can't drift apart
+        self.map_panel_startup_defaults = {
+            # the colourmap lives in the Colourbar panel, but a colour
+            # preset - which is a Map panel control - changes it too, so
+            # resetting the Map panel has to put it back or the preset is
+            # only half undone
+            "colourmap": self.map_colourmap.currentIndex(),
+            "projection": self.map_projection.currentIndex(),
+            "land_colour": self.map_land_colour.currentIndex(),
+            "ocean_colour": self.map_ocean_colour.currentIndex(),
+            "resolution": self.map_resolution.currentIndex(),
+            "borders": self.map_borders.isChecked(),
+            "gridlines": self.map_gridlines.isChecked(),
+        }
+        self.map_colourbar_startup_defaults = {
+            "colourmap": self.map_colourmap.currentIndex(),
+            "colourmap_scale": self.map_colourmap_scale.currentIndex(),
+            "n_ticks": self.map_n_ticks.text(),
+            "n_sections": self.map_n_sections.text(),
+        }
+        self.map_points_startup_defaults = {
+            "auto_sizing": self.map_auto_sizing.isChecked(),
+            "markersize_unsel": self.map_markersize_unsel_sl.value(),
+            "opacity_unsel": self.map_opacity_unsel_sl.value(),
+            "markersize_sel": self.map_markersize_sel_sl.value(),
+            "opacity_sel": self.map_opacity_sel_sl.value(),
+        }
+
+        # every sub-panel, keyed by the nav button that opens it, so the
+        # three toggles/resets are one shared implementation rather than
+        # three near-identical copies
+        self.map_subpanels = {
+            "map": (self.map_panel_button, self.map_panel_elements, "Map"),
+            "points": (self.map_points_panel_button, self.map_sizing_elements, "Points"),
+            "colourbar": (
+                self.map_colourbar_panel_button,
+                self.map_colourbar_panel_elements,
+                "Colourbar",
+            ),
+        }
+        self.map_open_subpanel = None
+        # deliberately not calling sync_map_n_sections_visibility() here -
+        # sub-panel elements all start hidden, and it calls setVisible(True)
+        # for a Discrete scale (the config default), which would show
+        # n_sections on startup before its panel is ever opened
+
+        # size each nav button to its own text and centre the row
+        self.layout_map_nav_buttons()
+
+        # everything built for "map", main panel and sub-panels alike - see
+        # above for why the sub-panels stay in this list. get_elements() never
+        # included buttons, so the nav buttons and the resets are added
+        # explicitly to be repositioned and hidden with the rest of the menu
+        self.map_elements = self.map_menu.get_elements() + [
+            self.map_panel_button,
+            self.map_points_panel_button,
+            self.map_colourbar_panel_button,
+            self.map_cb_reset,
+            self.map_panel_reset,
+            self.map_colourbar_panel_reset,
+            self.map_points_panel_reset,
+        ]
+
+        # hide every sub-panel whenever Settings is opened or closed, so none
+        # is left open, or visible with the rest of the menu hidden, from a
+        # previous session
+        self.map_menu.buttons["settings_button"].clicked.connect(
+            self.reset_map_subpanels
+        )
 
         # TIMESERIES PLOT SETTINGS MENU #
         # create timeseries settings menu
@@ -3605,7 +5393,25 @@ class Canvas(FigureCanvas):
         if key in ["periodic_violin", "fairmode_target", "fairmode_statsummary"]:
             key = key.replace("_", "-")
 
+        # busy cursor around the redraw, same as every other settings
+        # handler - re-styling every point on a densely populated map is
+        # not instant, and without this the slider was one of the few
+        # controls that left the plain arrow cursor up while it worked
+        self.read_instance.cursor_function = set_cursor(
+            self.read_instance.cursor_function, "update_markersize_func"
+        )
+        # see handle_map_colourmap_scale_update() for why this is here
+        QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
+
         self.update_markersize(self.plot_axes[key], key, markersize, event_source)
+
+        # repaint synchronously, inside the busy-cursor scope: the update
+        # above only schedules a deferred draw, which would otherwise land
+        # after the cursor had been restored and show the plain pointer
+        # (or matplotlib's own generic wait cursor) for the slow part
+        self.figure.canvas.draw()
+
+        unset_cursor(self.read_instance.cursor_function, "update_markersize_func")
 
         return None
 
@@ -3629,7 +5435,21 @@ class Canvas(FigureCanvas):
                         self.interactive_elements[key]["opacity_sl"][loc].value() / 10
                     )
                     break
+        # see update_markersize_func() for why the busy cursor is here
+        self.read_instance.cursor_function = set_cursor(
+            self.read_instance.cursor_function, "update_opacity_func"
+        )
+        QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
+
         self.update_opacity(self.plot_axes[key], key, opacity, event_source)
+
+        # repaint synchronously, inside the busy-cursor scope: the update
+        # above only schedules a deferred draw, which would otherwise land
+        # after the cursor had been restored and show the plain pointer
+        # (or matplotlib's own generic wait cursor) for the slow part
+        self.figure.canvas.draw()
+
+        unset_cursor(self.read_instance.cursor_function, "update_opacity_func")
 
         return None
 
@@ -3688,6 +5508,7 @@ class Canvas(FigureCanvas):
 
         return None
 
+    @restores_settings_guard
     def update_plot_option(self):
         """
         Function to handle the update of the plot options

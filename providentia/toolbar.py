@@ -349,6 +349,11 @@ class NavigationToolbar(NavigationToolbar2QT):
         ax = self.canvas_instance.plot_axes["map"]
         ax.set_extent([-180, 180, -90, 90])
         self.push_current()
+
+        # re-derive automatic marker size/opacity for the reset (fully
+        # zoomed out) view (a no-op if automatic sizing is off)
+        self.canvas_instance.apply_automatic_marker_style()
+
         self.canvas.draw_idle()
 
         # update map extent

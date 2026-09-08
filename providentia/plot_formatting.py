@@ -2092,12 +2092,195 @@ def format_plot_options(
             )
 
 
+def map_feature_ink(map_template, feature="borders"):
+    """
+    A line colour for the map's borders and gridlines that stays visible
+    against whatever land and ocean colours are currently set.
+
+    Both are drawn over the basemap, so a single fixed colour cannot work
+    for both a light and a dark one: the configured dark grey vanished
+    entirely once the land and ocean were switched to their dark options.
+    This picks a dark ink over a light basemap and a light ink over a dark
+    one, judged on the perceived (luminance-weighted) brightness of the
+    two basemap colours together rather than either alone, since borders
+    and gridlines cross both.
+
+    Parameters
+    ----------
+    map_template : dict
+        The map's plot_characteristics_templates entry, holding the
+        current land_polygon/ocean_polygon face colours.
+    feature : {"borders", "gridlines"}, optional
+        Which of the two to pick a colour for. Gridlines are a background
+        reference the eye should be able to ignore, so they get a much
+        softer tone than borders, which describe the map itself - drawing
+        both at the same strength left the gridlines dominating the
+        figure.
+
+    Returns
+    -------
+    str
+        Hex colour to draw the feature in.
+    """
+
+    def luminance(colour):
+        # Rec. 709 relative luminance - matches how bright a colour
+        # actually looks, unlike a plain mean of the channels
+        red, green, blue = mpl.colors.to_rgb(colour)
+        return 0.2126 * red + 0.7152 * green + 0.0722 * blue
+
+    land = map_template.get("land_polygon", {}).get("facecolor", "0.85")
+    ocean = map_template.get("ocean_polygon", {}).get("facecolor", "#DCE6ED")
+    try:
+        brightness = (luminance(land) + luminance(ocean)) / 2
+    except ValueError:
+        # an unparseable colour shouldn't take the map down with it
+        return "#8A8A8A" if feature == "gridlines" else "#4D4D4D"
+
+    light_basemap = brightness > 0.5
+    if feature == "gridlines":
+        # only just enough separation from the basemap to be followed -
+        # gridlines sit under everything else and are read by glancing at
+        # them, never studied
+        return "#9E9E9E" if light_basemap else "#6E7681"
+    # not pure black/white at either end: full contrast makes borders
+    # compete with the station data drawn on top of them, which is the
+    # thing actually meant to stand out
+    return "#3A3A3A" if light_basemap else "#C8C8C8"
 
 
+def draw_map_features(canvas_instance, ax):
+    """
+    Add the map's ocean, land, and country border cartopy features to an
+    axis, styled per canvas_instance.plot_characteristics_templates["map"].
+    Only meaningful for the "providentia" map background (the default) - a
+    custom background image or cartopy's shaded relief doesn't use these.
+
+    Split out from format_axis() so it can be re-run on its own whenever the
+    user changes land/ocean colour, border visibility, or coastline
+    resolution from the map settings menu, without re-doing the rest of
+    format_axis()'s one-time axis setup (which would duplicate gridlines).
+
+    Parameters
+    ----------
+    canvas_instance : object
+        Instance of class Canvas.
+    ax : cartopy.mpl.geoaxes.GeoAxes
+        Map axis to draw the features onto.
+
+    Returns
+    -------
+    dict
+        {"ocean": artist, "land": artist, "borders": artist}, any of which
+        may be None if that feature is turned off. Keep this and pass it back
+        in via remove_map_features() before calling this again, or the old
+        artists are left behind (drawn over, not replaced).
+    """
+
+    map_template = canvas_instance.plot_characteristics_templates["map"]
+    resolution = get_land_polygon_resolution(map_template["map_coastline_resolution"])
+    artists = {"ocean": None, "land": None, "borders": None}
+
+    # ocean first, so land and borders draw on top of it
+    ocean_characteristics = map_template.get("ocean_polygon", {})
+    if ocean_characteristics.get("visible", True):
+        ocean_kwargs = {
+            k: v for k, v in ocean_characteristics.items() if k != "visible"
+        }
+        artists["ocean"] = ax.add_feature(
+            cfeature.NaturalEarthFeature(
+                category="physical", name="ocean", scale=resolution, **ocean_kwargs
+            )
+        )
+
+    artists["land"] = ax.add_feature(
+        cfeature.NaturalEarthFeature(
+            category="physical",
+            name="land",
+            scale=resolution,
+            **map_template["land_polygon"],
+        )
+    )
+
+    borders_characteristics = map_template.get("borders", {})
+    if borders_characteristics.get("visible", False):
+        borders_kwargs = {
+            k: v for k, v in borders_characteristics.items() if k != "visible"
+        }
+        # borders track the basemap's brightness rather than keeping the
+        # single configured colour, which disappeared against the dark
+        # land/ocean options - see map_feature_ink()
+        borders_kwargs["edgecolor"] = map_feature_ink(map_template)
+        artists["borders"] = ax.add_feature(
+            cfeature.NaturalEarthFeature(
+                category="cultural",
+                name="admin_0_boundary_lines_land",
+                scale=resolution,
+                facecolor="none",
+                **borders_kwargs,
+            )
+        )
+
+    return artists
 
 
+def remove_map_features(feature_artists):
+    """
+    Remove the feature artists previously returned by draw_map_features(),
+    ready for it to be called again with updated settings.
+
+    Parameters
+    ----------
+    feature_artists : dict
+        Dict previously returned by draw_map_features().
+    """
+
+    for artist in feature_artists.values():
+        if artist is not None:
+            artist.remove()
 
 
+def draw_map_gridlines(canvas_instance, ax, gridlines_characteristics):
+    """
+    Add the map's gridlines to an axis - split out from format_axis() so it can
+    be re-run on its own (remove the previous Gridliner, call this again) when
+    the user toggles gridlines on/off from the map settings menu, same idea as
+    draw_map_features().
+
+    Unlike land/ocean/borders, gridlines apply regardless of which map
+    background is active (providentia/shaded_relief/custom image), so this
+    stays a standalone function rather than folding into draw_map_features().
+
+    Parameters
+    ----------
+    canvas_instance : object
+        Instance of class Canvas.
+    ax : cartopy.mpl.geoaxes.GeoAxes
+        Map axis to draw the gridlines onto.
+    gridlines_characteristics : dict
+        Gridlines plot characteristics for the plot type being drawn. Passed
+        in rather than read off canvas_instance, as only the dashboard keys
+        its plot characteristics by base plot type - report and library pass
+        the characteristics for the one plot type being made.
+
+    Returns
+    -------
+    cartopy.mpl.gridliner.Gridliner or None
+        The created Gridliner, or None if gridlines are turned off. Keep
+        this and call .remove() on it (if not None) before calling this
+        again, or the old gridlines are left behind.
+    """
+
+    if not gridlines_characteristics.get("visible", True):
+        return None
+
+    kwargs = {k: v for k, v in gridlines_characteristics.items() if k != "visible"}
+    # gridlines track the basemap's brightness, same as borders - see
+    # map_feature_ink()
+    kwargs["color"] = map_feature_ink(
+        canvas_instance.plot_characteristics_templates["map"], feature="gridlines"
+    )
+    return ax.gridlines(crs=canvas_instance.datacrs, **kwargs)
 
 
 def format_axis(
@@ -2329,7 +2512,7 @@ def format_axis(
             # add gridlines ?
             if "gridlines" in plot_characteristics_vars:
                 canvas_instance.map_gridliner = draw_map_gridlines(
-                    canvas_instance, ax_to_format
+                    canvas_instance, ax_to_format, plot_characteristics["gridlines"]
                 )
 
             # set map extent (if wanted)

@@ -7,7 +7,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join
-from .dashboard_elements import CheckableComboBox, ComboBox
+from .dashboard_elements import CheckableComboBox, ComboBox, MenuLineEdit
 from .dashboard_elements import set_formatting
 
 PROVIDENTIA_ROOT = "/".join(CURRENT_PATH.split("/")[:-1])
@@ -52,6 +52,12 @@ class SettingsMenu(object):
         self.checkable_comboboxes = {}
         self.sliders = {}
         self.checkboxes = {}
+        self.lineedits = {}
+        # a plot type can define more than one container (e.g. a nested
+        # sub-menu's own background panel, positioned separately from the
+        # main one) - self.container keeps pointing at the last one built,
+        # for the common single-container case
+        self.containers = {}
 
         for element_name in self.elements:
             element_settings = settings_dict[plot_type][element_name]
@@ -64,6 +70,7 @@ class SettingsMenu(object):
                 "checkable_combobox",
                 "slider",
                 "checkbox",
+                "lineedit",
             ]:
                 # Add element
                 element = getattr(self, "add_" + element_type)(element_settings)
@@ -109,7 +116,8 @@ class SettingsMenu(object):
                 # Save element in corresponding dictionary
                 if element_type == "container":
                     self.container = element
-                elif element_type in ["button", "label", "slider"]:
+                    self.containers[element_name] = element
+                elif element_type in ["button", "label", "slider", "lineedit"]:
                     getattr(self, element_type + "s")[element_name] = element
                 elif element_type in ["combobox", "checkable_combobox", "checkbox"]:
                     getattr(self, element_type + "es")[element_name] = element
@@ -137,11 +145,22 @@ class SettingsMenu(object):
             QtWidgets.QPushButton(self.canvas_instance),
             formatting_dict[element_settings["formatting_dict"]],
         )
-        button.setIcon(QtGui.QIcon(join(CURRENT_PATH, element_settings["path"])))
-        button.setIconSize(
-            QtCore.QSize(element_settings["size"][0], element_settings["size"][1])
-        )
+        # icon-only (the plot corner gear/save buttons) or text-only (e.g.
+        # a nested sub-menu's nav button) - support either
+        if "path" in element_settings.keys():
+            button.setIcon(QtGui.QIcon(join(CURRENT_PATH, element_settings["path"])))
+            button.setIconSize(
+                QtCore.QSize(element_settings["size"][0], element_settings["size"][1])
+            )
+        if "text" in element_settings.keys():
+            button.setText(element_settings["text"])
         button.clicked.connect(partial(self.connect, element_settings["function"]))
+
+        # deliberately not click-focusable - taking focus on click makes a
+        # field being edited commit during the press, so the redraw that
+        # triggers runs before the release and the click never completes.
+        # SettingsMenu.connect() applies any pending edit anyway
+        button.setFocusPolicy(QtCore.Qt.NoFocus)
 
         return button
 
@@ -164,6 +183,10 @@ class SettingsMenu(object):
             QtWidgets.QWidget(self.canvas_instance),
             formatting_dict[element_settings["formatting_dict"]],
         )
+        # clicking the panel background takes focus, so a line edit being
+        # edited inside it commits. Without this the background is
+        # focus-transparent and clicking off a field changed nothing
+        container.setFocusPolicy(QtCore.Qt.ClickFocus)
         container.raise_()
 
         return container
@@ -294,7 +317,44 @@ class SettingsMenu(object):
             partial(self.connect, element_settings["function"])
         )
 
+        # deliberately not click-focusable - taking focus on click makes a
+        # field being edited commit during the press, so the redraw that
+        # triggers runs before the release and the click never completes.
+        # SettingsMenu.connect() applies any pending edit anyway
+        combobox.setFocusPolicy(QtCore.Qt.NoFocus)
+
         return combobox
+
+    def add_lineedit(self, element_settings):
+        """
+        Add line edit
+
+        Parameters
+        ----------
+        element_settings : dict
+            Settings
+
+        Returns
+        -------
+        QtWidgets.QLineEdit
+            Line edit
+        """
+
+        lineedit = set_formatting(
+            MenuLineEdit(self.canvas_instance),
+            formatting_dict[element_settings["formatting_dict"]],
+        )
+        if "placeholder" in element_settings.keys():
+            lineedit.setPlaceholderText(element_settings["placeholder"])
+        # committed (Enter, or clicking away), not textChanged - typing
+        # shouldn't redraw the map on every keystroke. MenuLineEdit's own
+        # signal rather than editingFinished, which Qt suppresses on
+        # focus-out when a validator considers the text intermediate
+        lineedit.committed.connect(
+            partial(self.connect, element_settings["function"])
+        )
+
+        return lineedit
 
     def get_elements(self):
         """
@@ -311,14 +371,16 @@ class SettingsMenu(object):
         labels = list(self.labels.values())
         checkable_comboboxes = list(self.checkable_comboboxes.values())
         checkboxes = list(self.checkboxes.values())
+        lineedits = list(self.lineedits.values())
 
         return (
-            [self.container]
+            list(self.containers.values())
             + sliders
             + comboboxes
             + labels
             + checkable_comboboxes
             + checkboxes
+            + lineedits
         )
 
     def connect(self, function):
@@ -334,6 +396,16 @@ class SettingsMenu(object):
         if hasattr(self.canvas_instance, "interactive_elements"):
             # Call function only after all elements have been added
             if self.canvas_instance.interactive_elements.keys() == settings_dict.keys():
+                # apply any field holding an uncommitted value before this
+                # control's handler runs, so a value typed and then abandoned
+                # is never dropped. The commit calls each field's handler
+                # directly, so this cannot re-enter here
+                commit = getattr(
+                    self.canvas_instance, "commit_map_pending_edits", None
+                )
+                if commit is not None:
+                    commit()
+
                 getattr(self.canvas_instance, function)()
 
         return None

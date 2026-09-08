@@ -419,6 +419,10 @@ def zoom_map_func(canvas_instance, event):
             # save map extent (in data coords)
             canvas_instance.read_instance.map_extent = get_map_extent(canvas_instance)
 
+            # re-derive automatic marker size/opacity for the new zoom
+            # level (a no-op if automatic sizing is off)
+            canvas_instance.apply_automatic_marker_style()
+
             # draw changes
             canvas_instance.figure.canvas.draw_idle()
 
