@@ -609,7 +609,12 @@ else
     if $notebook; then
         echo "INFO: Starting Jupyter session."
         export PYTHONPATH="$(pwd)"
-        jupyter-lab --port 8888 --ip 0.0.0.0 --allow-root
+        # bind to localhost and open the URL directly. Jupyter hands the browser
+        # its connection_url, which comes straight from --ip: with 0.0.0.0 that is
+        # an unroutable wildcard the browser cannot open, and without the flag it
+        # is handed a file:// redirect page instead, which Safari will not follow
+        jupyter-lab --port 8888 --ip localhost --allow-root \
+            --ServerApp.use_redirect_file=False
     elif $interpolation; then
         unique_id=$(printf "%06d\n" $((RANDOM % 1000000)))
         eval "${python_command} ${n_cpus_option} ${n_cpus_explicit_option} --slurm_job_id=$unique_id" 2>&1 | tee logs/interpolation/management_logs/$unique_id.out
