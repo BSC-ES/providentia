@@ -1436,8 +1436,14 @@ class Canvas(FigureCanvas):
             prop=legend_plot_characteristics["prop"],
         )
 
-        # setup element picker in legend, and clip legend text to axis bounds
-        for legend_label in self.legend.texts:
+        # setup element picker in legend, and clip legend text to axis bounds.
+        # gid carries the real data label through, independent of the display
+        # text - matplotlib doesn't preserve a gid set on the handles passed
+        # into legend(), so it is redone here on the legend's own text
+        for legend_label, data_label in zip(
+            self.legend.texts, legend_plot_characteristics["data_labels_ordered"]
+        ):
+            legend_label.set_gid(data_label)
             legend_label.set_picker(True)
 
         return None

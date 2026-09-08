@@ -955,6 +955,12 @@ class Dashboard(QtWidgets.QWidget):
         # set variable to avoid updating the canvas while updating config bar parameters
         self.block_MPL_canvas_updates = True
 
+        # reset per-session legend display name overrides (see
+        # get_display_label() in plotting.py) - this function runs on every
+        # data load/reload, so a custom legend name doesn't survive one,
+        # by design
+        self.legend_label_overrides = {}
+
         # set some default configuration values when initialising config bar
         if self.config_bar_initialisation:
             # set initial selected start-end date

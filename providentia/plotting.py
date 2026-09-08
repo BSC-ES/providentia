@@ -70,6 +70,39 @@ contingency_settings = yaml.safe_load(
 )
 
 
+def get_display_label(read_instance, data_label):
+    """
+    Get the text to actually show for a data label (legend, statsummary),
+    applying any per-session rename set via double-clicking a legend entry
+    (see legend_picker_func()/rename_legend_label() in
+    dashboard_interactivity.py).
+
+    data_label itself - the real identifier used for data selection,
+    colour/style lookups, and everywhere else a data label is matched by
+    value - is never touched by this; only what gets drawn as text. That's
+    also why this doesn't affect the model pop-up menu, which shows
+    data_label directly rather than going through this function.
+
+    Parameters
+    ----------
+    read_instance : object
+        Instance of class Dashboard (or Report/Library, where this is
+        always a no-op - legend_label_overrides is dashboard-only, reset on
+        every data load, and never set outside the live dashboard session).
+    data_label : str
+        The data label's real identifier.
+
+    Returns
+    -------
+    str
+        data_label, or its override if one is set.
+    """
+
+    return getattr(read_instance, "legend_label_overrides", {}).get(
+        data_label, data_label
+    )
+
+
 class Plotting:
     """Class for plotting"""
 
@@ -470,8 +503,11 @@ class Plotting:
         if data_labels is None:
             data_labels = copy.deepcopy(self.read_instance.data_labels)
 
-        # create legend elements
+        # create legend elements, tracking the real data label behind each in
+        # the same order - Legend doesn't preserve a gid set on the handles
+        # passed in, so update_legend() sets gid on legend.texts using this
         legend_elements = []
+        legend_data_labels = []
 
         # add observations element, if available, and set_obs == True
         if (self.read_instance.observations_data_label in data_labels) and (set_obs):
@@ -485,9 +521,12 @@ class Plotting:
                         self.read_instance.observations_data_label
                     ]["colour"],
                     markersize=plot_characteristics_legend["handles"]["markersize"],
-                    label=self.read_instance.observations_data_label,
+                    label=get_display_label(
+                        self.read_instance, self.read_instance.observations_data_label
+                    ),
                 )
             )
+            legend_data_labels.append(self.read_instance.observations_data_label)
 
         # add element for each model
         for model in data_labels:
@@ -503,11 +542,13 @@ class Plotting:
                             "colour"
                         ],
                         markersize=plot_characteristics_legend["handles"]["markersize"],
-                        label=model,
+                        label=get_display_label(self.read_instance, model),
                     )
                 )
+                legend_data_labels.append(model)
 
         plot_characteristics_legend["plot"]["handles"] = legend_elements
+        plot_characteristics_legend["data_labels_ordered"] = legend_data_labels
 
         return plot_characteristics_legend
 
@@ -2844,6 +2885,14 @@ class Plotting:
 
                 # reset index
                 stats_df = stats_df.reset_index()
+
+                # show any renamed display text in that first (label) column,
+                # without touching data_labels itself - still the real
+                # identifiers, used just below for colour lookups
+                stats_df[stats_df.columns[0]] = [
+                    get_display_label(self.read_instance, data_label)
+                    for data_label in data_labels
+                ]
 
                 # get number of "empty" cells (without stats)
                 empty_cells = 1

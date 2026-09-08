@@ -528,6 +528,31 @@ class QVLine(QtWidgets.QFrame):
         self.setFrameShadow(QtWidgets.QFrame.Sunken)
 
 
+class LegendInlineEditor(QtWidgets.QLineEdit):
+    """
+    Small QLineEdit overlaid directly on top of a matplotlib legend label
+    for in-place renaming (see rename_legend_label() in
+    dashboard_interactivity.py), instead of a separate pop-up dialog.
+
+    QLineEdit already emits editingFinished on both Enter and losing focus,
+    which covers "commit"; it has no equivalent for "cancel", so this adds
+    an escapePressed signal for that.
+    """
+
+    escapePressed = QtCore.pyqtSignal()
+
+class LegendEditorCommitFilter(QtCore.QObject):
+    """
+    Installed application-wide for the lifetime of a LegendInlineEditor -
+    a click landing anywhere other than the editor itself commits the
+    rename, the same as pressing Enter. Needed because the editor sits
+    over a matplotlib canvas: clicking elsewhere on that canvas is handled
+    by matplotlib's own pick/event machinery rather than normal Qt
+    click-to-focus, so the editor doesn't reliably lose focus (and
+    therefore never emits editingFinished) just from clicking away.
+    """
+
+
 class Switch(QtWidgets.QPushButton):
     """Define class that generates switch buttons."""
 
