@@ -2066,6 +2066,20 @@ class Dashboard(QtWidgets.QWidget):
                 )
             )
 
+            # Taylor diagrams use a curvilinear grid whose tick positions
+            # come from a fixed ExtremeFinder set when the diagram is built
+            # (see make_taylor()), not from xlim/ylim - so the toolbar's
+            # set_xlim()/set_ylim() leaves the grid's cached extent stale and
+            # the ticks vanish. The diagram is a fixed comparison space
+            # anyway, not a literal data range, so zoom/pan is disabled
+            # through the hook matplotlib's toolbar checks
+            for taylor_ax in (
+                canvas_instance.plot_axes[changed_plot_type],
+                canvas_instance.plotting.taylor_polar_relevant_axis,
+            ):
+                taylor_ax.can_zoom = lambda: False
+                taylor_ax.can_pan = lambda: False
+
         elif changed_plot_type == "fairmode-statsummary":
             # create gridspec and add it to a list
             canvas_instance.plot_axes[changed_plot_type] = [

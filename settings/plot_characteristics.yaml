@@ -597,9 +597,13 @@
       "xtick_alteration":
         {
           "define": true,
-          "last_step": true,
-          "first_step": true,
-          "overlap": 15,
+          # ceiling on interior ticks (not counting the start/end ticks,
+          # always shown) a resolution may offer to even be considered -
+          # the actual count used also adapts down to whatever the
+          # panel's real width can fit without clashing, so this is a
+          # cap, not a target - see compute_timeseries_xticks() in
+          # plot_formatting.py
+          "max_ticks": 12,
         },
       "smooth": { "window": 10, "min_points_percentage": 50 },
       "plot":
@@ -621,7 +625,7 @@
           "ylabel": { "fontsize": 8 },
           "xtick_params": { "labelsize": 8 },
           "ytick_params": { "labelsize": 8 },
-          "xtick_alteration": { "n_slices": 4 },
+          "xtick_alteration": { "max_ticks": 12 },
           "annotate_text": { "fontsize": 8 },
           "smooth": { "format": { "linewidth": 1.0 } },
           "plot": { "markersize": 2 },
@@ -654,7 +658,7 @@
           "xlabel": { "fontsize": 8 },
           "ylabel": { "fontsize": 8 },
           "xtick_params": { "labelsize": 7 },
-          "xtick_alteration": { "n_slices": 6 },
+          "xtick_alteration": { "max_ticks": 10 },
           "ytick_params": { "labelsize": 7 },
           "legend":
             {
@@ -715,7 +719,7 @@
                 },
               "handles": { "markersize": 14 },
             },
-          "xtick_alteration": { "n_slices": 4 },
+          "xtick_alteration": { "max_ticks": 14 },
           "annotate_text": { "fontsize": 13 },
           "smooth": { "format": { "linewidth": 0.5 } },
           "markersize_npoints_threshold": 200,
@@ -746,7 +750,7 @@
             },
           "plot": { "markersize": "" },
           "annotate_text": { "fontsize": 13 },
-          "xtick_alteration": { "n_slices": 4 },
+          "xtick_alteration": { "max_ticks": 12 },
           "smooth": { "format": { "linewidth": 0.5 } },
           "main_gs": {
             "height_ratios": [5, 1], 

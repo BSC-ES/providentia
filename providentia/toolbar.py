@@ -1,6 +1,7 @@
 """ Class for the dashboard matplotlib navigation toolbar """
 
 import copy
+from contextlib import contextmanager
 from enum import Enum
 import os
 
@@ -12,7 +13,7 @@ from PyQt5 import QtGui, QtWidgets
 from providentia.auxiliar import CURRENT_PATH, join
 from .configuration import ProvConfiguration
 from .configuration import load_conf
-from .dashboard_elements import InputDialog
+from .dashboard_elements import InputDialog, set_cursor, unset_cursor
 from .dashboard_interactivity import LassoSelector
 from .fields_menus import multispecies_conf
 from .plot_aux import get_map_extent
@@ -20,6 +21,17 @@ from .plot_formatting import harmonise_xy_lims_paradigm
 from .read_aux import generate_file_trees
 from .warnings_prv import show_message
 from .writing import export_configuration, export_data_npz, export_netcdf
+
+
+@contextmanager
+def _no_wait_cursor():
+    """
+    Stand-in for matplotlib's wait-cursor-during-draw context manager -
+    see NavigationToolbar.__init__(). Does nothing, so the only busy
+    cursor the app ever shows is the Providentia one set by set_cursor().
+    """
+
+    yield
 
 
 class _Mode(str, Enum):
@@ -103,6 +115,11 @@ class NavigationToolbar(NavigationToolbar2QT):
 
         # allow access to methods of parent class NavigationToolbar2QT
         super(NavigationToolbar, self).__init__(canvas_instance, read_instance)
+
+        # matplotlib puts its own generic busy cursor up around any slow
+        # draw, which appeared instead of the Providentia logo whenever a
+        # redraw ran outside one of our own busy-cursor scopes
+        self._wait_cursor_for_draw_cm = _no_wait_cursor
 
         # set toolbar icons
         self._actions["save_data"].setIcon(
@@ -212,42 +229,116 @@ class NavigationToolbar(NavigationToolbar2QT):
             if prev_xlim != new_xlim or prev_ylim != new_ylim:
                 self.harmonise_changed_axis(axis)
 
-    def harmonise_changed_axis(self, axis):
+    def harmonise_changed_axis(self, axis, fallback_axes=None):
         """
         Identifies the context of a modified axis and propagates limit changes to related plots.
 
         Parameters
         ----------
-        axis : matplotlib.axes.Axes
+        axis : matplotlib.axes.Axes or None
             The specific axis object that has undergone a change in limits.
+            None when the triggering mouse event happened outside every
+            axes - see `fallback_axes`.
+        fallback_axes : list of matplotlib.axes.Axes, optional
+            The axes the interaction actually applied to, used when
+            `axis` is None. A box-zoom or pan is very commonly *released*
+            outside the axes it was performed on (dragging past the plot
+            edge is the normal way to zoom right up to a boundary), and
+            matplotlib reports event.inaxes as None for that release even
+            though it did zoom the axes the drag started in. Without this,
+            such a zoom silently never re-harmonised: the axis limits
+            changed but its ticks were left exactly as the *previous*,
+            wider view computed them, so only whichever of those stale
+            ticks happened to still fall inside the new view got drawn -
+            typically losing the start/end labels entirely and leaving a
+            sparse, arbitrary-looking few in the middle.
         """
 
-        # iterate through each plot until the one related to the axis is found
+        if axis is None:
+            for fallback_axis in fallback_axes or []:
+                if fallback_axis is not None:
+                    self.harmonise_changed_axis(fallback_axis)
+            return
+
+        # iterate through each plot until the one related to the axis is
+        # found - matched lets a periodic sub-axis match in the inner loop
+        # stop the outer one too, which otherwise carried on and attributed
+        # the change to the wrong plot
+        matched = False
         for plot_type, axes in self.canvas_instance.plot_axes.items():
             # for periodic plots, check the the axes inside the dictionary
             if plot_type == "periodic" or plot_type == "periodic-violin":
                 for periodic_type in axes:
                     if axes[periodic_type] == axis:
+                        matched = True
                         break
             # compare the main axis for the rest of the plots
             elif axes == axis:
+                matched = True
+            if matched:
                 break
+
+        # the changed axis doesn't belong to any currently-tracked plot
+        # (e.g. the mouse was released outside every axes, or the layout
+        # changed mid-interaction) - nothing to harmonise
+        if not matched:
+            return
 
         # apply harmonise to the plots with time
         if plot_type in ["periodic", "periodic-violin", "timeseries"]:
             plot_options = copy.deepcopy(
                 self.canvas_instance.current_plot_options[plot_type]
             )
-            harmonise_xy_lims_paradigm(
-                self.read_instance,
-                self.canvas_instance,
-                self.canvas_instance.plot_axes[plot_type],
-                plot_type,
-                self.canvas_instance.plot_characteristics[plot_type],
-                plot_options,
-                relim=True,
-                autoscale=False,
+            # for periodic, pass only the sub-axis actually interacted with,
+            # not the full resolution dict - the other call sites pass the
+            # full dict deliberately (sharing a y-scale when the data changes
+            # is intended there), but from here it merged the untouched
+            # panels' limits into the one being zoomed. A single-entry dict
+            # keeps the periodic-specific xlim/tick logic working while
+            # making that merge a no-op
+            if plot_type in ["periodic", "periodic-violin"]:
+                relevant_axs = {periodic_type: axis}
+            else:
+                relevant_axs = self.canvas_instance.plot_axes[plot_type]
+
+            # Providentia busy cursor while the axes are re-harmonised and
+            # their ticks recomputed, matching every settings-menu handler -
+            # toolbar navigation was the one route in that never set it
+            self.read_instance.cursor_function = set_cursor(
+                self.read_instance.cursor_function, "harmonise_changed_axis"
             )
+            try:
+                harmonise_xy_lims_paradigm(
+                    self.read_instance,
+                    self.canvas_instance,
+                    relevant_axs,
+                    plot_type,
+                    self.canvas_instance.plot_characteristics[plot_type],
+                    plot_options,
+                    relim=True,
+                    autoscale=False,
+                )
+            finally:
+                # restored even if harmonising raises, so a failure can
+                # never strand the loading cursor over the whole app
+                unset_cursor(
+                    self.read_instance.cursor_function, "harmonise_changed_axis"
+                )
+
+        # re-derive automatic marker size/opacity for the map's new view (a
+        # no-op if automatic sizing is off) - every toolbar action that can
+        # change the map extent routes through here
+        elif plot_type == "map":
+            self.read_instance.cursor_function = set_cursor(
+                self.read_instance.cursor_function, "harmonise_changed_axis"
+            )
+            try:
+                self.canvas_instance.apply_automatic_marker_style()
+                self.canvas.draw_idle()
+            finally:
+                unset_cursor(
+                    self.read_instance.cursor_function, "harmonise_changed_axis"
+                )
 
     def world(self):
         """
@@ -348,13 +439,33 @@ class NavigationToolbar(NavigationToolbar2QT):
             The mouse event triggered by dragging the plot surface.
         """
 
-        super().drag_pan(event)
+        # the axes being panned, read before super() runs - matplotlib
+        # records them when the pan starts, and event.inaxes is None
+        # whenever the pointer has been dragged outside them (see
+        # harmonise_changed_axis()'s `fallback_axes`)
+        pan_axes = list(getattr(getattr(self, "_pan_info", None), "axes", None) or [])
 
-        # harmonise axis if needed
-        self.harmonise_changed_axis(event.inaxes)
+        # busy cursor across the whole action - harmonise_changed_axis() sets
+        # one too, but only for the plot types it actually harmonises
+        self.read_instance.cursor_function = set_cursor(
+            self.read_instance.cursor_function, "toolbar_navigation"
+        )
+        try:
+            super().drag_pan(event)
 
-        # update map extent
-        self.read_instance.map_extent = get_map_extent(self.canvas_instance)
+            # harmonise axis if needed
+            self.harmonise_changed_axis(event.inaxes, fallback_axes=pan_axes)
+
+            # update map extent
+            self.read_instance.map_extent = get_map_extent(self.canvas_instance)
+
+            # repaint synchronously, inside the busy-cursor scope - matplotlib
+            # only schedules a deferred draw, so for any plot
+            # harmonise_changed_axis() doesn't redraw itself the repaint
+            # landed after the cursor had already been restored
+            self.canvas.draw()
+        finally:
+            unset_cursor(self.read_instance.cursor_function, "toolbar_navigation")
 
     def release_zoom(self, event):
         """
@@ -366,13 +477,33 @@ class NavigationToolbar(NavigationToolbar2QT):
             The mouse release event that defines the final zoom boundary.
         """
 
-        super().release_zoom(event)
+        # the axes being zoomed, read before super() runs - it clears
+        # _zoom_info on release, and event.inaxes is None whenever the drag
+        # was released outside them, the normal way to zoom to a boundary
+        zoom_axes = list(getattr(getattr(self, "_zoom_info", None), "axes", None) or [])
 
-        # harmonise axis if needed
-        self.harmonise_changed_axis(event.inaxes)
+        # busy cursor across the whole action - see drag_pan()
+        self.read_instance.cursor_function = set_cursor(
+            self.read_instance.cursor_function, "toolbar_navigation"
+        )
+        try:
+            super().release_zoom(event)
 
-        # update map extent
-        self.read_instance.map_extent = get_map_extent(self.canvas_instance)
+            # harmonise axis if needed (also re-derives automatic marker
+            # size/opacity when the changed axis is the map - see
+            # harmonise_changed_axis())
+            self.harmonise_changed_axis(event.inaxes, fallback_axes=zoom_axes)
+
+            # update map extent
+            self.read_instance.map_extent = get_map_extent(self.canvas_instance)
+
+            # repaint synchronously, inside the busy-cursor scope - matplotlib
+            # only schedules a deferred draw, so for any plot
+            # harmonise_changed_axis() doesn't redraw itself the repaint
+            # landed after the cursor had already been restored
+            self.canvas.draw()
+        finally:
+            unset_cursor(self.read_instance.cursor_function, "toolbar_navigation")
 
     def save_figure(self):
         """

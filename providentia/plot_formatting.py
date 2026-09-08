@@ -5,18 +5,19 @@ from datetime import datetime, timedelta
 import os
 
 import cartopy.feature as cfeature
-import matplotlib
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.dates import num2date
+from matplotlib.figure import Figure
 from matplotlib import ticker
+from matplotlib import transforms as mtransforms
 import numpy as np
-from packaging.version import Version
 import pandas as pd
 from PIL import Image
 
 from providentia.auxiliar import CURRENT_PATH, join
 from .plot_aux import get_land_polygon_resolution, set_map_extent
+from .read_aux import get_periodic_relevant_temporal_resolutions
 from .plot_options import (
     annotation,
     model_domain,
@@ -29,6 +30,19 @@ from .statistics import get_z_statistic_info
 from .warnings_prv import show_message
 
 Image.MAX_IMAGE_PIXELS = None
+
+# matplotlib's default font (DejaVu Sans) has no CJK glyphs, so Chinese
+# station names/metadata render as boxes. Add whichever CJK font is already
+# on the machine as a fallback, keeping DejaVu Sans as the primary font.
+# Fixed install paths are probed as well as matplotlib's font cache, as the
+# frozen Mac app (bin/Mac/Providentia) does not find the OS fonts on its own.
+
+# fixed, well-known install paths for the same fonts, per OS - tried
+# (potentially incomplete, e.g. inside a frozen app bundle) directory scan
+
+
+
+
 
 
 def set_equal_axes(ax, plot_options, plot_characteristics, base_plot_type):
@@ -101,6 +115,1144 @@ def set_equal_axes(ax, plot_options, plot_characteristics, base_plot_type):
             ax.set_ylim(plot_characteristics["ylim"])
 
 
+# fixed hierarchy of calendar-aligned tick steps, finest to coarsest
+# (hour multiples are every divisor of 24, so every sub-daily grid puts a
+# tick on midnight; day multiples are fine-grained to give the search a
+# close density match; semimonth is the 1st and 15th, which reads better
+# than an arbitrary day stride over a few months)
+_TIMESERIES_TICK_STEPS = [
+    ("hour", 1),
+    ("hour", 2),
+    ("hour", 3),
+    ("hour", 4),
+    ("hour", 6),
+    ("hour", 8),
+    ("hour", 12),
+    ("hour", 24),
+    ("day", 1), ("day", 2), ("day", 3), ("day", 4), ("day", 5),
+    ("day", 6), ("day", 7), ("day", 8), ("day", 9), ("day", 10),
+    ("day", 12), ("day", 14), ("day", 16), ("day", 18), ("day", 20),
+    ("day", 24), ("day", 28), ("day", 32), ("day", 36), ("day", 40),
+    ("day", 45), ("day", 50), ("day", 60), ("day", 70), ("day", 80),
+    ("day", 90), ("day", 100), ("day", 120), ("day", 140), ("day", 160),
+    ("day", 180), ("day", 210), ("day", 240), ("day", 270), ("day", 300),
+    ("day", 330), ("day", 365),
+    ("semimonth", 1),
+    ("month", 1),
+    ("month", 3),
+    ("month", 6),
+    ("year", 1),
+    ("year", 2),
+    ("year", 5),
+    ("year", 10),
+    ("year", 25),
+    ("year", 50),
+    ("year", 100),
+    ("year", 250),
+    ("year", 500),
+    ("year", 1000),
+]
+
+
+def _parse_yyyymmdd(value):
+    """
+    Parse a configured start/end date (an int or numeric string like 20180101)
+    as a datetime. Callers treat None as "the true loaded range isn't known
+    here", not an error.
+
+    Parameters
+    ----------
+    value : int or str or None
+        Date to parse
+
+    Returns
+    -------
+    datetime.datetime or None
+        Parsed date, or None if missing/unparseable
+    """
+    if value is None:
+        return None
+    try:
+        text = str(int(value))
+        return datetime(int(text[:4]), int(text[4:6]), int(text[6:8]))
+    except (TypeError, ValueError):
+        return None
+
+
+# named temporal resolutions in seconds, used to recognise a view zoomed down
+# to a single observation, so it can be labelled with that observation's own
+# time rather than the two edges of the span
+_RESOLUTION_SECONDS = {
+    "hourly": 3600,
+    "hourly_instantaneous": 3600,
+    "3hourly": 3 * 3600,
+    "3hourly_instantaneous": 3 * 3600,
+    "6hourly": 6 * 3600,
+    "6hourly_instantaneous": 6 * 3600,
+    "daily": 86400,
+}
+
+
+def _format_single_observation_tick(dt):
+    """
+    Get label text for the one tick shown when a view has been zoomed down to
+    at most a single observation. Full year-month-day precision always, with
+    hour/minute/second appended only as far as the timestamp needs.
+
+    Parameters
+    ----------
+    dt : datetime.datetime
+        Time of the observation
+
+    Returns
+    -------
+    str
+        Label text
+    """
+    if (dt.hour, dt.minute, dt.second, dt.microsecond) == (0, 0, 0, 0):
+        return dt.strftime("%Y-%m-%d")
+    if (dt.minute, dt.second, dt.microsecond) == (0, 0, 0):
+        return dt.strftime("%Y-%m-%d %Hh")
+    if (dt.second, dt.microsecond) == (0, 0):
+        return dt.strftime("%Y-%m-%d %H:%M")
+    return dt.strftime("%Y-%m-%d %H:%M:%S")
+
+
+def _drops_a_day_start(candidates, kept_dates):
+    """
+    Determine if any midnight among the candidates falling strictly inside the
+    span shown was left out of the kept ticks. Midnights at or outside the two
+    end ticks do not count, as those are the view's own boundaries.
+
+    Parameters
+    ----------
+    candidates : list
+        Candidate tick datetimes
+    kept_dates : list
+        Tick datetimes that survived decluttering
+
+    Returns
+    -------
+    bool
+        True if a midnight inside the span was dropped
+    """
+    if not kept_dates:
+        return False
+    first, last = kept_dates[0], kept_dates[-1]
+    kept = set(kept_dates)
+    return any(
+        first < candidate < last and candidate not in kept
+        for candidate in candidates
+        if (candidate.hour, candidate.minute, candidate.second, candidate.microsecond)
+        == (0, 0, 0, 0)
+    )
+
+
+def _aligned_timeseries_ticks(left, right, kind, multiple):
+    """
+    Get all datetimes in [left, right] landing exactly on a calendar boundary
+    for the given step, e.g. kind="hour", multiple=3 gives every 3rd hour on
+    the clock (00:00, 03:00, ...), never an arbitrary offset grid.
+
+    Parameters
+    ----------
+    left : datetime.datetime
+        Start of the range
+    right : datetime.datetime
+        End of the range
+    kind : str
+        Step kind ("hour", "day", "semimonth", "month" or "year")
+    multiple : int
+        Step multiple
+
+    Returns
+    -------
+    list
+        Aligned tick datetimes
+    """
+
+    ticks = []
+
+    if kind == "hour":
+        current = left.replace(minute=0, second=0, microsecond=0)
+        if current < left:
+            current += timedelta(hours=1)
+        remainder = current.hour % multiple
+        if remainder:
+            current += timedelta(hours=multiple - remainder)
+        step = timedelta(hours=multiple)
+        while current <= right:
+            ticks.append(current)
+            current += step
+
+    elif kind == "day":
+        # day-ordinal aligned (day 1 is 0001-01-01), so a multi-day stride
+        # always lands on the same fixed set of calendar days regardless of
+        # where the visible range happens to start
+        start_date = left.date()
+        if (left.hour, left.minute, left.second, left.microsecond) != (
+            0,
+            0,
+            0,
+            0,
+        ):
+            start_date += timedelta(days=1)
+        ordinal = start_date.toordinal()
+        remainder = ordinal % multiple
+        if remainder:
+            ordinal += multiple - remainder
+        step = timedelta(days=multiple)
+        current = datetime.fromordinal(ordinal)
+        while current <= right:
+            ticks.append(current)
+            current += step
+
+    elif kind == "semimonth":
+        # the 1st and 15th of every month in range - the only kind here whose
+        # gaps aren't equal in real time. `multiple` is unused, but kept for a
+        # consistent per-kind signature
+        year, month = left.year, left.month
+        while True:
+            for day in (1, 15):
+                current = datetime(year, month, day)
+                if current > right:
+                    ticks.sort()
+                    return ticks
+                if current >= left:
+                    ticks.append(current)
+            year, month = (year + 1, 1) if month == 12 else (year, month + 1)
+
+    elif kind == "month":
+        # months counted as a single index from January of year 0, so a
+        # step of e.g. 3 always lands on Jan/Apr/Jul/Oct, never an
+        # offset depending on where the visible range happens to start
+        month_index = left.year * 12 + (left.month - 1)
+        if (left.day, left.hour, left.minute, left.second, left.microsecond) != (
+            1,
+            0,
+            0,
+            0,
+            0,
+        ):
+            month_index += 1
+        remainder = month_index % multiple
+        if remainder:
+            month_index += multiple - remainder
+        while True:
+            year, month = divmod(month_index, 12)
+            current = datetime(year, month + 1, 1)
+            if current > right:
+                break
+            ticks.append(current)
+            month_index += multiple
+
+    elif kind == "year":
+        year = left.year
+        if (left.month, left.day, left.hour, left.minute, left.second) != (
+            1,
+            1,
+            0,
+            0,
+            0,
+        ):
+            year += 1
+        remainder = year % multiple
+        if remainder:
+            year += multiple - remainder
+        current = datetime(year, 1, 1)
+        while current <= right:
+            ticks.append(current)
+            current = current.replace(year=current.year + multiple)
+
+    return ticks
+
+
+def _format_timeseries_tick(dt, kind):
+    """
+    Get label text for one aligned tick, precise enough for its own step and
+    no more. "hour" ticks always carry their date too, so each reads
+    unambiguously without depending on a nearby label for its date.
+
+    Parameters
+    ----------
+    dt : datetime.datetime
+        Tick time
+    kind : str
+        Step kind of the tier the tick belongs to
+
+    Returns
+    -------
+    str
+        Label text
+    """
+
+    if kind == "year":
+        return dt.strftime("%Y")
+    if kind == "month":
+        return dt.strftime("%Y-%m")
+    if kind in ("day", "semimonth"):
+        return dt.strftime("%Y-%m-%d")
+    return dt.strftime("%Y-%m-%d %Hh")
+
+
+def _set_timeseries_tick_alignment(tick_labels):
+    """
+    Centre every tick label on its tick, and reset each label's transform back
+    to its un-nudged state. Both are set explicitly even when already correct,
+    as matplotlib reuses a pool of Text objects across set_ticks() calls, so a
+    label can otherwise inherit an alignment or a nudge left on a reused object
+    by a previous call and quietly bias this call's own measurements.
+
+    Parameters
+    ----------
+    tick_labels : list
+        Tick label Text objects
+    """
+
+    for label in tick_labels:
+        label.set_ha("center")
+        base_transform = getattr(label, "_ptv_base_transform", None)
+        if base_transform is None:
+            base_transform = label.get_transform()
+            label._ptv_base_transform = base_transform
+        label.set_transform(base_transform)
+
+
+def _nudge_edge_labels_onscreen(ax, renderer, min_gap_pixels):
+    """
+    Shift the rightmost tick label back inside the axes when it hangs off the
+    visible plot area, by the minimum needed to stop its real (unpadded) box
+    being clipped. The left edge is never nudged. The shift is capped at how
+    far it can go before crowding the previous label, as the declutter pass
+    measured every gap with this label still centred. Only meaningful for the
+    final label set shown, not during the search over candidate tiers.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        Axis to nudge the labels on
+    renderer : matplotlib.backend_bases.RendererBase
+        Renderer to measure the labels against
+    min_gap_pixels : float
+        Minimum gap to keep between neighbouring labels
+    """
+
+    labels = ax.xaxis.get_majorticklabels()
+    n = len(labels)
+    if n < 2:
+        return
+    ax_bbox = ax.get_window_extent(renderer)
+
+    # every label's transform has already been reset to its un-nudged state
+    # by the preceding _set_timeseries_tick_alignment() call, so only the
+    # label actually being nudged here needs touching
+    label = labels[-1]
+    base_transform = getattr(label, "_ptv_base_transform", None)
+    if base_transform is None:
+        base_transform = label.get_transform()
+        label._ptv_base_transform = base_transform
+
+    # the real, unpadded box - only shift as far as is needed to stop the
+    # text clipping, and not even quite that far, as a label pulled fully
+    # flush with the boundary reads worse than a few px of overflow
+    bbox = label.get_window_extent(renderer)
+    x0 = bbox.x0
+    shift_px = _edge_nudge_shift(bbox, ax_bbox)
+
+    if shift_px and n >= 2:
+        neighbour_bbox = labels[-2].get_window_extent(renderer)
+        neighbour_pad = (neighbour_bbox.width * 0.15) / 2
+        neighbour_x1 = neighbour_bbox.x1 + neighbour_pad
+        # shift_px < 0 (moving left) - stop short of the previous
+        # label's space
+        min_shift = (neighbour_x1 + min_gap_pixels) - x0
+        shift_px = max(shift_px, min(0, min_shift))
+
+    if shift_px:
+        shift_in = shift_px / ax.figure.dpi
+        label.set_transform(
+            base_transform
+            + mtransforms.ScaledTranslation(shift_in, 0, ax.figure.dpi_scale_trans)
+        )
+
+
+def _edge_tick_text(dt, kind):
+    """
+    Get one edge's label text at the chosen tier - normally the same format as
+    any interior tick of that tier, so the edge reads like it belongs on the
+    same axis. "month", "year" and "hour" formats drop precision that is right
+    for an edge genuinely on that tier's boundary but would hide a real
+    difference otherwise, so each falls back one precision level finer for an
+    edge that is not on its own boundary.
+
+    Parameters
+    ----------
+    dt : datetime.datetime
+        Edge time
+    kind : str
+        Step kind of the chosen tier
+
+    Returns
+    -------
+    str
+        Label text
+    """
+    if kind == "year" and (dt.month, dt.day) != (1, 1):
+        return dt.strftime("%Y-%m-%d")
+    if kind == "month" and dt.day != 1:
+        return dt.strftime("%Y-%m-%d")
+    if kind == "hour" and (dt.minute, dt.second, dt.microsecond) != (0, 0, 0):
+        if dt.second or dt.microsecond:
+            return dt.strftime("%Y-%m-%d %H:%M:%S")
+        return dt.strftime("%Y-%m-%d %H:%M")
+    return _format_timeseries_tick(dt, kind)
+
+
+def _disambiguate_edge_labels(left, right, kind):
+    """
+    Get text for the two forced start/end labels. Unlike interior ticks, the
+    edges are wherever the view was zoomed or snapped to, and at a coarse
+    resolution can format identically - so if the two texts come out equal,
+    precision is escalated (minutes, then seconds) until they differ. Pixel
+    level clash avoidance still happens in the shared declutter pass.
+
+    Parameters
+    ----------
+    left : datetime.datetime
+        Left edge time
+    right : datetime.datetime
+        Right edge time
+    kind : str
+        Step kind of the chosen tier
+
+    Returns
+    -------
+    tuple of str
+        Left and right edge label text
+    """
+
+    left_text = _edge_tick_text(left, kind)
+    right_text = _edge_tick_text(right, kind)
+    if left_text != right_text:
+        return left_text, right_text
+
+    if kind == "hour":
+        escalations = ["%Y-%m-%d %H:%M", "%Y-%m-%d %H:%M:%S"]
+    else:
+        escalations = ["%Y-%m-%d", "%Y-%m-%d %H:%M", "%Y-%m-%d %H:%M:%S"]
+    for fmt in escalations:
+        left_text, right_text = left.strftime(fmt), right.strftime(fmt)
+        if left_text != right_text:
+            return left_text, right_text
+
+    # last-resort universal fallback - unreachable in practice, since
+    # left < right always differ at full precision, but kept as a
+    # defensive floor rather than ever returning a duplicate pair
+    return (
+        left.strftime("%Y-%m-%d %H:%M:%S"),
+        right.strftime("%Y-%m-%d %H:%M:%S"),
+    )
+
+
+# fraction of the correction needed to bring a clipped right-hand edge label
+# back on screen that is actually applied - a label pulled exactly flush with
+# the boundary reads as more obviously shunted
+_EDGE_NUDGE_FRACTION = 0.85
+
+
+def _edge_nudge_shift(bbox, ax_bbox):
+    """
+    Get the pixel shift the rightmost label will really be given once drawn.
+    The single source of truth for that number, as the space has to be reserved
+    while deciding which interior ticks fit and then applied when the chosen set
+    is displayed - if the two disagree, fit decisions set aside room the label
+    never uses and interior ticks near the right-hand end are dropped for it.
+
+    Parameters
+    ----------
+    bbox : matplotlib.transforms.Bbox
+        The label's real, unpadded bounding box
+    ax_bbox : matplotlib.transforms.Bbox
+        The axis's bounding box
+
+    Returns
+    -------
+    float
+        Shift in pixels, negative, or zero when the label already fits
+    """
+    new_x0, _new_x1 = _onscreen_bbox_x(bbox.x0, bbox.x1, ax_bbox, "right")
+    return (new_x0 - bbox.x0) * _EDGE_NUDGE_FRACTION
+
+
+def _onscreen_bbox_x(x0, x1, ax_bbox, side):
+    """
+    Get a label's real (x0, x1) shifted just enough to stay within the axis's
+    bounding box, applying the same correction _nudge_edge_labels_onscreen()
+    makes once a label set is displayed - so it is accounted for as reserved
+    space up front rather than discovered as a clash after the choice is made.
+
+    Parameters
+    ----------
+    x0 : float
+        Left edge of the label box, in pixels
+    x1 : float
+        Right edge of the label box, in pixels
+    ax_bbox : matplotlib.transforms.Bbox
+        The axis's bounding box
+    side : str
+        Which edge of the box might be overflowing ("left" or "right")
+
+    Returns
+    -------
+    tuple of float
+        Corrected (x0, x1)
+    """
+    if side == "left" and x0 < ax_bbox.x0:
+        shift = ax_bbox.x0 - x0
+        x0, x1 = x0 + shift, x1 + shift
+    elif side == "right" and x1 > ax_bbox.x1:
+        shift = x1 - ax_bbox.x1
+        x0, x1 = x0 - shift, x1 - shift
+    return x0, x1
+
+
+def _measure_and_declutter(
+    ax, renderer, candidates, min_gap_pixels, xlim, protected=frozenset()
+):
+    """
+    Install the candidates as real ticks on the axis and greedily keep as many
+    as fit left to right without their rendered bounding boxes crowding each
+    other, always keeping the first and last. Protected candidates are taken in
+    a pass of their own first, so a landmark tick is not crowded out by an
+    ordinary one just before it.
+
+    The renderer is reused as-is rather than redrawing the figure per candidate
+    set, as get_window_extent() lays the string out against it fresh each call.
+    xlim is re-applied straight after set_ticks(), as matplotlib silently
+    expands the axis's data limits to fit any tick outside the current view,
+    even with autoscale off, which would corrupt every later measurement.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        Axis to install the ticks on
+    renderer : matplotlib.backend_bases.RendererBase
+        Renderer to measure the labels against
+    candidates : list
+        (datetime, text) tuples, first and last being the two edges
+    min_gap_pixels : float
+        Minimum gap to keep between neighbouring labels
+    xlim : tuple
+        Numeric x-axis limits to restore after setting ticks
+    protected : frozenset, optional
+        Candidate datetimes given first claim on the available space
+
+    Returns
+    -------
+    tuple of list
+        Kept tick datetimes and their label text, in order
+    """
+
+    candidate_dates = [c[0] for c in candidates]
+    candidate_texts = [c[1] for c in candidates]
+    ax.xaxis.set_ticks(candidate_dates, labels=candidate_texts)
+    ax.set_xlim(*xlim)
+    tick_labels = ax.xaxis.get_majorticklabels()
+    _set_timeseries_tick_alignment(tick_labels)
+    ax_bbox = ax.get_window_extent(renderer)
+
+    n = len(candidates)
+    label_edges = []
+    for i, ((dt, _text), label) in enumerate(zip(candidates, tick_labels)):
+        bbox = label.get_window_extent(renderer)
+        # a small safety margin around the measured box, rather than
+        # trusting it to the last pixel - two labels sitting exactly
+        # min_gap_pixels apart with nothing to spare would still read
+        # as touching
+        pad = (bbox.width * 0.15) / 2
+        x0, x1 = bbox.x0 - pad, bbox.x1 + pad
+        # the right edge label is centred on a tick at the data boundary, so
+        # its box can extend past the axis. Reserve exactly the shift
+        # _nudge_edge_labels_onscreen() will give it, so the chosen
+        # candidates already leave room. The left edge is never nudged
+        if i == n - 1:
+            shift = _edge_nudge_shift(bbox, ax_bbox)
+            x0, x1 = x0 + shift, x1 + shift
+        label_edges.append((dt, x0, x1))
+
+    # always keep the first (left) candidate, then add later ones only if
+    # they don't crowd the last kept label. `protected` candidates are taken
+    # in a pass of their own first, and a plain candidate is only kept if it
+    # also leaves room for the next protected one - a single greedy pass
+    # would let an ordinary tick take the space a midnight needed
+    interior = label_edges[1:-1]
+    end_dt, end_x0, end_x1 = label_edges[-1]
+
+    chosen_protected = []
+    if protected:
+        cursor_x1 = label_edges[0][2]
+        for dt, x0, x1 in interior:
+            if dt in protected and x0 - cursor_x1 >= min_gap_pixels:
+                chosen_protected.append((dt, x0, x1))
+                cursor_x1 = x1
+        # the right edge is mandatory too, so give up the protected ones
+        # closest to it rather than let them crowd it out
+        while chosen_protected and end_x0 - chosen_protected[-1][2] < min_gap_pixels:
+            chosen_protected.pop()
+
+    kept = [label_edges[0]]
+    next_protected = 0
+    for dt, x0, x1 in interior:
+        if next_protected < len(chosen_protected) and dt == chosen_protected[next_protected][0]:
+            kept.append((dt, x0, x1))
+            next_protected += 1
+            continue
+        if dt in protected:
+            # protected, but already ruled out above - never fill its
+            # place with a neighbour it would have displaced
+            continue
+        if x0 - kept[-1][2] < min_gap_pixels:
+            continue
+        if next_protected < len(chosen_protected):
+            upcoming = chosen_protected[next_protected]
+            if upcoming[1] - x1 < min_gap_pixels:
+                continue
+        kept.append((dt, x0, x1))
+
+    # always keep the last (right) candidate too - dropping back through
+    # whatever was already kept if it would otherwise crowd this one
+    while len(kept) > 1:
+        if end_x0 - kept[-1][2] >= min_gap_pixels:
+            break
+        kept.pop()
+    if kept[-1][0] != end_dt:
+        kept.append((end_dt, end_x0, end_x1))
+
+    text_by_date = {dt: text for dt, text in candidates}
+    kept_dates = [dt for dt, _x0, _x1 in kept]
+    kept_texts = [text_by_date[dt] for dt in kept_dates]
+    return kept_dates, kept_texts
+
+
+def _edge_pair_fits(
+    ax, renderer, edge_left, edge_right, left_text, right_text, min_gap_pixels, xlim
+):
+    """
+    Determine whether the two edge labels fit side by side on their own,
+    accounting for the same on-screen correction the right edge gets once
+    displayed, so a pair is not judged as fitting only for the nudge to then
+    have nowhere to go.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        Axis to install the ticks on
+    renderer : matplotlib.backend_bases.RendererBase
+        Renderer to measure the labels against
+    edge_left : datetime.datetime
+        Left edge time
+    edge_right : datetime.datetime
+        Right edge time
+    left_text : str
+        Left edge label text
+    right_text : str
+        Right edge label text
+    min_gap_pixels : float
+        Minimum gap to keep between the two labels
+    xlim : tuple
+        Numeric x-axis limits to restore after setting ticks
+
+    Returns
+    -------
+    bool
+        True if the two edge labels fit
+    """
+    ax.xaxis.set_ticks([edge_left, edge_right], labels=[left_text, right_text])
+    ax.set_xlim(*xlim)
+    labels = ax.xaxis.get_majorticklabels()
+    _set_timeseries_tick_alignment(labels)
+    ax_bbox = ax.get_window_extent(renderer)
+    left_box, right_box = (label.get_window_extent(renderer) for label in labels)
+    left_pad = (left_box.width * 0.15) / 2
+    right_pad = (right_box.width * 0.15) / 2
+    left_x0, left_x1 = left_box.x0 - left_pad, left_box.x1 + left_pad
+    right_shift = _edge_nudge_shift(right_box, ax_bbox)
+    right_x0 = right_box.x0 - right_pad + right_shift
+    return (right_x0 - left_x1) >= min_gap_pixels
+
+
+def _shorten_edge_text(left, right, kind):
+    """
+    Get a shorter fallback pair of edge texts, used only when the tier's normal
+    edge format does not fit the two edges side by side even with no interior
+    ticks. "hour" drops the date if both edges share a day, "day"/"semimonth"
+    drop the year if both share one, and "month"/"year" have nothing shorter
+    that would still be meaningful.
+
+    Parameters
+    ----------
+    left : datetime.datetime
+        Left edge time
+    right : datetime.datetime
+        Right edge time
+    kind : str
+        Step kind of the chosen tier
+
+    Returns
+    -------
+    tuple of str or None
+        Shortened left and right edge text, or None if this kind has no
+        shorter form to offer
+    """
+    if kind == "hour":
+        formats = ["%Hh", "%H:%M"] if left.date() == right.date() else ["%m-%d %Hh"]
+    elif kind in ("day", "semimonth") and left.year == right.year:
+        formats = ["%m-%d"]
+    else:
+        formats = []
+    for fmt in formats:
+        left_text, right_text = left.strftime(fmt), right.strftime(fmt)
+        if left_text != right_text:
+            return left_text, right_text
+    return None
+
+
+def _resolve_timeseries_edges(left, right, kind, edge_aligned, data_start, data_end):
+    """
+    Get the datetimes to actually use for the left/right edge ticks, which are
+    not always left/right themselves. A side showing the full loaded data range
+    uses that true boundary, so an un-zoomed view of a full year reads
+    "2018-01"/"2019-01" rather than whatever the margin padding lands on. A side
+    that has been zoomed snaps inward to the nearest tick in edge_aligned, which
+    is day precision (or hour precision for a sub-daily view) regardless of how
+    coarse the interior ticks need to be. Never rounds outward past the true
+    edge, as a tick outside the view silently widens the axis.
+
+    Parameters
+    ----------
+    left : datetime.datetime
+        Left view boundary
+    right : datetime.datetime
+        Right view boundary
+    kind : str
+        Step kind of the chosen tier
+    edge_aligned : list
+        Day or hour precision aligned ticks to snap a zoomed edge to
+    data_start : datetime.datetime or None
+        True start of the loaded data, None if not known
+    data_end : datetime.datetime or None
+        True end of the loaded data, None if not known
+
+    Returns
+    -------
+    tuple of datetime.datetime
+        Left and right edge times
+    """
+    if data_start is not None and left <= data_start:
+        edge_left = data_start
+    elif edge_aligned:
+        edge_left = edge_aligned[0]
+    else:
+        edge_left = left
+
+    if data_end is not None and right >= data_end:
+        edge_right = data_end
+    elif edge_aligned:
+        edge_right = edge_aligned[-1]
+    else:
+        edge_right = right
+
+    # collision guard: a single-element aligned list (or a data range
+    # narrower than one tick step) could pick the same point for both
+    if edge_left >= edge_right:
+        edge_left, edge_right = left, right
+
+    return edge_left, edge_right
+
+
+def _fit_timeseries_ticks(
+    ax, renderer, left, right, kind, aligned, min_gap_pixels, data_start, data_end, xlim
+):
+    """
+    Build the label candidates for one tier (the edges plus whatever aligned
+    ticks fall between them) and find how many actually fit, reporting both how
+    many interior candidates were offered and how many were kept so the caller
+    can tell whether this tier's density suits the available space.
+
+    A left-to-right greedy keep is used only to find out how many interior ticks
+    the space can hold, as it can leave a gap-toothed result. A second attempt
+    then picks that many at an even stride across the full offered set, and is
+    used whenever it fits at least as many, so what is shown reads as an
+    intentional coarser resolution rather than an arbitrary subset of a finer one.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        Axis to install the ticks on
+    renderer : matplotlib.backend_bases.RendererBase
+        Renderer to measure the labels against
+    left : datetime.datetime
+        Left view boundary
+    right : datetime.datetime
+        Right view boundary
+    kind : str
+        Step kind of this tier
+    aligned : list
+        Aligned tick datetimes offered by this tier
+    min_gap_pixels : float
+        Minimum gap to keep between neighbouring labels
+    data_start : datetime.datetime or None
+        True start of the loaded data, None if not known
+    data_end : datetime.datetime or None
+        True end of the loaded data, None if not known
+    xlim : tuple
+        Numeric x-axis limits to restore after setting ticks
+
+    Returns
+    -------
+    tuple
+        Kept tick datetimes, their label text, the number of interior
+        candidates offered and the number kept
+    """
+
+    # edges always snap at day precision, or whole-hour precision for a
+    # sub-daily view - and to every hour, not this tier's own multiple, so an
+    # edge sits as close to where the view really begins and ends as a
+    # sensible unit allows, rather than being dragged onto the interior grid
+    edge_aligned = _aligned_timeseries_ticks(left, right, "hour", 1) if kind == "hour" else _aligned_timeseries_ticks(left, right, "day", 1)
+    edge_left, edge_right = _resolve_timeseries_edges(
+        left, right, kind, edge_aligned, data_start, data_end
+    )
+    left_text, right_text = _disambiguate_edge_labels(edge_left, edge_right, kind)
+    if not _edge_pair_fits(
+        ax, renderer, edge_left, edge_right, left_text, right_text, min_gap_pixels, xlim
+    ):
+        # the two edges, both always shown, don't fit side by side at their
+        # normal per-tier precision - shorten just enough for the pair to
+        # fit, keeping the original text if this kind has nothing shorter
+        shortened = _shorten_edge_text(edge_left, edge_right, kind)
+        if shortened is not None:
+            left_text, right_text = shortened
+    interior = [
+        (dt, _format_timeseries_tick(dt, kind))
+        for dt in aligned
+        if edge_left < dt < edge_right
+    ]
+    # drop an interior candidate showing identical text to the edge next to
+    # it (e.g. a mid-month right edge and a month-start tick both reading
+    # "2018-05") - the edge wins, as it is the one guaranteed to stay
+    if interior and interior[0][1] == left_text:
+        interior = interior[1:]
+    if interior and interior[-1][1] == right_text:
+        interior = interior[:-1]
+
+    n_offered = len(interior)
+    edges = [(edge_left, left_text), (edge_right, right_text)]
+    if n_offered == 0:
+        kept_dates, kept_texts = _measure_and_declutter(
+            ax, renderer, edges, min_gap_pixels, xlim
+        )
+        return kept_dates, kept_texts, 0, 0
+
+    # on a sub-daily view the start of a day is the only landmark there is,
+    # so midnights get first claim on the space. Above day resolution every
+    # candidate is already a day boundary, so there is nothing to single out
+    protected = (
+        frozenset(
+            dt
+            for dt, _text in interior
+            if (dt.hour, dt.minute, dt.second, dt.microsecond) == (0, 0, 0, 0)
+        )
+        if kind == "hour"
+        else frozenset()
+    )
+
+    all_candidates = [edges[0]] + interior + [edges[1]]
+    kept_dates, kept_texts = _measure_and_declutter(
+        ax, renderer, all_candidates, min_gap_pixels, xlim, protected
+    )
+    n_kept = len(kept_dates) - 2
+    if n_kept == n_offered:
+        return kept_dates, kept_texts, n_offered, n_kept  # everything fit
+
+    if n_kept <= 0:
+        return kept_dates, kept_texts, n_offered, 0
+
+    if protected:
+        # the protected pass above already placed the day boundaries and
+        # filled around them; re-picking an evenly-spaced subset below
+        # would choose purely by spacing again and undo exactly that
+        return kept_dates, kept_texts, n_offered, n_kept
+
+    # an even-stride subset reads as an intentional coarser resolution rather
+    # than a leftover from the greedy pass. Greedy's own count is a lower
+    # bound, not the maximum, so every size from n_offered down to 1 is a
+    # candidate - fitting is monotonic in size, so the largest clean size is
+    # found with a binary search rather than by trying every one
+    def _even_stride_attempt(size):
+        # stride across the full edge-to-edge span, not just the interior
+        # list's own span - striding the interior alone always anchors the
+        # first and last chosen point immediately next to an edge, however
+        # sparse the size
+        idx = sorted(
+            {
+                min(n_offered - 1, max(0, round(k * (n_offered + 1) / (size + 1)) - 1))
+                for k in range(1, size + 1)
+            }
+        )
+        chosen_interior = [interior[i] for i in idx]
+        candidates = [edges[0]] + chosen_interior + [edges[1]]
+        dates, texts = _measure_and_declutter(
+            ax, renderer, candidates, min_gap_pixels, xlim
+        )
+        return dates, texts, len(dates) - 2
+
+    best_even = None  # (dates, texts, size) - largest size confirmed clean
+    lo, hi = 1, n_offered
+    while lo <= hi:
+        mid = (lo + hi) // 2
+        dates, texts, kept_at_mid = _even_stride_attempt(mid)
+        if kept_at_mid == mid:
+            best_even = (dates, texts, mid)
+            lo = mid + 1
+        else:
+            hi = mid - 1
+
+    if best_even is not None and best_even[2] >= n_kept:
+        even_dates, even_texts, even_n_kept = best_even
+        return even_dates, even_texts, n_offered, even_n_kept
+    return kept_dates, kept_texts, n_offered, n_kept
+
+
+def compute_timeseries_xticks(
+    ax, left, right, max_ticks=6, min_gap_pixels=12, data_start=None, data_end=None,
+    data_resolution_seconds=None,
+):
+    """
+    Set "nice" x-axis tick positions and labels for a timeseries date
+    range directly on `ax`, always labelling both edges - with ticks in
+    between snapped to a fixed hierarchy of calendar-aligned resolutions
+    (see _TIMESERIES_TICK_STEPS) rather than a generic locator's full
+    range of possible steps, so every tick lands on a boundary that
+    actually means something (never e.g. a half hour).
+
+    The edges themselves are not always `left`/`right` exactly - see
+    _resolve_timeseries_edges(): a side still showing the full loaded
+    data range reads as that range's own clean start/end (e.g. the
+    default view of a full year reads "2018-01"/"2019-01", not a
+    margin-padded value a few percent past it), while a side that's
+    actually been zoomed in snaps to the nearest sensible tick instead
+    of an exact, often visually clunky boundary.
+
+    Density adapts to the axis's actual, current pixel width rather
+    than a fixed guess at how many ticks "should" fit: tiers are tried
+    from finest to coarsest, and for each candidate tier that isn't
+    already ruled out on count alone, its labels are really installed,
+    drawn, and measured (_fit_timeseries_ticks) to see whether they all
+    survive decluttering untouched - the first (finest, most
+    informative) tier where nothing had to be dropped is what's used, so
+    a wide panel naturally ends up with more, closer-together ticks than
+    a narrow one showing the same span, without either ever clashing.
+
+    Three earlier versions of this decluttering step measured
+    candidates *before* they were actually on screen - a fraction of
+    the total data range, then a prediction of each label's rendered
+    pixel width via get_text_width_height_descent() - and still let
+    labels clash on a real machine despite passing the same kind of
+    check in a test environment: a predicted width is only as good as
+    the font/DPI assumptions behind it, and those can differ (font
+    substitution, HiDPI scaling, hinting) between wherever this gets
+    tested and where it actually runs. So this measures real,
+    already-rendered label bounding boxes instead - whatever
+    font/DPI/renderer is in play on the machine actually running this
+    is exactly what gets measured, by construction.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The real axis to set ticks on - candidates are installed on it
+        and it is actually drawn so each label's real rendered bounding
+        box can be read back.
+    left : datetime.datetime
+        Start of the visible x-axis range.
+    right : datetime.datetime
+        End of the visible x-axis range.
+    max_ticks : int, default 6
+        Ceiling on how many *interior* ticks a tier may offer to even be
+        considered - the two edges are always additionally shown on top
+        of this, so the real total can run up to max_ticks + 2. Not a
+        target: the tier actually used is whichever fits this ceiling
+        *and* the axis's real available width (see above), so the
+        result is commonly fewer than max_ticks on a narrow panel and
+        can be noticeably more on a wide one.
+    min_gap_pixels : float, default 12
+        Minimum gap, in pixels, required between two adjacent labels'
+        edges for both to be kept.
+    data_start, data_end : datetime.datetime, optional
+        The true, configured start/end of the loaded data (not the
+        current view) - see _resolve_timeseries_edges(). Left as None,
+        both edges are always treated as zoomed (the same behaviour as
+        before this parameter existed).
+    data_resolution_seconds : float, optional
+        The loaded data's own sampling interval, in seconds (e.g. 3600
+        for hourly). When the current view is zoomed to no wider than
+        this, there is at most one real observation actually in it, so
+        a single tick at that observation's own time is shown instead of
+        two edge labels either side of a gap with nothing real in it.
+        Left as None, this collapse never happens (the same behaviour as
+        before this parameter existed).
+
+    Returns
+    -------
+    xticks : list of datetime.datetime
+        The tick positions actually set on `ax`, sorted, always
+        starting and ending at whatever _resolve_timeseries_edges()
+        settled on for that side (unless the two are so close together
+        that even their own labels can't help but overlap - both are
+        still kept, since having a start/end label at all wins over
+        avoiding that one unavoidable clash).
+    """
+
+    full_precision = "%Y-%m-%d %H:%M:%S"
+
+    if left >= right:
+        dates = [left, right] if left < right else [left]
+        ax.xaxis.set_ticks(dates, labels=[d.strftime(full_precision) for d in dates])
+        return dates
+
+    if (
+        data_resolution_seconds
+        and (right - left).total_seconds() <= data_resolution_seconds * 1.01
+    ):
+        # the view is no wider than a single sample interval, so show that
+        # one observation's own instant rather than two edge labels either
+        # side of a gap with nothing in it. The tick goes on the sample
+        # boundary nearest the middle of the view, not the view's midpoint,
+        # as the label has to sit under the plotted point it names. Only
+        # boundaries inside the view are eligible, as matplotlib silently
+        # widens the axis to fit a tick outside it
+        centre = left + (right - left) / 2
+        epoch = datetime(left.year, 1, 1)
+        step = data_resolution_seconds
+        steps_before = int((centre - epoch).total_seconds() // step)
+        in_view = [
+            boundary
+            for boundary in (
+                epoch + timedelta(seconds=steps_before * step),
+                epoch + timedelta(seconds=(steps_before + 1) * step),
+            )
+            if left <= boundary <= right
+        ]
+        if in_view:
+            snapped = min(
+                in_view, key=lambda boundary: abs((boundary - centre).total_seconds())
+            )
+            ax.xaxis.set_ticks(
+                [snapped], labels=[_format_single_observation_tick(snapped)]
+            )
+            return [snapped]
+
+    # one real draw, to settle the axis's own layout - reused as the
+    # renderer for every candidate set tried below instead of redrawing
+    # the whole figure (data, other axes, everything) each time; see
+    # _measure_and_declutter() for why that's still an accurate measure
+    ax.figure.canvas.draw()
+    renderer = ax.figure.canvas.get_renderer()
+
+    # the view's numeric x-limits, re-applied after every set_ticks() call
+    # below - matplotlib silently expands the axis's data limits to fit any
+    # tick outside the current view, even with autoscale off
+    xlim = ax.get_xlim()
+
+    # prime the axis's tick-label object pool before the search takes its
+    # first measurement: the first Text objects matplotlib hands out measure
+    # a few pixels off from what every later call confirms, occasionally
+    # enough to make the first tier tried look like it fits when it doesn't
+    ax.xaxis.set_ticks([left, right], labels=["", ""])
+    ax.set_xlim(*xlim)
+    for label in ax.xaxis.get_majorticklabels():
+        label.get_window_extent(renderer)
+
+    # try tiers finest to coarsest, skipping any whose interior tick count
+    # exceeds max_ticks, then score each surviving tier on how many ticks it
+    # kept, with a 2x handicap for calendar-anchored kinds - a month start is
+    # a landmark a reader recognises, where a large day stride lands on a
+    # date with no significance. Highest score anywhere wins
+
+    # judge the count gate below against where the edges will actually end
+    # up, not the raw view bounds - a side showing the full loaded range
+    # resolves to data_start/data_end, which is narrower than left/right (an
+    # autoscaled view sits a margin outside the real data). Counting against
+    # the padded bounds counts that margin's own extra month as an interior
+    # candidate, which tipped e.g. a Jan-to-July view's "month,1" over
+    # max_ticks it would otherwise have cleared
+    count_left = data_start if (data_start is not None and left <= data_start) else left
+    count_right = data_end if (data_end is not None and right >= data_end) else right
+
+    best = None
+    best_score = -1
+    best_calendar_kind = False
+    for step_kind, multiple in _TIMESERIES_TICK_STEPS:
+        if step_kind != "hour" and best is not None and best[3] == 0:
+            # every "hour" tier kept zero interior candidates, and coarser
+            # steps can only have less to offer, so stop rather than measure
+            # all ~50 remaining day/month/year steps
+            break
+        step_ticks = _aligned_timeseries_ticks(left, right, step_kind, multiple)
+        interior_count = sum(1 for t in step_ticks if count_left < t < count_right)
+        if interior_count > max_ticks:
+            continue
+        result = _fit_timeseries_ticks(
+            ax, renderer, left, right, step_kind, step_ticks, min_gap_pixels,
+            data_start, data_end, xlim,
+        )
+        _kept_dates, _kept_texts, n_offered, n_kept = result
+        # a coarser tier with nothing to offer trivially keeps 0 too, but
+        # must never outscore a finer tier that had something to show -
+        # guaranteed, as a 0-kept tier scores 0 whatever the handicap
+        calendar_kind = step_kind in ("semimonth", "month", "year")
+        score = n_kept * (2 if calendar_kind else 1)
+        if step_kind == "hour" and _drops_a_day_start(step_ticks, _kept_dates):
+            # midnight is always among an "hour" tier's candidates, but the
+            # thinning picks by spacing alone and readily drops it. Losing a
+            # day start is what makes a sub-daily view read as random, so
+            # score it far below any midnight-preserving option - still
+            # proportional to n_kept, so the fullest wins when none can
+            score *= 0.01
+        # a tie goes to the calendar-anchored tier - day tiers are tried
+        # first, so a plain ">" would let a same-scoring day tier win purely
+        # for being found first, undoing the calendar handicap
+        if best is None or score > best_score or (
+            score == best_score
+            and score > 0
+            and calendar_kind
+            and not best_calendar_kind
+        ):
+            best = result
+            best_score = score
+            best_calendar_kind = calendar_kind
+
+    if best is None:
+        # every tier offered more interior candidates than max_ticks allows
+        # - stride evenly through the coarsest rather than showing an
+        # unbounded number of ticks
+        step_kind, multiple = _TIMESERIES_TICK_STEPS[-1]
+        step_ticks = _aligned_timeseries_ticks(left, right, step_kind, multiple)
+        stride = max(1, len(step_ticks) // max(1, max_ticks))
+        best = _fit_timeseries_ticks(
+            ax, renderer, left, right, step_kind, step_ticks[::stride], min_gap_pixels,
+            data_start, data_end, xlim,
+        )
+
+    kept_dates, kept_texts, _n_offered, _n_kept = best
+    ax.xaxis.set_ticks(kept_dates, labels=kept_texts)
+    ax.set_xlim(*xlim)
+    _set_timeseries_tick_alignment(ax.xaxis.get_majorticklabels())
+    _nudge_edge_labels_onscreen(ax, renderer, min_gap_pixels)
+
+    return kept_dates
+
+
 def harmonise_xy_lims_paradigm(
     read_instance,
     canvas_instance,
@@ -155,6 +1307,20 @@ def harmonise_xy_lims_paradigm(
         If True, harmonise axes across the paradigm.
     """
 
+    # periodic_relevant_temporal_resolutions is set once data has been
+    # resampled (see resample() in statistics.py), which can lag behind the
+    # first time a periodic axis is interacted with - guard rather than crash
+    if base_plot_type in ["periodic", "periodic-violin"] and not hasattr(
+        read_instance, "periodic_relevant_temporal_resolutions"
+    ):
+        active_resolution = getattr(read_instance, "active_resolution", None) or getattr(
+            read_instance, "resolution", None
+        )
+        if active_resolution:
+            read_instance.periodic_relevant_temporal_resolutions = (
+                get_periodic_relevant_temporal_resolutions(active_resolution)
+            )
+
     # initialise arrays to save lower and upper limits in all axes
     all_xlim_lower = []
     all_xlim_upper = []
@@ -167,40 +1333,54 @@ def harmonise_xy_lims_paradigm(
     ylim_min = None
     ylim_max = None
 
-    # transform axis dict or str to list
+    # transform axis dict or str to list. A dict's own keys drive the
+    # periodic resolution mapping below, so a caller can pass just the one
+    # sub-axis a zoom changed rather than have harmonisation pull in the
+    # other panels' limits (see harmonise_changed_axis() in toolbar.py)
+    dict_resolutions = None
     if not isinstance(relevant_axs, list):
         # if changes only apply to one axis, put it in list
         if not isinstance(relevant_axs, dict):
             relevant_axs = [relevant_axs]
         # transform dictionaries into lists
         else:
-            relevant_axs = [
-                relevant_axs[relevant_temporal_resolution]
-                for relevant_temporal_resolution in read_instance.periodic_relevant_temporal_resolutions
-            ]
+            dict_resolutions = list(relevant_axs.keys())
+            relevant_axs = [relevant_axs[k] for k in dict_resolutions]
 
     # get mapped resolution per axis for periodic plots
     if base_plot_type in ["periodic", "periodic-violin"]:
-        mapped_resolutions = read_instance.periodic_relevant_temporal_resolutions * (
-            int(
-                len(relevant_axs)
-                / len(read_instance.periodic_relevant_temporal_resolutions)
+        if dict_resolutions is not None:
+            mapped_resolutions = dict_resolutions
+        else:
+            mapped_resolutions = read_instance.periodic_relevant_temporal_resolutions * (
+                int(
+                    len(relevant_axs)
+                    / len(read_instance.periodic_relevant_temporal_resolutions)
+                )
             )
-        )
 
-    # remove any axes from relevant_axs which are not active (only for report and library)
+    # remove any axes from relevant_axs which are not active (only for report and library),
+    # and any that are None - a caller can end up passing one (e.g. a
+    # stale/mismatched axis-to-plot-type lookup at the toolbar layer)
+    # and there's nothing to harmonise for it anyway
     if read_instance.mode in ["report", "library"]:
         relevant_axs_active = []
         mapped_resolutions_active = []
         for ax_ii, ax in enumerate(relevant_axs):
-            if ax.axison:
+            if ax is not None and ax.axison:
                 relevant_axs_active.append(ax)
                 if base_plot_type in ["periodic", "periodic-violin"]:
                     mapped_resolutions_active.append(mapped_resolutions[ax_ii])
     else:
-        relevant_axs_active = relevant_axs
         if base_plot_type in ["periodic", "periodic-violin"]:
-            mapped_resolutions_active = mapped_resolutions
+            relevant_axs_active = []
+            mapped_resolutions_active = []
+            for ax_ii, ax in enumerate(relevant_axs):
+                if ax is not None:
+                    relevant_axs_active.append(ax)
+                    mapped_resolutions_active.append(mapped_resolutions[ax_ii])
+        else:
+            relevant_axs_active = [ax for ax in relevant_axs if ax is not None]
 
     # get lower and upper limits across all relevant axes
     for ax in relevant_axs_active:
@@ -228,7 +1408,16 @@ def harmonise_xy_lims_paradigm(
             ]:
                 xlim_lower, xlim_upper = ax.get_xlim()
             elif base_plot_type in ["timeseries", "scatter"]:
-                xlim_lower, xlim_upper = get_no_margin_lim(ax, "xlim")
+                if base_plot_type == "timeseries":
+                    # the axis's actual current view, not a margin-stripped
+                    # derivative - get_no_margin_lim() assumes the configured
+                    # margin is baked into xlim, which is only true right
+                    # after an autoscale. An explicit zoom/pan sets xlim with
+                    # no margin, so subtracting one back out shrinks the
+                    # visible range and mislabels the start/end ticks
+                    xlim_lower, xlim_upper = ax.get_xlim()
+                else:
+                    xlim_lower, xlim_upper = get_no_margin_lim(ax, "xlim")
                 try:
                     xlim_lower = num2date(xlim_lower).replace(tzinfo=None)
                     xlim_upper = num2date(xlim_upper).replace(tzinfo=None)
@@ -337,6 +1526,24 @@ def harmonise_xy_lims_paradigm(
                 if temporal_resolution == "hour":
                     xlim_lower = first_valid_x - 0.65
                     xlim_upper = last_valid_x + 0.65
+
+                    # the "hour" axis is normally shown at every 3rd hour
+                    # (see format_axis()), a fixed step set once when the
+                    # plot is built - zooming into a handful of hours could
+                    # land between two of those and show no ticks at all, so
+                    # recompute the step from the hours actually in view
+                    visible_hours = last_valid_x - first_valid_x + 1
+                    if visible_hours <= 8:
+                        hour_step = 1
+                    elif visible_hours <= 16:
+                        hour_step = 2
+                    else:
+                        hour_step = 3
+                    sub_ax.set_xticks(
+                        canvas_instance.periodic_xticks[temporal_resolution][
+                            ::hour_step
+                        ]
+                    )
                 elif temporal_resolution == "dayofweek":
                     xlim_lower = first_valid_x - 0.55
                     xlim_upper = last_valid_x + 0.55
@@ -419,118 +1626,97 @@ def harmonise_xy_lims_paradigm(
                 left = xlim[0]
                 right = xlim[1]
 
-            # round left/right datetimes to the nearest day
-            if left.hour >= 12:
-                left = datetime(left.year, left.month, left.day) + timedelta(days=1)
-            else:
-                left = datetime(left.year, left.month, left.day)
-            if right.hour >= 12:
-                right = datetime(right.year, right.month, right.day) + timedelta(days=1)
-            else:
-                right = datetime(right.year, right.month, right.day)
+            if left == right:
+                # a degenerate (zero-width) range has no meaningful ticks to
+                # compute - let matplotlib pick, as in the unresolved xlim
+                # case below
+                for ax in relevant_axs_active:
+                    ax.xaxis.set_major_locator(mpl.dates.AutoDateLocator())
+                    ax.xaxis.set_major_formatter(
+                        mpl.dates.ConciseDateFormatter(ax.xaxis.get_major_locator())
+                    )
+                return
 
-            # get number of days
-            n_days = (right - left).days
-
-            first_step = plot_characteristics["xtick_alteration"]["first_step"]
-            last_step = plot_characteristics["xtick_alteration"]["last_step"]
-            n_slices = plot_characteristics["xtick_alteration"]["n_slices"]
-            overlap = plot_characteristics["xtick_alteration"]["overlap"]
-
-            # if there's more than 3 months, define time slices as the first day of the month
-            if n_days >= 3 * 30:
-                # get the first and last days of each month
-                months_start = pd.date_range(left, right, freq="MS")
-                if Version(matplotlib.__version__) < Version("3.9"):
-                    months_end = pd.date_range(left, right, freq="M")
+            if read_instance.daily_forecast:
+                # forecast-day-numbered labels ("Day1 3h") need day-aligned
+                # boundaries to count from, so round to the nearest day
+                if left.hour >= 12:
+                    forecast_left = datetime(
+                        left.year, left.month, left.day
+                    ) + timedelta(days=1)
                 else:
-                    months_end = pd.date_range(left, right, freq="ME")
+                    forecast_left = datetime(left.year, left.month, left.day)
+                if right.hour >= 12:
+                    forecast_right = datetime(
+                        right.year, right.month, right.day
+                    ) + timedelta(days=1)
+                else:
+                    forecast_right = datetime(right.year, right.month, right.day)
 
-                # set steps as the start of the months
-                steps = months_start
-
-                # remove last day if there's less than a n days difference
-                if last_step and 0 < (right - months_end[-1]).days <= overlap:
-                    steps = steps[:-1]
-
-                # remove first day if there's less than a n days difference
-                if first_step and 0 < (months_start[0] - left).days <= overlap:
-                    steps = steps[1:]
-
-                # get xticks
-                slices = int(np.ceil(len(steps) / int(n_slices + 1)))
-                xticks = steps[0::slices]
-
-                # transform to numpy.datetime64
-                if not isinstance(xticks[0], np.datetime64):
-                    xticks = [np.datetime64(x, "D") for x in xticks]
-                if not isinstance(right, np.datetime64):
-                    right = np.datetime64(right)
-
-                # add last step to xticks
-                if last_step and (xticks[-1] != right):
-                    xticks = np.append(xticks, right)
-
-                # add first step to xticks
-                if first_step and (xticks[0] != left):
-                    xticks = np.insert(xticks, 0, left)
-
-            else:
-                # round up the limit hours to the whole hour
-                left = pd.to_datetime(left).ceil("h")
-                right = pd.to_datetime(right).floor("h")
-
-                # set frequency to hourly when there's less than 7 days
-                freq = "h" if n_days < 7 else "D"
-
-                # get all the dates in the frequency
-                steps = pd.date_range(left, right, freq=freq)
-
-                # get n_periods dates from all_ticks
-                periods = n_slices + int(first_step) + int(last_step) + 1
-
-                # compute number of ticks to select, it can't exceed available steps
-                n_ticks = min(periods, len(steps))
-                xticks = steps[np.linspace(0, len(steps) - 1, n_ticks, dtype=int)]
-
-            # show hours if number of days is less than 7
-            if n_days < 7:
-                ax.xaxis.set_major_formatter(mpl.dates.DateFormatter("%Y-%m-%d %Hh"))
-            else:
-                ax.xaxis.set_major_formatter(mpl.dates.DateFormatter("%Y-%m-%d"))
-
-            # set modified xticks
-            for ax in relevant_axs_active:
-                # if daily forecast is active, do specific formatting to show forecast days
-                if read_instance.daily_forecast:
-                    if ((right - left).total_seconds() / 3600) <= 24:
-                        freq = "3h"
-                    elif ((right - left).total_seconds() / 3600) <= 48:
-                        freq = "6h"
+                forecast_hours = (
+                    forecast_right - forecast_left
+                ).total_seconds() / 3600
+                if forecast_hours <= 24:
+                    freq = "3h"
+                elif forecast_hours <= 48:
+                    freq = "6h"
+                else:
+                    freq = "12h"
+                xticks = pd.date_range(forecast_left, forecast_right, freq=freq)
+                xticklabels = []
+                start_pd_dt = xticks[0]
+                for pd_dt in xticks:
+                    pd_dt_diff = pd_dt - start_pd_dt
+                    day = (
+                        pd_dt_diff.days
+                        + 1
+                        + (read_instance.active_forecast_days[0] - 1)
+                    )
+                    hour = pd_dt.strftime("%H")
+                    if int(hour) == 0:
+                        label = "Day{} {}h".format(day, hour)
                     else:
-                        freq = "12h"
-                    xticks = pd.date_range(left, right, freq=freq)
-                    xticklabels = []
-                    start_pd_dt = xticks[0]
-                    for pd_dt in xticks:
-                        pd_dt_diff = pd_dt - start_pd_dt
-                        day = (
-                            pd_dt_diff.days
-                            + 1
-                            + (read_instance.active_forecast_days[0] - 1)
-                        )
-                        hour = pd_dt.strftime("%H")
-                        if int(hour) == 0:
-                            label = "Day{} {}h".format(day, hour)
-                        else:
-                            label = "{}h".format(hour)
-                        xticklabels.append(label)
+                        label = "{}h".format(hour)
+                    xticklabels.append(label)
+                for ax in relevant_axs_active:
                     ax.xaxis.set_ticks(xticks, labels=xticklabels)
-                else:
-                    ax.xaxis.set_ticks(xticks)
+
+            else:
+                # always label the visible start and end, with ticks between
+                # snapped to a hierarchy of calendar-aligned resolutions (see
+                # compute_timeseries_xticks()) instead of evenly slicing the
+                # range into a fixed number of pieces. data_start/data_end
+                # let a side still showing the full range read as that
+                # range's own boundary rather than a margin-padded value,
+                # each side judged independently
+                max_ticks = plot_characteristics["xtick_alteration"]["max_ticks"]
+                data_start = _parse_yyyymmdd(getattr(read_instance, "start_date", None))
+                data_end = _parse_yyyymmdd(getattr(read_instance, "end_date", None))
+                active_resolution = getattr(read_instance, "active_resolution", None) or getattr(
+                    read_instance, "resolution", None
+                )
+                data_resolution_seconds = _RESOLUTION_SECONDS.get(active_resolution)
+                for ax in relevant_axs_active:
+                    compute_timeseries_xticks(
+                        ax, left, right, max_ticks=max_ticks,
+                        data_start=data_start, data_end=data_end,
+                        data_resolution_seconds=data_resolution_seconds,
+                    )
 
             # pad the margins
-            ax.margins(**plot_characteristics["margin_padding"])
+            for ax in relevant_axs_active:
+                ax.margins(**plot_characteristics["margin_padding"])
+
+        elif plot_characteristics["xtick_alteration"]["define"]:
+            # xlim couldn't be resolved for any axis this call - don't leave
+            # ticks as whatever a previous, differently zoomed call set:
+            # those positions are unlikely to fall inside a narrowed view,
+            # showing no ticks at all rather than just imprecise ones
+            for ax in relevant_axs_active:
+                ax.xaxis.set_major_locator(mpl.dates.AutoDateLocator())
+                ax.xaxis.set_major_formatter(
+                    mpl.dates.ConciseDateFormatter(ax.xaxis.get_major_locator())
+                )
 
 
 def set_axis_title(read_instance, relevant_axis, title, plot_characteristics):
@@ -806,6 +1992,14 @@ def format_plot_options(
             )
 
 
+
+
+
+
+
+
+
+
 def format_axis(
     read_instance,
     canvas_instance,
@@ -1004,19 +2198,9 @@ def format_axis(
 
             # providentia default background
             if plot_characteristics["background"] == "providentia":
-                feature = cfeature.NaturalEarthFeature(
-                    category="physical",
-                    name="land",
-                    scale=get_land_polygon_resolution(
-                        canvas_instance.plot_characteristics_templates["map"][
-                            "map_coastline_resolution"
-                        ]
-                    ),
-                    **canvas_instance.plot_characteristics_templates["map"][
-                        "land_polygon"
-                    ],
+                canvas_instance.map_feature_artists = draw_map_features(
+                    canvas_instance, ax_to_format
                 )
-                ax_to_format.add_feature(feature)
 
             # shaded relief (cartopy default)
             elif plot_characteristics["background"] == "shaded_relief":
@@ -1044,9 +2228,8 @@ def format_axis(
 
             # add gridlines ?
             if "gridlines" in plot_characteristics_vars:
-                gridlines_characteristics = plot_characteristics["gridlines"]
-                ax_to_format.gridlines(
-                    crs=canvas_instance.datacrs, **gridlines_characteristics
+                canvas_instance.map_gridliner = draw_map_gridlines(
+                    canvas_instance, ax_to_format
                 )
 
             # set map extent (if wanted)
@@ -1054,9 +2237,66 @@ def format_axis(
                 set_map_extent(canvas_instance, ax_to_format, map_extent)
 
         elif base_plot_type == "fairmode-target":
-            # update axis labels
-            ax_to_format.set_xticks(**plot_characteristics["xticks"])
-            ax_to_format.set_yticks(**plot_characteristics["yticks"])
+            # the fixed xticks/yticks list was applied once at plot creation
+            # and never adapted, so zooming into a sub-range containing none
+            # of those positions left no visible ticks. Locators recompute
+            # positions on every redraw, so unlike periodic this needs no
+            # per-navigation hook. nbins=4 keeps the original 5-tick look
+            decimal_places = plot_characteristics.get("round_decimal_places", {})
+            ax_to_format.xaxis.set_major_locator(ticker.MaxNLocator(nbins=4))
+            ax_to_format.yaxis.set_major_locator(ticker.MaxNLocator(nbins=4))
+            # the diagram's x axis is signed CRMSE but conventionally
+            # labelled by magnitude only - matches the original static
+            # xticks, whose "labels" were already each tick's absolute
+            # value (see plot_characteristics.yaml)
+            ax_to_format.xaxis.set_major_formatter(
+                ticker.FuncFormatter(
+                    lambda value, _pos: format_tick_label(
+                        abs(value), decimal_places.get("x", 2)
+                    )
+                )
+            )
+            ax_to_format.yaxis.set_major_formatter(
+                ticker.FuncFormatter(
+                    lambda value, _pos: format_tick_label(
+                        value, decimal_places.get("y", 2)
+                    )
+                )
+            )
+
+
+def format_tick_label(value, max_decimal_places):
+    """
+    Format a tick value with up to a fixed number of decimal places,
+    trimming any that aren't needed - e.g. 2.0 -> "2", 0.5 -> "0.5",
+    0.08 -> "0.08" (at max_decimal_places=2) - rather than a fixed
+    ``f"{value:.{n}f}"`` always showing every one of them (2.00, 0.50,
+    ...), which looks cluttered on an axis mixing whole numbers and finer
+    ones (e.g. after zooming in on part of it).
+
+    Parameters
+    ----------
+    value : float
+        The tick value to format.
+    max_decimal_places : int
+        The most decimal places to show - fewer are used if the value
+        doesn't need them.
+
+    Returns
+    -------
+    str
+        The formatted label.
+    """
+
+    label = f"{value:.{max_decimal_places}f}"
+    if "." in label:
+        label = label.rstrip("0").rstrip(".")
+    # rstrip can turn "-0.00" into just "-" (or "0.00" into "") - both
+    # mean zero
+    if label in ("", "-"):
+        label = "0"
+
+    return label
 
 
 def get_no_margin_lim(ax, lim):
