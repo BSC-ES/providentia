@@ -55,6 +55,7 @@ from .plot_aux import (
     get_multispecies_conversion_factor,
     convert_multispecies_df_units,
 )
+from . import plot_formatting
 from .plot_formatting import set_axis_title
 from .warnings_prv import show_message
 
@@ -1092,6 +1093,11 @@ class Plotting:
 
             # iterate current_n_vars_per_line
             current_n_vars_per_line += 1
+
+        # re-apply the CJK font fallback before drawing: plot_aux.py calls
+        # sns.reset_orig() on every plot-parameters refresh, which restores
+        # all rcParams and silently undoes the fallback
+        plot_formatting.enable_cjk_font_fallback()
 
         # plot string to axis
         plot_txt = relevant_axis.text(

@@ -7,6 +7,7 @@ import os
 import cartopy.feature as cfeature
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from matplotlib import font_manager
 from matplotlib.dates import num2date
 from matplotlib.figure import Figure
 from matplotlib import ticker
@@ -36,13 +37,112 @@ Image.MAX_IMAGE_PIXELS = None
 # on the machine as a fallback, keeping DejaVu Sans as the primary font.
 # Fixed install paths are probed as well as matplotlib's font cache, as the
 # frozen Mac app (bin/Mac/Providentia) does not find the OS fonts on its own.
+_CJK_FONT_CANDIDATES = [
+    # macOS
+    "PingFang SC", "PingFang TC", "PingFang HK", "Hiragino Sans GB",
+    "Heiti SC", "Heiti TC", "STHeiti", "Songti SC", "Apple SD Gothic Neo",
+    # Linux
+    "Noto Sans CJK SC", "Noto Sans CJK TC", "Noto Sans CJK JP",
+    "Noto Sans SC", "Noto Sans TC", "WenQuanYi Zen Hei",
+    "WenQuanYi Micro Hei", "Droid Sans Fallback", "Source Han Sans SC",
+    "Source Han Sans TC",
+    # Windows
+    "Microsoft YaHei", "Microsoft JhengHei", "SimHei", "SimSun",
+]
 
 # fixed, well-known install paths for the same fonts, per OS - tried
+# directly against the filesystem, bypassing font_manager's own
 # (potentially incomplete, e.g. inside a frozen app bundle) directory scan
+_CJK_FONT_PATHS = [
+    # macOS
+    "/System/Library/Fonts/PingFang.ttc",
+    "/System/Library/Fonts/Hiragino Sans GB.ttc",
+    "/System/Library/Fonts/STHeiti Light.ttc",
+    "/System/Library/Fonts/STHeiti Medium.ttc",
+    "/System/Library/Fonts/Supplemental/Songti.ttc",
+    "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
+    "/Library/Fonts/Arial Unicode.ttf",
+    # Linux
+    "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+    "/usr/share/fonts/opentype/noto/NotoSansCJKsc-Regular.otf",
+    "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+    "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc",
+    "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc",
+    "/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf",
+    "/usr/share/fonts/truetype/arphic/uming.ttc",
+    # Windows
+    r"C:\Windows\Fonts\msyh.ttc",
+    r"C:\Windows\Fonts\simhei.ttf",
+    r"C:\Windows\Fonts\simsun.ttc",
+    r"C:\Windows\Fonts\msjh.ttc",
+]
 
 
+def enable_cjk_font_fallback():
+    """
+    Make any already-installed CJK-capable font(s) available as a
+    fallback for CJK text, without changing which font non-CJK (the
+    vast majority of the dashboard's) text uses.
+
+    This sets rcParams['font.family'] itself, deliberately not just
+    rcParams['font.sans-serif']: matplotlib only does real per-glyph
+    fallback across *multiple* concrete fonts when font.family holds a
+    list of concrete font names. Left at its default generic alias
+    value (['sans-serif']) and with only font.sans-serif edited,
+    findfont() just resolves that alias to a single, primary concrete
+    font - the first available name in font.sans-serif - and uses that
+    one font for everything. An earlier version of this fix prepended
+    the CJK font there, which "worked" for CJK glyphs but also made
+    that CJK font (which incidentally covers Latin/ASCII fine too) the
+    primary font for *all* text, visibly replacing DejaVu Sans
+    dashboard-wide - a real, user-visible regression, not the intended
+    surgical fallback. Setting font.family directly avoids that: the
+    existing primary font (DejaVu Sans, matplotlib's bundled default)
+    stays first and so stays primary for everything it already covers;
+    the CJK candidates are only ever reached for glyphs it's missing.
+
+    Not just called once at import time here: plot_aux.py calls
+    seaborn's sns.reset_orig() on every plot-parameters refresh, which
+    restores *all* rcParams (mpl.rcParams.update(mpl.rcParamsOrig)) to
+    their state from before this module ever ran, silently wiping this
+    fallback back out mid-session. So Plotting.make_metadata() also
+    calls this again right before it draws text, to reinstate it every
+    time regardless of what reset happened in between. It's cheap
+    (a handful of dict lookups plus a handful of os.path.isfile() checks)
+    so re-running it per metadata draw is not a concern.
+    """
+    found = []
+
+    # first: whatever the environment's own font cache already knows about
+    available = {f.name for f in font_manager.fontManager.ttflist}
+    found += [name for name in _CJK_FONT_CANDIDATES if name in available]
+
+    # second: explicit, fixed OS install paths, in case the font cache
+    # missed them (e.g. a frozen app bundle's incomplete font scan) -
+    # registers the file directly with font_manager rather than relying
+    # on it having found the font on its own
+    for path in _CJK_FONT_PATHS:
+        if os.path.isfile(path):
+            try:
+                font_manager.fontManager.addfont(path)
+                name = font_manager.FontProperties(fname=path).get_name()
+            except Exception:
+                continue
+            if name not in found:
+                found.append(name)
+
+    if found:
+        # font.sans-serif itself is left untouched throughout, so its
+        # first entry is always the existing, unmodified primary font
+        # (DejaVu Sans by default) - used here as font.family's own
+        # primary, with the CJK fonts appended purely as fallback
+        primary = mpl.rcParams["font.sans-serif"][0]
+        mpl.rcParams["font.family"] = [primary] + [
+            name for name in found if name != primary
+        ]
 
 
+enable_cjk_font_fallback()
 
 
 def set_equal_axes(ax, plot_options, plot_characteristics, base_plot_type):
