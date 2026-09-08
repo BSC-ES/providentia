@@ -426,7 +426,14 @@ def update_plotting_parameters(
 
 
 def kde_fft(
-    xin, gridsize=1024, extents=None, weights=None, adjust=1.0, bw="scott", xgrid=None
+    xin,
+    gridsize=1024,
+    extents=None,
+    weights=None,
+    adjust=1.0,
+    bw="scott",
+    xgrid=None,
+    min_bandwidth=None,
 ):
     """
     A fft-based Gaussian kernel density estimate (KDE)
@@ -452,6 +459,12 @@ def kde_fft(
         Method used to calculate bandwidth (default is 'scott').
     xgrid : ndarray, shape (n,), optional
         If provided, this grid will be used for KDE evaluation. Overrides `gridsize` and `extents`.
+    min_bandwidth : float, optional
+        Floor for the kernel's standard deviation, in the same units as xin
+        (e.g. a species' instrument reporting resolution). Below it, the KDE
+        reproduces the comb of rounded observations rather than smoothing
+        over it, seen as ringing on the curve. None leaves the automatic
+        bandwidth unmodified
 
     Returns
     -------
@@ -523,9 +536,18 @@ def kde_fft(
     elif bw == "silverman":
         bw_factor = ((n * 3 / 4.0) ** (-1.0 / 5)) * adjust
 
+    # kernel standard deviation, in grid cells
+    kernel_std = bw_factor * std_x
+
+    # floor the kernel width at min_bandwidth, converted from data units to
+    # grid cells - a large enough sample count otherwise shrinks the automatic
+    # bandwidth below the data's own reporting resolution
+    if min_bandwidth is not None and min_bandwidth > 0:
+        kernel_std = max(kernel_std, min_bandwidth / dx)
+
     # make the gaussian kernel
     # first, determine the bandwidth using defined bandwidth estimator rule
-    kern_nx = int(np.round(bw_factor * 2 * np.pi * std_x))
+    kern_nx = int(np.round(kernel_std * 2 * np.pi))
 
     # If bandwidth is 0, skip plot for current data label
     if kern_nx == 0:
@@ -535,7 +557,7 @@ def kde_fft(
         return error
 
     # Then evaluate the gaussian function on the kernel grid
-    kernel = np.reshape(gaussian(kern_nx, bw_factor * std_x), (kern_nx, 1))
+    kernel = np.reshape(gaussian(kern_nx, kernel_std), (kern_nx, 1))
 
     # convolve the histogram with the gaussian kernel
     # use symmetric padding to correct for data boundaries in the kde
@@ -544,8 +566,11 @@ def kde_fft(
     grid = convolve(grid, kernel, mode="same")[npad : npad + nx]
 
     # normalization factor to divide result by so that units are in the same
-    # units as scipy.stats.kde.gaussian_kde's output.
-    norm_factor = 2 * np.pi * std_x * std_x * bw_factor**2
+    # units as scipy.stats.kde.gaussian_kde's output. Uses kernel_std (the
+    # actual, possibly min_bandwidth-floored kernel width) rather than
+    # bw_factor * std_x directly, so normalization stays consistent with
+    # whichever kernel was actually used above.
+    norm_factor = 2 * np.pi * kernel_std**2
     norm_factor = n * dx * np.sqrt(norm_factor)
 
     # normalize the result

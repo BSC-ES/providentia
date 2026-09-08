@@ -1800,6 +1800,15 @@ class Plotting:
                 networkspeci
             ]
 
+        # look up the species' instrument reporting resolution once, used to
+        # size the KDE grid and to floor the KDE bandwidth so it can never
+        # smooth less than that resolution (see kde_fft()'s min_bandwidth -
+        # below it, rounded observations produce ringing on the curve)
+        minimum_resolution = self.read_instance.parameter_dictionary[
+            networkspeci.split("|")[1]
+        ]["minimum_resolution"]
+        min_bandwidth = None if pd.isnull(minimum_resolution) else minimum_resolution
+
         # set xgrid for calculating distribution
         # if calculating for period n_samples is set to pdf_min_samples
         # otherwise it is inferred from data (if above minimum value)
@@ -1807,24 +1816,11 @@ class Plotting:
             n_samples = plot_characteristics["pdf_min_samples"]
         else:
             minmax_diff = data_range_max - data_range_min
-            if pd.isnull(
-                self.read_instance.parameter_dictionary[networkspeci.split("|")[1]][
-                    "minimum_resolution"
-                ]
-            ):
+            if min_bandwidth is None:
                 n_samples = plot_characteristics["pdf_min_samples"]
             else:
                 n_samples = int(
-                    np.around(
-                        minmax_diff
-                        / (
-                            self.read_instance.parameter_dictionary[
-                                networkspeci.split("|")[1]
-                            ]["minimum_resolution"]
-                            / 100.0
-                        ),
-                        0,
-                    )
+                    np.around(minmax_diff / (min_bandwidth / 100.0), 0)
                 )
                 if n_samples < plot_characteristics["pdf_min_samples"]:
                     n_samples = plot_characteristics["pdf_min_samples"]
@@ -1891,7 +1887,9 @@ class Plotting:
                         show_message(self.read_instance, msg)
                         return
                     else:
-                        PDF_obs_sampled = kde_fft(kde_data_obs, xgrid=x_grid)
+                        PDF_obs_sampled = kde_fft(
+                            kde_data_obs, xgrid=x_grid, min_bandwidth=min_bandwidth
+                        )
 
                         if isinstance(PDF_obs_sampled, str):
                             msg = PDF_obs_sampled
@@ -1923,7 +1921,9 @@ class Plotting:
                     show_message(self.read_instance, msg)
                     continue
                 # calculate PDF
-                PDF_model_sampled = kde_fft(kde_data_model, xgrid=x_grid)
+                PDF_model_sampled = kde_fft(
+                    kde_data_model, xgrid=x_grid, min_bandwidth=min_bandwidth
+                )
                 if isinstance(PDF_model_sampled, str):
                     msg = PDF_model_sampled
                     msg += f"The distribution plot will be created and not include data for this label ({data_label}). "
@@ -2012,7 +2012,9 @@ class Plotting:
                             show_message(self.read_instance, msg)
                         continue
                     else:
-                        PDF_sampled = kde_fft(kde_data, xgrid=x_grid)
+                        PDF_sampled = kde_fft(
+                            kde_data, xgrid=x_grid, min_bandwidth=min_bandwidth
+                        )
                         if isinstance(PDF_sampled, str):
                             msg = PDF_sampled
                             msg += f"The distribution plot will be created and not include data for this label ({data_label}). "
