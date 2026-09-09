@@ -3,6 +3,7 @@
 from collections import OrderedDict
 import copy
 from functools import partial
+import logging
 import os
 import sys
 import time
@@ -2673,6 +2674,13 @@ def main(**kwargs):
     q_app.setApplicationDisplayName("Providentia")
     q_app.setDesktopFileName("Providentia")
 
-    # open Providentia
-    Dashboard(**kwargs)
-    sys.exit(q_app.exec_())
+    # open Providentia - kept in a variable so the window cannot be collected
+    dashboard = Dashboard(**kwargs)
+    exit_code = q_app.exec_()
+
+    # exit without finalising the interpreter, as PyQt's atexit handler
+    # intermittently crashed on objects Qt had already destroyed
+    logging.shutdown()
+    sys.stdout.flush()
+    sys.stderr.flush()
+    os._exit(exit_code)
