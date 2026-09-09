@@ -38,6 +38,7 @@ from .statistics import (
     get_fairmode_data,
     get_z_statistic_info,
     get_z_statistic_type,
+    resolve_colourmap,
 )
 from .read_aux import drop_nans, get_valid_metadata
 from .plot_aux import (
@@ -2554,13 +2555,24 @@ class Plotting:
         else:
             annotate = False
 
-        # plot heatmap
+        # plot heatmap - coloured by what the statistic measures, the same way
+        # the map is (see resolve_colourmap()), so a signed bias reads
+        # diverging and an error reads as one continuous scale. Only the
+        # colourmaps of the preset are used, a heatmap having no basemap for
+        # its land and ocean colours to apply to
+        heatmap_kwargs = dict(plot_characteristics["plot"])
+        if not heatmap_kwargs.get("cmap"):
+            colourmap = resolve_colourmap(
+                self.read_instance, zstat, plot_characteristics, networkspeci.split("|")[-1]
+            )
+            if colourmap:
+                heatmap_kwargs["cmap"] = colourmap
         heatmap = sns.heatmap(
             stats_df,
             ax=relevant_axis,
             annot=annotate,
             fmt="",
-            **plot_characteristics["plot"],
+            **heatmap_kwargs,
         )
 
         # remove networkspecies-subsections label from y-axis

@@ -1569,6 +1569,7 @@
     },
   "heatmap":
     {
+      "colour_preset": "Light",
       "parent_section_names": false,
       "multispecies":
         {
