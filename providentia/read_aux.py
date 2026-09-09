@@ -11,6 +11,7 @@ import cftime
 from netCDF4 import Dataset, num2date, chartostring
 import numpy as np
 import pandas as pd
+import re
 
 from providentia.auxiliar import CURRENT_PATH, join
 from providentia.warnings_prv import show_message
@@ -1117,15 +1118,15 @@ def get_valid_interpolated_models(instance, start_date, end_date, resolution, ne
     
     Returns
     -------
-    models : dict
+    dict
         Dictionary mapping each networkspeci (str, "network|speci") to a set of
         model names that have valid interpolated data available for it within
         the given date range and resolution.
-    available_model_data : dict
+    dict
         Nested dictionary of available interpolated model data, structured as
         {network: {resolution: {speci: {model: valid_file_yearmonths}}}}, where
         valid_file_yearmonths is a sorted list of 'YYYYMM' strings.
-    file_roots : dict
+    dict
         Dictionary mapping (type, model, network, speci) tuples, with type
         fixed as "interpolated", to the file root path prefix (str) used to
         build the netCDF file paths for that model/network/speci combination.
@@ -1147,7 +1148,7 @@ def get_valid_interpolated_models(instance, start_date, end_date, resolution, ne
             )      
     else:
         msg = (
-            f"Cannot access noninterpolated model path, mod_to_interp_root defined as {models_path} in data_paths.yaml."
+            f"Cannot access interpolated model path, mod_root defined as {models_path} in data_paths.yaml."
         )
         show_message(instance, msg, print=True)
         return models, available_model_data, file_roots
@@ -1235,6 +1236,39 @@ def get_valid_interpolated_models(instance, start_date, end_date, resolution, ne
 
     return models, available_model_data, file_roots
 
+def parse_model_filename(filename, speci):
+    """
+    Split a gridded model filename into speci, ensemble, date and statistic information (av, av_an).
+    
+    Parameters
+    ----------
+    filename : str
+        Gridded model filename
+    speci : str
+        Speci
+
+    Returns
+    -------
+    dict 
+    """
+
+    pattern = (r'^' + re.escape(speci) +
+                r'(?:[-_](?P<ensemble>\d{3}))?'
+                r'_(?P<date>\d{10}|\d{8}|\d{6})'
+                r'(?P<extra>(?:_[a-zA-Z0-9]+)*)\.nc$')
+    match = re.match(pattern, filename)
+    if match is None:
+        return None
+    parsed = match.groupdict()
+
+    return {'speci': speci,
+            'ensemble': parsed['ensemble'],
+            'date': parsed['date'],
+            'tags': [t for t in parsed['extra'].split('_') if t],
+            # prefix/suffix around the date, for rebuilding paths
+            'prefix': filename[:match.start('date')],
+            'suffix': parsed['extra']}
+
 def get_valid_noninterpolated_models(instance, start_date, end_date, resolution, networkspecies):
     """
     Get noninterpolated models in mod_to_interp_root
@@ -1254,19 +1288,21 @@ def get_valid_noninterpolated_models(instance, start_date, end_date, resolution,
 
     Returns
     -------
-    models : dict
+    dict
         Dictionary mapping each speci (str) to a set of model_id strings
         (formatted as "experiment-domain-ensemble") that have valid
         non-interpolated data available for it within the given date range
         and resolution.
-    available_model_data : dict
+    dict
         Nested dictionary of available non-interpolated model data, structured
-        as {domain: {resolution: {speci: {model_id: valid_file_yearmonths}}}},
-        where valid_file_yearmonths is a sorted list of 'YYYYMM' strings.
-    file_roots : dict
-        Dictionary mapping ("noninterpolated", model_id, "", speci) tuples to
-        the file root path prefix (str) used to build the netCDF file paths
-        for that model/speci combination.
+        as {domain: {resolution: {speci: {model_id: valid_file_timesteps}}}},
+        where valid_file_timesteps is a sorted list of 'YYYYMM', 'YYYYMMDD' or
+        'YYYYMMDDHH' strings.
+    dict
+        Dictionary mapping ("noninterpolated", model_id, speci) tuples to the
+        netCDF filename template (str) for that model/speci combination, with a
+        '{date}' placeholder for the file timestep
+        (e.g. '<dir>/od550du-006_{date}_an.nc').
     """
 
     # track which species each model has data for
@@ -1317,28 +1353,69 @@ def get_valid_noninterpolated_models(instance, start_date, end_date, resolution,
                     except PermissionError:
                         continue
 
-                # get monthly start date (YYYYMM) of all files
-                file_yearmonths = sorted([f.split("_")[-1][:6] for f in available_files])
+                # models can be formatted like:
+                # - sconcno2_006_2022101900.nc
+                # - sconco3_201604.nc
+                # - od550du-006_2018082003_an.nc
+                # - pm10_2017092100.nc
+                # - sconco3-000_2019050900.nc
+                # - od550du_2020061400_av_an.nc
+                parsed_files = [parse_model_filename(f, speci) for f in sorted(available_files)]
+                parsed_files = [parsed for parsed in parsed_files if parsed is not None]
+                if len(parsed_files) == 0:
+                    continue
 
-                # write nested dictionary for model, with associated file yearmonths
-                if len(file_yearmonths) > 0:
-                    # get file yearmonths within date range
-                    valid_file_yearmonths = sorted(
-                        [
-                            ym
-                            for ym in file_yearmonths
-                            if (int("{}01".format(ym)) >= start_date_firstdayofmonth)
-                            & (int("{}01".format(ym)) < int(end_date))
-                        ]
-                    )
+                # group files per ensemble member, as a directory can hold more than one
+                # (e.g. sconco3-000_2019050900.nc and sconco3-006_2019050900.nc)
+                files_per_ensemble = {}
+                for parsed in parsed_files:
+                    # ensemble member, keeping any statistic tag so that, for example,
+                    # od550du-006_2018082003.nc and od550du-006_2018082003_an.nc are kept apart
+                    if parsed["ensemble"] is not None:
+                        ensemble = "_".join([parsed["ensemble"]] + parsed["tags"])
+                    # no ensemble member, so the statistic tags define the ensemble option
+                    elif parsed["tags"]:
+                        ensemble = "_".join(parsed["tags"])
+                    else:
+                        ensemble = "000"
 
+                    files_per_ensemble.setdefault(ensemble, []).append(parsed)
+
+                for ensemble, ensemble_files in files_per_ensemble.items():
+
+                    # get timestep start date of all files
+                    file_timesteps = sorted({parsed["date"] for parsed in ensemble_files})
+
+                    # write nested dictionary for model, with associated file timesteps
+                    # monthly files (e.g. '202301')
+                    if len(file_timesteps[0]) == 6:
+                        valid_file_timesteps = sorted(
+                            [
+                                ym
+                                for ym in file_timesteps
+                                if (int("{}01".format(ym)) >= start_date_firstdayofmonth)
+                                & (int("{}01".format(ym)) < int(end_date))
+                            ]
+                        )
+                    # daily files (e.g. '2023010100')
+                    elif len(file_timesteps[0]) > 6:
+                        valid_file_timesteps = sorted(
+                                                    [
+                                                        ym
+                                                        for ym in file_timesteps
+                                                        if (int(ym[0:8]) >= start_date_firstdayofmonth)
+                                                        & (int(ym[0:8]) < int(end_date))
+                                                    ]
+                                                )
+                    else:
+                        valid_file_timesteps = []
+                        
                     # if have valid files, then add model to pop-up menu,
                     # and add yearmonths to available model data
-                    if len(valid_file_yearmonths) > 0:
-                        # TODO: Get ensemble option right
+                    if len(valid_file_timesteps) > 0:
                         # model id shown on the models menu (experiment-domain-ensemble),
                         # used as key everywhere so both modes are looked up the same way
-                        model_id = f"{model}-{domain}-000"
+                        model_id = f"{model}-{domain}-{ensemble}"
                         models[speci].add(model_id)
 
                         if domain not in available_model_data:
@@ -1353,12 +1430,22 @@ def get_valid_noninterpolated_models(instance, start_date, end_date, resolution,
                         ):
                             available_model_data[domain][resolution][speci][
                                 model_id
-                            ] = valid_file_yearmonths
+                            ] = valid_file_timesteps
 
-                        # store file root, so paths never have to be rebuilt when reading
+                        # store filename template, so paths never have to be rebuilt when
+                        # reading (prefix/suffix carry the ensemble tag and trailing tags)
+                        prefix = ensemble_files[0]["prefix"]
+                        suffix = ensemble_files[0]["suffix"]
+                        if len({(p["prefix"], p["suffix"]) for p in ensemble_files}) > 1:
+                            msg = (
+                                f"Model files in {files_directory} for ensemble {ensemble} do "
+                                f"not all share the same name format, assuming "
+                                f"{prefix}<date>{suffix}.nc"
+                            )
+                            show_message(instance, msg, print=True)
                         file_roots[
-                            ("noninterpolated", model_id, "", speci)
-                        ] = "%s/%s_" % (files_directory, speci)
+                            ("noninterpolated", model_id, speci)
+                        ] = "{}/{}{{date}}{}.nc".format(files_directory, prefix, suffix)
 
     return models, available_model_data, file_roots
 
@@ -1371,7 +1458,7 @@ def get_valid_models(instance, start_date, end_date, resolution, networkspecies)
     instance : object
         An instance of the application class containing directory roots and menu configurations.
     start_date : str
-        The start date in 'YYYYMMDD' format.
+        The start date in 'YYYYMMDD' formafor parsed in parsed_filet.
     end_date : str
         The end date in 'YYYYMMDD' format.
     resolution : str
@@ -1394,7 +1481,7 @@ def get_valid_models(instance, start_date, end_date, resolution, networkspecies)
         **interpolated_file_roots,
         **noninterpolated_file_roots,
     }
-
+    
     # set list of model names to add on models pop-up
     # models interpolated for at least one networkspeci
     if instance.mode not in ["report", "library"]:

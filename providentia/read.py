@@ -16,6 +16,7 @@ import yaml
 from providentia.auxiliar import (
     CURRENT_PATH,
     join,
+    get_conversion_factor,
     get_standard_units,
     get_standard_parameters_by_speci,
 )
@@ -1682,18 +1683,22 @@ class DataReader:
                 # only check model data labels
                 if data_label != self.read_instance.observations_data_label:
                     # split raw data label into model id and type
-                    # (e.g. 'cams61_emep_ph2-eu-000::interpolated')
-                    model_id, _, model_type = data_label_raw.rpartition("::")
-                    if model_type not in ["interpolated", "noninterpolated"]:
+                    # only the dashboard tags the interpolation mode onto the raw data
+                    # TODO: Remove separation when report / library can read noninterpolated data
+                    if "::" in data_label_raw:
+                        # e.g. 'cams61_emep_ph2-eu-000::interpolated
+                        model_id, _, model_type = data_label_raw.rpartition("::")
+
+                        # non-interpolated data has no stations, so it is not
+                        # read here, it is read per date when the gridded map is drawn
+                        if model_type == "noninterpolated":
+                            continue
+                    # in report and library modes read interpolated data only
+                    else:
                         model_id, model_type = data_label_raw, "interpolated"
 
-                    # non-interpolated data is stored per domain, interpolated per network
-                    if model_type == "noninterpolated":
-                        data_key = model_id.rsplit("-", 2)[1]
-                        file_root_key = (model_type, model_id, "", speci)
-                    else:
-                        data_key = network
-                        file_root_key = (model_type, model_id, network, speci)
+                    data_key = network
+                    file_root_key = (model_type, model_id, network, speci)
 
                     # get file path
                     if (
@@ -2271,14 +2276,19 @@ class DataReader:
 
                     else:
                         # split raw data label into model id and type
-                        model_id, _, model_type = base_data_label_raw.rpartition("::")
-                        if model_type not in ["interpolated", "noninterpolated"]:
-                            model_id, model_type = base_data_label_raw, "interpolated"
+                        # only the dashboard tags the interpolation mode onto the raw data
+                        # TODO: Remove separation when report / library can read noninterpolated data
+                        if "::" in base_data_label_raw:
+                            # e.g. 'cams61_emep_ph2-eu-000::interpolated
+                            model_id, _, model_type = base_data_label_raw.rpartition("::")
 
-                        # non-interpolated data has no stations, so it is not
-                        # read here, it is read per date when the gridded map is drawn
-                        if model_type == "noninterpolated":
-                            continue
+                            # non-interpolated data has no stations, so it is not
+                            # read here, it is read per date when the gridded map is drawn
+                            if model_type == "noninterpolated":
+                                continue
+                        # in report and library modes read interpolated data only
+                        else:
+                            model_id, model_type = base_data_label_raw, "interpolated"
 
                         data_key = network
                         file_root_key = (model_type, model_id, network, speci)
@@ -3134,6 +3144,96 @@ class DataReader:
 
         return True
 
+    def read_model_dataset(self, ds, speci, obs_units, standard_parameter_speci, first_file=True):
+        """
+        Read model dataset
+
+        Parameters
+        ----------
+        ds : netCDF4.Dataset
+            Opened model gridded dataset
+        speci : str
+            Speci
+        obs_units : str
+            Measurement units of observations (and interpolated model)
+        standard_parameter_speci : dict
+            GHOST standard parameters dictionary
+        first_file : bool, optional
+            Indicates if dataset to read comes from first file in files_to_read list, by default True
+
+        Returns
+        -------
+        np.array
+            Gridded model variable data for each file
+        np.array
+            Gridded model latitude for first file
+        np.array
+            Gridded model longitude for first file
+        """
+
+        speci_object = ds[speci]
+
+        # drop level
+        if len(speci_object.shape) == 4:
+            z_varname = speci_object.dimensions[1]
+
+            # check if species Z dimension is named correctly, and in correct BSC standard order
+            # if not skip
+            # Z dimension is valid if == 'z' or 'lev' or 'alt' or 'height' or 'level'
+            if z_varname not in ["lev", "z", "alt", "height", "level"]:
+                # msg = f"Z dimension incorrectly named in {filepath}. Z={z_varname}. Skipping."
+                # show_message(self.read_instance, msg)
+                return None
+
+            # check if vertical dimension goes up or down to get correct index for surface
+            mod_vert_obj = ds[z_varname]
+            direction = mod_vert_obj.positive
+
+            # if direction == 'up', surface index is location of mininum value in z var
+            if direction == "up":
+                z_index = np.argmin(mod_vert_obj[:])
+            # if direction == 'down', surface index is location of maximum value in z var
+            elif direction == "down":
+                z_index = np.argmax(mod_vert_obj[:])
+            # if cannot determine a surface index, skip
+            else:
+                # msg = f"Cannot determine surface index in vertical dimension in {filepath}. Z={z_varname}. Skipping."
+                # show_message(self.read_instance, msg)
+                return None
+
+            read_data = speci_object[:, z_index, :, :]
+        else:
+            read_data = speci_object[:]
+
+        # convert model units to observational units
+        mod_speci_units = speci_object.units
+        conversion_factor = get_conversion_factor(
+            mod_speci_units, obs_units, standard_parameter_speci
+        )
+        read_data = read_data * conversion_factor
+
+        lat, lon = None, None
+        if first_file:
+            # get lat, lon and units from first readable file
+            for name in ("lat", "latitude"):
+                if name in ds.variables:
+                    lat = ds.variables[name][:]
+                    break
+            else:
+                msg = "Latitudes cannot be read, model grid won't be plotted."
+                show_message(self.read_instance, msg)
+                return None
+            for name in ("lon", "longitude"):
+                if name in ds.variables:
+                    lon = ds.variables[name][:]
+                    break
+            else:
+                msg = "Longitudes cannot be read, model grid won't be plotted."
+                show_message(self.read_instance, msg)
+                return None
+        
+        return read_data, lat, lon
+
     def read_gridded_data(self, speci, date=None, hour=None, zstat=None):
         """
         Read model gridded data
@@ -3177,94 +3277,107 @@ class DataReader:
         
         # take the first selected gridded model
         model_id = selected_gridded_models[0]
-        model = model_id.rsplit("-", 2)[0]
         domain = model_id.rsplit("-", 2)[1]
-
         resolution = self.read_instance.resolution
 
-        if date and hour:
-            filepath = f"{self.read_instance.mod_to_interp_root}/{model}/{domain}/{resolution}/{speci}/{speci}_{date[0:6]}.nc"
+        file_root_key = ("noninterpolated", model_id, speci)
 
-            if not os.path.exists(filepath):
+        # get file path
+        if (
+            file_root_key
+            not in self.read_instance.available_model_data_file_roots
+        ):
+            return None
+        file_root = self.read_instance.available_model_data_file_roots[
+            file_root_key
+        ]
+
+        try:
+            available_timesteps = self.read_instance.available_model_data[
+                "noninterpolated"
+            ][domain][resolution][speci][model_id]
+        except KeyError:
+            return None
+
+        # get intersection of timesteps and available_yearmonths
+        timesteps_to_read_intersect = [
+            ts
+            for ts in available_timesteps
+            if ts[:6] in self.read_instance.yearmonths
+        ]
+
+        # no files inside the date range, nothing to check
+        if len(timesteps_to_read_intersect) == 0:
+            return None
+
+        files_to_read = sorted(
+            [
+                file_root.format(date=timestep)
+                for timestep in timesteps_to_read_intersect
+            ]
+        )
+
+        obs_units = self.read_instance.measurement_units[speci]
+        standard_parameter_speci = get_standard_parameters_by_speci(
+            speci, self.read_instance.ghost_version
+        )
+        
+        if date and hour:
+            # find the file covering the requested date (monthly or daily/hourly files)
+            matching = [ts for ts in timesteps_to_read_intersect if date.startswith(ts[:6])
+                        and (len(ts) == 6 or ts[:8] == date)]
+            if not matching:
                 return None
 
-            with Dataset(filepath) as nc:
-
-                variables = nc.variables
-                lat = variables["lat"][:] if "lat" in variables else variables["latitude"][:]
-                lon = variables["lon"][:] if "lon" in variables else variables["longitude"][:]
+            filepath = file_root.format(date=matching[0])
+            if not os.path.exists(filepath):
+                return None
+            
+            with Dataset(filepath) as ds:
                 t = date2index(datetime.datetime.strptime(date, "%Y%m%d") + datetime.timedelta(hours=hour), 
-                            variables["time"], select="exact")
-                data = variables[speci][t]
-                units = variables[speci].units
-
+                               ds["time"], select="exact")
+                data, lat, lon = self.read_model_dataset(ds, speci, obs_units, standard_parameter_speci)
+                data = data[t]
+        
         elif zstat:
             if zstat not in ['Mean']:
                 msg = f"Statistic '{zstat}' is not supported. Only 'Mean' is supported."
                 show_message(self.read_instance, msg)
                 return None
 
-            current_date = datetime.datetime.strptime(str(self.read_instance.start_date), "%Y%m%d")
-            end_date = datetime.datetime.strptime(str(self.read_instance.end_date), "%Y%m%d")
-
             sum_data = None
             count_data = None
 
-            while current_date < end_date:
-                
-                filepath = f"{self.read_instance.mod_to_interp_root}/{model}/{domain}/{resolution}/{speci}/{speci}_{current_date.strftime('%Y%m')}.nc"
-                if os.path.exists(filepath):
+            for filepath in files_to_read:
+                if not os.path.exists(filepath):
+                    msg = f"Statistic '{zstat}' is not supported. Only 'Mean' is supported."
+                    continue
 
-                    with Dataset(filepath) as ds:
-                        monthly_data = ds.variables[speci][:]
+                with Dataset(filepath) as ds:
+                    # first file
+                    if sum_data is None and count_data is None:
+                        # read variable data and get latitudes and longitudes from first file
+                        timestep_data, lat, lon = self.read_model_dataset(ds, speci, obs_units, standard_parameter_speci)
 
-                        # initialise using the spatial dimensions of first file
-                        if sum_data is None:
-                            sum_data = np.zeros(
-                                monthly_data.shape[1:],
-                                dtype=np.float64
-                            )
-
-                            count_data = np.zeros(
-                                monthly_data.shape[1:],
-                                dtype=np.int64
-                            )
-
-                            # get lat, lon and units from first readable file
-                            for name in ("lat", "latitude"):
-                                if name in ds.variables:
-                                    lat = ds.variables[name][:]
-                                    break
-                            else:
-                                msg = "Latitudes cannot be read, model grid won't be plotted."
-                                show_message(self.read_instance, msg)
-                                return None
-                            for name in ("lon", "longitude"):
-                                if name in ds.variables:
-                                    lon = ds.variables[name][:]
-                                    break
-                            else:
-                                msg = "Longitudes cannot be read, model grid won't be plotted."
-                                show_message(self.read_instance, msg)
-                                return None 
-                            units = ds.variables[speci].units
-
-                        # ignore NaNs
-                        sum_data += np.nansum(monthly_data, axis=0)
-                        count_data += np.sum(
-                            ~np.isnan(monthly_data),
-                            axis=0
+                        # initialise dimensions of sum_data and count_data using the dimensions of first file
+                        sum_data = np.zeros(
+                            timestep_data.shape[1:],
+                            dtype=np.float64
                         )
+                        count_data = np.zeros(
+                            timestep_data.shape[1:],
+                            dtype=np.int64
+                        )
+                    else:
+                        # read variable data, but not coordinates (already read)
+                        timestep_data, _, _ = self.read_model_dataset(ds, speci, obs_units, standard_parameter_speci, 
+                                                                      first_file=False)
 
-                # move to next month
-                if current_date.month == 12:
-                    current_date = current_date.replace(
-                        year=current_date.year + 1,
-                        month=1
-                    )
-                else:
-                    current_date = current_date.replace(
-                        month=current_date.month + 1
+                    # ignore NaNs and append
+                    sum_data += np.nansum(timestep_data, axis=0)
+                    count_data += np.sum(
+                        ~np.isnan(timestep_data),
+                        axis=0
                     )
 
             # do not calculate mean if no data files were found
@@ -3283,4 +3396,4 @@ class DataReader:
         else:
             raise ValueError("Either 'date' and 'hour' or 'stat' must be provided.")
 
-        return data, lat, lon, units
+        return data, lat, lon, obs_units

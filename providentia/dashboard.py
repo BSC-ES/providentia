@@ -2611,6 +2611,10 @@ class Dashboard(QtWidgets.QWidget):
             self.forecast = []
 
             for model_raw, model in models.items():
+                # skip gridded models as they have no forecast options
+                if model_raw.endswith("::noninterpolated"):
+                    continue
+
                 # get available and selected forecast options
                 selected_forecast_options = self.models_menu["models"]["forecast"][
                     model

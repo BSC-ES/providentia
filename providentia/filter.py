@@ -1273,7 +1273,13 @@ class DataFilter:
             for base_data_label in base_data_labels:
                 if base_data_label != self.read_instance.observations_data_label:
                     current_count = 0
-                    for data_label in self.read_instance.data_labels:
+                    for data_label, data_label_raw in zip(
+                        self.read_instance.data_labels,
+                        self.read_instance.data_labels_raw,
+                    ):
+                        # gridded models have no forecast dimension, skip
+                        if data_label_raw.endswith("::noninterpolated"):
+                            continue
                         if data_label.startswith(base_data_label):
                             current_count += 1
                             # Check if this label has forecast indices for the current network

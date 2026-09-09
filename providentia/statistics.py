@@ -547,7 +547,12 @@ def merge_forecast_days(
     for base_label_ii, base_label in enumerate(unique_base_data_labels):
         # Find indices of all data_labels that match this base label
         relevant_inds = np.array(
-            [i for i, lbl in enumerate(data_labels) if lbl.startswith(base_label)],
+            [
+                i
+                for i, lbl in enumerate(data_labels)
+                if lbl.startswith(base_label)
+                and not read_instance.data_labels_raw[i].endswith("::noninterpolated")
+            ],
             dtype=np.int32,
         )
 

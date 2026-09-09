@@ -566,13 +566,7 @@ class ModelInterpolation(object):
                     # misnamed (or attribute-less) Z dimension gives this clean error instead of an
                     # uncaught exception being raised when accessing it
                     # Z dimension is valid if == 'z' or 'lev' or 'alt' or 'height' or 'level'
-                    if (
-                        (self.z_varname != "lev")
-                        and (self.z_varname != "z")
-                        and (self.z_varname != "alt")
-                        and (self.z_varname != "height")
-                        and (self.z_varname != "level")
-                    ):
+                    if self.z_varname not in ["lev", "z", "alt", "height", "level"]:
                         self.log_file_str += (
                             "Z dimension incorrectly named. Terminating process."
                         )
