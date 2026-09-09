@@ -4695,6 +4695,10 @@ class Canvas(FigureCanvas):
             if plot_type in ['heatmap', 'statsummary', 'table', 'boxplot']:
                 # return species in checkable combobox for multispecies plots
                 selected_networkspecies = combobox.currentData()
+                if not selected_networkspecies:
+                    selected_networkspecies = sorted(
+                        self.read_instance.networkspecies
+                    )
             else:
                 # return speci in combobox for single species plots
                 selected_networkspecies = combobox.currentText()
