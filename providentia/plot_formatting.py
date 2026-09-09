@@ -16,7 +16,7 @@ import numpy as np
 import pandas as pd
 from PIL import Image
 
-from providentia.auxiliar import CURRENT_PATH, join
+from providentia.auxiliar import CURRENT_PATH, join, get_map_colours
 from .plot_aux import get_land_polygon_resolution, set_map_extent
 from .read_aux import get_periodic_relevant_temporal_resolutions
 from .plot_options import (
@@ -2129,8 +2129,7 @@ def map_feature_ink(map_template, feature="borders"):
         red, green, blue = mpl.colors.to_rgb(colour)
         return 0.2126 * red + 0.7152 * green + 0.0722 * blue
 
-    land = map_template.get("land_polygon", {}).get("facecolor", "0.85")
-    ocean = map_template.get("ocean_polygon", {}).get("facecolor", "#DCE6ED")
+    land, ocean = get_map_colours(map_template)
     try:
         brightness = (luminance(land) + luminance(ocean)) / 2
     except ValueError:
@@ -2181,24 +2180,30 @@ def draw_map_features(canvas_instance, ax):
     resolution = get_land_polygon_resolution(map_template["map_coastline_resolution"])
     artists = {"ocean": None, "land": None, "borders": None}
 
+    # land/ocean colours come from the active preset unless set explicitly
+    land_colour, ocean_colour = get_map_colours(map_template)
+
     # ocean first, so land and borders draw on top of it
     ocean_characteristics = map_template.get("ocean_polygon", {})
     if ocean_characteristics.get("visible", True):
         ocean_kwargs = {
             k: v for k, v in ocean_characteristics.items() if k != "visible"
         }
+        ocean_kwargs["facecolor"] = ocean_colour
         artists["ocean"] = ax.add_feature(
             cfeature.NaturalEarthFeature(
                 category="physical", name="ocean", scale=resolution, **ocean_kwargs
             )
         )
 
+    land_kwargs = dict(map_template["land_polygon"])
+    land_kwargs["facecolor"] = land_colour
     artists["land"] = ax.add_feature(
         cfeature.NaturalEarthFeature(
             category="physical",
             name="land",
             scale=resolution,
-            **map_template["land_polygon"],
+            **land_kwargs,
         )
     )
 
@@ -2207,10 +2212,10 @@ def draw_map_features(canvas_instance, ax):
         borders_kwargs = {
             k: v for k, v in borders_characteristics.items() if k != "visible"
         }
-        # borders track the basemap's brightness rather than keeping the
-        # single configured colour, which disappeared against the dark
-        # land/ocean options - see map_feature_ink()
-        borders_kwargs["edgecolor"] = map_feature_ink(map_template)
+        # with no colour set, borders track the basemap's brightness - a single
+        # fixed colour disappeared against the darker land/ocean options
+        if not borders_kwargs.get("edgecolor"):
+            borders_kwargs["edgecolor"] = map_feature_ink(map_template)
         artists["borders"] = ax.add_feature(
             cfeature.NaturalEarthFeature(
                 category="cultural",
@@ -2275,11 +2280,11 @@ def draw_map_gridlines(canvas_instance, ax, gridlines_characteristics):
         return None
 
     kwargs = {k: v for k, v in gridlines_characteristics.items() if k != "visible"}
-    # gridlines track the basemap's brightness, same as borders - see
-    # map_feature_ink()
-    kwargs["color"] = map_feature_ink(
-        canvas_instance.plot_characteristics_templates["map"], feature="gridlines"
-    )
+    # with no colour set, gridlines track the basemap's brightness, as borders do
+    if not kwargs.get("color"):
+        kwargs["color"] = map_feature_ink(
+            canvas_instance.plot_characteristics_templates["map"], feature="gridlines"
+        )
     return ax.gridlines(crs=canvas_instance.datacrs, **kwargs)
 
 

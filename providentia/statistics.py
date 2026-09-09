@@ -16,6 +16,7 @@ from providentia.auxiliar import (
     CURRENT_PATH,
     join,
     get_conversion_factor,
+    get_role_colourmap,
     get_standard_parameters_by_speci,
 )
 from .calculate import Stats, ModBias
@@ -1876,6 +1877,100 @@ def get_axes_vminmax(axs):
         return np.nan, np.nan
 
 
+def get_colourmap_role(zstat):
+    """
+    Get the kind of colourmap a statistic needs - see settings/colourmaps.yaml.
+
+    Parameters
+    ----------
+    zstat : str
+        Statistic being plotted
+
+    Returns
+    -------
+    str
+        Colourmap role
+    """
+
+    (
+        _,
+        base_zstat,
+        z_statistic_type,
+        z_statistic_sign,
+        _,
+    ) = get_z_statistic_info(zstat=zstat)
+
+    if z_statistic_sign == "absolute":
+        return "sequential"
+
+    if z_statistic_type == "basic":
+        stats_dict = basic_stats.get(base_zstat, {})
+    else:
+        stats_dict = modbias_stats.get(base_zstat, {})
+
+    return stats_dict.get("cmap_type_bias") or "diverging"
+
+
+def resolve_colourmap(read_instance, zstat, plot_characteristics, speci):
+    """
+    Get the colourmap for a statistic, in this order: the colourmap named for
+    the statistic itself, then the one for the kind of scale the statistic
+    needs (its role) taken from the active colour preset. See
+    settings/colourmaps.yaml.
+
+    Parameters
+    ----------
+    read_instance : object
+        Instance of class Dashboard, Report or Library
+    zstat : str
+        Statistic being plotted
+    plot_characteristics : dict
+        Plot characteristics for the plot type being made
+    speci : str
+        Current species
+
+    Returns
+    -------
+    str or None
+        Colourmap name, or None if none is defined anywhere
+    """
+
+    (
+        _,
+        base_zstat,
+        z_statistic_type,
+        z_statistic_sign,
+        _,
+    ) = get_z_statistic_info(zstat=zstat)
+
+    if z_statistic_type == "basic":
+        stats_dict = basic_stats.get(base_zstat, {})
+    else:
+        stats_dict = modbias_stats.get(base_zstat, {})
+
+    role = get_colourmap_role(zstat)
+    cmap_var_name = (
+        "cmap_absolute" if z_statistic_sign == "absolute" else "cmap_bias"
+    )
+
+    # colourmap named for this statistic, as a string for every species or as
+    # a dict per species
+    named = stats_dict.get(cmap_var_name)
+    if isinstance(named, dict):
+        if speci in named.keys():
+            named = named[speci]
+        else:
+            error = f"Error: colourmap ({cmap_var_name}) is not defined for {speci}. "
+            error += f"{cmap_var_name} can be set as a string per statistic (for all species), or as a dict (per species)."
+            read_instance.logger.error(error)
+            sys.exit(1)
+
+    if named:
+        return named
+
+    return get_role_colourmap(role, plot_characteristics.get("colour_preset"))
+
+
 def generate_colourbar_detail(
     read_instance,
     zstat,
@@ -2009,40 +2104,12 @@ def generate_colourbar_detail(
     if only_label:
         return z_label
 
-    # set cmap for z statistic
-    # first check if have defined cmap (in this order: 1. specific for z statistic 2. specific for species 3. configuration file)
-    set_cmap = False
-    if z_statistic_sign == "absolute":
-        cmap_var_name = "cmap_absolute"
-    else:
-        cmap_var_name = "cmap_bias"
-    # 1. get cmap specific for z statistic
-    if cmap_var_name in stats_dict:
-        if (stats_dict[cmap_var_name] != "") and (stats_dict[cmap_var_name] != {}):
-            set_cmap = True
-            if isinstance(stats_dict[cmap_var_name], dict):
-                if speci in stats_dict[cmap_var_name].keys():
-                    z_colourmap = stats_dict[cmap_var_name][speci]
-
-                else:
-                    error = f"Error: colourmap ({cmap_var_name}) is not defined for {speci}. "
-                    error += f"{cmap_var_name} can be set as a string per statistic (for all species), or as a dict (per species)."
-                    read_instance.logger.error(error)
-                    sys.exit(1)
-            else:
-                z_colourmap = stats_dict[cmap_var_name]
-    # 3. check configuration file
-    if not set_cmap:
-        if cmap_var_name in plot_characteristics["cb"]:
-            if (plot_characteristics["cb"][cmap_var_name] != "") and (
-                plot_characteristics["cb"][cmap_var_name]
-            ):
-                z_colourmap = plot_characteristics["cb"][cmap_var_name]
-                set_cmap = True
-    # if have no defined cmap, raise error
-    if not set_cmap:
-        error = f"Error: colourmap ({cmap_var_name}) for the colourbar needs to be defined, either in the "
-        error += "configuration files for the map, or per statistic in 'basic_stats.yaml' or 'model_bias_stats.yaml'."
+    # colourmap for this statistic - see resolve_colourmap()
+    z_colourmap = resolve_colourmap(read_instance, zstat, plot_characteristics, speci)
+    if not z_colourmap:
+        error = "Error: colourmap for the colourbar needs to be defined, either per "
+        error += "statistic in 'basic_stats.yaml' or 'model_bias_stats.yaml', or per "
+        error += "role in 'colourmaps.yaml'."
         read_instance.logger.error(error)
         sys.exit(1)
 

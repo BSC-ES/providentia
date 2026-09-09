@@ -15,20 +15,60 @@ There are 3 options as present:
 - `medium`: 50m in resolution (default)
 - `high`: 10m in resolution
 
-### Map background
+### Map projection
 
-Users can define the type of background that is plotted on the map. This can be set by changing the background variable under the `map` section.
+The projection the map is drawn in can be set by changing the `projection` variable under the `map` section. Any of the following can be used:
 
-There are 3 available standard options:
-- `providentia`: The standard white and grey combination that has been historically available (default)
-- `blue_marble`: NASA's blue marble product
-- `shaded_relief`: Imagery showing changes in elevation 
+`Aitoff`, `AzimuthalEquidistant`, `EckertI`, `EckertII`, `EckertIII`, `EckertIV`, `EckertV`, `EckertVI`, `EqualEarth`, `Hammer`, `InterruptedGoodeHomolosine`, `LambertAzimuthalEqualArea`, `LambertCylindrical`, `Mercator`, `Miller`, `Mollweide`, `NorthPolarStereo`, `Orthographic`, `PlateCarree`, `Robinson` (default), `Sinusoidal`, `SouthPolarStereo`, `Stereographic`
 
-Users can easily add any type of background by putting an image file in the `providentia/dependencies/resources` folder, with the filename named in the same way as in the plot characteristics file, e.g. `blue_marble.png` and `"background": "blue_marble"`. 
+### Map colour presets
 
-### Custom colorbars
+A colour preset sets the land and ocean colours together with the colourmaps used for the map points. It can be set by changing the `colour_preset` variable under the `map` section, and applies to every mode.
 
-Users can define the color and bounds of the colorbar (cmap, vmin and vmax) per species using a dictionary, with the keys being the names of the species inside `basic_stats.yaml` and `model_bias_stats.yaml`. An example can be seen in the code below:
+The available presets are defined in `settings/colourmaps.yaml`:
+- `Light`: a near-white basemap, giving the colourmap the most room (default)
+- `Dark`: dark grey land and sea
+- `Night`: near-black land and sea
+- `Classic`: more classical land and sea colours  
+- `Terrain`: sandy land and a blue sea
+- `Colourblind`: colours chosen to stay distinguishable under the common forms of colour blindness
+
+In the dashboard the preset can also be changed from the map settings menu.
+
+### Map land and ocean colours
+
+The land and ocean colours come from the preset, but can be set individually by changing the `facecolor` of the `land_polygon` and `ocean_polygon` variables under the `map` section. Left empty, the preset's colours are used. Any matplotlib colour can be given, e.g. `"#E8E8E8"` or `"lightgrey"`.
+
+The ocean can be hidden entirely by setting `visible` to `false` under `ocean_polygon`.
+
+### Colourbar colourmaps and bounds
+
+Two things decide how the map points are coloured: the colourmap they are drawn with, and the bounds the colourbar spans. They are set separately, and neither has to be set for a plot to be made.
+
+#### Colourmaps
+
+Statistics measure different things, so they are not all drawn with the same colourmap. Which one a statistic needs is set with `cmap_type_bias` in `basic_stats.yaml` and `model_bias_stats.yaml`:
+
+- `diverging`: the statistic is signed and the ideal value sits in the middle, e.g. `MB`, `r`
+- `sequential_low_best`: the statistic is an error, never negative, and 0 is perfect, e.g. `RMSE`
+- `sequential_high_best`: the statistic is a skill score and its maximum is perfect, e.g. `r2`
+
+The absolute view of a statistic is always drawn sequentially, so `cmap_type_bias` only describes the bias view.
+
+The colourmap each of these types gets comes from the active colour preset in `settings/colourmaps.yaml`, each of which sets one per type, chosen to stay legible against that preset's land and ocean colours (see [Map colour presets](#map-colour-presets)). Between them these cover every statistic, without anything having to be set per statistic, and changing the preset changes all of them together.
+
+To use a particular colourmap for one statistic instead of the one its type would give it, set `cmap_absolute` or `cmap_bias` for that statistic in the `basic_stats.yaml` and `model_bias_stats.yaml` files. They can be given as a string, which applies to every species, or as a dictionary per species, which then needs to cover **each of the species** loaded or an error will appear. Left empty, the statistic's type decides.
+
+Colourmaps are therefore resolved in this order:
+1. the colourmap chosen in the dashboard's map settings menu, which applies until the statistic is changed
+2. `cmap_absolute` / `cmap_bias` for the statistic in `basic_stats.yaml` and `model_bias_stats.yaml`, if set
+3. the colourmap for the statistic's type, from the colour preset in use
+
+#### Bounds
+
+The bounds of the colourbar are statistic specific, and are set alongside the colourmaps, in the entry for the statistic in `basic_stats.yaml` and `model_bias_stats.yaml`. Each statistic has four: `vmin_absolute` and `vmax_absolute` for its absolute view, and `vmin_bias` and `vmax_bias` for its bias view. Each is given as a dictionary with the keys being the names of the species, so the bounds can differ per species as well as per statistic. They can be defined for some species only, and the rest will take the data minimum and maximum values.
+
+An example of an entry setting both bounds and colourmaps can be seen in the code below:
 
 ```
 "Mean":        {"function": "calculate_mean", 
@@ -45,7 +85,40 @@ Users can define the color and bounds of the colorbar (cmap, vmin and vmax) per 
                 "cmap_bias": "RdYlBu_r"},
 ```
 
-If they define the cmap, they will need to give a complete list of cmap options **for each of the species** that they load or otherwise a warning will appear. For vmin and vmax, they can define the bounds for some species and the rest will take the data minimum and maximum values.
+In the dashboard both the colourmap and the bounds can also be changed from the map settings menu, and returned to the values above with the reset control beside the colourbar settings.
+
+### Number of colourbar labels and sections
+
+The number of labels shown on the colourbar can be set with `n_ticks` under the `cb` section. Colourbars are drawn in discrete sections by default; this can be changed with `discrete`, and the number of sections with `n_discrete`. All three can also be changed from the dashboard's map settings menu.
+
+### Heatmap colours
+
+Heatmaps are coloured by statistic type in the same way as the map, and have a `colour_preset` variable of their own under the `heatmap` section, naming any of the presets above. Only the colourmaps of that preset are used, as a heatmap has no basemap for the land and ocean colours to apply to, so a heatmap and a map can be given different presets without the two looking unrelated.
+
+To use one colourmap for every statistic instead, set `cmap` under the `plot` variable of the `heatmap` section.
+
+### Country borders and gridlines
+
+Country borders and gridlines can be turned on and off by setting `visible` under the `borders` and `gridlines` variables of the `map` section. Borders are off by default, gridlines are on.
+
+Their style can be edited with the same variables, e.g. `linewidth` for the borders and `linestyle` and `alpha` for the gridlines. Left empty, the `edgecolor` of the borders and the `color` of the gridlines are chosen to stay visible against the land and ocean colours in use, so a dark basemap gets light borders and a light basemap dark ones. Setting either uses that colour instead, whatever the basemap.
+
+### Map background
+
+Users can define the type of background that is plotted on the map. This can be set by changing the background variable under the `map` section.
+
+There are 3 available standard options:
+- `providentia`: The standard white and grey combination that has been historically available (default)
+- `blue_marble`: NASA's blue marble product
+- `shaded_relief`: Imagery showing changes in elevation 
+
+Users can easily add any type of background by putting an image file in the `providentia/dependencies/resources` folder, with the filename named in the same way as in the plot characteristics file, e.g. `blue_marble.png` and `"background": "blue_marble"`. 
+
+### Map point sizing
+
+The size of the map points is worked out from how densely the stations being shown are packed into the plot, so they stay legible whether a map is showing a handful of stations or several thousand. This applies to every mode, and in the dashboard it is recalculated as the map is zoomed.
+
+In the dashboard the opacity of the points is set alongside the size, and selected stations are drawn larger and more solid than unselected ones. This can be turned off by setting `marker_automatic` to `false` under the `dashboard` section of `map`, in which case the size and opacity come from the `marker_selected` and `marker_unselected` variables and can be changed with the sliders in the map settings menu.
 
 ## Removing extreme stations by their statistical values
 
