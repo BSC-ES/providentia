@@ -7,7 +7,8 @@
              "minimum_bias": [0.0], 
              "vmin_bias": {}, 
              "vmax_bias": {},
-             "cmap_bias": "RdYlBu_r"},
+             "cmap_bias": "",
+             "cmap_type_bias": "diverging"},
     
     "NMB":  {"function": "calculate_mb", 
              "order": 1, 
@@ -17,7 +18,8 @@
              "minimum_bias": [0.0], 
              "vmin_bias": {}, 
              "vmax_bias": {}, 
-             "cmap_bias": "RdYlBu_r"},
+             "cmap_bias": "",
+             "cmap_type_bias": "diverging"},
     
     "ME":   {"function": "calculate_me", 
              "order": 2, 
@@ -27,7 +29,8 @@
              "minimum_bias": [0.0], 
              "vmin_bias": 0.0,
              "vmax_bias": {}, 
-             "cmap_bias": "viridis"},
+             "cmap_bias": "",
+             "cmap_type_bias": "sequential_low_best"},
     
     "NME":  {"function": "calculate_me", 
              "order": 3, 
@@ -37,7 +40,8 @@
              "minimum_bias": [0.0], 
              "vmin_bias": 0.0, 
              "vmax_bias": {},
-             "cmap_bias": "viridis"},
+             "cmap_bias": "",
+             "cmap_type_bias": "sequential_low_best"},
     
     "MNB":  {"function": "calculate_mnb", 
              "order": 4, 
@@ -47,7 +51,8 @@
              "minimum_bias": [0.0],
              "vmin_bias": {}, 
              "vmax_bias": {}, 
-             "cmap_bias": "RdYlBu_r"},
+             "cmap_bias": "",
+             "cmap_type_bias": "diverging"},
     
     "MNE":  {"function": "calculate_mne", 
              "order": 5, 
@@ -57,7 +62,8 @@
              "minimum_bias": [0.0],
              "vmin_bias": 0.0, 
              "vmax_bias": {},
-             "cmap_bias": "viridis"},
+             "cmap_bias": "",
+             "cmap_type_bias": "sequential_low_best"},
     
     "MFB":  {"function": "calculate_mfb", 
              "order": 6, 
@@ -67,7 +73,8 @@
              "minimum_bias": [0.0], 
              "vmin_bias": {}, 
              "vmax_bias": {}, 
-             "cmap_bias": "RdYlBu_r"},
+             "cmap_bias": "",
+             "cmap_type_bias": "diverging"},
     
     "MFE":  {"function": "calculate_mfe", 
              "order": 7, 
@@ -77,7 +84,8 @@
              "minimum_bias": [0.0],
              "vmin_bias": 0.0,
              "vmax_bias": {}, 
-             "cmap_bias": "viridis"},
+             "cmap_bias": "",
+             "cmap_type_bias": "sequential_low_best"},
     
     "RMSE": {"function": "calculate_rmse", 
              "order": 8, 
@@ -87,7 +95,8 @@
              "minimum_bias": [0.0], 
              "vmin_bias": 0.0,
              "vmax_bias": {}, 
-             "cmap_bias": "viridis"},
+             "cmap_bias": "",
+             "cmap_type_bias": "sequential_low_best"},
     
     "NRMSE": {"function": "calculate_rmse", 
               "order": 9, 
@@ -97,7 +106,8 @@
               "minimum_bias": [0.0], 
               "vmin_bias": 0.0,
               "vmax_bias": {}, 
-              "cmap_bias": "viridis"},
+              "cmap_bias": "",
+              "cmap_type_bias": "sequential_low_best"},
 
     "COE":  {"function": "calculate_coe", 
              "order": 10, 
@@ -107,7 +117,8 @@
              "minimum_bias": [1.0],
              "vmin_bias": {}, 
              "vmax_bias": 1.0, 
-             "cmap_bias": "viridis_r"},
+             "cmap_bias": "",
+             "cmap_type_bias": "sequential_high_best"},
     
     "FAC2": {"function": "calculate_fac2", 
              "order": 11, 
@@ -117,7 +128,8 @@
              "minimum_bias": [100.0], 
              "vmin_bias": {},
              "vmax_bias": 100.0,  
-             "cmap_bias": "viridis_r"},
+             "cmap_bias": "",
+             "cmap_type_bias": "sequential_high_best"},
     
     "IOA":  {"function": "calculate_ioa", 
              "order": 12, 
@@ -127,7 +139,8 @@
              "units": "",
              "vmin_bias": -1.0, 
              "vmax_bias": 1.0,
-             "cmap_bias": "viridis_r"},
+             "cmap_bias": "",
+             "cmap_type_bias": "sequential_high_best"},
     
     "r":    {"function": "calculate_r", 
              "order": 13, 
@@ -137,7 +150,8 @@
              "minimum_bias": [1.0], 
              "vmin_bias": -1.0, 
              "vmax_bias": 1.0,
-             "cmap_bias": "RdYlBu_r"},
+             "cmap_bias": "",
+             "cmap_type_bias": "diverging"},
     
     "r2":   {"function": "calculate_r_squared", 
              "order":14, 
@@ -147,7 +161,8 @@
              "minimum_bias": [1.0], 
              "vmin_bias": 0.0, 
              "vmax_bias": 1.0,
-             "cmap_bias": "viridis_r"},
+             "cmap_bias": "",
+             "cmap_type_bias": "sequential_high_best"},
     
     "UPA":  {"function": "calculate_upa", 
              "order":15, 
@@ -155,5 +170,6 @@
              "arguments": {}, 
              "units": "%", 
              "minimum_bias": [0.0],  
-             "cmap_bias": "RdYlBu_r"}
+             "cmap_bias": "",
+             "cmap_type_bias": "diverging"}
 }

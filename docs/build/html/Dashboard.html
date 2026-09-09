@@ -265,6 +265,18 @@ If more than one section is defined, a pop-up will appear asking you to select t
 <p>One major plot option to note is <strong>bias</strong>. By selecting <strong>bias</strong> what is plotted is the result of the model - observations (i.e. bias). On the map, rather than selecting <strong>bias</strong> as a plot option, it can be obtained by selecting a secondary dataset. The bias will be calculated by the two active datasets.</p>
 <p>On some plots, the plotted statistic can also be altered though the settings menu, e.g. <strong>periodic</strong>.</p>
 <p>See here for more information about all available <a class="reference internal" href="Plot-types-and-options.html"><span class="doc std std-doc">plot options</span></a>.</p>
+<section id="map-settings">
+<h4>Map settings<a class="headerlink" href="#map-settings" title="Link to this heading"></a></h4>
+<p>The map’s settings menu has an additional three sub-menus, with the following customisation options:</p>
+<ul class="simple">
+<li><p><strong>Map</strong>: the projection, the colour preset, the land and ocean colours, the coastline resolution, and whether country borders and gridlines are drawn</p></li>
+<li><p><strong>Points</strong>: automatic point sizing, and the size and opacity of selected and unselected stations when it is turned off</p></li>
+<li><p><strong>Colourbar</strong>: the colourbar limits, the colourmap, whether it is drawn continuously or in sections, and the number of labels and sections</p></li>
+</ul>
+<p>Each of the three has a reset control beside its title, which returns just that panel to the settings Providentia started with.</p>
+<p>The colourmap shown is the one the statistic currently being mapped resolves to, and it changes with the statistic. Choosing one here keeps it until the statistic changes, or until the panel is reset.</p>
+<p>Changes made here apply for the session only. To change what the dashboard opens with, edit <code class="docutils literal notranslate"><span class="pre">settings/plot_characteristics.yaml</span></code> (see <a class="reference internal" href="Plot-customisation.html"><span class="std std-doc">Plot customisation</span></a>).</p>
+</section>
 </section>
 <section id="legend">
 <h3>Legend<a class="headerlink" href="#legend" title="Link to this heading"></a></h3>

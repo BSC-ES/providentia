@@ -384,6 +384,7 @@
       "background": "providentia",
       "map_coastline_resolution": "medium",
       "projection": "Robinson",
+      "colour_preset": "Light",
       "round_decimal_places": { "title": 2, "csv": 2  },
       "annotate_stats": ["Mean"],
       "annotate_offset": { "loc": "upper left" },
@@ -403,18 +404,17 @@
           "round_decimal_places": 2,
           "sep": 1,
         },
-      "gridlines": { "linestyle": "-", "alpha": 0.4, "visible": true },
+      "gridlines": { "color": "", "linestyle": "-", "alpha": 0.4, "visible": true },
       "plot": { "zorder": 3, "linewidth": 0.0, "alpha": null },
       "axis_title": { "label": "" },
-      "land_polygon": { "facecolor": "#E8E8E8" },
-      "ocean_polygon": { "facecolor": "#FAFAFA", "edgecolor": "none", "visible": true },
-      "borders": { "edgecolor": "0.4", "linewidth": 0.4, "visible": false },
+      "land_polygon": { "facecolor": "" },
+      "ocean_polygon": { "facecolor": "", "edgecolor": "none", "visible": true },
+      "borders": { "edgecolor": "", "linewidth": 0.4, "visible": false },
       "dashboard":
         {
           "plot_options": ["annotate", "domain"],
           "land_polygon": { "edgecolor": null },
           "base_scale": 1.3,
-          "gridlines": {},
           "axis_title": { "fontsize": 8.5, "pad": 3, "loc": "center" },
           "cb":
             {
@@ -422,8 +422,6 @@
               "vmax_absolute": "",
               "vmin_bias": "",
               "vmax_bias": "",
-              "cmap_absolute": "",
-              "cmap_bias": "",
               "n_ticks": 7,
               "orientation": "horizontal",
               "discrete": true,
@@ -435,6 +433,7 @@
           "marker_zero_stations_selected": { "s": 4, "alpha": 1.0 },
           "marker_selected": { "s": 8, "alpha": 1.0 },
           "marker_unselected": { "s": 4, "alpha": 0.4 },
+          "marker_automatic": true,
           "plot": { "s": 4, "picker": 1 },
           "marker_annotate_rounding": 2,
         },
@@ -462,8 +461,6 @@
               "vmax_absolute": "",
               "vmin_bias": "",
               "vmax_bias": "",
-              "cmap_absolute": "",
-              "cmap_bias": "",
               "n_ticks": 8,
               "orientation": "horizontal",
               "discrete": true,
@@ -488,7 +485,6 @@
               "wspace": 0.00,
             },
           "axis_title": { "fontsize": 16, "pad": 3, "loc": "center" },
-          "gridlines": {},
           "cb":
             {
               "position": [0.05, 0.1, 0.9, 0.05],
@@ -496,8 +492,6 @@
               "vmax_absolute": "",
               "vmin_bias": "",
               "vmax_bias": "",
-              "cmap_absolute": "",
-              "cmap_bias": "",
               "n_ticks": 8,
               "orientation": "horizontal",
               "discrete": true,
@@ -599,12 +593,6 @@
       "xtick_alteration":
         {
           "define": true,
-          # ceiling on interior ticks (not counting the start/end ticks,
-          # always shown) a resolution may offer to even be considered -
-          # the actual count used also adapts down to whatever the
-          # panel's real width can fit without clashing, so this is a
-          # cap, not a target - see compute_timeseries_xticks() in
-          # plot_formatting.py
           "max_ticks": 12,
         },
       "smooth": { "window": 10, "min_points_percentage": 50 },

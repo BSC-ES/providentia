@@ -206,8 +206,12 @@ _QUALITATIVE_COLOURMAPS = {
 
 def get_valid_colourmaps():
     """
-    Get the names of every colourmap registered with matplotlib, excluding
-    the "_r" (reversed) duplicate of each one.
+    Get the names of every colourmap registered with matplotlib.
+
+    The "_r" (reversed) variants are included: reversing carries meaning here,
+    as a statistic whose best value is its maximum is drawn with the reverse
+    of the colourmap used for one whose best value is its minimum (see
+    settings/colourmaps.yaml), so they have to be selectable.
 
     Returns
     -------
@@ -219,7 +223,8 @@ def get_valid_colourmaps():
     return sorted(
         name
         for name in matplotlib.colormaps
-        if not name.endswith("_r") and name not in _QUALITATIVE_COLOURMAPS
+        if name not in _QUALITATIVE_COLOURMAPS
+        and name.removesuffix("_r") not in _QUALITATIVE_COLOURMAPS
     )
 
 
@@ -263,7 +268,28 @@ def make_colourmap_icon(name, width=64, height=13):
     return QtGui.QIcon(pixmap)
 
 
-def populate_colourmap_combobox(combobox, current):
+def select_colourmap(combobox, name):
+    """
+    Select a colourmap in a combobox already populated by
+    populate_colourmap_combobox(), leaving its items alone.
+
+    Rebuilding the list to change the selection means regenerating every
+    swatch icon, which is wasted work when only the selection is changing.
+
+    Parameters
+    ----------
+    combobox : QtWidgets.QComboBox
+        Combobox to change the selection of.
+    name : str
+        Colourmap name to select. Ignored if it is not in the combobox.
+    """
+
+    index = combobox.findText(name)
+    if index != -1:
+        combobox.setCurrentIndex(index)
+
+
+def populate_colourmap_combobox(combobox, current=None):
     """
     Fill a QComboBox with every valid matplotlib colourmap, each shown with a
     gradient swatch icon of its actual colours.
@@ -272,7 +298,7 @@ def populate_colourmap_combobox(combobox, current):
     ----------
     combobox : QtWidgets.QComboBox
         Combobox to populate (cleared first).
-    current : str
+    current : str, optional
         Colourmap name to select initially. Falls back to the first (alpha-
         betically) colourmap if this isn't a valid colourmap name.
     """
@@ -456,43 +482,6 @@ OCEAN_COLOUR_OPTIONS = {
 # ready-made land/ocean/colourmap combinations, chosen so the basemap stays
 # quiet enough for the station colours to carry the information. "Custom" is
 # not a preset - it is what the selector shows once land, ocean or colourmap
-# has been changed individually
-COLOUR_PRESET_CUSTOM = "Custom"
-
-# each entry is scored by how much of its colourmap stays distinguishable
-# (WCAG contrast >= 1.5) from both basemap colours - i.e. how much of the data
-# range is readable rather than sinking into the background
-COLOUR_PRESETS = {
-    # ordered lightest basemap to darkest, so the list reads as a scale.
-    # Percentages are the visibility score described above - this default
-    # gives the colourmap the most room of any light option (72%)
-    "Light": {"land": "#E8E8E8", "ocean": "#FAFAFA", "colourmap": "viridis"},
-    # the previous default's slightly deeper grey land and blue-tinted
-    # sea, kept as an option in its own right (62%)
-    "Classic": {"land": "#D9D9D9", "ocean": "#DCE6ED", "colourmap": "viridis"},
-    # muted natural tones, closest to a conventional atlas (58%)
-    "Terrain": {"land": "#C8DCC0", "ocean": "#AED6F1", "colourmap": "viridis"},
-    # white land against a deep blue sea - the strongest land/sea separation
-    # of any preset (contrast 3.9 against roughly 1.1 for the light ones),
-    # which is what makes the coastline read so clearly. Scores lowest on
-    # colourmap visibility (48%), a deliberate trade for the clearer map
-    "High contrast": {"land": "#FFFFFF", "ocean": "#1B4B8F", "colourmap": "plasma"},
-    # colour-vision-deficiency friendly throughout: cividis is designed
-    # for it, on a low-saturation basemap that doesn't compete (60%)
-    "Colourblind safe": {
-        "land": "#E8DCC8",
-        "ocean": "#DCE6ED",
-        "colourmap": "cividis",
-    },
-    # dark basemap; magma runs from near-black through to pale yellow, so
-    # its bright end separates cleanly from the dark land and sea (66%)
-    "Dark": {"land": "#2F3640", "ocean": "#22303C", "colourmap": "magma"},
-    # for a dark room or a dark-themed report, and the highest-scoring
-    # combination available (88%): against a near-black basemap viridis
-    # is legible over almost its whole range. Distinct from "Dark", which
-    # keeps a visibly blue-grey sea rather than going to black
-    "Night": {"land": "#1E1E1E", "ocean": "#0D0D0D", "colourmap": "viridis"},
-}
 
 
 def make_colour_icon(hex_colour, width=34, height=13):

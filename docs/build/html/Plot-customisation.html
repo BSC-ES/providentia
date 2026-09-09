@@ -57,8 +57,15 @@
 <li class="toctree-l3"><a class="reference internal" href="#editing-the-plots-style">Editing the plots style</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#general-edits">General edits</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#map-coastline-resolution">Map coastline resolution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#map-projection">Map projection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#map-colour-presets">Map colour presets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#map-land-and-ocean-colours">Map land and ocean colours</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#colourbar-colourmaps-and-bounds">Colourbar colourmaps and bounds</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#number-of-colourbar-labels-and-sections">Number of colourbar labels and sections</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#heatmap-colours">Heatmap colours</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#country-borders-and-gridlines">Country borders and gridlines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#map-background">Map background</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#custom-colorbars">Custom colorbars</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#map-point-sizing">Map point sizing</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#removing-extreme-stations-by-their-statistical-values">Removing extreme stations by their statistical values</a></li>
@@ -127,20 +134,55 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">high</span></code>: 10m in resolution</p></li>
 </ul>
 </section>
-<section id="map-background">
-<h3>Map background<a class="headerlink" href="#map-background" title="Link to this heading"></a></h3>
-<p>Users can define the type of background that is plotted on the map. This can be set by changing the background variable under the <code class="docutils literal notranslate"><span class="pre">map</span></code> section.</p>
-<p>There are 3 available standard options:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">providentia</span></code>: The standard white and grey combination that has been historically available (default)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">blue_marble</span></code>: NASA’s blue marble product</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">shaded_relief</span></code>: Imagery showing changes in elevation</p></li>
-</ul>
-<p>Users can easily add any type of background by putting an image file in the <code class="docutils literal notranslate"><span class="pre">providentia/dependencies/resources</span></code> folder, with the filename named in the same way as in the plot characteristics file, e.g. <code class="docutils literal notranslate"><span class="pre">blue_marble.png</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;background&quot;:</span> <span class="pre">&quot;blue_marble&quot;</span></code>.</p>
+<section id="map-projection">
+<h3>Map projection<a class="headerlink" href="#map-projection" title="Link to this heading"></a></h3>
+<p>The projection the map is drawn in can be set by changing the <code class="docutils literal notranslate"><span class="pre">projection</span></code> variable under the <code class="docutils literal notranslate"><span class="pre">map</span></code> section. Any of the following can be used:</p>
+<p><code class="docutils literal notranslate"><span class="pre">Aitoff</span></code>, <code class="docutils literal notranslate"><span class="pre">AzimuthalEquidistant</span></code>, <code class="docutils literal notranslate"><span class="pre">EckertI</span></code>, <code class="docutils literal notranslate"><span class="pre">EckertII</span></code>, <code class="docutils literal notranslate"><span class="pre">EckertIII</span></code>, <code class="docutils literal notranslate"><span class="pre">EckertIV</span></code>, <code class="docutils literal notranslate"><span class="pre">EckertV</span></code>, <code class="docutils literal notranslate"><span class="pre">EckertVI</span></code>, <code class="docutils literal notranslate"><span class="pre">EqualEarth</span></code>, <code class="docutils literal notranslate"><span class="pre">Hammer</span></code>, <code class="docutils literal notranslate"><span class="pre">InterruptedGoodeHomolosine</span></code>, <code class="docutils literal notranslate"><span class="pre">LambertAzimuthalEqualArea</span></code>, <code class="docutils literal notranslate"><span class="pre">LambertCylindrical</span></code>, <code class="docutils literal notranslate"><span class="pre">Mercator</span></code>, <code class="docutils literal notranslate"><span class="pre">Miller</span></code>, <code class="docutils literal notranslate"><span class="pre">Mollweide</span></code>, <code class="docutils literal notranslate"><span class="pre">NorthPolarStereo</span></code>, <code class="docutils literal notranslate"><span class="pre">Orthographic</span></code>, <code class="docutils literal notranslate"><span class="pre">PlateCarree</span></code>, <code class="docutils literal notranslate"><span class="pre">Robinson</span></code> (default), <code class="docutils literal notranslate"><span class="pre">Sinusoidal</span></code>, <code class="docutils literal notranslate"><span class="pre">SouthPolarStereo</span></code>, <code class="docutils literal notranslate"><span class="pre">Stereographic</span></code></p>
 </section>
-<section id="custom-colorbars">
-<h3>Custom colorbars<a class="headerlink" href="#custom-colorbars" title="Link to this heading"></a></h3>
-<p>Users can define the color and bounds of the colorbar (cmap, vmin and vmax) per species using a dictionary, with the keys being the names of the species inside <code class="docutils literal notranslate"><span class="pre">basic_stats.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">model_bias_stats.yaml</span></code>. An example can be seen in the code below:</p>
+<section id="map-colour-presets">
+<h3>Map colour presets<a class="headerlink" href="#map-colour-presets" title="Link to this heading"></a></h3>
+<p>A colour preset sets the land and ocean colours together with the colourmaps used for the map points. It can be set by changing the <code class="docutils literal notranslate"><span class="pre">colour_preset</span></code> variable under the <code class="docutils literal notranslate"><span class="pre">map</span></code> section, and applies to every mode.</p>
+<p>The available presets are defined in <code class="docutils literal notranslate"><span class="pre">settings/colourmaps.yaml</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Light</span></code>: a near-white basemap, giving the colourmap the most room (default)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Dark</span></code>: dark grey land and sea</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Night</span></code>: near-black land and sea</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Classic</span></code>: more classical land and sea colours</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Terrain</span></code>: sandy land and a blue sea</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Colourblind</span></code>: colours chosen to stay distinguishable under the common forms of colour blindness</p></li>
+</ul>
+<p>In the dashboard the preset can also be changed from the map settings menu.</p>
+</section>
+<section id="map-land-and-ocean-colours">
+<h3>Map land and ocean colours<a class="headerlink" href="#map-land-and-ocean-colours" title="Link to this heading"></a></h3>
+<p>The land and ocean colours come from the preset, but can be set individually by changing the <code class="docutils literal notranslate"><span class="pre">facecolor</span></code> of the <code class="docutils literal notranslate"><span class="pre">land_polygon</span></code> and <code class="docutils literal notranslate"><span class="pre">ocean_polygon</span></code> variables under the <code class="docutils literal notranslate"><span class="pre">map</span></code> section. Left empty, the preset’s colours are used. Any matplotlib colour can be given, e.g. <code class="docutils literal notranslate"><span class="pre">&quot;#E8E8E8&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;lightgrey&quot;</span></code>.</p>
+<p>The ocean can be hidden entirely by setting <code class="docutils literal notranslate"><span class="pre">visible</span></code> to <code class="docutils literal notranslate"><span class="pre">false</span></code> under <code class="docutils literal notranslate"><span class="pre">ocean_polygon</span></code>.</p>
+</section>
+<section id="colourbar-colourmaps-and-bounds">
+<h3>Colourbar colourmaps and bounds<a class="headerlink" href="#colourbar-colourmaps-and-bounds" title="Link to this heading"></a></h3>
+<p>Two things decide how the map points are coloured: the colourmap they are drawn with, and the bounds the colourbar spans. They are set separately, and neither has to be set for a plot to be made.</p>
+<section id="colourmaps">
+<h4>Colourmaps<a class="headerlink" href="#colourmaps" title="Link to this heading"></a></h4>
+<p>Statistics measure different things, so they are not all drawn with the same colourmap. Which one a statistic needs is set with <code class="docutils literal notranslate"><span class="pre">cmap_type_bias</span></code> in <code class="docutils literal notranslate"><span class="pre">basic_stats.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">model_bias_stats.yaml</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">diverging</span></code>: the statistic is signed and the ideal value sits in the middle, e.g. <code class="docutils literal notranslate"><span class="pre">MB</span></code>, <code class="docutils literal notranslate"><span class="pre">r</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sequential_low_best</span></code>: the statistic is an error, never negative, and 0 is perfect, e.g. <code class="docutils literal notranslate"><span class="pre">RMSE</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sequential_high_best</span></code>: the statistic is a skill score and its maximum is perfect, e.g. <code class="docutils literal notranslate"><span class="pre">r2</span></code></p></li>
+</ul>
+<p>The absolute view of a statistic is always drawn sequentially, so <code class="docutils literal notranslate"><span class="pre">cmap_type_bias</span></code> only describes the bias view.</p>
+<p>The colourmap each of these types gets comes from the active colour preset in <code class="docutils literal notranslate"><span class="pre">settings/colourmaps.yaml</span></code>, each of which sets one per type, chosen to stay legible against that preset’s land and ocean colours (see <a class="reference internal" href="#map-colour-presets"><span class="xref myst">Map colour presets</span></a>). Between them these cover every statistic, without anything having to be set per statistic, and changing the preset changes all of them together.</p>
+<p>To use a particular colourmap for one statistic instead of the one its type would give it, set <code class="docutils literal notranslate"><span class="pre">cmap_absolute</span></code> or <code class="docutils literal notranslate"><span class="pre">cmap_bias</span></code> for that statistic in the <code class="docutils literal notranslate"><span class="pre">basic_stats.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">model_bias_stats.yaml</span></code> files. They can be given as a string, which applies to every species, or as a dictionary per species, which then needs to cover <strong>each of the species</strong> loaded or an error will appear. Left empty, the statistic’s type decides.</p>
+<p>Colourmaps are therefore resolved in this order:</p>
+<ol class="arabic simple">
+<li><p>the colourmap chosen in the dashboard’s map settings menu, which applies until the statistic is changed</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cmap_absolute</span></code> / <code class="docutils literal notranslate"><span class="pre">cmap_bias</span></code> for the statistic in <code class="docutils literal notranslate"><span class="pre">basic_stats.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">model_bias_stats.yaml</span></code>, if set</p></li>
+<li><p>the colourmap for the statistic’s type, from the colour preset in use</p></li>
+</ol>
+</section>
+<section id="bounds">
+<h4>Bounds<a class="headerlink" href="#bounds" title="Link to this heading"></a></h4>
+<p>The bounds of the colourbar are statistic specific, and are set alongside the colourmaps, in the entry for the statistic in <code class="docutils literal notranslate"><span class="pre">basic_stats.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">model_bias_stats.yaml</span></code>. Each statistic has four: <code class="docutils literal notranslate"><span class="pre">vmin_absolute</span></code> and <code class="docutils literal notranslate"><span class="pre">vmax_absolute</span></code> for its absolute view, and <code class="docutils literal notranslate"><span class="pre">vmin_bias</span></code> and <code class="docutils literal notranslate"><span class="pre">vmax_bias</span></code> for its bias view. Each is given as a dictionary with the keys being the names of the species, so the bounds can differ per species as well as per statistic. They can be defined for some species only, and the rest will take the data minimum and maximum values.</p>
+<p>An example of an entry setting both bounds and colourmaps can be seen in the code below:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;Mean&quot;</span><span class="p">:</span>        <span class="p">{</span><span class="s2">&quot;function&quot;</span><span class="p">:</span> <span class="s2">&quot;calculate_mean&quot;</span><span class="p">,</span> 
                 <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> 
                 <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Mean&quot;</span><span class="p">,</span> 
@@ -155,7 +197,38 @@
                 <span class="s2">&quot;cmap_bias&quot;</span><span class="p">:</span> <span class="s2">&quot;RdYlBu_r&quot;</span><span class="p">},</span>
 </pre></div>
 </div>
-<p>If they define the cmap, they will need to give a complete list of cmap options <strong>for each of the species</strong> that they load or otherwise a warning will appear. For vmin and vmax, they can define the bounds for some species and the rest will take the data minimum and maximum values.</p>
+<p>In the dashboard both the colourmap and the bounds can also be changed from the map settings menu, and returned to the values above with the reset control beside the colourbar settings.</p>
+</section>
+</section>
+<section id="number-of-colourbar-labels-and-sections">
+<h3>Number of colourbar labels and sections<a class="headerlink" href="#number-of-colourbar-labels-and-sections" title="Link to this heading"></a></h3>
+<p>The number of labels shown on the colourbar can be set with <code class="docutils literal notranslate"><span class="pre">n_ticks</span></code> under the <code class="docutils literal notranslate"><span class="pre">cb</span></code> section. Colourbars are drawn in discrete sections by default; this can be changed with <code class="docutils literal notranslate"><span class="pre">discrete</span></code>, and the number of sections with <code class="docutils literal notranslate"><span class="pre">n_discrete</span></code>. All three can also be changed from the dashboard’s map settings menu.</p>
+</section>
+<section id="heatmap-colours">
+<h3>Heatmap colours<a class="headerlink" href="#heatmap-colours" title="Link to this heading"></a></h3>
+<p>Heatmaps are coloured by statistic type in the same way as the map, and have a <code class="docutils literal notranslate"><span class="pre">colour_preset</span></code> variable of their own under the <code class="docutils literal notranslate"><span class="pre">heatmap</span></code> section, naming any of the presets above. Only the colourmaps of that preset are used, as a heatmap has no basemap for the land and ocean colours to apply to, so a heatmap and a map can be given different presets without the two looking unrelated.</p>
+<p>To use one colourmap for every statistic instead, set <code class="docutils literal notranslate"><span class="pre">cmap</span></code> under the <code class="docutils literal notranslate"><span class="pre">plot</span></code> variable of the <code class="docutils literal notranslate"><span class="pre">heatmap</span></code> section.</p>
+</section>
+<section id="country-borders-and-gridlines">
+<h3>Country borders and gridlines<a class="headerlink" href="#country-borders-and-gridlines" title="Link to this heading"></a></h3>
+<p>Country borders and gridlines can be turned on and off by setting <code class="docutils literal notranslate"><span class="pre">visible</span></code> under the <code class="docutils literal notranslate"><span class="pre">borders</span></code> and <code class="docutils literal notranslate"><span class="pre">gridlines</span></code> variables of the <code class="docutils literal notranslate"><span class="pre">map</span></code> section. Borders are off by default, gridlines are on.</p>
+<p>Their style can be edited with the same variables, e.g. <code class="docutils literal notranslate"><span class="pre">linewidth</span></code> for the borders and <code class="docutils literal notranslate"><span class="pre">linestyle</span></code> and <code class="docutils literal notranslate"><span class="pre">alpha</span></code> for the gridlines. Left empty, the <code class="docutils literal notranslate"><span class="pre">edgecolor</span></code> of the borders and the <code class="docutils literal notranslate"><span class="pre">color</span></code> of the gridlines are chosen to stay visible against the land and ocean colours in use, so a dark basemap gets light borders and a light basemap dark ones. Setting either uses that colour instead, whatever the basemap.</p>
+</section>
+<section id="map-background">
+<h3>Map background<a class="headerlink" href="#map-background" title="Link to this heading"></a></h3>
+<p>Users can define the type of background that is plotted on the map. This can be set by changing the background variable under the <code class="docutils literal notranslate"><span class="pre">map</span></code> section.</p>
+<p>There are 3 available standard options:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">providentia</span></code>: The standard white and grey combination that has been historically available (default)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">blue_marble</span></code>: NASA’s blue marble product</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">shaded_relief</span></code>: Imagery showing changes in elevation</p></li>
+</ul>
+<p>Users can easily add any type of background by putting an image file in the <code class="docutils literal notranslate"><span class="pre">providentia/dependencies/resources</span></code> folder, with the filename named in the same way as in the plot characteristics file, e.g. <code class="docutils literal notranslate"><span class="pre">blue_marble.png</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;background&quot;:</span> <span class="pre">&quot;blue_marble&quot;</span></code>.</p>
+</section>
+<section id="map-point-sizing">
+<h3>Map point sizing<a class="headerlink" href="#map-point-sizing" title="Link to this heading"></a></h3>
+<p>The size of the map points is worked out from how densely the stations being shown are packed into the plot, so they stay legible whether a map is showing a handful of stations or several thousand. This applies to every mode, and in the dashboard it is recalculated as the map is zoomed.</p>
+<p>In the dashboard the opacity of the points is set alongside the size, and selected stations are drawn larger and more solid than unselected ones. This can be turned off by setting <code class="docutils literal notranslate"><span class="pre">marker_automatic</span></code> to <code class="docutils literal notranslate"><span class="pre">false</span></code> under the <code class="docutils literal notranslate"><span class="pre">dashboard</span></code> section of <code class="docutils literal notranslate"><span class="pre">map</span></code>, in which case the size and opacity come from the <code class="docutils literal notranslate"><span class="pre">marker_selected</span></code> and <code class="docutils literal notranslate"><span class="pre">marker_unselected</span></code> variables and can be changed with the sliders in the map settings menu.</p>
 </section>
 </section>
 <section id="removing-extreme-stations-by-their-statistical-values">

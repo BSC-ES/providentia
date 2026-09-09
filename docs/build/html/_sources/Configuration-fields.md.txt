@@ -73,6 +73,8 @@ Apart from the common parameters, these are the fields used by all analysis and 
 | `remove_extreme_stations` | Type of extreme stations removal, from the options given in `remove_extreme_stations.yaml`. | — |
 | `resampling_resolution` | Resolution you want to resample your data to: `hourly`, `3hourly`, `6hourly`, `daily`, `monthly`, `annual`. | — |
 | `multispecies_units` | Units of data in multispecies plots. Only accepts strings, if units for each species are: {'sconco3': 'ug m-3', 'sconcno2': 'ug m-3', 'sconcco': 'mg m-3', 'sconcso2': 'ug m-3'}, choose only one between ug m-3 and mg m-3 (e.g. `ug m-3`) and the data of the species that are not in the chosen units will be converted. | — |
+| `station_order` | Order stations by the values of any metadata variable, e.g. `latitude`, or randomly by setting `random`. By default the ordering is done in ascending order, for both text and numeric fields. In order to sort in descending order add the `\|\| descending` argument | — |
+| `station_cap` | Cap number of stations to visualise to an integer maximum e.g. `100` | — |
 
 (dashboard-parameters)=
 ## Dashboard parameters

@@ -23,16 +23,21 @@ import pandas as pd
 from pandas.plotting import register_matplotlib_converters
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from providentia.auxiliar import CURRENT_PATH, join
+from providentia.auxiliar import (
+    CURRENT_PATH,
+    join,
+    COLOUR_PRESET_CUSTOM,
+    get_colour_presets,
+    get_map_colours,
+    get_role_colourmap,
+)
 from .canvas_menus import SettingsMenu
 from .dashboard_elements import ComboBox
 from .dashboard_elements import set_formatting, set_cursor, unset_cursor
-from .dashboard_elements import populate_colourmap_combobox
+from .dashboard_elements import populate_colourmap_combobox, select_colourmap
 from .dashboard_elements import (
     populate_projection_combobox,
     populate_colour_combobox,
-    COLOUR_PRESETS,
-    COLOUR_PRESET_CUSTOM,
     LAND_COLOUR_OPTIONS,
     OCEAN_COLOUR_OPTIONS,
 )
@@ -68,6 +73,8 @@ from .statistics import (
     get_selected_station_data,
     get_z_statistic_type,
     get_z_statistic_info,
+    resolve_colourmap,
+    get_colourmap_role,
 )
 from .warnings_prv import show_message
 
@@ -1648,6 +1655,12 @@ class Canvas(FigureCanvas):
             self.map_cb_max.clear()
             self.read_instance.map_vmin_override = None
             self.read_instance.map_vmax_override = None
+            # the colourmap suited to one statistic rarely suits the next, so
+            # fall back to the statistic's own - see sync_map_colourmap()
+            self.read_instance.map_colourmap_override = None
+            self.sync_map_colourmap()
+            # with that choice dropped the basemap may match its preset again
+            self.sync_map_colour_preset()
 
             # update plotted map z statistic
             if not self.read_instance.block_MPL_canvas_updates:
@@ -1801,7 +1814,7 @@ class Canvas(FigureCanvas):
     def handle_map_colour_preset_update(self):
         """
         Function which applies a ready-made land/ocean/colourmap
-        combination (see COLOUR_PRESETS) upon interaction with the map
+        combination (see settings/colourmaps.yaml) upon interaction with the map
         colour preset combobox - one selection instead of setting the
         three individually.
 
@@ -1812,7 +1825,8 @@ class Canvas(FigureCanvas):
         """
 
         if not self.read_instance.block_config_bar_handling_updates:
-            preset = COLOUR_PRESETS.get(self.map_colour_preset.currentText())
+            preset_name = self.map_colour_preset.currentText()
+            preset = get_colour_presets().get(preset_name)
             if preset is None:
                 return None
 
@@ -1826,6 +1840,7 @@ class Canvas(FigureCanvas):
             self.read_instance.block_config_bar_handling_updates = True
 
             map_template = self.plot_characteristics_templates["map"]
+            self.set_map_colour_preset(preset_name)
             map_template["land_polygon"]["facecolor"] = preset["land"]
             map_template["ocean_polygon"]["facecolor"] = preset["ocean"]
             populate_colour_combobox(
@@ -1834,10 +1849,11 @@ class Canvas(FigureCanvas):
             populate_colour_combobox(
                 self.map_ocean_colour, OCEAN_COLOUR_OPTIONS, current=preset["ocean"]
             )
-            populate_colourmap_combobox(
-                self.map_colourmap, current=preset["colourmap"]
-            )
-            self.read_instance.map_colourmap_override = preset["colourmap"]
+            # a preset gives a colourmap per statistic type rather than one
+            # colourmap, so clear any explicit choice and let the statistic's
+            # own role pick from the preset
+            self.read_instance.map_colourmap_override = None
+            self.sync_map_colourmap()
 
             if not self.read_instance.block_MPL_canvas_updates:
                 # the colourmap change goes through the z statistic
@@ -1855,15 +1871,86 @@ class Canvas(FigureCanvas):
 
         return None
 
+    def set_map_colour_preset(self, preset_name):
+        """
+        Function which records the active map colour preset.
+
+        Written to the map's plot characteristics as well as the template it
+        was copied from: the two are separate dicts (see Plotting.make_plot(),
+        which deep copies the template once), and the colourbar resolves its
+        colourmap from the copy while the basemap features are drawn from the
+        template.
+
+        Parameters
+        ----------
+        preset_name : str
+            Name of the preset, or an empty string for a custom combination
+        """
+
+        self.plot_characteristics_templates["map"]["colour_preset"] = preset_name
+        if "map" in self.plot_characteristics:
+            self.plot_characteristics["map"]["colour_preset"] = preset_name
+
+        return None
+
+    def sync_map_colourmap(self):
+        """
+        Function which points the colourmap selector at the colourmap the
+        current statistic actually resolves to, so the box always reports what
+        is on screen.
+
+        The colourmap a statistic gets depends on what it measures - an error
+        that is never negative reads differently to a signed bias - so it is
+        resolved per statistic rather than held fixed. Only an explicit choice
+        in the selector overrides it, and that is cleared whenever the
+        statistic changes, same as the colourbar limits.
+        """
+
+        resolved = getattr(self.read_instance, "map_colourmap_override", None)
+        if not resolved and not self.map_z_stat.currentText():
+            # nothing plotted yet, so there is no statistic to resolve against
+            return None
+
+        if not resolved:
+            # compose the statistic exactly as update_map_z_statistic() does:
+            # with a second dataset selected the map shows the bias form, which
+            # needs a different colourmap to the absolute one of the same name
+            zstat = get_z_statistic_comboboxes(
+                self.map_z_stat.currentText(),
+                bias=self.map_z2.currentText() != "",
+            )
+            resolved = resolve_colourmap(
+                self.read_instance,
+                zstat,
+                self.plot_characteristics_templates["map"],
+                self.read_instance.networkspeci.split("|")[-1],
+            )
+
+        if resolved:
+            # showing the resolved colourmap must not read as choosing it, so
+            # the settings guard is held while it is set - not blockSignals(),
+            # which on this editable combobox also stops Qt updating the line
+            # edit the closed box actually displays, leaving the old name on
+            # screen (see ComboBox in dashboard_elements.py). Restored to what
+            # it was rather than cleared, as callers already hold it
+            previous = self.read_instance.block_config_bar_handling_updates
+            self.read_instance.block_config_bar_handling_updates = True
+            select_colourmap(self.map_colourmap, resolved)
+            self.read_instance.block_config_bar_handling_updates = previous
+
+        return None
+
     def sync_map_colour_preset(self):
         """
-        Function which points the colour preset selector at whichever
-        preset the current land colour, ocean colour and colourmap
-        together match, or at "Custom" when they match none of them.
+        Function which points the colour preset selector at whichever preset
+        the current land and ocean colours match, or at "Custom" when they
+        match none of them.
 
-        Called after any of those three changes individually, so the box
-        stops naming a preset the moment the combination stops being that
-        preset.
+        Called after either colour changes individually, so the box stops
+        naming a preset the moment the basemap stops being that preset. The
+        colourmap takes no part in the match: a preset now carries one
+        colourmap per statistic type rather than a single one, and a choice
+        made in the colourmap selector only lasts until the statistic changes.
         """
 
         # compare colours as resolved RGB, not as the strings they happen to
@@ -1878,23 +1965,51 @@ class Canvas(FigureCanvas):
             except ValueError:
                 return first == second
 
+        # the resolved colours, not the raw ones - land/ocean are left empty in
+        # the config when they come from the preset, and comparing those empty
+        # values against every preset would always fall through to "Custom"
         map_template = self.plot_characteristics_templates["map"]
-        current_land = map_template["land_polygon"]["facecolor"]
-        current_ocean = map_template["ocean_polygon"]["facecolor"]
-        current_colourmap = getattr(self.read_instance, "map_colourmap_override", None)
+        current_land, current_ocean = get_map_colours(map_template)
+        # a preset is its basemap and its colourmaps together, so a colourmap
+        # chosen by hand takes the selector off the preset just as a changed
+        # land or ocean colour does. A preset carries one colourmap per
+        # statistic type, so the comparison is against the one for the
+        # statistic on screen. With no choice made there is nothing to compare
+        # and the basemap alone decides
+        presets = get_colour_presets()
+        chosen_colourmap = getattr(self.read_instance, "map_colourmap_override", None)
+        role = None
+        if chosen_colourmap:
+            role = get_colourmap_role(
+                get_z_statistic_comboboxes(
+                    self.map_z_stat.currentText(),
+                    bias=self.map_z2.currentText() != "",
+                )
+            )
         matched = next(
             (
                 name
-                for name, preset in COLOUR_PRESETS.items()
+                for name, preset in presets.items()
                 if same_colour(preset["land"], current_land)
                 and same_colour(preset["ocean"], current_ocean)
-                and preset["colourmap"] == current_colourmap
+                and (role is None or preset.get(role) == chosen_colourmap)
             ),
             COLOUR_PRESET_CUSTOM,
         )
+        if matched == COLOUR_PRESET_CUSTOM:
+            # the basemap no longer matches a preset exactly, so write the
+            # resolved colours back - nothing is left to be filled in later.
+            # colour_preset is deliberately left naming the preset it came
+            # from: it still says where the colourmaps come from, and a
+            # basemap tweaked from a dark preset needs to keep that preset's
+            # colourmaps rather than fall back to the light ones in defaults
+            map_template["land_polygon"]["facecolor"] = current_land
+            map_template["ocean_polygon"]["facecolor"] = current_ocean
+        else:
+            self.set_map_colour_preset(matched)
         # setCurrentIndex(), not setCurrentText() - see the comment on
         # map_colourmap_scale in generate_interactive_elements()
-        names = list(COLOUR_PRESETS) + [COLOUR_PRESET_CUSTOM]
+        names = list(presets) + [COLOUR_PRESET_CUSTOM]
         self.map_colour_preset.setCurrentIndex(names.index(matched))
 
         return None
@@ -2018,8 +2133,6 @@ class Canvas(FigureCanvas):
         """Restore the "Map" sub-panel's startup control state."""
 
         defaults = self.map_panel_startup_defaults
-        self.map_colourmap.setCurrentIndex(defaults["colourmap"])
-        self.read_instance.map_colourmap_override = self.map_colourmap.currentText()
         self.map_projection.setCurrentIndex(defaults["projection"])
         self.map_land_colour.setCurrentIndex(defaults["land_colour"])
         self.map_ocean_colour.setCurrentIndex(defaults["ocean_colour"])
@@ -2040,7 +2153,11 @@ class Canvas(FigureCanvas):
         map_template["map_coastline_resolution"] = self.map_resolution.currentText()
         map_template["borders"]["visible"] = defaults["borders"]
         self.plot_characteristics["map"]["gridlines"]["visible"] = defaults["gridlines"]
+        # resolved once the basemap is back, so the colourmap follows the
+        # preset the restored land/ocean colours belong to
+        self.read_instance.map_colourmap_override = None
         self.sync_map_colour_preset()
+        self.sync_map_colourmap()
 
         return None
 
@@ -2048,7 +2165,6 @@ class Canvas(FigureCanvas):
         """Restore the "Colourbar" sub-panel's startup control state."""
 
         defaults = self.map_colourbar_startup_defaults
-        self.map_colourmap.setCurrentIndex(defaults["colourmap"])
         self.map_colourmap_scale.setCurrentIndex(defaults["colourmap_scale"])
         self.map_n_ticks.setText(defaults["n_ticks"])
         self.map_n_sections.setText(defaults["n_sections"])
@@ -2057,7 +2173,10 @@ class Canvas(FigureCanvas):
         self.map_cb_min.clear()
         self.map_cb_max.clear()
 
-        self.read_instance.map_colourmap_override = self.map_colourmap.currentText()
+        # the colourmap goes back to following the statistic, the same way the
+        # limits go back to automatic - a colourmap pinned here would outlast
+        # the reset and keep overriding every statistic that followed
+        self.read_instance.map_colourmap_override = None
         self.read_instance.map_discrete_override = (
             self.map_colourmap_scale.currentText() == "Discrete"
         )
@@ -2070,6 +2189,10 @@ class Canvas(FigureCanvas):
         self.read_instance.map_vmin_override = None
         self.read_instance.map_vmax_override = None
         self.sync_map_n_sections_visibility()
+        self.sync_map_colourmap()
+        # the basemap has not changed, but the colourmap has, so the
+        # combination may no longer be the preset the selector is naming
+        self.sync_map_colour_preset()
 
         return None
 
@@ -4711,8 +4834,11 @@ class Canvas(FigureCanvas):
         # (see apply_automatic_marker_style()). The manual sliders stay
         # functional as an override, just hidden while automatic is on
         self.map_auto_sizing = self.map_menu.checkboxes["auto_sizing"]
-        self.map_auto_sizing.setChecked(True)
-        self.read_instance.map_auto_marker_sizing = True
+        automatic = bool(
+            self.plot_characteristics["map"].get("marker_automatic", True)
+        )
+        self.map_auto_sizing.setChecked(automatic)
+        self.read_instance.map_auto_marker_sizing = automatic
 
         self.map_sizing_elements = [
             # container first, so raising this list in order (see
@@ -4748,13 +4874,19 @@ class Canvas(FigureCanvas):
             "colourbar_panel_container"
         ]
 
-        # get colourmap selector - dashboard-only (report/library output still
-        # take their colourmap from the yaml config, unaffected by this).
-        # Preselect "viridis", the cmap_absolute every entry in basic_stats.yaml
-        # resolves to for the initial (non-bias) statistic the map opens on.
+        # get colourmap selector - dashboard only. It opens on whatever the
+        # first statistic resolves to rather than a fixed colourmap, and
+        # re-resolves whenever the statistic changes; only an explicit choice
+        # here overrides that. See sync_map_colourmap()
         self.map_colourmap = self.map_menu.comboboxes["colourmap"]
-        populate_colourmap_combobox(self.map_colourmap, current="viridis")
-        self.read_instance.map_colourmap_override = self.map_colourmap.currentText()
+        populate_colourmap_combobox(
+            self.map_colourmap,
+            current=get_role_colourmap(
+                "sequential",
+                self.plot_characteristics_templates["map"].get("colour_preset"),
+            ),
+        )
+        self.read_instance.map_colourmap_override = None
 
         # get colourmap scale (continuous/discrete) and number-of-chunks
         # controls, preseeded from plot_characteristics.yaml's map.cb.n_discrete.
@@ -4816,24 +4948,25 @@ class Canvas(FigureCanvas):
         # get map detail controls (land/ocean colour, country borders,
         # coastline resolution) - all read from plot_characteristics_templates
         # (see draw_map_features()), same as projection above
+        # seeded from the resolved colours, not the raw ones - land/ocean are
+        # left empty in the config when they come from the preset, and an empty
+        # value is not one of the options, so the box would fall back to its
+        # first entry and name a colour the map is not drawn in
         map_template = self.plot_characteristics_templates["map"]
+        land_colour, ocean_colour = get_map_colours(map_template)
         self.map_land_colour = self.map_menu.comboboxes["land_colour"]
         populate_colour_combobox(
-            self.map_land_colour,
-            LAND_COLOUR_OPTIONS,
-            current=map_template["land_polygon"]["facecolor"],
+            self.map_land_colour, LAND_COLOUR_OPTIONS, current=land_colour
         )
         self.map_ocean_colour = self.map_menu.comboboxes["ocean_colour"]
         populate_colour_combobox(
-            self.map_ocean_colour,
-            OCEAN_COLOUR_OPTIONS,
-            current=map_template["ocean_polygon"]["facecolor"],
+            self.map_ocean_colour, OCEAN_COLOUR_OPTIONS, current=ocean_colour
         )
         # colour preset selector, sitting above the individual land/ocean
         # controls it drives - see handle_map_colour_preset_update()
         self.map_colour_preset = self.map_menu.comboboxes["colour_preset"]
         self.map_colour_preset.addItems(
-            list(COLOUR_PRESETS) + [COLOUR_PRESET_CUSTOM]
+            list(get_colour_presets()) + [COLOUR_PRESET_CUSTOM]
         )
         self.sync_map_colour_preset()
 
@@ -4911,11 +5044,6 @@ class Canvas(FigureCanvas):
         # dashboard opens with. Captured rather than re-derived from the yaml
         # at reset time, so the two can't drift apart
         self.map_panel_startup_defaults = {
-            # the colourmap lives in the Colourbar panel, but a colour
-            # preset - which is a Map panel control - changes it too, so
-            # resetting the Map panel has to put it back or the preset is
-            # only half undone
-            "colourmap": self.map_colourmap.currentIndex(),
             "projection": self.map_projection.currentIndex(),
             "land_colour": self.map_land_colour.currentIndex(),
             "ocean_colour": self.map_ocean_colour.currentIndex(),
@@ -4923,8 +5051,10 @@ class Canvas(FigureCanvas):
             "borders": self.map_borders.isChecked(),
             "gridlines": self.map_gridlines.isChecked(),
         }
+        # the colourmap is not captured here: it has no fixed startup value,
+        # being resolved from whichever statistic is on screen, so both resets
+        # clear the override and let it resolve again
         self.map_colourbar_startup_defaults = {
-            "colourmap": self.map_colourmap.currentIndex(),
             "colourmap_scale": self.map_colourmap_scale.currentIndex(),
             "n_ticks": self.map_n_ticks.text(),
             "n_sections": self.map_n_sections.text(),

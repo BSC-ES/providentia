@@ -191,6 +191,20 @@ On some plots, the plotted statistic can also be altered though the settings men
 
 See here for more information about all available [plot options](Plot-types-and-options).
 
+#### Map settings
+
+The map's settings menu has an additional three sub-menus, with the following customisation options:
+
+- **Map**: the projection, the colour preset, the land and ocean colours, the coastline resolution, and whether country borders and gridlines are drawn
+- **Points**: automatic point sizing, and the size and opacity of selected and unselected stations when it is turned off
+- **Colourbar**: the colourbar limits, the colourmap, whether it is drawn continuously or in sections, and the number of labels and sections
+
+Each of the three has a reset control beside its title, which returns just that panel to the settings Providentia started with.
+
+The colourmap shown is the one the statistic currently being mapped resolves to, and it changes with the statistic. Choosing one here keeps it until the statistic changes, or until the panel is reset.
+
+Changes made here apply for the session only. To change what the dashboard opens with, edit `settings/plot_characteristics.yaml` (see [Plot customisation](Plot-customisation.md)).
+
 ### Legend
 
 ![providentia](uploads/dashboard_legend.png)
