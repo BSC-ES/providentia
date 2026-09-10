@@ -1258,6 +1258,186 @@
           }
         },
     },
+  "histogram":
+    {
+      "round_decimal_places": { "title": 2, "csv": 2 },
+      "grid": { "axis": "both", "color": "lightgrey", "alpha": 0.8 },
+      "annotate_stats": ["Min", "Max"],
+      "annotate_offset": { "loc": "upper left" },
+      "annotate_bbox":
+        {
+          "facecolor": "white",
+          "edgecolor": "gainsboro",
+          "alpha": 1,
+          "zorder": 100,
+        },
+      "annotate_text":
+        {
+          "s": "",
+          "n_stations": false,
+          "mod_labels": true,
+          "color": "",
+          "round_decimal_places": 2,
+          "sep": 1,
+        },
+      "bias_line":
+        {
+          "y": 0.0,
+          "linestyle": "--",
+          "linewidth": 1.0,
+          "color": "black",
+          "zorder": 0,
+        },
+      "threshold_line":
+        { "linestyle": "--", "linewidth": 1.0, "color": "red", "zorder": 0 },
+      "axis_title": { "label": "" },
+      "xlabel": { "xlabel": "[measurement_units]" },
+      "ylabel": { "ylabel": "Density" },
+      "xtick_params":
+        {
+          "which": "both",
+          "bottom": true,
+          "top": false,
+          "right": false,
+          "left": true,
+          "labelbottom": true,
+          "labeltop": false,
+          "labelright": false,
+          "labelleft": true,
+        },
+      "dashboard":
+        {
+          "bins": "auto",
+          "min_bins": 10,
+          "max_bins": 50,
+          "range": "tukey",
+          "plot_options": ["annotate", "bias", "logx", "logy", "threshold"],
+          "remove_spines": ["top", "right"],
+          "axis_title": { "fontsize": 8.5, "loc": "left" },
+          "xlabel": { "fontsize": 8 },
+          "ylabel": { "fontsize": 8 },
+          "xtick_params": { "labelsize": 7 },
+          "ytick_params": { "labelsize": 7 },
+          "annotate_text": { "fontsize": 8 },
+          "plot": { "linewidth": 1 },
+          "marker_annotate_rounding": 2,
+        },
+      "report":
+        {
+          "bins": "auto",
+          "min_bins": 10,
+          "max_bins": 60,
+          "range": "tukey",
+          "plot_options":
+            [
+              "annotate",
+              "bias",
+              "individual",
+              "logx",
+              "logy",
+              "obs",
+              "threshold",
+            ],
+          "orientation": "portrait",
+          "figure": { "ncols": 2, "nrows": 3 },
+          "page_title":
+            {
+              "t": "Histogram",
+              "fontsize": 10,
+              "ha": "left",
+              "x": 0.05,
+              "y": 0.98,
+            },
+          "axis_title": { "fontsize": 8 },
+          "xlabel": { "fontsize": 8 },
+          "ylabel": { "fontsize": 8 },
+          "xtick_params": { "labelsize": 7 },
+          "ytick_params": { "labelsize": 7 },
+          "legend":
+            {
+              "plot":
+                {
+                  "loc": "upper right",
+                  "columnspacing": 1,
+                  "frameon": false,
+                  "handletextpad": 0,
+                  "ncol": 4,
+                  "borderaxespad": 1,
+                  "fontsize": 10.0,
+                },
+              "handles": { "markersize": 10, "marker": "o", "color": "white" },
+            },
+          "subplots_adjust":
+            {
+              "left": 0.06,
+              "right": 0.98,
+              "top": 0.86,
+              "bottom": 0.06,
+              "hspace": 0.33,
+              "wspace": 0.14,
+            },
+          "annotate_text": { "fontsize": 6 },
+          "plot": { "linewidth": 1 },
+        },
+      "library":
+        {
+          "bins": "auto",
+          "min_bins": 10,
+          "max_bins": 60,
+          "range": "tukey",
+          "plot_options": ["annotate", "bias", "logx", "logy", "threshold"],
+          "figsize": [13, 7],
+          "subplots_adjust":
+            {
+              "left": 0.0,
+              "right": 1.0,
+              "top": 1.0,
+              "bottom": 0.0,
+              "hspace": 0.0,
+              "wspace": 0.0,
+            },
+          "axis_title": { "fontsize": 16, "loc": "center" },
+          "xlabel": { "fontsize": 16 },
+          "ylabel": { "fontsize": 16 },
+          "xtick_params": { "labelsize": 14 },
+          "ytick_params": { "labelsize": 14 },
+          "legend":
+            {
+              "plot":
+                {
+                  "loc": "upper left",
+                  "columnspacing": 0.5,
+                  "frameon": false,
+                  "handletextpad": 0,
+                  "ncol": 4,
+                  "borderaxespad": 0,
+                  "fontsize": 10.0,
+                },
+              "handles": { "markersize": 14, "marker": "o", "color": "white" },
+            },
+          "annotate_text": { "fontsize": 13 },
+          "plot": { "linewidth": 2 },
+          "main_gs": {
+            "height_ratios": [5, 1], 
+            "hspace": 0.25
+          }
+        },
+      "tests":
+        {
+          "bins": "auto",
+          "min_bins": 10,
+          "max_bins": 50,
+          "range": "tukey",
+          "plot_options": ["annotate", "bias", "logx", "logy", "threshold"],
+          "figsize": [13, 7],
+          "plot": { "linewidth": 1 },
+          "annotate_text": { "fontsize": 13 },
+          "main_gs": {
+            "height_ratios": [5, 1], 
+            "hspace": 0.1
+          }
+        },
+    },
   "scatter":
     {
       "grid": { "axis": "both", "color": "lightgrey", "alpha": 0.8 },

@@ -30,6 +30,38 @@ elif operating_system in ["Windows", "MINGW32_NT", "MINGW64_NT"]:
     )
 
 
+# how faded a slider is drawn while it is disabled. Faded rather than
+# restyled, as a slider given a stylesheet stops being drawn by the platform
+# altogether and so changes appearance when enabled as well - and the platform
+# draws a disabled slider identically to an enabled one, leaving the sliders
+# held by an automatic setting (map point sizing, histogram bins) looking as
+# though they can still be dragged
+DISABLED_SLIDER_OPACITY = 0.35
+
+
+def set_slider_enabled(slider, enabled):
+    """
+    Set whether a settings menu slider can be used, fading it while it cannot.
+
+    Parameters
+    ----------
+    slider : QtWidgets.QSlider
+        Slider to enable or disable
+    enabled : bool
+        Whether the slider can be used
+    """
+
+    slider.setEnabled(enabled)
+    if enabled:
+        slider.setGraphicsEffect(None)
+    else:
+        faded = QtWidgets.QGraphicsOpacityEffect(slider)
+        faded.setOpacity(DISABLED_SLIDER_OPACITY)
+        slider.setGraphicsEffect(faded)
+
+    return None
+
+
 class SettingsMenu(object):
     def __init__(self, plot_type, canvas_instance):
         """
