@@ -203,7 +203,7 @@ See here for more information about all available [plot options](Plot-types-and-
 
 The map's settings menu has an additional three sub-menus, with the following customisation options:
 
-- **Map**: the projection, the colour preset, the land and ocean colours, the coastline resolution, and whether country borders and gridlines are drawn
+- **Map**: the projection, the colour preset, the land and ocean colours, the map resolution, and whether country borders and gridlines are drawn
 - **Points**: automatic point sizing, and the size and opacity of selected and unselected stations when it is turned off
 - **Colourbar**: the colourbar limits, the colourmap, whether it is drawn continuously or in sections, and the number of labels and sections
 

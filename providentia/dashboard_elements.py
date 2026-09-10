@@ -852,13 +852,70 @@ class ComboBox(QtWidgets.QComboBox):
 
     def fixCursorPosition(self):
         """
-        Move (invisible) cursor to first position to avoid cutting off the start
+        Move (invisible) cursor to first position, so that a name too long for
+        the box is shown from its start rather than its end.
+
+        A line edit shows the text around wherever its cursor sits, which
+        leaves a long name identifiable only by its ending. Applied whenever
+        the text or the width changes, as either can leave the box scrolled.
         """
 
-        # apply only to comboboxes with text lengths of more than 8 chars
-        if len(self.lineEdit().text()) >= 8:
-            self.lineEdit().setCursorPosition(0)
-            self.lineEdit().setFocus()
+        self.lineEdit().setCursorPosition(0)
+
+    def setCurrentText(self, text):
+        """
+        Set the text shown by the box
+
+        Parameters
+        ----------
+        text : str
+            Text to show
+        """
+
+        # setting the text leaves the cursor at its end, and says nothing when
+        # the text has not actually changed, so the box is put back to its
+        # start here rather than left to currentTextChanged
+        super().setCurrentText(text)
+        self.fixCursorPosition()
+
+    def setCurrentIndex(self, index):
+        """
+        Set which of the box's options is shown
+
+        Parameters
+        ----------
+        index : int
+            Index of the option
+        """
+
+        super().setCurrentIndex(index)
+        self.fixCursorPosition()
+
+    def resizeEvent(self, event):
+        """
+        Handle the box being resized
+
+        Parameters
+        ----------
+        event : QResizeEvent
+            Resize event
+        """
+
+        super().resizeEvent(event)
+        self.fixCursorPosition()
+
+    def showEvent(self, event):
+        """
+        Handle the box being shown
+
+        Parameters
+        ----------
+        event : QShowEvent
+            Show event
+        """
+
+        super().showEvent(event)
+        self.fixCursorPosition()
 
     def showPopup(self):
         """
@@ -912,13 +969,15 @@ class CheckableComboBox(QtWidgets.QComboBox):
 
     def fixCursorPosition(self):
         """
-        Move (invisible) cursor to first position to avoid cutting off the start
+        Move (invisible) cursor to first position, so that a name too long for
+        the box is shown from its start rather than its end.
+
+        A line edit shows the text around wherever its cursor sits, which
+        leaves a long name identifiable only by its ending. Applied whenever
+        the text or the width changes, as either can leave the box scrolled.
         """
 
-        # apply only to comboboxes with text lengths of more than 8 chars
-        if len(self.lineEdit().text()) >= 8:
-            self.lineEdit().setCursorPosition(0)
-            self.lineEdit().setFocus()
+        self.lineEdit().setCursorPosition(0)
 
     def resizeEvent(self, event):
         """
@@ -933,6 +992,7 @@ class CheckableComboBox(QtWidgets.QComboBox):
         # recompute text to elide as needed
         self.updateText()
         super().resizeEvent(event)
+        self.fixCursorPosition()
 
     def eventFilter(self, obj, event):
         """

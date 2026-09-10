@@ -2156,7 +2156,7 @@ def draw_map_features(canvas_instance, ax):
     custom background image or cartopy's shaded relief doesn't use these.
 
     Split out from format_axis() so it can be re-run on its own whenever the
-    user changes land/ocean colour, border visibility, or coastline
+    user changes land/ocean colour, border visibility, or map
     resolution from the map settings menu, without re-doing the rest of
     format_axis()'s one-time axis setup (which would duplicate gridlines).
 
@@ -2177,7 +2177,7 @@ def draw_map_features(canvas_instance, ax):
     """
 
     map_template = canvas_instance.plot_characteristics_templates["map"]
-    resolution = get_land_polygon_resolution(map_template["map_coastline_resolution"])
+    resolution = get_land_polygon_resolution(map_template["map_resolution"])
     artists = {"ocean": None, "land": None, "borders": None}
 
     # land/ocean colours come from the active preset unless set explicitly

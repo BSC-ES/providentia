@@ -271,7 +271,7 @@
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [40, 225],
-          "text": "Coastline resolution",
+          "text": "Map resolution",
         },
 
       "resolution":
@@ -460,7 +460,7 @@
         {
           "element_type": "container",
           "formatting_dict": "settings_container",
-          "size": [250, 365],
+          "size": [250, 312],
           "relative_position": [30, 45],
         },
 
