@@ -6,9 +6,9 @@
 
 If you want to edit the style of your plots, you will need to edit the file `settings/plot_characteristics.yaml`. There you will find parameters per plot type, and within those, parameters for each of the available modes, as well as general ones that are applied to all modes.
 
-### Map coastline resolution
+### Map resolution
 
-It is possible to customise the map coastline resolution by changing the `map_coastline_resolution` variable under the `map` section in the plot characteristics file. 
+It is possible to customise the resolution the map is drawn at by changing the `map_resolution` variable under the `map` section in the plot characteristics file. 
 
 There are 3 options as present:
 - `low`: 110m in resolution

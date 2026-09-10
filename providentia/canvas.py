@@ -2,6 +2,7 @@
 
 import copy
 import functools
+import inspect
 import datetime
 import math
 import sys
@@ -132,8 +133,31 @@ def restores_settings_guard(method):
         Wrapped handler
     """
 
+    # how many arguments the handler itself takes, so that anything Qt adds
+    # beyond them can be dropped. A signal hands its slot the value that
+    # changed, and PyQt drops what the slot has no room for - but it reads the
+    # slot's signature to know that, and through this wrapper every handler
+    # looks as though it takes anything, so the trimming is done here instead
+    parameters = list(inspect.signature(method).parameters.values())
+    takes_anything = any(
+        parameter.kind is parameter.VAR_POSITIONAL for parameter in parameters
+    )
+    accepted = (
+        len(
+            [
+                parameter
+                for parameter in parameters
+                if parameter.kind
+                in (parameter.POSITIONAL_ONLY, parameter.POSITIONAL_OR_KEYWORD)
+            ]
+        )
+        - 1
+    )
+
     @functools.wraps(method)
     def wrapper(self, *args, **kwargs):
+        if not takes_anything:
+            args = args[:accepted]
         previous = self.read_instance.block_config_bar_handling_updates
         try:
             return method(self, *args, **kwargs)
@@ -2019,7 +2043,7 @@ class Canvas(FigureCanvas):
     def handle_map_panel_reset(self):
         """
         Function which returns every control in the map settings menu's
-        "Map" sub-panel (projection, land/ocean colour, coastline
+        "Map" sub-panel (projection, land/ocean colour, map
         resolution, country borders, gridlines) to the state the dashboard
         started up in, upon clicking the reset control beside its title.
 
@@ -2152,7 +2176,7 @@ class Canvas(FigureCanvas):
         map_template["ocean_polygon"]["facecolor"] = OCEAN_COLOUR_OPTIONS[
             self.map_ocean_colour.currentText()
         ]
-        map_template["map_coastline_resolution"] = self.map_resolution.currentText()
+        map_template["map_resolution"] = self.map_resolution.currentText()
         map_template["borders"]["visible"] = defaults["borders"]
         self.plot_characteristics["map"]["gridlines"]["visible"] = defaults["gridlines"]
         # resolved once the basemap is back, so the colourmap follows the
@@ -2564,7 +2588,7 @@ class Canvas(FigureCanvas):
     @restores_settings_guard
     def handle_map_resolution_update(self):
         """
-        Function which handles update of coastline/land polygon resolution
+        Function which handles update of the map (coastline/land polygon) resolution
         upon interaction with the map resolution combobox
         """
 
@@ -2576,7 +2600,7 @@ class Canvas(FigureCanvas):
             self.read_instance.block_config_bar_handling_updates = True
 
             self.plot_characteristics_templates["map"][
-                "map_coastline_resolution"
+                "map_resolution"
             ] = self.map_resolution.currentText()
             if not self.read_instance.block_MPL_canvas_updates:
                 self.refresh_map_features()
@@ -2608,11 +2632,13 @@ class Canvas(FigureCanvas):
         a fixed width would either clip the text somewhere or leave one
         button visibly padded.
 
-        All three go on one line when they fit; when they don't (a wider
-        font than the stylesheet's own, say), "Colourbar" - the widest,
-        and the odd one out of the pair that naturally belong together -
-        drops to a second line centred beneath the other two, and
-        everything below the row shifts down to make space for it.
+        All three go on one line when they fit, spread so that the outer
+        two sit against the panel's edges - level with the controls above
+        them, which span the same width. When they don't fit (a wider font
+        than the stylesheet's own, say), "Colourbar" - the widest, and the
+        odd one out of the pair that naturally belong together - drops to a
+        second line centred beneath the other two, and everything below the
+        row shifts down to make space for it.
 
         The button text is fixed, never gaining an "open" marker: the row
         is sized to its labels, so changing them would re-measure and
@@ -2650,9 +2676,23 @@ class Canvas(FigureCanvas):
                 button.move(x, y)
                 x += width + gap
 
+        def spread(row_buttons, row_widths, y):
+            """Sit the outer buttons against the panel's edges, gaps even."""
+
+            step = (panel_width - sum(row_widths)) // (len(row_widths) - 1)
+            x = panel_left
+            for button_ii, (button, width) in enumerate(zip(row_buttons, row_widths)):
+                # the last is placed against the right edge rather than at
+                # whatever the gaps have added up to, so rounding cannot
+                # leave it a pixel or two short of the controls above
+                if button_ii == len(row_buttons) - 1:
+                    x = panel_left + panel_width - width
+                button.move(x, y)
+                x += width + step
+
         wrapped = sum(widths) + gap * 2 > panel_width
         if not wrapped:
-            place(buttons, widths, row_y)
+            spread(buttons, widths, row_y)
         else:
             place(buttons[:2], widths[:2], row_y)
             place(buttons[2:], widths[2:], row_y + row_height + 5)
@@ -2721,7 +2761,7 @@ class Canvas(FigureCanvas):
     def handle_map_panel_toggle(self):
         """
         Function which toggles the map settings menu's "Map" sub-panel
-        (projection, land/ocean colour, coastline resolution, country
+        (projection, land/ocean colour, map resolution, country
         borders, gridlines) - see handle_map_subpanel_toggle().
         """
 
@@ -3141,7 +3181,7 @@ class Canvas(FigureCanvas):
     def refresh_map_features(self):
         """
         Redraws the map's ocean/land/country-border cartopy features after
-        the user changes their colour, visibility, or the coastline
+        the user changes their colour, visibility, or the map
         resolution from the map settings menu. Does nothing if the map isn't
         using the "providentia" background - a custom background image or
         cartopy's shaded relief doesn't have these features to refresh.
@@ -4948,7 +4988,7 @@ class Canvas(FigureCanvas):
         )
 
         # get map detail controls (land/ocean colour, country borders,
-        # coastline resolution) - all read from plot_characteristics_templates
+        # map resolution) - all read from plot_characteristics_templates
         # (see draw_map_features()), same as projection above
         # seeded from the resolved colours, not the raw ones - land/ocean are
         # left empty in the config when they come from the preset, and an empty
@@ -4987,7 +5027,7 @@ class Canvas(FigureCanvas):
         # setCurrentIndex(), not setCurrentText() - see the comment above
         # on map_colourmap_scale
         self.map_resolution.setCurrentIndex(
-            resolution_options.index(map_template["map_coastline_resolution"])
+            resolution_options.index(map_template["map_resolution"])
         )
 
         # elements belonging to each sub-panel, listed separately so

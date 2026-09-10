@@ -382,7 +382,7 @@
   "map":
     {
       "background": "providentia",
-      "map_coastline_resolution": "medium",
+      "map_resolution": "medium",
       "projection": "Robinson",
       "colour_preset": "Light",
       "round_decimal_places": { "title": 2, "csv": 2  },
