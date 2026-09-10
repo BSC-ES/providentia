@@ -187,6 +187,12 @@ If more than one section is defined, a pop-up will appear asking you to select t
 <p>The <strong>METADATA</strong> button opens a pop-up menu allows the user to filter stations on the map by a variety of metadata variables. See here for more detailed information: <a class="reference internal" href="Filtering.html#filtering-metadata"><span class="std std-ref">Metadata filtering</span></a></p>
 </section>
 </section>
+<section id="searching-for-a-field">
+<h4>Searching for a field<a class="headerlink" href="#searching-for-a-field" title="Link to this heading"></a></h4>
+<p>The pop-up menus opened by <strong>QA</strong>, <strong>FLAGS</strong>, <strong>MODELS</strong>, <strong>COVERAGE</strong>, <strong>PERIOD</strong> and <strong>METADATA</strong> each have a search box beside their buttons. Typing in it leaves only the fields matching what has been typed, and emptying it brings the rest back. Case, spaces, underscores and dashes are ignored, so <code class="docutils literal notranslate"><span class="pre">station</span> <span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">Station_Name</span></code> and <code class="docutils literal notranslate"><span class="pre">stationname</span></code> all find the same field, and a small typo will still find what was meant when nothing matches exactly.</p>
+<p>Anything already selected or typed into a field stays as it is while searching, whether or not the field is on screen. The <strong>Select All</strong>, <strong>Clear All</strong> and <strong>Select Default</strong> buttons apply to the fields the search has left showing, so they can be used to select a group of fields at once.</p>
+<p>The <strong>METADATA</strong> menu searches the fields inside all of its metadata types rather than the type buttons themselves, listing what it finds in a second column beside them. A numeric field is shown there with its min, max and apply controls, so it can be set without opening the page it belongs to, and a text field is shown as the button onto its own page of values.</p>
+</section>
 </section>
 <section id="statistics">
 <h3>Statistics<a class="headerlink" href="#statistics" title="Link to this heading"></a></h3>
