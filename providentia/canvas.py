@@ -31,7 +31,7 @@ from providentia.auxiliar import (
     get_map_colours,
     get_role_colourmap,
 )
-from .canvas_menus import SettingsMenu
+from .canvas_menus import SettingsMenu, set_slider_enabled
 from .dashboard_elements import ComboBox
 from .dashboard_elements import set_formatting, set_cursor, unset_cursor
 from .dashboard_elements import populate_colourmap_combobox, select_colourmap
@@ -198,6 +198,7 @@ class Canvas(FigureCanvas):
             "periodic",
             "metadata",
             "distribution",
+            "histogram",
             "scatter",
             "statsummary",
             "boxplot",
@@ -212,6 +213,7 @@ class Canvas(FigureCanvas):
             "None",
             "boxplot",
             "distribution",
+            "histogram",
             "metadata",
             "periodic",
             "periodic-violin",
@@ -2908,7 +2910,7 @@ class Canvas(FigureCanvas):
             self.map_markersize_sel_sl,
             self.map_opacity_sel_sl,
         ):
-            slider.setEnabled(manual)
+            set_slider_enabled(slider, manual)
 
         return None
 
@@ -4008,7 +4010,7 @@ class Canvas(FigureCanvas):
             elif plot_type == "metadata":
                 self.remove_axis_objects(ax_to_remove.texts)
 
-            elif plot_type == "distribution":
+            elif plot_type in ["distribution", "histogram"]:
                 for objects in [ax_to_remove.lines, ax_to_remove.artists]:
                     self.remove_axis_objects(objects)
 
@@ -5291,6 +5293,50 @@ class Canvas(FigureCanvas):
             "linewidth_sl": [self.distribution_linewidth_sl],
         }
 
+        # HISTOGRAM PLOT SETTINGS MENU #
+        # create histogram settings menu
+        self.histogram_menu = SettingsMenu(plot_type="histogram", canvas_instance=self)
+        self.histogram_options = self.histogram_menu.checkable_comboboxes["options"]
+        self.histogram_elements = self.histogram_menu.get_elements()
+
+        # get sliders and update values
+        self.histogram_linewidth_sl = self.histogram_menu.sliders["linewidth_sl"]
+        self.histogram_linewidth_sl.setMaximum(
+            int(self.plot_characteristics["histogram"]["plot"]["linewidth"] * 100)
+        )
+        self.histogram_linewidth_sl.setValue(
+            self.plot_characteristics["histogram"]["plot"]["linewidth"] * 10
+        )
+
+        # the bin count slider spans the range the automatic count is held to,
+        # and is set to whatever count is drawn until it is moved - see
+        # sync_histogram_bins_slider()
+        self.histogram_bins_sl = self.histogram_menu.sliders["bins_sl"]
+        self.histogram_bins_sl.setMinimum(
+            self.plot_characteristics["histogram"]["min_bins"]
+        )
+        self.histogram_bins_sl.setMaximum(
+            self.plot_characteristics["histogram"]["max_bins"]
+        )
+
+        # automatic bin count, on by default - worked out from the data every
+        # time the histogram is drawn (see get_histogram_bin_edges()). The
+        # slider stays showing the count in use while automatic is on, just
+        # disabled, so taking manual control starts from what is on screen
+        self.histogram_auto_bins = self.histogram_menu.checkboxes["auto_bins"]
+        self.histogram_auto_bins.setChecked(
+            self.plot_characteristics["histogram"]["bins"] == "auto"
+        )
+        self.sync_histogram_bins_slider_enabled()
+
+        # get histogram interactive dictionary
+        self.interactive_elements["histogram"] = {
+            "hidden": True,
+            "linewidth_sl": [self.histogram_linewidth_sl],
+            "auto_bins": [self.histogram_auto_bins],
+            "bins_sl": [self.histogram_bins_sl],
+        }
+
         # SCATTER PLOT SETTINGS MENU #
         # create scatter settings menu
         self.scatter_menu = SettingsMenu(plot_type="scatter", canvas_instance=self)
@@ -5620,6 +5666,98 @@ class Canvas(FigureCanvas):
             key = "periodic-violin"
 
         self.update_linewidth(self.plot_axes[key], key, linewidth)
+
+        return None
+
+    def sync_histogram_bins_slider_enabled(self):
+        """
+        Function which enables the bin count slider only while the count is
+        being set by hand, as an automatic count overwrites whatever it is set
+        to every time the histogram is drawn.
+
+        The slider stays in place rather than being hidden, showing the count
+        the automatic rule arrived at, so that taking manual control has an
+        obvious starting point.
+        """
+
+        set_slider_enabled(
+            self.histogram_bins_sl, not self.histogram_auto_bins.isChecked()
+        )
+
+        return None
+
+    def handle_histogram_auto_bins_update(self):
+        """
+        Function which handles toggling the automatic bin count upon
+        interaction with the histogram settings menu's checkbox
+        """
+
+        if not self.read_instance.block_config_bar_handling_updates:
+            # going back to automatic hands the count back to the data;
+            # coming off it holds the histogram at the count on screen
+            if self.histogram_auto_bins.isChecked():
+                n_bins = "auto"
+            else:
+                n_bins = self.histogram_bins_sl.value()
+
+            self.sync_histogram_bins_slider_enabled()
+            self.set_histogram_bins(n_bins)
+
+        return None
+
+    def set_histogram_bins(self, n_bins):
+        """
+        Function which sets the number of bins the histogram is drawn with and
+        remakes it.
+
+        Parameters
+        ----------
+        n_bins : int or str
+            Number of bins, or "auto" to work it out from the data
+        """
+
+        # written to the template as well as the copy being drawn from, as the
+        # two are separate dicts (see Plotting.make_plot())
+        self.plot_characteristics["histogram"]["bins"] = n_bins
+        self.plot_characteristics_templates["histogram"]["bins"] = n_bins
+
+        # remake the plot, as the bins decide what is counted rather than how
+        # what has been counted is drawn
+        self.update_associated_active_dashboard_plot("histogram")
+        self.figure.canvas.draw_idle()
+
+        return None
+
+    def update_histogram_bins_func(self):
+        """
+        Function to handle the update of the number of histogram bins
+        """
+
+        # a number set here stands in for the automatic count until it is
+        # changed again, the same way it would if written into the plot
+        # characteristics
+        n_bins = self.histogram_bins_sl.value()
+        self.set_histogram_bins(n_bins)
+
+        return None
+
+    def sync_histogram_bins_slider(self, n_bins):
+        """
+        Function which points the bin count slider at the number of bins the
+        histogram has just been drawn with, so it always reports what is on
+        screen rather than a number nothing was drawn with.
+
+        Parameters
+        ----------
+        n_bins : int
+            Number of bins the histogram was drawn with
+        """
+
+        # showing the count must not read as setting it, or every redraw would
+        # pin the bins to whatever the last one worked out
+        self.histogram_bins_sl.blockSignals(True)
+        self.histogram_bins_sl.setValue(int(n_bins))
+        self.histogram_bins_sl.blockSignals(False)
 
         return None
 

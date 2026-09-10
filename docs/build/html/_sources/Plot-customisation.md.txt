@@ -120,6 +120,14 @@ The size of the map points is worked out from how densely the stations being sho
 
 In the dashboard the opacity of the points is set alongside the size, and selected stations are drawn larger and more solid than unselected ones. This can be turned off by setting `marker_automatic` to `false` under the `dashboard` section of `map`, in which case the size and opacity come from the `marker_selected` and `marker_unselected` variables and can be changed with the sliders in the map settings menu.
 
+### Histogram bins
+
+The number of bins is worked out from the data rather than fixed, as a count suiting one species suits another badly, and is held between `min_bins` and `max_bins`. Setting `bins` to a number uses that many instead. All three are set per mode, under the `dashboard`, `report` and `library` sections of `histogram`.
+
+The bins are then squared up with the resolution the species is reported to, as a width that is not a whole number of those steps notches the plot with a regular comb, so the count drawn can differ a little from the one asked for. The axis stops at the upper inner Tukey fence rather than the largest value measured, so a long right tail cannot squeeze the distribution into the leftmost bins; setting `range` to `full` puts every value back. In a report the bins are gathered across subsections, as their data ranges are, so that the counts on different pages can be read against one another.
+
+In the dashboard the count is automatic until the **Automatic** checkbox in the histogram settings menu is unchecked, which hands control to the **Number of bins** slider beneath it.
+
 ## Removing extreme stations by their statistical values
 
 If you want to automatically remove stations that have certain statistical values, you will need to add your criteria in the file `settings/remove_extreme_stations.yaml`. An example of this exists for `CAMS`:

@@ -998,6 +998,7 @@ class HoverAnnotation(object):
                             in [
                                 "timeseries",
                                 "distribution",
+                                "histogram",
                                 "periodic",
                                 "periodic-violin",
                             ]
@@ -1473,6 +1474,85 @@ class HoverAnnotation(object):
                 data_label,
                 density,
                 self.canvas_instance.plot_characteristics["distribution"][
+                    "marker_annotate_rounding"
+                ],
+            )
+
+        # update tooltip and show vline
+        self.canvas_instance.figure.canvas.setToolTip(text_label)
+        self.canvas_instance.canvas_annotation_vline.show()
+
+        return None
+
+    def update_histogram_annotation(self, annotation_index):
+        """
+        Update the tooltip annotation for a hovered bin on the histogram plot
+
+        Parameters
+        ----------
+        annotation_index : dict
+            Dictionary containing the index of the hovered point
+        """
+
+        # initialise annotation text
+        text_label = ""
+
+        # iterate through active data labels
+        for data_label in self.canvas_instance.plot_elements["data_labels_active"]:
+            # skip observations for bias plot
+            if (
+                self.canvas_instance.plot_elements["histogram"]["active"] == "bias"
+            ) and (
+                data_label == self.canvas_instance.read_instance.observations_data_label
+            ):
+                continue
+
+            # do not annotate if plot is cleared
+            if (
+                data_label
+                not in self.canvas_instance.plot_elements["histogram"][
+                    self.canvas_instance.plot_elements["histogram"]["active"]
+                ].keys()
+            ):
+                continue
+
+            # retrieve the bin's edge and density
+            line = self.canvas_instance.plot_elements["histogram"][
+                self.canvas_instance.plot_elements["histogram"]["active"]
+            ][data_label]["plot"][0]
+            concentration = line.get_xdata()[annotation_index["ind"][0]]
+            density = line.get_ydata()[annotation_index["ind"][0]]
+
+            # first valid data label?
+            if not text_label:
+                # update vline position
+                self.update_vline_position()
+
+                # create annotation text
+                text_label += (
+                    "<p style='white-space:pre'><i>{0}: {1:.{2}f}</i>"
+                ).format(
+                    self.canvas_instance.read_instance.species[0],
+                    concentration,
+                    self.canvas_instance.plot_characteristics["histogram"][
+                        "marker_annotate_rounding"
+                    ],
+                )
+
+            # get colour for data label
+            colour = self.canvas_instance.read_instance.plotting_params[data_label][
+                "colour"
+            ]
+
+            # convert data label colour to hex code
+            hex_colour = get_hex_code(colour)
+
+            # add text label
+            text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(
+                hex_colour,
+                data_label,
+                density,
+                self.canvas_instance.plot_characteristics["histogram"][
                     "marker_annotate_rounding"
                 ],
             )

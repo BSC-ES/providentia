@@ -2063,6 +2063,326 @@ class Plotting:
         if violin_resolution is not None:
             return period_x_grid, PDFs_sampled
 
+    def get_histogram_bin_edges(
+        self,
+        data,
+        data_range_min,
+        data_range_max,
+        plot_characteristics,
+        min_resolution=None,
+        n_bins=None,
+    ):
+        """
+        Work out the bin edges to draw a histogram with, shared by every data
+        label so that the observations and each model can be read against one
+        another.
+
+        The number of bins is worked out from the data rather than fixed, as a
+        count that suits one species suits another badly: the spread of a
+        species, its reporting resolution and how much data is loaded all move
+        it. Taken as the larger of the Freedman-Diaconis and Sturges rules
+        (numpy's "auto"), which is driven by the interquartile range and so is
+        not thrown by the long right tail concentrations tend to have, while
+        keeping enough bins to see the shape of a short record. The count is
+        held between "min_bins" and "max_bins" so that the plot stays readable
+        in a dashboard panel, and setting "bins" to a number in the plot
+        characteristics overrides the lot.
+
+        Whatever count is asked for, the bins are then squared up with the
+        resolution the species is reported to. Measurements arrive rounded to
+        that resolution, so a bin width that is not a whole number of those
+        steps catches two reportable values in some bins and one in others,
+        combing the plot with regular notches that say nothing about the data
+        (the same rounding the distribution plot floors its bandwidth against).
+        The width is taken to the nearest whole number of steps and the edges
+        offset by half a step, leaving the reported values at bin centres.
+
+        Parameters
+        ----------
+        data : np.ndarray
+            All of the data being plotted, pooled across data labels
+        data_range_min : float
+            Lower edge of the first bin
+        data_range_max : float
+            Upper edge of the last bin
+        plot_characteristics : dict
+            Plot characteristics
+        min_resolution : float, optional
+            Resolution the species is reported to
+        n_bins : int, optional
+            Number of bins to use, in place of working one out
+
+        Returns
+        -------
+        np.ndarray
+            Bin edges
+        """
+
+        if n_bins is None:
+            n_bins = plot_characteristics.get("bins", "auto")
+
+        if not isinstance(n_bins, int):
+            n_bins = (
+                len(
+                    np.histogram_bin_edges(
+                        data, bins=n_bins, range=(data_range_min, data_range_max)
+                    )
+                )
+                - 1
+            )
+
+        min_bins = plot_characteristics["min_bins"]
+        max_bins = plot_characteristics["max_bins"]
+        n_bins = int(np.clip(n_bins, min_bins, max_bins))
+
+        # nothing to square up against for a species with no reported
+        # resolution, so the range is simply divided into the bins asked for
+        if (min_resolution is None) or (min_resolution <= 0):
+            return np.linspace(data_range_min, data_range_max, n_bins + 1)
+
+        # widen the bins to a whole number of reporting steps, then take
+        # whatever count that leaves - and keep widening if it leaves more
+        # bins than the plot can show
+        steps = max(1, int(np.round(((data_range_max - data_range_min) / n_bins) / min_resolution)))
+        start = data_range_min - (min_resolution / 2.0)
+        span = (data_range_max + (min_resolution / 2.0)) - start
+        n_bins = int(np.ceil(span / (steps * min_resolution)))
+        while (n_bins > max_bins) and (steps < span / min_resolution):
+            steps += 1
+            n_bins = int(np.ceil(span / (steps * min_resolution)))
+
+        # too few bins to see anything, so the reporting resolution is finer
+        # than this plot needs and an even split reads better
+        if n_bins < min_bins:
+            return np.linspace(data_range_min, data_range_max, min_bins + 1)
+
+        return start + (np.arange(n_bins + 1) * (steps * min_resolution))
+
+    def make_histogram(
+        self,
+        relevant_axis,
+        networkspeci,
+        data_labels,
+        plot_characteristics,
+        plot_options,
+        data_range_min=None,
+        data_range_max=None,
+        n_bins=None,
+    ):
+        """
+        Renders the distribution of the data as a histogram, one stepped
+        outline per data label.
+
+        Drawn as outlines rather than filled bars so that the observations and
+        every model stay visible where they overlap. The bars are normalised to
+        a density, i.e. their area sums to one, so that data labels holding
+        different numbers of valid measurements can still be compared, and so
+        that the y-axis reads the same as the distribution plot's.
+
+        Parameters
+        ----------
+        relevant_axis : object
+            Axis to plot on.
+        networkspeci : str
+            Current networkspeci (e.g. EBAS|sconco3).
+        data_labels : list
+            Data arrays to plot.
+        plot_characteristics : dict
+            Plot characteristics.
+        plot_options : list
+            Options to configure plot.
+        data_range_min : float, optional
+            Lower edge of the first bin.
+        data_range_max : float, optional
+            Upper edge of the last bin.
+        n_bins : int, optional
+            Number of bins, worked out across every subsection of a report so
+            that its pages share one set of bins. Worked out from the data
+            being drawn when not given.
+        """
+
+        # determine if 'bias' in plot_options
+        if "bias" in plot_options:
+            bias = True
+        else:
+            bias = False
+
+        # if 'obs' in plot_options, set data labels to just observations label
+        if "obs" in plot_options:
+            data_labels = [self.read_instance.observations_data_label]
+
+        # get valid data labels for networkspeci
+        valid_data_labels = self.canvas_instance.selected_station_data_labels[
+            networkspeci
+        ]
+
+        # cut data_labels for those in valid data labels
+        cut_data_labels = [
+            data_label for data_label in data_labels if data_label in valid_data_labels
+        ]
+
+        # set data ranges for bin edges if not set explicitly
+        if data_range_min is None:
+            data_range_min = self.canvas_instance.selected_station_data_min[
+                networkspeci
+            ]
+
+        if data_range_max is None:
+            data_range_max = self.canvas_instance.selected_station_data_max[
+                networkspeci
+            ]
+
+        if data_range_max <= data_range_min:
+            msg = "The histogram cannot be created because the data has no range."
+            show_message(self.read_instance, msg)
+            return None
+
+        # gather the data of every label first, as the bins are worked out
+        # across all of them together - bins that differed per label would put
+        # the labels on axes that cannot be read against one another
+        label_data = {}
+        for data_label in cut_data_labels:
+            label_data[data_label] = drop_nans(
+                self.canvas_instance.selected_station_data[networkspeci]["flat"][
+                    valid_data_labels.index(data_label), 0, :
+                ]
+            )
+
+        # the observations are needed for a bias plot whether or not they are
+        # being drawn themselves
+        observations_label = self.read_instance.observations_data_label
+        if bias and observations_label not in label_data:
+            if observations_label in valid_data_labels:
+                label_data[observations_label] = drop_nans(
+                    self.canvas_instance.selected_station_data[networkspeci]["flat"][
+                        valid_data_labels.index(observations_label), 0, :
+                    ]
+                )
+
+        pooled_data = np.concatenate(
+            [data for data in label_data.values() if data.size > 0]
+            or [np.array([], dtype=np.float32)]
+        )
+        if pooled_data.size == 0:
+            msg = "The histogram cannot be created because there are no valid values."
+            show_message(self.read_instance, msg)
+            return None
+
+        # the resolution the species is reported to, used to square the bins up
+        # with the values that can actually be reported - see make_distribution(),
+        # which floors its bandwidth against the same number
+        minimum_resolution = self.read_instance.parameter_dictionary[
+            networkspeci.split("|")[1]
+        ]["minimum_resolution"]
+        min_resolution = None if pd.isnull(minimum_resolution) else minimum_resolution
+
+        # every page of a report drawn over the same data range shares one set
+        # of bins, worked out for the first of them: bins that followed each
+        # subsection's own data would put every page on its own axis, and the
+        # counts on those pages are meant to be read against one another. Keyed
+        # by that range, so the summary and per-station pages - which the report
+        # deliberately ranges differently - keep their own bins
+        shared_bins = getattr(self.read_instance, "histogram_bin_edges", None)
+        if shared_bins is None:
+            shared_bins = {}
+            self.read_instance.histogram_bin_edges = shared_bins
+        shared_key = (networkspeci, round(data_range_min, 6), round(data_range_max, 6))
+
+        if (self.read_instance.mode == "report") and (shared_key in shared_bins):
+            bin_edges = shared_bins[shared_key]
+        else:
+            # a report has already settled the range and the count across all
+            # of its subsections, so neither is worked out again here
+            if n_bins is None:
+                # the upper end of the axis is held back to where the data
+                # actually is, rather than out at its most extreme value: a
+                # species with a long right tail (most of them) would otherwise
+                # draw its whole distribution into the leftmost bins with an
+                # empty axis stretching away to the right. The cut is the upper
+                # inner Tukey fence, the same measure the violin plot uses to
+                # bound its distributions, and setting "range" to "full" in the
+                # plot characteristics keeps every value on the axis
+                if plot_characteristics.get("range", "tukey") == "tukey":
+                    _, upper_inner_fence = boxplot_inner_fences(pooled_data)
+                    if data_range_min < upper_inner_fence < data_range_max:
+                        data_range_max = upper_inner_fence
+
+            bin_edges = self.get_histogram_bin_edges(
+                pooled_data,
+                data_range_min,
+                data_range_max,
+                plot_characteristics,
+                min_resolution=min_resolution,
+                n_bins=n_bins,
+            )
+            shared_bins[shared_key] = bin_edges
+
+        # tell the dashboard's bin count slider what was worked out, so that it
+        # opens showing the automatic count rather than a number of its own
+        if hasattr(self.canvas_instance, "sync_histogram_bins_slider"):
+            self.canvas_instance.sync_histogram_bins_slider(len(bin_edges) - 1)
+
+        # plot horizontal line across x axis at 0 if bias plot
+        # also remove observations from cut_data_labels
+        if bias:
+            bias_line = [relevant_axis.axhline(**plot_characteristics["bias_line"])]
+            # track plot elements
+            if self.read_instance.mode not in ["report"]:
+                self.track_plot_elements(
+                    "ALL", "histogram", "bias_line", bias_line, bias=bias
+                )
+            if observations_label in cut_data_labels:
+                cut_data_labels.remove(observations_label)
+
+            # the bias is the difference between the model's histogram and the
+            # observations', bin by bin, as it is on the distribution plot
+            observations_data = label_data.get(
+                observations_label, np.array([], dtype=np.float32)
+            )
+            if observations_data.size == 0:
+                msg = "The histogram bias cannot be calculated because there are no valid observational values."
+                show_message(self.read_instance, msg)
+                return None
+            observations_density, _ = np.histogram(
+                observations_data, bins=bin_edges, density=True
+            )
+
+        # iterate through data labels
+        for data_label in cut_data_labels:
+            data = label_data[data_label]
+            if data.size == 0:
+                msg = "The histogram will not include {} as it has no valid values.".format(
+                    data_label
+                )
+                show_message(self.read_instance, msg)
+                continue
+
+            density, _ = np.histogram(data, bins=bin_edges, density=True)
+            if bias:
+                density = density - observations_density
+
+            # drawn as a step through the bin edges, the last height repeated
+            # so that the final bin is closed off rather than left open
+            self.histogram_plot = relevant_axis.step(
+                bin_edges,
+                np.append(density, density[-1]),
+                where="post",
+                color=self.read_instance.plotting_params[data_label]["colour"],
+                **plot_characteristics["plot"],
+            )
+
+            # track plot elements
+            if self.read_instance.mode not in ["report"]:
+                self.track_plot_elements(
+                    data_label,
+                    "histogram",
+                    "plot",
+                    self.histogram_plot,
+                    bias=bias,
+                )
+
+        return None
+
     def make_scatter(
         self,
         relevant_axis,

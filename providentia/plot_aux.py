@@ -28,6 +28,7 @@ from providentia.auxiliar import (
 )
 from .dashboard_elements import CheckDialog, MessageBox
 from .statistics import (
+    boxplot_inner_fences,
     calculate_statistic,
     get_z_statistic_sign,
     get_z_statistic_type,
@@ -423,6 +424,44 @@ def update_plotting_parameters(
             )
             # Update count of models
             model_ind += 1
+
+
+def histogram_bin_target(data):
+    """
+    Work out what one set of data would want from a histogram's bins, as the
+    widest bin it can carry and how far up the axis its values reach.
+
+    Gathered across a report's subsections (the same way their data ranges
+    are) so that every page can be drawn with one set of bins: bins following
+    each subsection's own data would put every page on its own axis, and the
+    counts on those pages are meant to be read against one another.
+
+    Parameters
+    ----------
+    data : np.ndarray
+        Values of one subsection, across all data labels
+
+    Returns
+    -------
+    tuple of float
+        Bin width the data would choose, and its upper inner Tukey fence.
+        Both nan if the data cannot be binned
+    """
+
+    data = data[np.isfinite(data)]
+    if (data.size == 0) or (np.nanmin(data) == np.nanmax(data)):
+        return np.nan, np.nan
+
+    _, upper_inner_fence = boxplot_inner_fences(data)
+
+    # the bins this data would be given on its own (numpy's "auto" - the
+    # larger of the Freedman-Diaconis and Sturges counts), as a width, which
+    # unlike a count can be carried over to the range shared by every page
+    edges = np.histogram_bin_edges(data, bins="auto")
+    if len(edges) < 2:
+        return np.nan, upper_inner_fence
+
+    return float(edges[1] - edges[0]), float(upper_inner_fence)
 
 
 def kde_fft(
@@ -1529,7 +1568,7 @@ def download_plot_data_to_csv(
         else read_instance.observations_data_label
         if base_plot_type == "scatter"
         else "concentration"
-        if base_plot_type == "distribution"
+        if base_plot_type in ["distribution", "histogram"]
         else canvas_instance.plot_characteristics[plot_type]["xlabel"]["xlabel"]
         if base_plot_type == "fairmode-target"
         else "x"
@@ -1623,6 +1662,7 @@ def download_plot_data_to_csv(
                 elif base_plot_type in [
                     "timeseries",
                     "distribution",
+                    "histogram",
                     "scatter",
                     "fairmode-target",
                     "fairmode-statsummary",
@@ -1875,6 +1915,7 @@ def download_plot_data_to_csv(
         "timeseries",
         "scatter",
         "distribution",
+        "histogram",
         "periodic",
         "periodic-violin",
         "taylor",

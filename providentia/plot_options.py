@@ -309,7 +309,7 @@ def threshold(
         )
 
     # draw horizontal line
-    if base_plot_type in ["distribution", "scatter"]:
+    if base_plot_type in ["distribution", "histogram", "scatter"]:
         threshold_line = relevant_axis.axvline(
             x=threshold, **plot_characteristics["threshold_line"]
         )

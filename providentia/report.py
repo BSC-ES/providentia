@@ -32,7 +32,11 @@ from .fields_menus import (
 )
 from .filter import DataFilter
 from .plotting import Plotting
-from .plot_aux import get_taylor_diagram_ghelper, set_map_extent
+from .plot_aux import (
+    get_taylor_diagram_ghelper,
+    histogram_bin_target,
+    set_map_extent,
+)
 from .plot_formatting import (
     format_plot_options,
     format_axis,
@@ -446,6 +450,27 @@ class Report:
             self.plotting.set_plot_characteristics(["header"])
             self.plotting.make_header(self.pdf, self.plot_characteristics["header"])
 
+            # histogram bins are worked out once per data range and shared by
+            # every page drawn over it, so they start afresh with each section
+            self.histogram_bin_edges = {}
+
+            # widest bins any subsection wants, and how far up the axis their
+            # values reach, gathered across subsections the same way the data
+            # ranges below are - so that every page can be given one set of
+            # bins wide enough not to leave the sparsest subsection as noise
+            self.histogram_width_summary = {
+                networkspeci: 0 for networkspeci in self.networkspecies
+            }
+            self.histogram_width_station = {
+                networkspeci: 0 for networkspeci in self.networkspecies
+            }
+            self.histogram_fence_summary = {
+                networkspeci: 0 for networkspeci in self.networkspecies
+            }
+            self.histogram_fence_station = {
+                networkspeci: 0 for networkspeci in self.networkspecies
+            }
+
             # create variables to keep track of minimum and maximum data ranges across subsections
             self.data_range_min_summary = {
                 networkspeci: np.inf for networkspeci in self.networkspecies
@@ -466,16 +491,20 @@ class Report:
                 networkspeci: 0 for networkspeci in self.networkspecies
             }
 
-            # make all plots per subsection (for all plot types except distribution/taylor plots)
+            # make all plots per subsection (for all plot types except distribution/histogram/taylor plots)
             summary_plots_to_make = [
                 plot_type
                 for plot_type in self.summary_plots_to_make
-                if ("distribution" not in plot_type) and ("taylor" not in plot_type)
+                if ("distribution" not in plot_type)
+                and ("histogram" not in plot_type)
+                and ("taylor" not in plot_type)
             ]
             station_plots_to_make = [
                 plot_type
                 for plot_type in self.station_plots_to_make
-                if ("distribution" not in plot_type) and ("taylor" not in plot_type)
+                if ("distribution" not in plot_type)
+                and ("histogram" not in plot_type)
+                and ("taylor" not in plot_type)
             ]
             self.make_plots_per_subsection(
                 summary_plots_to_make,
@@ -484,17 +513,21 @@ class Report:
             )
 
             # make all plots per subsection
-            # for distribution/taylor plot types --> done so to calculate data ranges
+            # for distribution/histogram/taylor plot types --> done so to calculate data ranges
             # across subsections first
             summary_plots_to_make = [
                 plot_type
                 for plot_type in self.summary_plots_to_make
-                if ("distribution" in plot_type) or ("taylor" in plot_type)
+                if ("distribution" in plot_type)
+                or ("histogram" in plot_type)
+                or ("taylor" in plot_type)
             ]
             station_plots_to_make = [
                 plot_type
                 for plot_type in self.station_plots_to_make
-                if ("distribution" in plot_type) or ("taylor" in plot_type)
+                if ("distribution" in plot_type)
+                or ("histogram" in plot_type)
+                or ("taylor" in plot_type)
             ]
             if (len(summary_plots_to_make) > 0) or (len(station_plots_to_make) > 0):
                 self.make_plots_per_subsection(
@@ -1568,6 +1601,9 @@ class Report:
                     self.stddev_max_summary[ns] = copy.deepcopy(
                         self.selected_station_stddev_max[ns]
                     )
+                self.update_histogram_bin_target(
+                    ns, self.histogram_width_summary, self.histogram_fence_summary
+                )
 
         # if have no valid data across data labels (no observations or models), then set flag
         if not self.selected_station_data[networkspeci]:
@@ -1842,6 +1878,11 @@ class Report:
                 self.data_range_max_station[networkspeci] = copy.deepcopy(
                     self.selected_station_data_max[networkspeci]
                 )
+            self.update_histogram_bin_target(
+                networkspeci,
+                self.histogram_width_station,
+                self.histogram_fence_station,
+            )
             if (
                 self.selected_station_stddev_max[networkspeci]
                 > self.stddev_max_station[networkspeci]
@@ -2215,6 +2256,39 @@ class Report:
 
         return None
 
+    def update_histogram_bin_target(self, networkspeci, widths, fences):
+        """
+        Keep track of the widest bins any subsection of this section wants for
+        a networkspeci, and of how far up the axis its values reach.
+
+        Every page of a report is drawn with one set of bins, so that the
+        counts on them can be read against one another. The widest bins asked
+        for are taken rather than the narrowest, as bins fine enough for the
+        richest subsection would leave the sparsest as noise.
+
+        Parameters
+        ----------
+        networkspeci : str
+            Current networkspeci (e.g. EBAS|sconco3)
+        widths : dict
+            Widest bin wanted so far, per networkspeci
+        fences : dict
+            Highest upper inner Tukey fence so far, per networkspeci
+        """
+
+        if not self.selected_station_data.get(networkspeci):
+            return None
+
+        width, fence = histogram_bin_target(
+            self.selected_station_data[networkspeci]["flat"].flatten()
+        )
+        if np.isfinite(width) and (width > widths[networkspeci]):
+            widths[networkspeci] = width
+        if np.isfinite(fence) and (fence > fences[networkspeci]):
+            fences[networkspeci] = fence
+
+        return None
+
     def make_plot(self, plotting_paradigm, plot_type, plot_options, networkspeci):
         """
         Directs the generation of specific plot types by coordinating data labels, axes, and plotting functions.
@@ -2408,10 +2482,14 @@ class Report:
             data_range_min = self.data_range_min_summary[networkspeci]
             data_range_max = self.data_range_max_summary[networkspeci]
             stddev_max = self.stddev_max_summary[networkspeci]
+            histogram_width = self.histogram_width_summary[networkspeci]
+            histogram_fence = self.histogram_fence_summary[networkspeci]
         elif plotting_paradigm == "station":
             data_range_min = self.data_range_min_station[networkspeci]
             data_range_max = self.data_range_max_station[networkspeci]
             stddev_max = self.stddev_max_station[networkspeci]
+            histogram_width = self.histogram_width_station[networkspeci]
+            histogram_fence = self.histogram_fence_station[networkspeci]
 
         # map plots (1 plot per data array/s (1 array if absolute plot,
         # 2 arrays if making bias plot), per subsection)
@@ -2763,6 +2841,31 @@ class Report:
                         self.plot_characteristics[plot_type],
                         plot_options,
                         zstat=zstat,
+                    )
+                elif base_plot_type == "histogram":
+                    # the axis stops where the subsections' values stop rather
+                    # than at the most extreme of them, and the count comes
+                    # from the widest bins any of them wanted, so that every
+                    # page of the report is drawn with the same bins
+                    histogram_range_max = data_range_max
+                    if data_range_min < histogram_fence < data_range_max:
+                        histogram_range_max = histogram_fence
+                    n_bins = None
+                    if histogram_width > 0:
+                        n_bins = int(
+                            np.ceil(
+                                (histogram_range_max - data_range_min) / histogram_width
+                            )
+                        )
+                    func(
+                        relevant_axis,
+                        networkspeci,
+                        data_labels,
+                        self.plot_characteristics[plot_type],
+                        plot_options,
+                        data_range_min=data_range_min,
+                        data_range_max=histogram_range_max,
+                        n_bins=n_bins,
                     )
                 elif base_plot_type == "distribution":
                     func(

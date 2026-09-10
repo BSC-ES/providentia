@@ -66,6 +66,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#country-borders-and-gridlines">Country borders and gridlines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#map-background">Map background</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#map-point-sizing">Map point sizing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#histogram-bins">Histogram bins</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#removing-extreme-stations-by-their-statistical-values">Removing extreme stations by their statistical values</a></li>
@@ -229,6 +230,12 @@
 <h3>Map point sizing<a class="headerlink" href="#map-point-sizing" title="Link to this heading"></a></h3>
 <p>The size of the map points is worked out from how densely the stations being shown are packed into the plot, so they stay legible whether a map is showing a handful of stations or several thousand. This applies to every mode, and in the dashboard it is recalculated as the map is zoomed.</p>
 <p>In the dashboard the opacity of the points is set alongside the size, and selected stations are drawn larger and more solid than unselected ones. This can be turned off by setting <code class="docutils literal notranslate"><span class="pre">marker_automatic</span></code> to <code class="docutils literal notranslate"><span class="pre">false</span></code> under the <code class="docutils literal notranslate"><span class="pre">dashboard</span></code> section of <code class="docutils literal notranslate"><span class="pre">map</span></code>, in which case the size and opacity come from the <code class="docutils literal notranslate"><span class="pre">marker_selected</span></code> and <code class="docutils literal notranslate"><span class="pre">marker_unselected</span></code> variables and can be changed with the sliders in the map settings menu.</p>
+</section>
+<section id="histogram-bins">
+<h3>Histogram bins<a class="headerlink" href="#histogram-bins" title="Link to this heading"></a></h3>
+<p>The number of bins is worked out from the data rather than fixed, as a count suiting one species suits another badly, and is held between <code class="docutils literal notranslate"><span class="pre">min_bins</span></code> and <code class="docutils literal notranslate"><span class="pre">max_bins</span></code>. Setting <code class="docutils literal notranslate"><span class="pre">bins</span></code> to a number uses that many instead. All three are set per mode, under the <code class="docutils literal notranslate"><span class="pre">dashboard</span></code>, <code class="docutils literal notranslate"><span class="pre">report</span></code> and <code class="docutils literal notranslate"><span class="pre">library</span></code> sections of <code class="docutils literal notranslate"><span class="pre">histogram</span></code>.</p>
+<p>The bins are then squared up with the resolution the species is reported to, as a width that is not a whole number of those steps notches the plot with a regular comb, so the count drawn can differ a little from the one asked for. The axis stops at the upper inner Tukey fence rather than the largest value measured, so a long right tail cannot squeeze the distribution into the leftmost bins; setting <code class="docutils literal notranslate"><span class="pre">range</span></code> to <code class="docutils literal notranslate"><span class="pre">full</span></code> puts every value back. In a report the bins are gathered across subsections, as their data ranges are, so that the counts on different pages can be read against one another.</p>
+<p>In the dashboard the count is automatic until the <strong>Automatic</strong> checkbox in the histogram settings menu is unchecked, which hands control to the <strong>Number of bins</strong> slider beneath it.</p>
 </section>
 </section>
 <section id="removing-extreme-stations-by-their-statistical-values">

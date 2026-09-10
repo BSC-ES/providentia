@@ -13,6 +13,7 @@ The standard plot types consist of:
 - Periodic violin plot (`periodic-violin`)
 - Box plot (`boxplot`)
 - Distribution plot (`distribution`)
+- Histogram (`histogram`)
 - Scatter plot (`scatter`)
 - Heat map (`heatmap`) - Not available in dashboard
 - Table that gives one statistic per subsection per model (`table`) - Not available in dashboard
@@ -52,6 +53,10 @@ For the `metadata` plot the metadata displayed is set to a default list of metad
 ### Distribution (`distribution`)
 
 ![Distribution](uploads/plot_types/distribution.png)
+
+### Histogram (`histogram`)
+
+![Histogram](uploads/plot_types/histogram.png)
 
 ### Scatter plot (`scatter`)
 
@@ -107,7 +112,7 @@ The extension `_obs` allows users to only show observations in their plots.
 
 Plot types: 
 - Dashboard: Not applicable 
-- Report: `map`, `timeseries`, `periodic`, `periodic-violin`, `distribution`, `boxplot`
+- Report: `map`, `timeseries`, `periodic`, `periodic-violin`, `distribution`, `histogram`, `boxplot`
 - Library: Not applicable 
 
 ### Split the plots by label (`_individual`)
@@ -118,7 +123,7 @@ The extension `_individual` allows users to disaggregate the plots and see the p
 
 Plot types: 
 - Dashboard: Not applicable
-- Report: `timeseries`, `periodic`, `periodic-violin`, `distribution`, `scatter`, `boxplot`, `taylor`, `fairmode-target`, `fairmode-statsummary`
+- Report: `timeseries`, `periodic`, `periodic-violin`, `distribution`, `histogram`, `scatter`, `boxplot`, `taylor`, `fairmode-target`, `fairmode-statsummary`
 - Library: Not applicable
 
 ### Add annotations (`_annotate`)
@@ -128,9 +133,9 @@ If the configuration option `_annotate` is added, a box will be created on the p
 ![annotate](uploads/annotate.jpg)
 
 Plot types: 
-- Dashboard: `map`, `timeseries`, `periodic`, `periodic-violin`, `distribution`, `scatter`, `boxplot`, `taylor`, `fairmode-target`
-- Report: `map`, `timeseries`, `periodic`, `periodic-violin`, `distribution`, `scatter`, `boxplot`, `heatmap`, `taylor`, `fairmode-target`
-- Library: `map`, `timeseries`, `periodic`, `periodic-violin`, `distribution`, `scatter`, `boxplot`, `heatmap`, `taylor`, `fairmode-target`
+- Dashboard: `map`, `timeseries`, `periodic`, `periodic-violin`, `distribution`, `histogram`, `scatter`, `boxplot`, `taylor`, `fairmode-target`
+- Report: `map`, `timeseries`, `periodic`, `periodic-violin`, `distribution`, `histogram`, `scatter`, `boxplot`, `heatmap`, `taylor`, `fairmode-target`
+- Library: `map`, `timeseries`, `periodic`, `periodic-violin`, `distribution`, `histogram`, `scatter`, `boxplot`, `heatmap`, `taylor`, `fairmode-target`
 
 ### Get the bias of the data (`_bias`)
 
@@ -139,9 +144,9 @@ Alternatively the plots can be modified to show, rather than the absolute observ
 ![bias](uploads/bias.jpg)
 
 Plot types: 
-- Dashboard: `timeseries`, `periodic`, `distribution`, `statsummary`
-- Report: `map`, `timeseries`, `periodic`, `distribution`, `heatmap`, `table`, `statsummary`
-- Library: `timeseries`, `periodic`, `distribution`, `heatmap`, `table`, `statsummary`
+- Dashboard: `timeseries`, `periodic`, `distribution`, `histogram`, `statsummary`
+- Report: `map`, `timeseries`, `periodic`, `distribution`, `histogram`, `heatmap`, `table`, `statsummary`
+- Library: `timeseries`, `periodic`, `distribution`, `histogram`, `heatmap`, `table`, `statsummary`
 
 ### Add a smooth line to the timeseries (`_smooth`)
 
