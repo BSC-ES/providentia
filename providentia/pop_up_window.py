@@ -1,6 +1,7 @@
 """ Class for dashboard pop-up window """
 
 import copy
+from functools import partial
 import platform
 import time
 
@@ -13,11 +14,15 @@ from .read_aux import get_default_qa
 from .dashboard_elements import (
     set_formatting,
     wrap_tooltip_text,
+    search_field_labels,
     ComboBox,
     CheckableComboBox,
 )
 from .warnings_prv import show_message
 
+
+# narrowest a column is squeezed to before it is left to be scrolled through
+MINIMUM_COLUMN_WIDTH = 250
 
 PROVIDENTIA_ROOT = "/".join(CURRENT_PATH.split("/")[:-1])
 # get operating system specific formatting
@@ -178,6 +183,40 @@ class PopUpWindow(QtWidgets.QWidget):
 
             add_row_button.clicked.connect(lambda: self.add_multispecies_widgets())
 
+        # check if page has fields a search could narrow down
+        self.searchable_menu_types = [
+            menu_type
+            for menu_type in ["checkboxes", "rangeboxes", "navigation_buttons", "models"]
+            if menu_type in menu_current_keys
+            and len(self.menu_current[menu_type].get("labels", [])) > 0
+        ]
+
+        # a search on the root page of a menu whose buttons lead to further
+        # fields (i.e. metadata) reaches into those pages rather than only
+        # matching the button labels, as the fields being looked for are a
+        # level below - see build_search_results()
+        self.search_results = {}
+        self.grids = {}
+        self.search_descends = (len(self.menu_levels) == 0) and any(
+            self.submenu_fields()
+        )
+
+        # create search box, sat with the buttons so the two read as one row
+        if self.searchable_menu_types:
+            self.have_buttons = True
+            self.search_box = set_formatting(
+                QtWidgets.QLineEdit(),
+                formatting_dict["popup_lineedit_search"],
+            )
+            self.search_box.setPlaceholderText("Search fields")
+            self.search_box.setClearButtonEnabled(True)
+            self.search_box.setToolTip(
+                "Show only the fields matching the search. Case, spaces, "
+                "underscores and dashes are ignored"
+            )
+            self.search_box.textChanged.connect(self.handle_search)
+            button_row.addWidget(self.search_box)
+
         # add button row to parent layout (if have some buttons)
         if self.have_buttons:
             parent_layout.addLayout(button_row)
@@ -233,6 +272,14 @@ class PopUpWindow(QtWidgets.QWidget):
         horizontal_parent : QtWidgets.QHBoxLayout
             Layout containing the horizontally concatenated grids.
         """
+
+        # kept so a search results column can be sat alongside them
+        self.menu_type_scroll_areas = []
+
+        # keep hold of each menu type's grid, its rows and the measurements
+        # used to lay it out, so that a search can place the rows it keeps
+        # exactly as they were placed here - see apply_search_filter()
+        self.grids = {}
 
         # create horizontal layout to place all menu types within
         horizontal_parent = QtWidgets.QHBoxLayout()
@@ -466,6 +513,7 @@ class PopUpWindow(QtWidgets.QWidget):
             # add horizontal scroll
             scroll_area.setWidget(scroll_area_content)
             horizontal_parent.addWidget(scroll_area)
+            self.menu_type_scroll_areas.append(scroll_area)
 
             # add horizontal scrollbar spacing to occupied vertical space
             occupied_vertical_space_before_grid += (
@@ -477,8 +525,25 @@ class PopUpWindow(QtWidgets.QWidget):
                 occupied_vertical_space_before_grid
             )
 
+            # store what a re-layout needs to reproduce this placement
+            self.grids[menu_type] = {
+                "grid": self.grid,
+                "rows": [],
+                "column_headers": [],
+                "obj_height": obj_height,
+                "vertical_spacing": grid_vertical_spacing,
+                "start_row_n": start_row_n,
+                "space_before_grid": occupied_vertical_space_before_grid,
+                "have_column_headers": have_column_headers,
+                "hidden_by_search": set(),
+                "visible_labels": None,
+            }
+
             # iterate through all grid labels
             for label_ii, label in enumerate(menu_current_type["labels"]):
+                # widgets making up this row, gathered as they are created
+                row_widgets = {"subtitle": None, "label": None, "elements": []}
+                self.grids[menu_type]["rows"].append(row_widgets)
                 # evaluate if all available vertical space has been consumed
                 row_available_space = (
                     self.full_window_geometry.height()
@@ -515,6 +580,7 @@ class PopUpWindow(QtWidgets.QWidget):
                                 column_n,
                                 QtCore.Qt.AlignLeft,
                             )
+                            row_widgets["subtitle"] = subtitle_label
 
                             # update occupied vertical space
                             currently_occupied_vertical_space += (
@@ -550,6 +616,7 @@ class PopUpWindow(QtWidgets.QWidget):
                         column_n,
                         QtCore.Qt.AlignLeft,
                     )
+                    row_widgets["label"] = rangebox_label
 
                 # create all elements in column, per row
                 for (element_ii, element), widget in zip(
@@ -849,6 +916,9 @@ class PopUpWindow(QtWidgets.QWidget):
                             column_n + element_ii,
                             QtCore.Qt.AlignLeft,
                         )
+                    row_widgets["elements"].append(
+                        self.page_memory[menu_type][element][label_ii]
+                    )
 
                 # update multispecies filtering fields for each row
                 if menu_type == "multispecies":
@@ -869,36 +939,15 @@ class PopUpWindow(QtWidgets.QWidget):
 
             # add column headers to menu type grid if needed
             if have_column_headers:
+                # checkbox and rangebox headers are placed by the same method
+                # a search uses, so that they are known to it and can be put
+                # back over whichever columns the search leaves in use
+                self.place_column_headers(menu_type, column_n)
+
                 for column_number in np.arange(
                     0, column_n + 1, self.page_memory[menu_type]["n_column_consumed"]
                 ):
-                    if menu_type == "checkboxes":
-                        texts = ["K", "R"]
-                        for i, text in enumerate(texts):
-                            column_label = set_formatting(
-                                QtWidgets.QLabel(self, text=text),
-                                formatting_dict["popup_label_column_header"],
-                            )
-                            self.grid.addWidget(
-                                column_label,
-                                0,
-                                column_number + i + 1,
-                                QtCore.Qt.AlignCenter,
-                            )
-                    elif menu_type == "rangeboxes":
-                        texts = ["Min", "Max", "A"]
-                        for i, text in enumerate(texts):
-                            column_label = set_formatting(
-                                QtWidgets.QLabel(self, text=text),
-                                formatting_dict["popup_label_column_header"],
-                            )
-                            self.grid.addWidget(
-                                column_label,
-                                0,
-                                column_number + i + 1,
-                                QtCore.Qt.AlignCenter,
-                            )
-                    elif menu_type == "multispecies":
+                    if menu_type == "multispecies":
                         if len(self.menu_current["multispecies"]["labels"]) > 0:
                             texts = [
                                 "Network",
@@ -918,8 +967,522 @@ class PopUpWindow(QtWidgets.QWidget):
                                     column_label, 1, i, QtCore.Qt.AlignCenter
                                 )
 
+        # kept so that a search can add its results column beside the grids
+        self.horizontal_parent = horizontal_parent
+
         # return horizontally concatenated menu type grids
         return horizontal_parent
+
+
+    def submenu_fields(self):
+        """
+        Function which gathers the fields sitting one level below the current
+        page, as (menu level, menu type, index, label) for each.
+
+        Used by the metadata menu, whose root page holds nothing but buttons
+        into the five metadata types: the fields a search is after are inside
+        those pages, so the search reaches into them rather than only matching
+        the button labels.
+
+        Returns
+        -------
+        list
+            One entry per field found below this page
+        """
+
+        fields = []
+        if "navigation_buttons" not in self.menu_current:
+            return fields
+
+        for menu_level in self.menu_current["navigation_buttons"].get("labels", []):
+            submenu = self.menu_current.get(menu_level)
+            if not isinstance(submenu, dict):
+                continue
+            for menu_type in ["rangeboxes", "navigation_buttons"]:
+                labels = submenu.get(menu_type, {}).get("labels", [])
+                for label_ii, label in enumerate(labels):
+                    fields.append((menu_level, menu_type, label_ii, label))
+
+        return fields
+
+    def handle_search(self, query):
+        """
+        Function which narrows the page down to the fields matching what has
+        been typed into the search box, upon every change to it.
+
+        Parameters
+        ----------
+        query : str
+            Text currently in the search box
+        """
+
+        # the metadata root page keeps its own column of buttons whole, as the
+        # fields being searched for are a level below it and are shown in a
+        # results column of their own instead
+        if self.search_descends:
+            self.build_search_results(query)
+            return None
+
+        for menu_type in self.grids:
+            # a multispecies row is a filter being built up rather than a
+            # named field, so there is nothing to search through
+            if menu_type == "multispecies":
+                continue
+            labels = list(self.menu_current[menu_type].get("labels", []))
+            matched = search_field_labels(query, labels)
+            self.filter_grid(menu_type, set(matched))
+
+        return None
+
+    def filter_grid(self, menu_type, visible_labels):
+        """
+        Function which lays a menu type's grid out again with only the wanted
+        rows in it, closing up the space left by the rest.
+
+        The rows are the ones built by create_grid(), moved rather than
+        rebuilt, so that anything selected or typed into them survives a
+        search - and stays where the window's closure expects to find it, as
+        it reads the rows back by position.
+
+        Parameters
+        ----------
+        menu_type : str
+            Menu type whose grid is being laid out again
+        visible_labels : set
+            Indices of the labels to keep
+        """
+
+        grid_info = self.grids[menu_type]
+        grid = grid_info["grid"]
+        grid_info["visible_labels"] = visible_labels
+
+        # take every row out of the grid, hiding what it holds - a widget left
+        # out of the layout is still drawn where it last sat until it is
+        for row in grid_info["rows"]:
+            for widget in [row["subtitle"], row["label"]] + row["elements"]:
+                if widget is None:
+                    continue
+                grid.removeWidget(widget)
+                # only hide what is showing, so that a widget the page itself
+                # hid (an unchecked model's forecast options, say) is not
+                # brought back by a search
+                if not widget.isHidden():
+                    grid_info["hidden_by_search"].add(widget)
+                    widget.hide()
+
+        # the column headers follow the number of columns, so they are made
+        # again rather than moved
+        for header in grid_info["column_headers"]:
+            header.setParent(None)
+        grid_info["column_headers"] = []
+
+        n_column_consumed = self.page_memory[menu_type]["n_column_consumed"]
+        row_n = 0
+        column_n = 0
+        occupied_vertical_space = copy.deepcopy(grid_info["space_before_grid"])
+        pending_subtitle = None
+
+        def show_row_widget(widget, column, alignment):
+            """Place one widget back in the grid, showing it if the search hid it."""
+
+            grid.addWidget(widget, grid_info["start_row_n"] + row_n, column, alignment)
+            if widget in grid_info["hidden_by_search"]:
+                grid_info["hidden_by_search"].discard(widget)
+                widget.show()
+
+        for label_ii, row in enumerate(grid_info["rows"]):
+            # a subtitle heads the rows beneath it, so it is only worth showing
+            # once one of them has survived the search
+            if row["subtitle"] is not None:
+                pending_subtitle = row["subtitle"]
+
+            if label_ii not in visible_labels:
+                continue
+
+            # start a new column once this one has no room left, exactly as
+            # create_grid() does when first filling the grid
+            if (
+                self.full_window_geometry.height() - occupied_vertical_space
+            ) <= int(grid_info["obj_height"]):
+                column_n += n_column_consumed
+                row_n = 0
+                occupied_vertical_space = copy.deepcopy(grid_info["space_before_grid"])
+
+            if pending_subtitle is not None:
+                show_row_widget(pending_subtitle, column_n, QtCore.Qt.AlignLeft)
+                pending_subtitle = None
+                occupied_vertical_space += (
+                    int(formatting_dict["popup_subtitle"]["QLabel"]["height"])
+                    + grid_info["vertical_spacing"]
+                )
+                row_n += 1
+
+            if row["label"] is not None:
+                show_row_widget(row["label"], column_n, QtCore.Qt.AlignLeft)
+
+            for element_ii, widget in enumerate(row["elements"]):
+                # the label of a row takes the first column of the group, so
+                # its elements start one along - as they were first placed
+                column_offset = element_ii + 1 if row["label"] is not None else element_ii
+                show_row_widget(widget, column_n + column_offset, QtCore.Qt.AlignLeft)
+
+            row_n += 1
+            occupied_vertical_space += (
+                int(grid_info["obj_height"]) + grid_info["vertical_spacing"]
+            )
+
+        # put the column headers back over whatever columns are now in use
+        if grid_info["have_column_headers"]:
+            self.place_column_headers(menu_type, column_n)
+
+        return None
+
+    def place_column_headers(self, menu_type, max_column):
+        """
+        Function which puts a header over each column of a menu type's grid.
+
+        Parameters
+        ----------
+        menu_type : str
+            Menu type the headers belong to
+        max_column : int
+            Index of the last column in use
+        """
+
+        header_texts = {"checkboxes": ["K", "R"], "rangeboxes": ["Min", "Max", "A"]}
+        if menu_type not in header_texts:
+            return None
+
+        grid_info = self.grids[menu_type]
+        for column_number in np.arange(
+            0, max_column + 1, self.page_memory[menu_type]["n_column_consumed"]
+        ):
+            for header_ii, text in enumerate(header_texts[menu_type]):
+                column_label = set_formatting(
+                    QtWidgets.QLabel(self, text=text),
+                    formatting_dict["popup_label_column_header"],
+                )
+                grid_info["grid"].addWidget(
+                    column_label, 0, column_number + header_ii + 1, QtCore.Qt.AlignCenter
+                )
+                column_label.show()
+                grid_info["column_headers"].append(column_label)
+
+        return None
+
+
+    def build_search_results(self, query):
+        """
+        Function which fills a second column beside the menu with the fields
+        below this page matching what has been typed into the search box.
+
+        Used by the metadata menu's root page, which holds only the buttons
+        into the five metadata types. The column it already shows is left
+        whole, so nothing is lost from sight, and the matches are listed
+        alongside it: a numeric field with its min, max and apply controls, so
+        it can be set without leaving the page, and a text field as the button
+        onto its own page of values.
+
+        Parameters
+        ----------
+        query : str
+            Text currently in the search box
+        """
+
+        fields = self.submenu_fields()
+        matched = (
+            search_field_labels(query, [field[3] for field in fields])
+            if query.strip()
+            else []
+        )
+
+        # build the column the first time it is needed, then reuse it
+        if not self.search_results:
+            scroll_area_content = QtWidgets.QWidget()
+            results_grid = QtWidgets.QGridLayout(scroll_area_content)
+            results_grid.setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignCenter)
+            results_grid.setHorizontalSpacing(15)
+            results_grid.setVerticalSpacing(3)
+            scroll_area = QtWidgets.QScrollArea()
+            scroll_area.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+            scroll_area.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+            scroll_area.setWidgetResizable(True)
+            scroll_area.setFrameShape(0)
+            scroll_area.setWidget(scroll_area_content)
+            self.horizontal_parent.addWidget(scroll_area)
+            self.search_results = {"scroll_area": scroll_area, "grid": results_grid}
+
+        results_grid = self.search_results["grid"]
+
+        # empty the column of the last search's results
+        while results_grid.count():
+            item = results_grid.takeAt(0)
+            if item.widget() is not None:
+                item.widget().setParent(None)
+
+        # with nothing to show the column is taken away entirely, leaving the
+        # menu's own column centred as it was before the search
+        if not matched:
+            self.search_results["scroll_area"].hide()
+            self.set_columns_centred(False)
+            return None
+        self.search_results["scroll_area"].show()
+
+        # results run into further columns once one is full, as the menu's own
+        # grids do, rather than off the bottom of the window
+        row_height = int(formatting_dict["popup_button"]["QPushButton"]["height"]) + 3
+        occupied_vertical_space = (
+            (self.page_margin * 2)
+            + int(formatting_dict["popup_title"]["QLabel"]["height"])
+            + (self.layout_spacing * 2)
+            + int(formatting_dict["popup_button"]["QPushButton"]["height"])
+            + int(formatting_dict["popup_label_column_header"]["QLabel"]["height"])
+            + 3
+            + (self.search_results["scroll_area"].horizontalScrollBar().height() * 2.0)
+        )
+        rows_per_column = max(
+            1,
+            int(
+                (self.full_window_geometry.height() - occupied_vertical_space)
+                // row_height
+            ),
+        )
+
+        # column headers, only worth showing once a numeric field is among the
+        # results, as they head its min/max/apply controls
+        if any(fields[field_ii][1] == "rangeboxes" for field_ii in matched):
+            for column_start in range(
+                0, len(matched), rows_per_column
+            ):
+                column_n = (column_start // rows_per_column) * 4
+                for header_ii, text in enumerate(["Min", "Max", "A"]):
+                    results_grid.addWidget(
+                        set_formatting(
+                            QtWidgets.QLabel(self, text=text),
+                            formatting_dict["popup_label_column_header"],
+                        ),
+                        0,
+                        column_n + header_ii + 1,
+                        QtCore.Qt.AlignCenter,
+                    )
+
+        for result_ii, field_ii in enumerate(matched):
+            row_n = (result_ii % rows_per_column) + 1
+            column_n = (result_ii // rows_per_column) * 4
+            menu_level, menu_type, label_ii, label = fields[field_ii]
+            submenu = self.menu_current[menu_level][menu_type]
+            tooltip = ""
+            if len(submenu.get("tooltips", [])) > label_ii:
+                tooltip = wrap_tooltip_text(
+                    "{} ({})".format(submenu["tooltips"][label_ii], menu_level),
+                    self.full_window_geometry.width(),
+                    "popup_label",
+                )
+
+            # a text field is filtered by picking from its values, so the
+            # result is the button onto that page
+            if menu_type == "navigation_buttons":
+                result_button = set_formatting(
+                    QtWidgets.QPushButton(str(label)), formatting_dict["popup_button"]
+                )
+                result_button.setToolTip(tooltip)
+                result_button.clicked.connect(
+                    partial(self.open_search_result_page, [menu_level, label])
+                )
+                results_grid.addWidget(
+                    result_button, row_n, column_n, QtCore.Qt.AlignLeft
+                )
+                continue
+
+            # a numeric field is set by its bounds, so those are shown here
+            # and written straight back to the page they belong to
+            result_label = set_formatting(
+                QtWidgets.QLabel(self, text=str(label)), formatting_dict["popup_label"]
+            )
+            result_label.setToolTip(tooltip)
+            results_grid.addWidget(
+                result_label, row_n, column_n, QtCore.Qt.AlignLeft
+            )
+
+            for element_ii, element in enumerate(["current_lower", "current_upper"]):
+                rangebox = set_formatting(
+                    QtWidgets.QLineEdit(), formatting_dict["popup_lineedit_rangebox"]
+                )
+                rangebox.setText(str(submenu[element][label_ii]))
+                rangebox.textChanged.connect(
+                    partial(self.handle_search_result_range, submenu, element, label_ii)
+                )
+                results_grid.addWidget(
+                    rangebox, row_n, column_n + element_ii + 1, QtCore.Qt.AlignLeft
+                )
+
+            apply_box = set_formatting(
+                QtWidgets.QCheckBox(""), formatting_dict["popup_checkbox"]
+            )
+            if label in list(submenu["apply_selected"]):
+                apply_box.setCheckState(QtCore.Qt.Checked)
+            apply_box.stateChanged.connect(
+                partial(self.handle_search_result_apply, submenu, label)
+            )
+            results_grid.addWidget(apply_box, row_n, column_n + 3, QtCore.Qt.AlignLeft)
+
+        # sat against the menu's own column, the two centred together. Left
+        # to the next turn of the event loop, as a widget only settles on the
+        # width it needs once it has been through one
+        QtCore.QTimer.singleShot(0, partial(self.set_columns_centred, True))
+
+        return None
+
+    def set_columns_centred(self, centred):
+        """
+        Function which sets whether the page's columns hug their contents and
+        sit together in the middle, or spread out across the page as they do
+        with nothing to sit beside.
+
+        Parameters
+        ----------
+        centred : bool
+            Whether the columns should be held together
+        """
+
+        policy = (
+            QtWidgets.QSizePolicy.Maximum
+            if centred
+            else QtWidgets.QSizePolicy.Preferred
+        )
+        scroll_areas = self.menu_type_scroll_areas + (
+            [self.search_results["scroll_area"]] if self.search_results else []
+        )
+
+        # the columns must not ask for more width than the window has, or a
+        # long list of results would run off the side of it with no way to
+        # reach the end. Held within it instead, which leaves the results
+        # column to be scrolled through
+        available_width = (
+            self.full_window_geometry.width()
+            - (self.page_margin * 2)
+            - (self.horizontal_parent.spacing() * max(0, len(scroll_areas) - 1))
+        )
+
+        for scroll_area in scroll_areas:
+            scroll_area.setSizePolicy(policy, QtWidgets.QSizePolicy.Preferred)
+            # hugging the contents must not cut them off, so each column is
+            # held at the width its contents ask for. Taken from the layout
+            # rather than the widget, whose own hint is still the one it had
+            # before the column was filled
+            content = scroll_area.widget()
+            content_layout = content.layout()
+            if content_layout is not None:
+                content_layout.invalidate()
+                content_layout.activate()
+            content_hint = (
+                content_layout.sizeHint()
+                if content_layout is not None
+                else content.sizeHint()
+            )
+            wanted_width = content_hint.width()
+            if centred and scroll_area is scroll_areas[-1]:
+                # the last column takes whatever width the ones before it
+                # have left, never less than enough to read a field in
+                taken_width = sum(
+                    other.minimumWidth() for other in scroll_areas[:-1]
+                )
+                wanted_width = min(
+                    wanted_width, max(MINIMUM_COLUMN_WIDTH, available_width - taken_width)
+                )
+            elif centred:
+                wanted_width = min(wanted_width, available_width)
+            scroll_area.setMinimumWidth(wanted_width if centred else 0)
+            # a column filled after the window was laid out is left at the
+            # height it was given when empty, so it is asked for again here.
+            # A column too wide to fit is scrolled through sideways, and the
+            # scrollbar takes a strip of the height with it
+            wanted_height = content_hint.height()
+            if content_hint.width() > wanted_width:
+                wanted_height += scroll_area.horizontalScrollBar().sizeHint().height()
+            scroll_area.setMinimumHeight(
+                min(wanted_height, self.full_window_geometry.height())
+                if centred
+                else 0
+            )
+            scroll_area.updateGeometry()
+
+        return None
+
+    def handle_search_result_range(self, rangeboxes, element, label_ii, text):
+        """
+        Function which writes a bound set in the search results column back to
+        the menu page the field belongs to, upon it being typed.
+
+        Written as it is typed rather than when the window closes, as the
+        results are rebuilt on every change to the search box and so are gone
+        by then.
+
+        Parameters
+        ----------
+        rangeboxes : dict
+            Rangeboxes of the menu level the field belongs to
+        element : str
+            Bound being set, "current_lower" or "current_upper"
+        label_ii : int
+            Position of the field within that menu level
+        text : str
+            Value that has been typed
+        """
+
+        rangeboxes[element][label_ii] = text
+
+        return None
+
+    def handle_search_result_apply(self, rangeboxes, label, state):
+        """
+        Function which adds or removes a field from those to filter by, upon
+        its apply box being checked in the search results column.
+
+        Parameters
+        ----------
+        rangeboxes : dict
+            Rangeboxes of the menu level the field belongs to
+        label : str
+            Field the apply box belongs to
+        state : int
+            Check state of the box
+        """
+
+        apply_selected = [
+            selected for selected in list(rangeboxes["apply_selected"]) if selected != label
+        ]
+        if state == QtCore.Qt.Checked:
+            apply_selected.append(label)
+        rangeboxes["apply_selected"] = apply_selected
+
+        return None
+
+    def open_search_result_page(self, menu_levels):
+        """
+        Function which opens the page a search result sits on, upon clicking
+        it in the results column.
+
+        Parameters
+        ----------
+        menu_levels : list
+            Sequence of keys leading to the page holding the field
+        """
+
+        self.new_window = PopUpWindow(
+            self.read_instance,
+            self.menu_root,
+            list(menu_levels),
+            self.full_window_geometry,
+        )
+
+        # sleep briefly to allow new page to be generated
+        time.sleep(0.1)
+
+        # close current pop-up page
+        self.close()
+
+        return None
 
     def open_new_page(self):
         """
@@ -981,6 +1544,29 @@ class PopUpWindow(QtWidgets.QWidget):
         # close current pop-up page
         self.close()
 
+    def label_is_showing(self, menu_type, label_ii):
+        """
+        Function which reports whether a field is currently showing, so that
+        the select buttons only reach the fields a search has left on the
+        page rather than the whole menu behind it.
+
+        Parameters
+        ----------
+        menu_type : str
+            Menu type the field belongs to
+        label_ii : int
+            Position of the field within the menu type
+
+        Returns
+        -------
+        bool
+            Whether the field is showing
+        """
+
+        visible_labels = self.grids.get(menu_type, {}).get("visible_labels")
+
+        return (visible_labels is None) or (label_ii in visible_labels)
+
     def select_all(self):
         """
         Sets the state of all applicable checkboxes within the current menu to checked.
@@ -998,6 +1584,8 @@ class PopUpWindow(QtWidgets.QWidget):
                 for checkbox_ii, checkbox in enumerate(
                     self.page_memory[menu_type][element]
                 ):
+                    if not self.label_is_showing(menu_type, checkbox_ii):
+                        continue
                     self.page_memory[menu_type][element][checkbox_ii].setCheckState(
                         QtCore.Qt.Checked
                     )
@@ -1019,6 +1607,8 @@ class PopUpWindow(QtWidgets.QWidget):
                 for checkbox_ii, checkbox in enumerate(
                     self.page_memory[menu_type][element]
                 ):
+                    if not self.label_is_showing(menu_type, checkbox_ii):
+                        continue
                     self.page_memory[menu_type][element][checkbox_ii].setCheckState(
                         QtCore.Qt.Unchecked
                     )
@@ -1033,6 +1623,8 @@ class PopUpWindow(QtWidgets.QWidget):
             for checkbox_ii, checkbox in enumerate(
                 self.page_memory["checkboxes"][element]
             ):
+                if not self.label_is_showing("checkboxes", checkbox_ii):
+                    continue
                 self.page_memory["checkboxes"][element][checkbox_ii].setCheckState(
                     QtCore.Qt.Unchecked
                 )
@@ -1054,6 +1646,8 @@ class PopUpWindow(QtWidgets.QWidget):
         # now select only desired default checkboxes
         for element in self.page_memory["checkboxes"]["ordered_elements"]:
             for default_ind in default_inds:
+                if not self.label_is_showing("checkboxes", default_ind):
+                    continue
                 self.page_memory["checkboxes"][element][default_ind].setCheckState(
                     QtCore.Qt.Checked
                 )

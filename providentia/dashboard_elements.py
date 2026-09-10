@@ -1,8 +1,10 @@
 """ Functions and classes to create and format dashboard PyQt elements """
 
 import copy
+from difflib import SequenceMatcher
 from functools import partial
 import platform
+import re
 from textwrap import wrap
 
 import matplotlib
@@ -27,6 +29,142 @@ elif operating_system in ["Windows", "MINGW32_NT", "MINGW64_NT"]:
     formatting_dict = yaml.safe_load(
         open(join(PROVIDENTIA_ROOT, "settings/internal/stylesheet_windows.yaml"))
     )
+
+
+def normalise_search_text(text):
+    """
+    Function which reduces text to the characters a search should compare,
+    so that case, spaces, underscores and dashes cannot stop a field being
+    found (i.e. "Station Name", "station_name" and "stationname" are equal).
+
+    Parameters
+    ----------
+    text : str
+        Text to normalise
+
+    Returns
+    -------
+    str
+        Text as lowercase letters and digits only
+    """
+
+    return re.sub(r"[^0-9a-z]", "", str(text).lower())
+
+
+def search_match_score(query, label):
+    """
+    Function which scores how well a field label answers a search query,
+    returning None when the label is not a match at all.
+
+    Scored rather than simply matched so that results can be ordered by how
+    well they answer the query, the closest first. Matching runs through
+    progressively looser tests - the whole query as written, then its words in
+    any order, then an approximate comparison which tolerates a typo - so an
+    exact match is never pushed down the list by a fuzzy one.
+
+    Parameters
+    ----------
+    query : str
+        Text typed into the search box
+    label : str
+        Field label to test against
+
+    Returns
+    -------
+    float or None
+        Score, where lower is a better match, or None if the label does not
+        match the query
+    """
+
+    query_normalised = normalise_search_text(query)
+    label_normalised = normalise_search_text(label)
+
+    # an empty query matches everything, leaving the menu as it was
+    if not query_normalised:
+        return 0.0
+    if not label_normalised:
+        return None
+
+    if label_normalised == query_normalised:
+        return 0.0
+    if label_normalised.startswith(query_normalised):
+        return 0.1
+    if query_normalised in label_normalised:
+        # earlier in the label reads as the better match
+        return 0.2 + (
+            label_normalised.index(query_normalised) / len(label_normalised)
+        )
+
+    # every word of the query somewhere in the label, in any order, so that
+    # "class area" finds "area_classification"
+    query_words = [
+        normalise_search_text(word) for word in re.split(r"[\s_-]+", query.strip())
+    ]
+    query_words = [word for word in query_words if word]
+    if len(query_words) > 1 and all(
+        word in label_normalised for word in query_words
+    ):
+        return 0.5
+
+    # approximate match, for a mistyped or half-remembered field name. Held
+    # back to longer queries, below which nearly everything looks similar to
+    # everything else, and only ever used by search_field_labels() when the
+    # query matches nothing as written
+    if len(query_normalised) >= 5:
+        ratio = SequenceMatcher(None, query_normalised, label_normalised).ratio()
+        # also compared against the best window of the label the query could
+        # sit in, so a typo still finds a long name the query is only part of
+        window = len(query_normalised)
+        for start in range(max(1, len(label_normalised) - window + 1)):
+            ratio = max(
+                ratio,
+                SequenceMatcher(
+                    None, query_normalised, label_normalised[start : start + window]
+                ).ratio(),
+            )
+        if ratio >= 0.75:
+            return 1.0 + (1.0 - ratio)
+
+    return None
+
+
+def search_field_labels(query, labels):
+    """
+    Function which picks the field labels answering a search query, ordered
+    with the closest match first.
+
+    Approximate matches are only ever offered when nothing matches the query
+    as written: a typo should find the field it was meant to be, but should
+    not pad a good set of results with loosely similar names.
+
+    Parameters
+    ----------
+    query : str
+        Text typed into the search box
+    labels : list
+        Field labels to search through
+
+    Returns
+    -------
+    list
+        Indices of the matching labels, best match first
+    """
+
+    if not normalise_search_text(query):
+        return list(range(len(labels)))
+
+    scored = []
+    for label_ii, label in enumerate(labels):
+        score = search_match_score(query, label)
+        if score is not None:
+            scored.append((score, label_ii))
+
+    # scores of 1.0 and above are the approximate matches
+    exact = [entry for entry in scored if entry[0] < 1.0]
+    if exact:
+        scored = exact
+
+    return [label_ii for _, label_ii in sorted(scored)]
 
 
 def set_formatting(

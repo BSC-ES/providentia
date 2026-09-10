@@ -90,6 +90,14 @@ See here for more detailed information: [Period filtering](periods)
 
 The **METADATA** button opens a pop-up menu allows the user to filter stations on the map by a variety of metadata variables. See here for more detailed information: [Metadata filtering](filtering_metadata)
 
+#### Searching for a field
+
+The pop-up menus opened by **QA**, **FLAGS**, **MODELS**, **COVERAGE**, **PERIOD** and **METADATA** each have a search box beside their buttons. Typing in it leaves only the fields matching what has been typed, and emptying it brings the rest back. Case, spaces, underscores and dashes are ignored, so `station name`, `Station_Name` and `stationname` all find the same field, and a small typo will still find what was meant when nothing matches exactly.
+
+Anything already selected or typed into a field stays as it is while searching, whether or not the field is on screen. The **Select All**, **Clear All** and **Select Default** buttons apply to the fields the search has left showing, so they can be used to select a group of fields at once.
+
+The **METADATA** menu searches the fields inside all of its metadata types rather than the type buttons themselves, listing what it finds in a second column beside them. A numeric field is shown there with its min, max and apply controls, so it can be set without opening the page it belongs to, and a text field is shown as the button onto its own page of values.
+
 ### Statistics
 
 ![providentia](uploads/dashboard_statistics.png)
