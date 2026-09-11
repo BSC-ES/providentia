@@ -61,6 +61,40 @@ QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 PROVIDENTIA_ROOT = "/".join(CURRENT_PATH.split("/")[:-1])
 
 
+# plots showing a table or a written summary rather than a range of data.
+# There is nothing in them to zoom into, and the toolbar's rubber band only
+# left them redrawn at a scale that made them unreadable
+NON_NAVIGABLE_PLOTS = [
+    "contingencytable",
+    "fairmode-statsummary",
+    "metadata",
+    "statsummary",
+]
+
+
+def disable_axis_navigation(axes):
+    """
+    Stop the navigation toolbar zooming or panning the given axes, through
+    the hooks its rubber band checks before acting.
+
+    Parameters
+    ----------
+    axes : object
+        An axis, a list of axes, or a dict of them
+    """
+
+    if isinstance(axes, dict):
+        axes = list(axes.values())
+    elif not isinstance(axes, (list, tuple)):
+        axes = [axes]
+
+    for ax in axes:
+        ax.can_zoom = lambda: False
+        ax.can_pan = lambda: False
+
+    return None
+
+
 class Dashboard(QtWidgets.QWidget):
     """Class that generates Providentia dashboard interface."""
 
@@ -958,7 +992,7 @@ class Dashboard(QtWidgets.QWidget):
         self.block_MPL_canvas_updates = True
 
         # reset per-session legend display name overrides (see
-        # get_display_label() in plotting.py) - this function runs on every
+        # get_display_label() in plot_aux.py) - this function runs on every
         # data load/reload, so a custom legend name doesn't survive one,
         # by design
         self.legend_label_overrides = {}
@@ -2075,12 +2109,12 @@ class Dashboard(QtWidgets.QWidget):
             # the ticks vanish. The diagram is a fixed comparison space
             # anyway, not a literal data range, so zoom/pan is disabled
             # through the hook matplotlib's toolbar checks
-            for taylor_ax in (
-                canvas_instance.plot_axes[changed_plot_type],
-                canvas_instance.plotting.taylor_polar_relevant_axis,
-            ):
-                taylor_ax.can_zoom = lambda: False
-                taylor_ax.can_pan = lambda: False
+            disable_axis_navigation(
+                [
+                    canvas_instance.plot_axes[changed_plot_type],
+                    canvas_instance.plotting.taylor_polar_relevant_axis,
+                ]
+            )
 
         elif changed_plot_type == "fairmode-statsummary":
             # create gridspec and add it to a list
@@ -2089,6 +2123,11 @@ class Dashboard(QtWidgets.QWidget):
                 for i in range(nrows)
                 for j in range(ncols)
             ]
+
+        # done once the axes exist, whichever of the branches above made them
+        if changed_plot_type in NON_NAVIGABLE_PLOTS:
+            if changed_plot_type in canvas_instance.plot_axes:
+                disable_axis_navigation(canvas_instance.plot_axes[changed_plot_type])
 
     def handle_data_selection_update(self):
         """Execute the data reading process and synchronise the interface and canvas based on current selections."""

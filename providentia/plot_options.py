@@ -6,7 +6,7 @@ import numpy as np
 from .read_aux import drop_nans
 from .statistics import calculate_statistic, get_z_statistic_info, exceedance_lim
 from .warnings_prv import show_message
-from .plot_aux import create_statistical_timeseries
+from .plot_aux import create_statistical_timeseries, get_display_label
 
 
 def log_axes(relevant_axis, log_ax, plot_characteristics, undo=False):
@@ -472,7 +472,11 @@ def annotation(
 
             # append annotation line
             if plot_characteristics["annotate_text"]["mod_labels"]:
-                str_to_append = data_label + " | " + ", ".join(stats_annotate)
+                str_to_append = (
+                    get_display_label(read_instance, data_label)
+                    + " | "
+                    + ", ".join(stats_annotate)
+                )
             else:
                 str_to_append = ", ".join(stats_annotate)
             str_to_annotate.append(str_to_append)

@@ -1586,6 +1586,15 @@ class Canvas(FigureCanvas):
             legend_label.set_gid(data_label)
             legend_label.set_picker(True)
 
+            # a label whose data has been clicked off is drawn in regular
+            # weight rather than bold (see _toggle_legend_visibility()), and
+            # this builds the legend afresh - so without putting that back,
+            # anything hidden returns looking as though it were showing,
+            # which a rename did every time it rebuilt the legend
+            active_labels = self.plot_elements.get("data_labels_active")
+            if (active_labels is not None) and (data_label not in active_labels):
+                legend_label.set_fontweight("regular")
+
         return None
 
     @restores_settings_guard
