@@ -21,9 +21,6 @@ from .dashboard_elements import (
 from .warnings_prv import show_message
 
 
-# narrowest a column is squeezed to before it is left to be scrolled through
-MINIMUM_COLUMN_WIDTH = 250
-
 PROVIDENTIA_ROOT = "/".join(CURRENT_PATH.split("/")[:-1])
 # get operating system specific formatting
 operating_system = platform.system()
@@ -290,6 +287,25 @@ class PopUpWindow(QtWidgets.QWidget):
         # align grids to centre and top
         horizontal_parent.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignTop)
 
+        # layout the menu's own columns are placed in
+        column_parent = horizontal_parent
+
+        # on a page whose search lists its matches in a column of their own
+        # (see build_search_results()), the menu's own columns sit centred in
+        # a half of their own. It spans the whole window until something is
+        # searched for, then the left half, with the results in the right
+        if self.search_descends:
+            horizontal_parent.setAlignment(QtCore.Qt.AlignTop)
+            menu_half = QtWidgets.QWidget()
+            menu_half.setSizePolicy(
+                QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Preferred
+            )
+            column_parent = QtWidgets.QHBoxLayout(menu_half)
+            column_parent.setContentsMargins(0, 0, 0, 0)
+            column_parent.setSpacing(horizontal_parent.spacing())
+            column_parent.addStretch(1)
+            horizontal_parent.addWidget(menu_half, 1)
+
         # order appearance of menu types grids in menu (from left to right)
         menu_type_order_dict = {
             "navigation_buttons": 1,
@@ -512,7 +528,7 @@ class PopUpWindow(QtWidgets.QWidget):
 
             # add horizontal scroll
             scroll_area.setWidget(scroll_area_content)
-            horizontal_parent.addWidget(scroll_area)
+            column_parent.addWidget(scroll_area)
             self.menu_type_scroll_areas.append(scroll_area)
 
             # add horizontal scrollbar spacing to occupied vertical space
@@ -970,6 +986,17 @@ class PopUpWindow(QtWidgets.QWidget):
         # kept so that a search can add its results column beside the grids
         self.horizontal_parent = horizontal_parent
 
+        # close the menu's own columns in from the right too, centring them in
+        # their half, and add the half search results are listed in - hidden
+        # until something is searched for
+        if self.search_descends:
+            column_parent.addStretch(1)
+            self.create_search_results_column()
+            self.hold_menu_columns()
+            # again once the window has been shown, as a widget only settles
+            # on the width it needs once it has been through the event loop
+            QtCore.QTimer.singleShot(0, self.hold_menu_columns)
+
         # return horizontally concatenated menu type grids
         return horizontal_parent
 
@@ -1173,13 +1200,13 @@ class PopUpWindow(QtWidgets.QWidget):
 
     def build_search_results(self, query):
         """
-        Function which fills a second column beside the menu with the fields
-        below this page matching what has been typed into the search box.
+        Function which fills the right half of the page with the fields below
+        it matching what has been typed into the search box.
 
         Used by the metadata menu's root page, which holds only the buttons
-        into the five metadata types. The column it already shows is left
-        whole, so nothing is lost from sight, and the matches are listed
-        alongside it: a numeric field with its min, max and apply controls, so
+        into the five metadata types. Those move into the left half whole, so
+        nothing is lost from sight, and the matches are listed alongside
+        them: a numeric field with its min, max and apply controls, so
         it can be set without leaving the page, and a text field as the button
         onto its own page of values.
 
@@ -1196,22 +1223,6 @@ class PopUpWindow(QtWidgets.QWidget):
             else []
         )
 
-        # build the column the first time it is needed, then reuse it
-        if not self.search_results:
-            scroll_area_content = QtWidgets.QWidget()
-            results_grid = QtWidgets.QGridLayout(scroll_area_content)
-            results_grid.setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignCenter)
-            results_grid.setHorizontalSpacing(15)
-            results_grid.setVerticalSpacing(3)
-            scroll_area = QtWidgets.QScrollArea()
-            scroll_area.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-            scroll_area.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
-            scroll_area.setWidgetResizable(True)
-            scroll_area.setFrameShape(0)
-            scroll_area.setWidget(scroll_area_content)
-            self.horizontal_parent.addWidget(scroll_area)
-            self.search_results = {"scroll_area": scroll_area, "grid": results_grid}
-
         results_grid = self.search_results["grid"]
 
         # empty the column of the last search's results
@@ -1220,13 +1231,29 @@ class PopUpWindow(QtWidgets.QWidget):
             if item.widget() is not None:
                 item.widget().setParent(None)
 
-        # with nothing to show the column is taken away entirely, leaving the
-        # menu's own column centred as it was before the search
-        if not matched:
+        # with nothing searched for the results half is taken away, and the
+        # menu's own column goes back to the middle of the whole window
+        if not query.strip():
             self.search_results["scroll_area"].hide()
-            self.set_columns_centred(False)
+            self.fit_search_results_column()
             return None
+
+        # otherwise the page stays split even when nothing matches, rather
+        # than the menu's column jumping back to the middle and out again as
+        # a search is typed, and says so in place of the results
         self.search_results["scroll_area"].show()
+        if not matched:
+            results_grid.addWidget(
+                set_formatting(
+                    QtWidgets.QLabel(self, text="No fields match"),
+                    formatting_dict["popup_label"],
+                ),
+                0,
+                0,
+                QtCore.Qt.AlignLeft,
+            )
+            QtCore.QTimer.singleShot(0, self.fit_search_results_column)
+            return None
 
         # results run into further columns once one is full, as the menu's own
         # grids do, rather than off the bottom of the window
@@ -1326,86 +1353,89 @@ class PopUpWindow(QtWidgets.QWidget):
             )
             results_grid.addWidget(apply_box, row_n, column_n + 3, QtCore.Qt.AlignLeft)
 
-        # sat against the menu's own column, the two centred together. Left
-        # to the next turn of the event loop, as a widget only settles on the
-        # width it needs once it has been through one
-        QtCore.QTimer.singleShot(0, partial(self.set_columns_centred, True))
+        # left to the next turn of the event loop, as a widget only settles on
+        # the size it needs once it has been through one
+        QtCore.QTimer.singleShot(0, self.fit_search_results_column)
 
         return None
 
-    def set_columns_centred(self, centred):
+    def create_search_results_column(self):
         """
-        Function which sets whether the page's columns hug their contents and
-        sit together in the middle, or spread out across the page as they do
-        with nothing to sit beside.
+        Function which adds the half of the page search results are listed
+        in, to the right of the half holding the menu's own columns (see
+        create_grid()).
 
-        Parameters
-        ----------
-        centred : bool
-            Whether the columns should be held together
+        The two halves are the same width whatever either holds, so that
+        filling this one never moves the menu's columns. Results too wide for
+        it are scrolled through sideways. Hidden until something is searched
+        for, leaving the menu's half the whole window.
         """
 
-        policy = (
-            QtWidgets.QSizePolicy.Maximum
-            if centred
-            else QtWidgets.QSizePolicy.Preferred
+        scroll_area_content = QtWidgets.QWidget()
+        results_grid = QtWidgets.QGridLayout(scroll_area_content)
+        results_grid.setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignHCenter)
+        results_grid.setHorizontalSpacing(15)
+        results_grid.setVerticalSpacing(3)
+        scroll_area = QtWidgets.QScrollArea()
+        scroll_area.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        scroll_area.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setFrameShape(0)
+        scroll_area.setWidget(scroll_area_content)
+        scroll_area.setSizePolicy(
+            QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Preferred
         )
-        scroll_areas = self.menu_type_scroll_areas + (
-            [self.search_results["scroll_area"]] if self.search_results else []
-        )
+        self.horizontal_parent.addWidget(scroll_area, 1)
+        scroll_area.hide()
+        self.search_results = {"scroll_area": scroll_area, "grid": results_grid}
 
-        # the columns must not ask for more width than the window has, or a
-        # long list of results would run off the side of it with no way to
-        # reach the end. Held within it instead, which leaves the results
-        # column to be scrolled through
-        available_width = (
-            self.full_window_geometry.width()
-            - (self.page_margin * 2)
-            - (self.horizontal_parent.spacing() * max(0, len(scroll_areas) - 1))
-        )
+        return None
 
-        for scroll_area in scroll_areas:
-            scroll_area.setSizePolicy(policy, QtWidgets.QSizePolicy.Preferred)
-            # hugging the contents must not cut them off, so each column is
-            # held at the width its contents ask for. Taken from the layout
-            # rather than the widget, whose own hint is still the one it had
-            # before the column was filled
-            content = scroll_area.widget()
-            content_layout = content.layout()
-            if content_layout is not None:
-                content_layout.invalidate()
-                content_layout.activate()
-            content_hint = (
-                content_layout.sizeHint()
-                if content_layout is not None
-                else content.sizeHint()
+    def hold_menu_columns(self):
+        """
+        Function which fixes the menu's own columns at the width their
+        contents need, on a page whose search results sit beside them, so
+        that they stay the same width - and so centred in their half -
+        whatever is searched for.
+        """
+
+        available_width = self.full_window_geometry.width() - (self.page_margin * 2)
+        for scroll_area in self.menu_type_scroll_areas:
+            # taken from the layout rather than the widget, whose own hint is
+            # capped short of what a wide grid needs
+            content_layout = scroll_area.widget().layout()
+            content_layout.invalidate()
+            content_layout.activate()
+            scroll_area.setFixedWidth(
+                min(content_layout.sizeHint().width(), available_width)
             )
-            wanted_width = content_hint.width()
-            if centred and scroll_area is scroll_areas[-1]:
-                # the last column takes whatever width the ones before it
-                # have left, never less than enough to read a field in
-                taken_width = sum(
-                    other.minimumWidth() for other in scroll_areas[:-1]
-                )
-                wanted_width = min(
-                    wanted_width, max(MINIMUM_COLUMN_WIDTH, available_width - taken_width)
-                )
-            elif centred:
-                wanted_width = min(wanted_width, available_width)
-            scroll_area.setMinimumWidth(wanted_width if centred else 0)
-            # a column filled after the window was laid out is left at the
-            # height it was given when empty, so it is asked for again here.
-            # A column too wide to fit is scrolled through sideways, and the
-            # scrollbar takes a strip of the height with it
+
+        return None
+
+    def fit_search_results_column(self):
+        """
+        Function which gives the search results column the height its
+        contents need - a column filled after the window was laid out is
+        otherwise left at the height it was given when empty.
+        """
+
+        scroll_area = self.search_results["scroll_area"]
+        content_layout = self.search_results["grid"]
+        content_layout.invalidate()
+        content_layout.activate()
+        content_hint = content_layout.sizeHint()
+
+        wanted_height = 0
+        if content_layout.count() > 0:
             wanted_height = content_hint.height()
-            if content_hint.width() > wanted_width:
+            # results too wide for the column are scrolled through sideways,
+            # and the scrollbar takes a strip of the height with it
+            if content_hint.width() > scroll_area.viewport().width():
                 wanted_height += scroll_area.horizontalScrollBar().sizeHint().height()
-            scroll_area.setMinimumHeight(
-                min(wanted_height, self.full_window_geometry.height())
-                if centred
-                else 0
-            )
-            scroll_area.updateGeometry()
+        scroll_area.setMinimumHeight(
+            min(wanted_height, self.full_window_geometry.height())
+        )
+        scroll_area.updateGeometry()
 
         return None
 

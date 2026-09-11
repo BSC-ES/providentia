@@ -426,6 +426,39 @@ def update_plotting_parameters(
             model_ind += 1
 
 
+def get_display_label(read_instance, data_label):
+    """
+    Get the text to actually show for a data label (legend, statsummary),
+    applying any per-session rename set via double-clicking a legend entry
+    (see legend_picker_func()/rename_legend_label() in
+    dashboard_interactivity.py).
+
+    data_label itself - the real identifier used for data selection,
+    colour/style lookups, and everywhere else a data label is matched by
+    value - is never touched by this; only what gets drawn as text. That's
+    also why this doesn't affect the model pop-up menu, which shows
+    data_label directly rather than going through this function.
+
+    Parameters
+    ----------
+    read_instance : object
+        Instance of class Dashboard (or Report/Library, where this is
+        always a no-op - legend_label_overrides is dashboard-only, reset on
+        every data load, and never set outside the live dashboard session).
+    data_label : str
+        The data label's real identifier.
+
+    Returns
+    -------
+    str
+        data_label, or its override if one is set.
+    """
+
+    return getattr(read_instance, "legend_label_overrides", {}).get(
+        data_label, data_label
+    )
+
+
 def histogram_bin_target(data):
     """
     Work out what one set of data would want from a histogram's bins, as the

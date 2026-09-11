@@ -18,7 +18,7 @@ from .dashboard_elements import (
     LegendInlineEditor,
     LegendEditorCommitFilter,
 )
-from .plot_aux import get_map_extent, get_hex_code
+from .plot_aux import get_display_label, get_map_extent, get_hex_code
 
 
 class LassoSelector(_SelectorWidget):
@@ -615,7 +615,7 @@ def rename_legend_label(canvas_instance, legend_label, data_label):
     Edit a data label's display name in place, overlaying a QLineEdit on top of
     the double-clicked legend text - Enter or clicking away commits, Escape
     cancels. The new name is shown in the legend and any other plot drawing data
-    labels as text (see get_display_label() in plotting.py), but data_label
+    labels as text (see get_display_label() in plot_aux.py), but data_label
     itself, the real identifier used for data selection and style lookups, is
     never touched. The override is cleared by emptying the field, and by the
     next data load.
@@ -759,18 +759,31 @@ def rename_legend_label(canvas_instance, legend_label, data_label):
     editor_width = min(editor_width_for(current_display), canvas_width - editor_x)
     editor.setGeometry(editor_x, editor_y, editor_width, int(round(widget_height)))
 
-    # with the size settled, line the editor's own ink up with the ink
-    # matplotlib drew, absorbing the widget's internal text margin and any
-    # residual baseline difference in one measured step
+    # with the size settled, line the editor's own ink up horizontally with
+    # the ink matplotlib drew, absorbing the widget's internal text margin
     ink_offset = _editor_ink_offset(editor)
     if ink_offset is not None:
-        ink_dx, ink_dy = ink_offset
+        ink_dx, _ = ink_offset
         target_ink_x = bbox.x0 / dpi_ratio
-        target_ink_y = (fig_height - bbox.y1) / dpi_ratio
         editor_x = int(round(min(max(target_ink_x - ink_dx, 0), canvas_width - 1)))
-        editor_y = int(round(min(max(target_ink_y - ink_dy, 0), canvas_height - 1)))
         editor_width = min(editor_width_for(current_display), canvas_width - editor_x)
         editor.setGeometry(editor_x, editor_y, editor_width, int(round(widget_height)))
+
+    # vertically it is the baselines that are lined up, not the ink. A text's
+    # extent in matplotlib is reported from the font's metrics rather than
+    # from the glyphs the string actually holds, so its top sits at the
+    # ascender line whether or not anything reaches it - matching it to ink
+    # lifted a name of short letters ("cams") by the height of the ascenders
+    # it does not have. The caret's own box gives Qt's line position, and is
+    # the same whatever the letters, so the two agree for any name
+    caret = editor.cursorRect()
+    qt_baseline_from_top = caret.top() + QtGui.QFontMetricsF(editor_font).ascent()
+    editor_y = int(
+        round(
+            min(max(mpl_baseline_from_top - qt_baseline_from_top, 0), canvas_height - 1)
+        )
+    )
+    editor.move(editor.x(), editor_y)
     editor.show()
     editor.setFocus()
     # not selectAll() - an active selection has no blinking caret, and as the
@@ -904,6 +917,93 @@ class HoverAnnotation(object):
 
         return None
 
+    def pointer_over_menu(self, event):
+        """
+        Whether the pointer is over one of the settings menus, which are Qt
+        widgets sat on top of the canvas rather than anything drawn into it.
+
+        Parameters
+        ----------
+        event : matplotlib.backend_bases.MouseEvent
+            Mouse move event
+
+        Returns
+        -------
+        bool
+            Whether a menu is under the pointer
+        """
+
+        canvas_instance = self.canvas_instance
+        if (event.x is None) or (event.y is None):
+            return False
+
+        # matplotlib counts from the bottom left of the figure in its own
+        # pixels; Qt counts from the top left of the widget in screen ones
+        ratio = canvas_instance.figure.canvas.devicePixelRatioF()
+        position = QtCore.QPoint(
+            int(event.x / ratio),
+            int((canvas_instance.figure.bbox.height - event.y) / ratio),
+        )
+
+        # the hover line and the legend's editor are the canvas's own, and
+        # follow the pointer around - they are not something to keep clear of
+        not_menus = (
+            getattr(canvas_instance, "canvas_annotation_vline", None),
+            getattr(canvas_instance, "_legend_inline_editor", None),
+        )
+
+        for child in canvas_instance.children():
+            if (
+                isinstance(child, QWidget)
+                and (child not in not_menus)
+                and child.isVisible()
+                and child.geometry().contains(position)
+            ):
+                return True
+
+        return False
+
+    def hover_legend_label(self, event):
+        """
+        Show the pointer over a legend label as editable, and say how.
+
+        Parameters
+        ----------
+        event : matplotlib.backend_bases.MouseEvent
+            Mouse move event
+
+        Returns
+        -------
+        bool
+            Whether a legend label is being hovered over
+        """
+
+        legend = getattr(self.canvas_instance, "legend", None)
+        figure_canvas = self.canvas_instance.figure.canvas
+
+        hovered = None
+        if (legend is not None) and (event.inaxes is not None):
+            if event.inaxes == self.canvas_instance.plot_axes.get("legend"):
+                for legend_label in legend.texts:
+                    if legend_label.get_visible() and legend_label.contains(event)[0]:
+                        hovered = legend_label
+                        break
+
+        if hovered is None:
+            # only put the pointer back if this is what changed it, so that
+            # nothing else setting a cursor is undone from here
+            if getattr(self.canvas_instance, "_legend_hover_cursor", False):
+                figure_canvas.unsetCursor()
+                self.canvas_instance._legend_hover_cursor = False
+            return False
+
+        if not getattr(self.canvas_instance, "_legend_hover_cursor", False):
+            figure_canvas.setCursor(QtCore.Qt.IBeamCursor)
+            self.canvas_instance._legend_hover_cursor = True
+        figure_canvas.setToolTip("Double-click to rename")
+
+        return True
+
     def hover_annotation(self, event):
         """
         Handle hover events to display point annotations on timeseries, scatter, distribution, taylor
@@ -919,6 +1019,18 @@ class HoverAnnotation(object):
         self.canvas_instance.figure.canvas.setToolTip("")
         QToolTip.hideText()
         self.canvas_instance.canvas_annotation_vline.hide()
+
+        # an open settings menu sits over the canvas, and its controls are
+        # there to be used - a tooltip following the pointer across them
+        # gets in the way of reading and clicking them
+        if self.pointer_over_menu(event):
+            return None
+
+        # a legend label can be renamed by double-clicking it, which nothing
+        # on screen says, so hovering one shows the text cursor and a hint -
+        # the same invitation an editable field on a page gives
+        if self.hover_legend_label(event):
+            return None
 
         # identify which axis is currently being hovered over
         plot_type = None
@@ -1202,7 +1314,7 @@ class HoverAnnotation(object):
             # add text label
             text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(
                 hex_colour,
-                data_label,
+                get_display_label(self.canvas_instance.read_instance, data_label),
                 concentration,
                 self.canvas_instance.plot_characteristics["timeseries"][
                     "marker_annotate_rounding"
@@ -1258,7 +1370,10 @@ class HoverAnnotation(object):
         hex_colour = get_hex_code(colour)
 
         # add text label
-        text_label += ('<font color="{0}">{1}</font>').format(hex_colour, data_label)
+        text_label += ('<font color="{0}">{1}</font>').format(
+            hex_colour,
+            get_display_label(self.canvas_instance.read_instance, data_label),
+        )
         # observations label
         text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(
             hex_colour,
@@ -1323,7 +1438,10 @@ class HoverAnnotation(object):
         hex_colour = get_hex_code(colour)
 
         # add text label
-        text_label += ('<font color="{0}">{1}</font>').format(hex_colour, data_label)
+        text_label += ('<font color="{0}">{1}</font>').format(
+            hex_colour,
+            get_display_label(self.canvas_instance.read_instance, data_label),
+        )
         # CRMSE
         text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(
             hex_colour,
@@ -1390,7 +1508,10 @@ class HoverAnnotation(object):
         hex_colour = get_hex_code(colour)
 
         # add text label
-        text_label += f'<font color="{hex_colour}">{data_label}</font>'
+        display_label = get_display_label(
+            self.canvas_instance.read_instance, data_label
+        )
+        text_label += f'<font color="{hex_colour}">{display_label}</font>'
 
         # CRMSE
         rounding = self.canvas_instance.plot_characteristics["fairmode-statsummary"][
@@ -1471,7 +1592,7 @@ class HoverAnnotation(object):
             # add text label
             text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(
                 hex_colour,
-                data_label,
+                get_display_label(self.canvas_instance.read_instance, data_label),
                 density,
                 self.canvas_instance.plot_characteristics["distribution"][
                     "marker_annotate_rounding"
@@ -1550,7 +1671,7 @@ class HoverAnnotation(object):
             # add text label
             text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(
                 hex_colour,
-                data_label,
+                get_display_label(self.canvas_instance.read_instance, data_label),
                 density,
                 self.canvas_instance.plot_characteristics["histogram"][
                     "marker_annotate_rounding"
@@ -1601,7 +1722,10 @@ class HoverAnnotation(object):
         hex_colour = get_hex_code(colour)
 
         # add text label
-        text_label += ('<font color="{0}">{1}</font>').format(hex_colour, data_label)
+        text_label += ('<font color="{0}">{1}</font>').format(
+            hex_colour,
+            get_display_label(self.canvas_instance.read_instance, data_label),
+        )
         # corr stat
         text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(
             hex_colour,
@@ -1704,7 +1828,7 @@ class HoverAnnotation(object):
             # add text label
             text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(
                 hex_colour,
-                data_label,
+                get_display_label(self.canvas_instance.read_instance, data_label),
                 concentration,
                 self.canvas_instance.plot_characteristics["periodic"][
                     "marker_annotate_rounding"
@@ -1796,7 +1920,7 @@ class HoverAnnotation(object):
             # add text label
             text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(
                 hex_colour,
-                data_label,
+                get_display_label(self.canvas_instance.read_instance, data_label),
                 concentration,
                 self.canvas_instance.plot_characteristics["periodic-violin"][
                     "marker_annotate_rounding"

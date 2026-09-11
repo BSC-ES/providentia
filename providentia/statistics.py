@@ -327,6 +327,21 @@ def get_selected_station_data(
                     "per_station"
                 ] = data_array
 
+            # the stations before any spatial aggregation, on the same time
+            # axis as per_station, for the unique station count to be taken
+            # from - so it says how many stations are behind the numbers in
+            # every mode. Under Spatial|Temporal per_station holds the one
+            # series the stations were aggregated into, which counts as a
+            # single station; in the other modes the two are the same array
+            if read_instance.statistic_mode == "Spatial|Temporal":
+                canvas_instance.selected_station_data[networkspeci]["stations"] = (
+                    data_array if read_instance.daily_forecast else data_array_ts
+                )
+            else:
+                canvas_instance.selected_station_data[networkspeci][
+                    "stations"
+                ] = canvas_instance.selected_station_data[networkspeci]["per_station"]
+
             # transform timeseries to pandas dataframe
             canvas_instance.selected_station_data[networkspeci][
                 "timeseries"
@@ -1305,6 +1320,20 @@ def calculate_statistic(
                         networkspeci
                     ]["active_mode"][data_label_b_indices]
 
+        # the unique station count is taken before any spatial aggregation
+        # - see get_selected_station_data()
+        if any(
+            get_z_statistic_info(zstat=zstat)[1] == "NUniqueStations"
+            for zstat in zstats
+        ):
+            data_array_a_st = canvas_instance.selected_station_data[networkspeci][
+                "stations"
+            ][data_label_a_indices]
+            if len(data_labels_b) != 0:
+                data_array_b_st = canvas_instance.selected_station_data[
+                    networkspeci
+                ]["stations"][data_label_b_indices]
+
     # iterate through zstats and calculate statistics
     stats_calc = {}
     for zstat in zstats:
@@ -1346,6 +1375,13 @@ def calculate_statistic(
                 data_array_a = data_array_a_am
                 if len(data_labels_b) != 0:
                     data_array_b = data_array_b_am
+
+            # counted from the stations themselves rather than from what they
+            # were aggregated into, which under Spatial|Temporal is one series
+            if base_zstat == "NUniqueStations":
+                data_array_a = data_array_a_st
+                if len(data_labels_b) != 0:
+                    data_array_b = data_array_b_st
 
         # if need to mask data, then do so
         if mask is not None:

@@ -42,6 +42,7 @@ from .statistics import (
 )
 from .read_aux import drop_nans, get_valid_metadata
 from .plot_aux import (
+    get_display_label,
     create_statistical_timeseries,
     get_multispecies_aliases,
     get_AERONET_sizedist_bin_radius,
@@ -71,39 +72,6 @@ fairmode_settings = yaml.safe_load(
 contingency_settings = yaml.safe_load(
     open(join(PROVIDENTIA_ROOT, "settings/contingency.yaml"))
 )
-
-
-def get_display_label(read_instance, data_label):
-    """
-    Get the text to actually show for a data label (legend, statsummary),
-    applying any per-session rename set via double-clicking a legend entry
-    (see legend_picker_func()/rename_legend_label() in
-    dashboard_interactivity.py).
-
-    data_label itself - the real identifier used for data selection,
-    colour/style lookups, and everywhere else a data label is matched by
-    value - is never touched by this; only what gets drawn as text. That's
-    also why this doesn't affect the model pop-up menu, which shows
-    data_label directly rather than going through this function.
-
-    Parameters
-    ----------
-    read_instance : object
-        Instance of class Dashboard (or Report/Library, where this is
-        always a no-op - legend_label_overrides is dashboard-only, reset on
-        every data load, and never set outside the live dashboard session).
-    data_label : str
-        The data label's real identifier.
-
-    Returns
-    -------
-    str
-        data_label, or its override if one is set.
-    """
-
-    return getattr(read_instance, "legend_label_overrides", {}).get(
-        data_label, data_label
-    )
 
 
 class Plotting:
@@ -2738,7 +2706,10 @@ class Plotting:
         # labels for standard plot
         else:
             xticks = positions
-            xtick_labels = copy.deepcopy(cut_data_labels)
+            xtick_labels = [
+                get_display_label(self.read_instance, data_label)
+                for data_label in cut_data_labels
+            ]
 
         # modify xticks to be horizontal as just have 1 label
         if len(xtick_labels) == 1:
@@ -3590,7 +3561,7 @@ class Plotting:
                 **plot_characteristics["plot"],
                 mfc=self.read_instance.plotting_params[data_label]["colour"],
                 mec=self.read_instance.plotting_params[data_label]["colour"],
-                label=data_label,
+                label=get_display_label(self.read_instance, data_label),
             )
 
             # track plot elements
@@ -3850,7 +3821,9 @@ class Plotting:
                 )
 
             # add MQI90
-            self.faimode_target_annotate_text.append(f"\n\n{data_label}")
+            self.faimode_target_annotate_text.append(
+                "\n\n" + get_display_label(self.read_instance, data_label)
+            )
             self.faimode_target_annotate_colour.append("black")
             if "MQI90" in plot_characteristics["annotate_options"] and not np.all(
                 np.isnan(mqi_array)
