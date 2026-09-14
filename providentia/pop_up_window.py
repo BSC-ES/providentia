@@ -1045,13 +1045,18 @@ class PopUpWindow(QtWidgets.QWidget):
             return
 
         for element in self.page_memory[menu_type]["ordered_elements"]:
-            if element in ["keep_selected", "remove_selected"]:
+            if element in ["keep_selected", "remove_selected", "interpolated", "noninterpolated"]:
                 for checkbox_ii, checkbox in enumerate(
                     self.page_memory[menu_type][element]
                 ):
-                    self.page_memory[menu_type][element][checkbox_ii].setCheckState(
-                        QtCore.Qt.Checked
-                    )
+                    # skip models without data available
+                    if not checkbox.isEnabled():
+                        continue
+                    checkbox.setCheckState(QtCore.Qt.Checked)
+                    
+                    # only one gridded model can be loaded, so select the first available one
+                    if element == "noninterpolated":
+                        break
 
     def clear_all(self):
         """
@@ -1066,7 +1071,7 @@ class PopUpWindow(QtWidgets.QWidget):
             return
 
         for element in self.page_memory[menu_type]["ordered_elements"]:
-            if element in ["keep_selected", "remove_selected"]:
+            if element in ["keep_selected", "remove_selected", "interpolated", "noninterpolated"]:
                 for checkbox_ii, checkbox in enumerate(
                     self.page_memory[menu_type][element]
                 ):
