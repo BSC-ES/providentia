@@ -4,6 +4,7 @@ import copy
 from datetime import datetime
 from itertools import groupby
 import math
+import re
 import sys
 
 import cartopy
@@ -505,13 +506,26 @@ class Plotting:
 
             # group the gridded/non-gridded versions of the same model together, so a
             # model loaded both ways shows as a filled dot with a square
-            base_label = data_label.replace(" (gridded)", "")
-            gridded_label = f"{base_label} (gridded)"
-            non_gridded_label = base_label
-            has_gridded = gridded_label in data_labels
-            has_non_gridded = non_gridded_label in data_labels
-            processed_labels.update({gridded_label, non_gridded_label})
+            # interpolated labels can have a forecast suffix (e.g. '-combined') that gridded labels
+            # do not have, so compare without it (gridded model is read for the same forecast days)
+            is_gridded = data_label.endswith(" (gridded)")
+            model_label = re.sub(
+                r"-(daily|combined|day\d+)$", "", data_label.replace(" (gridded)", "")
+            )
+            gridded_label = f"{model_label} (gridded)"
+            non_gridded_labels = [
+                label
+                for label in data_labels
+                if re.fullmatch(re.escape(model_label) + r"(-daily|-combined|-day\d+)?", label)
+            ]
 
+            # pair only if there is a single interpolated version
+            # (with several forecast days, e.g. -day1 and -day2, gridded is shown on its own)
+            paired = (gridded_label in data_labels) and (len(non_gridded_labels) == 1)
+            if paired:
+                processed_labels.update({gridded_label, non_gridded_labels[0]})
+            else:
+                processed_labels.add(data_label)
             colour = self.read_instance.plotting_params[data_label]["colour"]
 
             # empty square with coloured border, for gridded models
@@ -533,18 +547,19 @@ class Plotting:
                 markersize=plot_characteristics_legend["handles"]["markersize"],
             )
 
-            # gridded and interpolated show combined square+dot entry
-            if has_gridded and has_non_gridded:
+            # gridded and interpolated show combined square+dot entry, with interpolated label
+            # (including forecast suffix)
+            if paired:
                 legend_elements.append((square_handle, dot_handle))
-                legend_labels.append(base_label)
+                legend_labels.append(non_gridded_labels[0])
             # only gridded show square only
-            elif has_gridded:
+            elif is_gridded:
                 legend_elements.append(square_handle)
-                legend_labels.append(gridded_label)
+                legend_labels.append(data_label)
             # only interpolated loaded show dot only
             else:
                 legend_elements.append(dot_handle)
-                legend_labels.append(non_gridded_label)
+                legend_labels.append(data_label)
 
         plot_characteristics_legend["plot"]["handles"] = legend_elements
         plot_characteristics_legend["plot"]["labels"] = legend_labels
