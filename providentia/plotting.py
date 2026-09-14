@@ -1357,6 +1357,9 @@ class Plotting:
             # update maximum smooth value
             if self.read_instance.mode not in ["report", "library"]:
                 self.canvas_instance.timeseries_smooth_window_sl.setMaximum(len(ts))
+                # the window is shown as the time it spans, which changes with
+                # the resolution drawn at whether or not its step count does
+                self.canvas_instance.timeseries_smooth_window_sl.refresh_readout()
                 # To get straight line
                 # if self.canvas_instance.timeseries_smooth_window_sl.value() != (len(ts)*2 - 1):
                 #     self.canvas_instance.timeseries_smooth_window_sl.setMaximum(int(len(ts)*2 - 1))
@@ -2056,14 +2059,16 @@ class Plotting:
         in a dashboard panel, and setting "bins" to a number in the plot
         characteristics overrides the lot.
 
-        Whatever count is asked for, the bins are then squared up with the
-        resolution the species is reported to. Measurements arrive rounded to
-        that resolution, so a bin width that is not a whole number of those
-        steps catches two reportable values in some bins and one in others,
-        combing the plot with regular notches that say nothing about the data
-        (the same rounding the distribution plot floors its bandwidth against).
-        The width is taken to the nearest whole number of steps and the edges
-        offset by half a step, leaving the reported values at bin centres.
+        A count worked out that way is then squared up with the resolution the
+        species is reported to. Measurements arrive rounded to that resolution,
+        so a bin width that is not a whole number of those steps catches two
+        reportable values in some bins and one in others, combing the plot with
+        regular notches that say nothing about the data (the same rounding the
+        distribution plot floors its bandwidth against). The width is taken to
+        the nearest whole number of steps and the edges offset by half a step,
+        leaving the reported values at bin centres. A count asked for by hand is
+        used as it stands instead, as squaring up can only land on a handful of
+        counts and would leave the dashboard's bin slider stuck between them.
 
         Parameters
         ----------
@@ -2085,6 +2090,15 @@ class Plotting:
         np.ndarray
             Bin edges
         """
+
+        # a count set by hand (the dashboard's bin slider, or "bins" in the
+        # plot characteristics) is taken as asked for, skipping the squaring up
+        # below. That can only land on the counts a whole number of reporting
+        # steps allows - a handful across the whole range - so applying it to
+        # the slider snapped most counts back to the one before and left the
+        # slider unable to move. A count worked out from the data (including a
+        # report's shared one, passed in as n_bins) is squared up as ever
+        manual_bins = isinstance(plot_characteristics.get("bins"), int)
 
         if n_bins is None:
             n_bins = plot_characteristics.get("bins", "auto")
@@ -2108,12 +2122,26 @@ class Plotting:
         if (min_resolution is None) or (min_resolution <= 0):
             return np.linspace(data_range_min, data_range_max, n_bins + 1)
 
+        start = data_range_min - (min_resolution / 2.0)
+        span = (data_range_max + (min_resolution / 2.0)) - start
+
+        # a count asked for by hand keeps the count, and takes the widest whole
+        # number of reporting steps that still covers the data - which at the
+        # count the automatic rule arrived at gives exactly the bins below, so
+        # that taking manual control of a histogram leaves it as it was drawn
+        if manual_bins:
+            steps = max(1, int(np.round((span / n_bins) / min_resolution)))
+            bin_width = steps * min_resolution
+            # too narrow to reach the end of the data (a count far finer than
+            # the reporting resolution), so an even split is all that is left
+            if (start + (n_bins * bin_width)) < data_range_max:
+                bin_width = span / n_bins
+            return start + (np.arange(n_bins + 1) * bin_width)
+
         # widen the bins to a whole number of reporting steps, then take
         # whatever count that leaves - and keep widening if it leaves more
         # bins than the plot can show
         steps = max(1, int(np.round(((data_range_max - data_range_min) / n_bins) / min_resolution)))
-        start = data_range_min - (min_resolution / 2.0)
-        span = (data_range_max + (min_resolution / 2.0)) - start
         n_bins = int(np.ceil(span / (steps * min_resolution)))
         while (n_bins > max_bins) and (steps < span / min_resolution):
             steps += 1

@@ -1756,14 +1756,11 @@ class Dashboard(QtWidgets.QWidget):
                             "fairmode-statsummary",
                         ]:
                             previous_plot_type = previous_plot_type.replace("-", "_")
-                        for element in getattr(
-                            self.mpl_canvas, previous_plot_type + "_elements"
-                        ):
-                            if isinstance(element, dict):
-                                for sub_element in element.values():
-                                    sub_element.hide()
-                            else:
-                                element.hide()
+                        # closed rather than only hidden, so the menu is not
+                        # still taken to be open the next time the plot is
+                        # chosen, when its settings button would need two
+                        # clicks to open it
+                        self.mpl_canvas.close_settings_menus([previous_plot_type])
                         break
 
             # if changed_plot_type already axis on another axis then remove those axis elements
@@ -2435,11 +2432,13 @@ class Dashboard(QtWidgets.QWidget):
                 or ("read_left" in read_operations)
                 or ("read_right" in read_operations)
             ):
+                # the plots' settings menus are closed too, as they would
+                # otherwise be left open over plots no longer drawn
+                self.mpl_canvas.close_settings_menus()
                 self.mpl_canvas.canvas_cover.show()
             # otherwise, just cover plotting axes as are adding/removing models
             else:
-                self.mpl_canvas.top_right_canvas_cover.show()
-                self.mpl_canvas.lower_canvas_cover.show()
+                self.mpl_canvas.cover_plot_axes()
             # update to show covers immediately - repaint() rather than
             # flush_events(), which would also deliver queued user input
             # mid-handler (see update_map_station_selection())

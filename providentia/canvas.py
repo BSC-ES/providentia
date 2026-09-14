@@ -426,8 +426,7 @@ class Canvas(FigureCanvas):
 
         # uncover map, but hide plotting axes
         self.canvas_cover.hide()
-        self.top_right_canvas_cover.show()
-        self.lower_canvas_cover.show()
+        self.cover_plot_axes()
 
         # draw changes
         self.figure.canvas.draw_idle()
@@ -1519,8 +1518,7 @@ class Canvas(FigureCanvas):
                 for plot_type in active_plots:
                     if plot_type != "None":
                         self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
-                self.top_right_canvas_cover.show()
-                self.lower_canvas_cover.show()
+                self.cover_plot_axes()
 
             elif len(self.relative_selected_station_inds) > 0:
                 # get selected station data
@@ -5201,6 +5199,15 @@ class Canvas(FigureCanvas):
         self.timeseries_smooth_window_sl = self.timeseries_menu.sliders[
             "smooth_window_sl"
         ]
+        # the smooth line starts off, its window at zero, and is turned on by
+        # setting a window (see update_smooth_window()) - the same way the
+        # scatter plot's regression line is by its width. Held to what the
+        # slider shows, as the window the plot characteristics carry is what a
+        # smooth line is drawn with once one is asked for, not a line already
+        # on screen
+        self.timeseries_smooth_window_sl.setValue(0)
+        self.plot_characteristics["timeseries"]["smooth"]["window"] = 0
+        self.plot_characteristics_templates["timeseries"]["smooth"]["window"] = 0
         self.timeseries_smooth_min_points_sl = self.timeseries_menu.sliders[
             "smooth_min_points_sl"
         ]
@@ -5406,9 +5413,12 @@ class Canvas(FigureCanvas):
         self.scatter_regression_linewidth_sl.setMaximum(
             int(self.plot_characteristics["scatter"]["regression"]["linewidth"] * 100)
         )
-        self.scatter_regression_linewidth_sl.setValue(
-            int(self.plot_characteristics["scatter"]["regression"]["linewidth"] * 10)
-        )
+        # the regression line starts off, its width at zero, and is turned on by
+        # setting a width - as the timeseries smooth line is by its window (see
+        # update_regression_linewidth())
+        self.scatter_regression_linewidth_sl.setValue(0)
+        self.plot_characteristics["scatter"]["regression"]["linewidth"] = 0.0
+        self.plot_characteristics_templates["scatter"]["regression"]["linewidth"] = 0.0
 
         # get scatter interactive dictionary
         self.interactive_elements["scatter"] = {
@@ -5590,22 +5600,65 @@ class Canvas(FigureCanvas):
                 break
 
         if hidden:
+            # raised as well as shown, so the menu just opened is drawn over any
+            # other left open that it overlaps, rather than wherever the menus'
+            # fixed order puts it. In the order the elements are listed, which
+            # puts the menu's own panel beneath its controls
             for element in elements:
                 if isinstance(element, dict):
                     for sub_element in element.values():
                         sub_element.show()
+                        sub_element.raise_()
                 else:
                     element.show()
+                    element.raise_()
 
             self.interactive_elements[key]["hidden"] = False
         else:
-            for element in elements:
+            self.close_settings_menus([key])
+
+        return None
+
+    def close_settings_menus(self, keys=None):
+        """
+        Function which closes settings menus that are open - e.g. those of the
+        plots covered while their data is re-read, or while no stations are
+        selected, which would otherwise be left open over plots no longer
+        drawn.
+
+        Parameters
+        ----------
+        keys : list, optional
+            Menus to close, as keys of self.interactive_elements (default is
+            None, i.e. every menu but the map's, whose plot is never covered
+            on its own)
+        """
+
+        if keys is None:
+            keys = [key for key in self.interactive_elements if key != "map"]
+
+        for key in keys:
+            if self.interactive_elements[key]["hidden"]:
+                continue
+            for element in getattr(self, key + "_elements"):
                 if isinstance(element, dict):
                     for sub_element in element.values():
                         sub_element.hide()
                 else:
                     element.hide()
             self.interactive_elements[key]["hidden"] = True
+
+        return None
+
+    def cover_plot_axes(self):
+        """
+        Function which covers every plot but the map's, closing their settings
+        menus - see close_settings_menus().
+        """
+
+        self.close_settings_menus()
+        self.top_right_canvas_cover.show()
+        self.lower_canvas_cover.show()
 
         return None
 
@@ -5714,7 +5767,52 @@ class Canvas(FigureCanvas):
         if key == "periodic_violin":
             key = "periodic-violin"
 
+        # the scatter plot's slider sets the width of its regression line,
+        # which it also turns on and off - see update_regression_linewidth()
+        if key == "scatter":
+            self.update_regression_linewidth(linewidth)
+            return None
+
         self.update_linewidth(self.plot_axes[key], key, linewidth)
+
+        return None
+
+    def update_regression_linewidth(self, linewidth):
+        """
+        Function to handle the update of the scatter plot's regression line
+        width, which turns the line on and off with it: there is nothing to see
+        at a width of zero, so the regression plot option follows the slider
+        the same way the timeseries smooth line follows its window (see
+        update_smooth_window()).
+
+        Parameters
+        ----------
+        linewidth : float
+            Width to draw the regression line with
+        """
+
+        # written to the template as well as the copy being drawn from, as the
+        # two are separate dicts (see Plotting.set_plot_characteristics())
+        self.plot_characteristics["scatter"]["regression"]["linewidth"] = linewidth
+        self.plot_characteristics_templates["scatter"]["regression"][
+            "linewidth"
+        ] = linewidth
+
+        # get index of regression in plot options
+        all_plot_options = self.plot_characteristics["scatter"]["plot_options"]
+        index = all_plot_options.index("regression")
+
+        # remove regression plot option, so the line is drawn again at the new
+        # width rather than left as it was
+        self.scatter_options.model().item(index).setCheckState(QtCore.Qt.Unchecked)
+
+        # create regression line
+        if linewidth > 0:
+            # add regression plot option
+            self.scatter_options.model().item(index).setCheckState(QtCore.Qt.Checked)
+
+        # draw changes
+        self.figure.canvas.draw_idle()
 
         return None
 
@@ -6208,6 +6306,18 @@ class Canvas(FigureCanvas):
                     # option 'regression'
                     elif option == "regression":
                         if not undo:
+                            # uncheck option in combobox if line width is 0
+                            if (
+                                self.plot_characteristics[plot_type]["regression"][
+                                    "linewidth"
+                                ]
+                                == 0
+                            ):
+                                msg = "It is not possible to show the regression line "
+                                msg += "if line width is 0, increase it in advance."
+                                show_message(self.read_instance, msg)
+                                self.update_option_on_combobox(event_source, index)
+                                return None
                             linear_regression(
                                 self.read_instance,
                                 self,
