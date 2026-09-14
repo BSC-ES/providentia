@@ -3052,6 +3052,28 @@ class Dashboard(QtWidgets.QWidget):
             # unselect all/intersect/extent checkboxes
             self.mpl_canvas.unselect_map_checkboxes()
 
+            # add networkspecies as items to networkspecies combobox
+            all_plot_types = ["map", "timeseries", "periodic", "periodic_violin", "metadata",
+                             "distribution", "scatter", "statsummary", "boxplot", "taylor",
+                             "fairmode_target", "fairmode_statsummary", "contingencytable",
+                             "heatmap", "table"]
+            multispecies_plot_types = ["statsummary", "boxplot", "heatmap", "table"]
+            sorted_networkspecies = sorted(self.networkspecies)
+            
+            for plot_type in all_plot_types:
+                element = getattr(self.mpl_canvas, f"{plot_type}_networkspecies")
+                previous_networkspeci = element.currentText()
+                element.blockSignals(True)
+                element.clear()
+                element.addItems(sorted_networkspecies)
+                if plot_type in multispecies_plot_types:
+                    for row in range(element.model().rowCount()):
+                        element.model().item(row).setCheckState(QtCore.Qt.Checked)
+                # keep previous if valid
+                elif previous_networkspeci in sorted_networkspecies:
+                    element.setCurrentText(previous_networkspeci)
+                element.blockSignals(False)
+                
             # unset variable to allow updating of MPL canvas
             self.block_MPL_canvas_updates = False
 
@@ -3067,21 +3089,6 @@ class Dashboard(QtWidgets.QWidget):
 
         # restore mouse cursor to normal
         unset_cursor(self.cursor_function, "handle_data_selection_update")
-
-        # add networkspecies as items to networkspecies combobox
-        all_plot_types = ["map", "timeseries", "periodic", "periodic_violin", "metadata",
-                          "distribution", "scatter", "statsummary", "boxplot", "taylor",
-                          "fairmode_target", "fairmode_statsummary", "contingencytable",
-                          "heatmap", "table"]
-        multispecies_plot_types = ["statsummary", "boxplot", "heatmap", "table"]
-        sorted_networkspecies = sorted(self.networkspecies)
-        for plot_type in all_plot_types:
-            element = getattr(self.mpl_canvas, f"{plot_type}_networkspecies")
-            element.clear()
-            element.addItems(sorted_networkspecies)
-            if plot_type in multispecies_plot_types:
-                for row in range(element.model().rowCount()):
-                    element.model().item(row).setCheckState(QtCore.Qt.Checked)
 
         # update performing read variable to false
         self.performing_read = False
