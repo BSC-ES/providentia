@@ -2537,6 +2537,23 @@ class Plotting:
         if "obs" in plot_options:
             data_labels = [self.read_instance.observations_data_label]
 
+        # in the dashboard, a data label hidden via the legend (a single
+        # click) is left out of the boxplot altogether, rather than drawn
+        # with its box hidden but its category tick and label left behind -
+        # see _toggle_legend_visibility() in dashboard_interactivity.py,
+        # which redraws the boxplot for exactly this rather than toggling
+        # its elements' visibility in place like every other plot type
+        if self.read_instance.mode == "dashboard":
+            active_labels = self.canvas_instance.plot_elements.get(
+                "data_labels_active"
+            )
+            if active_labels is not None:
+                data_labels = [
+                    data_label
+                    for data_label in data_labels
+                    if data_label in active_labels
+                ]
+
         # if multispecies in plot options then make plot for all networkspecies
         if "multispecies" in plot_options:
             networkspecies = self.read_instance.networkspecies
@@ -2600,6 +2617,12 @@ class Plotting:
 
         # iterate through networkspecies
         ns_current = 0
+        # positions is otherwise only set inside the "have some data labels
+        # to plot" branch below - if every data label ends up filtered out
+        # for every networkspeci (e.g. every legend entry hidden), it is
+        # still read afterwards to set (empty) xticks, so it must exist
+        # regardless of whether anything was actually plotted
+        positions = []
         for ns in networkspecies:
             # get valid data labels for networkspeci
             valid_data_labels = self.canvas_instance.selected_station_data_labels[ns]
@@ -2745,9 +2768,26 @@ class Plotting:
             xticklabel_params = {}
 
         # set xticks / xticklabels
-        relevant_axis.set_xticks(xticks)
-        relevant_axis.xaxis.set_tick_params(**xtick_params)
-        relevant_axis.set_xticklabels(xtick_labels, **xticklabel_params)
+        if self.read_instance.mode == "dashboard":
+            # dashboard panels are narrower than a report/library figure and
+            # change width with the layout, so work out whether the category
+            # labels can be shown without clashing or running off screen,
+            # rather than always drawing them at the fixed rotation used
+            # elsewhere (see fit_boxplot_xticklabels())
+            shown = plot_formatting.fit_boxplot_xticklabels(
+                relevant_axis, xticks, xtick_labels, xtick_params, xticklabel_params
+            )
+            self.canvas_instance.boxplot_xtick_cache = {
+                "xticks": xticks,
+                "xtick_labels": xtick_labels,
+                "xtick_params": xtick_params,
+                "xticklabel_params": xticklabel_params,
+            }
+            self.canvas_instance.sync_boxplot_xlabels_checkbox(shown)
+        else:
+            relevant_axis.set_xticks(xticks)
+            relevant_axis.xaxis.set_tick_params(**xtick_params)
+            relevant_axis.set_xticklabels(xtick_labels, **xticklabel_params)
 
     def make_heatmap(
         self,

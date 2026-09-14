@@ -1645,7 +1645,7 @@
         {
           "element_type": "container",
           "formatting_dict": "settings_container",
-          "size": [250, 80],
+          "size": [250, 105],
           "relative_position": [-230, 25],
         },
 
@@ -1658,12 +1658,23 @@
           "text": "SETTINGS",
         },
 
+      "xlabels":
+        {
+          "element_type": "checkbox",
+          "formatting_dict": "menu_checkbox",
+          "fixed_width": 230,
+          "relative_position": [-220, 50],
+          "object_name": "boxplot_xlabels",
+          "text": "X-axis labels",
+          "function": "handle_boxplot_xlabels_update",
+        },
+
       "options_label":
         {
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 50],
+          "relative_position": [-220, 75],
           "text": "Options",
         },
 
@@ -1672,7 +1683,7 @@
           "element_type": "checkable_combobox",
           "formatting_dict": "menu_checkable_combobox",
           "size": [230, 20],
-          "relative_position": [-220, 75],
+          "relative_position": [-220, 100],
           "object_name": "boxplot_options",
           "function": "update_plot_option",
         },

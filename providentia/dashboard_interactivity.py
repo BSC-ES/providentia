@@ -569,6 +569,7 @@ def _toggle_legend_visibility(canvas_instance, legend_label, data_label):
                         "heatmap",
                         "table",
                         "statsummary",
+                        "boxplot",
                     ]:
                         # get currently selected options for plot
                         plot_options = canvas_instance.current_plot_options[plot_type]
@@ -591,6 +592,15 @@ def _toggle_legend_visibility(canvas_instance, legend_label, data_label):
                                         plot_element.set_visible(True)
                                     else:
                                         plot_element.set_visible(False)
+
+                # the boxplot's categories - position, spacing and tick
+                # labels alike - depend on which data labels are currently
+                # shown, so it is redrawn from scratch here rather than
+                # having the hidden one's box merely toggled invisible in
+                # place, which left its own tick and label behind (see
+                # make_boxplot() in plotting.py)
+                if "boxplot" in canvas_instance.read_instance.active_dashboard_plots:
+                    canvas_instance.update_associated_active_dashboard_plot("boxplot")
 
             # change font weight of label
             legend_label._fontproperties = canvas_instance.legend.get_texts()[
@@ -854,11 +864,16 @@ def rename_legend_label(canvas_instance, legend_label, data_label):
         canvas_instance.update_legend()
 
         # a rename doesn't touch any underlying data or selection, and
-        # statsummary's table is the only other place a display label appears
-        # - the broader update_associated_active_dashboard_plots() re-fetches
-        # station data and redraws every active plot, which felt slow
-        if "statsummary" in read_instance.active_dashboard_plots:
-            canvas_instance.update_associated_active_dashboard_plot("statsummary")
+        # statsummary's table and the boxplot's category labels are the only
+        # other places a display label appears - the broader
+        # update_associated_active_dashboard_plots() re-fetches station data
+        # and redraws every active plot, which felt slow. The boxplot redraw
+        # also re-decides whether its labels now fit (see
+        # fit_boxplot_xticklabels()), as a new name can be shorter or longer
+        # than the one it last measured
+        for plot_type in ("statsummary", "boxplot"):
+            if plot_type in read_instance.active_dashboard_plots:
+                canvas_instance.update_associated_active_dashboard_plot(plot_type)
 
         # draw(), not draw_idle(): a deferred repaint lands after the
         # cursor below has been restored, leaving the slow part of the

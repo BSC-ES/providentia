@@ -1662,7 +1662,7 @@
           "axis_title": { "fontsize": 8.5, "loc": "left" },
           "xlabel": { "fontsize": 8 },
           "ylabel": { "fontsize": 8 },
-          "xtick_params": { "labelsize": 7, "labelbottom": false },
+          "xtick_params": { "labelsize": 7 },
           "ytick_params": { "labelsize": 7 },
           "annotate_text": { "fontsize": 8 },
         },
