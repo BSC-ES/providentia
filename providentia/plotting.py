@@ -2517,14 +2517,15 @@ class Plotting:
             if ((len(all_networkspecies) > 1) 
                 and ('multispecies' not in plot_options)):
                 plot_options.append('multispecies')
-        
+
+        # if multispecies in plot options then make plot for all networkspecies
+        if "multispecies" in plot_options:
+            networkspecies = all_networkspecies
+        else:
+            networkspecies = [networkspeci]
+
         # if statistical dataframe is not provided then create it
         if not isinstance(stats_df, pd.DataFrame):
-            if "multispecies" in plot_options:
-                networkspecies = all_networkspecies
-            else:
-                networkspecies = [networkspeci]
-
             rows = []
             for selected_networkspeci in networkspecies:
                 # get valid data labels for networkspeci
