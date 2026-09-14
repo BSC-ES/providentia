@@ -10,7 +10,7 @@
 "Button": [236, 236, 236, 255],
 "ButtonText": [0, 0, 0, 255],
 "BrightText": [255, 255, 255, 255],
-"Highlight": [246, 196, 197, 255],
+"Highlight": [197, 220, 240, 255],
 "HighlightedText": [0, 0, 0, 216],
 "Link": [0, 104, 218, 255],
 "LinkVisited": [255, 0, 255, 255],

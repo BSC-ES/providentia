@@ -1151,7 +1151,8 @@ class Plotting:
         labelb="",
         var=None, 
         lat=None, 
-        lon=None
+        lon=None,
+        date_range=None,
     ):
         """
         Renders a geospatial scatter plot of stations onto a map axis, coloured by a calculated statistical metric.
@@ -1172,6 +1173,9 @@ class Plotting:
             Label of first dataset.
         labelb : str, optional
             Label of second dataset (if defined then a bias plot is made).
+        date_range : tuple, optional
+            Start and end (inclusive) datetimes of period used for station statistics,
+            by default None (all loaded period).
         """
 
         # if not only model gridded data is loaded
@@ -1185,8 +1189,9 @@ class Plotting:
                 [labela],
                 [labelb],
                 map=True,
+                date_range=date_range,
             )
-
+            
             # get marker size (for report and library)
             if self.read_instance.mode in ["report", "library"]:
                 self.get_markersize(

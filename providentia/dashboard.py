@@ -23,6 +23,8 @@ from .configuration import ProvConfiguration
 from .dashboard_elements import (
     CheckableComboBox,
     ComboBox,
+    DateLineEdit,
+    DateTimePicker,
     QVLine,
     InputDialog,
     MultiSwitch,
@@ -342,6 +344,58 @@ class Dashboard(QtWidgets.QWidget):
         # update geometry of qt elements
         self.update_qt_elements_geometry(resize=True)
 
+    def show_date_picker(self, line_edit):
+        """
+        Show date picker under a start/end date field.
+
+        Parameters
+        ----------
+        line_edit : QtWidgets.QLineEdit
+            Start or end date field (YYYYMMDD)
+        """
+
+        self.date_picker_line_edit = line_edit
+
+        # get date in edit line field
+        date = QtCore.QDate.fromString(line_edit.text(), "yyyyMMdd")
+
+        # if date on edit line field is not valid, show last read date in calendar
+        if not date.isValid():
+            last_read_date = self.start_date if line_edit == self.le_start_date else self.end_date
+            date = QtCore.QDate.fromString(str(last_read_date), "yyyyMMdd")
+
+        # end date must be after start date (end date is not included in the period read)
+        start_date = QtCore.QDate.fromString(self.le_start_date.text(), "yyyyMMdd")
+        end_date = QtCore.QDate.fromString(self.le_end_date.text(), "yyyyMMdd")
+        minimum_date_time, maximum_date_time = None, None
+
+        # minimum end date is one day after start date
+        if (line_edit == self.le_end_date) and start_date.isValid():
+            minimum_date_time = QtCore.QDateTime(start_date.addDays(1), QtCore.QTime(0, 0), QtCore.Qt.UTC)
+        # maximum start date is one day before end date
+        elif (line_edit == self.le_start_date) and end_date.isValid():
+            maximum_date_time = QtCore.QDateTime(end_date.addDays(-1), QtCore.QTime(0, 0), QtCore.Qt.UTC)
+
+        # show date picker in dropdown position
+        self.date_picker.show_at(
+            line_edit.mapToGlobal(QtCore.QPoint(0, line_edit.height())),
+            QtCore.QDateTime(date, QtCore.QTime(0, 0), QtCore.Qt.UTC),
+            minimum_date_time,
+            maximum_date_time,
+        )
+
+    def handle_date_picker_selection(self, date_time):
+        """
+        Write date selected in date picker into start/end date field.
+
+        Parameters
+        ----------
+        date_time : QtCore.QDateTime
+            Selected date
+        """
+
+        self.date_picker_line_edit.setText(date_time.toString("yyyyMMdd"))
+
     def update_qt_elements_geometry(
         self, plot_types="ALL", positions=[1, 2, 3, 4, 5], resize=False
     ):
@@ -474,6 +528,16 @@ class Dashboard(QtWidgets.QWidget):
                             self.mpl_canvas.canvas_cover.setGeometry(
                                 0, 0, canvas_width, canvas_height
                             )
+                            
+                            # place map date range selector under the colourbar
+                            cb_bbox = self.mpl_canvas.plot_axes["cb"].get_position()
+                            gap = int((45 * canvas_height) / 1016)
+                            self.mpl_canvas.map_date_range.setGeometry(
+                                int(cb_bbox.x0 * canvas_width),
+                                int((1 - cb_bbox.y0) * canvas_height) + gap,
+                                int(cb_bbox.width * canvas_width),
+                                24,
+                            )
 
                         else:
                             # apply new geometry to layout button
@@ -550,7 +614,11 @@ class Dashboard(QtWidgets.QWidget):
             self.formatting_dict["menu_title"],
         )
         self.switch = set_formatting(
-            MultiSwitch(self, ["BOTH", "OBS", "MODEL"]),
+            MultiSwitch(
+                self,
+                ["BOTH", "OBS", "MODEL"],
+                highlight_color=self.plot_characteristics_templates["general"]["highlight_color"],
+            ),
             self.formatting_dict["menu_multiswitch"],
         )
         self.switch.setToolTip("See observations, models or both")
@@ -558,13 +626,31 @@ class Dashboard(QtWidgets.QWidget):
         self.switch.setFixedHeight(two_row_height)
 
         self.le_start_date = set_formatting(
-            QtWidgets.QLineEdit(self), self.formatting_dict["menu_lineedit"]
+            DateLineEdit(self), self.formatting_dict["menu_lineedit"]
         )
-        self.le_start_date.setToolTip("Set data start date: YYYYMMDD")
+        self.le_start_date.setToolTip("Set data start date: YYYY-MM-DD")
         self.le_end_date = set_formatting(
-            QtWidgets.QLineEdit(self), self.formatting_dict["menu_lineedit"]
+            DateLineEdit(self), self.formatting_dict["menu_lineedit"]
         )
-        self.le_end_date.setToolTip("Set data end date: YYYYMMDD")
+        self.le_end_date.setToolTip("Set data end date: YYYY-MM-DD")
+
+        # add calendar icon inside start and end date fields to open date picker
+        self.date_picker = DateTimePicker(
+            self,
+            highlight_color=self.plot_characteristics_templates["general"]["highlight_color"],
+            show_clock=False,
+        )
+        self.date_picker.accepted.connect(self.handle_date_picker_selection)
+        self.date_picker_line_edit = None
+        for line_edit in [self.le_start_date, self.le_end_date]:
+            picker_action = line_edit.addAction(
+                QtGui.QIcon(join(CURRENT_PATH, "resources/calendar_icon.png")),
+                QtWidgets.QLineEdit.TrailingPosition,
+            )
+            picker_action.setToolTip("Select date")
+            picker_action.triggered.connect(
+                lambda _, line_edit=line_edit: self.show_date_picker(line_edit)
+            )
 
         self.cb_resolution = set_formatting(
             ComboBox(self), self.formatting_dict["menu_combobox"]
@@ -580,6 +666,12 @@ class Dashboard(QtWidgets.QWidget):
             CheckableComboBox(self), self.formatting_dict["menu_combobox"]
         )
         self.cb_species.setToolTip("Select species")
+
+        # date fields need 110px to show full YYYY-MM-DD, widen whole date columns in GENERAL
+        for element in [self.le_start_date, self.le_end_date, 
+                        self.cb_matrix, self.cb_species, 
+                        self.cb_resolution]:
+            element.setFixedWidth(110)
 
         self.vertical_splitter_1 = QVLine()
         self.vertical_splitter_1.setMaximumWidth(20)
@@ -846,8 +938,8 @@ class Dashboard(QtWidgets.QWidget):
         )
         self.cb_matrix.currentTextChanged.connect(self.handle_config_bar_params_change)
         self.cb_species.currentTextChanged.connect(self.handle_config_bar_params_change)
-        self.le_start_date.textChanged.connect(self.handle_config_bar_params_change)
-        self.le_end_date.textChanged.connect(self.handle_config_bar_params_change)
+        self.le_start_date.dateTextChanged.connect(self.handle_config_bar_params_change)
+        self.le_end_date.dateTextChanged.connect(self.handle_config_bar_params_change)
         self.cb_statistic_mode.currentTextChanged.connect(
             self.handle_config_bar_params_change
         )
@@ -2482,6 +2574,26 @@ class Dashboard(QtWidgets.QWidget):
 
     def handle_data_selection_update(self):
         """Execute the data reading process and synchronise the interface and canvas based on current selections."""
+
+        # check start and end dates are valid before reading
+        start_date = QtCore.QDate.fromString(self.le_start_date.text(), "yyyyMMdd")
+        end_date = QtCore.QDate.fromString(self.le_end_date.text(), "yyyyMMdd")
+        invalid_dates = [
+            f"{date_name} ('{line_edit.text()}')"
+            for date_name, line_edit, date in [
+                ("start date", self.le_start_date, start_date),
+                ("end date", self.le_end_date, end_date),
+            ]
+            if not date.isValid()
+        ]
+        if invalid_dates:
+            msg = f"Invalid {' and '.join(invalid_dates)}. Dates must be given as YYYY-MM-DD. Data won't be read."
+            show_message(self, msg)
+            return
+        if start_date >= end_date:
+            msg = "End date must be after start date. Data won't be read."
+            show_message(self, msg)
+            return
 
         # if have no data to read, then do not read any data
         if self.no_data_to_read:

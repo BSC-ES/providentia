@@ -1269,6 +1269,46 @@ def parse_model_filename(filename, speci):
             'prefix': filename[:match.start('date')],
             'suffix': parsed['extra']}
 
+def model_file_overlaps_period(timestep, start, end):
+    """
+    Check if a gridded model file can have data inside a period, based on the date
+    in its filename (YYYYMM: monthly file, YYYYMMDD: daily file, YYYYMMDDHH: forecast run)
+
+    Parameters
+    ----------
+    timestep : str
+        Date in filename ('YYYYMM', 'YYYYMMDD' or 'YYYYMMDDHH')
+    start : pd.Timestamp
+        Start of period
+    end : pd.Timestamp
+        End of period (inclusive)
+
+    Returns
+    -------
+    bool
+        False if the file cannot have data inside the period
+    """
+
+    formats = {6: "%Y%m", 8: "%Y%m%d", 10: "%Y%m%d%H"}
+    file_start = pd.to_datetime(timestep, format=formats[len(timestep)])
+
+    # file starts after period ends
+    if file_start > end:
+        return False
+
+    # YYYYMM: file ends before period starts
+    if len(timestep) == 6:
+        file_end = file_start + pd.DateOffset(months=1)
+    # YYYYMMDD
+    elif len(timestep) == 8:
+        file_end = file_start + pd.Timedelta(days=1)
+    # length of forecast runs is not known from filename, keep file
+    # TODO: Improve timestep selection for forecasts
+    else:
+        return True
+
+    return file_end > start
+
 def get_valid_noninterpolated_models(instance, start_date, end_date, resolution, networkspecies):
     """
     Get noninterpolated models in mod_to_interp_root

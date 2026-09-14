@@ -38,6 +38,7 @@ from .read_aux import (
     get_frequency_code,
     get_yearmonths_to_read,
     init_shared_vars_read_netcdf_data,
+    model_file_overlaps_period,
     read_netcdf_data,
     read_netcdf_metadata,
     check_forecast_dimension,
@@ -3234,7 +3235,7 @@ class DataReader:
         
         return read_data, lat, lon
 
-    def read_gridded_data(self, speci, date=None, hour=None, zstat=None):
+    def read_gridded_data(self, speci, date=None, hour=None, zstat=None, date_range=None):
         """
         Read model gridded data
 
@@ -3248,7 +3249,10 @@ class DataReader:
             Hour, by default None
         stat : str, optional
             Statistic (only Mean accepted), by default None
-
+        date_range : tuple, optional
+            Start and end (inclusive) datetimes of period used to calculate statistic,
+            by default None (all loaded period)
+        
         Returns
         -------
         np.array
@@ -3306,6 +3310,15 @@ class DataReader:
             if ts[:6] in self.read_instance.yearmonths
         ]
 
+        # keep only files that can have data inside the selected period
+        if date_range is not None:
+            start, end = pd.Timestamp(date_range[0]), pd.Timestamp(date_range[1])
+            timesteps_to_read_intersect = [
+                ts
+                for ts in timesteps_to_read_intersect
+                if model_file_overlaps_period(ts, start, end)
+            ]
+
         # no files inside the date range, nothing to check
         if len(timesteps_to_read_intersect) == 0:
             return None
@@ -3354,6 +3367,15 @@ class DataReader:
                     continue
 
                 with Dataset(filepath) as ds:
+                    # get timesteps of file inside selected date range, skip file if there are none
+                    if date_range is not None:
+                        file_timestamps = time_var_to_asi8(ds["time"])
+                        in_period = (file_timestamps >= start.value) & (file_timestamps <= end.value)
+                        if not in_period.any():
+                            continue
+                    else:
+                        in_period = slice(None)
+
                     # first file
                     if sum_data is None and count_data is None:
                         # read variable data and get latitudes and longitudes from first file
@@ -3373,6 +3395,9 @@ class DataReader:
                         timestep_data, _, _ = self.read_model_dataset(ds, speci, obs_units, standard_parameter_speci, 
                                                                       first_file=False)
 
+                    # keep only timesteps inside selected period
+                    timestep_data = timestep_data[in_period]
+
                     # ignore NaNs and append
                     sum_data += np.nansum(timestep_data, axis=0)
                     count_data += np.sum(
@@ -3383,7 +3408,10 @@ class DataReader:
             # do not calculate mean if no data files were found
             if sum_data is None:
                 msg = "No model data files found for the specified date range: "
-                msg += f"{self.read_instance.start_date} to {self.read_instance.end_date}."
+                if date_range is not None:
+                    msg += f"{start:%Y-%m-%d %H:%M} to {end:%Y-%m-%d %H:%M}."
+                else:
+                    msg += f"{self.read_instance.start_date} to {self.read_instance.end_date}."
                 show_message(self.read_instance, msg)
                 return None
 

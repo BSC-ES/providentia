@@ -18,12 +18,12 @@ import numpy as np
 from packaging.version import Version
 import pandas as pd
 from pandas.plotting import register_matplotlib_converters
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from providentia.auxiliar import CURRENT_PATH, join, correct_plot_type_name
 from .canvas_menus import SettingsMenu
-from .dashboard_elements import ComboBox
-from .dashboard_elements import set_formatting, set_cursor, unset_cursor
+from .dashboard_elements import ComboBox, DateTimePicker
+from .dashboard_elements import set_formatting, set_cursor, unset_cursor, set_highlight_color
 from .dashboard_interactivity import HoverAnnotation
 from .dashboard_interactivity import (
     legend_picker_func,
@@ -101,6 +101,8 @@ class Canvas(FigureCanvas):
 
         # initialise some key vars
         self.filter_data = None
+        self.map_date_range_selection = None
+        self.map_date_range_full = None
 
         # initialise Plotting class
         self.plotting = Plotting(read_instance=self.read_instance, canvas_instance=self)
@@ -193,10 +195,10 @@ class Canvas(FigureCanvas):
         # create map, colorbar and legend plot axes
         self.plot_axes = {}
         self.plot_axes["map"] = self.figure.add_subplot(
-            self.gridspec.new_subplotspec((2, 0), rowspan=44, colspan=42),
+            self.gridspec.new_subplotspec((2, 0), rowspan=40, colspan=42),
             projection=self.plotcrs,
         )
-        self.plot_axes["cb"] = self.figure.add_axes([0.0255, 0.536, 0.3794, 0.02])
+        self.plot_axes["cb"] = self.figure.add_axes([0.0255, 0.57, 0.3794, 0.02])
         self.plot_axes["legend"] = self.figure.add_subplot(
             self.gridspec.new_subplotspec((0, 47), rowspan=8, colspan=53)
         )
@@ -284,7 +286,13 @@ class Canvas(FigureCanvas):
             QtWidgets.QWidget(self), self.read_instance.formatting_dict["canvas_cover"]
         )
         self.lower_canvas_cover.hide()
-        # place partial canvas covers below map elements
+
+        # place period selector above partial canvas covers, but below the full canvas cover,
+        # so it is hidden whenever the map is covered (e.g. while reading data)
+        self.map_date_range.raise_()
+        self.canvas_cover.raise_()
+
+        # place canvas covers below map elements
         for element in self.map_elements:
             element.raise_()
 
@@ -315,6 +323,22 @@ class Canvas(FigureCanvas):
 
         # update legend
         self.update_legend()
+
+        # set limits of map date range selector to loaded period and show it
+        start = self.read_instance.time_array[0]
+        end = self.read_instance.time_array[-1]
+        qstart = QtCore.QDateTime(QtCore.QDate(start.year, start.month, start.day),
+                                  QtCore.QTime(start.hour, 0), QtCore.Qt.UTC)
+        qend = QtCore.QDateTime(QtCore.QDate(end.year, end.month, end.day),
+                                QtCore.QTime(end.hour, 0), QtCore.Qt.UTC)
+        for date_edit, qdate in [(self.map_start_date, qstart), (self.map_end_date, qend)]:
+            date_edit.blockSignals(True)
+            date_edit.setDateTimeRange(qstart, qend)
+            date_edit.setDateTime(qdate)
+            date_edit.blockSignals(False)
+        self.map_date_range_full = (start.to_pydatetime(), end.to_pydatetime())
+        self.map_date_range_selection = self.map_date_range_full
+        self.map_date_range.show()
 
         # update plotted map z statistic and grid
         self.update_map()
@@ -584,6 +608,75 @@ class Canvas(FigureCanvas):
 
         return None
 
+    def handle_map_date_range_update(self):
+        """
+        Function that handles the update of the map date range selector
+        """
+
+        start = self.map_start_date.dateTime().toPyDateTime()
+        end = self.map_end_date.dateTime().toPyDateTime()
+
+        # do not allow start date to be after end date
+        if start > end:
+            self.map_start_date.blockSignals(True)
+            self.map_start_date.setDateTime(self.map_end_date.dateTime())
+            self.map_start_date.blockSignals(False)
+            start = end
+
+        # do nothing if selection has not changed
+        if (start, end) == self.map_date_range_selection:
+            return None
+
+        # update mouse cursor to a waiting cursor
+        self.read_instance.cursor_function = set_cursor(
+            self.read_instance.cursor_function, "handle_map_date_range_update"
+        )
+
+        self.map_date_range_selection = (start, end)
+
+        # update plotted map z statistic and grid
+        self.update_map()
+
+        # restore mouse cursor to normal
+        unset_cursor(self.read_instance.cursor_function, "handle_map_date_range_update")
+
+        return None
+
+    def show_date_time_picker(self, date_edit):
+        """
+        Function that shows date and hour picker under a date edit
+
+        Parameters
+        ----------
+        date_edit : QtWidgets.QDateTimeEdit
+            Date edit
+        """
+
+        self.date_time_picker_date_edit = date_edit
+        self.date_time_picker.show_at(
+            date_edit.mapToGlobal(QtCore.QPoint(0, date_edit.height())),
+            date_edit.dateTime(),
+            date_edit.minimumDateTime(),
+            date_edit.maximumDateTime(),
+        )
+
+        return None
+
+    def handle_date_time_picker_selection(self, date_time):
+        """
+        Function that handles the selection of a date and hour in the picker
+
+        Parameters
+        ----------
+        date_time : QtCore.QDateTime
+            Selected date and hour
+        """
+
+        self.date_time_picker_date_edit.setDateTime(date_time)
+        self.handle_map_date_range_update()
+
+        return None
+    
     def handle_statistic_mode_update(self):
         """
         Function that handles the update of the MPL canvas
@@ -816,14 +909,21 @@ class Canvas(FigureCanvas):
         else:
             zstat = get_z_statistic_comboboxes(base_zstat, bias=True)
 
-        # if there is grid data, get it
+        # restrict map statistic (stations and grid) to period selected under the map colourbar
+        # (if all loaded period is selected, use all data)
+        date_range = None
+        if self.map_date_range_selection != self.map_date_range_full:
+            date_range = self.map_date_range_selection
+
+        # if there is grid data, read it
         results = self.read_instance.datareader.read_gridded_data(
-            speci, zstat=zstat)
+            speci, zstat=zstat, date_range=date_range)
+
         if results:
             grid_data, grid_lat, grid_lon, grid_units = results
         else:
             grid_data, grid_lat, grid_lon, grid_units = None, None, None, None
-        
+
         # ensure label that have in memory still exists
 
         # plot map for zstat --> updating active map valid station indices and setting up plot picker
@@ -837,7 +937,8 @@ class Canvas(FigureCanvas):
             labelb=self.map_z2.currentText(),
             var=grid_data,
             lat=grid_lat,
-            lon=grid_lon
+            lon=grid_lon,
+            date_range=date_range
         )
 
         # update absolute selected plotted station indices with respect to new active map valid station indices
@@ -922,9 +1023,11 @@ class Canvas(FigureCanvas):
         # update plot options
         self.update_plot_options(plot_types=["map"])
 
-        # redraw plot (needed to update plotted colours before update_map_station_selection)
-        self.figure.canvas.draw()
-        self.figure.canvas.flush_events()
+        # calculate station colours from z statistic (needed before update_map_station_selection),
+        # without redrawing, so stations are not shown for an instant with their initial size
+        for collection in self.plot_axes["map"].collections:
+            if isinstance(collection, matplotlib.collections.PathCollection):
+                collection.update_scalarmappable()
 
         # update map selection appropriately for z statistic
         self.update_map_station_selection()
@@ -3173,6 +3276,7 @@ class Canvas(FigureCanvas):
         # index the array of indices of stations plotted on the map (indexed with respect to
         # all available stations), with the absolute indices of the subset of plotted selected stations
         return self.active_map_valid_station_inds[selected_map_inds]
+
     def generate_interactive_elements(self):
         """
         Function to create settings menus for each plot and their elements
@@ -3262,6 +3366,54 @@ class Canvas(FigureCanvas):
             "opacity_sl": [self.map_opacity_unsel_sl, self.map_opacity_sel_sl],
         }
 
+        # add date and hour picker for map date range selector
+        highlight_color = self.plot_characteristics_templates["general"]["highlight_color"]
+        self.date_time_picker = DateTimePicker(self, highlight_color=highlight_color)
+        self.date_time_picker.accepted.connect(self.handle_date_time_picker_selection)
+        self.date_time_picker_date_edit = None
+
+        # add map date range selector (placed under the map colourbar)
+        self.map_date_range = QtWidgets.QWidget(self)
+        set_highlight_color(self.map_date_range, highlight_color)
+        date_range_layout = QtWidgets.QHBoxLayout(self.map_date_range)
+        date_range_layout.setContentsMargins(0, 0, 0, 0)
+        date_range_layout.setSpacing(4)
+        self.map_start_date = QtWidgets.QDateTimeEdit(self.map_date_range)
+        self.map_end_date = QtWidgets.QDateTimeEdit(self.map_date_range)
+        date_range_layout.addWidget(QtWidgets.QLabel("Period:", self.map_date_range))
+
+        # add date pickers
+        for date_edit in [self.map_start_date, self.map_end_date]:
+            date_edit.setTimeSpec(QtCore.Qt.UTC)
+            date_edit.setDisplayFormat("yyyy-MM-dd HH':00'")
+            date_edit.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
+            date_edit.editingFinished.connect(self.handle_map_date_range_update)
+
+            # add calendar icon that opens date and hour picker
+            picker_action = date_edit.lineEdit().addAction(
+                QtGui.QIcon(join(CURRENT_PATH, "resources/calendar_icon.png")),
+                QtWidgets.QLineEdit.TrailingPosition,
+            )
+            picker_action.setToolTip("Select date and hour")
+            picker_action.triggered.connect(
+                lambda _, date_edit=date_edit: self.show_date_time_picker(date_edit)
+            )
+            # widen field so icon does not cover the date
+            date_edit.setMinimumWidth(date_edit.sizeHint().width() + 24)
+
+            # add a dash separator between date pickers
+            if date_edit == self.map_end_date:
+                date_range_layout.addWidget(QtWidgets.QLabel("–", self.map_date_range))
+            date_range_layout.addWidget(date_edit)
+
+        # do not allow end date/hour before start date/hour, nor start after end
+        self.map_start_date.dateTimeChanged.connect(self.map_end_date.setMinimumDateTime)
+        self.map_end_date.dateTimeChanged.connect(self.map_start_date.setMaximumDateTime)
+
+        date_range_layout.addStretch()
+        self.map_date_range.setToolTip("Select period used for the map statistic")
+        self.map_date_range.hide()
+        
         # TIMESERIES PLOT SETTINGS MENU #
         # create timeseries settings menu
         self.timeseries_menu = SettingsMenu(
