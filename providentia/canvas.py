@@ -2,6 +2,7 @@
 
 import copy
 import datetime
+import re
 import sys
 import yaml
 from weakref import WeakKeyDictionary
@@ -326,7 +327,9 @@ class Canvas(FigureCanvas):
 
         # set limits of map date range selector to loaded period and show it
         start = self.read_instance.time_array[0]
-        end = self.read_instance.time_array[-1]
+        end = self.read_instance.time_array[-1] + pd.tseries.frequencies.to_offset(
+            self.read_instance.active_frequency_code
+        )
         qstart = QtCore.QDateTime(QtCore.QDate(start.year, start.month, start.day),
                                   QtCore.QTime(start.hour, 0), QtCore.Qt.UTC)
         qend = QtCore.QDateTime(QtCore.QDate(end.year, end.month, end.day),
@@ -580,6 +583,13 @@ class Canvas(FigureCanvas):
             self.read_instance.active_resolution = (
                 self.read_instance.resampling_resolution
             )
+
+            # warn that resampling is not applied to gridded data
+            if any(data_label_raw.endswith("::noninterpolated")
+                for data_label_raw in self.read_instance.data_labels_raw
+            ):
+                msg = "Resampling is not applied to gridded data."
+                show_message(self.read_instance, msg)
         else:
             self.read_instance.active_resolution = self.read_instance.resolution
 
@@ -616,12 +626,17 @@ class Canvas(FigureCanvas):
         start = self.map_start_date.dateTime().toPyDateTime()
         end = self.map_end_date.dateTime().toPyDateTime()
 
-        # do not allow start date to be after end date
-        if start > end:
+        # do not allow start date to be at or after end date (end is exclusive)
+        if start >= end:
+            start = (end - pd.tseries.frequencies.to_offset(
+                self.read_instance.active_frequency_code
+            )).to_pydatetime()
             self.map_start_date.blockSignals(True)
-            self.map_start_date.setDateTime(self.map_end_date.dateTime())
+            self.map_start_date.setDateTime(
+                QtCore.QDateTime(QtCore.QDate(start.year, start.month, start.day),
+                                 QtCore.QTime(start.hour, 0), QtCore.Qt.UTC)
+            )
             self.map_start_date.blockSignals(False)
-            start = end
 
         # do nothing if selection has not changed
         if (start, end) == self.map_date_range_selection:
@@ -780,6 +795,15 @@ class Canvas(FigureCanvas):
         # turn colocation on
         if check_state == QtCore.Qt.Checked:
             self.read_instance.temporal_colocation = True
+            
+            # warn that temporal colocation is not applied to gridded data
+            if any(
+                data_label_raw.endswith("::noninterpolated")
+                for data_label_raw in self.read_instance.data_labels_raw
+            ):
+                msg = "Temporal colocation is not applied to gridded data."
+                show_message(self.read_instance, msg)
+
             # need to update plots?
             if len(self.read_instance.data_labels) < 2:
                 if self.read_instance.temporal_colocation_active:
@@ -868,6 +892,25 @@ class Canvas(FigureCanvas):
 
         self.read_instance.block_MPL_canvas_updates = False
 
+    def get_map_lead_days(self):
+        """
+        Get forecast lead days loaded, so gridded model uses the same forecast days
+        as interpolated models (day 1 if no forecast option is loaded)
+        """
+
+        # daily and combined forecasts use all active forecast days
+        if self.read_instance.daily_forecast or self.read_instance.combined_forecast:
+            return list(self.read_instance.active_forecast_days)
+
+        # N day forecast(s)
+        lead_days = set()
+        for data_label_raw in self.read_instance.data_labels_raw:
+            match = re.search(r"::interpolated-day(\d+)$", data_label_raw)
+            if match:
+                lead_days.add(int(match.group(1)))
+
+        return sorted(lead_days) if lead_days else [1]
+
     def update_map(self):
         """
         Function that updates plotted z statistic on map, with colourbar
@@ -916,8 +959,10 @@ class Canvas(FigureCanvas):
             date_range = self.map_date_range_selection
 
         # if there is grid data, read it
+        print('lead days', self.get_map_lead_days())
         results = self.read_instance.datareader.read_gridded_data(
-            speci, zstat=zstat, date_range=date_range)
+            speci, zstat=zstat, date_range=date_range,
+            lead_days=self.get_map_lead_days())
 
         if results:
             grid_data, grid_lat, grid_lon, grid_units = results
@@ -1649,8 +1694,9 @@ class Canvas(FigureCanvas):
             for data_label in self.read_instance.data_labels:
                 if 'gridded' in data_label:
                     has_gridded = True
+            # TODO: Add Median when ready
             if has_gridded:
-                z_stat_items = ['Mean', 'Median']
+                z_stat_items = ['Mean']
             else:
                 # update z statistic field to all basic stats if colocation not-active OR z2
                 # array not selected, else select basic+bias stats

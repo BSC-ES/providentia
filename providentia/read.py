@@ -35,6 +35,7 @@ from .plot_aux import update_plotting_parameters
 from .read_aux import (
     check_for_ghost,
     get_default_qa,
+    get_forecast_run_mask,
     get_frequency_code,
     get_yearmonths_to_read,
     init_shared_vars_read_netcdf_data,
@@ -3235,7 +3236,7 @@ class DataReader:
         
         return read_data, lat, lon
 
-    def read_gridded_data(self, speci, date=None, hour=None, zstat=None, date_range=None):
+    def read_gridded_data(self, speci, date=None, hour=None, zstat=None, date_range=None, lead_days=None):
         """
         Read model gridded data
 
@@ -3250,9 +3251,11 @@ class DataReader:
         stat : str, optional
             Statistic (only Mean accepted), by default None
         date_range : tuple, optional
-            Start and end (inclusive) datetimes of period used to calculate statistic,
+            Start (inclusive) and end (exclusive) datetimes of period used to calculate statistic,
             by default None (all loaded period)
-        
+        lead_days : list of int, optional
+            Forecast lead days used from forecast runs (YYYYMMDDHH files), by default None ([1])
+
         Returns
         -------
         np.array
@@ -3265,20 +3268,21 @@ class DataReader:
             Gridded model variable units
         """
 
-        # get gridded models selected on the models menu
-        selected_gridded_models = self.read_instance.models_menu["models"][
-            "keep_selected"
-        ]["noninterpolated"]
+        # get gridded model loaded
+        selected_gridded_models = [
+            data_label_raw.rpartition("::")[0]
+            for data_label_raw in self.read_instance.data_labels_raw
+            if data_label_raw.endswith("::noninterpolated")
+        ]
 
         # nothing to draw if no gridded model is selected
         if len(selected_gridded_models) == 0:
             return None
         
-        # do not plot more than one grid at the same time
-        if len(selected_gridded_models) > 1:
-            msg = f"It is not possible to plot more than one gridded model. Plotting the first one: {selected_gridded_models[0]}"
-            show_message(self.read_instance, msg)
-        
+        # use first lead day by default
+        if lead_days is None:
+            lead_days = [1]
+
         # take the first selected gridded model
         model_id = selected_gridded_models[0]
         domain = model_id.rsplit("-", 2)[1]
@@ -3303,32 +3307,42 @@ class DataReader:
         except KeyError:
             return None
 
-        # get intersection of timesteps and available_yearmonths
+        # get start (inclusive) and end (exclusive) of period, all loaded period by default
+        if date_range is not None:
+            start, end = pd.Timestamp(date_range[0]), pd.Timestamp(date_range[1])
+        else:
+            start = self.read_instance.time_array[0]
+            end = self.read_instance.time_array[-1] + pd.tseries.frequencies.to_offset(
+                self.read_instance.active_frequency_code
+            )
+        
+        # keep only files that can have data inside the period
         timesteps_to_read_intersect = [
             ts
             for ts in available_timesteps
-            if ts[:6] in self.read_instance.yearmonths
+            if model_file_overlaps_period(ts, start, end, lead_days)
         ]
-
-        # keep only files that can have data inside the selected period
-        if date_range is not None:
-            start, end = pd.Timestamp(date_range[0]), pd.Timestamp(date_range[1])
-            timesteps_to_read_intersect = [
-                ts
-                for ts in timesteps_to_read_intersect
-                if model_file_overlaps_period(ts, start, end)
-            ]
 
         # no files inside the date range, nothing to check
         if len(timesteps_to_read_intersect) == 0:
             return None
 
-        files_to_read = sorted(
-            [
-                file_root.format(date=timestep)
-                for timestep in timesteps_to_read_intersect
-            ]
+        # warn if forecast runs are not 24 hours apart, as lead day N of each run is taken
+        # as the 24 hours from run start + (N-1) days, e.g. for lead day 1 the run of
+        # 2023010100 covers 2023-01-01 00:00 to 2023-01-01 23:00 and the run of
+        # 2023010200 covers 2023-01-02 00:00 to 2023-01-02 23:00
+        run_starts = pd.to_datetime(
+            sorted(ts for ts in timesteps_to_read_intersect if len(ts) == 10),
+            format="%Y%m%d%H",
         )
+        run_diffs = run_starts[1:] - run_starts[:-1]
+        wrong_diffs = run_diffs[run_diffs != pd.Timedelta(days=1)]
+        if len(wrong_diffs) > 0:
+            msg = (
+                f"Forecast runs of {model_id} are expected to be 24 hours apart, "
+                f"but found differences of {', '.join(sorted({str(d) for d in wrong_diffs}))}."
+            )
+            show_message(self.read_instance, msg)
 
         obs_units = self.read_instance.measurement_units[speci]
         standard_parameter_speci = get_standard_parameters_by_speci(
@@ -3361,20 +3375,27 @@ class DataReader:
             sum_data = None
             count_data = None
 
-            for filepath in files_to_read:
+            for timestep in sorted(timesteps_to_read_intersect):
+                filepath = file_root.format(date=timestep)
                 if not os.path.exists(filepath):
-                    msg = f"Statistic '{zstat}' is not supported. Only 'Mean' is supported."
                     continue
 
                 with Dataset(filepath) as ds:
-                    # get timesteps of file inside selected date range, skip file if there are none
-                    if date_range is not None:
-                        file_timestamps = time_var_to_asi8(ds["time"])
-                        in_period = (file_timestamps >= start.value) & (file_timestamps <= end.value)
-                        if not in_period.any():
-                            continue
-                    else:
-                        in_period = slice(None)
+                    # get timesteps of file inside period
+                    file_timestamps = time_var_to_asi8(ds["time"])
+                    in_period = (file_timestamps >= start.value) & (file_timestamps < end.value)
+                    
+                    # forecast runs: keep only timesteps of wanted lead days
+                    if len(timestep) == 10:
+                        in_period &= get_forecast_run_mask(
+                            file_timestamps,
+                            pd.to_datetime(timestep, format="%Y%m%d%H"),
+                            lead_days,
+                        )
+
+                    # skip file if there are no timesteps to use
+                    if not in_period.any():
+                        continue
 
                     # first file
                     if sum_data is None and count_data is None:
@@ -3408,10 +3429,7 @@ class DataReader:
             # do not calculate mean if no data files were found
             if sum_data is None:
                 msg = "No model data files found for the specified date range: "
-                if date_range is not None:
-                    msg += f"{start:%Y-%m-%d %H:%M} to {end:%Y-%m-%d %H:%M}."
-                else:
-                    msg += f"{self.read_instance.start_date} to {self.read_instance.end_date}."
+                msg += f"{start:%Y-%m-%d %H:%M} to {end:%Y-%m-%d %H:%M}."
                 show_message(self.read_instance, msg)
                 return None
 

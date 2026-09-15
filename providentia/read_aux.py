@@ -1269,7 +1269,7 @@ def parse_model_filename(filename, speci):
             'prefix': filename[:match.start('date')],
             'suffix': parsed['extra']}
 
-def model_file_overlaps_period(timestep, start, end):
+def model_file_overlaps_period(timestep, start, end, lead_days):
     """
     Check if a gridded model file can have data inside a period, based on the date
     in its filename (YYYYMM: monthly file, YYYYMMDD: daily file, YYYYMMDDHH: forecast run)
@@ -1281,7 +1281,9 @@ def model_file_overlaps_period(timestep, start, end):
     start : pd.Timestamp
         Start of period
     end : pd.Timestamp
-        End of period (inclusive)
+        End of period (exclusive)
+    lead_days : list of int
+        Forecast lead days used from forecast runs
 
     Returns
     -------
@@ -1289,25 +1291,65 @@ def model_file_overlaps_period(timestep, start, end):
         False if the file cannot have data inside the period
     """
 
-    formats = {6: "%Y%m", 8: "%Y%m%d", 10: "%Y%m%d%H"}
-    file_start = pd.to_datetime(timestep, format=formats[len(timestep)])
-
-    # file starts after period ends
-    if file_start > end:
-        return False
-
-    # YYYYMM: file ends before period starts
+    # YYYYMM
     if len(timestep) == 6:
+        file_start = pd.to_datetime(timestep, format="%Y%m")
         file_end = file_start + pd.DateOffset(months=1)
     # YYYYMMDD
     elif len(timestep) == 8:
+        file_start = pd.to_datetime(timestep, format="%Y%m%d")
         file_end = file_start + pd.Timedelta(days=1)
-    # length of forecast runs is not known from filename, keep file
-    # TODO: Improve timestep selection for forecasts
+    # YYYYMMDDHH
     else:
-        return True
+        # forecast run start, taken from the file name
+        run_start = pd.to_datetime(timestep, format="%Y%m%d%H")
 
-    return file_end > start
+        # get first time used in file considering lowest desired lead day
+        file_start = run_start + pd.Timedelta(days=min(lead_days) - 1)
+
+        # get last time used in file considering highest desired lead day
+        file_end = run_start + pd.Timedelta(days=max(lead_days))
+
+    return (file_start < end) and (file_end > start)
+
+
+def get_forecast_run_mask(file_timestamps, run_start, lead_days):
+    """
+    Get mask of timesteps in a forecast run file used for the wanted lead days,
+    where lead day N covers [run start + (N-1) days, run start + N days)
+
+    Parameters
+    ----------
+    file_timestamps : np.array
+        Timestamps of file (ns)
+    run_start : pd.Timestamp
+        Start of forecast run
+    lead_days : list of int
+        Wanted lead days (1 = first 24 hours after the model initialisation)
+
+    Returns
+    -------
+    np.array
+        Boolean mask, True for timesteps to use
+    """
+
+    # calculate time elapsed since model initialised for each timestep (ns)
+    day = pd.Timedelta(days=1).value
+    lead_offset = file_timestamps - run_start.value
+    
+    mask = np.zeros(file_timestamps.shape, dtype=bool)
+
+    # add timesteps of each wanted lead day
+    # lead time = 1: at least 0 h after run start, but less than 24 h
+    # lead time = 2: at least 24 h after run start, but less than 48 h
+    # lead time = 3: at least 48 h after run start, but less than 72 h
+    # lead time = N: at least (N−1)×24 h after run start, but less than N×24 h
+    for lead_day in lead_days:
+        window_start = (lead_day - 1) * day
+        mask |= (lead_offset >= window_start) & (lead_offset < window_start + day)
+
+    return mask
+
 
 def get_valid_noninterpolated_models(instance, start_date, end_date, resolution, networkspecies):
     """
@@ -1332,7 +1374,7 @@ def get_valid_noninterpolated_models(instance, start_date, end_date, resolution,
         Dictionary mapping each speci (str) to a set of model_id strings
         (formatted as "experiment-domain-ensemble") that have valid
         non-interpolated data available for it within the given date range
-        and resolution.
+        (and beyond for forecast files) and resolution.
     dict
         Nested dictionary of available non-interpolated model data, structured
         as {domain: {resolution: {speci: {model_id: valid_file_timesteps}}}},
@@ -1426,6 +1468,9 @@ def get_valid_noninterpolated_models(instance, start_date, end_date, resolution,
                     # get timestep start date of all files
                     file_timesteps = sorted({parsed["date"] for parsed in ensemble_files})
 
+                    # initialise valid timesteps
+                    valid_file_timesteps = []
+
                     # write nested dictionary for model, with associated file timesteps
                     # monthly files (e.g. '202301')
                     if len(file_timesteps[0]) == 6:
@@ -1439,16 +1484,22 @@ def get_valid_noninterpolated_models(instance, start_date, end_date, resolution,
                         )
                     # daily files (e.g. '2023010100')
                     elif len(file_timesteps[0]) > 6:
+                        # keep files from previous month, as later lead days of forecast runs
+                        # can fall inside period
+                        prev_month_firstday = int(
+                            (pd.Timestamp(str(start_date)[:6] + "01") - pd.DateOffset(months=1)).strftime("%Y%m%d")
+                        )
                         valid_file_timesteps = sorted(
-                                                    [
-                                                        ym
-                                                        for ym in file_timesteps
-                                                        if (int(ym[0:8]) >= start_date_firstdayofmonth)
-                                                        & (int(ym[0:8]) < int(end_date))
-                                                    ]
-                                                )
-                    else:
-                        valid_file_timesteps = []
+                            [
+                                ym
+                                for ym in file_timesteps
+                                if (int(ym[0:8]) >= prev_month_firstday)
+                                & (int(ym[0:8]) < int(end_date))
+                            ]
+                        )
+                        # do not show model if it only has files from previous month
+                        if not any(int(ym[0:8]) >= start_date_firstdayofmonth for ym in valid_file_timesteps):
+                            valid_file_timesteps = []
                         
                     # if have valid files, then add model to pop-up menu,
                     # and add yearmonths to available model data

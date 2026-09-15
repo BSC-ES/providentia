@@ -513,7 +513,7 @@ def get_date_range_mask(read_instance, time_index, date_range):
     time_index : pandas.DatetimeIndex
         Time steps of the data array (after resampling).
     date_range : tuple
-        Start and end (inclusive) of date range, as datetimes.
+        Start (inclusive) and end (exclusive) of date range, as datetimes.
 
     Returns
     -------
@@ -530,7 +530,7 @@ def get_date_range_mask(read_instance, time_index, date_range):
         resolution = read_instance.resolution
     offset = pd.tseries.frequencies.to_offset(get_frequency_code(resolution))
 
-    return np.asarray((time_index <= end) & ((time_index + offset) > start))
+    return np.asarray((time_index < end) & ((time_index + offset) > start))
 
 
 def merge_forecast_days(
@@ -1130,7 +1130,7 @@ def calculate_statistic(
     forecast_type : str, optional
         Identifier for forecast-specific handling (e.g., 'daily').
     date_range : tuple, optional
-        Start and end (inclusive) datetimes of period used for map statistics.
+        Start (inclusive) and end (exclusive) of date range, as datetimes.
         Data outside the period is ignored. By default None (all loaded period).
 
     Returns

@@ -1707,8 +1707,12 @@ class Dashboard(QtWidgets.QWidget):
                     if (model in self.models_menu["models"]["map_vars"])
                     and self.models_menu["models"]["enabled"][model_type].get(model, False)
                 ]
-                # only one gridded model can be plotted on the map at a time
+                # only one gridded model can be plotted on the map at a time, keep first one
                 if model_type == 'noninterpolated':
+                    if self.from_conf and len(candidate_models) > 1:
+                        msg = ("It is not possible to load more than one gridded model from a configuration file. "
+                               f"Selecting the first one: {candidate_models[0]}")
+                        show_message(self, msg)
                     candidate_models = candidate_models[:1]
                 self.models_menu["models"]["keep_selected"][model_type] = candidate_models
 
@@ -2692,6 +2696,13 @@ class Dashboard(QtWidgets.QWidget):
 
         # if are not loading from conf then get data labels, models and forecast indices
         if not self.from_conf:
+            # only one gridded model can be plotted on the map at a time, keep first one
+            selected_gridded_models = self.models_menu["models"]["keep_selected"]["noninterpolated"]
+            if len(selected_gridded_models) > 1:
+                msg = ("It is not possible to plot more than one gridded model. "
+                       f"Selecting the first one: {selected_gridded_models[0]}")
+                show_message(self, msg)
+                self.models_menu["models"]["keep_selected"]["noninterpolated"] = selected_gridded_models[:1]
             # get the models selected on the models menu, interpolated and gridded
             models = {}
             for model_type in ['interpolated', 'noninterpolated']:
