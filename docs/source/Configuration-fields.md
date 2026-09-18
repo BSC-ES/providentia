@@ -11,12 +11,12 @@ Some of these fields are required depending on the mode. If a parameter required
 
 | Parameter | Required in | Description | Default
 | ------ | ------ | ------ | ------ |
-| `network`, `observation`, `framework` | Dashboard, Report, Interpolation | Network(s) to load observations from. Multiple values are allowed (e.g. `CAPMoN, EBAS`). Wildcards (`*`) expand to multiple variables (e.g. `vconcaerobin*` → `vconcaerobin1`, `vconcaerobin2`, etc.). For GHOST networks, the selection is dictated by GHOST. For non-GHOST networks, available options are defined under the `nonghost_available_networks` key in `available_inputs.yaml` and can be modified by the user. | — |
-| `model`, `models`, `experiments`, `experiment` | Dashboard, Report, Interpolation | Model(s). Model IDs can optionally include domain and/or ensemble information in the following formats: `modelID`, `modelID-ensemble`, `modelID-domain` or `modelID-domain-ensemble`. Also, `model`, `domain` and/or `ensemble` can be specified separately. Model IDs can also be mapped to alternative names (aliases) by appending them in parentheses after the ID (e.g. `mod1-dom-ens, mod2-dom-ens (altmod1, altmod2)`). | — |
-| `species` | All modes | Species to load. Can be multiple (e.g. `sconco3, sconcno2`). Dictated by GHOST. See the [Available Species](Available-species) page for options. | — |
-| `resolution` | All modes | Temporal resolution of the observations to load (e.g. `hourly`, `daily`). For GHOST networks, the resolution is dictated by GHOST. For non-GHOST networks, available options are defined under the `nonghost_available_resolutions` key in `available_inputs.yaml` and can be modified by the user. || — |
-| `start_date` | All modes | Comparison start date in `YYYYMMDD` format or `YYYYMM` when interpolation is enabled (e.g. `20170101`). | — |
-| `end_date` | All modes | Comparison end date in `YYYYMMDD` format or `YYYYMM` when interpolation is enabled (e.g. `20180601`). | — |
+| `network`, `observation`, `framework` | Dashboard, Report, Interpolation | Network to load observations from, can be multiple (e.g. `CAPMoN, EBAS`). The networks can be GHOST or non-GHOST. For GHOST see [Available Networks](ghost-networks) for the available options. | — |
+| `model`, `models`, `experiments`, `experiment` | Dashboard, Report, Interpolation | Model to load data from, can be multiple (e.g. `mod1, mod2`). Model IDs can optionally include domain and/or ensemble information in the following formats: `modelID`, `modelID-ensemble`, `modelID-domain` or `modelID-domain-ensemble`. Also, `model`, `domain` and/or `ensemble` can be specified separately. Model IDs can also be mapped to alternative names (aliases) by appending them in parentheses after the ID (e.g. `mod1-dom-ens, mod2-dom-ens (altmod1, altmod2)`). | — |
+| `species` | All modes | Species to load, can be multiple (e.g. `sconco3, sconcno2`). See the [Available Species](Available-species) page for options. Wildcards (`*`) expand to multiple variables (e.g. `vconcaerobin*` → `vconcaerobin1`, `vconcaerobin2`, etc.). A model species can be optionally interpolated to a different observational species via the syntax: `model_species@observational_species` - see [Interpolating between species](interpolation-between-species). | — |
+| `resolution` | All modes | Temporal resolution of data to load (e.g. `hourly`), cannot be multiple. For GHOST networks, the available resolutions are: `hourly, daily, monthly`, and an optional `hourly_instantaneous` resolution for variables measured instantaenously, e.g. meteorological. For non-GHOST networks, available options are defined under the `nonghost_available_resolutions` key in `available_inputs.yaml` and can be modified by the user. | — |
+| `start_date` | All modes | Data start date in `YYYYMMDD` format (e.g. `20170101`), or `YYYYMM` in the interpolation mode . | — |
+| `end_date` | All modes | Data end date in `YYYYMMDD` format (e.g. `20180601`), or `YYYYMM` in the interpolation mode | — |
 | `ghost_version` | Optional | GHOST version used when a GHOST network is selected. | `1.5` |
 | `ghost_features` | Optional | Level of GHOST features to utilise: `max`, `med` or `min`. `max` means all GHOST filter variables and metadata are read, `min` means no GHOST filter variables and very limited metadata are read , and `med` means GHOST native coverage filter variables are not read, and a curated selction is read. | `med` |
 | `domain` | Optional | Domain of the model (e.g. `regional`, `global`). When multiple model IDs and multiple ensembles/domains are provided, all possible combinations of model, domain and ensemble will be used. Options are defined under the `available_domains` key in `available_inputs.yaml` and can be modified by the user. | All available |
@@ -75,6 +75,7 @@ Apart from the common parameters, these are the fields used by all analysis and 
 | `multispecies_units` | Units of data in multispecies plots. Only accepts strings, if units for each species are: {'sconco3': 'ug m-3', 'sconcno2': 'ug m-3', 'sconcco': 'mg m-3', 'sconcso2': 'ug m-3'}, choose only one between ug m-3 and mg m-3 (e.g. `ug m-3`) and the data of the species that are not in the chosen units will be converted. | — |
 | `station_order` | Order stations by the values of any metadata variable, e.g. `latitude`, or randomly by setting `random`. By default the ordering is done in ascending order, for both text and numeric fields. In order to sort in descending order add the `\|\| descending` argument | — |
 | `station_cap` | Cap number of stations to visualise to an integer maximum e.g. `100` | — |
+| `plots` | Plots to visualise, this can be in the form of a list (e.g `timeseries, periodic-violin, scatter, distribution`), or the name of a preset group of plots from `settings/report_plots.yaml` (e.g. `standard`). Preset names cannot take the name of a plot type (e.g. `timeseries`). Each plot can be defined with valid plot options via the `_option` suffix (e.g. `taylor_perstation`), and/or a `-stat` suffix to select a statistic where the plot supports one (e.g. `periodic-r`). For the dashboard, 4 plots are needed to be set, if the number exceeds this only the first 4 are kept. | — |
 
 (dashboard-parameters)=
 ## Dashboard parameters
@@ -83,7 +84,7 @@ This parameter is used only in the [Dashboard mode](Dashboard). It is **optional
 
 | Parameter | Description | Default |
 | ------ | ------ | ------ |
-| `active_dashboard_plots` | Plots that will be active in the dashboard once it is launched (e.g. `timeseries, periodic-violin, scatter, distribution`). | `timeseries, statsummary, distribution, periodic` |
+| `dashboard_plots` | Plots that will be active in the dashboard once it is launched, this can be in the form of a list (e.g. `timeseries, periodic-violin, scatter, distribution`), or the name of a preset group of plots from `settings/report_plots.yaml` (e.g. `standard`). Preset names cannot take the name of a plot type (e.g. `timeseries`). Each plot can be defined with valid plot options via the `_option` suffix (e.g. `taylor_perstation`), and/or a `-stat` suffix to select a statistic where the plot supports one (e.g. `periodic-r`). 4 plots are needed to be set, if the number exceeds this only the first 4 are kept. This overrides the `plots` variable if set. | `timeseries, statsummary, distribution, periodic` |
 
 (report-parameters)=
 ## Report parameters
@@ -92,7 +93,7 @@ These parameters are used only in the [Report mode](Report). All of them are **o
 
 | Parameter | Description | Default |
 | ------ | ------ | ------ |
-| `report_type` | Type of report to generate that defines which plots the report will contain, from the options given in `report_plots.yaml`. | `standard` |
+| `report_plots` | Plots to make in a report, this can be in the form of a list (e.g. `timeseries, periodic-violin, scatter, distribution`), or the name of a preset group of plots from `settings/report_plots.yaml` (e.g. `standard`). Preset names cannot take the name of a plot type (e.g. `timeseries`). Each plot can be defined with valid plot options via the `_option` suffix (e.g. `taylor_perstation`), and/or a `-stat` suffix to select a statistic where the plot supports one (e.g. `periodic-r`). This overrides the `plots` variable if set. | `standard` |
 | `report_summary` | Boolean variable to set if you wish to make specific plots for each station in subsection. | `True` |
 | `report_stations` | Boolean variable to set if you wish to make summary plots across station subsection. | `False` |
 | `report_title` | The header in the first page of the report (as in the PDF). | `Providentia Report` |

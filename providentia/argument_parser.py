@@ -318,7 +318,22 @@ class ProvArgumentParser(object):
                 help="remove extreme stations using defined statistic limits",
             )
             self.parser.add_argument(
-                "--report_type", dest="report_type", help="define plot options"
+                "--report_plots",
+                dest="report_plots",
+                help="plots to make in the report - a single named preset "
+                "(e.g. standard, looked up in report_plots.yaml) or a list "
+                "of plots given directly (e.g. timeseries,distribution-r)",
+            )
+            self.parser.add_argument(
+                "--report_type",
+                dest="report_type",
+                help="deprecated alias for report_plots",
+            )
+            self.parser.add_argument(
+                "--plots",
+                dest="plots",
+                help="plots to make - for dashboard_plots (first 4 used) "
+                "or report_plots, whichever is not otherwise set",
             )
             self.parser.add_argument(
                 "--report_summary",
@@ -347,9 +362,14 @@ class ProvArgumentParser(object):
                 help="harmonise axes limits across stations for stations report",
             )
             self.parser.add_argument(
+                "--dashboard_plots",
+                dest="dashboard_plots",
+                help="plots on dashboard upon launch",
+            )
+            self.parser.add_argument(
                 "--active_dashboard_plots",
                 dest="active_dashboard_plots",
-                help="active plots on dashboard upon launch",
+                help="deprecated alias for dashboard_plots",
             )
             self.parser.add_argument(
                 "--resampling_resolution",

@@ -1173,7 +1173,7 @@
         {
           "element_type": "container",
           "formatting_dict": "settings_container",
-          "size": [250, 130],
+          "size": [250, 180],
           "relative_position": [-230, 25],
         },
 
@@ -1186,12 +1186,31 @@
           "text": "SETTINGS",
         },
 
-      "linewidth_sl_label":
+      "station_stat_label":
         {
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 50],
+          "text": "Station statistic",
+        },
+
+      "station_stat":
+        {
+          "element_type": "combobox",
+          "formatting_dict": "menu_combobox",
+          "fixed_width": 105,
+          "relative_position": [-220, 75],
+          "object_name": "distribution_station_stat",
+          "function": "handle_distribution_station_statistic_update",
+        },
+
+      "linewidth_sl_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_sublabel",
+          "size": [230, 20],
+          "relative_position": [-220, 100],
           "text": "Line width",
         },
 
@@ -1199,7 +1218,7 @@
         {
           "element_type": "slider",
           "size": [230, 20],
-          "relative_position": [-220, 75],
+          "relative_position": [-220, 125],
           "object_name": "distribution_linewidth_sl",
           "value_unit": "pt",
           "value_divisor": 10,
@@ -1214,7 +1233,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 100],
+          "relative_position": [-220, 150],
           "text": "Options",
         },
 
@@ -1223,7 +1242,7 @@
           "element_type": "checkable_combobox",
           "formatting_dict": "menu_checkable_combobox",
           "size": [230, 20],
-          "relative_position": [-220, 125],
+          "relative_position": [-220, 175],
           "object_name": "distribution_options",
           "function": "update_plot_option",
         },
@@ -1265,7 +1284,7 @@
         {
           "element_type": "container",
           "formatting_dict": "settings_container",
-          "size": [250, 205],
+          "size": [250, 255],
           "relative_position": [-230, 25],
         },
 
@@ -1278,12 +1297,31 @@
           "text": "SETTINGS",
         },
 
-      "bins_sl_label":
+      "station_stat_label":
         {
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 50],
+          "text": "Station statistic",
+        },
+
+      "station_stat":
+        {
+          "element_type": "combobox",
+          "formatting_dict": "menu_combobox",
+          "fixed_width": 105,
+          "relative_position": [-220, 75],
+          "object_name": "histogram_station_stat",
+          "function": "handle_histogram_station_statistic_update",
+        },
+
+      "bins_sl_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_sublabel",
+          "size": [230, 20],
+          "relative_position": [-220, 100],
           "text": "Number of bins",
         },
 
@@ -1292,7 +1330,7 @@
           "element_type": "checkbox",
           "formatting_dict": "menu_checkbox",
           "fixed_width": 230,
-          "relative_position": [-220, 75],
+          "relative_position": [-220, 125],
           "object_name": "histogram_auto_bins",
           "text": "Automatic",
           "function": "handle_histogram_auto_bins_update",
@@ -1302,7 +1340,7 @@
         {
           "element_type": "slider",
           "size": [230, 20],
-          "relative_position": [-220, 100],
+          "relative_position": [-220, 150],
           "object_name": "histogram_bins_sl",
           "minimum": 1,
           "tick_interval": 5,
@@ -1315,7 +1353,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 125],
+          "relative_position": [-220, 175],
           "text": "Line width",
         },
 
@@ -1323,7 +1361,7 @@
         {
           "element_type": "slider",
           "size": [230, 20],
-          "relative_position": [-220, 150],
+          "relative_position": [-220, 200],
           "object_name": "histogram_linewidth_sl",
           "value_unit": "pt",
           "value_divisor": 10,
@@ -1338,7 +1376,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 175],
+          "relative_position": [-220, 225],
           "text": "Options",
         },
 
@@ -1347,7 +1385,7 @@
           "element_type": "checkable_combobox",
           "formatting_dict": "menu_checkable_combobox",
           "size": [230, 20],
-          "relative_position": [-220, 200],
+          "relative_position": [-220, 250],
           "object_name": "histogram_options",
           "function": "update_plot_option",
         },
@@ -1834,7 +1872,7 @@
         {
           "element_type": "container",
           "formatting_dict": "settings_container",
-          "size": [250, 180],
+          "size": [250, 205],
           "relative_position": [-230, 25],
         },
 
@@ -1847,34 +1885,12 @@
           "text": "SETTINGS",
         },
 
-      "markersize_sl_label":
-        {
-          "element_type": "label",
-          "formatting_dict": "settings_sublabel",
-          "size": [230, 20],
-          "relative_position": [-220, 50],
-          "text": "Size",
-        },
-
-      "markersize_sl":
-        {
-          "element_type": "slider",
-          "size": [230, 20],
-          "relative_position": [-220, 75],
-          "object_name": "fairmode_target_markersize_sl",
-          "value_unit": "pt",
-          "minimum": 0,
-          "tick_interval": 2,
-          "tracking": false,
-          "function": "update_markersize_func",
-        },
-
       "classification_label":
         {
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 100],
+          "relative_position": [-220, 50],
           "text": "Classification type",
         },
 
@@ -1883,8 +1899,41 @@
           "element_type": "combobox",
           "formatting_dict": "menu_combobox",
           "fixed_width": 105,
-          "relative_position": [-220, 125],
+          "relative_position": [-220, 75],
           "function": "handle_fairmode_target_classification_update",
+        },
+
+      "legend":
+        {
+          "element_type": "checkbox",
+          "formatting_dict": "menu_checkbox",
+          "fixed_width": 230,
+          "relative_position": [-220, 100],
+          "object_name": "fairmode_target_legend",
+          "text": "Legend",
+          "function": "handle_fairmode_target_legend_update",
+        },
+
+      "markersize_sl_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_sublabel",
+          "size": [230, 20],
+          "relative_position": [-220, 125],
+          "text": "Size",
+        },
+
+      "markersize_sl":
+        {
+          "element_type": "slider",
+          "size": [230, 20],
+          "relative_position": [-220, 150],
+          "object_name": "fairmode_target_markersize_sl",
+          "value_unit": "pt",
+          "minimum": 0,
+          "tick_interval": 2,
+          "tracking": false,
+          "function": "update_markersize_func",
         },
 
       "options_label":
@@ -1892,7 +1941,7 @@
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 150],
+          "relative_position": [-220, 175],
           "text": "Options",
         },
 
@@ -1901,7 +1950,7 @@
           "element_type": "checkable_combobox",
           "formatting_dict": "menu_checkable_combobox",
           "size": [230, 20],
-          "relative_position": [-220, 175],
+          "relative_position": [-220, 200],
           "object_name": "fairmode_target_options",
           "function": "update_plot_option",
         },

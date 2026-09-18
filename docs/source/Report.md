@@ -26,18 +26,13 @@ The report mode has access to a larger variety of plot types than the standard i
 
 ## Plot selection
 
-You should edit the file `settings/report_plots.yaml` and add a new dictionary key with the names of the plots you want to have. For instance, if you want to include timeseries and scatter plots with and without annotations in your report, you should add:
+The plots that are defined to be visualised in the report can be set via the `plots` variable in 2 ways.  
 
-```
-"new_plots": ["timeseries", "timeseries_annotate", 
-              "scatter", "scatter_annotate"]
-```
+They can be set in the form of a list, (e.g. `plots = timeseries, distribution, statsummary`), or the name of a preset group of plots from `settings/report_plots.yaml` (e.g. `standard`). Preset names cannot take the name of a plot type (e.g. `timeseries`). 
 
-The plots will appear in the report in the given order, with the exception of `multispecies` plots, which will appear first. The key name `new_plots` will be used if called from the `report_type` parameter in the [configuration file](Configuration-files):
+Each plot can be defined with valid plot options via the `_option` suffix (e.g. `taylor_perstation`), and/or a `-stat` suffix to select a statistic where the plot supports one (e.g. `periodic-r`).
 
-```
-report_type = new_plots
-```
+The plots will appear in the report in the defined plot order, with the exception of `multispecies` plots, which will appear first.
 
 ## Summary and station plots
 

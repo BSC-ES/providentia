@@ -599,7 +599,7 @@ def _toggle_legend_visibility(canvas_instance, legend_label, data_label):
                 # having the hidden one's box merely toggled invisible in
                 # place, which left its own tick and label behind (see
                 # make_boxplot() in plotting.py)
-                if "boxplot" in canvas_instance.read_instance.active_dashboard_plots:
+                if "boxplot" in canvas_instance.read_instance.dashboard_plots:
                     canvas_instance.update_associated_active_dashboard_plot("boxplot")
 
             # change font weight of label
@@ -866,13 +866,13 @@ def rename_legend_label(canvas_instance, legend_label, data_label):
         # a rename doesn't touch any underlying data or selection, and
         # statsummary's table and the boxplot's category labels are the only
         # other places a display label appears - the broader
-        # update_associated_active_dashboard_plots() re-fetches station data
+        # update_associated_dashboard_plots() re-fetches station data
         # and redraws every active plot, which felt slow. The boxplot redraw
         # also re-decides whether its labels now fit (see
         # fit_boxplot_xticklabels()), as a new name can be shorter or longer
         # than the one it last measured
         for plot_type in ("statsummary", "boxplot"):
-            if plot_type in read_instance.active_dashboard_plots:
+            if plot_type in read_instance.dashboard_plots:
                 canvas_instance.update_associated_active_dashboard_plot(plot_type)
 
         # draw(), not draw_idle(): a deferred repaint lands after the
@@ -1438,9 +1438,10 @@ class HoverAnnotation(object):
             return None
 
         # retrieve CRMSE / β·RMSᵤ and Mean Bias / β·RMSᵤ
+        point_ind = annotation_index["ind"][0]
         line = self.canvas_instance.plot_elements["fairmode-target"][
             self.canvas_instance.plot_elements["fairmode-target"]["active"]
-        ][data_label]["plot"][annotation_index["ind"][0]]
+        ][data_label]["plot"][point_ind]
         x = line.get_xdata()[0]
         y = line.get_ydata()[0]
 
@@ -1451,6 +1452,39 @@ class HoverAnnotation(object):
 
         # convert data label colour to hex code
         hex_colour = get_hex_code(colour)
+
+        # each point is one station - name it first, as on the map
+        (
+            station_names,
+            station_references,
+            area_classifications,
+            station_type_classifications,
+        ) = getattr(
+            self.canvas_instance, "fairmode_target_stations", ([], [], [], [])
+        )
+        if point_ind < len(station_names):
+            text_label += ('<font color="{0}">Station: {1}</font><br>').format(
+                hex_colour, station_names[point_ind]
+            )
+            text_label += ('<font color="{0}">Reference: {1}</font><br>').format(
+                hex_colour, station_references[point_ind]
+            )
+            if point_ind < len(area_classifications):
+                classification = area_classifications[point_ind]
+                if isinstance(classification, str) and (
+                    classification.lower() != "nan"
+                ):
+                    text_label += (
+                        '<font color="{0}">Area type: {1}</font><br>'
+                    ).format(hex_colour, classification)
+            if point_ind < len(station_type_classifications):
+                classification = station_type_classifications[point_ind]
+                if isinstance(classification, str) and (
+                    classification.lower() != "nan"
+                ):
+                    text_label += (
+                        '<font color="{0}">Station type: {1}</font><br>'
+                    ).format(hex_colour, classification)
 
         # add text label
         text_label += ('<font color="{0}">{1}</font>').format(
@@ -1506,13 +1540,15 @@ class HoverAnnotation(object):
             return None
 
         # retrieve CRMSE / β·RMSᵤ and Mean Bias / β·RMSᵤ
+        point_ind = annotation_index["ind"][0]
         line = self.canvas_instance.plot_elements["fairmode-statsummary"][
             self.canvas_instance.plot_elements["fairmode-statsummary"]["active"]
-        ][data_label]["plot"][annotation_index["ind"][0]]
+        ][data_label]["plot"][point_ind]
 
         # get closest value to the point currently hovered
         x = line.get_xdata()
-        closest_value = min(x, key=lambda i: abs(i - self.xdata))
+        closest_ind = int(np.argmin(np.abs(np.asarray(x) - self.xdata)))
+        closest_value = x[closest_ind]
 
         # get colour for data label
         colour = self.canvas_instance.read_instance.plotting_params[data_label][
@@ -1521,6 +1557,53 @@ class HoverAnnotation(object):
 
         # convert data label colour to hex code
         hex_colour = get_hex_code(colour)
+
+        # only the middle-zone row keeps a station behind each point -
+        # the collapsed "_left"/"_right" dots can stand for more than one
+        row_titles = getattr(
+            self.canvas_instance.plotting, "fairmode_statsummary_row_titles", {}
+        ).get(data_label, [])
+        row = row_titles[point_ind] if point_ind < len(row_titles) else None
+        row_station_indices = getattr(
+            self.canvas_instance, "fairmode_statsummary_row_station_indices", {}
+        )
+        if (data_label, row) in row_station_indices:
+            station_inds = row_station_indices[(data_label, row)]
+            if closest_ind < len(station_inds):
+                (
+                    station_names,
+                    station_references,
+                    area_classifications,
+                    station_type_classifications,
+                ) = getattr(
+                    self.canvas_instance,
+                    "fairmode_statsummary_stations",
+                    ([], [], [], []),
+                )
+                station_idx = station_inds[closest_ind]
+                if station_idx < len(station_names):
+                    text_label += (
+                        '<font color="{0}">Station: {1}</font><br>'
+                    ).format(hex_colour, station_names[station_idx])
+                    text_label += (
+                        '<font color="{0}">Reference: {1}</font><br>'
+                    ).format(hex_colour, station_references[station_idx])
+                    if station_idx < len(area_classifications):
+                        classification = area_classifications[station_idx]
+                        if isinstance(classification, str) and (
+                            classification.lower() != "nan"
+                        ):
+                            text_label += (
+                                '<font color="{0}">Area type: {1}</font><br>'
+                            ).format(hex_colour, classification)
+                    if station_idx < len(station_type_classifications):
+                        classification = station_type_classifications[station_idx]
+                        if isinstance(classification, str) and (
+                            classification.lower() != "nan"
+                        ):
+                            text_label += (
+                                '<font color="{0}">Station type: {1}</font><br>'
+                            ).format(hex_colour, classification)
 
         # add text label
         display_label = get_display_label(
@@ -1585,11 +1668,24 @@ class HoverAnnotation(object):
                 # update vline position
                 self.update_vline_position()
 
+                # "Station statistic" x-axis is the stat's own label, not the species
+                station_statistic = self.canvas_instance.plot_characteristics[
+                    "distribution"
+                ].get("station_statistic")
+                if station_statistic not in (None, "", "None"):
+                    stats_dict = {
+                        **self.canvas_instance.read_instance.basic_stats,
+                        **self.canvas_instance.read_instance.modbias_stats,
+                    }
+                    x_label = stats_dict[station_statistic]["label"]
+                else:
+                    x_label = self.canvas_instance.read_instance.species[0]
+
                 # create annotation text
                 text_label += (
                     "<p style='white-space:pre'><i>{0}: {1:.{2}f}</i>"
                 ).format(
-                    self.canvas_instance.read_instance.species[0],
+                    x_label,
                     concentration,
                     self.canvas_instance.plot_characteristics["distribution"][
                         "marker_annotate_rounding"
@@ -1652,11 +1748,14 @@ class HoverAnnotation(object):
             ):
                 continue
 
-            # retrieve the bin's edge and density
+            # the picked vertex is a bin edge, not its centre - convert;
+            # the last vertex just repeats the final edge, fold it back
             line = self.canvas_instance.plot_elements["histogram"][
                 self.canvas_instance.plot_elements["histogram"]["active"]
             ][data_label]["plot"][0]
-            concentration = line.get_xdata()[annotation_index["ind"][0]]
+            edges = line.get_xdata()
+            bin_ind = min(annotation_index["ind"][0], len(edges) - 2)
+            concentration = (edges[bin_ind] + edges[bin_ind + 1]) / 2.0
             density = line.get_ydata()[annotation_index["ind"][0]]
 
             # first valid data label?
@@ -1664,11 +1763,24 @@ class HoverAnnotation(object):
                 # update vline position
                 self.update_vline_position()
 
+                # "Station statistic" x-axis is the stat's own label, not the species
+                station_statistic = self.canvas_instance.plot_characteristics[
+                    "histogram"
+                ].get("station_statistic")
+                if station_statistic not in (None, "", "None"):
+                    stats_dict = {
+                        **self.canvas_instance.read_instance.basic_stats,
+                        **self.canvas_instance.read_instance.modbias_stats,
+                    }
+                    x_label = stats_dict[station_statistic]["label"]
+                else:
+                    x_label = self.canvas_instance.read_instance.species[0]
+
                 # create annotation text
                 text_label += (
                     "<p style='white-space:pre'><i>{0}: {1:.{2}f}</i>"
                 ).format(
-                    self.canvas_instance.read_instance.species[0],
+                    x_label,
                     concentration,
                     self.canvas_instance.plot_characteristics["histogram"][
                         "marker_annotate_rounding"
@@ -1725,8 +1837,9 @@ class HoverAnnotation(object):
         line = self.canvas_instance.plot_elements["taylor"][
             self.canvas_instance.plot_elements["taylor"]["active"]
         ][data_label]["plot"][0]
-        corr_stat = line.get_xdata()[annotation_index["ind"][0]]
-        stddev = line.get_ydata()[annotation_index["ind"][0]]
+        point_ind = annotation_index["ind"][0]
+        corr_stat = line.get_xdata()[point_ind]
+        stddev = line.get_ydata()[point_ind]
 
         # get colour for data label
         colour = self.canvas_instance.read_instance.plotting_params[data_label][
@@ -1735,6 +1848,22 @@ class HoverAnnotation(object):
 
         # convert data label colour to hex code
         hex_colour = get_hex_code(colour)
+
+        # in "perstation" mode each point is one station, so name it first -
+        # in the default aggregated mode a point pools every selected
+        # station, so there is no single station to name
+        perstation_stations = getattr(
+            self.canvas_instance, "taylor_perstation_stations", {}
+        )
+        if data_label in perstation_stations:
+            station_names, station_references = perstation_stations[data_label]
+            if point_ind < len(station_names):
+                text_label += ('<font color="{0}">Station: {1}</font><br>').format(
+                    hex_colour, station_names[point_ind]
+                )
+                text_label += (
+                    '<font color="{0}">Reference: {1}</font><br>'
+                ).format(hex_colour, station_references[point_ind])
 
         # add text label
         text_label += ('<font color="{0}">{1}</font>').format(

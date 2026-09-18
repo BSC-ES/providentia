@@ -52,6 +52,7 @@ from .statistics import (
     generate_colourbar,
     generate_colourbar_detail,
     get_fairmode_data,
+    get_selected_station_count,
     get_selected_station_data,
     get_z_statistic_info,
 )
@@ -501,6 +502,8 @@ class Providentia:
         smooth=False,
         threshold=False,
         gerrity=False,
+        normalise=False,
+        perstation=False,
         plot_options=None,
         save=False,
         return_plot=False,
@@ -561,6 +564,10 @@ class Providentia:
             Indicates if plot has threshold line/s, defaults to False.
         gerrity : bool, optional
             Indicates if plot shows Gerrity scores per station
+        normalise : bool, optional
+            Indicates if boxplot is normalised, defaults to False.
+        perstation : bool, optional
+            Indicates if Taylor diagram shows one point per station, defaults to False.
         plot_options : list, optional
             List with plot options, defaults to None.
         save : bool or str, optional
@@ -652,6 +659,12 @@ class Providentia:
         if gerrity:
             if "gerrity" not in plot_options:
                 plot_options.append("gerrity")
+        if normalise:
+            if "normalise" not in plot_options:
+                plot_options.append("normalise")
+        if perstation:
+            if "perstation" not in plot_options:
+                plot_options.append("perstation")
 
         # get base plot type (no plot options), and plot type (with plot options)
         base_plot_type = copy.deepcopy(plot)
@@ -769,6 +782,16 @@ class Providentia:
                 show_message(self, msg)
                 return
 
+        # a stat-less taylor plot defaults to "r", as the dashboard does
+        if (base_plot_type == "taylor") and (zstat is None):
+            (
+                zstat,
+                base_zstat,
+                z_statistic_type,
+                z_statistic_sign,
+                z_statistic_period,
+            ) = get_z_statistic_info(plot_type="taylor-r")
+
         # make sure periodic, map, heatmap, taylor and table plots have a -[stat]
         if (
             base_plot_type in ["periodic", "map", "heatmap", "taylor", "table"]
@@ -816,6 +839,18 @@ class Providentia:
         # do not make periodic plot if stat is MDA8
         if (base_plot_type == "periodic") and (base_zstat == "MDA8"):
             msg = f"Cannot make {plot_type} because MDA8 statistic is not available for periodic plots. Not making plot."
+            show_message(self, msg)
+            return
+
+        # a "distribution-<stat>"/"histogram-<stat>" shows the spread of a
+        # statistic across stations, so a single station has nothing to show
+        # (see _resolve_station_statistic())
+        if (
+            (base_plot_type in ["distribution", "histogram"])
+            and (base_zstat is not None)
+            and (get_selected_station_count(self, self, networkspeci) < 2)
+        ):
+            msg = f"Cannot make {plot_type} because a station statistic needs at least 2 stations. Not making plot."
             show_message(self, msg)
             return
 
@@ -1298,6 +1333,18 @@ class Providentia:
                 stddev_max=stddev_max,
             )
 
+        # make distribution/histogram plot
+        elif base_plot_type in ["distribution", "histogram"]:
+            func(
+                relevant_ax,
+                networkspeci,
+                data_labels,
+                self.plot_characteristics[plot_type],
+                plot_options,
+                # e.g. "distribution-r" - the statistic's own per-station value
+                zstat=base_zstat if zstat else None,
+            )
+
         # other plots
         elif base_plot_type != "legend":
             func(
@@ -1379,7 +1426,19 @@ class Providentia:
             "taylor",
         ]:
             if not xlabel:
-                if "xlabel" in self.plot_characteristics[plot_type]:
+                # "distribution-<stat>"/"histogram-<stat>" x-axis is the stat's own label/units
+                if (base_plot_type in ["distribution", "histogram"]) and (
+                    base_zstat is not None
+                ):
+                    stats_dict = {**self.basic_stats, **self.modbias_stats}
+                    stat_settings = stats_dict[base_zstat]
+                    xlabel = stat_settings["label"]
+                    stat_units = stat_settings["units"]
+                    if stat_units == "[measurement_units]":
+                        stat_units = self.measurement_units[speci]
+                    if stat_units:
+                        xlabel += " [{}]".format(stat_units)
+                elif "xlabel" in self.plot_characteristics[plot_type]:
                     xlabel = self.plot_characteristics[plot_type]["xlabel"]["xlabel"]
                     if "[measurement_units]" in xlabel:
                         xlabel = xlabel.replace(

@@ -51,7 +51,7 @@ def normalise_search_text(text):
     return re.sub(r"[^0-9a-z]", "", str(text).lower())
 
 
-def search_match_score(query, label):
+def search_match_score(query, label, allow_fuzzy=True):
     """
     Function which scores how well a field label answers a search query,
     returning None when the label is not a match at all.
@@ -68,6 +68,12 @@ def search_match_score(query, label):
         Text typed into the search box
     label : str
         Field label to test against
+    allow_fuzzy : bool, optional
+        Whether to fall as far as the approximate, typo-tolerant comparison -
+        by far the most expensive test here, run once per label. Left False
+        by search_field_labels() on its first pass over a list of labels, so
+        it is only ever paid for on a second pass, over the whole list again,
+        when that first, cheap pass matched nothing at all - see there.
 
     Returns
     -------
@@ -106,6 +112,9 @@ def search_match_score(query, label):
     ):
         return 0.5
 
+    if not allow_fuzzy:
+        return None
+
     # approximate match, for a mistyped or half-remembered field name. Held
     # back to longer queries, below which nearly everything looks similar to
     # everything else, and only ever used by search_field_labels() when the
@@ -137,6 +146,14 @@ def search_field_labels(query, labels):
     as written: a typo should find the field it was meant to be, but should
     not pad a good set of results with loosely similar names.
 
+    Run as two passes rather than one for exactly that reason, and so that
+    the (by far the most expensive, a per-label loop of its own) approximate
+    comparison is only ever paid for on the rare query that needs it - a
+    field of many thousands of labels (e.g. every station name) otherwise
+    lagged on every keystroke of an ordinary, plainly-matching query, since a
+    single scoring pass ran the approximate comparison for every label that
+    the cheap tests above it did not already match.
+
     Parameters
     ----------
     query : str
@@ -153,16 +170,22 @@ def search_field_labels(query, labels):
     if not normalise_search_text(query):
         return list(range(len(labels)))
 
-    scored = []
-    for label_ii, label in enumerate(labels):
-        score = search_match_score(query, label)
-        if score is not None:
-            scored.append((score, label_ii))
+    scored = [
+        (score, label_ii)
+        for label_ii, label in enumerate(labels)
+        for score in [search_match_score(query, label, allow_fuzzy=False)]
+        if score is not None
+    ]
 
-    # scores of 1.0 and above are the approximate matches
-    exact = [entry for entry in scored if entry[0] < 1.0]
-    if exact:
-        scored = exact
+    # nothing matched as written - worth the far more expensive approximate
+    # comparison now, over the whole list again, as the only remaining option
+    if not scored:
+        scored = [
+            (score, label_ii)
+            for label_ii, label in enumerate(labels)
+            for score in [search_match_score(query, label, allow_fuzzy=True)]
+            if score is not None
+        ]
 
     return [label_ii for _, label_ii in sorted(scored)]
 

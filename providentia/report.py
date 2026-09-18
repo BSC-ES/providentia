@@ -16,7 +16,12 @@ from pypdf import PdfReader, PdfWriter
 import yaml
 import re
 
-from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
+from providentia.auxiliar import (
+    CURRENT_PATH,
+    join,
+    expand_plot_characteristics,
+    resolve_plots_or_preset,
+)
 from .configuration import load_conf
 from .configuration import ProvConfiguration
 from .fields_menus import (
@@ -54,9 +59,11 @@ from .read_aux import (
     get_valid_obs_files_in_date_range,
 )
 from .statistics import (
+    boxplot_inner_fences,
     calculate_statistic,
     get_fairmode_data,
     generate_colourbar,
+    get_selected_station_count,
     get_selected_station_data,
     get_z_statistic_info,
 )
@@ -128,9 +135,9 @@ class Report:
             self.logger.error(error)
             sys.exit(1)
 
-        # load report plot presets
+        # named presets a "report_plots" entry can refer to (e.g. "standard")
         try:
-            self.report_plots = yaml.safe_load(
+            self.report_plots_presets = yaml.safe_load(
                 open(join(PROVIDENTIA_ROOT, "settings/report_plots.yaml"))
             )
         except:
@@ -278,22 +285,19 @@ class Report:
                 self.logger.info("No valid data for {} section".format(section))
                 continue
 
-            # check if report type is valid
-            if self.report_type not in self.report_plots.keys():
-                error = "Error: The report type {0} cannot be found in settings/report_plots.yaml. ".format(
-                    self.report_type
-                )
-                error += "The available report types are {0}. Select one or create your own.".format(
-                    list(self.report_plots.keys())
-                )
-                self.logger.error(error)
-                sys.exit(1)
+            # a single entry is a preset name (e.g. "standard") unless it is
+            # itself a real plot type, which wins as itself
+            report_plots = resolve_plots_or_preset(
+                self.report_plots,
+                self.report_plots_presets,
+                set(self.plot_characteristics_templates.keys()),
+            )
 
             # set plots that need to be made (summary and station specific)
             self.summary_plots_to_make = []
             self.station_plots_to_make = []
-            if isinstance(self.report_plots[self.report_type], list):
-                for plot_type in self.report_plots[self.report_type]:
+            if isinstance(report_plots, list):
+                for plot_type in report_plots:
                     # there can be no station specific plots for map plot type
                     if plot_type[:4] != "map-":
                         self.station_plots_to_make.append(plot_type)
@@ -303,27 +307,27 @@ class Report:
                     else:
                         if "gerrity" in plot_type.split("_")[1:]:
                             self.summary_plots_to_make.append(plot_type)
-            elif isinstance(self.report_plots[self.report_type], dict):
+            elif isinstance(report_plots, dict):
                 # get summary plots
-                if "summary" in self.report_plots[self.report_type].keys():
+                if "summary" in report_plots.keys():
                     if not self.report_summary:
                         msg = "report_summary is False, summary plots will not be created."
                         show_message(self, msg)
                     else:
                         # there can be no summary specific contingency tables (if gerrity, then allow)
-                        for plot_type in self.report_plots[self.report_type]["summary"]:
+                        for plot_type in report_plots["summary"]:
                             if plot_type[:16] != "contingencytable":
                                 self.summary_plots_to_make.append(plot_type)
                             else:
                                 if "gerrity" in plot_type.split("_")[1:]:
                                     self.summary_plots_to_make.append(plot_type)
                 # get station plots
-                if "station" in self.report_plots[self.report_type].keys():
+                if "station" in report_plots.keys():
                     if not self.report_stations:
                         msg = "report_stations is False, station plots will not be created."
                         show_message(self, msg)
                     else:
-                        for plot_type in self.report_plots[self.report_type]["station"]:
+                        for plot_type in report_plots["station"]:
                             # there can be no station specific plots for map plot type
                             if plot_type[:4] != "map-":
                                 self.station_plots_to_make.append(plot_type)
@@ -470,6 +474,13 @@ class Report:
             self.histogram_fence_station = {
                 networkspeci: 0 for networkspeci in self.networkspecies
             }
+
+            # a "distribution-<stat>"/"histogram-<stat>" page is drawn over a
+            # statistic's own per-station values, on a different scale to the
+            # concentrations the ranges below are gathered in, so those pages
+            # need a range of their own - see update_station_statistic_range()
+            self.station_statistic_stats = self.get_station_statistic_stats()
+            self.station_statistic_range_summary = {}
 
             # create variables to keep track of minimum and maximum data ranges across subsections
             self.data_range_min_summary = {
@@ -1604,6 +1615,7 @@ class Report:
                 self.update_histogram_bin_target(
                     ns, self.histogram_width_summary, self.histogram_fence_summary
                 )
+                self.update_station_statistic_range(ns)
 
         # if have no valid data across data labels (no observations or models), then set flag
         if not self.selected_station_data[networkspeci]:
@@ -1646,6 +1658,16 @@ class Report:
 
             # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
             plot_options = plot_type.split("_")[1:]
+
+            # a stat-less taylor plot defaults to "r", as the dashboard does
+            if (base_plot_type == "taylor") and (zstat is None):
+                (
+                    zstat,
+                    base_zstat,
+                    z_statistic_type,
+                    z_statistic_sign,
+                    z_statistic_period,
+                ) = get_z_statistic_info(plot_type="taylor-r")
 
             # make sure periodic, map, heatmap, taylor and table plots have a -[stat]
             if (
@@ -1922,6 +1944,16 @@ class Report:
 
                 # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
                 plot_options = plot_type.split("_")[1:]
+
+                # a stat-less taylor plot defaults to "r", as the dashboard does
+                if (base_plot_type == "taylor") and (zstat is None):
+                    (
+                        zstat,
+                        base_zstat,
+                        z_statistic_type,
+                        z_statistic_sign,
+                        z_statistic_period,
+                    ) = get_z_statistic_info(plot_type="taylor-r")
 
                 # make sure periodic, map, heatmap, taylor and table plots have a -[stat]
                 if (
@@ -2289,6 +2321,147 @@ class Report:
 
         return None
 
+    def get_station_statistic_stats(self):
+        """
+        Get the statistics that "distribution-<stat>"/"histogram-<stat>" pages
+        of this section will be drawn over, e.g. "r" for "histogram-r_bias".
+
+        Returns
+        -------
+        list of str
+            Statistic names, without duplicates
+        """
+
+        stats = []
+        for plot_type in self.summary_plots_to_make:
+            base_plot_type = plot_type.split("_")[0]
+            if "-" not in base_plot_type:
+                continue
+            base, stat = base_plot_type.split("-", 1)
+            if (base in ["distribution", "histogram"]) and (stat not in stats):
+                stats.append(stat)
+
+        return stats
+
+    def update_station_statistic_range(self, networkspeci):
+        """
+        Keep track of the range each statistic's own per-station values cover
+        across the subsections of this section, how far up and down the axis
+        they reach, and the widest bins any subsection wants for them.
+
+        Gathered for the same reason the data ranges and bins of the raw pages
+        are (see update_histogram_bin_target()): a "distribution-<stat>"/
+        "histogram-<stat>" page following only its own subsection's values
+        would be drawn on its own axis, and the pages are meant to be read
+        against one another. The widest bins are taken rather than the
+        narrowest for that same reason - bins fine enough for a subsection
+        holding every station would leave one holding a handful as noise.
+
+        Parameters
+        ----------
+        networkspeci : str
+            Current networkspeci (e.g. EBAS|sconco3)
+        """
+
+        if not self.selected_station_data.get(networkspeci):
+            return None
+
+        for stat in self.station_statistic_stats:
+            # a modbias stat (e.g. r, MB) compares a model against the
+            # observations, so it needs both to be loaded and paired - the
+            # page itself is not made without them either
+            if (stat in self.modbias_stats) and (
+                (not self.temporal_colocation) or (len(self.data_labels) == 1)
+            ):
+                continue
+
+            label_data = self.plotting._station_statistic_label_data(
+                networkspeci, self.data_labels, stat
+            )
+            values = np.concatenate(
+                [data for data in label_data.values() if data.size > 0]
+                or [np.array([], dtype=np.float32)]
+            )
+            if values.size == 0:
+                continue
+
+            width, fence = histogram_bin_target(values)
+            lower_fence, _ = boxplot_inner_fences(values)
+            (
+                current_min,
+                current_max,
+                current_lower_fence,
+                current_fence,
+                current_width,
+            ) = self.station_statistic_range_summary.get(
+                (networkspeci, stat), (np.inf, -np.inf, np.inf, -np.inf, 0)
+            )
+            if np.isfinite(lower_fence) and (lower_fence < current_lower_fence):
+                current_lower_fence = lower_fence
+            if np.isfinite(fence) and (fence > current_fence):
+                current_fence = fence
+            if np.isfinite(width) and (width > current_width):
+                current_width = width
+            self.station_statistic_range_summary[(networkspeci, stat)] = (
+                min(float(np.nanmin(values)), current_min),
+                max(float(np.nanmax(values)), current_max),
+                current_lower_fence,
+                current_fence,
+                current_width,
+            )
+
+        return None
+
+    def get_station_statistic_range(
+        self, plotting_paradigm, networkspeci, stat, trim=False
+    ):
+        """
+        Get the range gathered across subsections for a
+        "distribution-<stat>"/"histogram-<stat>" page, if there is one.
+
+        Parameters
+        ----------
+        plotting_paradigm : str
+            'summary' or 'station'
+        networkspeci : str
+            Current networkspeci (e.g. EBAS|sconco3)
+        stat : str or None
+            Statistic the page is drawn over, None for a raw-value page
+        trim : bool, default False
+            Hold both ends of the range back to the inner Tukey fences, as
+            the histogram does - the distribution covers the values as they
+            are, in every mode
+
+        Returns
+        -------
+        tuple of float or None
+            Minimum and maximum of the statistic's per-station values, and the
+            widest bins any subsection wanted for them. None where the page is
+            drawn over the raw values, or is a station page (drawn over a
+            single station, which has no spread across stations to show)
+        """
+
+        if (stat is None) or (plotting_paradigm != "summary"):
+            return None
+
+        stat_range = self.station_statistic_range_summary.get((networkspeci, stat))
+        if stat_range is None:
+            return None
+
+        range_min, range_max, lower_fence, fence, width = stat_range
+
+        # both ends of the axis are held back to where the values actually
+        # are - the concentration pages hold back only the top, as a species
+        # has its long tail there, where a statistic can have one at either
+        # end (see make_histogram())
+        if trim:
+            if range_min < fence < range_max:
+                range_max = fence
+            if range_min < lower_fence < range_max:
+                range_min = lower_fence
+
+        return range_min, range_max, width
+
     def make_plot(self, plotting_paradigm, plot_type, plot_options, networkspeci):
         """
         Directs the generation of specific plot types by coordinating data labels, axes, and plotting functions.
@@ -2330,6 +2503,16 @@ class Report:
             base_plot_type = plot_type.split("-")[0]
         else:
             base_plot_type = plot_type.split("_")[0]
+
+        # a stat-less taylor plot defaults to "r", as the dashboard does
+        if (base_plot_type == "taylor") and (zstat is None):
+            (
+                zstat,
+                base_zstat,
+                z_statistic_type,
+                z_statistic_sign,
+                z_statistic_period,
+            ) = get_z_statistic_info(plot_type="taylor-r")
 
         # set variable to know if we need to create plot for dataframes in last subsection
         plot_type_df = self.get_plot_type_df(base_plot_type)
@@ -2416,6 +2599,18 @@ class Report:
         # do not make periodic plot if stat is MDA8
         if (base_plot_type == "periodic") and (base_zstat == "MDA8"):
             msg = f"Cannot make {plot_type} because MDA8 statistic is not available for periodic plots. Not making plot."
+            show_message(self, msg)
+            return plot_indices
+
+        # a "distribution-<stat>"/"histogram-<stat>" shows the spread of a
+        # statistic across stations, which a station page, drawn for a single
+        # station, has nothing of (see _resolve_station_statistic())
+        if (
+            (base_plot_type in ["distribution", "histogram"])
+            and (base_zstat is not None)
+            and (get_selected_station_count(self, self, networkspeci) < 2)
+        ):
+            msg = f"Cannot make {plot_type} because a station statistic needs at least 2 stations. Not making plot."
             show_message(self, msg)
             return plot_indices
 
@@ -2756,7 +2951,22 @@ class Report:
 
                 # axis xlabel is empty?
                 if (axis_xlabel == "") or ("[measurement_units]" in axis_xlabel):
-                    if "xlabel" in self.plot_characteristics[plot_type]:
+                    # "distribution-<stat>"/"histogram-<stat>" x-axis is the stat's own label/units
+                    if (
+                        (base_plot_type in ["distribution", "histogram"])
+                        and (base_zstat is not None)
+                    ):
+                        stats_dict = {**self.basic_stats, **self.modbias_stats}
+                        stat_settings = stats_dict[base_zstat]
+                        xlabel = stat_settings["label"]
+                        stat_units = stat_settings["units"]
+                        if stat_units == "[measurement_units]":
+                            stat_units = self.measurement_units[
+                                networkspeci.split("|")[-1]
+                            ]
+                        if stat_units:
+                            xlabel += " [{}]".format(stat_units)
+                    elif "xlabel" in self.plot_characteristics[plot_type]:
                         xlabel = self.plot_characteristics[plot_type]["xlabel"][
                             "xlabel"
                         ]
@@ -2843,10 +3053,21 @@ class Report:
                         zstat=zstat,
                     )
                 elif base_plot_type == "histogram":
-                    # the axis stops where the subsections' values stop rather
-                    # than at the most extreme of them, and the count comes
-                    # from the widest bins any of them wanted, so that every
-                    # page of the report is drawn with the same bins
+                    # a "histogram-<stat>" page is drawn over the statistic's
+                    # own values, which have a range and bins of their own
+                    # gathered across subsections - the concentration range
+                    # and count stay as they are for where such a page falls
+                    # back to the raw values (a station page, drawn for a
+                    # single station)
+                    stat_range = self.get_station_statistic_range(
+                        plotting_paradigm,
+                        networkspeci,
+                        base_zstat if zstat else None,
+                        trim=True,
+                    )
+
+                    # every subsection shares one bin count, worked out from
+                    # the widest bins any of them wanted
                     histogram_range_max = data_range_max
                     if data_range_min < histogram_fence < data_range_max:
                         histogram_range_max = histogram_fence
@@ -2857,6 +3078,16 @@ class Report:
                                 (histogram_range_max - data_range_min) / histogram_width
                             )
                         )
+
+                    station_statistic_range = None
+                    if stat_range is not None:
+                        stat_min, stat_max, stat_width = stat_range
+                        station_statistic_range = (stat_min, stat_max)
+                        n_bins = (
+                            int(np.ceil((stat_max - stat_min) / stat_width))
+                            if stat_width > 0
+                            else None
+                        )
                     func(
                         relevant_axis,
                         networkspeci,
@@ -2866,8 +3097,17 @@ class Report:
                         data_range_min=data_range_min,
                         data_range_max=histogram_range_max,
                         n_bins=n_bins,
+                        # e.g. "histogram-r" - the statistic's own per-station value
+                        zstat=base_zstat if zstat else None,
+                        station_statistic_range=station_statistic_range,
                     )
                 elif base_plot_type == "distribution":
+                    # see the equivalent histogram comment above - a
+                    # distribution has no bins, so only the range is taken
+                    stat_range = self.get_station_statistic_range(
+                        plotting_paradigm, networkspeci, base_zstat if zstat else None
+                    )
+
                     func(
                         relevant_axis,
                         networkspeci,
@@ -2876,6 +3116,10 @@ class Report:
                         plot_options,
                         data_range_min=data_range_min,
                         data_range_max=data_range_max,
+                        zstat=base_zstat if zstat else None,
+                        station_statistic_range=(
+                            stat_range[:2] if stat_range is not None else None
+                        ),
                     )
                 elif base_plot_type == "taylor":
                     func(

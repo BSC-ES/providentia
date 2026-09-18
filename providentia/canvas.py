@@ -251,8 +251,48 @@ class Canvas(FigureCanvas):
             "contingencytable",
         ]
 
-        # stop running if plot type in active_dashboard_plots does not exist
-        for plot_type in self.read_instance.active_dashboard_plots:
+        # a dashboard_plots entry can carry a "_option" and/or "-stat" suffix
+        # (e.g. "taylor_perstation", "distribution-r") - split off here; the
+        # "-stat" is applied later, from _apply_pending_dashboard_plot_stats(),
+        # once a real data read says what stats are actually available
+        self.dashboard_plots_initial_options = {}
+        self._dashboard_plots_pending_stat = {}
+        self._dashboard_plots_pending_stat_applied = False
+        parsed_dashboard_plots = []
+        for plot_type_entry in self.read_instance.dashboard_plots:
+            if plot_type_entry == "None":
+                parsed_dashboard_plots.append(plot_type_entry)
+                continue
+
+            plot_options = plot_type_entry.split("_")[1:]
+            (
+                zstat,
+                base_zstat,
+                z_statistic_type,
+                z_statistic_sign,
+                z_statistic_period,
+            ) = get_z_statistic_info(plot_type_entry)
+            base_plot_type = (
+                plot_type_entry.split("-")[0] if zstat else plot_type_entry.split("_")[0]
+            )
+
+            # a plot type can only be shown in one position, as it can be
+            # when picked from a position's own menu (see
+            # handle_layout_update()) - the first of any repeats is kept and
+            # the rest are left empty, taking their options/stat with them
+            if base_plot_type in parsed_dashboard_plots:
+                parsed_dashboard_plots.append("None")
+                continue
+
+            parsed_dashboard_plots.append(base_plot_type)
+            if plot_options:
+                self.dashboard_plots_initial_options[base_plot_type] = plot_options
+            if zstat:
+                self._dashboard_plots_pending_stat[base_plot_type] = base_zstat
+        self.read_instance.dashboard_plots = parsed_dashboard_plots
+
+        # stop running if plot type in dashboard_plots does not exist
+        for plot_type in self.read_instance.dashboard_plots:
             if plot_type not in self.all_plots + ["None"]:
                 error = "Error: Plot type {0} is not an option. ".format(plot_type)
                 error += "The available plots are: {0}.".format(self.all_plots[2:])
@@ -261,10 +301,10 @@ class Canvas(FigureCanvas):
 
         # initialize layout positions
         self.read_instance.position_1 = "map"
-        self.read_instance.position_2 = self.read_instance.active_dashboard_plots[0]
-        self.read_instance.position_3 = self.read_instance.active_dashboard_plots[1]
-        self.read_instance.position_4 = self.read_instance.active_dashboard_plots[2]
-        self.read_instance.position_5 = self.read_instance.active_dashboard_plots[3]
+        self.read_instance.position_2 = self.read_instance.dashboard_plots[0]
+        self.read_instance.position_3 = self.read_instance.dashboard_plots[1]
+        self.read_instance.position_4 = self.read_instance.dashboard_plots[2]
+        self.read_instance.position_5 = self.read_instance.dashboard_plots[3]
 
         # initialise plot elements
         self.plot_elements = {}
@@ -293,6 +333,32 @@ class Canvas(FigureCanvas):
             self.current_plot_options[plot_type] = []
             self.previous_plot_options[plot_type] = []
 
+            # apply plot options parsed off dashboard_plots above - an
+            # invalid one is dropped with a warning, not the whole plot
+            if plot_type in self.dashboard_plots_initial_options:
+                requested_options = self.dashboard_plots_initial_options[plot_type]
+                available_options = self.plot_characteristics[plot_type][
+                    "plot_options"
+                ]
+                invalid_options = [
+                    option
+                    for option in requested_options
+                    if option not in available_options
+                ]
+                if invalid_options:
+                    msg = (
+                        "{0}: ignoring invalid plot option(s) {1} set via "
+                        "dashboard_plots - available options for {0} are {2}."
+                    ).format(plot_type, invalid_options, list(available_options))
+                    show_message(self.read_instance, msg)
+                valid_options = [
+                    option
+                    for option in requested_options
+                    if option in available_options
+                ]
+                self.current_plot_options[plot_type] = valid_options
+                self.previous_plot_options[plot_type] = copy.deepcopy(valid_options)
+
         # create map, colorbar and legend plot axes
         self.plot_axes = {}
         self.plot_axes["map"] = self.figure.add_subplot(
@@ -307,9 +373,37 @@ class Canvas(FigureCanvas):
         # add settings menus
         self.generate_interactive_elements()
 
+        # reflect the validated options on each plot's checkable combobox -
+        # signals blocked, as nothing should redraw yet (no data read yet)
+        for plot_type in self.dashboard_plots_initial_options:
+            # validated options, not the raw dashboard_plots_initial_options
+            valid_options = self.current_plot_options[plot_type]
+            if not valid_options:
+                continue
+            combo_plot_type = plot_type
+            if combo_plot_type in [
+                "periodic-violin",
+                "fairmode-target",
+                "fairmode-statsummary",
+            ]:
+                combo_plot_type = combo_plot_type.replace("-", "_")
+            combo = getattr(self, "{}_options".format(combo_plot_type), None)
+            if combo is None:
+                continue
+            all_options = self.plot_characteristics[plot_type]["plot_options"]
+            # blockSignals, not block_MPL_canvas_updates: checking an item
+            # fires straight into a handler that needs an attribute not yet
+            # set this early in the dashboard's own construction
+            combo.blockSignals(True)
+            for option in valid_options:
+                combo.model().item(all_options.index(option)).setCheckState(
+                    QtCore.Qt.Checked
+                )
+            combo.blockSignals(False)
+
         # create rest of plot axes (default: timeseries, statsummary, distribution, periodic)
         # also show plot type buttons
-        for position, plot_type in enumerate(self.read_instance.active_dashboard_plots):
+        for position, plot_type in enumerate(self.read_instance.dashboard_plots):
             # update plot axis
             self.read_instance.update_plot_axis(self, position + 2, plot_type)
 
@@ -368,8 +462,8 @@ class Canvas(FigureCanvas):
             "scroll_event", lambda event: zoom_map_func(self, event)
         )
 
-        # format axes for map, legend and active_dashboard_plots
-        for plot_type in ["map", "legend"] + self.read_instance.active_dashboard_plots:
+        # format axes for map, legend and dashboard_plots
+        for plot_type in ["map", "legend"] + self.read_instance.dashboard_plots:
             if plot_type != "None":
                 format_axis(
                     self.read_instance,
@@ -572,7 +666,7 @@ class Canvas(FigureCanvas):
                 if hasattr(self, "relative_selected_station_inds"):
                     if len(self.relative_selected_station_inds) > 0:
                         # update associated plots with selected stations
-                        self.update_associated_active_dashboard_plots()
+                        self.update_associated_dashboard_plots()
 
             # draw changes
             self.figure.canvas.draw_idle()
@@ -679,7 +773,7 @@ class Canvas(FigureCanvas):
             self.update_map_z_statistic()
 
             # update associated plots
-            self.update_associated_active_dashboard_plots()
+            self.update_associated_dashboard_plots()
 
             # draw changes
             self.figure.canvas.draw_idle()
@@ -723,7 +817,7 @@ class Canvas(FigureCanvas):
             self.read_instance.block_config_bar_handling_updates = False
 
             # update associated plots with selected stations
-            self.update_associated_active_dashboard_plots()
+            self.update_associated_dashboard_plots()
 
             # draw changes
             self.figure.canvas.draw_idle()
@@ -760,7 +854,7 @@ class Canvas(FigureCanvas):
             self.read_instance.block_config_bar_handling_updates = False
 
             # update associated plots with selected stations
-            self.update_associated_active_dashboard_plots()
+            self.update_associated_dashboard_plots()
 
             # draw changes
             self.figure.canvas.draw_idle()
@@ -834,6 +928,8 @@ class Canvas(FigureCanvas):
             self.handle_statsummary_cycle_update()
             self.handle_statsummary_periodic_aggregation_update()
             self.handle_statsummary_periodic_mode_update()
+            self.handle_distribution_station_statistic_update()
+            self.handle_histogram_station_statistic_update()
             if self.read_instance.temporal_colocation_active:
                 self.handle_taylor_correlation_statistic_update()
                 self.handle_fairmode_target_classification_update()
@@ -845,7 +941,7 @@ class Canvas(FigureCanvas):
                 self.update_map_z_statistic()
 
                 # update associated plots with selected stations
-                self.update_associated_active_dashboard_plots()
+                self.update_associated_dashboard_plots()
 
                 # draw changes
                 self.figure.canvas.draw_idle()
@@ -854,6 +950,70 @@ class Canvas(FigureCanvas):
         unset_cursor(
             self.read_instance.cursor_function, "handle_temporal_colocate_update"
         )
+
+        return None
+
+    def _apply_pending_dashboard_plot_stats(self):
+        """
+        Applies a statistic parsed off a dashboard_plots entry's "-stat"
+        suffix (e.g. "periodic-r", "distribution-r"), once - the first time
+        a read has fully completed and every relevant statistic combobox
+        has been (re)populated with what is actually available, which
+        cannot be known any earlier (it depends on temporal colocation and
+        how many models are loaded). Only supported for plot types with a
+        single, dashboard-settable statistic; anything else's "-stat" is
+        dropped with a warning. Invalid or unavailable statistics are
+        dropped the same way, leaving that plot at its own default.
+        """
+
+        self._dashboard_plots_pending_stat_applied = True
+
+        for plot_type, stat in self._dashboard_plots_pending_stat.items():
+            if plot_type in ["distribution", "histogram"]:
+                available = self._station_statistic_items()
+                if stat in available:
+                    getattr(self, "{}_station_stat".format(plot_type)).setCurrentText(
+                        stat
+                    )
+                else:
+                    msg = (
+                        "{0}: ignoring invalid/unavailable statistic '{1}' set "
+                        "via dashboard_plots - available statistics for {0} "
+                        "are {2}."
+                    ).format(plot_type, stat, available)
+                    show_message(self.read_instance, msg)
+
+            elif plot_type == "periodic":
+                available = [
+                    self.periodic_stat.itemText(i)
+                    for i in range(self.periodic_stat.count())
+                ]
+                if stat in available:
+                    self.periodic_stat.setCurrentText(stat)
+                else:
+                    msg = (
+                        "periodic: ignoring invalid/unavailable statistic "
+                        "'{0}' set via dashboard_plots - available statistics "
+                        "are {1}."
+                    ).format(stat, available)
+                    show_message(self.read_instance, msg)
+
+            elif plot_type == "taylor":
+                if stat in ["r", "r2"]:
+                    self.taylor_corr_stat.setCurrentText(stat)
+                else:
+                    msg = (
+                        "taylor: ignoring invalid statistic '{0}' set via "
+                        "dashboard_plots - choose between 'r' and 'r2'."
+                    ).format(stat)
+                    show_message(self.read_instance, msg)
+
+            else:
+                msg = (
+                    "{0}: a '-stat' suffix in dashboard_plots is not "
+                    "supported for this plot type."
+                ).format(plot_type)
+                show_message(self.read_instance, msg)
 
         return None
 
@@ -1265,6 +1425,25 @@ class Canvas(FigureCanvas):
                 # get relevant axis
                 ax = self.plot_axes[plot_type]
 
+                # "Station statistic" needs >=2 selected stations - reset to
+                # "None" here first so this redraw matches what is drawn
+                if plot_type in ["distribution", "histogram"]:
+                    station_statistic = self.plot_characteristics[plot_type].get(
+                        "station_statistic"
+                    )
+                    if station_statistic not in (None, "", "None"):
+                        self.plotting._resolve_station_statistic(
+                            plot_type,
+                            self.plot_characteristics[plot_type],
+                            station_statistic,
+                            self.read_instance.networkspeci,
+                        )
+                    # suspend/restore "bias"/"threshold" to match the result
+                    self._sync_station_statistic_incompatible_options(
+                        plot_type,
+                        self.plot_characteristics[plot_type].get("station_statistic"),
+                    )
+
                 # get options defined to configure plot
                 plot_options = copy.deepcopy(self.current_plot_options[plot_type])
 
@@ -1360,8 +1539,26 @@ class Canvas(FigureCanvas):
 
                 # setup xlabel / ylabel for other plot_types
                 else:
+                    # "Station statistic" x-axis is the stat's own label/units
+                    station_statistic = (
+                        self.plot_characteristics[plot_type].get("station_statistic")
+                        if plot_type in ["distribution", "histogram"]
+                        else None
+                    )
+                    if station_statistic not in (None, "", "None"):
+                        stat_settings = self.read_instance.basic_stats.get(
+                            station_statistic
+                        ) or self.read_instance.modbias_stats.get(station_statistic)
+                        xlabel = stat_settings["label"]
+                        stat_units = stat_settings["units"]
+                        if stat_units == "[measurement_units]":
+                            stat_units = self.read_instance.measurement_units[
+                                self.read_instance.species[0]
+                            ]
+                        if stat_units:
+                            xlabel += " [{}]".format(stat_units)
                     # set new xlabel
-                    if "xlabel" in self.plot_characteristics[plot_type]:
+                    elif "xlabel" in self.plot_characteristics[plot_type]:
                         xlabel = self.plot_characteristics[plot_type]["xlabel"][
                             "xlabel"
                         ]
@@ -1505,7 +1702,7 @@ class Canvas(FigureCanvas):
             if plot_type == position_var:
                 return position
 
-    def update_associated_active_dashboard_plots(self):
+    def update_associated_dashboard_plots(self):
         """
         Function that updates all plots associated with selected stations on map
         """
@@ -1514,7 +1711,7 @@ class Canvas(FigureCanvas):
         if hasattr(self, "relative_selected_station_inds"):
             # have no selected stations, so clear all previously plotted artists from selected station plots
             # cover plotting axes also
-            active_plots = self.read_instance.active_dashboard_plots
+            active_plots = self.read_instance.dashboard_plots
             if len(self.relative_selected_station_inds) == 0:
                 for plot_type in active_plots:
                     if plot_type != "None":
@@ -1529,7 +1726,7 @@ class Canvas(FigureCanvas):
                     networkspecies=[self.read_instance.networkspeci],
                 )
 
-                # iterate through active_dashboard_plots
+                # iterate through dashboard_plots
                 for plot_type in active_plots:
                     # update plot
                     if plot_type != "None":
@@ -3577,6 +3774,179 @@ class Canvas(FigureCanvas):
 
         return None
 
+    def _station_statistic_items(self):
+        """
+        Returns the items offered by a "Station statistic" control (on the
+        distribution and histogram settings menus): "None" (plot the raw
+        values, as ever) plus whichever statistics are currently gated in,
+        gated the same way the map's own z-statistic combobox is - every
+        basic statistic always available, and every model-vs-observations
+        statistic (e.g. MB, RMSE, r) added on top only once temporal
+        colocation is active and more than one data label is loaded, since
+        such a statistic compares a model against the observations and
+        there is nothing colocated to compare without both.
+        """
+
+        if (not self.read_instance.temporal_colocation) or (
+            len(getattr(self.read_instance, "data_labels", [])) == 1
+        ):
+            stats = list(copy.deepcopy(self.read_instance.basic_z_stats))
+        else:
+            stats = list(copy.deepcopy(self.read_instance.basic_and_bias_z_stats))
+
+        # meaningless (or already shown some other way) per individual
+        # station - mirrors the map's own exclusion list
+        for nonsensical_stat in ["NStations", "NUniqueStations", "MDA8"]:
+            if nonsensical_stat in stats:
+                stats.remove(nonsensical_stat)
+
+        return ["None"] + stats
+
+    def _handle_station_statistic_update(self, plot_type, combobox):
+        """
+        Shared implementation behind handle_distribution_station_statistic_update()
+        and handle_histogram_station_statistic_update() - refreshes a
+        "Station statistic" combobox's offered items (which change with
+        temporal colocation and the number of models loaded) and applies
+        whichever ends up selected.
+
+        Parameters
+        ----------
+        plot_type : str
+            "distribution" or "histogram".
+        combobox : QtWidgets.QComboBox
+            The plot's "Station statistic" combobox.
+        """
+
+        if not self.read_instance.block_config_bar_handling_updates:
+            # update mouse cursor to a waiting cursor
+            self.read_instance.cursor_function = set_cursor(
+                self.read_instance.cursor_function,
+                "_handle_station_statistic_update",
+            )
+
+            self.read_instance.block_config_bar_handling_updates = True
+
+            # a statistic no longer offered falls back to "None" silently
+            selected_stat = combobox.currentText()
+            items = self._station_statistic_items()
+            if selected_stat not in items:
+                selected_stat = "None"
+
+            combobox.clear()
+            combobox.addItems(items)
+            combobox.setCurrentText(selected_stat)
+
+            self.plot_characteristics[plot_type]["station_statistic"] = selected_stat
+
+            self.read_instance.block_config_bar_handling_updates = False
+
+            if not self.read_instance.block_MPL_canvas_updates:
+                self.update_associated_active_dashboard_plot(plot_type)
+                self.figure.canvas.draw_idle()
+
+            # restore mouse cursor to normal
+            unset_cursor(
+                self.read_instance.cursor_function,
+                "_handle_station_statistic_update",
+            )
+
+        return None
+
+    def handle_distribution_station_statistic_update(self):
+        """
+        Function that handles update of the distribution plot's "Station
+        statistic" combobox
+        """
+
+        self._handle_station_statistic_update(
+            "distribution", self.distribution_station_stat
+        )
+
+        return None
+
+    def handle_histogram_station_statistic_update(self):
+        """
+        Function that handles update of the histogram plot's "Station
+        statistic" combobox
+        """
+
+        self._handle_station_statistic_update(
+            "histogram", self.histogram_station_stat
+        )
+
+        return None
+
+    def _sync_station_statistic_incompatible_options(self, plot_type, station_statistic):
+        """
+        "bias" and "threshold" don't make sense with every "Station
+        statistic" choice, the same way periodic already refuses to combine
+        "bias" with a stat that is already model-bias: "bias" has nothing
+        left to diff a model-vs-observations statistic (e.g. MB, r) against,
+        and "threshold" (concentration limit lines) has no meaning once the
+        axis is a statistic's own values rather than a concentration at all.
+
+        Rather than only rejecting a click made while incompatible (see the
+        "bias"/"threshold" handling in update_plot_option()), an option
+        already checked is suspended - unchecked, but remembered - the
+        moment "Station statistic" switches to something incompatible with
+        it, and restored automatically the moment it switches back to
+        something compatible again, so a preference set before switching is
+        not simply lost.
+
+        Parameters
+        ----------
+        plot_type : str
+            "distribution" or "histogram".
+        station_statistic : str
+            The statistic now actually active (already resolved by any
+            feasibility fallback - see _resolve_station_statistic()).
+        """
+
+        combo = getattr(self, "{}_options".format(plot_type))
+        all_options = self.plot_characteristics[plot_type]["plot_options"]
+
+        if not hasattr(self, "_station_statistic_suspended_options"):
+            self._station_statistic_suspended_options = {}
+        suspended = self._station_statistic_suspended_options.setdefault(
+            plot_type, set()
+        )
+
+        station_stat_active = station_statistic not in (None, "", "None")
+        is_modbias = station_statistic in self.read_instance.modbias_stats
+
+        incompatible_now = set()
+        if is_modbias:
+            incompatible_now.add("bias")
+        if station_stat_active:
+            incompatible_now.add("threshold")
+
+        for option in ("bias", "threshold"):
+            if option not in all_options:
+                continue
+            index = all_options.index(option)
+            currently_checked = option in self.current_plot_options[plot_type]
+
+            if (option in incompatible_now) and currently_checked:
+                # suspend: uncheck it, but remember it was on
+                self.update_option_on_combobox(combo, index, uncheck=True)
+                self.current_plot_options[plot_type].remove(option)
+                suspended.add(option)
+            elif (option not in incompatible_now) and (option in suspended):
+                # restore: check it again, now that it is compatible
+                self.update_option_on_combobox(combo, index, uncheck=False)
+                self.current_plot_options[plot_type].append(option)
+                suspended.discard(option)
+
+        # set "active" explicitly - the suspend/restore above bypassed the
+        # "bias" checkbox's own handler, which normally keeps it in step
+        if plot_type in self.plot_elements:
+            self.plot_elements[plot_type]["active"] = (
+                "bias" if "bias" in self.current_plot_options[plot_type] else "absolute"
+            )
+
+        return None
+
     def get_active_statsummary_stats(self, statistic_type):
         """
         Get active statistics from dictionary of statsummary statistics in list
@@ -3964,6 +4334,50 @@ class Canvas(FigureCanvas):
 
         return None
 
+    def handle_fairmode_target_legend_update(self):
+        """
+        Function which handles toggling the classification legend upon
+        interaction with the FAIRMODE target settings menu's "Legend"
+        checkbox
+        """
+
+        if not self.read_instance.block_config_bar_handling_updates:
+            # update mouse cursor to a waiting cursor
+            self.read_instance.cursor_function = set_cursor(
+                self.read_instance.cursor_function,
+                "handle_fairmode_target_legend_update",
+            )
+
+            # written to the template as well as the copy being drawn from,
+            # the same as set_histogram_bins() does for its own checkbox, as
+            # the two are separate dicts (see Plotting.make_plot())
+            legend_active = self.fairmode_target_legend.isChecked()
+            self.plot_characteristics["fairmode-target"]["markers"][
+                "legend_active"
+            ] = legend_active
+            self.plot_characteristics_templates["fairmode-target"]["markers"][
+                "legend_active"
+            ] = legend_active
+
+            # toggled directly, from data the last full draw already cached -
+            # a full remake (update_associated_active_dashboard_plot()) would
+            # redo FAIRMODE's own stats/unit-conversion pass for nothing, as
+            # the legend alone does not depend on any of that
+            if not self.read_instance.block_MPL_canvas_updates:
+                self.plotting.refresh_fairmode_target_legend(
+                    self.plot_axes["fairmode-target"],
+                    self.plot_characteristics["fairmode-target"],
+                )
+            self.figure.canvas.draw_idle()
+
+            # restore mouse cursor to normal
+            unset_cursor(
+                self.read_instance.cursor_function,
+                "handle_fairmode_target_legend_update",
+            )
+
+        return None
+
     def remove_axis_objects(
         self, ax_elements, elements_to_skip=None, types_to_remove=None
     ):
@@ -4225,7 +4639,7 @@ class Canvas(FigureCanvas):
                 self.previous_relative_selected_station_inds,
                 self.relative_selected_station_inds,
             ):
-                self.update_associated_active_dashboard_plots()
+                self.update_associated_dashboard_plots()
 
                 # draw changes
                 self.figure.canvas.draw_idle()
@@ -4352,7 +4766,7 @@ class Canvas(FigureCanvas):
                 self.previous_relative_selected_station_inds,
                 self.relative_selected_station_inds,
             ):
-                self.update_associated_active_dashboard_plots()
+                self.update_associated_dashboard_plots()
 
                 # draw changes
                 self.figure.canvas.draw_idle()
@@ -4467,7 +4881,7 @@ class Canvas(FigureCanvas):
                 self.previous_relative_selected_station_inds,
                 self.relative_selected_station_inds,
             ):
-                self.update_associated_active_dashboard_plots()
+                self.update_associated_dashboard_plots()
 
                 # draw changes
                 self.figure.canvas.draw_idle()
@@ -4625,7 +5039,7 @@ class Canvas(FigureCanvas):
             self.relative_selected_station_inds,
         ):
             self.update_map_station_selection()
-            self.update_associated_active_dashboard_plots()
+            self.update_associated_dashboard_plots()
 
             # draw changes
             self.figure.canvas.draw_idle()
@@ -4751,7 +5165,7 @@ class Canvas(FigureCanvas):
             self.relative_selected_station_inds,
         ):
             self.update_map_station_selection()
-            self.update_associated_active_dashboard_plots()
+            self.update_associated_dashboard_plots()
 
             # draw changes
             self.figure.canvas.draw_idle()
@@ -5335,6 +5749,15 @@ class Canvas(FigureCanvas):
         ]
         self.distribution_elements = self.distribution_menu.get_elements()
 
+        # "None" plus whichever statistics are currently offered
+        self.distribution_station_stat = self.distribution_menu.comboboxes[
+            "station_stat"
+        ]
+        self.distribution_station_stat.addItems(self._station_statistic_items())
+        self.distribution_station_stat.setCurrentText(
+            self.plot_characteristics["distribution"]["station_statistic"]
+        )
+
         # get sliders and update values
         self.distribution_linewidth_sl = self.distribution_menu.sliders["linewidth_sl"]
         self.distribution_linewidth_sl.setMaximum(
@@ -5355,6 +5778,14 @@ class Canvas(FigureCanvas):
         self.histogram_menu = SettingsMenu(plot_type="histogram", canvas_instance=self)
         self.histogram_options = self.histogram_menu.checkable_comboboxes["options"]
         self.histogram_elements = self.histogram_menu.get_elements()
+
+        # "Station statistic" combobox - see the equivalent on the
+        # distribution menu above
+        self.histogram_station_stat = self.histogram_menu.comboboxes["station_stat"]
+        self.histogram_station_stat.addItems(self._station_statistic_items())
+        self.histogram_station_stat.setCurrentText(
+            self.plot_characteristics["histogram"]["station_statistic"]
+        )
 
         # get sliders and update values
         self.histogram_linewidth_sl = self.histogram_menu.sliders["linewidth_sl"]
@@ -5442,6 +5873,14 @@ class Canvas(FigureCanvas):
         ]
         self.fairmode_target_classification.addItems(["Area", "Station"])
 
+        # classification legend, on by default
+        self.fairmode_target_legend = self.fairmode_target_menu.checkboxes["legend"]
+        self.fairmode_target_legend.setChecked(
+            self.plot_characteristics["fairmode-target"]["markers"].get(
+                "legend_active", True
+            )
+        )
+
         # get sliders and update values
         self.fairmode_target_markersize_sl = self.fairmode_target_menu.sliders[
             "markersize_sl"
@@ -5456,6 +5895,7 @@ class Canvas(FigureCanvas):
         # get fairmode target interactive dictionary
         self.interactive_elements["fairmode_target"] = {
             "hidden": True,
+            "legend": [self.fairmode_target_legend],
             "markersize_sl": [self.fairmode_target_markersize_sl],
         }
 
@@ -5975,6 +6415,53 @@ class Canvas(FigureCanvas):
 
         return None
 
+    def sync_taylor_markersize_slider(self, markersize):
+        """
+        Function which points the Taylor diagram's marker size slider at
+        whatever size was actually just drawn with, so it always reports
+        what is on screen. "perstation" draws with its own, smaller
+        markersize characteristic than the default aggregated points (see
+        perstation_plot in plot_characteristics.yaml), so switching between
+        the two must move the slider too rather than leaving it wherever it
+        was left showing the other mode's size.
+
+        Parameters
+        ----------
+        markersize : int or float
+            Marker size the Taylor diagram was just drawn with
+        """
+
+        self.taylor_markersize_sl.blockSignals(True)
+        self.taylor_markersize_sl.setValue(int(round(markersize)))
+        self.taylor_markersize_sl.blockSignals(False)
+
+        return None
+
+    def sync_station_statistic_combobox(self, plot_type, station_statistic):
+        """
+        Function which points the distribution/histogram "Station
+        statistic" combobox at whatever is actually being drawn, so it
+        always reports what is on screen - used when make_distribution() or
+        make_histogram() has reset station_statistic back to "None" itself
+        (too few stations selected to plot one - see plotting.py), so the
+        combobox does not go on showing a statistic that is not actually
+        being plotted any more.
+
+        Parameters
+        ----------
+        plot_type : str
+            "distribution" or "histogram".
+        station_statistic : str
+            The statistic now actually in effect (typically "None").
+        """
+
+        combobox = getattr(self, "{}_station_stat".format(plot_type))
+        combobox.blockSignals(True)
+        combobox.setCurrentText(station_statistic)
+        combobox.blockSignals(False)
+
+        return None
+
     def update_smooth_window_func(self):
         """
         Function to handle the update of the smooth window
@@ -6411,8 +6898,41 @@ class Canvas(FigureCanvas):
                             self.current_plot_options[plot_type],
                         )
 
+                    # option 'perstation' (Taylor diagram)
+                    # switches between one aggregated point per model and a
+                    # per-station cloud, so the whole diagram needs remaking
+                    elif option == "perstation":
+                        # clear all previously plotted artists for plot type
+                        self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
+
+                        # make plot again considering plot option
+                        func = getattr(self.plotting, "make_taylor")
+                        func(
+                            self.plot_axes[plot_type],
+                            self.read_instance.networkspeci,
+                            self.read_instance.data_labels,
+                            self.plot_characteristics[plot_type],
+                            self.current_plot_options[plot_type],
+                            self.plot_characteristics[plot_type]["corr_stat"],
+                        )
+
                     # option 'threshold'
                     elif option == "threshold":
+                        # meaningless once "Station statistic" is active - refused silently
+                        if (
+                            (not undo)
+                            and (plot_type in ["distribution", "histogram"])
+                            and (
+                                self.plot_characteristics[plot_type].get(
+                                    "station_statistic"
+                                )
+                                not in (None, "", "None")
+                            )
+                        ):
+                            self.update_option_on_combobox(event_source, index)
+                            self.current_plot_options[plot_type].remove("threshold")
+                            return None
+
                         if not undo:
                             if isinstance(self.plot_axes[plot_type], dict):
                                 for (
@@ -6443,6 +6963,20 @@ class Canvas(FigureCanvas):
 
                     # option 'bias'
                     elif option == "bias":
+                        # a modbias "Station statistic" has no "bias" of its own - refused silently
+                        if (
+                            (plot_type in ["distribution", "histogram"])
+                            and (
+                                self.plot_characteristics[plot_type].get(
+                                    "station_statistic"
+                                )
+                                in self.read_instance.modbias_stats
+                            )
+                        ):
+                            self.update_option_on_combobox(event_source, index)
+                            self.current_plot_options[plot_type].remove("bias")
+                            return None
+
                         # firstly if just 1 data label then cannot make bias plot
                         if len(self.read_instance.data_labels) == 1:
                             msg = "It is not possible to make a bias plot with just observations loaded."
@@ -6972,7 +7506,14 @@ class Canvas(FigureCanvas):
 
             # update characteristics per plot type
             # this is made to keep the changes when selecting stations with lasso
-            if plot_type in [
+            if (plot_type == "taylor") and (
+                "perstation" in self.current_plot_options["taylor"]
+            ):
+                # "perstation" has its own separate markersize characteristic
+                self.plot_characteristics[plot_type]["perstation_plot"][
+                    "markersize"
+                ] = markersize
+            elif plot_type in [
                 "timeseries",
                 "periodic",
                 "scatter",
@@ -7368,7 +7909,7 @@ class Canvas(FigureCanvas):
                 continue
 
         # remove titles
-        for key in self.read_instance.active_dashboard_plots:
+        for key in self.read_instance.dashboard_plots:
             if key != "None":
                 if isinstance(self.plot_axes[key], dict):
                     for relevant_temporal_resolution, sub_ax in self.plot_axes[
@@ -7382,6 +7923,15 @@ class Canvas(FigureCanvas):
                                 ],
                                 loc=self.plot_characteristics[key]["axis_title"]["loc"],
                             )
+                elif isinstance(self.plot_axes[key], list):
+                    # a plain list of axes (e.g. fairmode-statsummary) - title on the first only
+                    self.plot_axes[key][0].set_title(
+                        label="",
+                        fontsize=self.plot_characteristics[key]["axis_title"][
+                            "fontsize"
+                        ],
+                        loc=self.plot_characteristics[key]["axis_title"]["loc"],
+                    )
                 else:
                     self.plot_axes[key].set_title(
                         label="",
@@ -7423,6 +7973,27 @@ class Canvas(FigureCanvas):
                     self.figure.savefig(
                         figure_path, bbox_inches=extent.expanded(expand_x, expand_y)
                     )
+        elif isinstance(self.plot_axes[plot_type], list):
+            # a plain list of axes (e.g. fairmode-statsummary) - union their extents
+            from matplotlib.transforms import Bbox
+
+            extent = Bbox.union(
+                [
+                    sub_ax.get_window_extent().transformed(
+                        self.figure.dpi_scale_trans.inverted()
+                    )
+                    for sub_ax in self.plot_axes[plot_type]
+                ]
+            )
+
+            # get folder where figure will be saved
+            figure_path = self.save_axis_figure_dialog(plot_type)
+
+            # save figure
+            if figure_path is not None:
+                self.figure.savefig(
+                    figure_path, bbox_inches=extent.expanded(expand_x, expand_y)
+                )
         else:
             extent = (
                 self.plot_axes[plot_type]
@@ -7440,7 +8011,7 @@ class Canvas(FigureCanvas):
                 )
 
         # add titles
-        for key in self.read_instance.active_dashboard_plots:
+        for key in self.read_instance.dashboard_plots:
             if key != "None":
                 if isinstance(self.plot_axes[key], dict):
                     for relevant_temporal_resolution, sub_ax in self.plot_axes[
@@ -7450,6 +8021,10 @@ class Canvas(FigureCanvas):
                             sub_ax.set_title(
                                 **self.plot_characteristics[key]["axis_title"]
                             )
+                elif isinstance(self.plot_axes[key], list):
+                    self.plot_axes[key][0].set_title(
+                        **self.plot_characteristics[key]["axis_title"]
+                    )
                 else:
                     self.plot_axes[key].set_title(
                         **self.plot_characteristics[key]["axis_title"]

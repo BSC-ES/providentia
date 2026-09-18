@@ -545,6 +545,73 @@ def _format_timeseries_tick(dt, kind):
     return dt.strftime("%Y-%m-%d %Hh")
 
 
+def _plotted_time_extent(ax):
+    """
+    Get the first and last time of the data plotted on a timeseries axis.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        Timeseries axis
+
+    Returns
+    -------
+    tuple of datetime.datetime or None
+        (first, last) plotted time, or None if nothing is plotted in data
+        coordinates
+    """
+
+    lines = [
+        line
+        for line in ax.lines
+        if line.get_transform().contains_branch_seperately(ax.transData)[0]
+        and len(line.get_xdata())
+    ]
+    visible_lines = [line for line in lines if line.get_visible()]
+    lines = visible_lines or lines
+    if not lines:
+        return None
+
+    x_mins, x_maxs = [], []
+    for line in lines:
+        x = np.asarray(ax.convert_xunits(line.get_xdata()), dtype=float)
+        if np.all(np.isnan(x)):
+            continue
+        x_mins.append(np.nanmin(x))
+        x_maxs.append(np.nanmax(x))
+    if not x_mins:
+        return None
+
+    return (
+        mpl.dates.num2date(min(x_mins)).replace(tzinfo=None),
+        mpl.dates.num2date(max(x_maxs)).replace(tzinfo=None),
+    )
+
+
+def _format_free_timeseries_ticks(dates):
+    """
+    Get label texts for ticks not aligned to a calendar step (manual "n_ticks"
+    or forced edges, both on whole hours), all at the precision the least
+    round of them needs.
+
+    Parameters
+    ----------
+    dates : list of datetime.datetime
+        Tick times
+
+    Returns
+    -------
+    list of str
+        Label texts
+    """
+
+    if all(d.hour == 0 for d in dates):
+        fmt = "%Y-%m-%d"
+    else:
+        fmt = "%Y-%m-%d %Hh"
+    return [d.strftime(fmt) for d in dates]
+
+
 def _set_timeseries_tick_alignment(tick_labels):
     """
     Centre every tick label on its tick, and reset each label's transform back
@@ -925,8 +992,8 @@ def fit_boxplot_xticklabels(
 
 
 def compute_timeseries_xticks(
-    ax, left, right, max_ticks=6, min_gap_pixels=12, data_start=None, data_end=None,
-    data_resolution_seconds=None,
+    ax, left, right, automatic_max_ticks=6, min_gap_pixels=12, data_start=None,
+    data_end=None, data_resolution_seconds=None, n_ticks=None, force_edge_ticks=False,
 ):
     """
     Set x-axis tick positions and labels for a timeseries date range directly
@@ -984,11 +1051,12 @@ def compute_timeseries_xticks(
         Start of the visible x-axis range.
     right : datetime.datetime
         End of the visible x-axis range.
-    max_ticks : int, default 6
+    automatic_max_ticks : int, default 6
         Ceiling on how many ticks a stride may offer to even be considered.
         Not a target: the stride actually used is whichever fits this ceiling
         *and* the axis's real available width, so the result is commonly
         fewer on a narrow panel and can be noticeably more on a wide one.
+        Ignored when `n_ticks` is set.
     min_gap_pixels : float, default 12
         Minimum gap, in pixels, required between two adjacent labels' edges.
     data_start, data_end : datetime.datetime, optional
@@ -1001,6 +1069,15 @@ def compute_timeseries_xticks(
         is at most one real observation actually in it, so a single tick at
         that observation's own time is shown instead. Left as None, this
         collapse never happens.
+    n_ticks : int, optional
+        Manual tick count - evenly spaced on whole hours between the visible
+        data's first and last hour, instead of the calendar-aligned automatic
+        search, and `automatic_max_ticks` is ignored. None (the default) keeps
+        the automatic behaviour.
+    force_edge_ticks : bool, default False
+        Always label the visible data's first and last whole hour, even where
+        they fall off whatever stride was chosen (the automatic search otherwise
+        leaves an edge unlabelled rather than space it unevenly - see above).
 
     Returns
     -------
@@ -1018,6 +1095,33 @@ def compute_timeseries_xticks(
             # with a sample interval either side of it - a view of no width
             # is left to matplotlib to expand however it sees fit
             _centre_view_on(ax, dates[0], (data_resolution_seconds or 3600) * 2)
+        return dates
+
+    # the plotted data's own start/end where the view still shows them, not
+    # the margin-padded view limits - rounded inwards to whole hours, as no
+    # finer resolution is ever used
+    plotted_extent = _plotted_time_extent(ax)
+    if plotted_extent is not None:
+        edge_left = max(left, plotted_extent[0])
+        edge_right = min(right, plotted_extent[1])
+    else:
+        edge_left = data_start if (data_start and left <= data_start <= right) else left
+        edge_right = data_end if (data_end and left <= data_end <= right) else right
+    edge_left = pd.Timestamp(edge_left).ceil("h").to_pydatetime()
+    edge_right = pd.Timestamp(edge_right).floor("h").to_pydatetime()
+    have_hour_edges = edge_left <= edge_right
+
+    if (n_ticks is not None) and have_hour_edges:
+        dates = sorted(
+            {
+                d.round("h").to_pydatetime()
+                for d in pd.date_range(edge_left, edge_right, periods=max(n_ticks, 2))
+            }
+        )
+        xlim = ax.get_xlim()
+        ax.xaxis.set_ticks(dates, labels=_format_free_timeseries_ticks(dates))
+        ax.set_xlim(*xlim)
+        _set_timeseries_tick_alignment(ax.xaxis.get_majorticklabels())
         return dates
 
     if (
@@ -1100,7 +1204,7 @@ def compute_timeseries_xticks(
                 )
                 if left <= dt <= right
             ]
-            if len(step_ticks) < 2 or len(step_ticks) > max_ticks:
+            if len(step_ticks) < 2 or len(step_ticks) > automatic_max_ticks:
                 continue
 
             texts = [_format_timeseries_tick(dt, step_kind) for dt in step_ticks]
@@ -1170,6 +1274,21 @@ def compute_timeseries_xticks(
         # of the view, which is the least that still says what is being shown
         kept_dates = [left, right]
         kept_texts = [left.strftime(full_precision), right.strftime(full_precision)]
+
+    if force_edge_ticks and have_hour_edges:
+        kept = [
+            (date, text)
+            for date, text in zip(kept_dates, kept_texts)
+            if edge_left <= date <= edge_right
+        ]
+        kept_dates = [date for date, _ in kept]
+        kept_texts = [text for _, text in kept]
+        if not kept_dates or kept_dates[0] != edge_left:
+            kept_dates.insert(0, edge_left)
+            kept_texts.insert(0, _format_free_timeseries_ticks([edge_left])[0])
+        if kept_dates[-1] != edge_right:
+            kept_dates.append(edge_right)
+            kept_texts.append(_format_free_timeseries_ticks([edge_right])[0])
 
     ax.xaxis.set_ticks(kept_dates, labels=kept_texts)
     ax.set_xlim(*ax.get_xlim())
@@ -1607,14 +1726,12 @@ def harmonise_xy_lims_paradigm(
                     ax.xaxis.set_ticks(xticks, labels=xticklabels)
 
             else:
-                # always label the visible start and end, with ticks between
-                # snapped to a hierarchy of calendar-aligned resolutions (see
-                # compute_timeseries_xticks()) instead of evenly slicing the
-                # range into a fixed number of pieces. data_start/data_end
-                # let a side still showing the full range read as that
-                # range's own boundary rather than a margin-padded value,
-                # each side judged independently
-                max_ticks = plot_characteristics["xtick_alteration"]["max_ticks"]
+                # ticks snap to calendar-aligned resolutions (see
+                # compute_timeseries_xticks()) unless "n_ticks" overrides that
+                xtick_alteration = plot_characteristics["xtick_alteration"]
+                automatic_max_ticks = xtick_alteration["automatic_max_ticks"]
+                n_ticks = xtick_alteration.get("n_ticks")
+                force_edge_ticks = xtick_alteration.get("force_edge_ticks", False)
                 data_start = _parse_yyyymmdd(getattr(read_instance, "start_date", None))
                 data_end = _parse_yyyymmdd(getattr(read_instance, "end_date", None))
                 active_resolution = getattr(read_instance, "active_resolution", None) or getattr(
@@ -1623,9 +1740,10 @@ def harmonise_xy_lims_paradigm(
                 data_resolution_seconds = _RESOLUTION_SECONDS.get(active_resolution)
                 for ax in relevant_axs_active:
                     compute_timeseries_xticks(
-                        ax, left, right, max_ticks=max_ticks,
+                        ax, left, right, automatic_max_ticks=automatic_max_ticks,
                         data_start=data_start, data_end=data_end,
                         data_resolution_seconds=data_resolution_seconds,
+                        n_ticks=n_ticks, force_edge_ticks=force_edge_ticks,
                     )
 
             # pad the margins
@@ -2263,6 +2381,23 @@ def format_axis(
                         )
                     )
                 )
+
+        # a density axis runs to very small numbers where what is plotted
+        # covers a wide range (a station statistic like NData, or a species
+        # reported in small units), and labels like "0.00005" grow wide
+        # enough to push the axis label into the plot beside it, or off the
+        # page - shown with one shared exponent above the axis instead
+        if (
+            (base_plot_type in ["distribution", "histogram"])
+            and ("y" not in plot_characteristics.get("round_decimal_places", {}))
+            and (ax_to_format.get_yscale() == "linear")
+            and isinstance(
+                ax_to_format.yaxis.get_major_formatter(), ticker.ScalarFormatter
+            )
+        ):
+            ax_to_format.ticklabel_format(
+                axis="y", style="sci", scilimits=(-3, 4), useMathText=True
+            )
 
         # remove spines?
         if "remove_spines" in plot_characteristics_vars:

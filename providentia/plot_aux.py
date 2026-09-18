@@ -30,6 +30,7 @@ from .dashboard_elements import CheckDialog, MessageBox
 from .statistics import (
     boxplot_inner_fences,
     calculate_statistic,
+    get_z_statistic_info,
     get_z_statistic_sign,
     get_z_statistic_type,
 )
@@ -457,6 +458,52 @@ def get_display_label(read_instance, data_label):
     return getattr(read_instance, "legend_label_overrides", {}).get(
         data_label, data_label
     )
+
+
+# fixed seed for get_deterministic_subsample() - not a secret or a tunable,
+# just a constant so every call is reproducible
+_DETERMINISTIC_SUBSAMPLE_SEED = 0
+
+
+def get_deterministic_subsample(n, max_points):
+    """
+    Pick a fixed-size, reproducible random subset of indices into an array
+    of length `n`, for plots that cap how many points they draw (a scatter
+    cloud, a per-station Taylor diagram) once a selection is too large to
+    render or read legibly in full.
+
+    Seeded locally rather than drawn from the shared, global numpy random
+    state: without a fixed seed, the exact same plot redrawn for a reason
+    that has nothing to do with its own data (the window resizing, a
+    sibling panel updating) silently swaps in a different random sample -
+    a station a reader had spotted and was tracking moves or disappears for
+    no reason connected to their own selection. A fixed seed instead
+    reproduces the same subset every time the pool is the same size, and
+    only ever changes because the underlying selection itself did. Using a
+    local generator rather than reseeding the global one also means this
+    can never be perturbed by unrelated code drawing random numbers
+    elsewhere, nor perturb it in turn.
+
+    Parameters
+    ----------
+    n : int
+        Size of the full index range to sample from.
+    max_points : int
+        Number of indices to draw. If `n` is already this size or smaller,
+        every index is returned and nothing is actually subsampled.
+
+    Returns
+    -------
+    numpy.ndarray
+        Sorted array of indices into an array of length `n`, `max_points`
+        long (or `n` long, if there was nothing to cut down).
+    """
+
+    if n <= max_points:
+        return np.arange(n)
+
+    rng = np.random.default_rng(_DETERMINISTIC_SUBSAMPLE_SEED)
+    return np.sort(rng.choice(n, size=max_points, replace=False))
 
 
 def histogram_bin_target(data):
@@ -1595,13 +1642,42 @@ def download_plot_data_to_csv(
     if len(element_types_to_save) == 0:
         return
 
+    # active statistic, from plot_characteristics (dashboard) or plot_type
+    # (report/library, e.g. "distribution-r") - for a meaningful column name
+    (parsed_zstat, parsed_base_zstat, _, _, _) = get_z_statistic_info(
+        plot_type=plot_type
+    )
+
+    station_statistic = None
+    if base_plot_type in ["distribution", "histogram"]:
+        station_statistic = parsed_zstat or canvas_instance.plot_characteristics[
+            plot_type
+        ].get("station_statistic")
+        if station_statistic in (None, "", "None"):
+            station_statistic = None
+
+    taylor_corr_stat = None
+    if base_plot_type == "taylor":
+        taylor_corr_stat = (
+            canvas_instance.plot_characteristics[plot_type].get("corr_stat")
+            or parsed_base_zstat
+            or "r"
+        )
+
+    stats_dict = {**read_instance.basic_stats, **read_instance.modbias_stats}
+
     x_column = (
         "time"
         if base_plot_type == "timeseries"
         else read_instance.observations_data_label
         if base_plot_type == "scatter"
+        else stats_dict[station_statistic]["label"]
+        if (base_plot_type in ["distribution", "histogram"])
+        and (station_statistic in stats_dict)
         else "concentration"
         if base_plot_type in ["distribution", "histogram"]
+        else taylor_corr_stat
+        if base_plot_type == "taylor"
         else canvas_instance.plot_characteristics[plot_type]["xlabel"]["xlabel"]
         if base_plot_type == "fairmode-target"
         else "x"
@@ -1756,6 +1832,16 @@ def download_plot_data_to_csv(
                         else:
                             data = []
                             xy = plot_element.get_xydata()
+
+                            # collapse the n+1 bin edges into centres, one
+                            # per real bin, dropping the repeated closing edge
+                            if base_plot_type == "histogram":
+                                edges = xy[:, 0]
+                                densities = xy[:-1, 1]
+                                xy = np.column_stack(
+                                    ((edges[:-1] + edges[1:]) / 2.0, densities)
+                                )
+
                             for x, y in xy:
                                 # no y axis on FAIRMODE statsummary
                                 if base_plot_type == "fairmode-statsummary":
@@ -1767,11 +1853,13 @@ def download_plot_data_to_csv(
                                 else:
                                     data.append(
                                         {
-                                            # convert time from unix to actual for timeseries
+                                            # taylor's x is arccos(correlation) - undo it
                                             x_column: pd.to_datetime(
                                                 x, unit="D", utc=True
                                             ).round("s")
                                             if base_plot_type == "timeseries"
+                                            else math.cos(x)
+                                            if base_plot_type == "taylor"
                                             else x,
                                             canvas_instance.plot_characteristics[
                                                 plot_type
@@ -1787,6 +1875,7 @@ def download_plot_data_to_csv(
                                 "timeseries",
                                 "scatter",
                                 "distribution",
+                                "histogram",
                                 "periodic",
                                 "periodic-violin",
                                 "taylor",

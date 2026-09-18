@@ -456,7 +456,7 @@ By adding a statistic and resolution, we can get statistical timeseries to see t
 provi.plot('timeseries-stat-resolution')
 ```
 
-The available plot options are: `annotate`, `bias`, `hidedata`, `logy` and `smooth`.
+The available plot options are: `annotate`, `bias`, `hidedata`, `logy`, `smooth` and `threshold`.
 
 ##### periodic
 
@@ -468,7 +468,7 @@ provi.plot('periodic-stat')
 
 where `stat` is the statistic that is wanted to be plotted. 
 
-The available plot options are: `annotate`, `bias` and `logy`.
+The available plot options are: `annotate`, `bias`, `logy` and `threshold`.
 
 ##### periodic-violin
 
@@ -478,7 +478,7 @@ The periodic-violin plot can be made as follows:
 provi.plot('periodic-violin')
 ```
 
-The available plot options are: `annotate`and `logy`.
+The available plot options are: `annotate`, `logy` and `threshold`.
 
 ##### distribution
 
@@ -488,7 +488,21 @@ The distribution plot can be made as follows:
 provi.plot('distribution')
 ```
 
-The available plot options are: `annotate`, `bias`, `logx` and `logy`.
+By adding a statistic (`provi.plot('distribution-stat')`), the distribution of that statistic across the selected stations is plotted instead of the raw concentration values. This needs at least 2 stations, otherwise the plot is not made.
+
+The available plot options are: `annotate`, `bias`, `logx`, `logy` and `threshold`.
+
+##### histogram
+
+The histogram can be made as follows: 
+
+```
+provi.plot('histogram')
+```
+
+As with the distribution, a statistic can be added (`provi.plot('histogram-stat')`) to plot a histogram of selected station statistics.
+
+The available plot options are: `annotate`, `bias`, `logx`, `logy` and `threshold`.
 
 ##### scatter
 
@@ -498,7 +512,7 @@ The scatter plot can be made as follows:
 provi.plot('scatter')
 ```
 
-The available plot options are: `annotate`, `hidedata`, `logx`, `logy` and `regression`.
+The available plot options are: `annotate`, `hidedata`, `logx`, `logy`, `regression` and `threshold`.
 
 ##### boxplot
 
@@ -508,7 +522,7 @@ The boxplot can be made as follows:
 provi.plot('boxplot')
 ```
 
-The available plot options are: `annotate`, `logy` and `multispecies`.
+The available plot options are: `annotate`, `logy`, `multispecies`, `normalise` and `threshold`.
 
 ##### heatmap
 
@@ -550,9 +564,11 @@ The Taylor diagram can be made as follows:
 provi.plot('taylor-stat')
 ```
 
-where `stat` is the statistic that is wanted to be plotted, from `r` or `r2`. 
+where `stat` is the statistic that is wanted to be plotted, from `r` or `r2`. If `stat` is not set (`provi.plot('taylor')`) it defaults to `r`.
 
-The available plot option is: `annotate`.
+The available plot options are: `annotate` and `perstation`.
+
+Setting `_perstation` draws one point per selected station for each model, instead of a single aggregated point per model, showing how model performance varies between stations.
 
 ##### fairmode-target
 
@@ -562,7 +578,7 @@ The FAIRMODE target plot can be made as follows:
 provi.plot('fairmode-target')
 ```
 
-The available plot option is: `annotate`.
+The available plot option is: `annotate`. 
 
 ##### fairmode-statsummary
 

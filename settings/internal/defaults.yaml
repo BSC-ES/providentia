@@ -34,7 +34,7 @@ visualization_defaults: &visualization_defaults
 dashboard: &dashboard
   <<: *visualization_defaults
   network:
-  active_dashboard_plots:
+  dashboard_plots:
     - timeseries
     - statsummary
     - distribution
@@ -58,7 +58,8 @@ dashboard_empty:
 report:
   <<: *visualization_defaults
   network:
-  report_type: standard
+  report_plots:
+    - standard
   report_summary: True
   report_stations: False
   report_title: Providentia Report

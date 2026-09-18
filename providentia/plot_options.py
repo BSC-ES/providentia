@@ -3,7 +3,6 @@
 from matplotlib.offsetbox import AnchoredOffsetbox, TextArea, VPacker
 import numpy as np
 
-from .read_aux import drop_nans
 from .statistics import calculate_statistic, get_z_statistic_info, exceedance_lim
 from .warnings_prv import show_message
 from .plot_aux import create_statistical_timeseries, get_display_label
@@ -81,37 +80,19 @@ def linear_regression(
         data_label for data_label in data_labels if data_label in valid_data_labels
     ]
 
-    # get observations data (flattened and drop NaNs)
-    observations_data = drop_nans(
-        canvas_instance.selected_station_data[networkspeci]["flat"][
-            valid_data_labels.index(read_instance.observations_data_label), 0, :
-        ]
-    )
-
-    # determine if number of points per data array exceeds max limit,
-    # if so subset arrays
-    subset = False
-    data_array_size = observations_data.size
-    if "max_points" in plot_characteristics:
-        if data_array_size > plot_characteristics["max_points"]:
-            subset = True
-            inds_subset = np.random.choice(
-                data_array_size, size=plot_characteristics["max_points"], replace=False
-            )
-            observations_data = observations_data[inds_subset]
+    # fit each model's line on exactly the pairs make_scatter() drew
+    plotted_pairs = getattr(canvas_instance, "scatter_plotted_pairs", {})
 
     # iterate through model data, making regression line to observations
     for data_label in cut_data_labels:
         if data_label != read_instance.observations_data_label:
-            # get model data (flattened and drop NaNs)
-            model_data = drop_nans(
-                canvas_instance.selected_station_data[networkspeci]["flat"][
-                    valid_data_labels.index(data_label), 0, :
-                ]
-            )
-            # subset data if neccessary
-            if subset:
-                model_data = model_data[inds_subset]
+            pair = plotted_pairs.get((networkspeci, data_label))
+            # nothing plotted for this model (no valid data, or the scatter
+            # hasn't been drawn yet) - so no line to fit either
+            if (pair is None) or (pair[0].size < 2):
+                continue
+            observations_data, model_data = pair
+
             m, b = np.polyfit(observations_data, model_data, deg=1)
             regression_line = relevant_axis.plot(
                 observations_data,

@@ -928,10 +928,22 @@ def export_configuration(prv, cname, separator="||"):
             options["section"]["map_extent"] = ",".join(str(i) for i in prv.map_extent)
 
     # active dashboard plots
-    if prv.active_dashboard_plots != merged_defaults["active_dashboard_plots"]:
-        options["section"]["active_dashboard_plots"] = ",".join(
-            str(i) for i in prv.active_dashboard_plots
+    if prv.dashboard_plots != merged_defaults["dashboard_plots"]:
+        options["section"]["dashboard_plots"] = ",".join(
+            str(i) for i in prv.dashboard_plots
         )
+
+    # report plots (a single named preset, e.g. "standard", or a list of
+    # plots given directly - either way always a list by this point, see
+    # ProvConfiguration.parse_parameter())
+    if prv.report_plots and (prv.report_plots != merged_defaults["report_plots"]):
+        options["section"]["report_plots"] = ",".join(
+            str(i) for i in prv.report_plots
+        )
+
+    # generic plots (same shape as report_plots/dashboard_plots above)
+    if prv.plots and (prv.plots != merged_defaults["plots"]):
+        options["section"]["plots"] = ",".join(str(i) for i in prv.plots)
 
     # plot_characteristics_filename
     if (

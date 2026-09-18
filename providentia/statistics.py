@@ -645,6 +645,39 @@ def boxplot_inner_fences(data):
         return lower_inner_fence, upper_inner_fence
 
 
+def get_selected_station_count(read_instance, canvas_instance, networkspeci):
+    """
+    Counts the stations actually behind the data currently being plotted.
+
+    Taken from the selected data itself rather than from the stations the
+    selection was made with (see get_station_inds()), so that it also holds
+    where a single station's data has been cut out of a wider selection, as
+    a report's per-station pages do.
+
+    Parameters
+    ----------
+    read_instance : object
+        The source instance containing filtered data and valid station indices.
+    canvas_instance : object
+        The target instance holding the selected data.
+    networkspeci : str
+        The combined network and species identifier.
+
+    Returns
+    -------
+    int
+        Number of stations behind the selected data.
+    """
+
+    selected_data = getattr(canvas_instance, "selected_station_data", {}).get(
+        networkspeci, {}
+    )
+    if "stations" in selected_data:
+        return selected_data["stations"].shape[1]
+
+    return len(get_station_inds(read_instance, canvas_instance, networkspeci, None))
+
+
 def get_station_inds(read_instance, canvas_instance, networkspeci, station_index):
     """
     Retrieves the indices of stations to be processed based on the current execution mode and context.

@@ -56,6 +56,19 @@ The file `settings/mapping_species.yaml` contains a dictionary mapping original 
 
 Note that the mapping species file is only used when the species name from the configuration file is not found in the expected location, meaning Povidentia first looks for the species written in the configuration file. If it is not found, it then searches for the corresponding mapped species in `mapping_species.yaml`.
 
+(interpolation-between-species)=
+#### Interpolating between species
+
+A model species can be interpolated to the stations of a different observational species, by joining the two with `@` in `species`, as `model_species@observational_species`. For example, to interpolate modelled 2m temperature to the stations measuring ozone:
+
+```
+species = t2@sconco3
+```
+
+Both species in a pair must be valid - if either is not, the whole pair is removed with a warning.
+
+In the [Download mode](Download), a defined pair downloads the observations of the observational species and the model data of the model species automatically.
+
 #### Different temporal resolutions between observations and model
 
 When you have observational and model data with different temporal resolutions, Providentia is very adaptable to try and ensure that an interpolation takes place.

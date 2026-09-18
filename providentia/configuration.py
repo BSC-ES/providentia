@@ -14,7 +14,12 @@ import sys
 import numpy as np
 import yaml
 
-from providentia.auxiliar import CURRENT_PATH, join, get_machine
+from providentia.auxiliar import (
+    CURRENT_PATH,
+    join,
+    get_machine,
+    resolve_plots_or_preset,
+)
 from providentia.read_aux import check_for_ghost, get_default_qa
 from providentia.warnings_prv import show_message
 
@@ -41,6 +46,19 @@ available_inputs = yaml.safe_load(
 )
 init = yaml.safe_load(
     open(join(PROVIDENTIA_ROOT, "settings", "internal", "init.yaml"))
+)
+# named presets a single "report_plots" or "dashboard_plots" entry can refer
+# to (see Report.run() and check_validity()'s "dashboard_plots" handling)
+report_plots_presets = yaml.safe_load(
+    open(join(PROVIDENTIA_ROOT, "settings", "report_plots.yaml"))
+)
+# valid base plot types, checked against a single "dashboard_plots" entry
+# before treating it as a preset name above - a real plot type wins as
+# itself even if a preset happens to share its name (see resolve_plots_or_preset())
+known_plot_types = set(
+    yaml.safe_load(
+        open(join(PROVIDENTIA_ROOT, "settings", "plot_characteristics.yaml"))
+    ).keys()
 )
 actris_standard_metadata = yaml.safe_load(
     open(
@@ -740,11 +758,19 @@ class ProvConfiguration:
             else:
                 return {}
 
-        elif key == "active_dashboard_plots":
-            # parse active_dashboard_plots
+        # "active_dashboard_plots"/"report_type" are deprecated aliases
+        # (settings/internal/init.yaml) - parsed the same as what they alias
+        elif key in (
+            "dashboard_plots",
+            "active_dashboard_plots",
+            "report_plots",
+            "report_type",
+            "plots",
+        ):
+            # parse plot type list
 
             if isinstance(value, str):
-                # parse multiple active_dashboard_plots
+                # parse multiple plot types
                 if "," in value:
                     return [plot.strip() for plot in value.split(",")]
                 else:
@@ -1506,6 +1532,38 @@ class ProvConfiguration:
                         default[self.read_instance.statistic_mode],
                     )
 
+            # falls back to "plots", then the hardcoded default. Either way,
+            # a single entry can be a report_plots.yaml preset name (a real
+            # plot type wins first) - only the first 4 are kept
+            elif field == "dashboard_plots":
+                if current_value in [[], "", None]:
+                    dashboard_plots = (
+                        self.read_instance.plots
+                        if self.read_instance.plots
+                        else default
+                    )
+                else:
+                    dashboard_plots = current_value
+
+                dashboard_plots = resolve_plots_or_preset(
+                    dashboard_plots, report_plots_presets, known_plot_types
+                )
+                if isinstance(dashboard_plots, dict):
+                    dashboard_plots = list(
+                        dict.fromkeys(
+                            dashboard_plots.get("summary", [])
+                            + dashboard_plots.get("station", [])
+                        )
+                    )
+                setattr(self.read_instance, field, dashboard_plots[:4])
+
+            # same as above, for report mode
+            elif (field == "report_plots") and (current_value in [[], "", None]):
+                if self.read_instance.plots:
+                    setattr(self.read_instance, field, self.read_instance.plots)
+                else:
+                    setattr(self.read_instance, field, default)
+
             # set the defined defaults
             elif current_value in [[], "", None]:
                 if default is not None:
@@ -1886,13 +1944,13 @@ class ProvConfiguration:
 
         # visualisation only validity checks
         if self.read_instance.mode not in ["download", "interpolation"]:
-            # check have 4 active dashboard plots
+            # check have 4 dashboard plots
             if (
-                len(self.read_instance.active_dashboard_plots) != 4
-                and "active_dashboard_plots" in self.read_instance.default_values
+                len(self.read_instance.dashboard_plots) != 4
+                and "dashboard_plots" in self.read_instance.default_values
                 and self.read_instance.mode == "dashboard"
             ):
-                error = 'Error: There must be 4 "active_dashboard_plots"'
+                error = 'Error: There must be 4 dashboard plots set via "plots" or "dashboard_plots".'
                 self.read_instance.logger.error(error)
                 sys.exit(1)
 

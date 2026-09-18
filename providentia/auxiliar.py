@@ -212,6 +212,50 @@ def expand_plot_characteristics(plot_characteristics, mode):
     return plot_characteristics
 
 
+def resolve_plots_or_preset(entries, presets, known_plot_types):
+    """
+    "report_plots"/"dashboard_plots" can hold either a literal list of plots
+    or, as a single entry, the name of a preset from settings/report_plots.yaml
+    (e.g. "standard"). This tells the two apart, used by Report.run() and by
+    ProvConfiguration.check_validity()'s "dashboard_plots" fallback.
+
+    A real, valid plot type always wins as itself even if a preset happens
+    to share its name (nothing currently shipped does, but a user's own
+    settings/report_plots.yaml could add one) - a literal plot type is what
+    someone typing it almost certainly means.
+
+    Parameters
+    ----------
+    entries : list of str
+        Plots as given directly, or the sole preset name.
+    presets : dict
+        Loaded from settings/report_plots.yaml.
+    known_plot_types : set of str
+        Valid base plot types - settings/plot_characteristics.yaml's own
+        top-level keys - checked against the single entry's "-"/"_"-delimited
+        first part (its base plot type, stat and options stripped).
+
+    Returns
+    -------
+    list or dict
+        The preset's own plots (a plain list, or - for a "paradigm"-style
+        preset - the dict of its separate summary/station lists) if `entries`
+        named one; `entries` unchanged otherwise.
+    """
+
+    if len(entries) != 1:
+        return entries
+
+    base_plot_type = entries[0].split("-")[0].split("_")[0]
+    if base_plot_type in known_plot_types:
+        return entries
+
+    if entries[0] not in presets:
+        return entries
+
+    return presets[entries[0]]
+
+
 def pad_array(arr, length, pad_value=np.nan):
     """
     Pad array with pad value if its length is less than input length

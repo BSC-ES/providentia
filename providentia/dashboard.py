@@ -1716,8 +1716,8 @@ class Dashboard(QtWidgets.QWidget):
             ):
                 self.position_5 = "None"
 
-            # remove axis elements for previous plot type, and from active_dashboard_plots
-            if (previous_plot_type in self.active_dashboard_plots) & (
+            # remove axis elements for previous plot type, and from dashboard_plots
+            if (previous_plot_type in self.dashboard_plots) & (
                 previous_plot_type in self.mpl_canvas.plot_axes
             ):
                 ax = self.mpl_canvas.plot_axes[previous_plot_type]
@@ -1764,7 +1764,7 @@ class Dashboard(QtWidgets.QWidget):
                         break
 
             # if changed_plot_type already axis on another axis then remove those axis elements
-            if (changed_plot_type in self.active_dashboard_plots) & (
+            if (changed_plot_type in self.dashboard_plots) & (
                 changed_plot_type in self.mpl_canvas.plot_axes
             ):
                 ax = self.mpl_canvas.plot_axes[changed_plot_type]
@@ -1777,13 +1777,13 @@ class Dashboard(QtWidgets.QWidget):
                         sub_ax.remove()
                 else:
                     ax.remove()
-                self.active_dashboard_plots[
-                    self.active_dashboard_plots.index(changed_plot_type)
+                self.dashboard_plots[
+                    self.dashboard_plots.index(changed_plot_type)
                 ] = "None"
 
             # update active dashboard plots
-            del self.active_dashboard_plots[changed_position - 2]
-            self.active_dashboard_plots.insert(changed_position - 2, changed_plot_type)
+            del self.dashboard_plots[changed_position - 2]
+            self.dashboard_plots.insert(changed_position - 2, changed_plot_type)
 
             # update plot axis for new plot type
             self.update_plot_axis(self.mpl_canvas, event_source, changed_plot_type)
@@ -2536,6 +2536,12 @@ class Dashboard(QtWidgets.QWidget):
 
         # unset variable to allow updating of MPL canvas
         self.block_MPL_canvas_updates = False
+
+        # apply a pending dashboard_plots "-stat" now the read is done
+        if hasattr(self, "mpl_canvas") and not getattr(
+            self.mpl_canvas, "_dashboard_plots_pending_stat_applied", True
+        ):
+            self.mpl_canvas._apply_pending_dashboard_plot_stats()
 
     def reset_options(self):
         """Restore all filter fields, metadata, and coverage settings to their initial values."""

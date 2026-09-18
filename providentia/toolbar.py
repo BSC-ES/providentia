@@ -645,9 +645,9 @@ class NavigationToolbar(NavigationToolbar2QT):
             The file path to the configuration file.
         """
 
-        # save current active_dashboard_plots
-        previous_active_dashboard_plots = copy.deepcopy(
-            self.read_instance.active_dashboard_plots
+        # save current dashboard_plots
+        previous_dashboard_plots = copy.deepcopy(
+            self.read_instance.dashboard_plots
         )
 
         # delete current active config attributes
@@ -675,11 +675,11 @@ class NavigationToolbar(NavigationToolbar2QT):
         # now all variables have been parsed, check validity of those, throwing errors where necessary
         provconf.check_validity()
 
-        # get new active_dashboard_plots and set it in memory to be the previous variable
-        new_active_dashboard_plots = copy.deepcopy(
-            self.read_instance.active_dashboard_plots
+        # get new dashboard_plots and set it in memory to be the previous variable
+        new_dashboard_plots = copy.deepcopy(
+            self.read_instance.dashboard_plots
         )
-        self.read_instance.active_dashboard_plots = previous_active_dashboard_plots
+        self.read_instance.dashboard_plots = previous_dashboard_plots
 
         # generate file trees if GHOST version has changed
         if current_ghost_version != self.read_instance.ghost_version:
@@ -698,7 +698,7 @@ class NavigationToolbar(NavigationToolbar2QT):
 
         # update active dashboard plots
         for position, (previous_plot_type, new_plot_type) in enumerate(
-            zip(previous_active_dashboard_plots, new_active_dashboard_plots)
+            zip(previous_dashboard_plots, new_dashboard_plots)
         ):
             if previous_plot_type != new_plot_type:
                 self.read_instance.handle_layout_update(

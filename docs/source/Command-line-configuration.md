@@ -42,7 +42,7 @@ The final value used would be `EBAS`.
 To provide a parameter with multiple values, do not include spaces between them. For example:
 
 ```
-./bin/providentia --active_dashboard_plots=timeseries,metadata,periodic-violin,boxplot
+./bin/providentia --plots=timeseries,metadata,periodic-violin,boxplot
 ```
 
 To specify a subsection, add the name of the parent section followed by an interpunct (·) before the subsection name, like in:

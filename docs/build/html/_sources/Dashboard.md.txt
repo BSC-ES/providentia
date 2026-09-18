@@ -195,7 +195,7 @@ At the bottom of the settings window is a drop-down menu for plot options, where
 
 One major plot option to note is **bias**. By selecting **bias** what is plotted is the result of the model - observations (i.e. bias). On the map, rather than selecting **bias** as a plot option, it can be obtained by selecting a secondary dataset. The bias will be calculated by the two active datasets.
 
-On some plots, the plotted statistic can also be altered though the settings menu, e.g. **periodic**.
+On some plots, the plotted statistic can also be altered though the settings menu, e.g. **periodic**. On the **distribution** and **histogram**, the "Station statistic" control switches from the raw concentration distribution to the distribution of a statistic across the selected stations (e.g. each station's correlation), which needs at least 2 stations selected.
 
 See here for more information about all available [plot options](Plot-types-and-options).
 

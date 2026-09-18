@@ -211,7 +211,11 @@ class PopUpWindow(QtWidgets.QWidget):
                 "Show only the fields matching the search. Case, spaces, "
                 "underscores and dashes are ignored"
             )
-            self.search_box.textChanged.connect(self.handle_search)
+            # debounced so rapid typing only searches once it pauses
+            self._search_debounce_timer = QtCore.QTimer(self)
+            self._search_debounce_timer.setSingleShot(True)
+            self._search_debounce_timer.timeout.connect(self._run_debounced_search)
+            self.search_box.textChanged.connect(self._schedule_search)
             button_row.addWidget(self.search_box)
 
         # add button row to parent layout (if have some buttons)
@@ -544,6 +548,7 @@ class PopUpWindow(QtWidgets.QWidget):
             # store what a re-layout needs to reproduce this placement
             self.grids[menu_type] = {
                 "grid": self.grid,
+                "scroll_area": scroll_area,
                 "rows": [],
                 "column_headers": [],
                 "obj_height": obj_height,
@@ -681,9 +686,12 @@ class PopUpWindow(QtWidgets.QWidget):
                         # set rangeboxes to previous set value (if any)
                         elif menu_type == "rangeboxes":
                             if element != "apply_selected":
-                                self.page_memory[menu_type][element][label_ii].setText(
-                                    menu_current_type[element][label_ii]
-                                )
+                                rangebox = self.page_memory[menu_type][element][
+                                    label_ii
+                                ]
+                                rangebox.setText(menu_current_type[element][label_ii])
+                                # show the value from its start, not its end
+                                rangebox.setCursorPosition(0)
                             else:
                                 if "map_vars" in current_menu_keys:
                                     var_to_check = menu_current_type["map_vars"][
@@ -1032,6 +1040,28 @@ class PopUpWindow(QtWidgets.QWidget):
 
         return fields
 
+    def _schedule_search(self, query):
+        """
+        Function which (re)starts the search debounce timer on every change
+        to the search box.
+
+        Parameters
+        ----------
+        query : str
+            Text currently in the search box (unused - the timer rereads it)
+        """
+
+        self._search_debounce_timer.start(150)
+
+        return None
+
+    def _run_debounced_search(self):
+        """Function which runs the search once the debounce timer fires."""
+
+        self.handle_search(self.search_box.text())
+
+        return None
+
     def handle_search(self, query):
         """
         Function which narrows the page down to the fields matching what has
@@ -1082,6 +1112,26 @@ class PopUpWindow(QtWidgets.QWidget):
         grid_info = self.grids[menu_type]
         grid = grid_info["grid"]
         grid_info["visible_labels"] = visible_labels
+
+        # detaching from the scroll area avoids live geometry updates while
+        # relaying out - ~20-30x faster for a large field (e.g. station name)
+        scroll_area = grid_info["scroll_area"]
+        container = scroll_area.takeWidget()
+        container.setUpdatesEnabled(False)
+        try:
+            self._filter_grid_relayout(menu_type, grid_info, grid, visible_labels)
+        finally:
+            container.setUpdatesEnabled(True)
+            scroll_area.setWidget(container)
+
+        return None
+
+    def _filter_grid_relayout(self, menu_type, grid_info, grid, visible_labels):
+        """
+        Does the actual work of filter_grid() - split out so the repaint
+        hold in filter_grid() wraps it in a try/finally without an extra
+        indent level over the whole method.
+        """
 
         # take every row out of the grid, hiding what it holds - a widget left
         # out of the layout is still drawn where it last sat until it is
@@ -1234,14 +1284,14 @@ class PopUpWindow(QtWidgets.QWidget):
         # with nothing searched for the results half is taken away, and the
         # menu's own column goes back to the middle of the whole window
         if not query.strip():
-            self.search_results["scroll_area"].hide()
+            self.search_results["container"].hide()
             self.fit_search_results_column()
             return None
 
         # otherwise the page stays split even when nothing matches, rather
         # than the menu's column jumping back to the middle and out again as
         # a search is typed, and says so in place of the results
-        self.search_results["scroll_area"].show()
+        self.search_results["container"].show()
         if not matched:
             results_grid.addWidget(
                 set_formatting(
@@ -1263,6 +1313,8 @@ class PopUpWindow(QtWidgets.QWidget):
             + int(formatting_dict["popup_title"]["QLabel"]["height"])
             + (self.layout_spacing * 2)
             + int(formatting_dict["popup_button"]["QPushButton"]["height"])
+            + int(formatting_dict["popup_subtitle"]["QLabel"]["height"])
+            + 3
             + int(formatting_dict["popup_label_column_header"]["QLabel"]["height"])
             + 3
             + (self.search_results["scroll_area"].horizontalScrollBar().height() * 2.0)
@@ -1336,6 +1388,8 @@ class PopUpWindow(QtWidgets.QWidget):
                     QtWidgets.QLineEdit(), formatting_dict["popup_lineedit_rangebox"]
                 )
                 rangebox.setText(str(submenu[element][label_ii]))
+                # show the value from its start, not its end
+                rangebox.setCursorPosition(0)
                 rangebox.textChanged.connect(
                     partial(self.handle_search_result_range, submenu, element, label_ii)
                 )
@@ -1385,9 +1439,27 @@ class PopUpWindow(QtWidgets.QWidget):
         scroll_area.setSizePolicy(
             QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Preferred
         )
-        self.horizontal_parent.addWidget(scroll_area, 1)
-        scroll_area.hide()
-        self.search_results = {"scroll_area": scroll_area, "grid": results_grid}
+
+        # kept outside results_grid so clearing it each search doesn't touch it
+        title_label = set_formatting(
+            QtWidgets.QLabel(self, text="Search results"),
+            formatting_dict["popup_subtitle"],
+        )
+        title_label.setAlignment(QtCore.Qt.AlignCenter)
+        container = QtWidgets.QWidget()
+        container_layout = QtWidgets.QVBoxLayout(container)
+        container_layout.setContentsMargins(0, 0, 0, 0)
+        container_layout.setSpacing(3)
+        container_layout.addWidget(title_label, 0, QtCore.Qt.AlignHCenter)
+        container_layout.addWidget(scroll_area, 1)
+
+        self.horizontal_parent.addWidget(container, 1)
+        container.hide()
+        self.search_results = {
+            "scroll_area": scroll_area,
+            "grid": results_grid,
+            "container": container,
+        }
 
         return None
 
