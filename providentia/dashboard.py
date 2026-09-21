@@ -529,14 +529,20 @@ class Dashboard(QtWidgets.QWidget):
                                 0, 0, canvas_width, canvas_height
                             )
                             
-                            # place map date range selector under the colourbar
+                            # place map controls under the colourbar
                             cb_bbox = self.mpl_canvas.plot_axes["cb"].get_position()
                             gap = int((45 * canvas_height) / 1016)
+
+                            date_range_x = int(cb_bbox.x0 * canvas_width)
+                            date_range_y = int((1 - cb_bbox.y0) * canvas_height) + gap
+                            date_range_width = int(cb_bbox.width * canvas_width)
+                            date_range_height = 24
+
                             self.mpl_canvas.map_date_range.setGeometry(
-                                int(cb_bbox.x0 * canvas_width),
-                                int((1 - cb_bbox.y0) * canvas_height) + gap,
-                                int(cb_bbox.width * canvas_width),
-                                24,
+                                date_range_x,
+                                date_range_y,
+                                date_range_width,
+                                date_range_height,
                             )
 
                         else:

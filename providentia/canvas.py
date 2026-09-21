@@ -288,8 +288,9 @@ class Canvas(FigureCanvas):
         )
         self.lower_canvas_cover.hide()
 
-        # place period selector above partial canvas covers, but below the full canvas cover,
-        # so it is hidden whenever the map is covered (e.g. while reading data)
+        # place map controls above partial canvas covers,
+        # but below the full canvas cover,
+        # so they are hidden whenever the map is covered (e.g. while reading data)
         self.map_date_range.raise_()
         self.canvas_cover.raise_()
 
@@ -692,6 +693,35 @@ class Canvas(FigureCanvas):
 
         return None
     
+    def handle_map_view_mode_update(self):
+        """
+        Function that handles the update of the map view mode (aggregated or instantaneous)
+        """
+
+        return None
+    
+
+    def handle_map_play_button_toggle(self, checked):
+        """
+        Function that handles the start and stop of the map animation
+
+        Parameters
+        ----------
+        checked : bool
+            If the play button is checked (i.e. the animation is playing)
+        """
+
+        self.map_animation_is_playing = checked
+
+        if self.map_animation_is_playing:
+            self.map_play_button.setIcon(self.map_pause_icon)
+            self.map_play_button.setToolTip("Stop map animation")
+        else:
+            self.map_play_button.setIcon(self.map_play_icon)
+            self.map_play_button.setToolTip("Play map animation")
+
+        return None
+
     def handle_statistic_mode_update(self):
         """
         Function that handles the update of the MPL canvas
@@ -959,7 +989,6 @@ class Canvas(FigureCanvas):
             date_range = self.map_date_range_selection
 
         # if there is grid data, read it
-        print('lead days', self.get_map_lead_days())
         results = self.read_instance.datareader.read_gridded_data(
             speci, zstat=zstat, date_range=date_range,
             lead_days=self.get_map_lead_days())
@@ -3387,6 +3416,14 @@ class Canvas(FigureCanvas):
         self.map_z1 = self.map_menu.comboboxes["z1"]
         self.map_z2 = self.map_menu.comboboxes["z2"]
 
+        # get view mode
+        self.map_view_mode = self.map_menu.comboboxes["view_mode"]
+        self.map_view_mode.addItems(["Aggregated", "Instantaneous"])
+        self.map_view_mode.setToolTip(
+            "Aggregated: one statistic over the selected period. "
+            "Instantaneous: one timestep at a time"
+        )
+
         # get sliders and update values
         self.map_markersize_unsel_sl = self.map_menu.sliders["markersize_unsel_sl"]
         self.map_markersize_unsel_sl.setValue(
@@ -3418,15 +3455,15 @@ class Canvas(FigureCanvas):
         self.date_time_picker.accepted.connect(self.handle_date_time_picker_selection)
         self.date_time_picker_date_edit = None
 
-        # add map date range selector (placed under the map colourbar)
+        # add map controls (date range selector and play button, placed under the map colourbar)
         self.map_date_range = QtWidgets.QWidget(self)
         set_highlight_color(self.map_date_range, highlight_color)
-        date_range_layout = QtWidgets.QHBoxLayout(self.map_date_range)
-        date_range_layout.setContentsMargins(0, 0, 0, 0)
-        date_range_layout.setSpacing(4)
+        map_controls_layout = QtWidgets.QHBoxLayout(self.map_date_range)
+        map_controls_layout.setContentsMargins(0, 0, 0, 0)
+        map_controls_layout.setSpacing(4)
         self.map_start_date = QtWidgets.QDateTimeEdit(self.map_date_range)
         self.map_end_date = QtWidgets.QDateTimeEdit(self.map_date_range)
-        date_range_layout.addWidget(QtWidgets.QLabel("Period:", self.map_date_range))
+        map_controls_layout.addWidget(QtWidgets.QLabel("Period:", self.map_date_range))
 
         # add date pickers
         for date_edit in [self.map_start_date, self.map_end_date]:
@@ -3449,17 +3486,34 @@ class Canvas(FigureCanvas):
 
             # add a dash separator between date pickers
             if date_edit == self.map_end_date:
-                date_range_layout.addWidget(QtWidgets.QLabel("–", self.map_date_range))
-            date_range_layout.addWidget(date_edit)
+                map_controls_layout.addWidget(QtWidgets.QLabel("–", self.map_date_range))
+            map_controls_layout.addWidget(date_edit)
 
         # do not allow end date/hour before start date/hour, nor start after end
         self.map_start_date.dateTimeChanged.connect(self.map_end_date.setMinimumDateTime)
         self.map_end_date.dateTimeChanged.connect(self.map_start_date.setMaximumDateTime)
 
-        date_range_layout.addStretch()
+        # add play button next to the date pickers
+        self.map_play_icon = QtGui.QIcon(join(CURRENT_PATH, "resources/play_icon.png"))
+        self.map_pause_icon = QtGui.QIcon(join(CURRENT_PATH, "resources/pause_icon.png"))
+        self.map_play_button = set_formatting(
+            QtWidgets.QPushButton(self.map_date_range),
+            self.read_instance.formatting_dict["save_icon"],
+        )
+        self.map_play_button.setIcon(self.map_play_icon)
+        self.map_play_button.setIconSize(QtCore.QSize(14, 14))
+        self.map_play_button.setCheckable(True)
+        self.map_play_button.clicked.connect(self.handle_map_play_button_toggle)
+        self.map_play_button.setToolTip("Play or stop map animation")
+        self.map_play_button.setFixedWidth(24)
+        map_controls_layout.addWidget(self.map_play_button)
+        self.map_animation_is_playing = False
+
+        # stretch keeps the controls packed to the left of the container
+        map_controls_layout.addStretch()
         self.map_date_range.setToolTip("Select period used for the map statistic")
         self.map_date_range.hide()
-        
+
         # TIMESERIES PLOT SETTINGS MENU #
         # create timeseries settings menu
         self.timeseries_menu = SettingsMenu(
