@@ -1086,6 +1086,50 @@ class ProvConfiguration:
         # it is mandatory to have the same number of models and alises, otherwise alises are dropped
         if (len(models) == len(aliases)) & (len(models) > 0):
             self.read_instance.alias_flag = True
+
+            # the gridded and non-gridded versions of an experiment are the same model, so
+            # they cannot be given different names, get the first alias given for each of them
+            alias_per_base_model = {}
+            model_inds_per_base_model = {}
+            overwritten_aliases = []
+            for mod_ii, (mod, alias) in enumerate(zip(models, aliases)):
+                base_model = mod.replace("::gridded", "").replace("::interpolated", "")
+                model_inds_per_base_model.setdefault(base_model, []).append(mod_ii)
+                if base_model not in alias_per_base_model:
+                    alias_per_base_model[base_model] = alias
+                elif alias != alias_per_base_model[base_model]:
+                    overwritten_aliases.append(
+                        "{} ({} --> {})".format(
+                            mod, alias, alias_per_base_model[base_model]
+                        )
+                    )
+
+            # set the shared alias for the models loaded in both interpolation modes, marking
+            # the gridded version, as the data labels have to stay unique to index the data
+            for base_model, mod_inds in model_inds_per_base_model.items():
+                if len(mod_inds) == 1:
+                    continue
+                for mod_ii in mod_inds:
+                    alias = alias_per_base_model[base_model]
+                    if models[mod_ii].endswith("::gridded"):
+                        alias = "{} (gridded)".format(alias)
+                    aliases[mod_ii] = alias
+
+            # inform that some of the aliases given have been overwritten
+            if overwritten_aliases:
+                msg = (
+                    "The gridded and non-gridded versions of a model cannot be given "
+                    "different aliases, keeping the first one given: {}.".format(
+                        ", ".join(overwritten_aliases)
+                    )
+                )
+                show_message(
+                    self.read_instance,
+                    msg,
+                    from_conf=self.read_instance.from_conf,
+                    deactivate=deactivate_warning,
+                )
+
             models = {mod: alias for mod, alias in zip(models, aliases)}
         else:
             self.read_instance.alias_flag = False
