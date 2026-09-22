@@ -2709,10 +2709,13 @@ class Dashboard(QtWidgets.QWidget):
                        f"Selecting the first one: {selected_gridded_models[0]}")
                 show_message(self, msg)
                 self.models_menu["models"]["keep_selected"]["noninterpolated"] = selected_gridded_models[:1]
+
             # get the models selected on the models menu, interpolated and gridded
             models = {}
-            for model_type in ['interpolated', 'noninterpolated']:
-                for mod in self.models_menu["models"]["keep_selected"][model_type]:
+            for mod in self.models_menu["models"]["map_vars"]:
+                for model_type in ['interpolated', 'noninterpolated']:
+                    if mod not in self.models_menu["models"]["keep_selected"][model_type]:
+                        continue
                     # the raw data label carries the interpolation mode, so the same
                     # experiment can be read interpolated and gridded at the same time
                     data_label_raw = "{}::{}".format(mod, model_type)

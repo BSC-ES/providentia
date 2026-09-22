@@ -409,21 +409,25 @@ def update_plotting_parameters(
             clrs = sns.color_palette(color_palettes[color_palette])
     else:
         # If palette not in YAML, generate colors automatically
-        if 'observations' in instance.data_labels:
-            n_colors = len(instance.data_labels) - 1
-        else:
-            n_colors = len(instance.data_labels)
+        # count base labels (the gridded and non-gridded versions of a model share a colour),
+        # so loading a model in both modes does not shift every other colour
+        n_colors = len(
+            {
+                data_label.replace(" (gridded)", "")
+                for data_label in instance.data_labels
+                if data_label != instance.observations_data_label
+            }
+        )
         clrs = sns.color_palette(color_palette, n_colors=n_colors)
 
     # assign a colour per base label (data label without the gridded tag), so that
     # the gridded and non-gridded versions of a model share a colour
-    # sort to put non-gridded labels first, so a gridded label only takes a new colour when its
-    # non-gridded counterpart is not loaded
+    # keep data label order, so a model keeps its colour whichever mode it is loaded in
+    # (the non-gridded label always precedes its gridded counterpart, so the pair takes
+    # the colour of the non-gridded one)
     colour_per_base_label = {}
     colour_ind = 1
-    for data_label in sorted(
-        instance.data_labels, key=lambda label: "(gridded)" in label
-    ):
+    for data_label in instance.data_labels:
         if data_label == instance.observations_data_label:
             continue
         base_label = data_label.replace(" (gridded)", "")

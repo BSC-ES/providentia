@@ -255,6 +255,13 @@ def legend_picker_func(canvas_instance, event):
             legend_label = event.artist
             data_label = legend_label.get_text()
 
+            # the legend drops the ' (gridded)' suffix when only the gridded version is
+            # loaded (the square handle already marks it), so map the text back to the data label
+            if data_label not in canvas_instance.read_instance.data_labels:
+                gridded_label = "{} (gridded)".format(data_label)
+                if gridded_label in canvas_instance.read_instance.data_labels:
+                    data_label = gridded_label
+
             if data_label not in canvas_instance.plot_elements["data_labels_active"]:
                 visible = True
                 # put observations label always first in pop-ups on hover

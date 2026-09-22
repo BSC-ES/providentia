@@ -1146,43 +1146,38 @@ class DataReader:
                 for model in models_to_remove
             ]
 
-            # remove model data
-            self.read_instance.data_in_memory[
-                self.read_instance.networkspecies[0]
-            ] = np.delete(
-                self.read_instance.data_in_memory[self.read_instance.networkspecies[0]],
-                models_to_remove_inds,
-                axis=0,
-            )
+            # remove model data (for every network / species in memory)
+            for networkspeci in self.read_instance.networkspecies:
+                self.read_instance.data_in_memory[networkspeci] = np.delete(
+                    self.read_instance.data_in_memory[networkspeci],
+                    models_to_remove_inds,
+                    axis=0,
+                )
 
         # need to read model/s ?
         if "read_mod" in operations:
-            # insert space for new models in data array
+            # insert space for new models in data array (for every network / species in memory)
             for model_to_read in models_to_read:
                 models_to_read_ind = self.read_instance.data_labels.index(model_to_read)
 
-                self.read_instance.data_in_memory[
-                    self.read_instance.networkspecies[0]
-                ] = np.insert(
-                    self.read_instance.data_in_memory[
-                        self.read_instance.networkspecies[0]
-                    ],
-                    models_to_read_ind,
-                    np.full(
-                        (
-                            1,
-                            len(
-                                self.read_instance.station_references[
-                                    self.read_instance.networkspecies[0]
-                                ]
+                for networkspeci in self.read_instance.networkspecies:
+                    self.read_instance.data_in_memory[networkspeci] = np.insert(
+                        self.read_instance.data_in_memory[networkspeci],
+                        models_to_read_ind,
+                        np.full(
+                            (
+                                1,
+                                len(
+                                    self.read_instance.station_references[networkspeci]
+                                ),
+                                len(self.read_instance.time_array),
                             ),
-                            len(self.read_instance.time_array),
+                            np.nan,
+                            dtype=np.float32,
                         ),
-                        np.nan,
-                        dtype=np.float32,
-                    ),
-                    axis=0,
-                )
+                        axis=0,
+                    )
+
 
             # get list of yearmonths to read
             yearmonths_to_read = get_yearmonths_to_read(

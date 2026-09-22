@@ -3494,20 +3494,20 @@ class Canvas(FigureCanvas):
         self.map_end_date.dateTimeChanged.connect(self.map_start_date.setMaximumDateTime)
 
         # add play button next to the date pickers
-        self.map_play_icon = QtGui.QIcon(join(CURRENT_PATH, "resources/play_icon.png"))
-        self.map_pause_icon = QtGui.QIcon(join(CURRENT_PATH, "resources/pause_icon.png"))
-        self.map_play_button = set_formatting(
-            QtWidgets.QPushButton(self.map_date_range),
-            self.read_instance.formatting_dict["save_icon"],
-        )
-        self.map_play_button.setIcon(self.map_play_icon)
-        self.map_play_button.setIconSize(QtCore.QSize(14, 14))
-        self.map_play_button.setCheckable(True)
-        self.map_play_button.clicked.connect(self.handle_map_play_button_toggle)
-        self.map_play_button.setToolTip("Play or stop map animation")
-        self.map_play_button.setFixedWidth(24)
-        map_controls_layout.addWidget(self.map_play_button)
-        self.map_animation_is_playing = False
+        # self.map_play_icon = QtGui.QIcon(join(CURRENT_PATH, "resources/play_icon.png"))
+        # self.map_pause_icon = QtGui.QIcon(join(CURRENT_PATH, "resources/pause_icon.png"))
+        # self.map_play_button = set_formatting(
+        #     QtWidgets.QPushButton(self.map_date_range),
+        #     self.read_instance.formatting_dict["save_icon"],
+        # )
+        # self.map_play_button.setIcon(self.map_play_icon)
+        # self.map_play_button.setIconSize(QtCore.QSize(14, 14))
+        # self.map_play_button.setCheckable(True)
+        # self.map_play_button.clicked.connect(self.handle_map_play_button_toggle)
+        # self.map_play_button.setToolTip("Play or stop map animation")
+        # self.map_play_button.setFixedWidth(24)
+        # map_controls_layout.addWidget(self.map_play_button)
+        # self.map_animation_is_playing = False
 
         # stretch keeps the controls packed to the left of the container
         map_controls_layout.addStretch()

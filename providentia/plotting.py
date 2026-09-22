@@ -553,9 +553,10 @@ class Plotting:
                 legend_elements.append((square_handle, dot_handle))
                 legend_labels.append(non_gridded_labels[0])
             # only gridded show square only
+            # the ' (gridded)' suffix is dropped from the legend text
             elif is_gridded:
                 legend_elements.append(square_handle)
-                legend_labels.append(data_label)
+                legend_labels.append(model_label)
             # only interpolated loaded show dot only
             else:
                 legend_elements.append(dot_handle)
