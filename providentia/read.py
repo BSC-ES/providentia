@@ -1681,14 +1681,14 @@ class DataReader:
                 if data_label != self.read_instance.observations_data_label:
                     # split raw data label into model id and type
                     # only the dashboard tags the interpolation mode onto the raw data
-                    # TODO: Remove separation when report / library can read noninterpolated data
+                    # TODO: Remove separation when report / library can read gridded data
                     if "::" in data_label_raw:
                         # e.g. 'cams61_emep_ph2-eu-000::interpolated
                         model_id, _, model_type = data_label_raw.rpartition("::")
 
-                        # non-interpolated data has no stations, so it is not
+                        # gridded data has no stations, so it is not
                         # read here, it is read per date when the gridded map is drawn
-                        if model_type == "noninterpolated":
+                        if model_type == "gridded":
                             continue
                     # in report and library modes read interpolated data only
                     else:
@@ -2274,14 +2274,14 @@ class DataReader:
                     else:
                         # split raw data label into model id and type
                         # only the dashboard tags the interpolation mode onto the raw data
-                        # TODO: Remove separation when report / library can read noninterpolated data
+                        # TODO: Remove separation when report / library can read gridded data
                         if "::" in base_data_label_raw:
                             # e.g. 'cams61_emep_ph2-eu-000::interpolated
                             model_id, _, model_type = base_data_label_raw.rpartition("::")
 
-                            # non-interpolated data has no stations, so it is not
+                            # gridded data has no stations, so it is not
                             # read here, it is read per date when the gridded map is drawn
-                            if model_type == "noninterpolated":
+                            if model_type == "gridded":
                                 continue
                         # in report and library modes read interpolated data only
                         else:
@@ -3267,7 +3267,7 @@ class DataReader:
         selected_gridded_models = [
             data_label_raw.rpartition("::")[0]
             for data_label_raw in self.read_instance.data_labels_raw
-            if data_label_raw.endswith("::noninterpolated")
+            if data_label_raw.endswith("::gridded")
         ]
 
         # nothing to draw if no gridded model is selected
@@ -3283,7 +3283,7 @@ class DataReader:
         domain = model_id.rsplit("-", 2)[1]
         resolution = self.read_instance.resolution
 
-        file_root_key = ("noninterpolated", model_id, speci)
+        file_root_key = ("gridded", model_id, speci)
 
         # get file path
         if (
@@ -3297,7 +3297,7 @@ class DataReader:
 
         try:
             available_timesteps = self.read_instance.available_model_data[
-                "noninterpolated"
+                "gridded"
             ][domain][resolution][speci][model_id]
         except KeyError:
             return None

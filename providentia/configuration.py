@@ -838,8 +838,24 @@ class ProvConfiguration:
             If True, suppresses user-facing warnings.
         """
 
+        # the conf can carry the interpolation mode in a '::' tag (e.g. 'mod-eu-000::gridded'),
+        # it is taken off before splitting and re-attached once the final model str is built
+        model_types = []
+        untagged_models = []
+        for mod in self.read_instance.experiments:
+            mod_untagged, _, mod_type = mod.rpartition("::")
+            if not mod_untagged:
+                mod_untagged, mod_type = mod, ""
+            elif mod_type not in ["interpolated", "gridded"]:
+                error = (f"Invalid interpolation mode '{mod_type}' for model {mod}. "
+                         "Valid modes are 'interpolated' and 'gridded'.")
+                self.read_instance.logger.error(error)
+                sys.exit(1)
+            untagged_models.append(mod_untagged)
+            model_types.append(mod_type)
+
         # get separated model parts list
-        split_models = [mod.split("-") for mod in self.read_instance.experiments]
+        split_models = [mod.split("-") for mod in untagged_models]
 
         # get default ensemble
         default_ensemble = self.read_instance.default_values["ensemble"]
@@ -1046,6 +1062,12 @@ class ProvConfiguration:
                                         mod_id_alt, d_alt, e_alt
                                     )
 
+                                # re-attach the interpolation mode tag taken off above
+                                if model_types[mod_ii]:
+                                    final_model = "{}::{}".format(
+                                        final_model, model_types[mod_ii]
+                                    )
+
                                 # append domain, ensemble, and forecast to arrays if not None, and not already set
                                 if (d_alt is not None) & (d_alt not in domains):
                                     domains.append(d_alt)
@@ -1067,7 +1089,14 @@ class ProvConfiguration:
             models = {mod: alias for mod, alias in zip(models, aliases)}
         else:
             self.read_instance.alias_flag = False
-            models = {mod: mod for mod in models}
+            models = {
+                mod: (
+                    "{} (gridded)".format(mod.rpartition("::")[0])
+                    if mod.endswith("::gridded")
+                    else (mod.rpartition("::")[0] or mod)
+                )
+                for mod in models
+            }
 
         # show warning if alias not possible to be set
         if (not self.read_instance.alias_flag) & (len(aliases) > 0):

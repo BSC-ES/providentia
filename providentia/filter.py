@@ -1278,7 +1278,7 @@ class DataFilter:
                         self.read_instance.data_labels_raw,
                     ):
                         # gridded models have no forecast dimension, skip
-                        if data_label_raw.endswith("::noninterpolated"):
+                        if data_label_raw.endswith("::gridded"):
                             continue
                         if data_label.startswith(base_data_label):
                             current_count += 1

@@ -447,6 +447,12 @@ class Plotting:
         if self.read_instance.mode == "library":
             return valid_plot_type
 
+    def get_model_id(self, data_label_raw):
+        """Model id of a raw data label, without interpolation mode or forecast suffix"""
+        return re.sub(
+            r"::(interpolated|gridded)(-(daily|combined|day\d+))?$", "", data_label_raw
+        )
+
     def make_legend_handles(
         self, plot_characteristics_legend, data_labels=None, set_obs=True
     ):
@@ -472,6 +478,16 @@ class Plotting:
         if data_labels is None:
             data_labels = copy.deepcopy(self.read_instance.data_labels)
 
+        # pair each data label with its raw counterpart, only the raw label carries the
+        # interpolation mode, as the display label can be an alias set in the .conf file
+        raw_per_data_label = dict(
+            zip(self.read_instance.data_labels, self.read_instance.data_labels_raw)
+        )
+        label_pairs = [
+            (data_label, raw_per_data_label.get(data_label, data_label))
+            for data_label in data_labels
+        ]
+
         # initialise legend elements and labels
         legend_elements = []
         legend_labels = []
@@ -479,7 +495,7 @@ class Plotting:
         # initialise labels that are already in legend
         processed_labels = set()
 
-        for data_label in data_labels:
+        for data_label, data_label_raw in label_pairs:
             if data_label in processed_labels:
                 continue
 
@@ -506,24 +522,29 @@ class Plotting:
 
             # group the gridded/non-gridded versions of the same model together, so a
             # model loaded both ways shows as a filled dot with a square
-            # interpolated labels can have a forecast suffix (e.g. '-combined') that gridded labels
-            # do not have, so compare without it (gridded model is read for the same forecast days)
-            is_gridded = data_label.endswith(" (gridded)")
-            model_label = re.sub(
-                r"-(daily|combined|day\d+)$", "", data_label.replace(" (gridded)", "")
-            )
-            gridded_label = f"{model_label} (gridded)"
+            # display labels can be aliases and interpolated labels can have a forecast suffix
+            # (e.g. '-combined') that gridded labels do not have, so models are matched on the
+            # raw label model id (gridded model is read for the same forecast days)
+            is_gridded = data_label_raw.endswith("::gridded")
+            model_id = self.get_model_id(data_label_raw)
+            gridded_labels = [
+                label
+                for label, label_raw in label_pairs
+                if label_raw.endswith("::gridded") and self.get_model_id(label_raw) == model_id
+            ]
             non_gridded_labels = [
                 label
-                for label in data_labels
-                if re.fullmatch(re.escape(model_label) + r"(-daily|-combined|-day\d+)?", label)
+                for label, label_raw in label_pairs
+                if (not label_raw.endswith("::gridded"))
+                and self.get_model_id(label_raw) == model_id
             ]
 
             # pair only if there is a single interpolated version
             # (with several forecast days, e.g. -day1 and -day2, gridded is shown on its own)
-            paired = (gridded_label in data_labels) and (len(non_gridded_labels) == 1)
+            paired = (len(gridded_labels) == 1) and (len(non_gridded_labels) == 1)
             if paired:
-                processed_labels.update({gridded_label, non_gridded_labels[0]})
+                processed_labels.update({gridded_labels[0], non_gridded_labels[0]})
+
             else:
                 processed_labels.add(data_label)
             colour = self.read_instance.plotting_params[data_label]["colour"]
@@ -553,10 +574,10 @@ class Plotting:
                 legend_elements.append((square_handle, dot_handle))
                 legend_labels.append(non_gridded_labels[0])
             # only gridded show square only
-            # the ' (gridded)' suffix is dropped from the legend text
+            # the ' (gridded)' suffix is dropped from the legend text (an alias has none)
             elif is_gridded:
                 legend_elements.append(square_handle)
-                legend_labels.append(model_label)
+                legend_labels.append(data_label.replace(" (gridded)", ""))
             # only interpolated loaded show dot only
             else:
                 legend_elements.append(dot_handle)
@@ -601,12 +622,11 @@ class Plotting:
                     "grid_edge_latitude"
                     not in self.read_instance.plotting_params[model]
                 ):
-                    # grid domain might be plotted from interpolated data label if loaded
+                    # grid domain is plotted only from interpolated data label if loaded
                     if 'gridded' in model:
                         continue
-                    msg = f"There is no model data for {model}, domain grid cannot be added on map."
-                    show_message(self.read_instance, msg)
                     continue
+                    
                 # create matplotlib polygon object from model grid edge map projection coordinates
                 grid_edge_outline_poly = Polygon(
                     np.vstack(

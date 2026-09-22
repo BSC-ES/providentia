@@ -256,6 +256,27 @@ def get_land_polygon_resolution(selection):
 
     return resolution
 
+def get_base_label(data_label_raw):
+    """
+    Get the label a model shares across its interpolated and gridded versions,
+    i.e. the raw data label without the interpolation mode tag.
+
+    The display label cannot be used for this, as it can be an alias set in the
+    .conf file, which carries no information about the interpolation mode.
+    The forecast suffix (e.g. '-day1') is kept, so each forecast day is kept apart.
+
+    Parameters
+    ----------
+    data_label_raw : str
+        Raw data label (e.g. 'cams61_monarch_ph2-eu-000::gridded').
+
+    Returns
+    -------
+    str
+        Base label (e.g. 'cams61_monarch_ph2-eu-000').
+    """
+
+    return data_label_raw.replace("::gridded", "").replace("::interpolated", "")
 
 def update_plotting_parameters(
     instance, data_labels_to_remove=None, data_labels_to_add=None, daily_forecast=False
@@ -386,6 +407,15 @@ def update_plotting_parameters(
             "zorder"
         ] = instance.plot_characteristics_templates["general"]["obs_zorder"]
 
+    # get the base label per data label, so that the gridded and non-gridded
+    # versions of a model are assigned the same colour
+    base_label_per_data_label = {
+        data_label: get_base_label(data_label_raw)
+        for data_label, data_label_raw in zip(
+            instance.data_labels, instance.data_labels_raw
+        )
+    }
+    
     # Generate a list of RGB tuples for the number of models
     sns.reset_orig()  # Reset seaborn to default
     color_palette = instance.plot_characteristics_templates["general"][
@@ -413,15 +443,18 @@ def update_plotting_parameters(
         # so loading a model in both modes does not shift every other colour
         n_colors = len(
             {
-                data_label.replace(" (gridded)", "")
+                base_label_per_data_label[data_label]
                 for data_label in instance.data_labels
                 if data_label != instance.observations_data_label
             }
         )
         clrs = sns.color_palette(color_palette, n_colors=n_colors)
 
-    # assign a colour per base label (data label without the gridded tag), so that
-    # the gridded and non-gridded versions of a model share a colour
+    # assign a colour per base label (raw data label without the interpolation mode tag), so
+    # that the gridded and non-gridded versions of a model share a colour
+    # the display label cannot be used as it can be an alias set in the .conf file, which
+    # carries no information about the interpolation mode
+    # the forecast suffix is kept, so each forecast day keeps its own colour
     # keep data label order, so a model keeps its colour whichever mode it is loaded in
     # (the non-gridded label always precedes its gridded counterpart, so the pair takes
     # the colour of the non-gridded one)
@@ -430,7 +463,7 @@ def update_plotting_parameters(
     for data_label in instance.data_labels:
         if data_label == instance.observations_data_label:
             continue
-        base_label = data_label.replace(" (gridded)", "")
+        base_label = base_label_per_data_label[data_label]
         if base_label not in colour_per_base_label:
             colour_per_base_label[base_label] = clrs[colour_ind - 1]
             colour_ind += 1
@@ -444,7 +477,7 @@ def update_plotting_parameters(
         if data_label != instance.observations_data_label:
             # Define colour for model
             instance.plotting_params[data_label]["colour"] = colour_per_base_label[
-                data_label.replace(" (gridded)", "")
+                base_label_per_data_label[data_label]
             ]
             # Define zorder for model relative to observations
             if instance.observations_data_label in instance.plotting_params.keys():

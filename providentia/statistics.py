@@ -584,7 +584,7 @@ def merge_forecast_days(
                 i
                 for i, lbl in enumerate(data_labels)
                 if lbl.startswith(base_label)
-                and not read_instance.data_labels_raw[i].endswith("::noninterpolated")
+                and not read_instance.data_labels_raw[i].endswith("::gridded")
             ],
             dtype=np.int32,
         )

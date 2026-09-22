@@ -1351,9 +1351,9 @@ def get_forecast_run_mask(file_timestamps, run_start, lead_days):
     return mask
 
 
-def get_valid_noninterpolated_models(instance, start_date, end_date, resolution, networkspecies):
+def get_valid_gridded_models(instance, start_date, end_date, resolution, networkspecies):
     """
-    Get noninterpolated models in mod_to_interp_root
+    Get gridded models in mod_to_interp_root
 
     Parameters
     ----------
@@ -1373,15 +1373,15 @@ def get_valid_noninterpolated_models(instance, start_date, end_date, resolution,
     dict
         Dictionary mapping each speci (str) to a set of model_id strings
         (formatted as "experiment-domain-ensemble") that have valid
-        non-interpolated data available for it within the given date range
+        gridded data available for it within the given date range
         (and beyond for forecast files) and resolution.
     dict
-        Nested dictionary of available non-interpolated model data, structured
+        Nested dictionary of available gridded model data, structured
         as {domain: {resolution: {speci: {model_id: valid_file_timesteps}}}},
         where valid_file_timesteps is a sorted list of 'YYYYMM', 'YYYYMMDD' or
         'YYYYMMDDHH' strings.
     dict
-        Dictionary mapping ("noninterpolated", model_id, speci) tuples to the
+        Dictionary mapping ("gridded", model_id, speci) tuples to the
         netCDF filename template (str) for that model/speci combination, with a
         '{date}' placeholder for the file timestep
         (e.g. '<dir>/od550du-006_{date}_an.nc').
@@ -1403,7 +1403,7 @@ def get_valid_noninterpolated_models(instance, start_date, end_date, resolution,
         available_models = os.listdir(models_path)
     else:
         msg = (
-            f"Cannot access noninterpolated model path, mod_to_interp_root defined as {models_path} in data_paths.yaml."
+            f"Cannot access gridded model path, mod_to_interp_root defined as {models_path} in data_paths.yaml."
         )
         show_message(instance, msg, print=True)
         return models, available_model_data, file_roots
@@ -1535,7 +1535,7 @@ def get_valid_noninterpolated_models(instance, start_date, end_date, resolution,
                             )
                             show_message(instance, msg, print=True)
                         file_roots[
-                            ("noninterpolated", model_id, speci)
+                            ("gridded", model_id, speci)
                         ] = "{}/{}{{date}}{}.nc".format(files_directory, prefix, suffix)
 
     return models, available_model_data, file_roots
@@ -1558,29 +1558,29 @@ def get_valid_models(instance, start_date, end_date, resolution, networkspecies)
         The monitoring networks|species to match against model data.
     """
 
-    noninterpolated_models, available_noninterpolated_model_data, noninterpolated_file_roots = get_valid_noninterpolated_models(
+    gridded_models, available_gridded_model_data, gridded_file_roots = get_valid_gridded_models(
         instance, start_date, end_date, resolution, networkspecies)
     interpolated_models, available_interpolated_model_data, interpolated_file_roots = get_valid_interpolated_models(
         instance, start_date, end_date, resolution, networkspecies)
 
     instance.available_model_data = {
         "interpolated": available_interpolated_model_data,
-        "noninterpolated": available_noninterpolated_model_data,
+        "gridded": available_gridded_model_data,
     }
     
     instance.available_model_data_file_roots = {
         **interpolated_file_roots,
-        **noninterpolated_file_roots,
+        **gridded_file_roots,
     }
     
     # set list of model names to add on models pop-up
     # models interpolated for at least one networkspeci
     if instance.mode not in ["report", "library"]:
-        noninterpolated_available_models = set.union(*noninterpolated_models.values())
+        gridded_available_models = set.union(*gridded_models.values())
         interpolated_available_models = set.union(*interpolated_models.values())
         if networkspecies:
             models_to_add = sorted(
-                set(noninterpolated_available_models) | set(interpolated_available_models)
+                set(gridded_available_models) | set(interpolated_available_models)
             )
         else:
             models_to_add = []
@@ -1593,8 +1593,8 @@ def get_valid_models(instance, start_date, end_date, resolution, networkspecies)
                 model_id: model_id in interpolated_available_models
                 for model_id in models_to_add
             },
-            "noninterpolated": {
-                model_id: model_id in noninterpolated_available_models
+            "gridded": {
+                model_id: model_id in gridded_available_models
                 for model_id in models_to_add
             },
         }

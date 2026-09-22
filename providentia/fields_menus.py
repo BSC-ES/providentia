@@ -100,11 +100,11 @@ def init_models(instance):
     instance.models_menu["models"]["labels"] = []
     instance.models_menu["models"]["keep_selected"] = {
         "interpolated": [],
-        "noninterpolated": [],
+        "gridded": [],
     }
     instance.models_menu["models"]["enabled"] = {
         "interpolated": {},
-        "noninterpolated": {},
+        "gridded": {},
     }
     instance.models_menu["models"]["forecast"] = {}
     instance.models_menu["models"]["forecast_days"] = {}

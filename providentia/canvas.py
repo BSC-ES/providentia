@@ -586,7 +586,7 @@ class Canvas(FigureCanvas):
             )
 
             # warn that resampling is not applied to gridded data
-            if any(data_label_raw.endswith("::noninterpolated")
+            if any(data_label_raw.endswith("::gridded")
                 for data_label_raw in self.read_instance.data_labels_raw
             ):
                 msg = "Resampling is not applied to gridded data."
@@ -828,7 +828,7 @@ class Canvas(FigureCanvas):
             
             # warn that temporal colocation is not applied to gridded data
             if any(
-                data_label_raw.endswith("::noninterpolated")
+                data_label_raw.endswith("::gridded")
                 for data_label_raw in self.read_instance.data_labels_raw
             ):
                 msg = "Temporal colocation is not applied to gridded data."

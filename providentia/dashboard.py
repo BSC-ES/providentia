@@ -1706,15 +1706,23 @@ class Dashboard(QtWidgets.QWidget):
 
         # update models -- keeping previously selected models if available
         if self.config_bar_initialisation:
-            for model_type in ['interpolated', 'noninterpolated']:
-                candidate_models = [
-                    model
-                    for model in self.experiments
-                    if (model in self.models_menu["models"]["map_vars"])
-                    and self.models_menu["models"]["enabled"][model_type].get(model, False)
-                ]
+            for model_type in ['interpolated', 'gridded']:
+                candidate_models = []
+                for model in self.experiments:
+                    # the conf carries the interpolation mode in the '::' tag,
+                    # the menu rows are keyed by bare model id, so the tag is taken off here
+                    model_id, _, conf_model_type = model.rpartition("::")
+                    if not model_id:
+                        model_id, conf_model_type = model, "interpolated"
+                    if conf_model_type != model_type:
+                        continue
+                    if (model_id in self.models_menu["models"]["map_vars"]) and (
+                        self.models_menu["models"]["enabled"][model_type].get(model_id, False)
+                    ):
+                        candidate_models.append(model_id)
+
                 # only one gridded model can be plotted on the map at a time, keep first one
-                if model_type == 'noninterpolated':
+                if model_type == 'gridded':
                     if self.from_conf and len(candidate_models) > 1:
                         msg = ("It is not possible to load more than one gridded model from a configuration file. "
                                f"Selecting the first one: {candidate_models[0]}")
@@ -1722,7 +1730,7 @@ class Dashboard(QtWidgets.QWidget):
                     candidate_models = candidate_models[:1]
                 self.models_menu["models"]["keep_selected"][model_type] = candidate_models
 
-        for model_type in ['interpolated', 'noninterpolated']:
+        for model_type in ['interpolated', 'gridded']:
             self.models_menu["models"]["keep_selected"][model_type] = [
                 previous_selected_model
                 for previous_selected_model in self.models_menu["models"]["keep_selected"][model_type]
@@ -1884,11 +1892,22 @@ class Dashboard(QtWidgets.QWidget):
         """
         Update internal self.read_instance.models_menu after checking if models have forecast options
         """
-        
+
+        # the conf leaves the interpolation mode tag off interpolated models
+        # (e.g. 'mod-eu-000'), so normalise the keys to be able to look up the
+        # aliases by the tagged raw data label used inside the dashboard
+        read_models = {}
+        for model, alias in self.experiments.items():
+            model_id, _, conf_model_type = model.rpartition("::")
+            if not model_id:
+                model_id, conf_model_type = model, "interpolated"
+            read_models["{}::{}".format(model_id, conf_model_type)] = alias
+
         # set all and selected models
         all_models = {}
         selected_models = {}
-        for model_type in ['interpolated', 'noninterpolated']:
+
+        for model_type in ['interpolated', 'gridded']:
             for mod in self.models_menu["models"]["map_vars"]:
                 # skip model types the model has no data available in
                 if not self.models_menu["models"]["enabled"][model_type].get(mod, False):
@@ -1899,13 +1918,13 @@ class Dashboard(QtWidgets.QWidget):
                 data_label_raw = "{}::{}".format(mod, model_type)
 
                 # keep the alias the model was last read under
-                if data_label_raw in self.experiments:
-                    data_label = self.experiments[data_label_raw]
+                if data_label_raw in read_models:
+                    data_label = read_models[data_label_raw]
                 # keep the alias set in the .conf file
                 elif data_label_raw in self.init_models:
                     data_label = self.init_models[data_label_raw]
                 # no alias, mark gridded models
-                elif model_type == "noninterpolated":
+                elif model_type == "gridded":
                     data_label = "{} (gridded)".format(mod)
                 # no alias, interpolated models keep the model name
                 else:
@@ -2703,17 +2722,17 @@ class Dashboard(QtWidgets.QWidget):
         # if are not loading from conf then get data labels, models and forecast indices
         if not self.from_conf:
             # only one gridded model can be plotted on the map at a time, keep first one
-            selected_gridded_models = self.models_menu["models"]["keep_selected"]["noninterpolated"]
+            selected_gridded_models = self.models_menu["models"]["keep_selected"]["gridded"]
             if len(selected_gridded_models) > 1:
                 msg = ("It is not possible to plot more than one gridded model. "
                        f"Selecting the first one: {selected_gridded_models[0]}")
                 show_message(self, msg)
-                self.models_menu["models"]["keep_selected"]["noninterpolated"] = selected_gridded_models[:1]
+                self.models_menu["models"]["keep_selected"]["gridded"] = selected_gridded_models[:1]
 
             # get the models selected on the models menu, interpolated and gridded
             models = {}
             for mod in self.models_menu["models"]["map_vars"]:
-                for model_type in ['interpolated', 'noninterpolated']:
+                for model_type in ['interpolated', 'gridded']:
                     if mod not in self.models_menu["models"]["keep_selected"][model_type]:
                         continue
                     # the raw data label carries the interpolation mode, so the same
@@ -2727,7 +2746,7 @@ class Dashboard(QtWidgets.QWidget):
                     elif data_label_raw in self.init_models:
                         models[data_label_raw] = self.init_models[data_label_raw]
                     # no alias, mark gridded models
-                    elif model_type == "noninterpolated":
+                    elif model_type == "gridded":
                         models[data_label_raw] = "{} (gridded)".format(mod)
                     # no alias, interpolated models keep the model name
                     else:
@@ -2744,7 +2763,7 @@ class Dashboard(QtWidgets.QWidget):
 
             for model_raw, model in models.items():
                 # skip gridded models as they have no forecast options
-                if model_raw.endswith("::noninterpolated"):
+                if model_raw.endswith("::gridded"):
                     continue
 
                 # get available and selected forecast options

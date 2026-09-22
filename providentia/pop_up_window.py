@@ -416,13 +416,13 @@ class PopUpWindow(QtWidgets.QWidget):
                 grid_vertical_spacing = 3
                 self.page_memory["models"] = {
                     "interpolated": [],
-                    "noninterpolated": [],
+                    "gridded": [],
                     "forecast": [],
                     "forecast_days": [],
                     "n_column_consumed": 4,
                     "ordered_elements": [
                         "interpolated",
-                        "noninterpolated",
+                        "gridded",
                         "forecast",
                         "forecast_days",
                     ],
@@ -677,7 +677,7 @@ class PopUpWindow(QtWidgets.QWidget):
 
                     # if menu type == models
                     elif menu_type == "models":
-                        if element in ['interpolated', 'noninterpolated']:
+                        if element in ['interpolated', 'gridded']:
                             model_checkbox = self.page_memory[menu_type][element][
                                 label_ii
                             ]
@@ -745,7 +745,7 @@ class PopUpWindow(QtWidgets.QWidget):
                                 ].addItems(all_forecast_vars)
                                 # if model is checked and have available forecast options, then show combobox
                                 row_checked = False
-                                for row_mode in ["interpolated", "noninterpolated"]:
+                                for row_mode in ["interpolated", "gridded"]:
                                     if self.page_memory[menu_type][row_mode][
                                         label_ii
                                     ].isChecked():
@@ -835,7 +835,7 @@ class PopUpWindow(QtWidgets.QWidget):
 
                                 # if model is checked and have selected forecast options, then show combobox
                                 row_checked = False
-                                for row_mode in ["interpolated", "noninterpolated"]:
+                                for row_mode in ["interpolated", "gridded"]:
                                     if self.page_memory[menu_type][row_mode][
                                         label_ii
                                     ].isChecked():
@@ -1045,7 +1045,7 @@ class PopUpWindow(QtWidgets.QWidget):
             return
 
         for element in self.page_memory[menu_type]["ordered_elements"]:
-            if element in ["keep_selected", "remove_selected", "interpolated", "noninterpolated"]:
+            if element in ["keep_selected", "remove_selected", "interpolated", "gridded"]:
                 for checkbox_ii, checkbox in enumerate(
                     self.page_memory[menu_type][element]
                 ):
@@ -1055,7 +1055,7 @@ class PopUpWindow(QtWidgets.QWidget):
                     checkbox.setCheckState(QtCore.Qt.Checked)
                     
                     # only one gridded model can be loaded, so select the first available one
-                    if element == "noninterpolated":
+                    if element == "gridded":
                         break
 
     def clear_all(self):
@@ -1071,7 +1071,7 @@ class PopUpWindow(QtWidgets.QWidget):
             return
 
         for element in self.page_memory[menu_type]["ordered_elements"]:
-            if element in ["keep_selected", "remove_selected", "interpolated", "noninterpolated"]:
+            if element in ["keep_selected", "remove_selected", "interpolated", "gridded"]:
                 for checkbox_ii, checkbox in enumerate(
                     self.page_memory[menu_type][element]
                 ):
@@ -1843,7 +1843,7 @@ class PopUpWindow(QtWidgets.QWidget):
         if model not in self.menu_current["models"]["forecast"]:
             if model in self.read_instance.init_models:
                 model = self.read_instance.init_models[model]
-            elif model_type == "noninterpolated":
+            elif model_type == "gridded":
                 model = "{} (gridded)".format(model_id)
             else:
                 model = model_id
@@ -1851,7 +1851,7 @@ class PopUpWindow(QtWidgets.QWidget):
         # The forecast comboboxes are shared by both modes of the row, so they stay
         # visible while the model is still checked in the other mode
         row_checked = False
-        for row_mode in ["interpolated", "noninterpolated"]:
+        for row_mode in ["interpolated", "gridded"]:
             if self.page_memory["models"][row_mode][label_ii].isChecked():
                 row_checked = True
                 break
@@ -2140,7 +2140,7 @@ class PopUpWindow(QtWidgets.QWidget):
 
                 elif menu_type == "models":
                     # save the models checked for each model type
-                    if element in ["interpolated", "noninterpolated"]:
+                    if element in ["interpolated", "gridded"]:
                         selected_vars = []
 
                         # iterate through models
@@ -2162,7 +2162,7 @@ class PopUpWindow(QtWidgets.QWidget):
                             if model not in self.menu_current[menu_type]["forecast"]:
                                 if model in self.read_instance.init_models:
                                     model = self.read_instance.init_models[model]
-                                elif element == "noninterpolated":
+                                elif element == "gridded":
                                     model = "{} (gridded)".format(model_id)
                                 else:
                                     model = model_id
