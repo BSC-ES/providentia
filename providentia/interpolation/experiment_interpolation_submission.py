@@ -277,6 +277,10 @@ class SubmitInterpolation(object):
 
         # iterate through desired model IDs and its types
         for mod_dom_ens, alias in models.items():
+            # skip gridded models
+            if "gridded" in mod_dom_ens:
+                continue
+            
             model_to_process, grid_type, ensemble = mod_dom_ens.split("-")
 
             print("\nMODEL: {0}\n".format(alias))

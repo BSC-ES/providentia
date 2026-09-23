@@ -41,6 +41,7 @@ from .plot_formatting import (
 from .read import DataReader
 from .read_aux import (
     generate_file_trees,
+    get_map_lead_days,
     get_possible_resampling_resolutions,
     get_periodic_nonrelevant_temporal_resolutions,
     get_periodic_relevant_temporal_resolutions,
@@ -1055,6 +1056,16 @@ class Providentia:
             elif z_statistic_sign == "bias":
                 map_title = "{}".format(labelb)
 
+            # if there is grid data, read it
+            results = self.datareader.read_gridded_data(
+                speci, zstat=zstat, date_range=None,
+                lead_days=get_map_lead_days(self))
+
+            if results:
+                grid_data, grid_lat, grid_lon = results
+            else:
+                grid_data, grid_lat, grid_lon = None, None, None
+
             func(
                 relevant_ax,
                 networkspeci,
@@ -1063,7 +1074,11 @@ class Providentia:
                 zstat=zstat,
                 labela=labela,
                 labelb=labelb,
+                var=grid_data,
+                lat=grid_lat,
+                lon=grid_lon,
             )
+        
         # periodic plot
         elif base_plot_type == "periodic":
             func(

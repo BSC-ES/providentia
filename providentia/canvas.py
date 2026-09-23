@@ -43,11 +43,10 @@ from .plot_formatting import (
     set_axis_title,
 )
 from .plot_options import annotation, linear_regression, log_axes, smooth, threshold
-from .read_aux import get_possible_resampling_resolutions, get_frequency_code
+from .read_aux import get_map_lead_days, get_possible_resampling_resolutions, get_frequency_code
 from .statistics import (
     get_z_statistic_comboboxes,
     generate_colourbar,
-    get_map_lead_days,
     get_selected_station_data,
     get_z_statistic_type,
     get_z_statistic_info,
