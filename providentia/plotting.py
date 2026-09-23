@@ -36,11 +36,14 @@ from .calculate import ModBias
 from .statistics import (
     boxplot_inner_fences,
     calculate_statistic,
+    generate_colourbar,
     group_periodic,
     get_fairmode_data,
+    get_z_statistic_comboboxes,
     get_z_statistic_info,
     get_z_statistic_type,
 )
+
 from .read_aux import drop_nans, get_valid_metadata
 from .plot_aux import (
     create_statistical_timeseries,
@@ -2540,11 +2543,11 @@ class Plotting:
             all_networkspecies = [networkspeci]
 
         # bias plot?
-        if "bias" in plot_options:
+        if ("bias" in plot_options) or (get_z_statistic_type(zstat) == "modbias"):
             bias = True
         else:
             bias = False
-        
+
         # always make multispecies plot if there is more than one networkspeci and plot can be multispecies
         # remove first to make sure we don't use a previous appended multispecies  
         if self.read_instance.mode == "dashboard":
@@ -2574,11 +2577,13 @@ class Plotting:
                     data_label for data_label in data_labels if data_label in valid_data_labels
                 ]
 
+                # remove observations for bias statistics
+                if bias and (self.read_instance.observations_data_label in cut_data_labels):
+                    cut_data_labels.remove(self.read_instance.observations_data_label)
+
                 # calculate statistic per data label
                 for dl in cut_data_labels:
                     if bias:
-                        if self.read_instance.observations_data_label in cut_data_labels:
-                            cut_data_labels.remove(self.read_instance.observations_data_label)
                         stats_calc = calculate_statistic(
                                 self.read_instance,
                                 self.canvas_instance,
@@ -2659,6 +2664,23 @@ class Plotting:
             **plot_characteristics["plot"],
         )
 
+        # add colourbar in dashboard
+        if self.read_instance.mode == "dashboard":
+            # remove previous colourbar axis, as heatmap axis is reused between updates
+            for child_ax in list(relevant_axis.child_axes):
+                if child_ax.get_label() == "heatmap_cb":
+                    child_ax.remove()
+            cb_ax = relevant_axis.inset_axes(plot_characteristics["cb"]["position"])
+            cb_ax.set_label("heatmap_cb")
+            generate_colourbar(
+                self.read_instance,
+                [relevant_axis],
+                [cb_ax],
+                get_z_statistic_comboboxes(zstat, bias=bias),
+                plot_characteristics,
+                networkspeci.split("|")[-1],
+            )
+
         # remove networkspecies-subsections label from y-axis
         relevant_axis.set_ylabel("")
 
@@ -2695,9 +2717,14 @@ class Plotting:
         )
 
         # set xticklabels
-        relevant_axis.set_xticklabels(
-            stats_df.columns, **plot_characteristics["xticklabels"]
-        )     
+        if plot_characteristics["xtick_params"].get("labelbottom", True):
+            relevant_axis.set_xticklabels(
+                stats_df.columns,
+                **plot_characteristics["xticklabels"]
+            )
+        else:
+            relevant_axis.set_xticklabels([])
+            relevant_axis.set_xlabel("")
 
         # axis cuts off due to bug in matplotlib 3.1.1 - hack fix
         if Version(matplotlib.__version__) <= Version("3.1.1"):

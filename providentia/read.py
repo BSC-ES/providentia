@@ -1850,6 +1850,26 @@ class DataReader:
         unique_data_labels_to_remove = []
         unique_data_labels_raw_to_remove = []
 
+        # reset models pop-up menu options if in dashboard mode, and are initialising
+        # (done once for all networkspecies, otherwise models only available for some
+        # networkspecies lose their entry when a later networkspeci resets the menu)
+        if (self.read_instance.mode not in ["report", "library"]) & (init):
+            self.read_instance.models_menu["models"]["forecast"] = {}
+            self.read_instance.models_menu["models"]["forecast_days"] = {}
+        # otherwise reset selected and disabled forecast variable and day options 
+        # (to ensure data labels that are no longer selected are cleaned)
+        elif (self.read_instance.mode not in ["report", "library"]) & (not init):
+            for data_label in self.read_instance.models_menu["models"]["forecast"]:
+                self.read_instance.models_menu["models"]["forecast"][data_label][
+                    1
+                ] = []
+                self.read_instance.models_menu["models"]["forecast"][data_label][
+                    2
+                ] = []
+                self.read_instance.models_menu["models"]["forecast_days"][
+                    data_label
+                ][1] = []
+
         # iterate over each network species
         for networkspeci in networkspecies:
             # temporary lists for each species
@@ -1857,23 +1877,6 @@ class DataReader:
             data_labels_raw_to_remove = []
             data_labels_to_add = []
             data_labels_raw_to_add = []
-
-            # reset models pop-up menu options if in dashboard mode, and are initialising
-            if (self.read_instance.mode not in ["report", "library"]) & (init):
-                self.read_instance.models_menu["models"]["forecast"] = {}
-                self.read_instance.models_menu["models"]["forecast_days"] = {}
-            # otherwise reset selected and disabled forecast variable and day options (to ensure data labels that are no longer selected are cleaned)
-            elif (self.read_instance.mode not in ["report", "library"]) & (not init):
-                for data_label in self.read_instance.models_menu["models"]["forecast"]:
-                    self.read_instance.models_menu["models"]["forecast"][data_label][
-                        1
-                    ] = []
-                    self.read_instance.models_menu["models"]["forecast"][data_label][
-                        2
-                    ] = []
-                    self.read_instance.models_menu["models"]["forecast_days"][
-                        data_label
-                    ][1] = []
 
             # initialise dictionary for this network species
             self.read_instance.forecast_indices_per_data_label[networkspeci] = {}

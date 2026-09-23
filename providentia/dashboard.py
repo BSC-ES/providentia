@@ -2601,6 +2601,14 @@ class Dashboard(QtWidgets.QWidget):
                 for j in range(ncols)
             ]
 
+        # shrink heatmap to leave space for its colourbar on the right
+        if changed_plot_type == "heatmap":
+            heatmap_ax = canvas_instance.plot_axes[changed_plot_type]
+            bbox = heatmap_ax.get_position()
+            heatmap_ax.set_position(
+                [bbox.x0, bbox.y0, bbox.width * 0.85, bbox.height]
+            )
+
     def handle_data_selection_update(self):
         """Execute the data reading process and synchronise the interface and canvas based on current selections."""
 
