@@ -43,6 +43,7 @@ from .plot_formatting import (
 from .read import DataReader
 from .read_aux import (
     generate_file_trees,
+    get_map_lead_days,
     get_possible_resampling_resolutions,
     get_periodic_nonrelevant_temporal_resolutions,
     get_periodic_relevant_temporal_resolutions,
@@ -2464,8 +2465,9 @@ class Report:
                         unavailable_label = "{}".format(z1_label)
                     else:
                         unavailable_label = "{} - {}".format(z2_label, z1_label)
-                    msg = f"{plot_type} cannot be created because there is no available data of {unavailable_label}."
-                    show_message(self, msg)
+                    if 'gridded' not in z1_label and 'gridded' not in z2_label:
+                        msg = f"{plot_type} cannot be created because there is no available data of {unavailable_label}."
+                        show_message(self, msg)
                     return plot_indices
 
                 # get relevant page/axis to plot on
@@ -2499,6 +2501,17 @@ class Report:
                 if self.map_extent:
                     set_map_extent(self, relevant_axis, self.map_extent)
 
+                # if there is grid data, read it
+                speci = networkspeci.split('|')[1]
+                results = self.datareader.read_gridded_data(
+                    speci, zstat=zstat, date_range=None,
+                    lead_days=get_map_lead_days(self))
+
+                if results:
+                    grid_data, grid_lat, grid_lon = results
+                else:
+                    grid_data, grid_lat, grid_lon = None, None, None
+
                 # make map plot
                 self.plotting.make_map(
                     relevant_axis,
@@ -2508,6 +2521,9 @@ class Report:
                     zstat=zstat,
                     labela=z1_label,
                     labelb=z2_label,
+                    var=grid_data,
+                    lat=grid_lat,
+                    lon=grid_lon,
                 )
 
                 # save plot information for later formatting

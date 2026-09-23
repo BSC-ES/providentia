@@ -3366,7 +3366,7 @@ class DataReader:
         
         elif zstat:
             if zstat not in ['Mean']:
-                msg = f"Statistic '{zstat}' is not supported. Only 'Mean' is supported."
+                msg = f"Statistic '{zstat}' is not supported for gridded data. Only 'Mean' is supported."
                 show_message(self.read_instance, msg)
                 return None
 
@@ -3440,4 +3440,4 @@ class DataReader:
         else:
             raise ValueError("Either 'date' and 'hour' or 'stat' must be provided.")
 
-        return data, lat, lon, obs_units
+        return data, lat, lon

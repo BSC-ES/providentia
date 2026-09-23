@@ -47,6 +47,7 @@ from .read_aux import get_possible_resampling_resolutions, get_frequency_code
 from .statistics import (
     get_z_statistic_comboboxes,
     generate_colourbar,
+    get_map_lead_days,
     get_selected_station_data,
     get_z_statistic_type,
     get_z_statistic_info,
@@ -991,12 +992,12 @@ class Canvas(FigureCanvas):
         # if there is grid data, read it
         results = self.read_instance.datareader.read_gridded_data(
             speci, zstat=zstat, date_range=date_range,
-            lead_days=self.get_map_lead_days())
+            lead_days=get_map_lead_days(self.read_instance))
 
         if results:
-            grid_data, grid_lat, grid_lon, grid_units = results
+            grid_data, grid_lat, grid_lon = results
         else:
-            grid_data, grid_lat, grid_lon, grid_units = None, None, None, None
+            grid_data, grid_lat, grid_lon = None, None, None
 
         # ensure label that have in memory still exists
 

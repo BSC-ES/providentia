@@ -2245,3 +2245,23 @@ def time_var_to_asi8(time_var):
     # ------------------------------------------------------
     dates = num2date(values, units=units, calendar=calendar)
     return _dates_to_asi8_seconds(dates, calendar)
+
+
+def get_map_lead_days(read_instance):
+    """
+    Get forecast lead days loaded, so gridded model uses the same forecast days
+    as interpolated models (day 1 if no forecast option is loaded)
+    """
+
+    # daily and combined forecasts use all active forecast days
+    if read_instance.daily_forecast or read_instance.combined_forecast:
+        return list(read_instance.active_forecast_days)
+
+    # N day forecast(s)
+    lead_days = set()
+    for data_label_raw in read_instance.data_labels_raw:
+        match = re.search(r"::interpolated-day(\d+)$", data_label_raw)
+        if match:
+            lead_days.add(int(match.group(1)))
+
+    return sorted(lead_days) if lead_days else [1]
