@@ -624,6 +624,11 @@ class Dashboard(QtWidgets.QWidget):
                 self,
                 ["BOTH", "OBS", "MODEL"],
                 highlight_color=self.plot_characteristics_templates["general"]["highlight_color"],
+                tooltips={
+                    "BOTH": "See observations and models",
+                    "OBS": "See observations only",
+                    "MODEL": "See models only",
+                },
             ),
             self.formatting_dict["menu_multiswitch"],
         )

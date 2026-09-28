@@ -775,7 +775,7 @@ class MultiSwitch(QtWidgets.QPushButton):
 
     stateChanged = QtCore.pyqtSignal(int)
 
-    def __init__(self, parent=None, options=None, highlight_color="steelblue"):
+    def __init__(self, parent=None, options=None, highlight_color="steelblue", tooltips=None):
         """
         Initialise class
 
@@ -787,6 +787,8 @@ class MultiSwitch(QtWidgets.QPushButton):
             Labels of the selectable options, in display order
         highlight_color : str
             Background colour of selected option
+        tooltips : dict
+            Tooltip text per option label, shown when hovering that segment
         """
 
         super(MultiSwitch, self).__init__(parent)
@@ -796,8 +798,25 @@ class MultiSwitch(QtWidgets.QPushButton):
             )
         self.options = options
         self.highlight_color = highlight_color
+        self.tooltips = tooltips if tooltips else {}
         self.state = 0
         self.setCursor(QtCore.Qt.PointingHandCursor)
+
+    def event(self, event):
+        """
+        Show tooltip of the option whose segment is hovered.
+        """
+
+        if event.type() == QtCore.QEvent.ToolTip and self.tooltips:
+            segment_width = self.rect().width() / len(self.options)
+            option_ii = min(int(event.pos().x() // segment_width), len(self.options) - 1)
+            text = self.tooltips.get(self.options[option_ii], self.toolTip())
+            if text:
+                QtWidgets.QToolTip.showText(event.globalPos(), text, self)
+            else:
+                QtWidgets.QToolTip.hideText()
+            return True
+        return super(MultiSwitch, self).event(event)
 
     def currentOption(self):
         """
