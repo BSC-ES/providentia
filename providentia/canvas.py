@@ -2851,8 +2851,14 @@ class Canvas(FigureCanvas):
 
             # else, if checkbox is checked then select all stations which intersect with all loaded model domains
             elif check_state == QtCore.Qt.Checked:
+                # get non-gridded model data labels (gridded models have no station data)
+                model_data_labels = [
+                    data_label for data_label in self.read_instance.data_labels
+                    if data_label != self.read_instance.observations_data_label
+                    and "gridded" not in data_label
+                ]
                 # if have only observations loaded into memory, select all plotted stations
-                if len(self.read_instance.data_labels) == 1:
+                if len(model_data_labels) == 0:
                     self.relative_selected_station_inds = copy.deepcopy(
                         self.active_map_valid_station_inds
                     )
@@ -2866,21 +2872,20 @@ class Canvas(FigureCanvas):
                 # and valid station indices associated with each loaded model array)
                 else:
                     intersect_lists = [self.active_map_valid_station_inds]
-                    for data_label in self.read_instance.data_labels:
-                        if data_label != self.read_instance.observations_data_label:
-                            if self.read_instance.temporal_colocation:
-                                valid_station_inds = self.read_instance.valid_station_inds_temporal_colocation[
+                    for data_label in model_data_labels:
+                        if self.read_instance.temporal_colocation:
+                            valid_station_inds = self.read_instance.valid_station_inds_temporal_colocation[
+                                self.read_instance.networkspeci
+                            ][
+                                data_label
+                            ]
+                        else:
+                            valid_station_inds = (
+                                self.read_instance.valid_station_inds[
                                     self.read_instance.networkspeci
-                                ][
-                                    data_label
-                                ]
-                            else:
-                                valid_station_inds = (
-                                    self.read_instance.valid_station_inds[
-                                        self.read_instance.networkspeci
-                                    ][data_label]
-                                )
-                            intersect_lists.append(valid_station_inds)
+                                ][data_label]
+                            )
+                        intersect_lists.append(valid_station_inds)
 
                     # get intersect between active map valid station indices and valid station indices
                     # associated with each loaded model array --> relative selected station indcies
