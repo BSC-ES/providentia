@@ -436,7 +436,7 @@
           "marker_unselected": { "s": 4, "alpha": 0.4 },
           "plot":
             {
-              "stations": { "s": 20, "picker": 1, "zorder": 5 },
+              "stations": { "s": 20, "picker": 1, "zorder": 5, "edgecolor": "black", "linewidth": 0.4 },
               "grid":     { "zorder": 2, "alpha": null },
             },
           "marker_annotate_rounding": 2,
@@ -477,7 +477,7 @@
           "annotate_text": { "fontsize": 6 },
           "plot":
             {
-              "stations": { "s": "", "picker": 1, "zorder": 5 },
+              "stations": { "s": "", "picker": 1, "zorder": 5, "edgecolor": "black", "linewidth": 0.4 },
               "grid":     { "zorder": 2, "alpha": null },
             },
         },
@@ -529,7 +529,7 @@
           "annotate_text": { "fontsize": 13 },
           "plot":
             {
-              "stations": { "s": "", "picker": 1, "zorder": 5 },
+              "stations": { "s": "", "picker": 1, "zorder": 5, "edgecolor": "black", "linewidth": 0.4 },
               "grid":     { "zorder": 2, "alpha": null },
             },
           "main_gs": {
