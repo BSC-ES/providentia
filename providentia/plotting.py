@@ -625,11 +625,12 @@ class Plotting:
                     "grid_edge_latitude"
                     not in self.read_instance.plotting_params[model]
                 ):
-                    # grid domain is plotted only from interpolated data label if loaded
-                    if 'gridded' in model:
-                        continue
                     continue
-                    
+                
+                # grid domain is plotted only from interpolated data label if loaded
+                if 'gridded' in model:
+                    continue
+
                 # create matplotlib polygon object from model grid edge map projection coordinates
                 grid_edge_outline_poly = Polygon(
                     np.vstack(
@@ -1249,16 +1250,39 @@ class Plotting:
         
         # plot model gridded data
         if var is not None and lon is not None and lat is not None:
-            relevant_axis.pcolormesh(
+            grid_mesh = relevant_axis.pcolormesh(
                 lon,
                 lat,
                 var,
                 transform=self.canvas_instance.datacrs,
                 **plot_characteristics["plot"]["grid"],
             )
+            
+            # save grid edges of gridded model (first gridded model is the one read),
+            # from mesh cell corners (bottom, right, top, left edges), to plot model domain
+            gridded_label = next(
+                label
+                for label, label_raw in zip(
+                    self.read_instance.data_labels, self.read_instance.data_labels_raw
+                )
+                if label_raw.endswith("::gridded")
+            )
+            corners = grid_mesh.get_coordinates()
+            grid_edges = np.concatenate(
+                (
+                    corners[0, :],
+                    corners[1:, -1],
+                    corners[-1, -2::-1],
+                    corners[-2:0:-1, 0],
+                )
+            )
+            self.read_instance.plotting_params[gridded_label]["grid_edge_longitude"] = grid_edges[:, 0]
+            self.read_instance.plotting_params[gridded_label]["grid_edge_latitude"] = grid_edges[:, 1]
 
-            plot_characteristics["plot"]["stations"]["edgecolor"] = "black"
-            plot_characteristics["plot"]["stations"]["linewidth"] = 0.4
+            # allow axis margins around the grid (pcolormesh sticks limits to the grid edges)
+            grid_mesh.sticky_edges.x[:] = []
+            grid_mesh.sticky_edges.y[:] = []
+            relevant_axis.autoscale_view()
 
         # if not only model gridded data is loaded
         if labela or labelb: 
