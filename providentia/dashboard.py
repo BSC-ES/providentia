@@ -1414,6 +1414,30 @@ class Dashboard(QtWidgets.QWidget):
             get_valid_obs_files_in_date_range(
                 self, self.le_start_date.text(), self.le_end_date.text()
             )
+        
+        # if have no available observational data, keep previous selection
+        # updating only variable informing that we have no data
+        # if GHOST networks are selected, only GHOST data counts (otherwise we would fall back to a
+        # non-GHOST network and the GHOST version could not be changed back)
+        reading_ghost = bool(self.selected_network) and all(
+            check_for_ghost(network) for network in self.selected_network
+        )
+        if reading_ghost:
+            has_data = any(check_for_ghost(network) for network in self.available_observation_data)
+        else:
+            has_data = len(self.available_observation_data) > 0
+        if not has_data:
+            self.no_data_to_read = True
+            msg = (f"No observational data available "
+                   f"between {self.le_start_date.text()} and {self.le_end_date.text()}. "
+                   "Please select a different GHOST version or change the date range.")
+            show_message(self, msg)
+            self.disable_element(self.bu_read, "button")
+            self.block_config_bar_handling_updates = False
+            self.block_MPL_canvas_updates = False
+            return
+        else:
+            self.no_data_to_read = False
 
         # initialise/update fields - maintain previously selected values wherever possible
         # clear fields
@@ -1424,23 +1448,12 @@ class Dashboard(QtWidgets.QWidget):
         self.cb_statistic_mode.clear()
         self.cb_statistic_aggregation.clear()
         self.cb_ghost_features.clear()
+        self.cb_ghost_version.clear()
         self.mpl_canvas.statsummary_periodic_aggregation.clear()
         self.mpl_canvas.statsummary_periodic_mode.clear()
         self.mpl_canvas.timeseries_stat.clear()
 
-        # if have no available observational data, return from function, updating variable informing that have no data
-        if len(self.available_observation_data) == 0:
-            self.no_data_to_read = True
-            # unset variable to allow interactive handling from now
-            self.block_config_bar_handling_updates = False
-            return
-        else:
-            self.no_data_to_read = False
 
-            # initialise ghost version if we have data
-            # if we clear it earlier we are not able to change the version if we find no data for a specific version
-            self.cb_ghost_version.clear()
-        
         # get matrices for GHOST version 1.5
         available_matrices = self.get_matrices_per_ghost_version()
 
@@ -2105,9 +2118,15 @@ class Dashboard(QtWidgets.QWidget):
             # if network, resolution, matrix, species, aggregation mode or resampling resolution have changed
             # then alter respective current selection for the changed param
             if event_source == self.cb_network:
-                self.selected_network = self.cb_network.currentData()
-                # ensure that QA defaults have been updated if network has changed (i.e. to or from ACTRIS)
-                update_qa(self)
+                new_selected_network = self.cb_network.currentData()
+                # networks must be all GHOST or non-GHOST, otherwise keep previous selection
+                if len({check_for_ghost(network) for network in new_selected_network}) > 1:
+                    msg = 'Networks must be all GHOST or non-GHOST. Keeping previous selection.'
+                    show_message(self, msg)
+                else:
+                    self.selected_network = new_selected_network
+                    # ensure that QA defaults have been updated if network has changed (i.e. to or from ACTRIS)
+                    update_qa(self)
 
             elif event_source == self.cb_resolution:
                 self.selected_resolution = changed_param
@@ -3227,14 +3246,19 @@ class Dashboard(QtWidgets.QWidget):
                 flags_active = obs_active
                 if self.ghost_features != "min":
                     period_active = obs_active
-                ghost_version_active = True
-                ghost_features_active = obs_active
                 break
             # if are reading ACTRIS network then QA and flags are active
             elif network == "actris/actris":
                 qa_active = obs_active
                 flags_active = obs_active
                 break
+
+        # GHOST version and features are only active if all selected networks are from GHOST
+        all_ghost = bool(self.selected_network) and all(
+            check_for_ghost(network) for network in self.selected_network
+        )
+        ghost_version_active = all_ghost
+        ghost_features_active = all_ghost and obs_active
 
         # update buttons
         if event_source == "update_configuration_bar_fields":

@@ -1847,12 +1847,12 @@ def generate_file_trees(instance, ghost_version=None, only_ghost=False):
                 )
             else:
                 instance.logger.info(f"Updating file tree {nonghost_filetree_path}...")
-            nonghost_observation_data = get_nonghost_observational_tree(instance)
+            instance.nonghost_observation_data = get_nonghost_observational_tree(instance)
         # load file trees
         else:
             instance.logger.info(f"Loading file tree {nonghost_filetree_path}...")
             try:
-                nonghost_observation_data = json.load(
+                instance.nonghost_observation_data = json.load(
                     open(
                         join(
                             PROVIDENTIA_ROOT, "settings/internal/nonghost_filetree.json"
@@ -1864,10 +1864,12 @@ def generate_file_trees(instance, ghost_version=None, only_ghost=False):
                 instance.logger.error(error)
                 sys.exit(1)
 
-        # merge GHOST and non-GHOST filetrees
+    # merge GHOST and non-GHOST filetrees
+    # (when only updating the GHOST version, reuse the previously loaded non-GHOST filetree)
+    if instance.nonghost_root is not None and hasattr(instance, "nonghost_observation_data"):
         instance.all_observation_data = {
             **instance.all_observation_data,
-            **nonghost_observation_data,
+            **instance.nonghost_observation_data,
         }
 
 
