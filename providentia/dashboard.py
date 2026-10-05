@@ -1446,10 +1446,11 @@ class Dashboard(QtWidgets.QWidget):
 
             # update qa / flags checkboxes
             self.flag_menu["checkboxes"]["remove_selected"] = copy.deepcopy(self.flags)
-            self.qa_menu["checkboxes"]["remove_selected"] = {
-                speci: copy.deepcopy(self.qa_per_species[speci])
-                for speci in self.selected_species
-            }
+            # TODO: Have different selections of qa per species
+            self.qa_menu["checkboxes"]["remove_selected"] = copy.deepcopy(
+                self.qa_per_species[self.selected_species[0]]
+            )
+
 
         # if date range or ghost version has changed then update available observational data dictionary
         if self.date_range_has_changed or self.ghost_version_has_changed:
