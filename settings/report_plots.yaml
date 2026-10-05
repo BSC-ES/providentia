@@ -44,7 +44,7 @@
 
     "all_plots": ["metadata",
                   "map-Median", "map-Median_bias", "map-Median_domain", "map-Median_annotate", 
-                  "map-Median_obs",
+                  "map-Median_obs", "histogram",
                   "timeseries", "timeseries_bias", "timeseries_smooth", "timeseries_individual", 
                   "timeseries_smooth_hidedata",
                   "timeseries_annotate","timeseries_logy", "timeseries_threshold",

@@ -2684,14 +2684,17 @@ class Dashboard(QtWidgets.QWidget):
                 for j in range(ncols)
             ]
 
-        # shrink heatmap to leave space for its colourbar on the right
+        # save space given to heatmap in this position, the axis is fitted inside it
+        # each time the heatmap is made, as its labels and colourbar change (see make_heatmap())
         if changed_plot_type == "heatmap":
-            heatmap_ax = canvas_instance.plot_axes[changed_plot_type]
-            bbox = heatmap_ax.get_position()
-            heatmap_ax.set_position(
-                [bbox.x0, bbox.y0, bbox.width * 0.85, bbox.height]
-            )
-
+            canvas_instance.heatmap_slot = canvas_instance.plot_axes[
+                changed_plot_type
+            ].get_position()
+            if changed_position == self.cb_position_2 or changed_position == 2:
+                canvas_instance.heatmap_scale = 0.8
+            else:
+                canvas_instance.heatmap_scale = 1.0
+                
         # done once the axes exist, whichever of the branches above made them
         if changed_plot_type in NON_NAVIGABLE_PLOTS:
             if changed_plot_type in canvas_instance.plot_axes:

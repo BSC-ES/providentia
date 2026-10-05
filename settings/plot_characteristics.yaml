@@ -1834,7 +1834,7 @@
       "dashboard":
         {
           "plot_options": ["annotate", "bias"],
-          "cb": { "orientation": "vertical", "position": [1.03, 0.0, 0.04, 1.0] },
+          "cb": { "orientation": "vertical", "position": [0.012, 0.0, 0.012, 0.3] },
           "axis_title": { "fontsize": 8.5, "loc": "left" },
           "cb_tick_params": { "labelsize": 8 },
           "cb_label": { "fontsize": 8 },

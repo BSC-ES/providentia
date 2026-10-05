@@ -3659,7 +3659,19 @@ class Plotting:
             for child_ax in list(relevant_axis.child_axes):
                 if child_ax.get_label() == "heatmap_cb":
                     child_ax.remove()
-            cb_ax = relevant_axis.inset_axes(plot_characteristics["cb"]["position"])
+            cb_x, cb_y, cb_width, cb_height = plot_characteristics["cb"]["position"]
+            slot = getattr(self.canvas_instance, "heatmap_slot", None)
+            fig = relevant_axis.figure
+            cb_ax = relevant_axis.inset_axes(
+                [cb_x, slot.y0 + (slot.height - cb_height) / 2 + cb_y, cb_width, cb_height],
+                transform=matplotlib.transforms.blended_transform_factory(
+                    fig.transFigure
+                    + matplotlib.transforms.ScaledTranslation(
+                        1.0, 0.0, relevant_axis.transAxes
+                    ),
+                    fig.transFigure,
+                ),
+            )
             cb_ax.set_label("heatmap_cb")
             generate_colourbar(
                 self.read_instance,
@@ -3779,6 +3791,43 @@ class Plotting:
             for tick in relevant_axis.get_yticklabels():
                 tick.set_verticalalignment("center")
 
+        # fit heatmap in its dashboard position, leaving the space that its
+        # labels (left) and colourbar (right) actually take outside the axis
+        slot = getattr(self.canvas_instance, "heatmap_slot", None)
+        if (self.read_instance.mode == "dashboard") and (slot is not None):
+            fig = relevant_axis.figure
+            # done twice as colourbar width changes with the axis width
+            for _ in range(2):
+                tight_bbox = relevant_axis.get_tightbbox(
+                    fig.canvas.get_renderer()
+                ).transformed(fig.transFigure.inverted())
+                ax_bbox = relevant_axis.get_position()
+                left_pad = max(ax_bbox.x0 - tight_bbox.x0, 0)
+                right_pad = max(tight_bbox.x1 - ax_bbox.x1, 0)
+                
+                # leave the same space on both sides, so heatmap itself is centred
+                # in the space, and not the group of labels, heatmap and colourbar
+                left_pad = right_pad = max(left_pad, right_pad)
+
+                # do not let very long labels remove the heatmap entirely
+                available_width = max(
+                    slot.width - left_pad - right_pad, slot.width * 0.2
+                )
+                
+                # scale heatmap, keeping it centred in the available space
+                scale = getattr(self.canvas_instance, "heatmap_scale", 1.0)
+                width = available_width * scale
+                height = slot.height * scale
+                relevant_axis.set_position(
+                    [
+                        slot.x0 + left_pad + (available_width - width) / 2,
+                        slot.y0 + (slot.height - height) / 2,
+                        width,
+                        height,
+                    ]
+                )
+                relevant_axis.apply_aspect()
+                
         # track plot elements
         if self.read_instance.mode not in ["report"]:
             self.track_plot_elements(
