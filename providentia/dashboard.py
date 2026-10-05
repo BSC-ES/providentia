@@ -1474,7 +1474,12 @@ class Dashboard(QtWidgets.QWidget):
             msg = (f"No observational data available "
                    f"between {self.le_start_date.text()} and {self.le_end_date.text()}. "
                    "Please select a different GHOST version or change the date range.")
-            show_message(self, msg)
+            # do not show message while dates are being edited (incomplete dates)
+            dates_complete = all(
+                QtCore.QDate.fromString(line_edit.text(), "yyyyMMdd").isValid()
+                for line_edit in [self.le_start_date, self.le_end_date]
+            )
+            show_message(self, msg, deactivate=self.date_range_has_changed and not dates_complete)
             self.disable_element(self.bu_read, "button")
             self.block_config_bar_handling_updates = False
             self.block_MPL_canvas_updates = False

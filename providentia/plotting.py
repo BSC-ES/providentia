@@ -673,6 +673,10 @@ class Plotting:
                 legend_labels.append(data_label)
 
         plot_characteristics_legend["plot"]["handles"] = legend_elements
+        plot_characteristics_legend["plot"]["labels"] = [
+            handle[-1].get_label() if isinstance(handle, tuple) else handle.get_label()
+            for handle in legend_elements
+        ]
         plot_characteristics_legend["data_labels_ordered"] = legend_labels
 
         return plot_characteristics_legend

@@ -6480,12 +6480,11 @@ class Canvas(FigureCanvas):
         ----------
         keys : list, optional
             Menus to close, as keys of self.interactive_elements (default is
-            None, i.e. every menu but the map's, whose plot is never covered
-            on its own)
+            None)
         """
 
         if keys is None:
-            keys = [key for key in self.interactive_elements if key != "map"]
+            keys = self.interactive_elements
 
         for key in keys:
             if self.interactive_elements[key]["hidden"]:
