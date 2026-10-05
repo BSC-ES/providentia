@@ -3187,7 +3187,7 @@ class Dashboard(QtWidgets.QWidget):
 
             # add networkspecies as items to networkspecies combobox
             all_plot_types = ["map", "timeseries", "periodic", "periodic_violin", "metadata",
-                             "distribution", "scatter", "statsummary", "boxplot", "taylor",
+                             "distribution", "histogram", "scatter", "statsummary", "boxplot", "taylor",
                              "fairmode_target", "fairmode_statsummary", "contingencytable",
                              "heatmap", "table"]
             multispecies_plot_types = ["statsummary", "boxplot", "heatmap", "table"]

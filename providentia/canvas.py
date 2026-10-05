@@ -3123,7 +3123,7 @@ class Canvas(FigureCanvas):
         panel_left = settings_button.x() - 220
         panel_width = 230
         gap = 6
-        row_y = settings_button.y() + 210
+        row_y = settings_button.y() + 310
         row_height = 20
 
         buttons = [
@@ -3172,7 +3172,7 @@ class Canvas(FigureCanvas):
         # the row is the last thing in the panel, so a wrapped second line
         # only needs the panel itself to grow to keep it inside
         container = self.map_menu.containers["container"]
-        container.resize(container.width(), 220 + (row_height + 5 if wrapped else 0))
+        container.resize(container.width(), 320 + (row_height + 5 if wrapped else 0))
 
         return None
 
@@ -6143,9 +6143,12 @@ class Canvas(FigureCanvas):
 
         # HISTOGRAM PLOT SETTINGS MENU #
         # create histogram settings menu
-        self.histogram_menu = SettingsMenu(plot_type="histogram", canvas_instance=self)
+        self.histogram_menu = SettingsMenu(
+            plot_type="histogram", canvas_instance=self, read_instance=self.read_instance
+        )
         self.histogram_options = self.histogram_menu.checkable_comboboxes["options"]
         self.histogram_elements = self.histogram_menu.get_elements()
+        self.histogram_networkspecies = self.histogram_menu.comboboxes["networkspecies"]
 
         # "Station statistic" combobox - see the equivalent on the
         # distribution menu above

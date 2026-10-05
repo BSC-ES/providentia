@@ -673,7 +673,7 @@ class Plotting:
                 legend_labels.append(data_label)
 
         plot_characteristics_legend["plot"]["handles"] = legend_elements
-        plot_characteristics_legend["plot"]["labels"] = legend_labels
+        plot_characteristics_legend["data_labels_ordered"] = legend_labels
 
         return plot_characteristics_legend
 
@@ -1331,7 +1331,7 @@ class Plotting:
             # afterwards, as plot_characteristics is shared between every map a
             # report draws - left in place, the first map's size would be reused
             # for all the rest, whatever their own station count and extent
-            original_markersize = plot_characteristics["plot"]["s"]
+            original_markersize = plot_characteristics["plot"]["stations"]["s"]
             if self.read_instance.mode in ["report", "library"]:
                 self.get_markersize(
                     relevant_axis,

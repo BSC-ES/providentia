@@ -49,7 +49,7 @@ dashboard: &dashboard
 dashboard_empty:
   <<: *dashboard
   network:
-    - EBAS
+    - GHOST
   species:
     - sconco3
   resolution: hourly
