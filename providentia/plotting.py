@@ -4022,14 +4022,6 @@ class Plotting:
             empty_cells = len(stats_df.columns) - len(data_labels)
             col_labels = [""] * empty_cells + data_labels
 
-        # show any renamed display text in that first (label) column,
-        # without touching data_labels itself - still the real
-        # identifiers, used just below for colour lookups
-        stats_df[stats_df.columns[0]] = [
-            get_display_label(self.read_instance, data_label)
-            for data_label in data_labels
-        ]
-
         # set cell colors
         if statsummary:
             if "cell_colours" in plot_characteristics:
@@ -4068,6 +4060,20 @@ class Plotting:
                         "white"
                     ] * empty_cells + col_colours
 
+        # show any renamed display text, after the colour lookups above,
+        # which need the real identifiers
+        # statsummary has data labels as rows, table has them as columns
+        if statsummary:
+            stats_df["labels"] = [
+                get_display_label(self.read_instance, data_label)
+                for data_label in stats_df["labels"]
+            ]
+        else:
+            col_labels = [""] * empty_cells + [
+                get_display_label(self.read_instance, data_label)
+                for data_label in data_labels
+            ]
+        
         # make table
         table = relevant_axis.table(
             cellText=stats_df.values,
@@ -5748,5 +5754,9 @@ class Plotting:
                     self.canvas_instance.datacrs,
                     self.read_instance.station_longitudes[networkspeci][
                         active_map_valid_station_inds
-                    ]
+                    ],
+                    self.read_instance.station_latitudes[networkspeci][
+                        active_map_valid_station_inds
+                    ],
+                    map_extent=map_extent,
                 )

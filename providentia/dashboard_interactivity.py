@@ -892,7 +892,7 @@ def rename_legend_label(canvas_instance, legend_label, data_label):
         # also re-decides whether its labels now fit (see
         # fit_boxplot_xticklabels()), as a new name can be shorter or longer
         # than the one it last measured
-        for plot_type in ("statsummary", "boxplot"):
+        for plot_type in ("statsummary", "table", "boxplot"):
             if plot_type in read_instance.dashboard_plots:
                 canvas_instance.update_associated_active_dashboard_plot(plot_type)
 
