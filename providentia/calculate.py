@@ -320,10 +320,12 @@ class Stats(object):
         periodic_statistic_aggregation=None,
     ):
         """
-        Calculate number of unique stations across the full domain.
+        Calculate number of unique stations.
 
-        A station is counted once if it has at least one non-NaN value anywhere
-        across all times and all groups.
+        A station is counted once if it has at least one non-NaN value across
+        the times it covers - over the whole record for an ungrouped array,
+        and within each chunk of a chunked or grouped one, which then gets a
+        count of its own.
 
         Parameters
         ----------
@@ -397,33 +399,24 @@ class Stats(object):
                 else:
                     station_axis = data.ndim - 2
 
-                # For the usual non-cycle cases, label axis is:
-                #   0 for 3D (label, station, time)
-                #   1 for grouped/independent cases like (group, label, station, time)
-                if data.ndim == 3:
-                    label_axis = 0
-                else:
-                    label_axis = 1
-
-                axes_to_reduce = tuple(
-                    ax
-                    for ax in range(data.ndim)
-                    if ax not in (label_axis, station_axis)
-                )
+                # only the axes after the station one are collapsed - the time
+                # within a chunk, over which a station counts once if it
+                # reported at all. Whatever comes before it stays: for a
+                # chunked or grouped array that is the chunk itself, and
+                # reducing it too returned one number per label where a value
+                # per chunk was wanted, leaving a timeseries of station counts
+                # the wrong shape entirely
+                axes_to_reduce = tuple(range(station_axis + 1, data.ndim))
 
                 if len(axes_to_reduce) > 0:
                     stations_valid = np.any(~np.isnan(data), axis=axes_to_reduce)
                 else:
                     stations_valid = ~np.isnan(data)
 
-                # After reduction, count stations along the remaining station axis
-                remaining_axes = [
-                    ax for ax in range(data.ndim) if ax not in axes_to_reduce
-                ]
-                station_axis_reduced = remaining_axes.index(station_axis)
-
+                # the station axis keeps its position, as nothing before it
+                # has been taken away
                 stations_number = np.count_nonzero(
-                    stations_valid, axis=station_axis_reduced
+                    stations_valid, axis=station_axis
                 ).astype("float32")
 
             return stations_number

@@ -3,6 +3,7 @@
 from collections import OrderedDict
 import copy
 from functools import partial
+import logging
 import os
 import sys
 import time
@@ -27,6 +28,7 @@ from .dashboard_elements import (
     DateTimePicker,
     QVLine,
     InputDialog,
+    MenuEditCommitFilter,
     MultiSwitch,
     set_cursor,
     unset_cursor,
@@ -67,6 +69,40 @@ os.environ["QT_FONT_DPI"] = "96"
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
 PROVIDENTIA_ROOT = "/".join(CURRENT_PATH.split("/")[:-1])
+
+
+# plots showing a table or a written summary rather than a range of data.
+# There is nothing in them to zoom into, and the toolbar's rubber band only
+# left them redrawn at a scale that made them unreadable
+NON_NAVIGABLE_PLOTS = [
+    "contingencytable",
+    "fairmode-statsummary",
+    "metadata",
+    "statsummary",
+]
+
+
+def disable_axis_navigation(axes):
+    """
+    Stop the navigation toolbar zooming or panning the given axes, through
+    the hooks its rubber band checks before acting.
+
+    Parameters
+    ----------
+    axes : object
+        An axis, a list of axes, or a dict of them
+    """
+
+    if isinstance(axes, dict):
+        axes = list(axes.values())
+    elif not isinstance(axes, (list, tuple)):
+        axes = [axes]
+
+    for ax in axes:
+        ax.can_zoom = lambda: False
+        ax.can_pan = lambda: False
+
+    return None
 
 
 class Dashboard(QtWidgets.QWidget):
@@ -1325,6 +1361,12 @@ class Dashboard(QtWidgets.QWidget):
         # set variable to avoid updating the canvas while updating config bar parameters
         self.block_MPL_canvas_updates = True
 
+        # reset per-session legend display name overrides (see
+        # get_display_label() in plot_aux.py) - this function runs on every
+        # data load/reload, so a custom legend name doesn't survive one,
+        # by design
+        self.legend_label_overrides = {}
+
         # set some default configuration values when initialising config bar
         if self.config_bar_initialisation:
             # set initial selected start-end date
@@ -2241,8 +2283,8 @@ class Dashboard(QtWidgets.QWidget):
             ):
                 self.position_5 = "None"
 
-            # remove axis elements for previous plot type, and from active_dashboard_plots
-            if (previous_plot_type in self.active_dashboard_plots) & (
+            # remove axis elements for previous plot type, and from dashboard_plots
+            if (previous_plot_type in self.dashboard_plots) & (
                 previous_plot_type in self.mpl_canvas.plot_axes
             ):
                 ax = self.mpl_canvas.plot_axes[previous_plot_type]
@@ -2271,18 +2313,15 @@ class Dashboard(QtWidgets.QWidget):
                         save_button.hide()
                         save_data_button.hide()
                         previous_plot_type = correct_plot_type_name(previous_plot_type)
-                        for element in getattr(
-                            self.mpl_canvas, previous_plot_type + "_elements"
-                        ):
-                            if isinstance(element, dict):
-                                for sub_element in element.values():
-                                    sub_element.hide()
-                            else:
-                                element.hide()
+                        # closed rather than only hidden, so the menu is not
+                        # still taken to be open the next time the plot is
+                        # chosen, when its settings button would need two
+                        # clicks to open it
+                        self.mpl_canvas.close_settings_menus([previous_plot_type])
                         break
 
             # if changed_plot_type already axis on another axis then remove those axis elements
-            if (changed_plot_type in self.active_dashboard_plots) & (
+            if (changed_plot_type in self.dashboard_plots) & (
                 changed_plot_type in self.mpl_canvas.plot_axes
             ):
                 ax = self.mpl_canvas.plot_axes[changed_plot_type]
@@ -2295,13 +2334,13 @@ class Dashboard(QtWidgets.QWidget):
                         sub_ax.remove()
                 else:
                     ax.remove()
-                self.active_dashboard_plots[
-                    self.active_dashboard_plots.index(changed_plot_type)
+                self.dashboard_plots[
+                    self.dashboard_plots.index(changed_plot_type)
                 ] = "None"
 
             # update active dashboard plots
-            del self.active_dashboard_plots[changed_position - 2]
-            self.active_dashboard_plots.insert(changed_position - 2, changed_plot_type)
+            del self.dashboard_plots[changed_position - 2]
+            self.dashboard_plots.insert(changed_position - 2, changed_plot_type)
 
             # update plot axis for new plot type
             self.update_plot_axis(self.mpl_canvas, event_source, changed_plot_type)
@@ -2617,6 +2656,20 @@ class Dashboard(QtWidgets.QWidget):
                 )
             )
 
+            # Taylor diagrams use a curvilinear grid whose tick positions
+            # come from a fixed ExtremeFinder set when the diagram is built
+            # (see make_taylor()), not from xlim/ylim - so the toolbar's
+            # set_xlim()/set_ylim() leaves the grid's cached extent stale and
+            # the ticks vanish. The diagram is a fixed comparison space
+            # anyway, not a literal data range, so zoom/pan is disabled
+            # through the hook matplotlib's toolbar checks
+            disable_axis_navigation(
+                [
+                    canvas_instance.plot_axes[changed_plot_type],
+                    canvas_instance.plotting.taylor_polar_relevant_axis,
+                ]
+            )
+
         elif changed_plot_type == "fairmode-statsummary":
             # create gridspec and add it to a list
             canvas_instance.plot_axes[changed_plot_type] = [
@@ -2632,6 +2685,11 @@ class Dashboard(QtWidgets.QWidget):
             heatmap_ax.set_position(
                 [bbox.x0, bbox.y0, bbox.width * 0.85, bbox.height]
             )
+
+        # done once the axes exist, whichever of the branches above made them
+        if changed_plot_type in NON_NAVIGABLE_PLOTS:
+            if changed_plot_type in canvas_instance.plot_axes:
+                disable_axis_navigation(canvas_instance.plot_axes[changed_plot_type])
 
     def handle_data_selection_update(self):
         """Execute the data reading process and synchronise the interface and canvas based on current selections."""
@@ -3004,14 +3062,18 @@ class Dashboard(QtWidgets.QWidget):
                 or ("read_left" in read_operations)
                 or ("read_right" in read_operations)
             ):
+                # the plots' settings menus are closed too, as they would
+                # otherwise be left open over plots no longer drawn
+                self.mpl_canvas.close_settings_menus()
                 self.mpl_canvas.canvas_cover.show()
             # otherwise, just cover plotting axes as are adding/removing models
             else:
-                self.mpl_canvas.top_right_canvas_cover.show()
-                self.mpl_canvas.lower_canvas_cover.show()
-            # update to show covers immediately
+                self.mpl_canvas.cover_plot_axes()
+            # update to show covers immediately - repaint() rather than
+            # flush_events(), which would also deliver queued user input
+            # mid-handler (see update_map_station_selection())
             self.mpl_canvas.figure.canvas.draw_idle()
-            self.mpl_canvas.figure.canvas.flush_events()
+            self.mpl_canvas.figure.canvas.repaint()
 
             # clear all axes elements
             for plot_type, ax in self.mpl_canvas.plot_axes.items():
@@ -3166,6 +3228,12 @@ class Dashboard(QtWidgets.QWidget):
 
         # unset variable to allow updating of MPL canvas
         self.block_MPL_canvas_updates = False
+
+        # apply a pending dashboard_plots "-stat" now the read is done
+        if hasattr(self, "mpl_canvas") and not getattr(
+            self.mpl_canvas, "_dashboard_plots_pending_stat_applied", True
+        ):
+            self.mpl_canvas._apply_pending_dashboard_plot_stats()
 
     def reset_options(self):
         """Restore all filter fields, metadata, and coverage settings to their initial values."""
@@ -3332,12 +3400,23 @@ def main(**kwargs):
     p.setColor(QtGui.QPalette.Text, QtGui.QColor(*dcp["Text"]))
     q_app.setPalette(p)
 
+    # apply a settings field being edited when a click finishes anywhere
+    # else, whatever that click lands on - see MenuEditCommitFilter
+    q_app.installEventFilter(MenuEditCommitFilter(q_app))
+
     # set application name and icon
     q_app.setWindowIcon(QtGui.QIcon(join(PROVIDENTIA_ROOT, "assets/logo.icns")))
     q_app.setApplicationName("Providentia")
     q_app.setApplicationDisplayName("Providentia")
     q_app.setDesktopFileName("Providentia")
 
-    # open Providentia
-    Dashboard(**kwargs)
-    sys.exit(q_app.exec_())
+    # open Providentia - kept in a variable so the window cannot be collected
+    dashboard = Dashboard(**kwargs)
+    exit_code = q_app.exec_()
+
+    # exit without finalising the interpreter, as PyQt's atexit handler
+    # intermittently crashed on objects Qt had already destroyed
+    logging.shutdown()
+    sys.stdout.flush()
+    sys.stderr.flush()
+    os._exit(exit_code)

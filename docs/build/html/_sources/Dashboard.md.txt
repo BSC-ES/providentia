@@ -90,6 +90,14 @@ See here for more detailed information: [Period filtering](periods)
 
 The **METADATA** button opens a pop-up menu allows the user to filter stations on the map by a variety of metadata variables. See here for more detailed information: [Metadata filtering](filtering_metadata)
 
+#### Searching for a field
+
+The pop-up menus opened by **QA**, **FLAGS**, **MODELS**, **COVERAGE**, **PERIOD** and **METADATA** each have a search box beside their buttons. Typing in it leaves only the fields matching what has been typed, and emptying it brings the rest back. Case, spaces, underscores and dashes are ignored, so `station name`, `Station_Name` and `stationname` all find the same field, and a small typo will still find what was meant when nothing matches exactly.
+
+Anything already selected or typed into a field stays as it is while searching, whether or not the field is on screen. The **Select All**, **Clear All** and **Select Default** buttons apply to the fields the search has left showing, so they can be used to select a group of fields at once.
+
+The **METADATA** menu searches the fields inside all of its metadata types rather than the type buttons themselves, listing what it finds in a second column beside them. A numeric field is shown there with its min, max and apply controls, so it can be set without opening the page it belongs to, and a text field is shown as the button onto its own page of values.
+
 ### Statistics
 
 ![providentia](uploads/dashboard_statistics.png)
@@ -187,9 +195,23 @@ At the bottom of the settings window is a drop-down menu for plot options, where
 
 One major plot option to note is **bias**. By selecting **bias** what is plotted is the result of the model - observations (i.e. bias). On the map, rather than selecting **bias** as a plot option, it can be obtained by selecting a secondary dataset. The bias will be calculated by the two active datasets.
 
-On some plots, the plotted statistic can also be altered though the settings menu, e.g. **periodic**.
+On some plots, the plotted statistic can also be altered though the settings menu, e.g. **periodic**. On the **distribution** and **histogram**, the "Station statistic" control switches from the raw concentration distribution to the distribution of a statistic across the selected stations (e.g. each station's correlation), which needs at least 2 stations selected.
 
 See here for more information about all available [plot options](Plot-types-and-options).
+
+#### Map settings
+
+The map's settings menu has an additional three sub-menus, with the following customisation options:
+
+- **Map**: the projection, the colour preset, the land and ocean colours, the map resolution, and whether country borders and gridlines are drawn
+- **Points**: automatic point sizing, and the size and opacity of selected and unselected stations when it is turned off
+- **Colourbar**: the colourbar limits, the colourmap, whether it is drawn continuously or in sections, and the number of labels and sections
+
+Each of the three has a reset control beside its title, which returns just that panel to the settings Providentia started with.
+
+The colourmap shown is the one the statistic currently being mapped resolves to, and it changes with the statistic. Choosing one here keeps it until the statistic changes, or until the panel is reset.
+
+Changes made here apply for the session only. To change what the dashboard opens with, edit `settings/plot_characteristics.yaml` (see [Plot customisation](Plot-customisation.md)).
 
 ### Legend
 

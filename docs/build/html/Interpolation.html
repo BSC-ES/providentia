@@ -156,6 +156,15 @@ Be aware that this can be demanding on the computer, so ensure your machine has 
 <p>The file <code class="docutils literal notranslate"><span class="pre">settings/mapping_species.yaml</span></code> contains a dictionary mapping original species names to their alternative names.</p>
 <p>Note that the mapping species file is only used when the species name from the configuration file is not found in the expected location, meaning Povidentia first looks for the species written in the configuration file. If it is not found, it then searches for the corresponding mapped species in <code class="docutils literal notranslate"><span class="pre">mapping_species.yaml</span></code>.</p>
 </section>
+<section id="interpolating-between-species">
+<span id="interpolation-between-species"></span><h4>Interpolating between species<a class="headerlink" href="#interpolating-between-species" title="Link to this heading"></a></h4>
+<p>A model species can be interpolated to the stations of a different observational species, by joining the two with <code class="docutils literal notranslate"><span class="pre">&#64;</span></code> in <code class="docutils literal notranslate"><span class="pre">species</span></code>, as <code class="docutils literal notranslate"><span class="pre">model_species&#64;observational_species</span></code>. For example, to interpolate modelled 2m temperature to the stations measuring ozone:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">species</span> <span class="o">=</span> <span class="n">t2</span><span class="nd">@sconco3</span>
+</pre></div>
+</div>
+<p>Both species in a pair must be valid - if either is not, the whole pair is removed with a warning.</p>
+<p>In the <a class="reference internal" href="Download.html"><span class="doc std std-doc">Download mode</span></a>, a defined pair downloads the observations of the observational species and the model data of the model species automatically.</p>
+</section>
 <section id="different-temporal-resolutions-between-observations-and-model">
 <h4>Different temporal resolutions between observations and model<a class="headerlink" href="#different-temporal-resolutions-between-observations-and-model" title="Link to this heading"></a></h4>
 <p>When you have observational and model data with different temporal resolutions, Providentia is very adaptable to try and ensure that an interpolation takes place.</p>

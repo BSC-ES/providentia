@@ -383,8 +383,9 @@
   "map":
     {
       "background": "providentia",
-      "map_coastline_resolution": "medium",
+      "map_resolution": "medium",
       "projection": "Robinson",
+      "colour_preset": "Light",
       "round_decimal_places": { "title": 2, "csv": 2  },
       "annotate_stats": ["Mean"],
       "annotate_offset": { "loc": "upper left" },
@@ -404,16 +405,17 @@
           "round_decimal_places": 2,
           "sep": 1,
         },
-      "gridlines": { "linestyle": "-", "alpha": 0.4 },
+      "gridlines": { "color": "", "linestyle": "-", "alpha": 0.4, "visible": true },
       "plot": { "zorder": 3, "linewidth": 0.0, "alpha": null },
       "axis_title": { "label": "" },
-      "land_polygon": { "facecolor": "0.85" },
+      "land_polygon": { "facecolor": "" },
+      "ocean_polygon": { "facecolor": "", "edgecolor": "none", "visible": true },
+      "borders": { "edgecolor": "", "linewidth": 0.4, "visible": false },
       "dashboard":
         {
           "plot_options": ["annotate", "domain"],
           "land_polygon": { "edgecolor": null },
           "base_scale": 1.3,
-          "gridlines": {},
           "axis_title": { "fontsize": 8.5, "pad": 3, "loc": "center" },
           "cb":
             {
@@ -421,8 +423,6 @@
               "vmax_absolute": "",
               "vmin_bias": "",
               "vmax_bias": "",
-              "cmap_absolute": "",
-              "cmap_bias": "",
               "n_ticks": 7,
               "orientation": "horizontal",
               "discrete": true,
@@ -434,6 +434,7 @@
           "marker_zero_stations_selected": { "s": 4, "alpha": 1.0 },
           "marker_selected": { "s": 8, "alpha": 1.0 },
           "marker_unselected": { "s": 4, "alpha": 0.4 },
+          "marker_automatic": true,
           "plot":
             {
               "stations": { "s": 20, "picker": 1, "zorder": 5, "edgecolor": "black", "linewidth": 0.4 },
@@ -465,8 +466,6 @@
               "vmax_absolute": "",
               "vmin_bias": "",
               "vmax_bias": "",
-              "cmap_absolute": "",
-              "cmap_bias": "",
               "n_ticks": 8,
               "orientation": "horizontal",
               "discrete": true,
@@ -495,7 +494,6 @@
               "wspace": 0.00,
             },
           "axis_title": { "fontsize": 16, "pad": 3, "loc": "center" },
-          "gridlines": {},
           "cb":
             {
               "position": [0.05, 0.1, 0.9, 0.05],
@@ -503,8 +501,6 @@
               "vmax_absolute": "",
               "vmin_bias": "",
               "vmax_bias": "",
-              "cmap_absolute": "",
-              "cmap_bias": "",
               "n_ticks": 8,
               "orientation": "horizontal",
               "discrete": true,
@@ -614,9 +610,9 @@
       "xtick_alteration":
         {
           "define": true,
-          "last_step": true,
-          "first_step": true,
-          "overlap": 15,
+          "automatic_max_ticks": 12,
+          "n_ticks": null,
+          "force_edge_ticks": false,
         },
       "smooth": { "window": 10, "min_points_percentage": 50 },
       "plot":
@@ -638,7 +634,7 @@
           "ylabel": { "fontsize": 8 },
           "xtick_params": { "labelsize": 8 },
           "ytick_params": { "labelsize": 8 },
-          "xtick_alteration": { "n_slices": 4 },
+          "xtick_alteration": { "automatic_max_ticks": 12 },
           "annotate_text": { "fontsize": 8 },
           "smooth": { "format": { "linewidth": 1.0 } },
           "plot": { "markersize": 2 },
@@ -671,7 +667,7 @@
           "xlabel": { "fontsize": 8 },
           "ylabel": { "fontsize": 8 },
           "xtick_params": { "labelsize": 7 },
-          "xtick_alteration": { "n_slices": 6 },
+          "xtick_alteration": { "automatic_max_ticks": 10 },
           "ytick_params": { "labelsize": 7 },
           "legend":
             {
@@ -732,7 +728,7 @@
                 },
               "handles": { "markersize": 14 },
             },
-          "xtick_alteration": { "n_slices": 4 },
+          "xtick_alteration": { "automatic_max_ticks": 14 },
           "annotate_text": { "fontsize": 13 },
           "smooth": { "format": { "linewidth": 0.5 } },
           "markersize_npoints_threshold": 200,
@@ -763,7 +759,7 @@
             },
           "plot": { "markersize": "" },
           "annotate_text": { "fontsize": 13 },
-          "xtick_alteration": { "n_slices": 4 },
+          "xtick_alteration": { "automatic_max_ticks": 12 },
           "smooth": { "format": { "linewidth": 0.5 } },
           "main_gs": {
             "height_ratios": [5, 1], 
@@ -1119,6 +1115,7 @@
   "distribution":
     {
       "round_decimal_places": { "title": 2, "csv": 2 },
+      "station_statistic": "None",
       "grid": { "axis": "both", "color": "lightgrey", "alpha": 0.8 },
       "annotate_stats": ["Min", "Max"],
       "annotate_offset": { "loc": "upper left" },
@@ -1220,12 +1217,12 @@
             },
           "subplots_adjust":
             {
-              "left": 0.06,
+              "left": 0.08,
               "right": 0.98,
               "top": 0.86,
               "bottom": 0.06,
               "hspace": 0.33,
-              "wspace": 0.14,
+              "wspace": 0.18,
             },
           "annotate_text": { "fontsize": 6 },
           "plot": { "linewidth": 1 },
@@ -1271,6 +1268,187 @@
         },
       "tests":
         {
+          "plot_options": ["annotate", "bias", "logx", "logy", "threshold"],
+          "figsize": [13, 7],
+          "plot": { "linewidth": 1 },
+          "annotate_text": { "fontsize": 13 },
+          "main_gs": {
+            "height_ratios": [5, 1], 
+            "hspace": 0.1
+          }
+        },
+    },
+  "histogram":
+    {
+      "round_decimal_places": { "title": 2, "csv": 2 },
+      "station_statistic": "None",
+      "grid": { "axis": "both", "color": "lightgrey", "alpha": 0.8 },
+      "annotate_stats": ["Min", "Max"],
+      "annotate_offset": { "loc": "upper left" },
+      "annotate_bbox":
+        {
+          "facecolor": "white",
+          "edgecolor": "gainsboro",
+          "alpha": 1,
+          "zorder": 100,
+        },
+      "annotate_text":
+        {
+          "s": "",
+          "n_stations": false,
+          "mod_labels": true,
+          "color": "",
+          "round_decimal_places": 2,
+          "sep": 1,
+        },
+      "bias_line":
+        {
+          "y": 0.0,
+          "linestyle": "--",
+          "linewidth": 1.0,
+          "color": "black",
+          "zorder": 0,
+        },
+      "threshold_line":
+        { "linestyle": "--", "linewidth": 1.0, "color": "red", "zorder": 0 },
+      "axis_title": { "label": "" },
+      "xlabel": { "xlabel": "[measurement_units]" },
+      "ylabel": { "ylabel": "Density" },
+      "xtick_params":
+        {
+          "which": "both",
+          "bottom": true,
+          "top": false,
+          "right": false,
+          "left": true,
+          "labelbottom": true,
+          "labeltop": false,
+          "labelright": false,
+          "labelleft": true,
+        },
+      "dashboard":
+        {
+          "bins": "auto",
+          "min_bins": 10,
+          "max_bins": 50,
+          "range": "tukey",
+          "plot_options": ["annotate", "bias", "logx", "logy", "threshold"],
+          "remove_spines": ["top", "right"],
+          "axis_title": { "fontsize": 8.5, "loc": "left" },
+          "xlabel": { "fontsize": 8 },
+          "ylabel": { "fontsize": 8 },
+          "xtick_params": { "labelsize": 7 },
+          "ytick_params": { "labelsize": 7 },
+          "annotate_text": { "fontsize": 8 },
+          "plot": { "linewidth": 1 },
+          "marker_annotate_rounding": 2,
+        },
+      "report":
+        {
+          "bins": "auto",
+          "min_bins": 10,
+          "max_bins": 60,
+          "range": "tukey",
+          "plot_options":
+            [
+              "annotate",
+              "bias",
+              "individual",
+              "logx",
+              "logy",
+              "obs",
+              "threshold",
+            ],
+          "orientation": "portrait",
+          "figure": { "ncols": 2, "nrows": 3 },
+          "page_title":
+            {
+              "t": "Histogram",
+              "fontsize": 10,
+              "ha": "left",
+              "x": 0.05,
+              "y": 0.98,
+            },
+          "axis_title": { "fontsize": 8 },
+          "xlabel": { "fontsize": 8 },
+          "ylabel": { "fontsize": 8 },
+          "xtick_params": { "labelsize": 7 },
+          "ytick_params": { "labelsize": 7 },
+          "legend":
+            {
+              "plot":
+                {
+                  "loc": "upper right",
+                  "columnspacing": 1,
+                  "frameon": false,
+                  "handletextpad": 0,
+                  "ncol": 4,
+                  "borderaxespad": 1,
+                  "fontsize": 10.0,
+                },
+              "handles": { "markersize": 10, "marker": "o", "color": "white" },
+            },
+          "subplots_adjust":
+            {
+              "left": 0.08,
+              "right": 0.98,
+              "top": 0.86,
+              "bottom": 0.06,
+              "hspace": 0.33,
+              "wspace": 0.18,
+            },
+          "annotate_text": { "fontsize": 6 },
+          "plot": { "linewidth": 1 },
+        },
+      "library":
+        {
+          "bins": "auto",
+          "min_bins": 10,
+          "max_bins": 60,
+          "range": "tukey",
+          "plot_options": ["annotate", "bias", "logx", "logy", "threshold"],
+          "figsize": [13, 7],
+          "subplots_adjust":
+            {
+              "left": 0.0,
+              "right": 1.0,
+              "top": 1.0,
+              "bottom": 0.0,
+              "hspace": 0.0,
+              "wspace": 0.0,
+            },
+          "axis_title": { "fontsize": 16, "loc": "center" },
+          "xlabel": { "fontsize": 16 },
+          "ylabel": { "fontsize": 16 },
+          "xtick_params": { "labelsize": 14 },
+          "ytick_params": { "labelsize": 14 },
+          "legend":
+            {
+              "plot":
+                {
+                  "loc": "upper left",
+                  "columnspacing": 0.5,
+                  "frameon": false,
+                  "handletextpad": 0,
+                  "ncol": 4,
+                  "borderaxespad": 0,
+                  "fontsize": 10.0,
+                },
+              "handles": { "markersize": 14, "marker": "o", "color": "white" },
+            },
+          "annotate_text": { "fontsize": 13 },
+          "plot": { "linewidth": 2 },
+          "main_gs": {
+            "height_ratios": [5, 1], 
+            "hspace": 0.25
+          }
+        },
+      "tests":
+        {
+          "bins": "auto",
+          "min_bins": 10,
+          "max_bins": 50,
+          "range": "tukey",
           "plot_options": ["annotate", "bias", "logx", "logy", "threshold"],
           "figsize": [13, 7],
           "plot": { "linewidth": 1 },
@@ -1505,7 +1683,7 @@
           "axis_title": { "fontsize": 8.5, "loc": "left" },
           "xlabel": { "fontsize": 8 },
           "ylabel": { "fontsize": 8 },
-          "xtick_params": { "labelsize": 7, "labelbottom": false },
+          "xtick_params": { "labelsize": 7 },
           "ytick_params": { "labelsize": 7 },
           "annotate_text": { "fontsize": 8 },
         },
@@ -1583,7 +1761,9 @@
           }
         },
       "tests": {
+        "plot_options": ["annotate", "logy", "multispecies", "threshold", "normalise"],
         "figsize": [13, 7],
+        "annotate_text": { "fontsize": 13 },
         "main_gs": {
             "height_ratios": [5, 1], 
             "hspace": 0.25
@@ -1592,6 +1772,7 @@
     },
   "heatmap":
     {
+      "colour_preset": "Light",
       "parent_section_names": false,
       "multispecies":
         {
@@ -2126,9 +2307,11 @@
         },
       "axis_title": { "label": "" },
       "plot": { "marker": "o", "linestyle": "None" },
+      "perstation_plot":
+        { "marker": "o", "linestyle": "None", "alpha": 0.5, "markersize": 3 },
       "dashboard":
         {
-          "plot_options": ["annotate"],
+          "plot_options": ["annotate", "perstation"],
           "axis_title": { "fontsize": 8.5, "loc": "left" },
           "xylabel": { "fontsize": 8 },
           "rlabel": { "fontsize": 8 },
@@ -2137,10 +2320,11 @@
           "annotate_text": { "fontsize": 8 },
           "marker_annotate_rounding": 2,
           "plot": { "markersize": 6 },
+          "perstation_max_points": null,
         },
       "report":
         {
-          "plot_options": ["annotate", "individual"],
+          "plot_options": ["annotate", "individual", "perstation"],
           "orientation": "portrait",
           "figure": { "ncols": 2, "nrows": 3 },
           "page_title":
@@ -2184,7 +2368,7 @@
         },
       "library":
         {
-          "plot_options": ["annotate"],
+          "plot_options": ["annotate", "perstation"],
           "figsize": [5, 5],
           "subplots_adjust":
             {
@@ -2223,7 +2407,7 @@
         },
       "tests":
         {
-          "plot_options": ["annotate"],
+          "plot_options": ["annotate", "perstation"],
           "figsize": [5, 5],
           "xylabel": { "fontsize": 10 },
           "rlabel": { "fontsize": 10 },
@@ -2269,7 +2453,8 @@
               "linestyle": "None",
               "color": "grey",
             },
-          "legend": { "loc": "upper left", "fontsize": 8 },
+          "legend": { "loc": "best", "fontsize": 8 },
+          "legend_active": true,
         },
       "xticks": { "ticks": [-2, -1, 0, 1, 2], "labels": [2, 1, 0, 1, 2] },
       "yticks": { "ticks": [-2, -1, 0, 1, 2], "labels": [-2, -1, 0, 1, 2] },

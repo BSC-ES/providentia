@@ -16,6 +16,7 @@ from providentia.auxiliar import (
     CURRENT_PATH,
     join,
     get_conversion_factor,
+    get_role_colourmap,
     get_standard_parameters_by_speci,
 )
 from .calculate import Stats, ModBias
@@ -324,6 +325,21 @@ def get_selected_station_data(
                 canvas_instance.selected_station_data[networkspeci][
                     "per_station"
                 ] = data_array
+
+            # the stations before any spatial aggregation, on the same time
+            # axis as per_station, for the unique station count to be taken
+            # from - so it says how many stations are behind the numbers in
+            # every mode. Under Spatial|Temporal per_station holds the one
+            # series the stations were aggregated into, which counts as a
+            # single station; in the other modes the two are the same array
+            if read_instance.statistic_mode == "Spatial|Temporal":
+                canvas_instance.selected_station_data[networkspeci]["stations"] = (
+                    data_array if read_instance.daily_forecast else data_array_ts
+                )
+            else:
+                canvas_instance.selected_station_data[networkspeci][
+                    "stations"
+                ] = canvas_instance.selected_station_data[networkspeci]["per_station"]
 
             # transform timeseries to pandas dataframe
             canvas_instance.selected_station_data[networkspeci][
@@ -664,6 +680,39 @@ def boxplot_inner_fences(data):
         upper_inner_fence = p75 + 1.5 * iqr
 
         return lower_inner_fence, upper_inner_fence
+
+
+def get_selected_station_count(read_instance, canvas_instance, networkspeci):
+    """
+    Counts the stations actually behind the data currently being plotted.
+
+    Taken from the selected data itself rather than from the stations the
+    selection was made with (see get_station_inds()), so that it also holds
+    where a single station's data has been cut out of a wider selection, as
+    a report's per-station pages do.
+
+    Parameters
+    ----------
+    read_instance : object
+        The source instance containing filtered data and valid station indices.
+    canvas_instance : object
+        The target instance holding the selected data.
+    networkspeci : str
+        The combined network and species identifier.
+
+    Returns
+    -------
+    int
+        Number of stations behind the selected data.
+    """
+
+    selected_data = getattr(canvas_instance, "selected_station_data", {}).get(
+        networkspeci, {}
+    )
+    if "stations" in selected_data:
+        return selected_data["stations"].shape[1]
+
+    return len(get_station_inds(read_instance, canvas_instance, networkspeci, None))
 
 
 def get_station_inds(read_instance, canvas_instance, networkspeci, station_index):
@@ -1355,6 +1404,20 @@ def calculate_statistic(
                         networkspeci
                     ]["active_mode"][data_label_b_indices]
 
+        # the unique station count is taken before any spatial aggregation
+        # - see get_selected_station_data()
+        if any(
+            get_z_statistic_info(zstat=zstat)[1] == "NUniqueStations"
+            for zstat in zstats
+        ):
+            data_array_a_st = canvas_instance.selected_station_data[networkspeci][
+                "stations"
+            ][data_label_a_indices]
+            if len(data_labels_b) != 0:
+                data_array_b_st = canvas_instance.selected_station_data[
+                    networkspeci
+                ]["stations"][data_label_b_indices]
+
     # iterate through zstats and calculate statistics
     stats_calc = {}
     for zstat in zstats:
@@ -1396,6 +1459,13 @@ def calculate_statistic(
                 data_array_a = data_array_a_am
                 if len(data_labels_b) != 0:
                     data_array_b = data_array_b_am
+
+            # counted from the stations themselves rather than from what they
+            # were aggregated into, which under Spatial|Temporal is one series
+            if base_zstat == "NUniqueStations":
+                data_array_a = data_array_a_st
+                if len(data_labels_b) != 0:
+                    data_array_b = data_array_b_st
 
         # if need to mask data, then do so
         if mask is not None:
@@ -1936,6 +2006,100 @@ def get_axes_vminmax(axs):
         return np.nan, np.nan
 
 
+def get_colourmap_role(zstat):
+    """
+    Get the kind of colourmap a statistic needs - see settings/colourmaps.yaml.
+
+    Parameters
+    ----------
+    zstat : str
+        Statistic being plotted
+
+    Returns
+    -------
+    str
+        Colourmap role
+    """
+
+    (
+        _,
+        base_zstat,
+        z_statistic_type,
+        z_statistic_sign,
+        _,
+    ) = get_z_statistic_info(zstat=zstat)
+
+    if z_statistic_sign == "absolute":
+        return "sequential"
+
+    if z_statistic_type == "basic":
+        stats_dict = basic_stats.get(base_zstat, {})
+    else:
+        stats_dict = modbias_stats.get(base_zstat, {})
+
+    return stats_dict.get("cmap_type_bias") or "diverging"
+
+
+def resolve_colourmap(read_instance, zstat, plot_characteristics, speci):
+    """
+    Get the colourmap for a statistic, in this order: the colourmap named for
+    the statistic itself, then the one for the kind of scale the statistic
+    needs (its role) taken from the active colour preset. See
+    settings/colourmaps.yaml.
+
+    Parameters
+    ----------
+    read_instance : object
+        Instance of class Dashboard, Report or Library
+    zstat : str
+        Statistic being plotted
+    plot_characteristics : dict
+        Plot characteristics for the plot type being made
+    speci : str
+        Current species
+
+    Returns
+    -------
+    str or None
+        Colourmap name, or None if none is defined anywhere
+    """
+
+    (
+        _,
+        base_zstat,
+        z_statistic_type,
+        z_statistic_sign,
+        _,
+    ) = get_z_statistic_info(zstat=zstat)
+
+    if z_statistic_type == "basic":
+        stats_dict = basic_stats.get(base_zstat, {})
+    else:
+        stats_dict = modbias_stats.get(base_zstat, {})
+
+    role = get_colourmap_role(zstat)
+    cmap_var_name = (
+        "cmap_absolute" if z_statistic_sign == "absolute" else "cmap_bias"
+    )
+
+    # colourmap named for this statistic, as a string for every species or as
+    # a dict per species
+    named = stats_dict.get(cmap_var_name)
+    if isinstance(named, dict):
+        if speci in named.keys():
+            named = named[speci]
+        else:
+            error = f"Error: colourmap ({cmap_var_name}) is not defined for {speci}. "
+            error += f"{cmap_var_name} can be set as a string per statistic (for all species), or as a dict (per species)."
+            read_instance.logger.error(error)
+            sys.exit(1)
+
+    if named:
+        return named
+
+    return get_role_colourmap(role, plot_characteristics.get("colour_preset"))
+
+
 def generate_colourbar_detail(
     read_instance,
     zstat,
@@ -1944,7 +2108,13 @@ def generate_colourbar_detail(
     plot_characteristics,
     speci,
     only_label=False,
-    label_units=None
+    label_units=None,
+    cmap_override=None,
+    vmin_override=None,
+    vmax_override=None,
+    discrete_override=None,
+    n_discrete_override=None,
+    n_ticks_override=None,
 ):
     """
     Determines colourbar parameters including limits, labels, and colourmaps for a specific statistic.
@@ -1965,6 +2135,27 @@ def generate_colourbar_detail(
         The species name, used for species-specific overrides.
     only_label : bool, optional
         If True, only the generated label string is returned (default is False).
+    cmap_override : str, optional
+        If given, used as the colourmap name instead of the one resolved from
+        the per-statistic/species/configuration-file precedence chain below
+        (default is None, i.e. no override).
+    vmin_override : float, optional
+        If given, used as the colourbar's lower limit instead of the resolved
+        value (default is None, i.e. no override) - see the map settings
+        menu's colourbar limit fields.
+    vmax_override : float, optional
+        As vmin_override, for the upper limit.
+    discrete_override : bool, optional
+        If given, forces the colourbar to be discrete (True) or continuous
+        (False) instead of the resolved value (default is None, i.e. no
+        override) - see the map settings menu's colourmap scale selector.
+    n_discrete_override : int, optional
+        If given together with discrete_override=True, used as the number of
+        discrete colour levels instead of the resolved value.
+    n_ticks_override : int, optional
+        If given, used as the number of tick labels on the colourbar
+        instead of the resolved value (default is None, i.e. no override)
+        - see the map settings menu's "Labels" field.
 
     Returns
     -------
@@ -2047,42 +2238,19 @@ def generate_colourbar_detail(
     if only_label:
         return z_label
 
-    # set cmap for z statistic
-    # first check if have defined cmap (in this order: 1. specific for z statistic 2. specific for species 3. configuration file)
-    set_cmap = False
-    if z_statistic_sign == "absolute":
-        cmap_var_name = "cmap_absolute"
-    else:
-        cmap_var_name = "cmap_bias"
-    # 1. get cmap specific for z statistic
-    if cmap_var_name in stats_dict:
-        if (stats_dict[cmap_var_name] != "") and (stats_dict[cmap_var_name] != {}):
-            set_cmap = True
-            if isinstance(stats_dict[cmap_var_name], dict):
-                if speci in stats_dict[cmap_var_name].keys():
-                    z_colourmap = stats_dict[cmap_var_name][speci]
-
-                else:
-                    error = f"Error: colourmap ({cmap_var_name}) is not defined for {speci}. "
-                    error += f"{cmap_var_name} can be set as a string per statistic (for all species), or as a dict (per species)."
-                    read_instance.logger.error(error)
-                    sys.exit(1)
-            else:
-                z_colourmap = stats_dict[cmap_var_name]
-    # 3. check configuration file
-    if not set_cmap:
-        if cmap_var_name in plot_characteristics["cb"]:
-            if (plot_characteristics["cb"][cmap_var_name] != "") and (
-                plot_characteristics["cb"][cmap_var_name]
-            ):
-                z_colourmap = plot_characteristics["cb"][cmap_var_name]
-                set_cmap = True
-    # if have no defined cmap, raise error
-    if not set_cmap:
-        error = f"Error: colourmap ({cmap_var_name}) for the colourbar needs to be defined, either in the "
-        error += "configuration files for the map, or per statistic in 'basic_stats.yaml' or 'model_bias_stats.yaml'."
+    # colourmap for this statistic - see resolve_colourmap()
+    z_colourmap = resolve_colourmap(read_instance, zstat, plot_characteristics, speci)
+    if not z_colourmap:
+        error = "Error: colourmap for the colourbar needs to be defined, either per "
+        error += "statistic in 'basic_stats.yaml' or 'model_bias_stats.yaml', or per "
+        error += "role in 'colourmaps.yaml'."
         read_instance.logger.error(error)
         sys.exit(1)
+
+    # explicit override (e.g. from the map settings menu's colourmap selector)
+    # takes precedence over everything resolved above
+    if cmap_override:
+        z_colourmap = cmap_override
 
     # check if have defined vmin (in this order: 1. specific for z statistic 2. specific for species 3. configuration file)
     # if have no defined vmin, then take vmin as minimum range value of calculated statistic
@@ -2153,6 +2321,20 @@ def generate_colourbar_detail(
         z_vmin = -limit_stat
         z_vmax = limit_stat
 
+    # explicit overrides (e.g. from the map settings menu's colourbar limit
+    # fields) take precedence over everything resolved above
+    if vmin_override is not None:
+        z_vmin = vmin_override
+    if vmax_override is not None:
+        z_vmax = vmax_override
+
+    # overriding only one of the two can invert the pair (e.g. a minimum set
+    # above the data's own maximum), which matplotlib refuses outright, part
+    # way through redrawing the map. Ordering them keeps both numbers asked
+    # for and lets the redraw finish
+    if z_vmin > z_vmax:
+        z_vmin, z_vmax = z_vmax, z_vmin
+
     # check if have defined n_discrete (in this order: 1. specific for z statistic 2. specific for species 3. configuration file)
     # if have no defined n_discrete, then take None
     set_n_discrete = False
@@ -2179,6 +2361,14 @@ def generate_colourbar_detail(
     # if have no defined n_discrete, take None
     if not set_n_discrete:
         n_discrete = None
+
+    # explicit override (e.g. from the map settings menu's colourmap scale
+    # selector) takes precedence over everything resolved above
+    if discrete_override is not None:
+        if discrete_override:
+            n_discrete = n_discrete_override if n_discrete_override else (n_discrete or 10)
+        else:
+            n_discrete = None
 
     # check if have defined n_ticks (in this order: 1. specific for z statistic 2. specific for species 3. configuration file)
     # if have no defined n_ticks, then raise error
@@ -2210,10 +2400,29 @@ def generate_colourbar_detail(
         read_instance.logger.error(error)
         sys.exit(1)
 
+    # explicit override (e.g. from the map settings menu's "Labels" field)
+    # takes precedence over everything resolved above
+    if n_ticks_override is not None:
+        n_ticks = n_ticks_override
+
     return z_vmin, z_vmax, z_label, z_colourmap, n_discrete, n_ticks
 
 
-def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, speci, label_units=None):
+def generate_colourbar(
+    read_instance,
+    axs,
+    cb_axs,
+    zstat,
+    plot_characteristics,
+    speci, 
+    label_units=None,
+    cmap_override=None,
+    vmin_override=None,
+    vmax_override=None,
+    discrete_override=None,
+    n_discrete_override=None,
+    n_ticks_override=None,
+):
     """
     Renders the colourbar on the specified axes and updates plot collection limits.
 
@@ -2231,6 +2440,33 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
         Configuration dictionary defining orientation, labels, and tick parameters.
     speci : str
         The species identifier for species-specific scaling.
+    cmap_override : str, optional
+        If given, used as the colourmap name instead of the default resolved
+        for the statistic/species/configuration (default is None).
+    vmin_override : float, optional
+        If given, used as the colourbar's lower limit instead of the resolved
+        value (default is None).
+    vmax_override : float, optional
+        As vmin_override, for the upper limit.
+    discrete_override : bool, optional
+        If given, forces the colourbar to be discrete (True) or continuous
+        (False) instead of the resolved value (default is None).
+    n_discrete_override : int, optional
+        If given together with discrete_override=True, used as the number of
+        discrete colour levels instead of the resolved value.
+    n_ticks_override : int, optional
+        If given, used as the number of tick labels on the colourbar
+        instead of the resolved value (default is None, i.e. no override)
+        - see the map settings menu's "Labels" field.
+
+    Returns
+    -------
+    z_vmin : np.float32 or None
+        The colourbar's resolved lower limit (whatever was actually applied -
+        auto-resolved or overridden), or None if there was no valid data to
+        plot a colourbar for.
+    z_vmax : np.float32 or None
+        As z_vmin, for the upper limit.
     """
 
     # get plotted vmin and vmax over relevant axes
@@ -2239,7 +2475,7 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
         for cb_ax in cb_axs:
             cb_ax.axis("off")
             cb_ax.set_visible(False)
-        return
+        return None, None
 
     # get colourbar limits/label
     (
@@ -2250,7 +2486,19 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
         n_discrete,
         n_ticks,
     ) = generate_colourbar_detail(
-        read_instance, zstat, plotted_min, plotted_max, plot_characteristics, speci, label_units=label_units
+        read_instance,
+        zstat,
+        plotted_min,
+        plotted_max,
+        plot_characteristics,
+        speci, 
+        label_units=label_units,
+        cmap_override=cmap_override,
+        vmin_override=vmin_override,
+        vmax_override=vmax_override,
+        discrete_override=discrete_override,
+        n_discrete_override=n_discrete_override,
+        n_ticks_override=n_ticks_override,
     )
 
     # generate colourbar tick array
@@ -2303,7 +2551,10 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
             # remove ticks for discrete colourbars
             # we do this because different screen resolutions slightly offset the tick position
             # https://github.com/BSC-ES/providentia/issues/159
-            if plot_characteristics["cb"]["discrete"]:
+            # n_discrete (not the static "discrete" config flag) is the
+            # source of truth here, since the map settings menu's colourmap
+            # scale selector can override it dynamically per statistic
+            if n_discrete:
                 plot_characteristics["cb_tick_params"]["size"] = 0
             cb.ax.tick_params(**plot_characteristics["cb_tick_params"])
 
@@ -2315,6 +2566,8 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
             ):
                 collection.set_clim(vmin=z_vmin, vmax=z_vmax)
                 collection.set_cmap(cmap=cmap)
+
+    return z_vmin, z_vmax
 
 
 def get_z_statistic_comboboxes(base_zstat, bias=False):

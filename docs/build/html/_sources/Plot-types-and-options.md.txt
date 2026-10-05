@@ -13,6 +13,7 @@ The standard plot types consist of:
 - Periodic violin plot (`periodic-violin`)
 - Box plot (`boxplot`)
 - Distribution plot (`distribution`)
+- Histogram (`histogram`)
 - Scatter plot (`scatter`)
 - Heat map (`heatmap`) - Not available in dashboard
 - Table that gives one statistic per subsection per model (`table`) - Not available in dashboard
@@ -53,6 +54,10 @@ For the `metadata` plot the metadata displayed is set to a default list of metad
 
 ![Distribution](uploads/plot_types/distribution.png)
 
+### Histogram (`histogram`)
+
+![Histogram](uploads/plot_types/histogram.png)
+
 ### Scatter plot (`scatter`)
 
 ![Scatter](uploads/plot_types/scatter.png)
@@ -91,7 +96,9 @@ For the `statsummary` plot the statistics displayed are set to a default list of
 
 ## Choosing a statistic to plot (`-[stat]`)
 
-Some of these plots are created for specific statistics, namely: `map`, `periodic`, `heatmap`, `taylor` and `table`. In the report and library modes, this statistic is defined by aggregating the `-[stat]` field to the plot type. `[stat]` should be replaced with any of the base statistic names (e.g. p5, Mean) or model bias names (e.g. r2, RMSE). For example to show the median values spatially, `map-p50` would be set as the plot name or `map-r2` to show the coefficient of determination. The available statistic names are documented in `settings/basic_stats.yaml` and `settings/model_bias_stats.yaml`. For the Taylor diagram, only `r`and `r2`can be used.
+Some of these plots are created for specific statistics, namely: `map`, `periodic`, `heatmap`, `taylor` and `table`. In the report and library modes, this statistic is defined by aggregating the `-[stat]` field to the plot type. `[stat]` should be replaced with any of the base statistic names (e.g. p5, Mean) or model bias names (e.g. r2, RMSE). For example to show the median values spatially, `map-p50` would be set as the plot name or `map-r2` to show the coefficient of determination. The available statistic names are documented in `settings/basic_stats.yaml` and `settings/model_bias_stats.yaml`. For the Taylor diagram, only `r` and `r2` can be used.
+
+The `distribution` and `histogram` plots can optionally take a `-[stat]` too (e.g. `histogram-r`, `distribution-Mean`). Rather than the distribution of the raw concentration values, they then show the distribution of that statistic across the selected stations, from one value per station, needing at least 2 stations to be selected to be made.
 
 The timeseries can also be used to show how statistics vary in time. In order to do this, we need to add `-[stat]` and the temporal resolution after the plot type name (e.g. `timeseries-Mean-daily`, `timeseries-r2-monthly`, `timeseries-r-annual`).
 
@@ -107,7 +114,7 @@ The extension `_obs` allows users to only show observations in their plots.
 
 Plot types: 
 - Dashboard: Not applicable 
-- Report: `map`, `timeseries`, `periodic`, `periodic-violin`, `distribution`, `boxplot`
+- Report: `map`, `timeseries`, `periodic`, `periodic-violin`, `distribution`, `histogram`, `boxplot`
 - Library: Not applicable 
 
 ### Split the plots by label (`_individual`)
@@ -118,7 +125,7 @@ The extension `_individual` allows users to disaggregate the plots and see the p
 
 Plot types: 
 - Dashboard: Not applicable
-- Report: `timeseries`, `periodic`, `periodic-violin`, `distribution`, `scatter`, `boxplot`, `taylor`, `fairmode-target`, `fairmode-statsummary`
+- Report: `timeseries`, `periodic`, `periodic-violin`, `distribution`, `histogram`, `scatter`, `boxplot`, `taylor`, `fairmode-target`, `fairmode-statsummary`
 - Library: Not applicable
 
 ### Add annotations (`_annotate`)
@@ -128,9 +135,9 @@ If the configuration option `_annotate` is added, a box will be created on the p
 ![annotate](uploads/annotate.jpg)
 
 Plot types: 
-- Dashboard: `map`, `timeseries`, `periodic`, `periodic-violin`, `distribution`, `scatter`, `boxplot`, `taylor`, `fairmode-target`
-- Report: `map`, `timeseries`, `periodic`, `periodic-violin`, `distribution`, `scatter`, `boxplot`, `heatmap`, `taylor`, `fairmode-target`
-- Library: `map`, `timeseries`, `periodic`, `periodic-violin`, `distribution`, `scatter`, `boxplot`, `heatmap`, `taylor`, `fairmode-target`
+- Dashboard: `map`, `timeseries`, `periodic`, `periodic-violin`, `distribution`, `histogram`, `scatter`, `boxplot`, `taylor`, `fairmode-target`
+- Report: `map`, `timeseries`, `periodic`, `periodic-violin`, `distribution`, `histogram`, `scatter`, `boxplot`, `heatmap`, `taylor`, `fairmode-target`
+- Library: `map`, `timeseries`, `periodic`, `periodic-violin`, `distribution`, `histogram`, `scatter`, `boxplot`, `heatmap`, `taylor`, `fairmode-target`
 
 ### Get the bias of the data (`_bias`)
 
@@ -139,9 +146,9 @@ Alternatively the plots can be modified to show, rather than the absolute observ
 ![bias](uploads/bias.jpg)
 
 Plot types: 
-- Dashboard: `timeseries`, `periodic`, `distribution`, `statsummary`
-- Report: `map`, `timeseries`, `periodic`, `distribution`, `heatmap`, `table`, `statsummary`
-- Library: `timeseries`, `periodic`, `distribution`, `heatmap`, `table`, `statsummary`
+- Dashboard: `timeseries`, `periodic`, `distribution`, `histogram`, `statsummary`
+- Report: `map`, `timeseries`, `periodic`, `distribution`, `histogram`, `heatmap`, `table`, `statsummary`
+- Library: `timeseries`, `periodic`, `distribution`, `histogram`, `heatmap`, `table`, `statsummary`
 
 ### Add a smooth line to the timeseries (`_smooth`)
 
@@ -183,18 +190,18 @@ Adding the options `_logx` will set the x axis to be logarithmically scaled.
 ![logs](uploads/logs.jpg)
 
 Plot types: 
-- Dashboard: `distribution`, `scatter`
-- Report: `distribution`, `scatter`
-- Library:  `distribution`, `scatter`
+- Dashboard: `distribution`, `histogram`, `scatter`
+- Report: `distribution`, `histogram`, `scatter`
+- Library: `distribution`, `histogram`, `scatter`
 
 ### Make the scale logarithmic in y axis (`_logy`)
 
 Adding the options `_logy` will set the y axis to be logarithmically scaled.
 
 Plot types: 
-- Dashboard: `timeseries`, `periodic`, `periodic-violin`, `distribution`, `scatter`, `boxplot`
-- Report: `timeseries`, `periodic`, `periodic-violin`, `distribution`, `scatter`, `boxplot`
-- Library: `timeseries`, `periodic`, `periodic-violin`, `distribution`, `scatter`, `boxplot`
+- Dashboard: `timeseries`, `periodic`, `periodic-violin`, `distribution`, `histogram`, `scatter`, `boxplot`
+- Report: `timeseries`, `periodic`, `periodic-violin`, `distribution`, `histogram`, `scatter`, `boxplot`
+- Library: `timeseries`, `periodic`, `periodic-violin`, `distribution`, `histogram`, `scatter`, `boxplot`
 
 ### Get plot by more than one network species (`_multispecies`)
 
@@ -225,9 +232,9 @@ Adding `_threshold` will add a line indicating the exceedances. These exceedance
 ![threshold](uploads/threshold.png)
 
 Plot types: 
-- Dashboard: `timeseries`, `periodic`, `periodic-violin`, `distribution`, `scatter`, `boxplot`
-- Report: `timeseries`, `periodic`, `periodic-violin`, `distribution`, `scatter`, `boxplot`
-- Library: `timeseries`, `periodic`, `periodic-violin`, `distribution`, `scatter`, `boxplot`
+- Dashboard: `timeseries`, `periodic`, `periodic-violin`, `distribution`, `histogram`, `scatter`, `boxplot`
+- Report: `timeseries`, `periodic`, `periodic-violin`, `distribution`, `histogram`, `scatter`, `boxplot`
+- Library: `timeseries`, `periodic`, `periodic-violin`, `distribution`, `histogram`, `scatter`, `boxplot`
 
 ### Normalise boxplot (`_normalise`)
 
@@ -250,3 +257,14 @@ Plot types:
 - Dashboard: `contingencytable`
 - Report: `contingencytable`
 - Library: `contingencytable`
+
+### Show each station in the Taylor diagram (`_perstation`)
+
+Adding `_perstation` draws one point per selected station for each model, instead of a single aggregated point per model, showing how model performance varies between stations.
+
+![perstation](uploads/perstation.png)
+
+Plot types: 
+- Dashboard: `taylor`
+- Report: `taylor`
+- Library: `taylor`

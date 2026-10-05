@@ -96,6 +96,11 @@ def test_make_distribution(inst, statistic_mode, network_type):
 
 
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
+def test_make_histogram(inst, statistic_mode, network_type):
+    plot(inst, statistic_mode, network_type, "histogram", ["annotate"])
+
+
+@pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
 def test_make_statsummary(inst, statistic_mode, network_type):
     plot(inst, statistic_mode, network_type, "statsummary")
     plot(inst, statistic_mode, network_type, "statsummary", ["bias"])

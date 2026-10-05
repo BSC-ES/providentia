@@ -40,15 +40,21 @@ from .statistics import (
     group_periodic,
     get_fairmode_data,
     get_z_statistic_comboboxes,
+    get_selected_station_count,
+    get_station_inds,
     get_z_statistic_info,
     get_z_statistic_type,
+    resolve_colourmap,
 )
 
 from .read_aux import drop_nans, get_valid_metadata
 from .plot_aux import (
+    get_display_label,
     create_statistical_timeseries,
+    get_deterministic_subsample,
     get_multispecies_aliases,
     get_AERONET_sizedist_bin_radius,
+    get_map_marker_size,
     get_taylor_diagram_ghelper_info,
     kde_fft,
     merge_cells,
@@ -60,11 +66,16 @@ from .plot_aux import (
     get_multispecies_conversion_factor,
     convert_multispecies_df_units,
 )
+from . import plot_formatting
 from .plot_formatting import set_axis_title
 from .warnings_prv import show_message
 
 # speed up transformations in cartopy
 pyproj.set_use_global_context()
+
+# sections of settings/plot_characteristics.yaml which are not plots that can
+# be asked for themselves (see available_plot_types())
+NON_PLOT_CHARACTERISTICS = ["general", "header", "doi"]
 
 PROVIDENTIA_ROOT = "/".join(CURRENT_PATH.split("/")[:-1])
 fairmode_settings = yaml.safe_load(
@@ -108,6 +119,55 @@ class Plotting:
         self.canvas_instance.temporal_axis_mapping_dict = temp_axis_dict()
         self.canvas_instance.periodic_xticks = periodic_xticks()
         self.canvas_instance.periodic_labels = periodic_labels()
+
+    def available_plot_types(self):
+        """
+        Get the plot types that can be asked for, i.e. every plot in
+        settings/plot_characteristics.yaml, leaving out the sections there
+        which are not plots in their own right.
+
+        Returns
+        -------
+        list of str
+            Plot type names, in alphabetical order
+        """
+
+        return sorted(
+            plot_type
+            for plot_type in self.canvas_instance.plot_characteristics_templates
+            if plot_type not in NON_PLOT_CHARACTERISTICS
+        )
+
+    def _exit_unavailable_plot_type(self, plot_type, base_plot_type):
+        """
+        Stop with a clear message for a plot type that does not exist, as the
+        dashboard does for one given in "dashboard_plots" - the name cannot be
+        drawn as anything, and a bare lookup failure says nothing about what
+        to correct.
+
+        Parameters
+        ----------
+        plot_type : str
+            Plot type as it was asked for, options and stat included.
+        base_plot_type : str
+            Plot type with its stat and options stripped, i.e. what was
+            looked for among the available plot types.
+        """
+
+        error = f"Error: Plot type {plot_type} is not an option. "
+        error += f"The available plots are: {self.available_plot_types()}."
+
+        # a preset is only expanded when it is the only plot asked for, so
+        # one named alongside others arrives here as a plot type of its own
+        presets = getattr(self.read_instance, "report_plots_presets", {})
+        if base_plot_type in presets:
+            error += (
+                f" {base_plot_type} is a preset in settings/report_plots.yaml, "
+                "which is only used as a preset when it is the only plot listed."
+            )
+
+        self.read_instance.logger.error(error)
+        sys.exit(1)
 
     def set_plot_characteristics(
         self, plot_types, zstat=False, data_labels=None, format={}
@@ -157,6 +217,28 @@ class Plotting:
                 z_statistic_period,
             ) = get_z_statistic_info(plot_type)
 
+            # a stat-less taylor plot defaults to "r", as the dashboard does
+            if (not zstat) and (plot_type.split("_")[0] == "taylor"):
+                (
+                    zstat,
+                    base_zstat,
+                    z_statistic_type,
+                    z_statistic_sign,
+                    z_statistic_period,
+                ) = get_z_statistic_info("taylor-r")
+
+            # a name that is not a plot type at all cannot be drawn as
+            # anything, so stop here rather than fail on the lookup below
+            if zstat and ("-" in plot_type):
+                base_plot_type = plot_type.split("-")[0]
+            else:
+                base_plot_type = plot_type.split("_")[0]
+            if (
+                base_plot_type
+                not in self.canvas_instance.plot_characteristics_templates
+            ):
+                self._exit_unavailable_plot_type(plot_type, base_plot_type)
+
             # check if plot type is correct for report and library modes
             if self.read_instance.mode in ["report", "library"]:
                 # remove plots where setting 'obs' and 'bias' options together
@@ -195,8 +277,13 @@ class Plotting:
 
             # add new keys to make plots with stats (map, periodic, heatmap, table)
             if zstat:
-                # get base plot type (without stat and options)
-                base_plot_type = plot_type.split("-")[0]
+                # get base plot type (without stat and options) - usually
+                # ahead of the "-stat" that implied zstat, but a stat-less
+                # taylor plot type defaulted above has no "-" of its own
+                if "-" in plot_type:
+                    base_plot_type = plot_type.split("-")[0]
+                else:
+                    base_plot_type = plot_type.split("_")[0]
                 # combine basic and modbias stats dicts together
                 stats_dict = {
                     **self.read_instance.basic_stats,
@@ -279,18 +366,13 @@ class Plotting:
                         self.canvas_instance.plot_characteristics_templates[plot_type]
                     )
                 else:
-                    try:
-                        self.canvas_instance.plot_characteristics[
-                            plot_type
-                        ] = copy.deepcopy(
-                            self.canvas_instance.plot_characteristics_templates[
-                                base_plot_type
-                            ]
-                        )
-                    except KeyError:
-                        error = f"Error: Plot type {plot_type} is not available. Remove from settings/report_plots.yaml"
-                        self.read_instance.logger.error(error)
-                        sys.exit(1)
+                    self.canvas_instance.plot_characteristics[
+                        plot_type
+                    ] = copy.deepcopy(
+                        self.canvas_instance.plot_characteristics_templates[
+                            base_plot_type
+                        ]
+                    )
 
                 # overwrite default plot characteristics with custom formatting
                 for format_var in format:
@@ -517,6 +599,8 @@ class Plotting:
                             "colour"
                         ],
                         markersize=plot_characteristics_legend["handles"]["markersize"],
+                        label=get_display_label(
+                            self.read_instance, self.read_instance.observations_data_label)
                     )
                 )
                 legend_labels.append(data_label)
@@ -561,6 +645,7 @@ class Plotting:
                 markeredgecolor=colour,
                 markeredgewidth=1.2,
                 markersize=plot_characteristics_legend["handles"]["markersize"] * 1.15,
+                label=get_display_label(self.read_instance, data_label.replace(" (gridded)", "")),
             )
             # filled dot, for interpolated models
             dot_handle = Line2D(
@@ -569,6 +654,7 @@ class Plotting:
                 color=plot_characteristics_legend["handles"]["color"],
                 markerfacecolor=colour,
                 markersize=plot_characteristics_legend["handles"]["markersize"],
+                label=get_display_label(self.read_instance, data_label.replace(" (gridded)", "")),
             )
 
             # gridded and interpolated show combined square+dot entry, with interpolated label
@@ -1135,6 +1221,11 @@ class Plotting:
             # iterate current_n_vars_per_line
             current_n_vars_per_line += 1
 
+        # re-apply the CJK font fallback before drawing: plot_aux.py calls
+        # sns.reset_orig() on every plot-parameters refresh, which restores
+        # all rcParams and silently undoes the fallback
+        plot_formatting.enable_cjk_font_fallback()
+
         # plot string to axis
         plot_txt = relevant_axis.text(
             0.0,
@@ -1193,6 +1284,7 @@ class Plotting:
         lat=None, 
         lon=None,
         date_range=None,
+        map_extent=None,
     ):
         """
         Renders a geospatial scatter plot of stations onto a map axis, coloured by a calculated statistical metric.
@@ -1216,6 +1308,9 @@ class Plotting:
         date_range : tuple, optional
             Start and end (inclusive) datetimes of period used for station statistics,
             by default None (all loaded period).
+        map_extent : array-like, shape (4,), optional
+            Extent the map will be shown at, used to size the markers against
+            the stations that will actually be on show.
         """
 
         # if not only model gridded data is loaded
@@ -1232,7 +1327,11 @@ class Plotting:
                 date_range=date_range,
             )
             
-            # get marker size (for report and library)
+            # get marker size (for report and library). The size is restored
+            # afterwards, as plot_characteristics is shared between every map a
+            # report draws - left in place, the first map's size would be reused
+            # for all the rest, whatever their own station count and extent
+            original_markersize = plot_characteristics["plot"]["s"]
             if self.read_instance.mode in ["report", "library"]:
                 self.get_markersize(
                     relevant_axis,
@@ -1240,7 +1339,8 @@ class Plotting:
                     networkspeci,
                     plot_characteristics,
                     active_map_valid_station_inds=active_map_valid_station_inds,
-                )
+                    map_extent=map_extent,
+            )
             # if using dashboard make z_statistic and active_map_valid_station_inds class variables
             else:
                 self.canvas_instance.z_statistic = z_statistic
@@ -1298,6 +1398,7 @@ class Plotting:
                 transform=self.canvas_instance.datacrs,
                 **plot_characteristics["plot"]["stations"],
             )
+            plot_characteristics["plot"]["s"] = original_markersize
 
             # track plot elements
             if self.read_instance.mode not in ["report"]:
@@ -1461,6 +1562,9 @@ class Plotting:
             # update maximum smooth value
             if self.read_instance.mode not in ["report", "library"]:
                 self.canvas_instance.timeseries_smooth_window_sl.setMaximum(len(ts))
+                # the window is shown as the time it spans, which changes with
+                # the resolution drawn at whether or not its step count does
+                self.canvas_instance.timeseries_smooth_window_sl.refresh_readout()
                 # To get straight line
                 # if self.canvas_instance.timeseries_smooth_window_sl.value() != (len(ts)*2 - 1):
                 #     self.canvas_instance.timeseries_smooth_window_sl.setMaximum(int(len(ts)*2 - 1))
@@ -1812,6 +1916,309 @@ class Plotting:
                             bias=bias,
                         )
 
+    def _resolve_station_statistic(
+        self, plot_type, plot_characteristics, station_statistic, networkspeci
+    ):
+        """
+        Works out what a "Station statistic" distribution/histogram can show:
+        it needs at least 2 stations to have any spread across stations at
+        all, since a single station's value has nothing to compare it to.
+
+        Where there are fewer, the dashboard falls back to the concentration
+        plot, with "Station statistic" reset to "None" both in
+        plot_characteristics and on the combobox itself, so that it does not
+        go on showing a statistic that is not actually being plotted. Report
+        and library do not make the plot at all, as they do for anything else
+        they cannot draw as asked for - the statistic is part of the plot
+        type name there, so drawing the raw values instead would leave a page
+        or figure that does not match the name it was asked for.
+
+        The count is taken from the stations actually behind the data being
+        plotted (see get_selected_station_count()) - the dashboard's map
+        selection, or every valid station for a report summary page or a
+        library plot, but a report station page is drawn for one station at a
+        time and has no spread across stations to show.
+
+        Parameters
+        ----------
+        plot_type : str
+            "distribution" or "histogram".
+        plot_characteristics : dict
+            Plot characteristics - mutated in place to reset
+            "station_statistic" where the dashboard falls back.
+        station_statistic : str
+            Name of the statistic the user asked for.
+        networkspeci : str
+            Current networkspeci (e.g. EBAS|sconco3).
+
+        Returns
+        -------
+        str
+            "statistic" to draw the statistic's own per-station values,
+            "concentration" to fall back to the raw values, or "skip" to not
+            make the plot at all.
+        """
+
+        n_selected_stations = get_selected_station_count(
+            self.read_instance, self.canvas_instance, networkspeci
+        )
+        if n_selected_stations >= 2:
+            return "statistic"
+
+        # report and library ask for the statistic by name, so there is
+        # nothing to fall back to - the plot is simply not made
+        if self.read_instance.mode in ["report", "library"]:
+            msg = (
+                "Cannot make {}-{} because a station statistic needs at least 2 "
+                "stations. Not making plot."
+            ).format(plot_type, station_statistic)
+            show_message(self.read_instance, msg)
+            return "skip"
+
+        msg = (
+            "The station statistic distribution needs at least 2 selected "
+            "stations to be made. Resetting to the concentration distribution."
+        ).format(
+            station_statistic,
+            n_selected_stations,
+            "station is" if n_selected_stations == 1 else "stations are",
+        )
+        show_message(self.read_instance, msg)
+
+        plot_characteristics["station_statistic"] = "None"
+        if hasattr(self.canvas_instance, "sync_station_statistic_combobox"):
+            self.canvas_instance.sync_station_statistic_combobox(plot_type, "None")
+
+        return "concentration"
+
+    def _station_statistic_label_data(
+        self, networkspeci, data_labels, station_statistic
+    ):
+        """
+        Per-data_label arrays of a statistic's own value at each of the
+        current selection's stations - the source data behind "Station
+        statistic" mode on the distribution and histogram plots, which show
+        the spread of a statistic across stations rather than the spread of
+        the raw values themselves. Mirrors make_taylor()'s own "perstation"
+        computation, just pooled into one distribution per model rather
+        than kept as individual points on a diagram.
+
+        A statistic drawn from model_bias_stats (e.g. MB, RMSE, r) already
+        compares a model against the observations, so there is no separate
+        "observations" version of it - it is left out of the returned dict
+        entirely rather than plotted as a meaningless self-comparison.
+
+        Parameters
+        ----------
+        networkspeci : str
+            Current networkspeci (e.g. EBAS|sconco3).
+        data_labels : list
+            Data labels to compute the statistic for.
+        station_statistic : str
+            Name of the statistic (from basic_stats or model_bias_stats).
+
+        Returns
+        -------
+        dict
+            data_label -> 1D array of per-station values (NaNs dropped).
+        """
+
+        is_modbias = station_statistic in self.read_instance.modbias_stats
+        observations_label = self.read_instance.observations_data_label
+
+        label_data = {}
+        for data_label in data_labels:
+            if is_modbias and data_label == observations_label:
+                continue
+            if is_modbias:
+                arr = calculate_statistic(
+                    self.read_instance,
+                    self.canvas_instance,
+                    networkspeci,
+                    station_statistic,
+                    [observations_label],
+                    [data_label],
+                    per_station=True,
+                )
+            else:
+                arr = calculate_statistic(
+                    self.read_instance,
+                    self.canvas_instance,
+                    networkspeci,
+                    station_statistic,
+                    [data_label],
+                    [],
+                    per_station=True,
+                )
+            if arr.size == 0:
+                label_data[data_label] = np.array([], dtype=np.float32)
+                continue
+            arr = arr[0]
+            label_data[data_label] = arr[~np.isnan(arr)]
+
+        return label_data
+
+    def _make_distribution_station_statistic(
+        self,
+        relevant_axis,
+        networkspeci,
+        cut_data_labels,
+        plot_characteristics,
+        bias,
+        station_statistic,
+        data_range_min=None,
+        data_range_max=None,
+    ):
+        """
+        "Station statistic" mode for make_distribution() - plots the KDE of
+        a statistic's own per-station value across the current selection,
+        one curve per data label, in place of the KDE of the raw values
+        (see _station_statistic_label_data()).
+
+        Parameters
+        ----------
+        relevant_axis : object
+            Axis to plot on.
+        networkspeci : str
+            Current networkspeci (e.g. EBAS|sconco3).
+        cut_data_labels : list
+            Data labels to plot (already cut to those valid for networkspeci).
+        plot_characteristics : dict
+            Plot characteristics.
+        bias : bool
+            Whether "bias" is active in plot_options - ignored for a
+            model-vs-observations statistic (see
+            _station_statistic_label_data()).
+        station_statistic : str
+            Name of the statistic (from basic_stats or model_bias_stats).
+        data_range_min, data_range_max : float, optional
+            Range to calculate the distribution over, given by a report so
+            that its subsections share one (see get_station_statistic_range()
+            in report.py). Taken from the statistic's own values when not given.
+        """
+
+        observations_label = self.read_instance.observations_data_label
+
+        if station_statistic in self.read_instance.modbias_stats:
+            bias = False
+
+        label_data = self._station_statistic_label_data(
+            networkspeci, cut_data_labels, station_statistic
+        )
+
+        # "bias" needs observations' own values even if not among the labels
+        if bias and (observations_label not in label_data):
+            label_data.update(
+                self._station_statistic_label_data(
+                    networkspeci, [observations_label], station_statistic
+                )
+            )
+
+        cut_data_labels = [dl for dl in cut_data_labels if dl in label_data]
+
+        pooled_data = np.concatenate(
+            [data for data in label_data.values() if data.size > 0]
+            or [np.array([], dtype=np.float32)]
+        )
+        if pooled_data.size == 0:
+            msg = "The distribution kernel density cannot be calculated because there are no valid values."
+            show_message(self.read_instance, msg)
+            return
+
+        if (data_range_min is None) or (data_range_max is None):
+            data_range_min = float(np.nanmin(pooled_data))
+            data_range_max = float(np.nanmax(pooled_data))
+        if data_range_max == data_range_min:
+            if pooled_data.size == 1:
+                msg = (
+                    "The distribution kernel density cannot be calculated because only one "
+                    "station has a valid {} value in the current selection."
+                ).format(station_statistic)
+            else:
+                msg = "The distribution kernel density cannot be calculated because all values are equal."
+            show_message(self.read_instance, msg)
+            return
+
+        # pad the grid so a model's kernel near the pooled min/max isn't clipped
+        pad = 0.05 * (data_range_max - data_range_min)
+        data_range_min -= pad
+        data_range_max += pad
+
+        # no natural reporting resolution to size the grid against for a
+        # statistic's own values (unlike the raw data - see make_distribution()),
+        # so the minimum sample count is used as it stands
+        n_samples = plot_characteristics["pdf_min_samples"]
+        n_samples = 2 ** np.ceil(np.log2(n_samples))
+        x_grid = np.linspace(data_range_min, data_range_max, int(n_samples))
+
+        if bias:
+            bias_line = [relevant_axis.axhline(**plot_characteristics["bias_line"])]
+            if self.read_instance.mode not in ["report"]:
+                self.track_plot_elements(
+                    "ALL", "distribution", "bias_line", bias_line, bias=bias
+                )
+            obs_data = label_data.get(
+                observations_label, np.array([], dtype=np.float32)
+            )
+            if (obs_data.size == 0) or np.all(obs_data == obs_data[0]):
+                msg = "The distribution kernel density bias cannot be calculated because there are no valid observational values."
+                show_message(self.read_instance, msg)
+                return
+            PDF_obs_sampled = kde_fft(obs_data, xgrid=x_grid)
+            if isinstance(PDF_obs_sampled, str):
+                show_message(self.read_instance, PDF_obs_sampled)
+                return
+            if observations_label in cut_data_labels:
+                cut_data_labels = [
+                    dl for dl in cut_data_labels if dl != observations_label
+                ]
+
+        for data_label in cut_data_labels:
+            kde_data = label_data[data_label]
+            if kde_data.size == 0:
+                msg = "The distribution plot will not include {} as it has no valid values.".format(
+                    data_label
+                )
+                show_message(self.read_instance, msg)
+                continue
+            if np.all(kde_data == kde_data[0]):
+                if kde_data.size == 1:
+                    msg = (
+                        "The distribution kernel density cannot be calculated for {} because "
+                        "only one station has a valid {} value in the current "
+                        "selection."
+                    ).format(data_label, station_statistic)
+                else:
+                    msg = "The distribution kernel density cannot be calculated because all {} values are equal.".format(
+                        data_label
+                    )
+                show_message(self.read_instance, msg)
+                continue
+
+            PDF_sampled = kde_fft(kde_data, xgrid=x_grid)
+            if isinstance(PDF_sampled, str):
+                show_message(self.read_instance, PDF_sampled)
+                continue
+
+            if bias:
+                PDF_sampled = PDF_sampled - PDF_obs_sampled
+
+            self.distribution_plot = relevant_axis.plot(
+                x_grid,
+                PDF_sampled,
+                color=self.read_instance.plotting_params[data_label]["colour"],
+                **plot_characteristics["plot"],
+            )
+
+            if self.read_instance.mode not in ["report"]:
+                self.track_plot_elements(
+                    data_label,
+                    "distribution",
+                    "plot",
+                    self.distribution_plot,
+                    bias=bias,
+                )
+
     def make_distribution(
         self,
         relevant_axis,
@@ -1822,6 +2229,8 @@ class Plotting:
         data_range_min=None,
         data_range_max=None,
         violin_resolution=None,
+        zstat=None,
+        station_statistic_range=None,
     ):
         """
         Computes and renders probability density functions using Fast Fourier Transform-based Kernel Density Estimation.
@@ -1844,6 +2253,16 @@ class Plotting:
             Maximum data range of distribution plot grid.
         violin_resolution : int, optional
             If are calculating distribution for violin plot, this is set to temporal resolution of groupings.
+        zstat : str, optional
+            Statistic parsed from a "distribution-<stat>" plot type (report/library modes), plotting the
+            distribution of that statistic's own per-station value rather than of the raw values - see
+            plot_characteristics["station_statistic"], which this takes priority over (the dashboard's
+            equivalent, set from the "Station statistic" menu control).
+        station_statistic_range : tuple of float, optional
+            Minimum and maximum of the statistic's own per-station values,
+            gathered by a report across its subsections so that their pages
+            share one range (see get_station_statistic_range() in report.py).
+            Worked out from the values being drawn when not given.
 
         Returns
         -------
@@ -1873,6 +2292,39 @@ class Plotting:
             data_label for data_label in data_labels if data_label in valid_data_labels
         ]
 
+        # "Station statistic" plots a statistic's own per-station values -
+        # not offered alongside periodic-violin
+        station_statistic = zstat or plot_characteristics.get("station_statistic")
+        if (station_statistic not in (None, "", "None")) and (
+            violin_resolution is None
+        ):
+            station_statistic_action = self._resolve_station_statistic(
+                "distribution", plot_characteristics, station_statistic, networkspeci
+            )
+            if station_statistic_action == "skip":
+                return
+            if station_statistic_action == "statistic":
+                self._make_distribution_station_statistic(
+                    relevant_axis,
+                    networkspeci,
+                    cut_data_labels,
+                    plot_characteristics,
+                    bias,
+                    station_statistic,
+                    # the statistic's own range, not the one passed for the raw
+                    # values below, which is on another scale
+                    data_range_min=(
+                        station_statistic_range[0] if station_statistic_range else None
+                    ),
+                    data_range_max=(
+                        station_statistic_range[1] if station_statistic_range else None
+                    ),
+                )
+                return
+            # too few stations selected for the dashboard, which has been
+            # reset to "None" above - fall through to the raw-value
+            # distribution below
+
         # set data ranges for distribution plot grid if not set explicitly
         if data_range_min is None:
             data_range_min = self.canvas_instance.selected_station_data_min[
@@ -1884,6 +2336,15 @@ class Plotting:
                 networkspeci
             ]
 
+        # look up the species' instrument reporting resolution once, used to
+        # size the KDE grid and to floor the KDE bandwidth so it can never
+        # smooth less than that resolution (see kde_fft()'s min_bandwidth -
+        # below it, rounded observations produce ringing on the curve)
+        minimum_resolution = self.read_instance.parameter_dictionary[
+            networkspeci.split("|")[1]
+        ]["minimum_resolution"]
+        min_bandwidth = None if pd.isnull(minimum_resolution) else minimum_resolution
+
         # set xgrid for calculating distribution
         # if calculating for period n_samples is set to pdf_min_samples
         # otherwise it is inferred from data (if above minimum value)
@@ -1891,24 +2352,11 @@ class Plotting:
             n_samples = plot_characteristics["pdf_min_samples"]
         else:
             minmax_diff = data_range_max - data_range_min
-            if pd.isnull(
-                self.read_instance.parameter_dictionary[networkspeci.split("|")[1]][
-                    "minimum_resolution"
-                ]
-            ):
+            if min_bandwidth is None:
                 n_samples = plot_characteristics["pdf_min_samples"]
             else:
                 n_samples = int(
-                    np.around(
-                        minmax_diff
-                        / (
-                            self.read_instance.parameter_dictionary[
-                                networkspeci.split("|")[1]
-                            ]["minimum_resolution"]
-                            / 100.0
-                        ),
-                        0,
-                    )
+                    np.around(minmax_diff / (min_bandwidth / 100.0), 0)
                 )
                 if n_samples < plot_characteristics["pdf_min_samples"]:
                     n_samples = plot_characteristics["pdf_min_samples"]
@@ -1967,15 +2415,17 @@ class Plotting:
 
                     # check if all values are equal in the dataframe
                     if kde_data_obs.size == 0:
-                        msg = "The kernel density cannot be calculated because there are no valid observational values."
+                        msg = "The distribution kernel density cannot be calculated because there are no valid observational values."
                         show_message(self.read_instance, msg)
                         return
                     elif np.all(kde_data_obs == kde_data_obs[0]):
-                        msg = "The kernel density cannot be calculated because all observational values are equal."
+                        msg = "The distribution kernel density cannot be calculated because all observational values are equal."
                         show_message(self.read_instance, msg)
                         return
                     else:
-                        PDF_obs_sampled = kde_fft(kde_data_obs, xgrid=x_grid)
+                        PDF_obs_sampled = kde_fft(
+                            kde_data_obs, xgrid=x_grid, min_bandwidth=min_bandwidth
+                        )
 
                         if isinstance(PDF_obs_sampled, str):
                             msg = PDF_obs_sampled
@@ -1995,19 +2445,21 @@ class Plotting:
 
                 # check if all values are equal in the dataframe
                 if kde_data_model.size == 0:
-                    msg = "The kernel density cannot be calculated because there are no valid values for {} model.".format(
+                    msg = "The distribution kernel density cannot be calculated because there are no valid values for {} model.".format(
                         data_label
                     )
                     show_message(self.read_instance, msg)
                     continue
                 elif np.all(kde_data_model == kde_data_model[0]):
-                    msg = "The kernel density cannot be calculated because all values for {} model are equal.".format(
+                    msg = "The distribution kernel density cannot be calculated because all values for {} model are equal.".format(
                         data_label
                     )
                     show_message(self.read_instance, msg)
                     continue
                 # calculate PDF
-                PDF_model_sampled = kde_fft(kde_data_model, xgrid=x_grid)
+                PDF_model_sampled = kde_fft(
+                    kde_data_model, xgrid=x_grid, min_bandwidth=min_bandwidth
+                )
                 if isinstance(PDF_model_sampled, str):
                     msg = PDF_model_sampled
                     msg += f"The distribution plot will be created and not include data for this label ({data_label}). "
@@ -2083,20 +2535,22 @@ class Plotting:
                     # check if all values are equal in the dataframe
                     if kde_data.size == 0:
                         if violin_resolution is None:
-                            msg = "The kernel density cannot be calculated because there are no valid values for {}.".format(
+                            msg = "The distribution kernel density cannot be calculated because there are no valid values for {}.".format(
                                 data_label
                             )
                             show_message(self.read_instance, msg)
                         continue
                     elif np.all(kde_data == kde_data[0]):
                         if violin_resolution is None:
-                            msg = "The kernel density cannot be calculated because all {} values are equal.".format(
+                            msg = "The distribution kernel density cannot be calculated because all {} values are equal.".format(
                                 data_label
                             )
                             show_message(self.read_instance, msg)
                         continue
                     else:
-                        PDF_sampled = kde_fft(kde_data, xgrid=x_grid)
+                        PDF_sampled = kde_fft(
+                            kde_data, xgrid=x_grid, min_bandwidth=min_bandwidth
+                        )
                         if isinstance(PDF_sampled, str):
                             msg = PDF_sampled
                             msg += f"The distribution plot will be created and not include data for this label ({data_label}). "
@@ -2132,6 +2586,449 @@ class Plotting:
         # if have made PDFs for violin plot then return it
         if violin_resolution is not None:
             return period_x_grid, PDFs_sampled
+
+    def get_histogram_bin_edges(
+        self,
+        data,
+        data_range_min,
+        data_range_max,
+        plot_characteristics,
+        min_resolution=None,
+        n_bins=None,
+    ):
+        """
+        Work out the bin edges to draw a histogram with, shared by every data
+        label so that the observations and each model can be read against one
+        another.
+
+        The number of bins is worked out from the data rather than fixed, as a
+        count that suits one species suits another badly: the spread of a
+        species, its reporting resolution and how much data is loaded all move
+        it. Taken as the larger of the Freedman-Diaconis and Sturges rules
+        (numpy's "auto"), which is driven by the interquartile range and so is
+        not thrown by the long right tail concentrations tend to have, while
+        keeping enough bins to see the shape of a short record. The count is
+        held between "min_bins" and "max_bins" so that the plot stays readable
+        in a dashboard panel, and setting "bins" to a number in the plot
+        characteristics overrides the lot.
+
+        A count worked out that way is then squared up with the resolution the
+        species is reported to. Measurements arrive rounded to that resolution,
+        so a bin width that is not a whole number of those steps catches two
+        reportable values in some bins and one in others, combing the plot with
+        regular notches that say nothing about the data (the same rounding the
+        distribution plot floors its bandwidth against). The width is taken to
+        the nearest whole number of steps and the edges offset by half a step,
+        leaving the reported values at bin centres. A count asked for by hand is
+        used as it stands instead, as squaring up can only land on a handful of
+        counts and would leave the dashboard's bin slider stuck between them.
+
+        Parameters
+        ----------
+        data : np.ndarray
+            All of the data being plotted, pooled across data labels
+        data_range_min : float
+            Lower edge of the first bin
+        data_range_max : float
+            Upper edge of the last bin
+        plot_characteristics : dict
+            Plot characteristics
+        min_resolution : float, optional
+            Resolution the species is reported to
+        n_bins : int, optional
+            Number of bins to use, in place of working one out
+
+        Returns
+        -------
+        np.ndarray
+            Bin edges
+        """
+
+        # a count set by hand (the dashboard's bin slider, or "bins" in the
+        # plot characteristics) is taken as asked for, skipping the squaring up
+        # below. That can only land on the counts a whole number of reporting
+        # steps allows - a handful across the whole range - so applying it to
+        # the slider snapped most counts back to the one before and left the
+        # slider unable to move. A count worked out from the data (including a
+        # report's shared one, passed in as n_bins) is squared up as ever
+        manual_bins = isinstance(plot_characteristics.get("bins"), int)
+
+        if n_bins is None:
+            n_bins = plot_characteristics.get("bins", "auto")
+
+        if not isinstance(n_bins, int):
+            n_bins = (
+                len(
+                    np.histogram_bin_edges(
+                        data, bins=n_bins, range=(data_range_min, data_range_max)
+                    )
+                )
+                - 1
+            )
+
+        min_bins = plot_characteristics["min_bins"]
+        max_bins = plot_characteristics["max_bins"]
+        n_bins = int(np.clip(n_bins, min_bins, max_bins))
+
+        # nothing to square up against for a species with no reported
+        # resolution, so the range is simply divided into the bins asked for
+        if (min_resolution is None) or (min_resolution <= 0):
+            return np.linspace(data_range_min, data_range_max, n_bins + 1)
+
+        start = data_range_min - (min_resolution / 2.0)
+        span = (data_range_max + (min_resolution / 2.0)) - start
+
+        # a count asked for by hand keeps the count, and takes the widest whole
+        # number of reporting steps that still covers the data - which at the
+        # count the automatic rule arrived at gives exactly the bins below, so
+        # that taking manual control of a histogram leaves it as it was drawn
+        if manual_bins:
+            steps = max(1, int(np.round((span / n_bins) / min_resolution)))
+            bin_width = steps * min_resolution
+            # too narrow to reach the end of the data (a count far finer than
+            # the reporting resolution), so an even split is all that is left
+            if (start + (n_bins * bin_width)) < data_range_max:
+                bin_width = span / n_bins
+            return start + (np.arange(n_bins + 1) * bin_width)
+
+        # widen the bins to a whole number of reporting steps, then take
+        # whatever count that leaves - and keep widening if it leaves more
+        # bins than the plot can show
+        steps = max(1, int(np.round(((data_range_max - data_range_min) / n_bins) / min_resolution)))
+        n_bins = int(np.ceil(span / (steps * min_resolution)))
+        while (n_bins > max_bins) and (steps < span / min_resolution):
+            steps += 1
+            n_bins = int(np.ceil(span / (steps * min_resolution)))
+
+        # too few bins to see anything, so the reporting resolution is finer
+        # than this plot needs and an even split reads better
+        if n_bins < min_bins:
+            return np.linspace(data_range_min, data_range_max, min_bins + 1)
+
+        return start + (np.arange(n_bins + 1) * (steps * min_resolution))
+
+    def make_histogram(
+        self,
+        relevant_axis,
+        networkspeci,
+        data_labels,
+        plot_characteristics,
+        plot_options,
+        data_range_min=None,
+        data_range_max=None,
+        n_bins=None,
+        zstat=None,
+        station_statistic_range=None,
+    ):
+        """
+        Renders the distribution of the data as a histogram, one stepped
+        outline per data label.
+
+        Drawn as outlines rather than filled bars so that the observations and
+        every model stay visible where they overlap. The bars are normalised to
+        a density, i.e. their area sums to one, so that data labels holding
+        different numbers of valid measurements can still be compared, and so
+        that the y-axis reads the same as the distribution plot's.
+
+        Parameters
+        ----------
+        relevant_axis : object
+            Axis to plot on.
+        networkspeci : str
+            Current networkspeci (e.g. EBAS|sconco3).
+        data_labels : list
+            Data arrays to plot.
+        plot_characteristics : dict
+            Plot characteristics.
+        plot_options : list
+            Options to configure plot.
+        data_range_min : float, optional
+            Lower edge of the first bin.
+        data_range_max : float, optional
+            Upper edge of the last bin.
+        n_bins : int, optional
+            Number of bins, worked out across every subsection of a report so
+            that its pages share one set of bins. Worked out from the data
+            being drawn when not given.
+        zstat : str, optional
+            Statistic parsed from a "histogram-<stat>" plot type (report/library modes), plotting the
+            distribution of that statistic's own per-station value rather than of the raw values - see
+            plot_characteristics["station_statistic"], which this takes priority over (the dashboard's
+            equivalent, set from the "Station statistic" menu control).
+        station_statistic_range : tuple of float, optional
+            Minimum and maximum of the statistic's own per-station values,
+            gathered by a report across its subsections so that their pages
+            share one range and one set of bins (see
+            get_station_statistic_range() in report.py, which `n_bins` is
+            gathered alongside). Worked out from the values being drawn when
+            not given.
+        """
+
+        # determine if 'bias' in plot_options
+        if "bias" in plot_options:
+            bias = True
+        else:
+            bias = False
+
+        # if 'obs' in plot_options, set data labels to just observations label
+        if "obs" in plot_options:
+            data_labels = [self.read_instance.observations_data_label]
+
+        # get valid data labels for networkspeci
+        valid_data_labels = self.canvas_instance.selected_station_data_labels[
+            networkspeci
+        ]
+
+        # cut data_labels for those in valid data labels
+        cut_data_labels = [
+            data_label for data_label in data_labels if data_label in valid_data_labels
+        ]
+
+        observations_label = self.read_instance.observations_data_label
+
+        # "Station statistic" plots a statistic's own per-station values
+        station_statistic = zstat or plot_characteristics.get("station_statistic")
+        station_statistic_active = station_statistic not in (None, "", "None")
+        if station_statistic_active:
+            station_statistic_action = self._resolve_station_statistic(
+                "histogram", plot_characteristics, station_statistic, networkspeci
+            )
+            if station_statistic_action == "skip":
+                return None
+            # too few stations selected for the dashboard, which has been
+            # reset to "None" above - fall through to the raw-value histogram
+            station_statistic_active = station_statistic_action == "statistic"
+
+        shared_stat_range = False
+
+        if station_statistic_active:
+            # a modbias stat (e.g. MB, r) has no "bias" version of its own
+            if station_statistic in self.read_instance.modbias_stats:
+                bias = False
+
+            label_data = self._station_statistic_label_data(
+                networkspeci, cut_data_labels, station_statistic
+            )
+
+            # "bias" needs observations' own values even if not among the labels
+            if bias and (observations_label not in label_data):
+                label_data.update(
+                    self._station_statistic_label_data(
+                        networkspeci, [observations_label], station_statistic
+                    )
+                )
+
+            cut_data_labels = [dl for dl in cut_data_labels if dl in label_data]
+
+            # a StdDev or a percentage bias lives on a different scale to the
+            # concentrations the range passed for the raw values is measured
+            # in, so the statistic's own is taken where a report has gathered
+            # one - along with the bin count gathered with it - and both are
+            # resolved below from the values drawn where it has not
+            if station_statistic_range is not None:
+                data_range_min, data_range_max = station_statistic_range
+                shared_stat_range = True
+            else:
+                data_range_min = None
+                data_range_max = None
+                n_bins = None
+        else:
+            # set data ranges for bin edges if not set explicitly
+            if data_range_min is None:
+                data_range_min = self.canvas_instance.selected_station_data_min[
+                    networkspeci
+                ]
+
+            if data_range_max is None:
+                data_range_max = self.canvas_instance.selected_station_data_max[
+                    networkspeci
+                ]
+
+            if data_range_max <= data_range_min:
+                msg = "The histogram cannot be created because the data has no range."
+                show_message(self.read_instance, msg)
+                return None
+
+            # gather the data of every label first, as the bins are worked out
+            # across all of them together - bins that differed per label would put
+            # the labels on axes that cannot be read against one another
+            label_data = {}
+            for data_label in cut_data_labels:
+                label_data[data_label] = drop_nans(
+                    self.canvas_instance.selected_station_data[networkspeci]["flat"][
+                        valid_data_labels.index(data_label), 0, :
+                    ]
+                )
+
+            # the observations are needed for a bias plot whether or not they are
+            # being drawn themselves
+            if bias and observations_label not in label_data:
+                if observations_label in valid_data_labels:
+                    label_data[observations_label] = drop_nans(
+                        self.canvas_instance.selected_station_data[networkspeci]["flat"][
+                            valid_data_labels.index(observations_label), 0, :
+                        ]
+                    )
+
+        pooled_data = np.concatenate(
+            [data for data in label_data.values() if data.size > 0]
+            or [np.array([], dtype=np.float32)]
+        )
+        if pooled_data.size == 0:
+            msg = "The histogram cannot be created because there are no valid values."
+            show_message(self.read_instance, msg)
+            return None
+
+        if station_statistic_active and (not shared_stat_range):
+            data_range_min = float(np.nanmin(pooled_data))
+            data_range_max = float(np.nanmax(pooled_data))
+            if data_range_max <= data_range_min:
+                msg = "The histogram cannot be created because the data has no range."
+                show_message(self.read_instance, msg)
+                return None
+
+        # the resolution the species is reported to, used to square the bins up
+        # with the values that can actually be reported - see make_distribution(),
+        # which floors its bandwidth against the same number. Not meaningful
+        # for a statistic's own values, which are not reported at that
+        # resolution themselves
+        if station_statistic_active:
+            min_resolution = None
+        else:
+            minimum_resolution = self.read_instance.parameter_dictionary[
+                networkspeci.split("|")[1]
+            ]["minimum_resolution"]
+            min_resolution = None if pd.isnull(minimum_resolution) else minimum_resolution
+
+        # every page of a report drawn over the same data range shares one set
+        # of bins, worked out for the first of them: bins that followed each
+        # subsection's own data would put every page on its own axis, and the
+        # counts on those pages are meant to be read against one another. Keyed
+        # by that range, so the summary and per-station pages - which the report
+        # deliberately ranges differently - keep their own bins
+        shared_bins = getattr(self.read_instance, "histogram_bin_edges", None)
+        if shared_bins is None:
+            shared_bins = {}
+            self.read_instance.histogram_bin_edges = shared_bins
+        shared_key = (networkspeci, round(data_range_min, 6), round(data_range_max, 6))
+
+        if (self.read_instance.mode == "report") and (shared_key in shared_bins):
+            bin_edges = shared_bins[shared_key]
+        else:
+            # a report has already settled the range and the count across all
+            # of its subsections, so neither is worked out again here
+            if (n_bins is None) and (not shared_stat_range):
+                # the upper end of the axis is held back to where the data
+                # actually is, rather than out at its most extreme value: a
+                # species with a long right tail (most of them) would otherwise
+                # draw its whole distribution into the leftmost bins with an
+                # empty axis stretching away to the right. The cut is the upper
+                # inner Tukey fence, the same measure the violin plot uses to
+                # bound its distributions, and setting "range" to "full" in the
+                # plot characteristics keeps every value on the axis
+                #
+                # a statistic's own values are held back at both ends
+                # instead: the stations that stand apart on one are as often
+                # at the bottom as the top (the handful a model correlates
+                # poorly with drag an "r" axis down), and left on the axis
+                # they squeeze every other station into a few bins and run
+                # the bin count up against "max_bins"
+                if plot_characteristics.get("range", "tukey") == "tukey":
+                    lower_inner_fence, upper_inner_fence = boxplot_inner_fences(
+                        pooled_data
+                    )
+                    if data_range_min < upper_inner_fence < data_range_max:
+                        data_range_max = upper_inner_fence
+                    if station_statistic_active and (
+                        data_range_min < lower_inner_fence < data_range_max
+                    ):
+                        data_range_min = lower_inner_fence
+
+            bin_edges = self.get_histogram_bin_edges(
+                pooled_data,
+                data_range_min,
+                data_range_max,
+                plot_characteristics,
+                min_resolution=min_resolution,
+                n_bins=n_bins,
+            )
+            shared_bins[shared_key] = bin_edges
+
+        # tell the dashboard's bin count slider what was worked out, so that it
+        # opens showing the automatic count rather than a number of its own
+        if hasattr(self.canvas_instance, "sync_histogram_bins_slider"):
+            self.canvas_instance.sync_histogram_bins_slider(len(bin_edges) - 1)
+
+        # plot horizontal line across x axis at 0 if bias plot
+        # also remove observations from cut_data_labels
+        if bias:
+            bias_line = [relevant_axis.axhline(**plot_characteristics["bias_line"])]
+            # track plot elements
+            if self.read_instance.mode not in ["report"]:
+                self.track_plot_elements(
+                    "ALL", "histogram", "bias_line", bias_line, bias=bias
+                )
+            if observations_label in cut_data_labels:
+                cut_data_labels.remove(observations_label)
+
+            # the bias is the difference between the model's histogram and the
+            # observations', bin by bin, as it is on the distribution plot
+            observations_data = label_data.get(
+                observations_label, np.array([], dtype=np.float32)
+            )
+            if observations_data.size == 0:
+                msg = "The histogram bias cannot be calculated because there are no valid observational values."
+                show_message(self.read_instance, msg)
+                return None
+            observations_density, _ = np.histogram(
+                observations_data, bins=bin_edges, density=True
+            )
+
+        # iterate through data labels
+        for data_label in cut_data_labels:
+            data = label_data[data_label]
+            if data.size == 0:
+                msg = "The histogram will not include {} as it has no valid values.".format(
+                    data_label
+                )
+                show_message(self.read_instance, msg)
+                continue
+
+            # one value has no spread across stations to show, as it does not
+            # on the distribution (see _make_distribution_station_statistic())
+            if station_statistic_active and (data.size == 1):
+                msg = (
+                    "The histogram cannot be made for {} because only one station "
+                    "has a valid {} value in the current selection."
+                ).format(data_label, station_statistic)
+                show_message(self.read_instance, msg)
+                continue
+
+            density, _ = np.histogram(data, bins=bin_edges, density=True)
+            if bias:
+                density = density - observations_density
+
+            # drawn as a step through the bin edges, the last height repeated
+            # so that the final bin is closed off rather than left open
+            self.histogram_plot = relevant_axis.step(
+                bin_edges,
+                np.append(density, density[-1]),
+                where="post",
+                color=self.read_instance.plotting_params[data_label]["colour"],
+                **plot_characteristics["plot"],
+            )
+
+            # track plot elements
+            if self.read_instance.mode not in ["report"]:
+                self.track_plot_elements(
+                    data_label,
+                    "histogram",
+                    "plot",
+                    self.histogram_plot,
+                    bias=bias,
+                )
+
+        return None
 
     def make_scatter(
         self,
@@ -2204,24 +3101,17 @@ class Plotting:
             data_label for data_label in data_labels if data_label in valid_data_labels
         ]
 
-        # get observations data (flattened)
-        observations_data = self.canvas_instance.selected_station_data[networkspeci][
-            "flat"
-        ][valid_data_labels.index(self.read_instance.observations_data_label), 0, :]
+        # observations data (flattened), undropped - each model has its own
+        # missing timestamps, so pairing is worked out per model below
+        observations_data_raw = self.canvas_instance.selected_station_data[
+            networkspeci
+        ]["flat"][
+            valid_data_labels.index(self.read_instance.observations_data_label), 0, :
+        ]
 
-        # determine if number of points per data array exceeds max limit,
-        # if so subset arrays
-        subset = False
-        data_array_size = observations_data.size
-        if "max_points" in plot_characteristics:
-            if data_array_size > plot_characteristics["max_points"]:
-                subset = True
-                inds_subset = np.random.choice(
-                    data_array_size,
-                    size=plot_characteristics["max_points"],
-                    replace=False,
-                )
-                observations_data = observations_data[inds_subset]
+        # (observations, model) pairs actually plotted, reused by
+        # linear_regression() so its fit matches what is drawn
+        self.canvas_instance.scatter_plotted_pairs = {}
 
         # iterate through data labels
         for data_label in cut_data_labels:
@@ -2230,13 +3120,31 @@ class Plotting:
                 continue
 
             # get model data (flattened)
-            model_data = self.canvas_instance.selected_station_data[networkspeci][
+            model_data_raw = self.canvas_instance.selected_station_data[networkspeci][
                 "flat"
             ][valid_data_labels.index(data_label), 0, :]
 
-            # subset data if neccessary
-            if subset:
+            # only pairs where both observations and this model have a
+            # value
+            valid = ~np.isnan(observations_data_raw) & ~np.isnan(model_data_raw)
+            observations_data = observations_data_raw[valid]
+            model_data = model_data_raw[valid]
+
+            # cap points drawn - deterministic, so a redraw is stable
+            if (
+                "max_points" in plot_characteristics
+                and observations_data.size > plot_characteristics["max_points"]
+            ):
+                inds_subset = get_deterministic_subsample(
+                    observations_data.size, plot_characteristics["max_points"]
+                )
+                observations_data = observations_data[inds_subset]
                 model_data = model_data[inds_subset]
+
+            self.canvas_instance.scatter_plotted_pairs[(networkspeci, data_label)] = (
+                observations_data,
+                model_data,
+            )
 
             # get marker size (for report and library)
             if self.read_instance.mode in ["report", "library"]:
@@ -2309,6 +3217,22 @@ class Plotting:
                 and ('multispecies' not in plot_options)):
                 plot_options.append('multispecies')
 
+            # in the dashboard, a data label hidden via the legend (a single
+            # click) is left out of the boxplot altogether, rather than drawn
+            # with its box hidden but its category tick and label left behind -
+            # see _toggle_legend_visibility() in dashboard_interactivity.py,
+            # which redraws the boxplot for exactly this rather than toggling
+            # its elements' visibility in place like every other plot type
+            active_labels = self.canvas_instance.plot_elements.get(
+                "data_labels_active"
+            )
+            if active_labels is not None:
+                data_labels = [
+                    data_label
+                    for data_label in data_labels
+                    if data_label in active_labels
+                ]
+
         # if multispecies in plot options then make plot for all networkspecies
         if "multispecies" in plot_options:
             networkspecies = all_networkspecies
@@ -2372,6 +3296,12 @@ class Plotting:
 
         # iterate through networkspecies
         ns_current = 0
+        # positions is otherwise only set inside the "have some data labels
+        # to plot" branch below - if every data label ends up filtered out
+        # for every networkspeci (e.g. every legend entry hidden), it is
+        # still read afterwards to set (empty) xticks, so it must exist
+        # regardless of whether anything was actually plotted
+        positions = []
         for ns in networkspecies:
             # get valid data labels for networkspeci
             valid_data_labels = self.canvas_instance.selected_station_data_labels[ns]
@@ -2508,7 +3438,10 @@ class Plotting:
         # labels for standard plot
         else:
             xticks = positions
-            xtick_labels = copy.deepcopy(cut_data_labels)
+            xtick_labels = [
+                get_display_label(self.read_instance, data_label)
+                for data_label in cut_data_labels
+            ]
 
         # modify xticks to be horizontal as just have 1 label
         if len(xtick_labels) == 1:
@@ -2516,9 +3449,26 @@ class Plotting:
             xticklabel_params = {}
 
         # set xticks / xticklabels
-        relevant_axis.set_xticks(xticks)
-        relevant_axis.xaxis.set_tick_params(**xtick_params)
-        relevant_axis.set_xticklabels(xtick_labels, **xticklabel_params)
+        if self.read_instance.mode == "dashboard":
+            # dashboard panels are narrower than a report/library figure and
+            # change width with the layout, so work out whether the category
+            # labels can be shown without clashing or running off screen,
+            # rather than always drawing them at the fixed rotation used
+            # elsewhere (see fit_boxplot_xticklabels())
+            shown = plot_formatting.fit_boxplot_xticklabels(
+                relevant_axis, xticks, xtick_labels, xtick_params, xticklabel_params
+            )
+            self.canvas_instance.boxplot_xtick_cache = {
+                "xticks": xticks,
+                "xtick_labels": xtick_labels,
+                "xtick_params": xtick_params,
+                "xticklabel_params": xticklabel_params,
+            }
+            self.canvas_instance.sync_boxplot_xlabels_checkbox(shown)
+        else:
+            relevant_axis.set_xticks(xticks)
+            relevant_axis.xaxis.set_tick_params(**xtick_params)
+            relevant_axis.set_xticklabels(xtick_labels, **xticklabel_params)
 
     def make_heatmap(
         self,
@@ -2679,13 +3629,24 @@ class Plotting:
         else:
             annotate = False
 
-        # plot heatmap
+        # plot heatmap - coloured by what the statistic measures, the same way
+        # the map is (see resolve_colourmap()), so a signed bias reads
+        # diverging and an error reads as one continuous scale. Only the
+        # colourmaps of the preset are used, a heatmap having no basemap for
+        # its land and ocean colours to apply to
+        heatmap_kwargs = dict(plot_characteristics["plot"])
+        if not heatmap_kwargs.get("cmap"):
+            colourmap = resolve_colourmap(
+                self.read_instance, zstat, plot_characteristics, networkspeci.split("|")[-1]
+            )
+            if colourmap:
+                heatmap_kwargs["cmap"] = colourmap
         heatmap = sns.heatmap(
             stats_df,
             ax=relevant_axis,
             annot=annotate,
             fmt="",
-            **plot_characteristics["plot"],
+            **heatmap_kwargs,
         )
 
         # add colourbar in dashboard
@@ -3057,6 +4018,14 @@ class Plotting:
             empty_cells = len(stats_df.columns) - len(data_labels)
             col_labels = [""] * empty_cells + data_labels
 
+        # show any renamed display text in that first (label) column,
+        # without touching data_labels itself - still the real
+        # identifiers, used just below for colour lookups
+        stats_df[stats_df.columns[0]] = [
+            get_display_label(self.read_instance, data_label)
+            for data_label in data_labels
+        ]
+
         # set cell colors
         if statsummary:
             if "cell_colours" in plot_characteristics:
@@ -3237,9 +4206,77 @@ class Plotting:
         stats_calc = np.insert(stats_calc, obs_index, np.nan)
         stats_dict[zstat] = stats_calc
 
+        # per-station (StdDev, correlation) pairs per model, scoped to the
+        # current station selection (per_station=True, not map=True)
+        self.canvas_instance.taylor_perstation_stations = {}
+
+        perstation_data = {}
+        if "perstation" in plot_options:
+            perstation_max_points = plot_characteristics.get("perstation_max_points")
+            all_station_inds = self.canvas_instance.station_inds[networkspeci]
+            for data_label in data_labels_sans_obs:
+                station_stddev = calculate_statistic(
+                    self.read_instance,
+                    self.canvas_instance,
+                    networkspeci,
+                    "StdDev",
+                    [data_label],
+                    [],
+                    per_station=True,
+                )
+                station_corr = calculate_statistic(
+                    self.read_instance,
+                    self.canvas_instance,
+                    networkspeci,
+                    zstat,
+                    [self.read_instance.observations_data_label],
+                    [data_label],
+                    per_station=True,
+                )
+                # guard against an empty selection returning a bare array
+                if (station_stddev.size == 0) or (station_corr.size == 0):
+                    continue
+                station_stddev = station_stddev[0]
+                station_corr = station_corr[0]
+                valid = ~np.isnan(station_stddev) & ~np.isnan(station_corr)
+                station_stddev = station_stddev[valid]
+                station_corr = station_corr[valid]
+                # aligned to all_station_inds, same order, so the mask above
+                # keeps identity lined up with the values it keeps
+                station_inds = all_station_inds[valid]
+                if station_stddev.size == 0:
+                    continue
+
+                # cap stations drawn - deterministic, so a redraw is stable
+                if perstation_max_points is not None:
+                    subset_inds = get_deterministic_subsample(
+                        station_stddev.size, perstation_max_points
+                    )
+                    station_stddev = station_stddev[subset_inds]
+                    station_corr = station_corr[subset_inds]
+                    station_inds = station_inds[subset_inds]
+
+                perstation_data[data_label] = (station_stddev, station_corr)
+                self.canvas_instance.taylor_perstation_stations[data_label] = (
+                    np.asarray(self.read_instance.station_names[networkspeci])[
+                        station_inds
+                    ],
+                    np.asarray(self.read_instance.station_references[networkspeci])[
+                        station_inds
+                    ],
+                )
+
         # get maximum stddev in dataframe (if not defined)
         if stddev_max is None:
             stddev_max = np.nanmax(stats_dict["StdDev"])
+            # the individual stations behind a model's aggregate point can
+            # spread wider than the aggregate itself, so the axis has to be
+            # sized from them too, or a perstation cloud would run outside it
+            if perstation_data:
+                stddev_max = max(
+                    stddev_max,
+                    max(np.nanmax(station_stddev) for station_stddev, _ in perstation_data.values()),
+                )
 
         # create stats dataframe
         stats_df = pd.DataFrame(data=stats_dict, index=data_labels, dtype=np.float64)
@@ -3374,25 +4411,50 @@ class Plotting:
         )
 
         # add models
+        perstation_active = "perstation" in plot_options
         for data_label, stddev, corr_stat in zip(
             stats_df.index, stats_df[xylabel], stats_df[rlabel]
         ):
             if data_label == self.read_instance.observations_data_label:
                 continue
-            self.taylor_plot = self.taylor_polar_relevant_axis.plot(
-                np.arccos(corr_stat),
-                stddev,
-                **plot_characteristics["plot"],
-                mfc=self.read_instance.plotting_params[data_label]["colour"],
-                mec=self.read_instance.plotting_params[data_label]["colour"],
-                label=data_label,
-            )
+
+            # "perstation" replaces the aggregate point with a per-station cloud
+            if perstation_active:
+                if data_label not in perstation_data:
+                    continue
+                station_stddev, station_corr = perstation_data[data_label]
+                self.taylor_plot = self.taylor_polar_relevant_axis.plot(
+                    np.arccos(station_corr),
+                    station_stddev,
+                    **plot_characteristics["perstation_plot"],
+                    mfc=self.read_instance.plotting_params[data_label]["colour"],
+                    mec=self.read_instance.plotting_params[data_label]["colour"],
+                    label=get_display_label(self.read_instance, data_label),
+                )
+            else:
+                self.taylor_plot = self.taylor_polar_relevant_axis.plot(
+                    np.arccos(corr_stat),
+                    stddev,
+                    **plot_characteristics["plot"],
+                    mfc=self.read_instance.plotting_params[data_label]["colour"],
+                    mec=self.read_instance.plotting_params[data_label]["colour"],
+                    label=get_display_label(self.read_instance, data_label),
+                )
 
             # track plot elements
             if self.read_instance.mode not in ["report"]:
                 self.track_plot_elements(
                     data_label, "taylor", "plot", self.taylor_plot, bias=False
                 )
+
+        # point the slider at whichever markersize is actually on screen
+        if self.read_instance.mode not in ["report", "library"]:
+            active_markersize = (
+                plot_characteristics["perstation_plot"]["markersize"]
+                if perstation_active
+                else plot_characteristics["plot"]["markersize"]
+            )
+            self.canvas_instance.sync_taylor_markersize_slider(active_markersize)
 
         return True
 
@@ -3510,17 +4572,48 @@ class Plotting:
         valid_station_references = get_valid_metadata(
             self, "station_reference", valid_station_idxs, networkspeci
         )
-        try:
-            valid_station_classifications = get_valid_metadata(
-                self,
-                f"{classification_type}_classification",
-                valid_station_idxs,
-                networkspeci,
-            )
-        except:
-            valid_station_classifications = np.full(
-                len(valid_station_references), np.nan, dtype=np.float32
-            )
+        valid_station_names = get_valid_metadata(
+            self, "station_name", valid_station_idxs, networkspeci
+        )
+
+        # both classifications are fetched, not just whichever one drives the
+        # marker shapes below - the hover annotation shows both regardless
+        # ("Area:"/"Type:", the same wording the legend title would use)
+        valid_area_classifications = None
+        valid_station_type_classifications = None
+        for other_type in ("area", "station"):
+            try:
+                fetched = get_valid_metadata(
+                    self,
+                    f"{other_type}_classification",
+                    valid_station_idxs,
+                    networkspeci,
+                )
+            except:
+                fetched = np.full(
+                    len(valid_station_references), np.nan, dtype=np.float32
+                )
+            if other_type == "area":
+                valid_area_classifications = fetched
+            else:
+                valid_station_type_classifications = fetched
+
+        # each model plots one marker per station, in this same order (see
+        # the per-station loop below) - kept here so the hover annotation
+        # can name the station a given point is for
+        self.canvas_instance.fairmode_target_stations = (
+            valid_station_names,
+            valid_station_references,
+            valid_area_classifications,
+            valid_station_type_classifications,
+        )
+
+        valid_station_classifications = (
+            valid_area_classifications
+            if classification_type == "area"
+            else valid_station_type_classifications
+        )
+        if np.all(pd.isnull(valid_station_classifications)):
             self.read_instance.logger.info(
                 f"Data for {classification_type}_classification is not available and will not be shown in the legend"
             )
@@ -3645,7 +4738,9 @@ class Plotting:
                 )
 
             # add MQI90
-            self.faimode_target_annotate_text.append(f"\n\n{data_label}")
+            self.faimode_target_annotate_text.append(
+                "\n\n" + get_display_label(self.read_instance, data_label)
+            )
             self.faimode_target_annotate_colour.append("black")
             if "MQI90" in plot_characteristics["annotate_options"] and not np.all(
                 np.isnan(mqi_array)
@@ -3690,33 +4785,7 @@ class Plotting:
             0
         ].strip()
 
-        # create legend
-        legend_elements = []
-        for classification in np.unique(classifications):
-            if classification == np.nan:
-                continue
-            if (
-                classification
-                not in plot_characteristics["markers"][
-                    f"{classification_type}_classification"
-                ]
-            ):
-                marker = "h"
-            else:
-                marker = plot_characteristics["markers"][
-                    f"{classification_type}_classification"
-                ][classification]
-            legend_element = mlines.Line2D(
-                [],
-                [],
-                marker=marker,
-                label=classification,
-                **plot_characteristics["markers"]["plot"],
-            )
-            legend_elements.append(legend_element)
-        relevant_axis.legend(
-            handles=legend_elements, **plot_characteristics["markers"]["legend"]
-        )
+        self.refresh_fairmode_target_legend(relevant_axis, plot_characteristics)
 
         # add title if using dashboard
         if self.read_instance.mode not in ["report", "library"]:
@@ -3726,6 +4795,58 @@ class Plotting:
                 fairmode_settings[speci]["title"],
                 plot_characteristics,
             )
+
+    def refresh_fairmode_target_legend(self, relevant_axis, plot_characteristics):
+        """
+        Add or remove the FAIRMODE target classification legend, from the
+        station classifications already cached on canvas_instance by the
+        last full draw - lets the dashboard's "Legend" checkbox toggle it
+        without redoing the whole plot.
+
+        Parameters
+        ----------
+        relevant_axis : object
+            Axis to plot on.
+        plot_characteristics : dict
+            Plot characteristics.
+        """
+
+        # a Legend isn't in ax.lines/artists/patches/texts, so
+        # remove_axis_elements() never clears a previous one on its own
+        if not plot_characteristics["markers"].get("legend_active", True):
+            if relevant_axis.get_legend() is not None:
+                relevant_axis.get_legend().remove()
+            return
+
+        _, _, area_classifications, station_classifications = getattr(
+            self.canvas_instance, "fairmode_target_stations", ([], [], [], [])
+        )
+        classification_type = plot_characteristics["markers"]["type"].lower()
+        classifications = (
+            area_classifications
+            if classification_type == "area"
+            else station_classifications
+        )
+        if not len(classifications):
+            return
+
+        marker_map = plot_characteristics["markers"][
+            f"{classification_type}_classification"
+        ]
+        legend_elements = [
+            mlines.Line2D(
+                [],
+                [],
+                marker=marker_map.get(classification, "h"),
+                label=classification,
+                **plot_characteristics["markers"]["plot"],
+            )
+            for classification in np.unique(classifications)
+            if classification == classification
+        ]
+        relevant_axis.legend(
+            handles=legend_elements, **plot_characteristics["markers"]["legend"]
+        )
 
     def make_fairmode_statsummary(
         self,
@@ -3795,6 +4916,37 @@ class Plotting:
         valid_station_references = get_valid_metadata(
             self, "station_reference", valid_station_idxs, networkspeci
         )
+        valid_station_names = get_valid_metadata(
+            self, "station_name", valid_station_idxs, networkspeci
+        )
+        # same area/station classifications the target plot's legend shows
+        valid_area_classifications = None
+        valid_station_type_classifications = None
+        for other_type in ("area", "station"):
+            try:
+                fetched = get_valid_metadata(
+                    self,
+                    f"{other_type}_classification",
+                    valid_station_idxs,
+                    networkspeci,
+                )
+            except:
+                fetched = np.full(
+                    len(valid_station_references), np.nan, dtype=np.float32
+                )
+            if other_type == "area":
+                valid_area_classifications = fetched
+            else:
+                valid_station_type_classifications = fetched
+
+        # every row below is built from arrays in this same station order -
+        # kept here so the hover annotation can name a hovered station
+        self.canvas_instance.fairmode_statsummary_stations = (
+            valid_station_names,
+            valid_station_references,
+            valid_area_classifications,
+            valid_station_type_classifications,
+        )
 
         # get valid data labels for networkspeci
         valid_data_labels = self.canvas_instance.selected_station_data_labels[
@@ -3807,6 +4959,10 @@ class Plotting:
         ]
 
         self.fairmode_statsummary_row_titles = {}
+        # per (data_label, row) station indices behind the middle-zone dots -
+        # the collapsed left/right corner dots stand for more than one
+        # station, so no single index is kept for those
+        self.canvas_instance.fairmode_statsummary_row_station_indices = {}
 
         # iterate through data labels
         for data_label in cut_data_labels:
@@ -3885,6 +5041,14 @@ class Plotting:
 
                 # get row dictionary
                 plot_dict = subplots[row]
+
+                # station indices behind fairmode_data, whittled down in
+                # step with it below (None for the two scalar summary rows,
+                # which are not per-station)
+                if isinstance(fairmode_data, np.ndarray):
+                    station_indices = np.arange(len(valid_station_references))
+                else:
+                    station_indices = None
 
                 # remove axis from the dot on right side
                 relevant_axis[i * 4 + 3].set_xticks([])
@@ -3988,6 +5152,8 @@ class Plotting:
                         if isinstance(fairmode_data, np.ndarray)
                         else np.array([])
                     )
+                    if station_indices is not None:
+                        station_indices = station_indices[~right_zone_mask]
 
                 # left zone configuration
                 # remove x ticks from the left dashed zone
@@ -4050,6 +5216,8 @@ class Plotting:
                             if isinstance(fairmode_data, np.ndarray)
                             else np.array([])
                         )
+                        if station_indices is not None:
+                            station_indices = station_indices[~left_zone_mask]
 
                 # plot stations as dots
                 stations_dots = relevant_axis[i * 4 + 1].plot(
@@ -4070,6 +5238,10 @@ class Plotting:
                 # add the dots to the track plot elements list
                 self.fairmode_statsummary_plot.append(stations_dots[0])
                 self.fairmode_statsummary_row_titles[data_label].append(f"{row}")
+                if station_indices is not None:
+                    self.canvas_instance.fairmode_statsummary_row_station_indices[
+                        (data_label, row)
+                    ] = station_indices
 
             # track plot elements
             if self.read_instance.mode not in ["report"]:
@@ -4525,6 +5697,7 @@ class Plotting:
         plot_characteristics,
         data=None,
         active_map_valid_station_inds=[],
+        map_extent=None,
     ):
         """
         Determines and updates the marker size within plot_characteristics based on data density and plot type.
@@ -4543,6 +5716,8 @@ class Plotting:
             Data array to be plotted.
         active_map_valid_station_inds : numpy array, optional
             Valid map indices to plot.
+        map_extent : array-like, shape (4,), optional
+            Extent the map will be shown at, passed to get_map_marker_size().
         """
 
         if base_plot_type in ["timeseries", "scatter"]:
@@ -4561,19 +5736,13 @@ class Plotting:
 
         elif base_plot_type == "map":
             if plot_characteristics["plot"]["stations"]["s"] == "":
-                # calculate marker size considering points density
-                n_points = len(
+                # calculate marker size considering the density of the points
+                # currently in view - shared with the dashboard's automatic
+                # sizing, so the same map reads the same way in every mode
+                plot_characteristics["plot"]["stations"]["s"] = get_map_marker_size(
+                    relevant_axis,
+                    self.canvas_instance.datacrs,
                     self.read_instance.station_longitudes[networkspeci][
                         active_map_valid_station_inds
                     ]
                 )
-
-                # calculate figure area and density
-                # divide area by 1000 so the function below makes sense
-                area = (relevant_axis.bbox.width * relevant_axis.bbox.height) / 1000
-                density = n_points / area
-
-                # marker size is calculated using an exponential equation
-                # the maximum size is 40 (very low densities)
-                # see https://github.com/BSC-ES/providentia/issues/199
-                plot_characteristics["plot"]["stations"]["s"] = 1.2 ** (-density) * 40

@@ -1,6 +1,6 @@
 # Available Species
 
-Providentia does not define or control the list of available species. All species are dictated by GHOST (**G**lobally **H**armonised **O**bservations in **S**pace & **T**ime).
+Providentia does not define or control the list of available species, rather these are defined by GHOST (**G**lobally **H**armonised **O**bservations in **S**pace & **T**ime).
 
 For a full description of GHOST and its standards, see the [GHOST reference paper](https://essd.copernicus.org/articles/16/4417/2024/).
 

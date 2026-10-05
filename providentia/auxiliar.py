@@ -6,10 +6,116 @@ import sys
 import time
 
 import numpy as np
+import yaml
 
 from .unit_converter import UnitConverter, get_molecular_mass
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+PROVIDENTIA_ROOT = "/".join(CURRENT_PATH.split("/")[:-1])
+
+# colourmap roles a statistic can need - see settings/colourmaps.yaml
+COLOURMAP_ROLES = [
+    "sequential",
+    "diverging",
+    "sequential_low_best",
+    "sequential_high_best",
+]
+# shown in the dashboard's preset selector once land, ocean or colourmap have
+# been changed individually, so the box never names a preset that is no longer
+# what is on screen
+COLOUR_PRESET_CUSTOM = "Custom"
+_colourmaps = None
+
+
+def load_colourmaps():
+    """
+    Load the colourmap roles and map colour presets from
+    settings/colourmaps.yaml, reading the file once and keeping it.
+
+    Returns
+    -------
+    dict
+        Parsed colourmaps configuration, with a "presets" key
+    """
+
+    global _colourmaps
+    if _colourmaps is None:
+        _colourmaps = yaml.safe_load(
+            open(join(PROVIDENTIA_ROOT, "settings/colourmaps.yaml"))
+        )
+
+    return _colourmaps
+
+
+def get_colour_presets():
+    """
+    Get the map colour presets.
+
+    Returns
+    -------
+    dict
+        Preset name to its land/ocean colours and colourmap per role
+    """
+
+    return load_colourmaps().get("presets", {})
+
+
+def get_role_colourmap(role, preset_name=None):
+    """
+    Get the colourmap for a statistic role, from a preset if one is named and
+    defines that role, otherwise from the first preset.
+
+    Parameters
+    ----------
+    role : str
+        Colourmap role, one of COLOURMAP_ROLES
+    preset_name : str, optional
+        Name of the active map colour preset
+
+    Returns
+    -------
+    str or None
+        Colourmap name, or None if the role is not defined anywhere
+    """
+
+    presets = get_colour_presets()
+    preset = presets.get(preset_name or "", {})
+    # as with the land and ocean colours, an unnamed (or unknown) preset still
+    # has to give the colourbar something to draw with, so the first preset
+    # stands in - see get_map_colours()
+    fallback = next(iter(presets.values()), {})
+
+    return preset.get(role) or fallback.get(role)
+
+
+def get_map_colours(plot_characteristics):
+    """
+    Get the land and ocean colours for a map, taking each from the active
+    colour preset unless plot characteristics set it explicitly.
+
+    Parameters
+    ----------
+    plot_characteristics : dict
+        Plot characteristics for the map
+
+    Returns
+    -------
+    tuple of str
+        Land and ocean colours
+    """
+
+    presets = get_colour_presets()
+    preset = presets.get(plot_characteristics.get("colour_preset", ""), {})
+    # a colour is never left empty - an unnamed (or unknown) preset still has
+    # to give the map something to draw, so the first preset stands in
+    fallback = preset or next(iter(presets.values()), {})
+    land = plot_characteristics.get("land_polygon", {}).get("facecolor", "")
+    ocean = plot_characteristics.get("ocean_polygon", {}).get("facecolor", "")
+
+    return (
+        land or preset.get("land") or fallback.get("land", ""),
+        ocean or preset.get("ocean") or fallback.get("ocean", ""),
+    )
 
 
 def join(*args):
@@ -129,6 +235,50 @@ def expand_plot_characteristics(plot_characteristics, mode):
             plot_type_characteristics.pop(key, None)
 
     return plot_characteristics
+
+
+def resolve_plots_or_preset(entries, presets, known_plot_types):
+    """
+    "report_plots"/"dashboard_plots" can hold either a literal list of plots
+    or, as a single entry, the name of a preset from settings/report_plots.yaml
+    (e.g. "standard"). This tells the two apart, used by Report.run() and by
+    ProvConfiguration.check_validity()'s "dashboard_plots" fallback.
+
+    A real, valid plot type always wins as itself even if a preset happens
+    to share its name (nothing currently shipped does, but a user's own
+    settings/report_plots.yaml could add one) - a literal plot type is what
+    someone typing it almost certainly means.
+
+    Parameters
+    ----------
+    entries : list of str
+        Plots as given directly, or the sole preset name.
+    presets : dict
+        Loaded from settings/report_plots.yaml.
+    known_plot_types : set of str
+        Valid base plot types - settings/plot_characteristics.yaml's own
+        top-level keys - checked against the single entry's "-"/"_"-delimited
+        first part (its base plot type, stat and options stripped).
+
+    Returns
+    -------
+    list or dict
+        The preset's own plots (a plain list, or - for a "paradigm"-style
+        preset - the dict of its separate summary/station lists) if `entries`
+        named one; `entries` unchanged otherwise.
+    """
+
+    if len(entries) != 1:
+        return entries
+
+    base_plot_type = entries[0].split("-")[0].split("_")[0]
+    if base_plot_type in known_plot_types:
+        return entries
+
+    if entries[0] not in presets:
+        return entries
+
+    return presets[entries[0]]
 
 
 def pad_array(arr, length, pad_value=np.nan):

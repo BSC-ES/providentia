@@ -25,6 +25,7 @@ Answer `n` to the prompt:
 
 _"Do you want to download from the BSC remote machine? (Otherwise, GHOST data will be retrieved from Zenodo)"_
 
+(ghost-networks)=
 ## Available networks
 
 To download a network, choose one of the networks from the options per data version below.
