@@ -8,7 +8,7 @@ import os
 import sys
 
 from dateutil.relativedelta import relativedelta
-from netCDF4 import Dataset, chartostring
+from netCDF4 import Dataset, chartostring, date2index
 import numpy as np
 import pandas as pd
 import yaml
@@ -16,6 +16,7 @@ import yaml
 from providentia.auxiliar import (
     CURRENT_PATH,
     join,
+    get_conversion_factor,
     get_standard_units,
     get_standard_parameters_by_speci,
 )
@@ -34,9 +35,11 @@ from .plot_aux import update_plotting_parameters
 from .read_aux import (
     check_for_ghost,
     get_default_qa,
+    get_forecast_run_mask,
     get_frequency_code,
     get_yearmonths_to_read,
     init_shared_vars_read_netcdf_data,
+    model_file_overlaps_period,
     read_netcdf_data,
     read_netcdf_metadata,
     check_forecast_dimension,
@@ -1143,43 +1146,38 @@ class DataReader:
                 for model in models_to_remove
             ]
 
-            # remove model data
-            self.read_instance.data_in_memory[
-                self.read_instance.networkspecies[0]
-            ] = np.delete(
-                self.read_instance.data_in_memory[self.read_instance.networkspecies[0]],
-                models_to_remove_inds,
-                axis=0,
-            )
+            # remove model data (for every network / species in memory)
+            for networkspeci in self.read_instance.networkspecies:
+                self.read_instance.data_in_memory[networkspeci] = np.delete(
+                    self.read_instance.data_in_memory[networkspeci],
+                    models_to_remove_inds,
+                    axis=0,
+                )
 
         # need to read model/s ?
         if "read_mod" in operations:
-            # insert space for new models in data array
+            # insert space for new models in data array (for every network / species in memory)
             for model_to_read in models_to_read:
                 models_to_read_ind = self.read_instance.data_labels.index(model_to_read)
 
-                self.read_instance.data_in_memory[
-                    self.read_instance.networkspecies[0]
-                ] = np.insert(
-                    self.read_instance.data_in_memory[
-                        self.read_instance.networkspecies[0]
-                    ],
-                    models_to_read_ind,
-                    np.full(
-                        (
-                            1,
-                            len(
-                                self.read_instance.station_references[
-                                    self.read_instance.networkspecies[0]
-                                ]
+                for networkspeci in self.read_instance.networkspecies:
+                    self.read_instance.data_in_memory[networkspeci] = np.insert(
+                        self.read_instance.data_in_memory[networkspeci],
+                        models_to_read_ind,
+                        np.full(
+                            (
+                                1,
+                                len(
+                                    self.read_instance.station_references[networkspeci]
+                                ),
+                                len(self.read_instance.time_array),
                             ),
-                            len(self.read_instance.time_array),
+                            np.nan,
+                            dtype=np.float32,
                         ),
-                        np.nan,
-                        dtype=np.float32,
-                    ),
-                    axis=0,
-                )
+                        axis=0,
+                    )
+
 
             # get list of yearmonths to read
             yearmonths_to_read = get_yearmonths_to_read(
@@ -1681,48 +1679,57 @@ class DataReader:
             for data_label, data_label_raw in zip(data_labels, data_labels_raw):
                 # only check model data labels
                 if data_label != self.read_instance.observations_data_label:
-                    if "/" in network:
-                        file_root = "%s/%s/%s/%s/%s/%s/%s_" % (
-                            self.read_instance.mod_root,
-                            ghost_version,
-                            data_label_raw,
-                            resolution,
-                            speci,
-                            network.replace("/", "-"),
-                            speci,
-                        )
+                    # split raw data label into model id and type
+                    # only the dashboard tags the interpolation mode onto the raw data
+                    # TODO: Remove separation when report / library can read gridded data
+                    if "::" in data_label_raw:
+                        # e.g. 'cams61_emep_ph2-eu-000::interpolated
+                        model_id, _, model_type = data_label_raw.rpartition("::")
+
+                        # gridded data has no stations, so it is not
+                        # read here, it is read per date when the gridded map is drawn
+                        if model_type == "gridded":
+                            continue
+                    # in report and library modes read interpolated data only
                     else:
-                        file_root = "%s/%s/%s/%s/%s/%s/%s_" % (
-                            self.read_instance.mod_root,
-                            ghost_version,
-                            data_label_raw,
-                            resolution,
-                            speci,
-                            network,
-                            speci,
-                        )
+                        model_id, model_type = data_label_raw, "interpolated"
+
+                    data_key = network
+                    file_root_key = (model_type, model_id, network, speci)
+
+                    # get file path
+                    if (
+                        file_root_key
+                        not in self.read_instance.available_model_data_file_roots
+                    ):
+                        continue
+                    file_root = self.read_instance.available_model_data_file_roots[
+                        file_root_key
+                    ]
 
                     try:
                         available_yearmonths = self.read_instance.available_model_data[
-                            network
-                        ][resolution][speci][data_label_raw]
+                            model_type
+                        ][data_key][resolution][speci][model_id]
                     except KeyError:
-                        print(
-                            file_root, self.read_instance.available_model_data[network]
-                        )
                         continue
 
                     # get intersection of yearmonths_to_read and available_yearmonths
                     yearmonths_to_read_intersect = list(
                         set(yearmonths_to_read) & set(available_yearmonths)
                     )
+
+                    # no files inside the date range, nothing to check
+                    if len(yearmonths_to_read_intersect) == 0:
+                        continue
+
                     files_to_read[data_label] = sorted(
                         [
                             file_root + str(yyyymm) + ".nc"
                             for yyyymm in yearmonths_to_read_intersect
                         ]
                     )[0]
-
+            
             # read forecast dimension for each model
             if len(files_to_read) == 0:
                 continue
@@ -1843,6 +1850,26 @@ class DataReader:
         unique_data_labels_to_remove = []
         unique_data_labels_raw_to_remove = []
 
+        # reset models pop-up menu options if in dashboard mode, and are initialising
+        # (done once for all networkspecies, otherwise models only available for some
+        # networkspecies lose their entry when a later networkspeci resets the menu)
+        if (self.read_instance.mode not in ["report", "library"]) & (init):
+            self.read_instance.models_menu["models"]["forecast"] = {}
+            self.read_instance.models_menu["models"]["forecast_days"] = {}
+        # otherwise reset selected and disabled forecast variable and day options 
+        # (to ensure data labels that are no longer selected are cleaned)
+        elif (self.read_instance.mode not in ["report", "library"]) & (not init):
+            for data_label in self.read_instance.models_menu["models"]["forecast"]:
+                self.read_instance.models_menu["models"]["forecast"][data_label][
+                    1
+                ] = []
+                self.read_instance.models_menu["models"]["forecast"][data_label][
+                    2
+                ] = []
+                self.read_instance.models_menu["models"]["forecast_days"][
+                    data_label
+                ][1] = []
+
         # iterate over each network species
         for networkspeci in networkspecies:
             # temporary lists for each species
@@ -1850,23 +1877,6 @@ class DataReader:
             data_labels_raw_to_remove = []
             data_labels_to_add = []
             data_labels_raw_to_add = []
-
-            # reset models pop-up menu options if in dashboard mode, and are initialising
-            if (self.read_instance.mode not in ["report", "library"]) & (init):
-                self.read_instance.models_menu["models"]["forecast"] = {}
-                self.read_instance.models_menu["models"]["forecast_days"] = {}
-            # otherwise reset selected and disabled forecast variable and day options (to ensure data labels that are no longer selected are cleaned)
-            elif (self.read_instance.mode not in ["report", "library"]) & (not init):
-                for data_label in self.read_instance.models_menu["models"]["forecast"]:
-                    self.read_instance.models_menu["models"]["forecast"][data_label][
-                        1
-                    ] = []
-                    self.read_instance.models_menu["models"]["forecast"][data_label][
-                        2
-                    ] = []
-                    self.read_instance.models_menu["models"]["forecast_days"][
-                        data_label
-                    ][1] = []
 
             # initialise dictionary for this network species
             self.read_instance.forecast_indices_per_data_label[networkspeci] = {}
@@ -2264,32 +2274,43 @@ class DataReader:
                     if filter_read:
                         continue
 
-                    elif "/" in network:
-                        file_root = "%s/%s/%s/%s/%s/%s/%s_" % (
-                            self.read_instance.mod_root,
-                            self.read_instance.ghost_version,
-                            base_data_label_raw,
-                            self.read_instance.resolution,
-                            speci,
-                            network.replace("/", "-"),
-                            speci,
-                        )
                     else:
-                        file_root = "%s/%s/%s/%s/%s/%s/%s_" % (
-                            self.read_instance.mod_root,
-                            self.read_instance.ghost_version,
-                            base_data_label_raw,
-                            self.read_instance.resolution,
-                            speci,
-                            network,
-                            speci,
-                        )
-                    try:
-                        available_yearmonths = self.read_instance.available_model_data[
-                            network
-                        ][self.read_instance.resolution][speci][base_data_label_raw]
-                    except KeyError:
-                        continue
+                        # split raw data label into model id and type
+                        # only the dashboard tags the interpolation mode onto the raw data
+                        # TODO: Remove separation when report / library can read gridded data
+                        if "::" in base_data_label_raw:
+                            # e.g. 'cams61_emep_ph2-eu-000::interpolated
+                            model_id, _, model_type = base_data_label_raw.rpartition("::")
+
+                            # gridded data has no stations, so it is not
+                            # read here, it is read per date when the gridded map is drawn
+                            if model_type == "gridded":
+                                continue
+                        # in report and library modes read interpolated data only
+                        else:
+                            model_id, model_type = base_data_label_raw, "interpolated"
+
+                        data_key = network
+                        file_root_key = (model_type, model_id, network, speci)
+
+                        # get file path
+                        if (
+                            file_root_key
+                            not in self.read_instance.available_model_data_file_roots
+                        ):
+                            continue
+                        file_root = self.read_instance.available_model_data_file_roots[
+                            file_root_key
+                        ]
+
+                        try:
+                            available_yearmonths = (
+                                self.read_instance.available_model_data[model_type][data_key][
+                                    self.read_instance.resolution
+                                ][speci][model_id]
+                            )
+                        except KeyError:
+                            continue
 
                 # get intersection of yearmonths_to_read and available_yearmonths
                 yearmonths_to_read_intersect = list(
@@ -3122,3 +3143,301 @@ class DataReader:
         ncdf_root.close()
 
         return True
+
+    def read_model_dataset(self, ds, speci, obs_units, standard_parameter_speci, first_file=True):
+        """
+        Read model dataset
+
+        Parameters
+        ----------
+        ds : netCDF4.Dataset
+            Opened model gridded dataset
+        speci : str
+            Speci
+        obs_units : str
+            Measurement units of observations (and interpolated model)
+        standard_parameter_speci : dict
+            GHOST standard parameters dictionary
+        first_file : bool, optional
+            Indicates if dataset to read comes from first file in files_to_read list, by default True
+
+        Returns
+        -------
+        np.array
+            Gridded model variable data for each file
+        np.array
+            Gridded model latitude for first file
+        np.array
+            Gridded model longitude for first file
+        """
+
+        speci_object = ds[speci]
+
+        # drop level
+        if len(speci_object.shape) == 4:
+            z_varname = speci_object.dimensions[1]
+
+            # check if species Z dimension is named correctly, and in correct BSC standard order
+            # if not skip
+            # Z dimension is valid if == 'z' or 'lev' or 'alt' or 'height' or 'level'
+            if z_varname not in ["lev", "z", "alt", "height", "level"]:
+                # msg = f"Z dimension incorrectly named in {filepath}. Z={z_varname}. Skipping."
+                # show_message(self.read_instance, msg)
+                return None
+
+            # check if vertical dimension goes up or down to get correct index for surface
+            mod_vert_obj = ds[z_varname]
+            direction = mod_vert_obj.positive
+
+            # if direction == 'up', surface index is location of mininum value in z var
+            if direction == "up":
+                z_index = np.argmin(mod_vert_obj[:])
+            # if direction == 'down', surface index is location of maximum value in z var
+            elif direction == "down":
+                z_index = np.argmax(mod_vert_obj[:])
+            # if cannot determine a surface index, skip
+            else:
+                # msg = f"Cannot determine surface index in vertical dimension in {filepath}. Z={z_varname}. Skipping."
+                # show_message(self.read_instance, msg)
+                return None
+
+            read_data = speci_object[:, z_index, :, :]
+        else:
+            read_data = speci_object[:]
+
+        # convert model units to observational units
+        mod_speci_units = speci_object.units
+        conversion_factor = get_conversion_factor(
+            mod_speci_units, obs_units, standard_parameter_speci
+        )
+        read_data = read_data * conversion_factor
+
+        lat, lon = None, None
+        if first_file:
+            # get lat, lon and units from first readable file
+            for name in ("lat", "latitude"):
+                if name in ds.variables:
+                    lat = ds.variables[name][:]
+                    break
+            else:
+                msg = "Latitudes cannot be read, model grid won't be plotted."
+                show_message(self.read_instance, msg)
+                return None
+            for name in ("lon", "longitude"):
+                if name in ds.variables:
+                    lon = ds.variables[name][:]
+                    break
+            else:
+                msg = "Longitudes cannot be read, model grid won't be plotted."
+                show_message(self.read_instance, msg)
+                return None
+        
+        return read_data, lat, lon
+
+    def read_gridded_data(self, speci, date=None, hour=None, zstat=None, date_range=None, lead_days=None):
+        """
+        Read model gridded data
+
+        Parameters
+        ----------
+        speci : str
+            Current speci (e.g. sconco3)
+        date : str, optional
+            Date, by default None
+        hour : int, optional
+            Hour, by default None
+        stat : str, optional
+            Statistic (only Mean accepted), by default None
+        date_range : tuple, optional
+            Start (inclusive) and end (exclusive) datetimes of period used to calculate statistic,
+            by default None (all loaded period)
+        lead_days : list of int, optional
+            Forecast lead days used from forecast runs (YYYYMMDDHH files), by default None ([1])
+
+        Returns
+        -------
+        np.array
+            Gridded model variable data
+        np.array
+            Gridded model latitude
+        np.array
+            Gridded model longitude
+        str
+            Gridded model variable units
+        """
+
+        # get gridded model loaded
+        selected_gridded_models = [
+            data_label_raw.rpartition("::")[0]
+            for data_label_raw in self.read_instance.data_labels_raw
+            if data_label_raw.endswith("::gridded")
+        ]
+
+        # nothing to draw if no gridded model is selected
+        if len(selected_gridded_models) == 0:
+            return None
+        
+        # use first lead day by default
+        if lead_days is None:
+            lead_days = [1]
+
+        # take the first selected gridded model
+        model_id = selected_gridded_models[0]
+        domain = model_id.rsplit("-", 2)[1]
+        resolution = self.read_instance.resolution
+
+        file_root_key = ("gridded", model_id, speci)
+
+        # get file path
+        if (
+            file_root_key
+            not in self.read_instance.available_model_data_file_roots
+        ):
+            return None
+        file_root = self.read_instance.available_model_data_file_roots[
+            file_root_key
+        ]
+
+        try:
+            available_timesteps = self.read_instance.available_model_data[
+                "gridded"
+            ][domain][resolution][speci][model_id]
+        except KeyError:
+            return None
+
+        # get start (inclusive) and end (exclusive) of period, all loaded period by default
+        if date_range is not None:
+            start, end = pd.Timestamp(date_range[0]), pd.Timestamp(date_range[1])
+        else:
+            start = self.read_instance.time_array[0]
+            end = self.read_instance.time_array[-1] + pd.tseries.frequencies.to_offset(
+                self.read_instance.active_frequency_code
+            )
+        
+        # keep only files that can have data inside the period
+        timesteps_to_read_intersect = [
+            ts
+            for ts in available_timesteps
+            if model_file_overlaps_period(ts, start, end, lead_days)
+        ]
+
+        # no files inside the date range, nothing to check
+        if len(timesteps_to_read_intersect) == 0:
+            return None
+
+        # warn if forecast runs are not 24 hours apart, as lead day N of each run is taken
+        # as the 24 hours from run start + (N-1) days, e.g. for lead day 1 the run of
+        # 2023010100 covers 2023-01-01 00:00 to 2023-01-01 23:00 and the run of
+        # 2023010200 covers 2023-01-02 00:00 to 2023-01-02 23:00
+        run_starts = pd.to_datetime(
+            sorted(ts for ts in timesteps_to_read_intersect if len(ts) == 10),
+            format="%Y%m%d%H",
+        )
+        run_diffs = run_starts[1:] - run_starts[:-1]
+        wrong_diffs = run_diffs[run_diffs != pd.Timedelta(days=1)]
+        if len(wrong_diffs) > 0:
+            msg = (
+                f"Forecast runs of {model_id} are expected to be 24 hours apart, "
+                f"but found differences of {', '.join(sorted({str(d) for d in wrong_diffs}))}."
+            )
+            show_message(self.read_instance, msg)
+
+        obs_units = self.read_instance.measurement_units[speci]
+        standard_parameter_speci = get_standard_parameters_by_speci(
+            speci, self.read_instance.ghost_version
+        )
+        
+        if date and hour:
+            # find the file covering the requested date (monthly or daily/hourly files)
+            matching = [ts for ts in timesteps_to_read_intersect if date.startswith(ts[:6])
+                        and (len(ts) == 6 or ts[:8] == date)]
+            if not matching:
+                return None
+
+            filepath = file_root.format(date=matching[0])
+            if not os.path.exists(filepath):
+                return None
+            
+            with Dataset(filepath) as ds:
+                t = date2index(datetime.datetime.strptime(date, "%Y%m%d") + datetime.timedelta(hours=hour), 
+                               ds["time"], select="exact")
+                data, lat, lon = self.read_model_dataset(ds, speci, obs_units, standard_parameter_speci)
+                data = data[t]
+        
+        elif zstat:
+            if zstat not in ['Mean']:
+                msg = f"Statistic '{zstat}' is not supported for gridded data. Only 'Mean' is supported."
+                show_message(self.read_instance, msg)
+                return None
+
+            sum_data = None
+            count_data = None
+
+            for timestep in sorted(timesteps_to_read_intersect):
+                filepath = file_root.format(date=timestep)
+                if not os.path.exists(filepath):
+                    continue
+
+                with Dataset(filepath) as ds:
+                    # get timesteps of file inside period
+                    file_timestamps = time_var_to_asi8(ds["time"])
+                    in_period = (file_timestamps >= start.value) & (file_timestamps < end.value)
+                    
+                    # forecast runs: keep only timesteps of wanted lead days
+                    if len(timestep) == 10:
+                        in_period &= get_forecast_run_mask(
+                            file_timestamps,
+                            pd.to_datetime(timestep, format="%Y%m%d%H"),
+                            lead_days,
+                        )
+
+                    # skip file if there are no timesteps to use
+                    if not in_period.any():
+                        continue
+
+                    # first file
+                    if sum_data is None and count_data is None:
+                        # read variable data and get latitudes and longitudes from first file
+                        timestep_data, lat, lon = self.read_model_dataset(ds, speci, obs_units, standard_parameter_speci)
+
+                        # initialise dimensions of sum_data and count_data using the dimensions of first file
+                        sum_data = np.zeros(
+                            timestep_data.shape[1:],
+                            dtype=np.float64
+                        )
+                        count_data = np.zeros(
+                            timestep_data.shape[1:],
+                            dtype=np.int64
+                        )
+                    else:
+                        # read variable data, but not coordinates (already read)
+                        timestep_data, _, _ = self.read_model_dataset(ds, speci, obs_units, standard_parameter_speci, 
+                                                                      first_file=False)
+
+                    # keep only timesteps inside selected period
+                    timestep_data = timestep_data[in_period]
+
+                    # ignore NaNs and append
+                    sum_data += np.nansum(timestep_data, axis=0)
+                    count_data += np.sum(
+                        ~np.isnan(timestep_data),
+                        axis=0
+                    )
+
+            # do not calculate mean if no data files were found
+            if sum_data is None:
+                msg = "No model data files found for the specified date range: "
+                msg += f"{start:%Y-%m-%d %H:%M} to {end:%Y-%m-%d %H:%M}."
+                show_message(self.read_instance, msg)
+                return None
+
+            # calculate mean
+            data = sum_data / count_data
+
+            # set nan in grid cells where all values are nan
+            data[count_data == 0] = np.nan
+
+        else:
+            raise ValueError("Either 'date' and 'hour' or 'stat' must be provided.")
+
+        return data, lat, lon

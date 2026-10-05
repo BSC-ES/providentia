@@ -5,6 +5,7 @@ import functools
 import inspect
 import datetime
 import math
+import re
 import sys
 import yaml
 from weakref import WeakKeyDictionary
@@ -26,17 +27,22 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from providentia.auxiliar import (
     CURRENT_PATH,
+    correct_plot_type_name,
     join,
     COLOUR_PRESET_CUSTOM,
     get_colour_presets,
     get_map_colours,
-    get_role_colourmap,
+    get_role_colourmap
 )
 from .canvas_menus import SettingsMenu, set_slider_enabled
-from .dashboard_elements import ComboBox
-from .dashboard_elements import set_formatting, set_cursor, unset_cursor
-from .dashboard_elements import populate_colourmap_combobox, select_colourmap
+from .dashboard_elements import ComboBox, DateTimePicker
 from .dashboard_elements import (
+    set_formatting, 
+    set_cursor, 
+    unset_cursor, 
+    set_highlight_color,
+    populate_colourmap_combobox, 
+    select_colourmap,
     populate_projection_combobox,
     populate_colour_combobox,
     LAND_COLOUR_OPTIONS,
@@ -68,7 +74,7 @@ from .plot_formatting import (
     draw_map_gridlines,
 )
 from .plot_options import annotation, linear_regression, log_axes, smooth, threshold
-from .read_aux import get_possible_resampling_resolutions, get_frequency_code
+from .read_aux import get_map_lead_days, get_possible_resampling_resolutions, get_frequency_code
 from .statistics import (
     get_z_statistic_comboboxes,
     generate_colourbar,
@@ -206,6 +212,8 @@ class Canvas(FigureCanvas):
 
         # initialise some key vars
         self.filter_data = None
+        self.map_date_range_selection = None
+        self.map_date_range_full = None
 
         # initialise Plotting class
         self.plotting = Plotting(read_instance=self.read_instance, canvas_instance=self)
@@ -231,6 +239,8 @@ class Canvas(FigureCanvas):
             "fairmode-target",
             "fairmode-statsummary",
             "contingencytable",
+            "heatmap",
+            "table"
         ]
 
         # define all possible plots in layout options
@@ -249,6 +259,8 @@ class Canvas(FigureCanvas):
             "fairmode-target",
             "fairmode-statsummary",
             "contingencytable",
+            "heatmap",
+            "table"
         ]
 
         # a dashboard_plots entry can carry a "_option" and/or "-stat" suffix
@@ -362,10 +374,10 @@ class Canvas(FigureCanvas):
         # create map, colorbar and legend plot axes
         self.plot_axes = {}
         self.plot_axes["map"] = self.figure.add_subplot(
-            self.gridspec.new_subplotspec((2, 0), rowspan=44, colspan=42),
+            self.gridspec.new_subplotspec((2, 0), rowspan=40, colspan=42),
             projection=self.plotcrs,
         )
-        self.plot_axes["cb"] = self.figure.add_axes([0.0255, 0.536, 0.3794, 0.02])
+        self.plot_axes["cb"] = self.figure.add_axes([0.0255, 0.57, 0.3794, 0.02])
         self.plot_axes["legend"] = self.figure.add_subplot(
             self.gridspec.new_subplotspec((0, 47), rowspan=8, colspan=53)
         )
@@ -412,12 +424,7 @@ class Canvas(FigureCanvas):
                 self.menu_buttons, self.save_buttons, self.save_data_buttons
             ):
                 menu_plot_type = menu_button.objectName().split("_menu")[0]
-                if plot_type in [
-                    "periodic_violin",
-                    "fairmode_target",
-                    "fairmode_statsummary",
-                ]:
-                    plot_type = plot_type.replace("_", "-")
+                plot_type = correct_plot_type_name(plot_type)
                 # proceed once have objects for plot type
                 if plot_type == menu_plot_type:
                     menu_button.show()
@@ -486,7 +493,14 @@ class Canvas(FigureCanvas):
             QtWidgets.QWidget(self), self.read_instance.formatting_dict["canvas_cover"]
         )
         self.lower_canvas_cover.hide()
-        # place partial canvas covers below map elements
+
+        # place map controls above partial canvas covers,
+        # but below the full canvas cover,
+        # so they are hidden whenever the map is covered (e.g. while reading data)
+        self.map_date_range.raise_()
+        self.canvas_cover.raise_()
+
+        # place canvas covers below map elements
         for element in self.map_elements:
             element.raise_()
 
@@ -505,6 +519,8 @@ class Canvas(FigureCanvas):
         self.plot_elements = {}
         self.plot_elements["data_labels_active"] = []
         for data_label in self.read_instance.data_labels:
+            if 'gridded' in data_label:
+                continue
             self.plot_elements["data_labels_active"].append(data_label)
 
         # add map domain plot option if on first read
@@ -516,8 +532,26 @@ class Canvas(FigureCanvas):
         # update legend
         self.update_legend()
 
-        # update plotted map z statistic
-        self.update_map_z_statistic()
+        # set limits of map date range selector to loaded period and show it
+        start = self.read_instance.time_array[0]
+        end = self.read_instance.time_array[-1] + pd.tseries.frequencies.to_offset(
+            self.read_instance.active_frequency_code
+        )
+        qstart = QtCore.QDateTime(QtCore.QDate(start.year, start.month, start.day),
+                                  QtCore.QTime(start.hour, 0), QtCore.Qt.UTC)
+        qend = QtCore.QDateTime(QtCore.QDate(end.year, end.month, end.day),
+                                QtCore.QTime(end.hour, 0), QtCore.Qt.UTC)
+        for date_edit, qdate in [(self.map_start_date, qstart), (self.map_end_date, qend)]:
+            date_edit.blockSignals(True)
+            date_edit.setDateTimeRange(qstart, qend)
+            date_edit.setDateTime(qdate)
+            date_edit.blockSignals(False)
+        self.map_date_range_full = (start.to_pydatetime(), end.to_pydatetime())
+        self.map_date_range_selection = self.map_date_range_full
+        self.map_date_range.show()
+
+        # update plotted map z statistic and grid
+        self.update_map()
 
         # uncover map, but hide plotting axes
         self.canvas_cover.hide()
@@ -612,7 +646,10 @@ class Canvas(FigureCanvas):
             self.filter_data = DataFilter(self.read_instance)
         # if it is, update filters, and update map and associated plots
         else:
-            self.filter_data.filter_all()
+            if not self.read_instance.obs_active:
+                self.filter_data.filter_models()
+            else:
+                self.filter_data.filter_all()
             self.update_active_map()
 
         # restore mouse cursor to normal
@@ -646,10 +683,11 @@ class Canvas(FigureCanvas):
 
             # disable MDA8 stat where neccessary
             self.handle_statsummary_statistics_update()
-            self.handle_periodic_statistic_update()
+            for plot_type in ["periodic", "heatmap", "table"]:
+                self.handle_statistic_update(plot_type)
             self.update_timeseries_chunk_statistics()
 
-            # # restore block_MPL_canvas_updates
+            # restore block_MPL_canvas_updates
             self.read_instance.block_MPL_canvas_updates = (
                 original_block_MPL_canvas_updates
             )
@@ -659,8 +697,8 @@ class Canvas(FigureCanvas):
 
             # update plots?
             if not self.read_instance.block_MPL_canvas_updates:
-                # update plotted map z statistic
-                self.update_map_z_statistic()
+                # update plotted map z statistic and grid
+                self.update_map()
 
                 # if have selected stations on map, then now remake plots
                 if hasattr(self, "relative_selected_station_inds"):
@@ -752,6 +790,13 @@ class Canvas(FigureCanvas):
             self.read_instance.active_resolution = (
                 self.read_instance.resampling_resolution
             )
+
+            # warn that resampling is not applied to gridded data
+            if any(data_label_raw.endswith("::gridded")
+                for data_label_raw in self.read_instance.data_labels_raw
+            ):
+                msg = "Resampling is not applied to gridded data."
+                show_message(self.read_instance, msg)
         else:
             self.read_instance.active_resolution = self.read_instance.resolution
 
@@ -760,7 +805,7 @@ class Canvas(FigureCanvas):
 
     def update_active_map(self):
         """
-        Function that updates plotted map z statistic and updates associated plots
+        Function that updates plotted map z statistic and grid and updates associated plots
         """
 
         if not self.read_instance.block_MPL_canvas_updates:
@@ -769,14 +814,117 @@ class Canvas(FigureCanvas):
                 self.relative_selected_station_inds
             )
 
-            # update plotted map z statistic
-            self.update_map_z_statistic()
+            # update plotted map z statistic and grid
+            self.update_map()
 
             # update associated plots
             self.update_associated_dashboard_plots()
 
             # draw changes
             self.figure.canvas.draw_idle()
+
+        return None
+
+    def handle_map_date_range_update(self):
+        """
+        Function that handles the update of the map date range selector
+        """
+
+        start = self.map_start_date.dateTime().toPyDateTime()
+        end = self.map_end_date.dateTime().toPyDateTime()
+
+        # do not allow start date to be at or after end date (end is exclusive)
+        if start >= end:
+            start = (end - pd.tseries.frequencies.to_offset(
+                self.read_instance.active_frequency_code
+            )).to_pydatetime()
+            self.map_start_date.blockSignals(True)
+            self.map_start_date.setDateTime(
+                QtCore.QDateTime(QtCore.QDate(start.year, start.month, start.day),
+                                 QtCore.QTime(start.hour, 0), QtCore.Qt.UTC)
+            )
+            self.map_start_date.blockSignals(False)
+
+        # do nothing if selection has not changed
+        if (start, end) == self.map_date_range_selection:
+            return None
+
+        # update mouse cursor to a waiting cursor
+        self.read_instance.cursor_function = set_cursor(
+            self.read_instance.cursor_function, "handle_map_date_range_update"
+        )
+
+        self.map_date_range_selection = (start, end)
+
+        # update plotted map z statistic and grid
+        self.update_map()
+
+        # restore mouse cursor to normal
+        unset_cursor(self.read_instance.cursor_function, "handle_map_date_range_update")
+
+        return None
+
+    def show_date_time_picker(self, date_edit):
+        """
+        Function that shows date and hour picker under a date edit
+
+        Parameters
+        ----------
+        date_edit : QtWidgets.QDateTimeEdit
+            Date edit
+        """
+
+        self.date_time_picker_date_edit = date_edit
+        self.date_time_picker.show_at(
+            date_edit.mapToGlobal(QtCore.QPoint(0, date_edit.height())),
+            date_edit.dateTime(),
+            date_edit.minimumDateTime(),
+            date_edit.maximumDateTime(),
+        )
+
+        return None
+
+    def handle_date_time_picker_selection(self, date_time):
+        """
+        Function that handles the selection of a date and hour in the picker
+
+        Parameters
+        ----------
+        date_time : QtCore.QDateTime
+            Selected date and hour
+        """
+
+        self.date_time_picker_date_edit.setDateTime(date_time)
+        self.handle_map_date_range_update()
+
+        return None
+    
+    def handle_map_view_mode_update(self):
+        """
+        Function that handles the update of the map view mode (aggregated or instantaneous)
+        """
+
+        return None
+    
+
+    def handle_map_play_button_toggle(self, checked):
+        """
+        Function that handles the start and stop of the map animation
+
+        Parameters
+        ----------
+        checked : bool
+            If the play button is checked (i.e. the animation is playing)
+        """
+
+        self.map_animation_is_playing = checked
+
+        if self.map_animation_is_playing:
+            self.map_play_button.setIcon(self.map_pause_icon)
+            self.map_play_button.setToolTip("Stop map animation")
+        else:
+            self.map_play_button.setIcon(self.map_play_icon)
+            self.map_play_button.setToolTip("Play map animation")
 
         return None
 
@@ -885,6 +1033,15 @@ class Canvas(FigureCanvas):
         # turn colocation on
         if check_state == QtCore.Qt.Checked:
             self.read_instance.temporal_colocation = True
+            
+            # warn that temporal colocation is not applied to gridded data
+            if any(
+                data_label_raw.endswith("::gridded")
+                for data_label_raw in self.read_instance.data_labels_raw
+            ):
+                msg = "Temporal colocation is not applied to gridded data."
+                show_message(self.read_instance, msg)
+
             # need to update plots?
             if len(self.read_instance.data_labels) < 2:
                 if self.read_instance.temporal_colocation_active:
@@ -923,7 +1080,8 @@ class Canvas(FigureCanvas):
             # update plot statistics
             self.handle_map_z_statistic_update()
             self.handle_timeseries_chunk_statistic_update()
-            self.handle_periodic_statistic_update()
+            for plot_type in ["periodic", "heatmap", "table"]:
+                self.handle_statistic_update(plot_type)
             self.handle_statsummary_statistics_update()
             self.handle_statsummary_cycle_update()
             self.handle_statsummary_periodic_aggregation_update()
@@ -937,8 +1095,8 @@ class Canvas(FigureCanvas):
 
             # if not performing read then update plots
             if not self.read_instance.performing_read:
-                # update plotted map z statistic
-                self.update_map_z_statistic()
+                # update plotted map z statistic and grid
+                self.update_map()
 
                 # update associated plots with selected stations
                 self.update_associated_dashboard_plots()
@@ -1038,7 +1196,26 @@ class Canvas(FigureCanvas):
 
         self.read_instance.block_MPL_canvas_updates = False
 
-    def update_map_z_statistic(self):
+    def get_map_lead_days(self):
+        """
+        Get forecast lead days loaded, so gridded model uses the same forecast days
+        as interpolated models (day 1 if no forecast option is loaded)
+        """
+
+        # daily and combined forecasts use all active forecast days
+        if self.read_instance.daily_forecast or self.read_instance.combined_forecast:
+            return list(self.read_instance.active_forecast_days)
+
+        # N day forecast(s)
+        lead_days = set()
+        for data_label_raw in self.read_instance.data_labels_raw:
+            match = re.search(r"::interpolated-day(\d+)$", data_label_raw)
+            if match:
+                lead_days.add(int(match.group(1)))
+
+        return sorted(lead_days) if lead_days else [1]
+
+    def update_map(self):
         """
         Function that updates plotted z statistic on map, with colourbar
         """
@@ -1046,16 +1223,30 @@ class Canvas(FigureCanvas):
         # remove axis elements from map/cb
         self.remove_axis_elements(self.plot_axes["map"], "map")
         self.remove_axis_elements(self.plot_axes["cb"], "cb")
+        
+        # get speci
+        networkspeci = self.get_plot_networkspeci('map')
+        speci = networkspeci.split('|')[1]
 
         # check if labels that have set for map exist in current data labels
         # if not then reset map plot
         labela = self.map_z1.currentText()
         labelb = self.map_z2.currentText()
-        if labela not in self.read_instance.data_labels:
-            self.map_z1.setCurrentText(self.read_instance.observations_data_label)
-            self.map_z2.setCurrentTextText("")
-        elif (labelb not in self.read_instance.data_labels) & (labelb != ""):
-            self.map_z1.setCurrentText(self.read_instance.observations_data_label)
+        if ((labela not in self.read_instance.data_labels) 
+            or ((labelb not in self.read_instance.data_labels) & (labelb != ""))):        
+            if not self.read_instance.obs_active:
+                # get first available interpolated model
+                set_mod_label = False
+                for data_label in self.read_instance.data_labels:
+                    if "gridded" not in data_label:
+                        self.map_z1.setCurrentText(data_label)
+                        set_mod_label = True
+                    break
+                # if only gridded, set empty                
+                if not set_mod_label:
+                    self.map_z1.setCurrentText("")
+            else:
+                self.map_z1.setCurrentText(self.read_instance.observations_data_label)
             self.map_z2.setCurrentText("")
 
         # get zstat name from combobox
@@ -1065,17 +1256,37 @@ class Canvas(FigureCanvas):
         else:
             zstat = get_z_statistic_comboboxes(base_zstat, bias=True)
 
+        # restrict map statistic (stations and grid) to period selected under the map colourbar
+        # (if all loaded period is selected, use all data)
+        date_range = None
+        if self.map_date_range_selection != self.map_date_range_full:
+            date_range = self.map_date_range_selection
+
+        # if there is grid data, read it
+        results = self.read_instance.datareader.read_gridded_data(
+            speci, zstat=zstat, date_range=date_range,
+            lead_days=get_map_lead_days(self.read_instance))
+
+        if results:
+            grid_data, grid_lat, grid_lon = results
+        else:
+            grid_data, grid_lat, grid_lon = None, None, None
+
         # ensure label that have in memory still exists
 
         # plot map for zstat --> updating active map valid station indices and setting up plot picker
         self.plotting.make_map(
             self.plot_axes["map"],
-            self.read_instance.networkspeci,
+            self.get_plot_networkspeci("map"),
             self.plot_characteristics["map"],
             self.current_plot_options["map"],
             zstat=zstat,
             labela=self.map_z1.currentText(),
             labelb=self.map_z2.currentText(),
+            var=grid_data,
+            lat=grid_lat,
+            lon=grid_lon,
+            date_range=date_range
         )
 
         # update absolute selected plotted station indices with respect to new active map valid station indices
@@ -1154,7 +1365,7 @@ class Canvas(FigureCanvas):
                 [self.plot_axes["cb"]],
                 zstat,
                 self.plot_characteristics["map"],
-                self.read_instance.species[0],
+                speci,
                 cmap_override=getattr(self.read_instance, "map_colourmap_override", None),
                 vmin_override=getattr(self.read_instance, "map_vmin_override", None),
                 vmax_override=getattr(self.read_instance, "map_vmax_override", None),
@@ -1177,12 +1388,8 @@ class Canvas(FigureCanvas):
         # update plot options
         self.update_plot_options(plot_types=["map"])
 
-        # resolve each collection's per-point face colours from its scalar
-        # mappable, which update_map_station_selection() reads to apply the
-        # selected/unselected styling on top of. A full draw+flush here
-        # painted that intermediate state to screen (the map appearing to
-        # flash selected then unselect) and pumped the event loop
-        # mid-handler, swallowing the click that triggered it
+        # calculate station colours from z statistic (needed before update_map_station_selection),
+        # without redrawing, so stations are not shown for an instant with their initial size
         for collection in self.plot_axes["map"].collections:
             if isinstance(collection, matplotlib.collections.PathCollection):
                 collection.update_scalarmappable()
@@ -1325,6 +1532,12 @@ class Canvas(FigureCanvas):
 
         if hasattr(self, "relative_selected_station_inds"):
             if len(self.relative_selected_station_inds) > 0:
+
+                # get active labels (the ones selected from legend picker)
+                # this is relevant to tables, heatmaps and statsummaries that are entirely remade 
+                # on interaction with legend picker
+                data_labels = self.plot_elements["data_labels_active"]
+
                 # get numeric position of plot type in dashboard
                 plot_type_position = self.get_plot_type_position(plot_type)
 
@@ -1349,7 +1562,7 @@ class Canvas(FigureCanvas):
                 ]:
                     if (not self.read_instance.temporal_colocation) or (
                         (self.read_instance.temporal_colocation)
-                        and (len(self.read_instance.data_labels) == 1)
+                        and (len(data_labels) == 1)
                     ):
                         if not self.read_instance.temporal_colocation:
                             msg = f"It is not possible to make {plot_type} plots without activating the temporal colocation."
@@ -1364,7 +1577,7 @@ class Canvas(FigureCanvas):
                 speci = self.read_instance.networkspeci.split("|")[1]
                 if plot_type == "contingencytable":
                     # if we have more than one model, skip contingency table
-                    if len(self.read_instance.data_labels) > 2:
+                    if len(data_labels) > 2:
                         msg = f"It is not possible to make {plot_type} plots with more than 1 model."
                         show_message(self.read_instance, msg)
                         self.read_instance.handle_layout_update(
@@ -1448,7 +1661,7 @@ class Canvas(FigureCanvas):
                 plot_options = copy.deepcopy(self.current_plot_options[plot_type])
 
                 # get plotting function for specific plot
-                if plot_type == "statsummary":
+                if plot_type in ['table', 'statsummary']:
                     func = getattr(self.plotting, "make_table")
                 elif plot_type in ["fairmode-target", "fairmode-statsummary"]:
                     func = getattr(
@@ -1534,7 +1747,7 @@ class Canvas(FigureCanvas):
                 # create structure to store data for Taylor diagram
                 elif plot_type == "taylor":
                     # get r or r2 as correlation statistic
-                    corr_stat = self.plot_characteristics[plot_type]["corr_stat"]
+                    corr_stat = self.taylor_menu.comboboxes["corr_stat"].currentText()
                     relevant_zstats = [corr_stat, "StdDev"]
 
                 # setup xlabel / ylabel for other plot_types
@@ -1596,51 +1809,74 @@ class Canvas(FigureCanvas):
                 if plot_type == "periodic":
                     func(
                         ax,
-                        self.read_instance.networkspeci,
-                        self.read_instance.data_labels,
+                        self.get_plot_networkspeci(plot_type),
+                        data_labels,
                         self.plot_characteristics[plot_type],
                         plot_options,
                         zstat=zstat,
                     )
                 # make statsummary plot
-                elif plot_type == "statsummary":
-                    if "bias" in plot_options:
-                        relevant_zstats = self.active_statsummary_stats["modbias"]
+                elif plot_type in ['statsummary', 'table']:
+                    if plot_type == 'statsummary':
+                        statsummary = True
+                        if "bias" in plot_options:
+                            relevant_zstats = self.active_statsummary_stats["modbias"]
+                        else:
+                            relevant_zstats = self.active_statsummary_stats["basic"]
                     else:
-                        relevant_zstats = self.active_statsummary_stats["basic"]
-
+                        statsummary = False
+                        # TODO: Get bias stat if bias in plot options
+                        relevant_zstats = [self.table_stat.currentText()]
                     func(
                         ax,
-                        self.read_instance.networkspeci,
-                        self.read_instance.data_labels,
+                        self.get_plot_networkspeci(plot_type),
+                        data_labels,
                         self.plot_characteristics[plot_type],
                         plot_options,
                         zstats=relevant_zstats,
-                        statsummary=True,
+                        statsummary=statsummary,
                     )
                 # make taylor diagram
                 elif plot_type == "taylor":
-                    corr_stat = self.plot_characteristics["taylor"]["corr_stat"]
                     func(
                         ax,
-                        self.read_instance.networkspeci,
-                        self.read_instance.data_labels,
+                        self.get_plot_networkspeci(plot_type),
+                        data_labels,
                         self.plot_characteristics[plot_type],
                         plot_options,
-                        corr_stat,
+                        self.taylor_corr_stat.currentText()
+                    )
+                # make heatmap diagram
+                elif plot_type == "heatmap":
+                    func(
+                        ax,
+                        self.get_plot_networkspeci(plot_type),
+                        data_labels,
+                        self.plot_characteristics[plot_type],
+                        plot_options,
+                        self.heatmap_stat.currentText(),
+                    )
+                # make boxplot
+                elif plot_type == "boxplot":
+                    func(
+                        ax,
+                        self.get_plot_networkspeci(plot_type),
+                        data_labels,
+                        self.plot_characteristics[plot_type],
+                        plot_options,
                     )
                 # other plots
                 else:
                     func(
                         ax,
-                        self.read_instance.networkspeci,
-                        self.read_instance.data_labels,
+                        self.get_plot_networkspeci(plot_type),
+                        data_labels,
                         self.plot_characteristics[plot_type],
                         plot_options,
                     )
 
                 # reset axes limits (harmonising across subplots for periodic plots)
-                if plot_type not in ["map", "taylor", "fairmode-statsummary"]:
+                if plot_type not in ["map", "taylor", "fairmode-statsummary", "heatmap"]:
                     if plot_type == "scatter":
                         harmonise_xy_lims_paradigm(
                             self.read_instance,
@@ -1678,7 +1914,7 @@ class Canvas(FigureCanvas):
                 self.reset_ax_navigation_toolbar_stack(ax)
 
                 # update plot options, except for plots with no options in dashboard
-                if plot_type not in ["metadata", "fairmode-statsummary"]:
+                if plot_type not in ["fairmode-statsummary", "metadata"]:
                     self.update_plot_options(plot_types=[plot_type])
 
     def get_plot_type_position(self, plot_type):
@@ -1723,7 +1959,7 @@ class Canvas(FigureCanvas):
                 get_selected_station_data(
                     read_instance=self.read_instance,
                     canvas_instance=self,
-                    networkspecies=[self.read_instance.networkspeci],
+                    networkspecies=self.read_instance.networkspecies,
                 )
 
                 # iterate through dashboard_plots
@@ -1809,6 +2045,12 @@ class Canvas(FigureCanvas):
             # changes to the z statistic comboboxes are made
             self.read_instance.block_config_bar_handling_updates = True
 
+            # update mouse cursor to a waiting cursor
+            self.read_instance.cursor_function = set_cursor(
+                self.read_instance.cursor_function,
+                "handle_map_z_statistic_update",
+            )
+
             # get currently selected items
             selected_z_stat = self.map_z_stat.currentText()
             selected_z1_array = self.map_z1.currentText()
@@ -1832,22 +2074,31 @@ class Canvas(FigureCanvas):
                     self.read_instance.observations_data_label
                 )
 
-            # update z statistic field to all basic stats if colocation not-active OR z2
-            # array not selected, else select basic+bias stats
-            if (
-                (not self.read_instance.temporal_colocation)
-                or (selected_z2_array == "")
-                or (len(self.read_instance.data_labels) == 1)
-            ):
-                z_stat_items = copy.deepcopy(self.read_instance.basic_z_stats)
+            # check if we have any gridded dataset
+            has_gridded = False
+            for data_label in self.read_instance.data_labels:
+                if 'gridded' in data_label:
+                    has_gridded = True
+            # TODO: Add Median when ready
+            if has_gridded:
+                z_stat_items = ['Mean']
             else:
-                z_stat_items = copy.deepcopy(self.read_instance.basic_and_bias_z_stats)
+                # update z statistic field to all basic stats if colocation not-active OR z2
+                # array not selected, else select basic+bias stats
+                if (
+                    (not self.read_instance.temporal_colocation)
+                    or (selected_z2_array == "")
+                    or (len(self.read_instance.data_labels) == 1)
+                ):
+                    z_stat_items = copy.deepcopy(self.read_instance.basic_z_stats)
+                else:
+                    z_stat_items = copy.deepcopy(self.read_instance.basic_and_bias_z_stats)
 
-            # remove nonsensical available map stats
-            nonsensical_map_stats = ["NStations", "NUniqueStations", "MDA8"]
-            for nonsensical_map_stat in nonsensical_map_stats:
-                if nonsensical_map_stat in z_stat_items:
-                    z_stat_items = z_stat_items[z_stat_items != nonsensical_map_stat]
+                # remove nonsensical available map stats
+                nonsensical_map_stats = ["NStations", "NUniqueStations", "MDA8"]
+                for nonsensical_map_stat in nonsensical_map_stats:
+                    if nonsensical_map_stat in z_stat_items:
+                        z_stat_items = z_stat_items[z_stat_items != nonsensical_map_stat]
 
             # remove selected z1/z2 items from opposite z2/z1 comboboxes (if have value
             # selected, i.e. z2 array not empty string)
@@ -1893,13 +2144,28 @@ class Canvas(FigureCanvas):
             # with that choice dropped the basemap may match its preset again
             self.sync_map_colour_preset()
 
-            # update plotted map z statistic
+            # a manually-typed colourbar limit rarely makes sense carried
+            # over to a different statistic (a concentration range typed for
+            # "Mean" would mis-scale "Bias"), so clear it back to auto
+            self.map_cb_min.clear()
+            self.map_cb_max.clear()
+            self.read_instance.map_vmin_override = None
+            self.read_instance.map_vmax_override = None
+            # the colourmap suited to one statistic rarely suits the next, so
+            # fall back to the statistic's own - see sync_map_colourmap()
+            self.read_instance.map_colourmap_override = None
+            self.sync_map_colourmap()
+            # with that choice dropped the basemap may match its preset again
+            self.sync_map_colour_preset()
+
+            # update plotted map z statistic and grid
             if not self.read_instance.block_MPL_canvas_updates:
-                self.update_map_z_statistic()
+                self.update_map()
 
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
-
+            
+            # restore mouse cursor to normal
             unset_cursor(
                 self.read_instance.cursor_function, "handle_map_z_statistic_update"
             )
@@ -1925,13 +2191,14 @@ class Canvas(FigureCanvas):
 
             # update plotted map z statistic (re-generates the colourbar too)
             if not self.read_instance.block_MPL_canvas_updates:
-                self.update_map_z_statistic()
+                self.update_map()
 
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
 
+            # restore mouse cursor to normal
             unset_cursor(
-                self.read_instance.cursor_function, "handle_map_colourmap_update"
+                self.read_instance.cursor_function, "handle_map_z_statistic_update"
             )
 
         return None
@@ -2856,7 +3123,7 @@ class Canvas(FigureCanvas):
         panel_left = settings_button.x() - 220
         panel_width = 230
         gap = 6
-        row_y = settings_button.y() + 210
+        row_y = settings_button.y() + 310
         row_height = 20
 
         buttons = [
@@ -2905,7 +3172,7 @@ class Canvas(FigureCanvas):
         # the row is the last thing in the panel, so a wrapped second line
         # only needs the panel itself to grow to keep it inside
         container = self.map_menu.containers["container"]
-        container.resize(container.width(), 220 + (row_height + 5 if wrapped else 0))
+        container.resize(container.width(), 320 + (row_height + 5 if wrapped else 0))
 
         return None
 
@@ -3440,7 +3707,7 @@ class Canvas(FigureCanvas):
                 get_selected_station_data(
                     read_instance=self.read_instance,
                     canvas_instance=self,
-                    networkspecies=[self.read_instance.networkspeci],
+                    networkspecies=self.read_instance.networkspecies,
                 )
 
                 # update plot
@@ -3526,7 +3793,7 @@ class Canvas(FigureCanvas):
                     get_selected_station_data(
                         read_instance=self.read_instance,
                         canvas_instance=self,
-                        networkspecies=[self.read_instance.networkspeci],
+                        networkspecies=self.read_instance.networkspecies,
                     )
 
                     # update plot
@@ -3645,74 +3912,78 @@ class Canvas(FigureCanvas):
         self.read_instance.block_config_bar_handling_updates = False
 
     @restores_settings_guard
-    def handle_periodic_statistic_update(self):
+    def handle_statistic_update(self, plot_type):
         """
-        Function that handles update of plotted periodic statistic
-        upon interaction with periodic statistic combobox
+        Function that handles update of plotted statistic
+        upon interaction with statistic combobox in heatmap / periodic plots
         """
 
         if not self.read_instance.block_config_bar_handling_updates:
+
             # update mouse cursor to a waiting cursor
             self.read_instance.cursor_function = set_cursor(
-                self.read_instance.cursor_function, "handle_periodic_statistic_update"
+                self.read_instance.cursor_function, f"handle_{plot_type}_statistic_update"
             )
 
             # set variable that blocks configuration bar handling updates until all changes
-            # to the periodic statistic combobox are made
+            # to the statistic combobox are made
             self.read_instance.block_config_bar_handling_updates = True
 
             # get currently selected statistic
-            zstat = self.periodic_stat.currentText()
+            plot_stat = getattr(self, f"{plot_type}_stat")
+            stat = plot_stat.currentText()
 
-            # update periodic statistics, to all basic stats
+            # update statistics, to all basic stats
             # if colocation not-active, and basic+bias stats if colocation active
             if (not self.read_instance.temporal_colocation) or (
                 len(self.read_instance.data_labels) == 1
             ):
-                available_periodic_stats = copy.deepcopy(
+                available_stats = copy.deepcopy(
                     self.read_instance.basic_z_stats
                 )
             else:
-                available_periodic_stats = copy.deepcopy(
+                available_stats = copy.deepcopy(
                     self.read_instance.basic_and_bias_z_stats
                 )
 
             # remove MDA8 from available stats
-            if "MDA8" in available_periodic_stats:
-                available_periodic_stats = np.delete(
-                    available_periodic_stats,
-                    np.where(available_periodic_stats == "MDA8")[0],
+            # TODO: Check this, I don't understand why we are removing it here 
+            # without checking temporal resolution
+            if "MDA8" in available_stats:
+                available_stats = np.delete(
+                    available_stats,
+                    np.where(available_stats == "MDA8")[0],
                 )
 
-            # if base_zstat is empty string, it is because fields are being initialised for the first time
-            if zstat == "":
+            # if stat is empty string, it is because fields are being initialised for the first time
+            if stat == "":
                 # set periodic stat to be first available stat
-                zstat = available_periodic_stats[0]
+                stat = available_stats[0]
 
             # update periodic statistic combobox (clear, then add items)
-            self.periodic_stat.clear()
-            self.periodic_stat.addItems(available_periodic_stats)
+            plot_stat.clear()
+            plot_stat.addItems(available_stats)
 
-            # maintain currently selected periodic statistic (if exists in new item list)
-            if zstat in available_periodic_stats:
-                self.periodic_stat.setCurrentText(zstat)
-            elif zstat == "MDA8":
-                msg = f"Periodic statistic is being reset to {self.periodic_stat.currentText()}. MDA8 can only be calculated when the active resolution is hourly."
+            # maintain currently selected statistic (if exists in new item list)
+            if stat in available_stats:
+                plot_stat.setCurrentText(stat)
+            elif stat == "MDA8":
+                msg = f"{plot_type.capitalize()} statistic is being reset to {plot_stat.currentText()}. MDA8 can only be calculated when the active resolution is hourly."
                 show_message(self.read_instance, msg)
 
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
 
-            # update plotted periodic statistic
+            # update plotted statistic
             if not self.read_instance.block_MPL_canvas_updates:
-                self.update_associated_active_dashboard_plot("periodic")
+                self.update_associated_active_dashboard_plot(plot_type)
 
             # draw changes
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
             unset_cursor(
-                self.read_instance.cursor_function, "handle_periodic_statistic_update"
+                self.read_instance.cursor_function, f"handle_{plot_type}_statistic_update"
             )
 
         return None
@@ -3753,9 +4024,6 @@ class Canvas(FigureCanvas):
             # maintain currently selected statistic
             self.taylor_corr_stat.setCurrentText(corr_stat)
 
-            # update dictionary
-            self.plot_characteristics["taylor"]["corr_stat"] = corr_stat
-
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
 
@@ -3773,7 +4041,7 @@ class Canvas(FigureCanvas):
             )
 
         return None
-
+    
     def _station_statistic_items(self):
         """
         Returns the items offered by a "Station statistic" control (on the
@@ -4441,9 +4709,12 @@ class Canvas(FigureCanvas):
                 self.remove_axis_objects(
                     ax_to_remove.artists, types_to_remove=[AnchoredOffsetbox]
                 )
+                # PathCollection corresponds to the scatter
+                # QuadMesh corresponds to the pcolormesh from the gridded model
                 self.remove_axis_objects(
                     ax_to_remove.collections,
-                    types_to_remove=[matplotlib.collections.PathCollection],
+                    types_to_remove=[matplotlib.collections.PathCollection,
+                                     matplotlib.collections.QuadMesh],
                 )
                 # # TODO: Put line collection back into place when we turn on the auto_update in gridlines
                 # self.remove_axis_objects(ax_to_remove.collections, types_to_remove=[matplotlib.collections.PathCollection],
@@ -4476,7 +4747,7 @@ class Canvas(FigureCanvas):
                 for objects in [ax_to_remove.lines, ax_to_remove.artists]:
                     self.remove_axis_objects(objects)
 
-            elif plot_type in ["statsummary", "contingencytable"]:
+            elif plot_type in ["statsummary", "contingencytable", "table"]:
                 self.remove_axis_objects(ax_to_remove.tables)
 
             elif plot_type in ["taylor", "scatter"]:
@@ -4502,6 +4773,13 @@ class Canvas(FigureCanvas):
 
             elif plot_type == "fairmode-statsummary":
                 self.remove_axis_objects(ax_to_remove.lines)
+
+            elif plot_type == "heatmap":
+                for objects in [
+                    ax_to_remove.texts,
+                    ax_to_remove.collections
+                ]:
+                    self.remove_axis_objects(objects)
 
         # remove tracked plot elements
         if plot_type in self.plot_elements:
@@ -4529,12 +4807,16 @@ class Canvas(FigureCanvas):
         for plot_type in plot_types:
             all_plot_options = self.plot_characteristics[plot_type]["plot_options"]
             checked_options = self.current_plot_options[plot_type]
-            if plot_type in [
-                "periodic-violin",
-                "fairmode-target",
-                "fairmode-statsummary",
-            ]:
-                plot_type = plot_type.replace("-", "_")
+            # There are certain plots ('heatmap', 'statsummary', 'boxplot', 'table') 
+            # that have multispecies in current_plot_options because the plot option has been forced 
+            # in the functions to create each plot inside the Plotting object (e.g. make_heatmap)
+            # so that when we have multiple species read into memory we always show multispecies plots.
+            # However, these plots do not have multispecies as an option in the burger menus
+            # and we do not need to check or uncheck them in the dropdown menus
+            if plot_type in ['heatmap', 'statsummary', 'boxplot', 'table']:
+                if 'multispecies' in checked_options:
+                    checked_options.remove('multispecies')
+            plot_type = correct_plot_type_name(plot_type)
             cb_options = getattr(self, plot_type + "_options")
 
             if plot_type == "contingencytable":
@@ -4690,8 +4972,14 @@ class Canvas(FigureCanvas):
 
             # else, if checkbox is checked then select all stations which intersect with all loaded model domains
             elif check_state == QtCore.Qt.Checked:
+                # get non-gridded model data labels (gridded models have no station data)
+                model_data_labels = [
+                    data_label for data_label in self.read_instance.data_labels
+                    if data_label != self.read_instance.observations_data_label
+                    and "gridded" not in data_label
+                ]
                 # if have only observations loaded into memory, select all plotted stations
-                if len(self.read_instance.data_labels) == 1:
+                if len(model_data_labels) == 0:
                     self.relative_selected_station_inds = copy.deepcopy(
                         self.active_map_valid_station_inds
                     )
@@ -4705,21 +4993,20 @@ class Canvas(FigureCanvas):
                 # and valid station indices associated with each loaded model array)
                 else:
                     intersect_lists = [self.active_map_valid_station_inds]
-                    for data_label in self.read_instance.data_labels:
-                        if data_label != self.read_instance.observations_data_label:
-                            if self.read_instance.temporal_colocation:
-                                valid_station_inds = self.read_instance.valid_station_inds_temporal_colocation[
+                    for data_label in model_data_labels:
+                        if self.read_instance.temporal_colocation:
+                            valid_station_inds = self.read_instance.valid_station_inds_temporal_colocation[
+                                self.read_instance.networkspeci
+                            ][
+                                data_label
+                            ]
+                        else:
+                            valid_station_inds = (
+                                self.read_instance.valid_station_inds[
                                     self.read_instance.networkspeci
-                                ][
-                                    data_label
-                                ]
-                            else:
-                                valid_station_inds = (
-                                    self.read_instance.valid_station_inds[
-                                        self.read_instance.networkspeci
-                                    ][data_label]
-                                )
-                            intersect_lists.append(valid_station_inds)
+                                ][data_label]
+                            )
+                        intersect_lists.append(valid_station_inds)
 
                     # get intersect between active map valid station indices and valid station indices
                     # associated with each loaded model array --> relative selected station indcies
@@ -5245,13 +5532,22 @@ class Canvas(FigureCanvas):
 
         # MAP SETTINGS MENU #
         # create map settings menu
-        self.map_menu = SettingsMenu(plot_type="map", canvas_instance=self)
+        self.map_menu = SettingsMenu(plot_type="map", canvas_instance=self, read_instance=self.read_instance)
         self.map_options = self.map_menu.checkable_comboboxes["options"]
+        self.map_networkspecies = self.map_menu.comboboxes["networkspecies"]
 
         # get stats
         self.map_z_stat = self.map_menu.comboboxes["z_stat"]
         self.map_z1 = self.map_menu.comboboxes["z1"]
         self.map_z2 = self.map_menu.comboboxes["z2"]
+
+        # get view mode
+        self.map_view_mode = self.map_menu.comboboxes["view_mode"]
+        self.map_view_mode.addItems(["Aggregated", "Instantaneous"])
+        self.map_view_mode.setToolTip(
+            "Aggregated: one statistic over the selected period. "
+            "Instantaneous: one timestep at a time"
+        )
 
         # get colourbar limit fields - populated with the actual resolved
         # limits after each redraw (see update_map_z_statistic()), not a
@@ -5292,6 +5588,71 @@ class Canvas(FigureCanvas):
             "markersize_sl": [self.map_markersize_unsel_sl, self.map_markersize_sel_sl],
             "opacity_sl": [self.map_opacity_unsel_sl, self.map_opacity_sel_sl],
         }
+
+        # add date and hour picker for map date range selector
+        highlight_color = self.plot_characteristics_templates["general"]["highlight_color"]
+        self.date_time_picker = DateTimePicker(self, highlight_color=highlight_color)
+        self.date_time_picker.accepted.connect(self.handle_date_time_picker_selection)
+        self.date_time_picker_date_edit = None
+
+        # add map controls (date range selector and play button, placed under the map colourbar)
+        self.map_date_range = QtWidgets.QWidget(self)
+        set_highlight_color(self.map_date_range, highlight_color)
+        map_controls_layout = QtWidgets.QHBoxLayout(self.map_date_range)
+        map_controls_layout.setContentsMargins(0, 0, 0, 0)
+        map_controls_layout.setSpacing(4)
+        self.map_start_date = QtWidgets.QDateTimeEdit(self.map_date_range)
+        self.map_end_date = QtWidgets.QDateTimeEdit(self.map_date_range)
+        map_controls_layout.addWidget(QtWidgets.QLabel("Period:", self.map_date_range))
+
+        # add date pickers
+        for date_edit in [self.map_start_date, self.map_end_date]:
+            date_edit.setTimeSpec(QtCore.Qt.UTC)
+            date_edit.setDisplayFormat("yyyy-MM-dd HH':00'")
+            date_edit.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
+            date_edit.editingFinished.connect(self.handle_map_date_range_update)
+
+            # add calendar icon that opens date and hour picker
+            picker_action = date_edit.lineEdit().addAction(
+                QtGui.QIcon(join(CURRENT_PATH, "resources/calendar_icon.png")),
+                QtWidgets.QLineEdit.TrailingPosition,
+            )
+            picker_action.setToolTip("Select date and hour")
+            picker_action.triggered.connect(
+                lambda _, date_edit=date_edit: self.show_date_time_picker(date_edit)
+            )
+            # widen field so icon does not cover the date
+            date_edit.setMinimumWidth(date_edit.sizeHint().width() + 24)
+
+            # add a dash separator between date pickers
+            if date_edit == self.map_end_date:
+                map_controls_layout.addWidget(QtWidgets.QLabel("–", self.map_date_range))
+            map_controls_layout.addWidget(date_edit)
+
+        # do not allow end date/hour before start date/hour, nor start after end
+        self.map_start_date.dateTimeChanged.connect(self.map_end_date.setMinimumDateTime)
+        self.map_end_date.dateTimeChanged.connect(self.map_start_date.setMaximumDateTime)
+
+        # add play button next to the date pickers
+        # self.map_play_icon = QtGui.QIcon(join(CURRENT_PATH, "resources/play_icon.png"))
+        # self.map_pause_icon = QtGui.QIcon(join(CURRENT_PATH, "resources/pause_icon.png"))
+        # self.map_play_button = set_formatting(
+        #     QtWidgets.QPushButton(self.map_date_range),
+        #     self.read_instance.formatting_dict["save_icon"],
+        # )
+        # self.map_play_button.setIcon(self.map_play_icon)
+        # self.map_play_button.setIconSize(QtCore.QSize(14, 14))
+        # self.map_play_button.setCheckable(True)
+        # self.map_play_button.clicked.connect(self.handle_map_play_button_toggle)
+        # self.map_play_button.setToolTip("Play or stop map animation")
+        # self.map_play_button.setFixedWidth(24)
+        # map_controls_layout.addWidget(self.map_play_button)
+        # self.map_animation_is_playing = False
+
+        # stretch keeps the controls packed to the left of the container
+        map_controls_layout.addStretch()
+        self.map_date_range.setToolTip("Select period used for the map statistic")
+        self.map_date_range.hide()
 
         # automatic size/opacity, on by default - keeps points well spaced as
         # the map is zoomed and boosts selected stations over unselected ones
@@ -5576,10 +5937,11 @@ class Canvas(FigureCanvas):
         # TIMESERIES PLOT SETTINGS MENU #
         # create timeseries settings menu
         self.timeseries_menu = SettingsMenu(
-            plot_type="timeseries", canvas_instance=self
+            plot_type="timeseries", canvas_instance=self, read_instance=self.read_instance
         )
         self.timeseries_options = self.timeseries_menu.checkable_comboboxes["options"]
         self.timeseries_elements = self.timeseries_menu.get_elements()
+        self.timeseries_networkspecies = self.timeseries_menu.comboboxes["networkspecies"]
 
         # get aggregation stat, chunk stat and chunk resolution
         self.timeseries_stat = self.timeseries_menu.comboboxes["stat"]
@@ -5645,9 +6007,11 @@ class Canvas(FigureCanvas):
 
         # PERIODIC PLOT SETTINGS MENU #
         # create periodic settings menu
-        self.periodic_menu = SettingsMenu(plot_type="periodic", canvas_instance=self)
+        self.periodic_menu = SettingsMenu(plot_type="periodic", canvas_instance=self, 
+                                          read_instance=self.read_instance)
         self.periodic_options = self.periodic_menu.checkable_comboboxes["options"]
         self.periodic_elements = self.periodic_menu.get_elements()
+        self.periodic_networkspecies = self.periodic_menu.comboboxes["networkspecies"]
 
         # get stats
         self.periodic_stat = self.periodic_menu.comboboxes["stat"]
@@ -5678,12 +6042,13 @@ class Canvas(FigureCanvas):
         # PERIODIC VIOLIN PLOT SETTINGS MENU #
         # create periodic violin settings menu
         self.periodic_violin_menu = SettingsMenu(
-            plot_type="periodic_violin", canvas_instance=self
+            plot_type="periodic_violin", canvas_instance=self, read_instance=self.read_instance
         )
         self.periodic_violin_options = self.periodic_violin_menu.checkable_comboboxes[
             "options"
         ]
         self.periodic_violin_elements = self.periodic_violin_menu.get_elements()
+        self.periodic_violin_networkspecies = self.periodic_violin_menu.comboboxes["networkspecies"]
 
         # get sliders and update values
         self.periodic_violin_markersize_sl = self.periodic_violin_menu.sliders[
@@ -5733,8 +6098,10 @@ class Canvas(FigureCanvas):
 
         # METADATA PLOT SETTINGS MENU #
         # create metadata settings menu
-        self.metadata_menu = SettingsMenu(plot_type="metadata", canvas_instance=self)
+        self.metadata_menu = SettingsMenu(plot_type="metadata", canvas_instance=self, 
+                                          read_instance=self.read_instance)
         self.metadata_elements = self.metadata_menu.get_elements()
+        self.metadata_networkspecies = self.metadata_menu.comboboxes["networkspecies"]
 
         # get metadata interactive dictionary
         self.interactive_elements["metadata"] = {"hidden": True}
@@ -5742,12 +6109,13 @@ class Canvas(FigureCanvas):
         # DISTRIBUTION PLOT SETTINGS MENU #
         # create distribution settings menu
         self.distribution_menu = SettingsMenu(
-            plot_type="distribution", canvas_instance=self
+            plot_type="distribution", canvas_instance=self, read_instance=self.read_instance
         )
         self.distribution_options = self.distribution_menu.checkable_comboboxes[
             "options"
         ]
         self.distribution_elements = self.distribution_menu.get_elements()
+        self.distribution_networkspecies = self.distribution_menu.comboboxes["networkspecies"]
 
         # "None" plus whichever statistics are currently offered
         self.distribution_station_stat = self.distribution_menu.comboboxes[
@@ -5775,9 +6143,12 @@ class Canvas(FigureCanvas):
 
         # HISTOGRAM PLOT SETTINGS MENU #
         # create histogram settings menu
-        self.histogram_menu = SettingsMenu(plot_type="histogram", canvas_instance=self)
+        self.histogram_menu = SettingsMenu(
+            plot_type="histogram", canvas_instance=self, read_instance=self.read_instance
+        )
         self.histogram_options = self.histogram_menu.checkable_comboboxes["options"]
         self.histogram_elements = self.histogram_menu.get_elements()
+        self.histogram_networkspecies = self.histogram_menu.comboboxes["networkspecies"]
 
         # "Station statistic" combobox - see the equivalent on the
         # distribution menu above
@@ -5827,9 +6198,10 @@ class Canvas(FigureCanvas):
 
         # SCATTER PLOT SETTINGS MENU #
         # create scatter settings menu
-        self.scatter_menu = SettingsMenu(plot_type="scatter", canvas_instance=self)
+        self.scatter_menu = SettingsMenu(plot_type="scatter", canvas_instance=self, read_instance=self.read_instance)
         self.scatter_options = self.scatter_menu.checkable_comboboxes["options"]
         self.scatter_elements = self.scatter_menu.get_elements()
+        self.scatter_networkspecies = self.scatter_menu.comboboxes["networkspecies"]
 
         # get sliders and update values
         self.scatter_markersize_sl = self.scatter_menu.sliders["markersize_sl"]
@@ -5862,12 +6234,13 @@ class Canvas(FigureCanvas):
         # FAIRMODE TARGET PLOT SETTINGS MENU #
         # create fairmode target settings menu
         self.fairmode_target_menu = SettingsMenu(
-            plot_type="fairmode_target", canvas_instance=self
+            plot_type="fairmode_target", canvas_instance=self, read_instance=self.read_instance
         )
         self.fairmode_target_options = self.fairmode_target_menu.checkable_comboboxes[
             "options"
         ]
         self.fairmode_target_elements = self.fairmode_target_menu.get_elements()
+        self.fairmode_target_networkspecies = self.fairmode_target_menu.comboboxes["networkspecies"]
         self.fairmode_target_classification = self.fairmode_target_menu.comboboxes[
             "classification"
         ]
@@ -5902,11 +6275,12 @@ class Canvas(FigureCanvas):
         # FAIRMODE STATSUMMARY PLOT SETTINGS MENU #
         # create fairmode statsummary settings menu
         self.fairmode_statsummary_menu = SettingsMenu(
-            plot_type="fairmode_statsummary", canvas_instance=self
+            plot_type="fairmode_statsummary", canvas_instance=self, read_instance=self.read_instance
         )
         self.fairmode_statsummary_elements = (
             self.fairmode_statsummary_menu.get_elements()
         )
+        self.fairmode_statsummary_networkspecies = self.fairmode_statsummary_menu.comboboxes["networkspecies"]
 
         # get sliders and update values
         self.fairmode_statsummary_markersize_sl = (
@@ -5928,9 +6302,10 @@ class Canvas(FigureCanvas):
         # STATSUMMARY PLOT SETTINGS MENU #
         # create statsummary settings menu
         self.statsummary_menu = SettingsMenu(
-            plot_type="statsummary", canvas_instance=self
+            plot_type="statsummary", canvas_instance=self, read_instance=self.read_instance
         )
         self.statsummary_options = self.statsummary_menu.checkable_comboboxes["options"]
+        self.statsummary_networkspecies = self.statsummary_menu.checkable_comboboxes["networkspecies"]
         self.statsummary_elements = self.statsummary_menu.get_elements()
 
         # get stats and add items to cycle
@@ -5949,8 +6324,10 @@ class Canvas(FigureCanvas):
 
         # BOXPLOT PLOT SETTINGS MENU #
         # create boxplot settings menu
-        self.boxplot_menu = SettingsMenu(plot_type="boxplot", canvas_instance=self)
+        self.boxplot_menu = SettingsMenu(plot_type="boxplot", canvas_instance=self,
+                                         read_instance=self.read_instance)
         self.boxplot_options = self.boxplot_menu.checkable_comboboxes["options"]
+        self.boxplot_networkspecies = self.boxplot_menu.checkable_comboboxes["networkspecies"]
         self.boxplot_elements = self.boxplot_menu.get_elements()
 
         # whether the category labels fit along the x-axis (horizontal, or
@@ -5967,9 +6344,10 @@ class Canvas(FigureCanvas):
 
         # TAYLOR DIAGRAM SETTINGS MENU #
         # create taylor diagram settings menu
-        self.taylor_menu = SettingsMenu(plot_type="taylor", canvas_instance=self)
+        self.taylor_menu = SettingsMenu(plot_type="taylor", canvas_instance=self, read_instance=self.read_instance)
         self.taylor_options = self.taylor_menu.checkable_comboboxes["options"]
         self.taylor_elements = self.taylor_menu.get_elements()
+        self.taylor_networkspecies = self.taylor_menu.comboboxes["networkspecies"]
 
         # get stat
         self.taylor_corr_stat = self.taylor_menu.comboboxes["corr_stat"]
@@ -5992,15 +6370,44 @@ class Canvas(FigureCanvas):
         # CONTINGENCY TABLE SETTINGS MENU #
         # create contingency table settings menu
         self.contingencytable_menu = SettingsMenu(
-            plot_type="contingencytable", canvas_instance=self
+            plot_type="contingencytable", canvas_instance=self, read_instance=self.read_instance
         )
         self.contingencytable_options = self.contingencytable_menu.checkable_comboboxes[
             "options"
         ]
         self.contingencytable_elements = self.contingencytable_menu.get_elements()
+        self.contingencytable_networkspecies = self.contingencytable_menu.comboboxes["networkspecies"]
 
         # get contingency table interactive dictionary
         self.interactive_elements["contingencytable"] = {"hidden": True}
+
+        # HEATMAP PLOT SETTINGS MENU #
+        # create heatmap settings menu
+        self.heatmap_menu = SettingsMenu(plot_type="heatmap", canvas_instance=self,
+                                         read_instance=self.read_instance)
+        self.heatmap_options = self.heatmap_menu.checkable_comboboxes["options"]
+        self.heatmap_networkspecies = self.heatmap_menu.checkable_comboboxes["networkspecies"]
+        self.heatmap_elements = self.heatmap_menu.get_elements()
+
+        # get stats
+        self.heatmap_stat = self.heatmap_menu.comboboxes["stat"]
+
+        # get heatmap interactive dictionary
+        self.interactive_elements["heatmap"] = {"hidden": True}
+
+        # TABLE PLOT SETTINGS MENU #
+        # create table settings menu
+        self.table_menu = SettingsMenu(plot_type="table", canvas_instance=self,
+                                         read_instance=self.read_instance)
+        self.table_options = self.table_menu.checkable_comboboxes["options"]
+        self.table_networkspecies = self.table_menu.checkable_comboboxes["networkspecies"]
+        self.table_elements = self.table_menu.get_elements()
+
+        # get stats
+        self.table_stat = self.table_menu.comboboxes["stat"]
+
+        # get heatmap interactive dictionary
+        self.interactive_elements["table"] = {"hidden": True}
 
         # create array with buttons and elements to edit when the canvas is resized or the plots are changed
         self.menu_buttons = []
@@ -6008,13 +6415,6 @@ class Canvas(FigureCanvas):
         self.save_data_buttons = []
         self.elements = []
         for plot_type in settings_dict.keys():
-            if plot_type in [
-                "periodic-violin",
-                "fairmode-target",
-                "fairmode-statsummary",
-            ]:
-                plot_type = plot_type.replace("-", "_")
-
             self.menu_buttons.append(
                 getattr(self, plot_type + "_menu").buttons["settings_button"]
             )
@@ -6080,12 +6480,11 @@ class Canvas(FigureCanvas):
         ----------
         keys : list, optional
             Menus to close, as keys of self.interactive_elements (default is
-            None, i.e. every menu but the map's, whose plot is never covered
-            on its own)
+            None)
         """
 
         if keys is None:
-            keys = [key for key in self.interactive_elements if key != "map"]
+            keys = self.interactive_elements
 
         for key in keys:
             if self.interactive_elements[key]["hidden"]:
@@ -6503,17 +6902,8 @@ class Canvas(FigureCanvas):
         if not self.read_instance.block_MPL_canvas_updates:
             # get source
             event_source = self.sender()
-            plot_type_alt = event_source.objectName().split("_options")[0]
-
-            # correct perodic-violin name
-            if plot_type_alt in [
-                "periodic_violin",
-                "fairmode_target",
-                "fairmode_statsummary",
-            ]:
-                plot_type = plot_type_alt.replace("_", "-")
-            else:
-                plot_type = copy.deepcopy(plot_type_alt)
+            plot_type = event_source.objectName().split("_options")[0]
+            plot_type = correct_plot_type_name(plot_type)
 
             # force Taylor diagram to show bias statistics
             if "taylor" in plot_type:
@@ -6762,7 +7152,7 @@ class Canvas(FigureCanvas):
                                             self.read_instance,
                                             self,
                                             sub_ax,
-                                            self.read_instance.networkspeci,
+                                            self.get_plot_networkspeci(plot_type),
                                             self.read_instance.data_labels,
                                             plot_type,
                                             self.plot_characteristics[plot_type],
@@ -6771,16 +7161,47 @@ class Canvas(FigureCanvas):
                                         )
                                         break
                             else:
-                                annotation(
-                                    self.read_instance,
-                                    self,
+                                if plot_type == 'heatmap':
+                                    # clear all previously plotted artists for plot type
+                                    self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
+                                    
+                                    # make plot again considering plot option
+                                    func = getattr(self.plotting, "make_heatmap")
+                                    func(
+                                        self.plot_axes[plot_type],
+                                        self.get_plot_networkspeci(plot_type),
+                                        self.read_instance.data_labels,
+                                        self.plot_characteristics[plot_type],
+                                        self.current_plot_options[plot_type],
+                                        self.heatmap_stat.currentText(),
+                                    )
+                                else:
+                                    # TODO: If we have multiple species, show annotations for all of them
+                                    annotation(
+                                        self.read_instance,
+                                        self,
+                                        self.plot_axes[plot_type],
+                                        self.get_plot_networkspeci(plot_type),
+                                        self.read_instance.data_labels,
+                                        plot_type,
+                                        self.plot_characteristics[plot_type],
+                                        self.current_plot_options[plot_type],
+                                        plot_z_statistic_sign=z_statistic_sign,
+                                    )
+                        else:
+                            if plot_type == 'heatmap':
+                                # clear all previously plotted artists for plot type
+                                self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
+
+                                # make plot again considering plot option
+                                func = getattr(self.plotting, "make_heatmap")
+                                func(
                                     self.plot_axes[plot_type],
-                                    self.read_instance.networkspeci,
+                                    self.get_plot_networkspeci(plot_type),
                                     self.read_instance.data_labels,
-                                    plot_type,
                                     self.plot_characteristics[plot_type],
                                     self.current_plot_options[plot_type],
-                                    plot_z_statistic_sign=z_statistic_sign,
+                                    self.heatmap_stat.currentText(),
                                 )
 
                     # option 'smooth'
@@ -6800,7 +7221,7 @@ class Canvas(FigureCanvas):
                                 self.read_instance,
                                 self,
                                 self.plot_axes[plot_type],
-                                self.read_instance.networkspeci,
+                                self.get_plot_networkspeci(plot_type),
                                 self.read_instance.data_labels,
                                 plot_type,
                                 self.plot_characteristics[plot_type],
@@ -6876,7 +7297,7 @@ class Canvas(FigureCanvas):
                                 self.read_instance,
                                 self,
                                 self.plot_axes[plot_type],
-                                self.read_instance.networkspeci,
+                                self.get_plot_networkspeci(plot_type),
                                 self.read_instance.data_labels,
                                 plot_type,
                                 self.plot_characteristics[plot_type],
@@ -6892,10 +7313,28 @@ class Canvas(FigureCanvas):
                         func = getattr(self.plotting, "make_contingencytable")
                         func(
                             self.plot_axes[plot_type],
-                            self.read_instance.networkspeci,
+                            self.get_plot_networkspeci(plot_type),
                             self.read_instance.data_labels,
                             self.plot_characteristics[plot_type],
                             self.current_plot_options[plot_type],
+                        )
+
+                    # option 'perstation' (Taylor diagram)
+                    # switches between one aggregated point per model and a
+                    # per-station cloud, so the whole diagram needs remaking
+                    elif option == "perstation":
+                        # clear all previously plotted artists for plot type
+                        self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
+
+                        # make plot again considering plot option
+                        func = getattr(self.plotting, "make_taylor")
+                        func(
+                            self.plot_axes[plot_type],
+                            self.get_plot_networkspeci(plot_type),
+                            self.read_instance.data_labels,
+                            self.plot_characteristics[plot_type],
+                            self.current_plot_options[plot_type],
+                            self.plot_characteristics[plot_type]["corr_stat"],
                         )
 
                     # option 'perstation' (Taylor diagram)
@@ -6947,7 +7386,7 @@ class Canvas(FigureCanvas):
                                             self.read_instance,
                                             self,
                                             sub_ax,
-                                            self.read_instance.networkspeci,
+                                            self.get_plot_networkspeci(plot_type),
                                             plot_type,
                                             self.plot_characteristics[plot_type],
                                         )
@@ -6956,7 +7395,7 @@ class Canvas(FigureCanvas):
                                     self.read_instance,
                                     self,
                                     self.plot_axes[plot_type],
-                                    self.read_instance.networkspeci,
+                                    self.get_plot_networkspeci(plot_type),
                                     plot_type,
                                     self.plot_characteristics[plot_type],
                                 )
@@ -7139,31 +7578,45 @@ class Canvas(FigureCanvas):
                                 if plot_type == "periodic":
                                     func(
                                         self.plot_axes[plot_type],
-                                        self.read_instance.networkspeci,
+                                        self.get_plot_networkspeci(plot_type),
                                         bias_labels_to_plot,
                                         self.plot_characteristics[plot_type],
                                         self.current_plot_options[plot_type],
                                         zstat=zstat,
                                     )
-                                # make statsummary plot
-                                elif plot_type == "statsummary":
-                                    relevant_zstats = self.active_statsummary_stats[
-                                        "modbias"
-                                    ]
+                                # make table / statsummary plot
+                                elif plot_type in ['statsummary', 'table']:
+                                    if plot_type == 'statsummary':
+                                        statsummary = True
+                                        relevant_zstats = self.active_statsummary_stats["modbias"]
+                                    else:
+                                        statsummary = False
+                                        # TODO: Get bias stat if bias in plot options
+                                        relevant_zstats = [self.table_stat.currentText()]
                                     func(
                                         self.plot_axes[plot_type],
-                                        self.read_instance.networkspeci,
+                                        self.get_plot_networkspeci(plot_type),
                                         self.read_instance.data_labels,
                                         self.plot_characteristics[plot_type],
                                         self.current_plot_options[plot_type],
                                         zstats=relevant_zstats,
-                                        statsummary=True,
+                                        statsummary=statsummary,
+                                    )
+                                # make heatmap plot
+                                elif plot_type == "heatmap":
+                                    func(
+                                        self.plot_axes[plot_type],
+                                        self.get_plot_networkspeci(plot_type),
+                                        bias_labels_to_plot,
+                                        self.plot_characteristics[plot_type],
+                                        self.current_plot_options[plot_type],
+                                        self.heatmap_stat.currentText(),
                                     )
                                 # other plots
                                 else:
                                     func(
                                         self.plot_axes[plot_type],
-                                        self.read_instance.networkspeci,
+                                        self.get_plot_networkspeci(plot_type),
                                         bias_labels_to_plot,
                                         self.plot_characteristics[plot_type],
                                         self.current_plot_options[plot_type],
@@ -7270,31 +7723,45 @@ class Canvas(FigureCanvas):
                                 if plot_type == "periodic":
                                     func(
                                         self.plot_axes[plot_type],
-                                        self.read_instance.networkspeci,
+                                        self.get_plot_networkspeci(plot_type),
                                         absolute_labels_to_plot,
                                         self.plot_characteristics[plot_type],
                                         self.current_plot_options[plot_type],
                                         zstat=zstat,
                                     )
-                                # make statsummary plot
-                                elif plot_type == "statsummary":
-                                    relevant_zstats = self.active_statsummary_stats[
-                                        "basic"
-                                    ]
+                                # make table / statsummary plot
+                                elif plot_type in ['statsummary', 'table']:
+                                    if plot_type == 'statsummary':
+                                        statsummary = True
+                                        relevant_zstats = self.active_statsummary_stats["basic"]
+                                    else:
+                                        statsummary = False
+                                        # TODO: Get bias stat if bias in plot options
+                                        relevant_zstats = [self.table_stat.currentText()]
                                     func(
                                         self.plot_axes[plot_type],
-                                        self.read_instance.networkspeci,
+                                        self.get_plot_networkspeci(plot_type),
                                         self.read_instance.data_labels,
                                         self.plot_characteristics[plot_type],
                                         self.current_plot_options[plot_type],
                                         zstats=relevant_zstats,
-                                        statsummary=True,
+                                        statsummary=statsummary,
+                                    )
+                                # make heatmap plot
+                                elif plot_type == "heatmap":
+                                    func(
+                                        self.plot_axes[plot_type],
+                                        self.get_plot_networkspeci(plot_type),
+                                        absolute_labels_to_plot,
+                                        self.plot_characteristics[plot_type],
+                                        self.current_plot_options[plot_type],
+                                        self.heatmap_stat.currentText(),
                                     )
                                 # other plots
                                 else:
                                     func(
                                         self.plot_axes[plot_type],
-                                        self.read_instance.networkspeci,
+                                        self.get_plot_networkspeci(plot_type),
                                         absolute_labels_to_plot,
                                         self.plot_characteristics[plot_type],
                                         self.current_plot_options[plot_type],
@@ -7316,7 +7783,7 @@ class Canvas(FigureCanvas):
                         self.read_instance.block_config_bar_handling_updates = False
 
                     # reset axes limits (harmonising across subplots for periodic plots)
-                    if plot_type not in ["map", "taylor", "fairmode-statsummary"]:
+                    if plot_type not in ["map", "taylor", "fairmode-statsummary", "heatmap"]:
                         if plot_type == "scatter":
                             harmonise_xy_lims_paradigm(
                                 self.read_instance,
@@ -7349,6 +7816,58 @@ class Canvas(FigureCanvas):
 
         return None
 
+    def handle_networkspeci_update(self):
+
+        # get source
+        event_source = self.sender()
+        plot_type = event_source.objectName().split("_networkspeci")[0]
+        plot_type = correct_plot_type_name(plot_type)
+
+        if not self.read_instance.block_MPL_canvas_updates:
+            # update plotted statistic      
+            if plot_type == "map":
+                self.update_map()
+            # update plot
+            else:
+                self.update_associated_active_dashboard_plot(plot_type)
+
+        # draw changes
+        self.figure.canvas.draw_idle()
+
+    def get_plot_networkspeci(self, plot_type):
+        """
+        Return the networkspeci a given plot type should render.
+        
+        Parameters
+        ----------
+        plot_type : str
+            Plot type
+
+        Returns
+        -------
+        str
+            Networkspeci to use for this plot (e.g. 'EBAS|sconco3')
+        """
+
+        plot_type = correct_plot_type_name(plot_type)
+        combobox = getattr(self, f'{plot_type}_networkspecies', None)
+        if combobox is not None:
+            if plot_type in ['heatmap', 'statsummary', 'table', 'boxplot']:
+                # return species in checkable combobox for multispecies plots
+                selected_networkspecies = combobox.currentData()
+                if not selected_networkspecies:
+                    selected_networkspecies = sorted(
+                        self.read_instance.networkspecies
+                    )
+            else:
+                # return speci in combobox for single species plots
+                selected_networkspecies = combobox.currentText()
+            if selected_networkspecies:
+                return selected_networkspecies
+
+        # fall back to the globally active networkspeci
+        return self.read_instance.networkspeci
+    
     def redraw_active_options(
         self, data_labels, plot_type, active, plot_options, z_statistic_sign="absolute"
     ):
@@ -7390,7 +7909,7 @@ class Canvas(FigureCanvas):
                                 self.read_instance,
                                 self,
                                 sub_ax,
-                                self.read_instance.networkspeci,
+                                self.get_plot_networkspeci(plot_type),
                                 data_labels,
                                 plot_type,
                                 self.plot_characteristics[plot_type],
@@ -7399,24 +7918,39 @@ class Canvas(FigureCanvas):
                             )
                             break
                 else:
-                    annotation(
-                        self.read_instance,
-                        self,
-                        self.plot_axes[plot_type],
-                        self.read_instance.networkspeci,
-                        data_labels,
-                        plot_type,
-                        self.plot_characteristics[plot_type],
-                        plot_options,
-                        plot_z_statistic_sign=z_statistic_sign,
-                    )
+                    if plot_type == 'heatmap':
+                        # clear all previously plotted artists for plot type
+                        self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
+                        
+                        # make plot again considering plot option
+                        func = getattr(self.plotting, "make_heatmap")
+                        func(
+                            self.plot_axes[plot_type],
+                            self.get_plot_networkspeci(plot_type),
+                            self.read_instance.data_labels,
+                            self.plot_characteristics[plot_type],
+                            self.current_plot_options[plot_type],
+                            self.heatmap_stat.currentText(),
+                        )
+                    else:
+                        annotation(
+                            self.read_instance,
+                            self,
+                            self.plot_axes[plot_type],
+                            self.get_plot_networkspeci(plot_type),
+                            data_labels,
+                            plot_type,
+                            self.plot_characteristics[plot_type],
+                            plot_options,
+                            plot_z_statistic_sign=z_statistic_sign,
+                        )
 
             elif plot_option == "smooth":
                 smooth(
                     self.read_instance,
                     self,
                     self.plot_axes[plot_type],
-                    self.read_instance.networkspeci,
+                    self.get_plot_networkspeci(plot_type),
                     data_labels_alt,
                     plot_type,
                     self.plot_characteristics[plot_type],
@@ -7436,7 +7970,7 @@ class Canvas(FigureCanvas):
                                 self.read_instance,
                                 self,
                                 sub_ax,
-                                self.read_instance.networkspeci,
+                                self.get_plot_networkspeci(plot_type),
                                 plot_type,
                                 self.plot_characteristics[plot_type],
                             )
@@ -7445,7 +7979,7 @@ class Canvas(FigureCanvas):
                         self.read_instance,
                         self,
                         self.plot_axes[plot_type],
-                        self.read_instance.networkspeci,
+                        self.get_plot_networkspeci(plot_type),
                         plot_type,
                         self.plot_characteristics[plot_type],
                     )
@@ -7455,7 +7989,7 @@ class Canvas(FigureCanvas):
                     self.read_instance,
                     self,
                     self.plot_axes[plot_type],
-                    self.read_instance.networkspeci,
+                    self.get_plot_networkspeci(plot_type),
                     data_labels_alt,
                     plot_type,
                     self.plot_characteristics[plot_type],
@@ -7848,8 +8382,8 @@ class Canvas(FigureCanvas):
         """
 
         default_filename = "{0}-{1}-{2}-{3}-{4}-{5}-{6}.png".format(
-            self.read_instance.network[0],
-            self.read_instance.species[0],
+            str(self.read_instance.network),
+            str(self.read_instance.species),
             self.read_instance.resolution,
             self.read_instance.start_date,
             self.read_instance.end_date,
@@ -7880,8 +8414,7 @@ class Canvas(FigureCanvas):
         # get option and plot names
         event_source = self.sender()
         plot_type = event_source.objectName().split("_save")[0]
-        if plot_type in ["periodic_violin", "fairmode_target", "fairmode_statsummary"]:
-            plot_type = plot_type.replace("_", "-")
+        plot_type = correct_plot_type_name(plot_type)
 
         # set extent expansion
         for i, position in enumerate(
@@ -8059,8 +8592,7 @@ class Canvas(FigureCanvas):
         # get option and plot names
         event_source = self.sender()
         plot_type = event_source.objectName().split("_save")[0]
-        if plot_type in ["periodic_violin", "fairmode_target", "fairmode_statsummary"]:
-            plot_type = plot_type.replace("_", "-")
+        plot_type = correct_plot_type_name(plot_type)
         plot_options = copy.deepcopy(self.current_plot_options[plot_type])
 
         tests_generate_output = False
@@ -8083,7 +8615,7 @@ class Canvas(FigureCanvas):
                 plot_type,
                 plot_options,
                 path,
-                self.read_instance.networkspeci,
+                self.get_plot_networkspeci(plot_type),
                 tests_generate_output,
                 labela,
                 labelb,

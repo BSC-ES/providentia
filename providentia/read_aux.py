@@ -11,6 +11,7 @@ import cftime
 from netCDF4 import Dataset, num2date, chartostring
 import numpy as np
 import pandas as pd
+import re
 
 from providentia.auxiliar import CURRENT_PATH, join
 from providentia.warnings_prv import show_message
@@ -826,7 +827,7 @@ def check_for_ghost(network_name):
         return True
 
 
-def get_ghost_observational_tree(instance):
+def get_ghost_observational_tree(instance, ghost_version):
     """
     Creates a nested dictionary representing the GHOST observational data tree and exports it to JSON.
 
@@ -849,7 +850,7 @@ def get_ghost_observational_tree(instance):
         # check if directory for network exists
         # if not, continue
         if not os.path.exists(
-            "%s/%s/%s" % (instance.ghost_root, network, instance.ghost_version)
+            "%s/%s/%s" % (instance.ghost_root, network, ghost_version)
         ):
             continue
 
@@ -862,7 +863,7 @@ def get_ghost_observational_tree(instance):
             # if not, continue
             if not os.path.exists(
                 "%s/%s/%s/%s"
-                % (instance.ghost_root, network, instance.ghost_version, resolution)
+                % (instance.ghost_root, network, ghost_version, resolution)
             ):
                 continue
 
@@ -872,7 +873,7 @@ def get_ghost_observational_tree(instance):
             # get available species for network/resolution
             available_species = os.listdir(
                 "%s/%s/%s/%s"
-                % (instance.ghost_root, network, instance.ghost_version, resolution)
+                % (instance.ghost_root, network, ghost_version, resolution)
             )
 
             # iterate through available files per species
@@ -883,7 +884,7 @@ def get_ghost_observational_tree(instance):
                     % (
                         instance.ghost_root,
                         network,
-                        instance.ghost_version,
+                        ghost_version,
                         resolution,
                         speci,
                     )
@@ -914,7 +915,7 @@ def get_ghost_observational_tree(instance):
     with open(
         join(
             PROVIDENTIA_ROOT,
-            "settings/internal/ghost_filetree_{}.json".format(instance.ghost_version),
+            "settings/internal/ghost_filetree_{}.json".format(ghost_version),
         ),
         "w",
     ) as json_file:
@@ -1098,10 +1099,9 @@ def get_valid_obs_files_in_date_range(instance, start_date, end_date):
                             matrix
                         ][speci] = valid_file_yearmonths
 
-
-def get_valid_models(instance, start_date, end_date, resolution, networks, species):
+def get_valid_interpolated_models(instance, start_date, end_date, resolution, networkspecies):
     """
-    Identifies models within a given date range and chosen networks and species.
+    Get interpolated models in mod_root for current GHOST version
 
     Parameters
     ----------
@@ -1113,30 +1113,54 @@ def get_valid_models(instance, start_date, end_date, resolution, networks, speci
         The end date in 'YYYYMMDD' format.
     resolution : str
         The temporal resolution (e.g. 'hourly', 'daily').
-    networks : list of str
-        The monitoring networks to match against model data.
-    species : list of str
-        The chemical species or parameters to match against model data.
+    networkspecies : list of str
+        The monitoring networks|species to match against model data.
+    
+    Returns
+    -------
+    dict
+        Dictionary mapping each networkspeci (str, "network|speci") to a set of
+        model names that have valid interpolated data available for it within
+        the given date range and resolution.
+    dict
+        Nested dictionary of available interpolated model data, structured as
+        {network: {resolution: {speci: {model: valid_file_yearmonths}}}}, where
+        valid_file_yearmonths is a sorted list of 'YYYYMM' strings.
+    dict
+        Dictionary mapping (type, model, network, speci) tuples, with type
+        fixed as "interpolated", to the file root path prefix (str) used to
+        build the netCDF file paths for that model/network/speci combination.
     """
 
-    # get all different model names (from providentia-interpolation output dir)
-    available_models = []
-    if os.path.exists(join(instance.mod_root, instance.ghost_version)):
-        available_models = os.listdir(
-            "%s/%s" % (instance.mod_root, instance.ghost_version)
-        )
+    # track which networkspecies each model has been interpolated for
+    models = {
+        networkspeci: set() for networkspeci in networkspecies
+    }
 
     # create dictionary to store available model data
-    instance.available_model_data = {}
+    available_model_data = {}
+    file_roots = {}
 
-    # list for saving models to add to models pop-up
-    models_to_add = []
-
+    models_path = join(instance.mod_root, instance.ghost_version)
+    if os.path.exists(models_path):
+        available_models = os.listdir(
+                "%s/%s" % (instance.mod_root, instance.ghost_version)
+            )      
+    else:
+        msg = (
+            f"Cannot access interpolated model path, mod_root defined as {models_path} in data_paths.yaml."
+        )
+        show_message(instance, msg, print=True)
+        return models, available_model_data, file_roots
+    
     # get start date on first of month
     start_date_firstdayofmonth = int(str(start_date)[:6] + "01")
 
     # iterate through networks and species
-    for network, speci in zip(networks, species):
+    for networkspeci in networkspecies:
+        network = networkspeci.split("|")[0]
+        speci = networkspeci.split("|")[1]
+
         # iterate through available models
         for model in available_models:
             # get folder where interpolated models are saved
@@ -1188,28 +1212,392 @@ def get_valid_models(instance, start_date, end_date, resolution, networks, speci
                 # if have valid files, then add model to pop-up menu,
                 # and add yearmonths to available model data
                 if len(valid_file_yearmonths) > 0:
-                    models_to_add.append(model)
+                    models[networkspeci].add(model)
 
-                    if network not in instance.available_model_data:
-                        instance.available_model_data[network] = {}
-                    if resolution not in instance.available_model_data[network]:
-                        instance.available_model_data[network][resolution] = {}
-                    if speci not in instance.available_model_data[network][resolution]:
-                        instance.available_model_data[network][resolution][speci] = {}
+                    if network not in available_model_data:
+                        available_model_data[network] = {}
+                    if resolution not in available_model_data[network]:
+                        available_model_data[network][resolution] = {}
+                    if speci not in available_model_data[network][resolution]:
+                        available_model_data[network][resolution][speci] = {}
                     if (
                         model
-                        not in instance.available_model_data[network][resolution][speci]
+                        not in available_model_data[network][resolution][speci]
                     ):
-                        instance.available_model_data[network][resolution][speci][
+                        available_model_data[network][resolution][speci][
                             model
                         ] = valid_file_yearmonths
 
+                    # store file root, so paths never have to be rebuilt when reading
+                    file_roots[("interpolated", model, network, speci)] = "%s/%s_" % (
+                        files_directory,
+                        speci,
+                    )
+
+    return models, available_model_data, file_roots
+
+def parse_model_filename(filename, speci):
+    """
+    Split a gridded model filename into speci, ensemble, date and statistic information (av, av_an).
+    
+    Parameters
+    ----------
+    filename : str
+        Gridded model filename
+    speci : str
+        Speci
+
+    Returns
+    -------
+    dict 
+    """
+
+    pattern = (r'^' + re.escape(speci) +
+                r'(?:[-_](?P<ensemble>\d{3}))?'
+                r'_(?P<date>\d{10}|\d{8}|\d{6})'
+                r'(?P<extra>(?:_[a-zA-Z0-9]+)*)\.nc$')
+    match = re.match(pattern, filename)
+    if match is None:
+        return None
+    parsed = match.groupdict()
+
+    return {'speci': speci,
+            'ensemble': parsed['ensemble'],
+            'date': parsed['date'],
+            'tags': [t for t in parsed['extra'].split('_') if t],
+            # prefix/suffix around the date, for rebuilding paths
+            'prefix': filename[:match.start('date')],
+            'suffix': parsed['extra']}
+
+def model_file_overlaps_period(timestep, start, end, lead_days):
+    """
+    Check if a gridded model file can have data inside a period, based on the date
+    in its filename (YYYYMM: monthly file, YYYYMMDD: daily file, YYYYMMDDHH: forecast run)
+
+    Parameters
+    ----------
+    timestep : str
+        Date in filename ('YYYYMM', 'YYYYMMDD' or 'YYYYMMDDHH')
+    start : pd.Timestamp
+        Start of period
+    end : pd.Timestamp
+        End of period (exclusive)
+    lead_days : list of int
+        Forecast lead days used from forecast runs
+
+    Returns
+    -------
+    bool
+        False if the file cannot have data inside the period
+    """
+
+    # YYYYMM
+    if len(timestep) == 6:
+        file_start = pd.to_datetime(timestep, format="%Y%m")
+        file_end = file_start + pd.DateOffset(months=1)
+    # YYYYMMDD
+    elif len(timestep) == 8:
+        file_start = pd.to_datetime(timestep, format="%Y%m%d")
+        file_end = file_start + pd.Timedelta(days=1)
+    # YYYYMMDDHH
+    else:
+        # forecast run start, taken from the file name
+        run_start = pd.to_datetime(timestep, format="%Y%m%d%H")
+
+        # get first time used in file considering lowest desired lead day
+        file_start = run_start + pd.Timedelta(days=min(lead_days) - 1)
+
+        # get last time used in file considering highest desired lead day
+        file_end = run_start + pd.Timedelta(days=max(lead_days))
+
+    return (file_start < end) and (file_end > start)
+
+
+def get_forecast_run_mask(file_timestamps, run_start, lead_days):
+    """
+    Get mask of timesteps in a forecast run file used for the wanted lead days,
+    where lead day N covers [run start + (N-1) days, run start + N days)
+
+    Parameters
+    ----------
+    file_timestamps : np.array
+        Timestamps of file (ns)
+    run_start : pd.Timestamp
+        Start of forecast run
+    lead_days : list of int
+        Wanted lead days (1 = first 24 hours after the model initialisation)
+
+    Returns
+    -------
+    np.array
+        Boolean mask, True for timesteps to use
+    """
+
+    # calculate time elapsed since model initialised for each timestep (ns)
+    day = pd.Timedelta(days=1).value
+    lead_offset = file_timestamps - run_start.value
+    
+    mask = np.zeros(file_timestamps.shape, dtype=bool)
+
+    # add timesteps of each wanted lead day
+    # lead time = 1: at least 0 h after run start, but less than 24 h
+    # lead time = 2: at least 24 h after run start, but less than 48 h
+    # lead time = 3: at least 48 h after run start, but less than 72 h
+    # lead time = N: at least (N−1)×24 h after run start, but less than N×24 h
+    for lead_day in lead_days:
+        window_start = (lead_day - 1) * day
+        mask |= (lead_offset >= window_start) & (lead_offset < window_start + day)
+
+    return mask
+
+
+def get_valid_gridded_models(instance, start_date, end_date, resolution, networkspecies):
+    """
+    Get gridded models in mod_to_interp_root
+
+    Parameters
+    ----------
+    instance : object
+        An instance of the application class containing directory roots and menu configurations.
+    start_date : str
+        The start date in 'YYYYMMDD' format.
+    end_date : str
+        The end date in 'YYYYMMDD' format.
+    resolution : str
+        The temporal resolution (e.g. 'hourly', 'daily').
+    networkspecies : list of str
+        The monitoring networks|species to match against model data.
+
+    Returns
+    -------
+    dict
+        Dictionary mapping each speci (str) to a set of model_id strings
+        (formatted as "experiment-domain-ensemble") that have valid
+        gridded data available for it within the given date range
+        (and beyond for forecast files) and resolution.
+    dict
+        Nested dictionary of available gridded model data, structured
+        as {domain: {resolution: {speci: {model_id: valid_file_timesteps}}}},
+        where valid_file_timesteps is a sorted list of 'YYYYMM', 'YYYYMMDD' or
+        'YYYYMMDDHH' strings.
+    dict
+        Dictionary mapping ("gridded", model_id, speci) tuples to the
+        netCDF filename template (str) for that model/speci combination, with a
+        '{date}' placeholder for the file timestep
+        (e.g. '<dir>/od550du-006_{date}_an.nc').
+    """
+
+    # track which species each model has data for
+    species = np.unique([networkspeci.split('|')[1] for networkspeci in networkspecies])
+    models = {
+        speci: set() for speci in species
+    }
+
+    # create dictionary to store available model data
+    available_model_data = {}
+    file_roots = {}
+
+    # get all different model names
+    models_path = instance.mod_to_interp_root
+    if os.path.exists(models_path):
+        available_models = os.listdir(models_path)
+    else:
+        msg = (
+            f"Cannot access gridded model path, mod_to_interp_root defined as {models_path} in data_paths.yaml."
+        )
+        show_message(instance, msg, print=True)
+        return models, available_model_data, file_roots
+
+    # get start date on first of month
+    start_date_firstdayofmonth = int(str(start_date)[:6] + "01")
+
+    # iterate through species
+    for speci in species:
+        # iterate through available models
+        for model in available_models:
+            for domain in instance.available_domains:
+                files_directory = "%s/%s/%s/%s/%s" % (
+                            instance.mod_to_interp_root,
+                            model,
+                            domain,
+                            resolution,
+                            speci,
+                        )
+
+                # test if non interpolated directory exists for model
+                # if it does not exit, continue
+                if not os.path.exists(files_directory):
+                    continue
+                else:
+                    # get all available netCDF files (handling potential permissions issues)
+                    try:
+                        available_files = os.listdir(files_directory)
+                    except PermissionError:
+                        continue
+
+                # models can be formatted like:
+                # - sconcno2_006_2022101900.nc
+                # - sconco3_201604.nc
+                # - od550du-006_2018082003_an.nc
+                # - pm10_2017092100.nc
+                # - sconco3-000_2019050900.nc
+                # - od550du_2020061400_av_an.nc
+                parsed_files = [parse_model_filename(f, speci) for f in sorted(available_files)]
+                parsed_files = [parsed for parsed in parsed_files if parsed is not None]
+                if len(parsed_files) == 0:
+                    continue
+
+                # group files per ensemble member, as a directory can hold more than one
+                # (e.g. sconco3-000_2019050900.nc and sconco3-006_2019050900.nc)
+                files_per_ensemble = {}
+                for parsed in parsed_files:
+                    # ensemble member, keeping any statistic tag so that, for example,
+                    # od550du-006_2018082003.nc and od550du-006_2018082003_an.nc are kept apart
+                    if parsed["ensemble"] is not None:
+                        ensemble = "_".join([parsed["ensemble"]] + parsed["tags"])
+                    # no ensemble member, so the statistic tags define the ensemble option
+                    elif parsed["tags"]:
+                        ensemble = "_".join(parsed["tags"])
+                    else:
+                        ensemble = "000"
+
+                    files_per_ensemble.setdefault(ensemble, []).append(parsed)
+
+                for ensemble, ensemble_files in files_per_ensemble.items():
+
+                    # get timestep start date of all files
+                    file_timesteps = sorted({parsed["date"] for parsed in ensemble_files})
+
+                    # initialise valid timesteps
+                    valid_file_timesteps = []
+
+                    # write nested dictionary for model, with associated file timesteps
+                    # monthly files (e.g. '202301')
+                    if len(file_timesteps[0]) == 6:
+                        valid_file_timesteps = sorted(
+                            [
+                                ym
+                                for ym in file_timesteps
+                                if (int("{}01".format(ym)) >= start_date_firstdayofmonth)
+                                & (int("{}01".format(ym)) < int(end_date))
+                            ]
+                        )
+                    # daily files (e.g. '2023010100')
+                    elif len(file_timesteps[0]) > 6:
+                        # keep files from previous month, as later lead days of forecast runs
+                        # can fall inside period
+                        prev_month_firstday = int(
+                            (pd.Timestamp(str(start_date)[:6] + "01") - pd.DateOffset(months=1)).strftime("%Y%m%d")
+                        )
+                        valid_file_timesteps = sorted(
+                            [
+                                ym
+                                for ym in file_timesteps
+                                if (int(ym[0:8]) >= prev_month_firstday)
+                                & (int(ym[0:8]) < int(end_date))
+                            ]
+                        )
+                        # do not show model if it only has files from previous month
+                        if not any(int(ym[0:8]) >= start_date_firstdayofmonth for ym in valid_file_timesteps):
+                            valid_file_timesteps = []
+                        
+                    # if have valid files, then add model to pop-up menu,
+                    # and add yearmonths to available model data
+                    if len(valid_file_timesteps) > 0:
+                        # model id shown on the models menu (experiment-domain-ensemble),
+                        # used as key everywhere so both modes are looked up the same way
+                        model_id = f"{model}-{domain}-{ensemble}"
+                        models[speci].add(model_id)
+
+                        if domain not in available_model_data:
+                            available_model_data[domain] = {}
+                        if resolution not in available_model_data[domain]:
+                            available_model_data[domain][resolution] = {}
+                        if speci not in available_model_data[domain][resolution]:
+                            available_model_data[domain][resolution][speci] = {}
+                        if (
+                            model_id
+                            not in available_model_data[domain][resolution][speci]
+                        ):
+                            available_model_data[domain][resolution][speci][
+                                model_id
+                            ] = valid_file_timesteps
+
+                        # store filename template, so paths never have to be rebuilt when
+                        # reading (prefix/suffix carry the ensemble tag and trailing tags)
+                        prefix = ensemble_files[0]["prefix"]
+                        suffix = ensemble_files[0]["suffix"]
+                        if len({(p["prefix"], p["suffix"]) for p in ensemble_files}) > 1:
+                            msg = (
+                                f"Model files in {files_directory} for ensemble {ensemble} do "
+                                f"not all share the same name format, assuming "
+                                f"{prefix}<date>{suffix}.nc"
+                            )
+                            show_message(instance, msg, print=True)
+                        file_roots[
+                            ("gridded", model_id, speci)
+                        ] = "{}/{}{{date}}{}.nc".format(files_directory, prefix, suffix)
+
+    return models, available_model_data, file_roots
+
+def get_valid_models(instance, start_date, end_date, resolution, networkspecies):
+    """
+    Identifies models within a given date range and chosen networks and species.
+
+    Parameters
+    ----------
+    instance : object
+        An instance of the application class containing directory roots and menu configurations.
+    start_date : str
+        The start date in 'YYYYMMDD' formafor parsed in parsed_filet.
+    end_date : str
+        The end date in 'YYYYMMDD' format.
+    resolution : str
+        The temporal resolution (e.g. 'hourly', 'daily').
+    networkspecies : list of str
+        The monitoring networks|species to match against model data.
+    """
+
+    gridded_models, available_gridded_model_data, gridded_file_roots = get_valid_gridded_models(
+        instance, start_date, end_date, resolution, networkspecies)
+    interpolated_models, available_interpolated_model_data, interpolated_file_roots = get_valid_interpolated_models(
+        instance, start_date, end_date, resolution, networkspecies)
+
+    instance.available_model_data = {
+        "interpolated": available_interpolated_model_data,
+        "gridded": available_gridded_model_data,
+    }
+    
+    instance.available_model_data_file_roots = {
+        **interpolated_file_roots,
+        **gridded_file_roots,
+    }
+    
     # set list of model names to add on models pop-up
+    # models interpolated for at least one networkspeci
     if instance.mode not in ["report", "library"]:
-        models_to_add = np.array(sorted(models_to_add))
+        gridded_available_models = set.union(*gridded_models.values())
+        interpolated_available_models = set.union(*interpolated_models.values())
+        if networkspecies:
+            models_to_add = sorted(
+                set(gridded_available_models) | set(interpolated_available_models)
+            )
+        else:
+            models_to_add = []
+        
+        models_to_add = np.array(models_to_add)
         instance.models_menu["models"]["labels"] = models_to_add
         instance.models_menu["models"]["map_vars"] = models_to_add
-
+        instance.models_menu["models"]["enabled"] = {
+            "interpolated": {
+                model_id: model_id in interpolated_available_models
+                for model_id in models_to_add
+            },
+            "gridded": {
+                model_id: model_id in gridded_available_models
+                for model_id in models_to_add
+            },
+        }
 
 def get_possible_temporal_resolutions():
     """
@@ -1384,7 +1772,7 @@ def valid_date(date_text):
         return False
 
 
-def generate_file_trees(instance):
+def generate_file_trees(instance, ghost_version=None, only_ghost=False):
     """
     Handles the dynamic generation or loading of observational data catalogues.
 
@@ -1408,13 +1796,14 @@ def generate_file_trees(instance):
     elif instance.filetree_type == "local":
         gft = True
 
+    # GHOST version is only passed to this function when updating version in dashboard from dropdown
+    if ghost_version is None:
+        ghost_version = instance.ghost_version
+
     # generate file trees
     ghost_filetree_path = join(
         PROVIDENTIA_ROOT,
-        "settings/internal/ghost_filetree_{}.json".format(instance.ghost_version),
-    )
-    nonghost_filetree_path = join(
-        PROVIDENTIA_ROOT, "settings/internal/nonghost_filetree.json"
+        "settings/internal/ghost_filetree_{}.json".format(ghost_version),
     )
 
     # generate file trees for ghost
@@ -1424,7 +1813,7 @@ def generate_file_trees(instance):
             instance.logger.info(f"Generating file tree {ghost_filetree_path}...")
         else:
             instance.logger.info(f"Updating file tree {ghost_filetree_path}...")
-        instance.all_observation_data = get_ghost_observational_tree(instance)
+        instance.all_observation_data = get_ghost_observational_tree(instance, ghost_version)
     # load file trees
     else:
         instance.logger.info(f"Loading file tree {ghost_filetree_path}...")
@@ -1434,19 +1823,22 @@ def generate_file_trees(instance):
                     join(
                         PROVIDENTIA_ROOT,
                         "settings/internal/ghost_filetree_{}.json".format(
-                            instance.ghost_version
+                            ghost_version
                         ),
                     )
                 )
             )
         except FileNotFoundError:
             error = "Error: Trying to load 'settings/internal/ghost_filetree_{}.json' but file does not exist. Run with the flag '--gft' to generate this file.".format(
-                instance.ghost_version
+                ghost_version
             )
             instance.logger.error(error)
             sys.exit(1)
 
-    if instance.nonghost_root is not None:
+    if instance.nonghost_root is not None and not only_ghost:
+        nonghost_filetree_path = join(
+            PROVIDENTIA_ROOT, "settings/internal/nonghost_filetree.json"
+        )
         # generate file trees for nonghost
         if gft or (not os.path.exists(nonghost_filetree_path)):
             if not os.path.exists(nonghost_filetree_path):
@@ -1455,12 +1847,12 @@ def generate_file_trees(instance):
                 )
             else:
                 instance.logger.info(f"Updating file tree {nonghost_filetree_path}...")
-            nonghost_observation_data = get_nonghost_observational_tree(instance)
+            instance.nonghost_observation_data = get_nonghost_observational_tree(instance)
         # load file trees
         else:
             instance.logger.info(f"Loading file tree {nonghost_filetree_path}...")
             try:
-                nonghost_observation_data = json.load(
+                instance.nonghost_observation_data = json.load(
                     open(
                         join(
                             PROVIDENTIA_ROOT, "settings/internal/nonghost_filetree.json"
@@ -1472,10 +1864,12 @@ def generate_file_trees(instance):
                 instance.logger.error(error)
                 sys.exit(1)
 
-        # merge GHOST and non-GHOST filetrees
+    # merge GHOST and non-GHOST filetrees
+    # (when only updating the GHOST version, reuse the previously loaded non-GHOST filetree)
+    if instance.nonghost_root is not None and hasattr(instance, "nonghost_observation_data"):
         instance.all_observation_data = {
             **instance.all_observation_data,
-            **nonghost_observation_data,
+            **instance.nonghost_observation_data,
         }
 
 
@@ -1853,3 +2247,23 @@ def time_var_to_asi8(time_var):
     # ------------------------------------------------------
     dates = num2date(values, units=units, calendar=calendar)
     return _dates_to_asi8_seconds(dates, calendar)
+
+
+def get_map_lead_days(read_instance):
+    """
+    Get forecast lead days loaded, so gridded model uses the same forecast days
+    as interpolated models (day 1 if no forecast option is loaded)
+    """
+
+    # daily and combined forecasts use all active forecast days
+    if read_instance.daily_forecast or read_instance.combined_forecast:
+        return list(read_instance.active_forecast_days)
+
+    # N day forecast(s)
+    lead_days = set()
+    for data_label_raw in read_instance.data_labels_raw:
+        match = re.search(r"::interpolated-day(\d+)$", data_label_raw)
+        if match:
+            lead_days.add(int(match.group(1)))
+
+    return sorted(lead_days) if lead_days else [1]

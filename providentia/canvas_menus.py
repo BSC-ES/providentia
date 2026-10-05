@@ -6,7 +6,7 @@ import platform
 from PyQt5 import QtCore, QtGui, QtWidgets
 import yaml
 
-from providentia.auxiliar import CURRENT_PATH, join
+from providentia.auxiliar import CURRENT_PATH, join, correct_plot_type_name
 from .dashboard_elements import CheckableComboBox, ComboBox, MenuLineEdit
 from .dashboard_elements import set_formatting
 
@@ -334,7 +334,7 @@ class ValueSlider(QtWidgets.QSlider):
 
 
 class SettingsMenu(object):
-    def __init__(self, plot_type, canvas_instance):
+    def __init__(self, plot_type, canvas_instance, read_instance):
         """
         Initialise object to create plot settings menu
 
@@ -347,6 +347,7 @@ class SettingsMenu(object):
         """
 
         self.canvas_instance = canvas_instance
+        self.read_instance = read_instance
 
         self.elements = list(settings_dict[plot_type].keys())
         self.buttons = {}
@@ -355,6 +356,7 @@ class SettingsMenu(object):
         self.checkable_comboboxes = {}
         self.sliders = {}
         self.checkboxes = {}
+        self.plot_type = plot_type
         self.lineedits = {}
         # a plot type can define more than one container (e.g. a nested
         # sub-menu's own background panel, positioned separately from the
@@ -380,16 +382,9 @@ class SettingsMenu(object):
 
                 # Add options as items to options combobox
                 if element_name == "options":
-                    if plot_type in [
-                        "periodic_violin",
-                        "fairmode_target",
-                        "fairmode_statsummary",
-                    ]:
-                        plot_type_corr = plot_type.replace("_", "-")
-                    else:
-                        plot_type_corr = plot_type
+                    plot_type = correct_plot_type_name(plot_type)
                     element.addItems(
-                        self.canvas_instance.plot_characteristics[plot_type_corr][
+                        self.canvas_instance.plot_characteristics[plot_type][
                             "plot_options"
                         ]
                     )
@@ -431,7 +426,15 @@ class SettingsMenu(object):
 
             else:
                 error = f"Error: Unknown element type: {element_type}"
-                self.canvas_instance.read_instance.logger.error(error)
+                self.read_instance.logger.error(error)
+
+        # the menu's sliders are fitted together, so they all end at the same
+        # point - see ValueSlider.fit_group()
+        sliders = list(self.sliders.values())
+        for slider in sliders:
+            slider.group = sliders
+        if sliders:
+            sliders[0].fit_group()
 
         # the menu's sliders are fitted together, so they all end at the same
         # point - see ValueSlider.fit_group()
@@ -608,7 +611,7 @@ class SettingsMenu(object):
             CheckableComboBox(self.canvas_instance),
             formatting_dict[element_settings["formatting_dict"]],
         )
-        checkable_combobox.currentTextChanged.connect(
+        checkable_combobox.checkedItemsChanged.connect(
             partial(self.connect, element_settings["function"])
         )
 
@@ -726,6 +729,11 @@ class SettingsMenu(object):
                 if commit is not None:
                     commit()
 
-                getattr(self.canvas_instance, function)()
+                # some plots share the same function (heatmap, periodic) 
+                # but we need to pass the plot type
+                if function == "handle_statistic_update":
+                    getattr(self.canvas_instance, function)(self.plot_type)
+                else:
+                    getattr(self.canvas_instance, function)()
 
         return None

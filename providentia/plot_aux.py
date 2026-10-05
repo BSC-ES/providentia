@@ -258,6 +258,27 @@ def get_land_polygon_resolution(selection):
 
     return resolution
 
+def get_base_label(data_label_raw):
+    """
+    Get the label a model shares across its interpolated and gridded versions,
+    i.e. the raw data label without the interpolation mode tag.
+
+    The display label cannot be used for this, as it can be an alias set in the
+    .conf file, which carries no information about the interpolation mode.
+    The forecast suffix (e.g. '-day1') is kept, so each forecast day is kept apart.
+
+    Parameters
+    ----------
+    data_label_raw : str
+        Raw data label (e.g. 'cams61_monarch_ph2-eu-000::gridded').
+
+    Returns
+    -------
+    str
+        Base label (e.g. 'cams61_monarch_ph2-eu-000').
+    """
+
+    return data_label_raw.replace("::gridded", "").replace("::interpolated", "")
 
 def update_plotting_parameters(
     instance, data_labels_to_remove=None, data_labels_to_add=None, daily_forecast=False
@@ -379,14 +400,24 @@ def update_plotting_parameters(
         for data_label in data_labels_to_remove:
             del instance.plotting_params[data_label]
 
-    # Add colour and zorder for observations
-    instance.plotting_params[instance.observations_data_label][
-        "colour"
-    ] = instance.plot_characteristics_templates["general"]["obs_markerfacecolor"]
-    instance.plotting_params[instance.observations_data_label][
-        "zorder"
-    ] = instance.plot_characteristics_templates["general"]["obs_zorder"]
+    # Add colour and zorder for observations if loaded
+    if instance.observations_data_label in instance.plotting_params.keys():
+        instance.plotting_params[instance.observations_data_label][
+            "colour"
+        ] = instance.plot_characteristics_templates["general"]["obs_markerfacecolor"]
+        instance.plotting_params[instance.observations_data_label][
+            "zorder"
+        ] = instance.plot_characteristics_templates["general"]["obs_zorder"]
 
+    # get the base label per data label, so that the gridded and non-gridded
+    # versions of a model are assigned the same colour
+    base_label_per_data_label = {
+        data_label: get_base_label(data_label_raw)
+        for data_label, data_label_raw in zip(
+            instance.data_labels, instance.data_labels_raw
+        )
+    }
+    
     # Generate a list of RGB tuples for the number of models
     sns.reset_orig()  # Reset seaborn to default
     color_palette = instance.plot_characteristics_templates["general"][
@@ -410,19 +441,56 @@ def update_plotting_parameters(
             clrs = sns.color_palette(color_palettes[color_palette])
     else:
         # If palette not in YAML, generate colors automatically
-        clrs = sns.color_palette(color_palette, n_colors=len(instance.data_labels) - 1)
+        # count base labels (the gridded and non-gridded versions of a model share a colour),
+        # so loading a model in both modes does not shift every other colour
+        n_colors = len(
+            {
+                base_label_per_data_label[data_label]
+                for data_label in instance.data_labels
+                if data_label != instance.observations_data_label
+            }
+        )
+        clrs = sns.color_palette(color_palette, n_colors=n_colors)
+
+    # assign a colour per base label (raw data label without the interpolation mode tag), so
+    # that the gridded and non-gridded versions of a model share a colour
+    # the display label cannot be used as it can be an alias set in the .conf file, which
+    # carries no information about the interpolation mode
+    # the forecast suffix is kept, so each forecast day keeps its own colour
+    # keep data label order, so a model keeps its colour whichever mode it is loaded in
+    # (the non-gridded label always precedes its gridded counterpart, so the pair takes
+    # the colour of the non-gridded one)
+    colour_per_base_label = {}
+    colour_ind = 1
+    for data_label in instance.data_labels:
+        if data_label == instance.observations_data_label:
+            continue
+        base_label = base_label_per_data_label[data_label]
+        if base_label not in colour_per_base_label:
+            colour_per_base_label[base_label] = clrs[colour_ind - 1]
+            colour_ind += 1
 
     # Add colours and zorder for each model (non-observations)
-    model_ind = 1
+    if not instance.obs_active:
+        model_ind = 0
+    else:
+        model_ind = 1
     for data_label in instance.data_labels:
         if data_label != instance.observations_data_label:
             # Define colour for model
-            instance.plotting_params[data_label]["colour"] = clrs[model_ind - 1]
+            instance.plotting_params[data_label]["colour"] = colour_per_base_label[
+                base_label_per_data_label[data_label]
+            ]
             # Define zorder for model relative to observations
-            instance.plotting_params[data_label]["zorder"] = (
-                instance.plotting_params[instance.observations_data_label]["zorder"]
-                + model_ind
-            )
+            if instance.observations_data_label in instance.plotting_params.keys():
+                instance.plotting_params[data_label]["zorder"] = (
+                    instance.plotting_params[instance.observations_data_label]["zorder"]
+                    + model_ind
+                )
+            else:
+                instance.plotting_params[data_label]["zorder"] = (
+                    model_ind
+                )
             # Update count of models
             model_ind += 1
 
@@ -1484,10 +1552,21 @@ def handle_test_or_save_df(
         if "time" in generated_output.columns:
             parse_dates.append("time")
         expected_output = pd.read_csv(f"{path}/{filename}.csv", parse_dates=parse_dates)
+
+        # when we read the expected output file, Unnamed: appears in columns that do not have values, keep emtpy for comparison
+        expected_output.columns = [
+            "" if col.startswith("Unnamed:") else col
+            for col in expected_output.columns
+        ]
         read_instance.logger.info(f'Expected_output ({f"{path}/{filename}.csv"})')
         read_instance.logger.info(expected_output)
+
+        read_instance.logger.info(f'Expected_dtypes {expected_output.dtypes}')
+        read_instance.logger.info(f'Generated_dtypes {generated_output.dtypes}')
+
         if "metadata" in filename:
             expected_output["value"] = expected_output["value"].astype(str)
+
         assert assert_frame_equal(generated_output, expected_output, atol=1e-5) is None
 
     else:
@@ -1742,13 +1821,30 @@ def download_plot_data_to_csv(
                                 else value,
                             }
                         )
-
+                    
                     df = (
                         pd.DataFrame(data, columns=["x", "y", "z"])
                         .pivot(index="x", columns="y", values="z")
                         .sort_index()
                         .rename_axis(index=None, columns=None)
                     )
+
+                    # in heatmap set data labels as columns
+                    if base_plot_type == 'heatmap':
+                        df.columns = canvas_instance.selected_station_data_labels[
+                            networkspeci
+                        ]
+                    # in statsummary
+                    elif base_plot_type == 'statsummary':
+                        # remove first row (column names made of numbers like 0, 1, 2, etc.) 
+                        # and set stats in second row as column names
+                        df.columns = df.iloc[0].to_list()
+                        df = df.iloc[1:].reset_index(drop=True)
+                        
+                        # make columns numeric
+                        n_empty = sum(col == "" for col in df.columns)
+                        numeric_cols = df.columns[n_empty:]
+                        df[numeric_cols] = df[numeric_cols].apply(pd.to_numeric)
 
                     df.columns = df.columns.astype(str)
 
@@ -1899,18 +1995,16 @@ def download_plot_data_to_csv(
                             # for other plot types save data per data label
                             else:
                                 if base_plot_type == "fairmode-statsummary":
-                                    plot_element_str = canvas_instance.plotting.fairmode_statsummary_row_titles[
-                                        data_label
-                                    ][
-                                        plot_element_i
-                                    ]
+                                    plot_element_str =(
+                                        f"_{canvas_instance.plotting.fairmode_statsummary_row_titles[data_label][plot_element_i]}"
+                                    )
                                 else:
                                     plot_element_str = (
-                                        f"{plot_element_i}"
+                                        f"_{plot_element_i}"
                                         if len(plot_elements) > 1
                                         else ""
                                     )
-                                filename = f"{plot_type}_{data_label}_{element_type}_{plot_element_str}"
+                                filename = f"{plot_type}_{data_label}_{element_type}{plot_element_str}"
                                 msgs = handle_test_or_save_df(
                                     read_instance,
                                     df,

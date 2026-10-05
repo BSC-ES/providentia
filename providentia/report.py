@@ -52,6 +52,7 @@ from .plot_formatting import (
 from .read import DataReader
 from .read_aux import (
     generate_file_trees,
+    get_map_lead_days,
     get_possible_resampling_resolutions,
     get_periodic_nonrelevant_temporal_resolutions,
     get_periodic_relevant_temporal_resolutions,
@@ -192,8 +193,10 @@ class Report:
             for k, val in self.section_opts.items():
                 # n_cpus is always passed via command line, either as default or explicit,
                 # only read n_cpus from conf if it was not explicitly defined in command line
-                if ((k not in self.commandline_arguments) 
-                    or (k == "n_cpus" and self.commandline_arguments['n_cpus_explicit'] == 'false')):
+                if (k not in self.commandline_arguments) or (
+                    k == "n_cpus"
+                    and self.commandline_arguments["n_cpus_explicit"] == "false"
+                ):
                     setattr(self, k, provconf.parse_parameter(k, val))
 
             # if first section or GHOST version has changed
@@ -247,12 +250,17 @@ class Report:
             self.periodic_nonrelevant_temporal_resolutions = (
                 get_periodic_nonrelevant_temporal_resolutions(self.resolution)
             )
-            self.data_labels = [self.observations_data_label] + list(
-                self.experiments.values()
-            )
-            self.data_labels_raw = [self.observations_data_label] + list(
-                self.experiments.keys()
-            )
+            # if no obs are loaded (when MODEL is active), remove observations from labels
+            if not self.obs_active:
+                self.data_labels = list(self.experiments.values())
+                self.data_labels_raw = list(self.experiments.keys())
+            else:
+                self.data_labels = [self.observations_data_label] + list(
+                    self.experiments.values()
+                )
+                self.data_labels_raw = [self.observations_data_label] + list(
+                    self.experiments.keys()
+                )
             self.networkspecies = [
                 "{}|{}".format(network, speci)
                 for network, speci in zip(self.network, self.species)
@@ -267,18 +275,18 @@ class Report:
                 self.start_date,
                 self.end_date,
                 self.resolution,
-                self.network,
-                self.species,
+                self.networkspecies
             )
 
             # read data
             self.datareader.read_setup(["reset"])
 
-            # initialise previous QA, flags, filter species and calibration factor as section values
+            # initialise previous QA, flags, filter species, ghost features and calibration factor as section values
             self.previous_qa = copy.deepcopy(self.qa)
             self.previous_flags = copy.deepcopy(self.flags)
             self.previous_filter_species = copy.deepcopy(self.filter_species)
             self.previous_calibration_factor = copy.deepcopy(self.calibration_factor)
+            self.previous_ghost_features = copy.deepcopy(self.ghost_features)
 
             # if no valid data has been found be to be read, then skip to next section
             if self.invalid_read:
@@ -1296,8 +1304,10 @@ class Report:
                 for k, val in self.subsection_opts.items():
                     # n_cpus is always passed via command line, either as default or explicit,
                     # only read n_cpus from conf if it was not explicitly defined in command line
-                    if ((k not in self.commandline_arguments) 
-                        or (k == "n_cpus" and self.commandline_arguments['n_cpus_explicit'] == 'false')):
+                    if (k not in self.commandline_arguments) or (
+                        k == "n_cpus"
+                        and self.commandline_arguments["n_cpus_explicit"] == "false"
+                    ):
                         value = provconf.parse_parameter(
                             k, val, deactivate_warning=True
                         )
@@ -1310,9 +1320,10 @@ class Report:
                 self.species = read_species
                 self.networkspecies = read_networkspecies
 
-            # determine if need to re-read data (qa, flags, filter_species or calibration factor have changed)
+            # determine if need to re-read data (qa, flags, filter_species, ghost features or calibration factor have changed)
             if (
-                (not np.array_equal(self.qa, self.previous_qa))
+                (self.ghost_features != self.previous_ghost_features)
+                or (not np.array_equal(self.qa, self.previous_qa))
                 or (not np.array_equal(self.flags, self.previous_flags))
                 or (
                     str(dict(sorted(self.filter_species.items())))
@@ -1353,11 +1364,12 @@ class Report:
                 update_metadata_fields(self)
                 metadata_conf(self)
 
-            # set previous QA, flags, filter species and calibration factor as subsection
+            # set previous QA, flags, filter species, ghost features and calibration factor as subsection
             self.previous_qa = copy.deepcopy(self.qa)
             self.previous_flags = copy.deepcopy(self.flags)
             self.previous_filter_species = copy.deepcopy(self.filter_species)
             self.previous_calibration_factor = copy.deepcopy(self.calibration_factor)
+            self.previous_ghost_features = copy.deepcopy(self.ghost_features)
 
             # filter dataset for current subsection
             self.logger.info(
@@ -2524,17 +2536,24 @@ class Report:
                 if z_statistic_sign == "bias":
                     data_labels = list(self.experiments.values())
                 else:
-                    data_labels = [self.observations_data_label] + list(
-                        self.experiments.values()
-                    )
+                    if not self.obs_active:
+                        data_labels = list(self.experiments.values())
+                    else:
+                        data_labels = [self.observations_data_label] + list(
+                            self.experiments.values()
+                        )
 
             elif base_plot_type == "statsummary":
                 if "bias" in plot_options:
                     data_labels = list(self.experiments.values())
                 else:
-                    data_labels = [self.observations_data_label] + list(
-                        self.experiments.values()
-                    )
+                    # if no obs are loaded (when MODEL is active), remove observations from labels
+                    if not self.obs_active:
+                        data_labels = list(self.experiments.values())
+                    else:
+                        data_labels = [self.observations_data_label] + list(
+                            self.experiments.values()
+                        )
 
         elif "multispecies" in plot_options:
             data_labels = []
@@ -2719,8 +2738,9 @@ class Report:
                         unavailable_label = "{}".format(z1_label)
                     else:
                         unavailable_label = "{} - {}".format(z2_label, z1_label)
-                    msg = f"{plot_type} cannot be created because there is no available data of {unavailable_label}."
-                    show_message(self, msg)
+                    if 'gridded' not in z1_label and 'gridded' not in z2_label:
+                        msg = f"{plot_type} cannot be created because there is no available data of {unavailable_label}."
+                        show_message(self, msg)
                     return plot_indices
 
                 # get relevant page/axis to plot on
@@ -2754,6 +2774,17 @@ class Report:
                 if self.map_extent:
                     set_map_extent(self, relevant_axis, self.map_extent)
 
+                # if there is grid data, read it
+                speci = networkspeci.split('|')[1]
+                results = self.datareader.read_gridded_data(
+                    speci, zstat=zstat, date_range=None,
+                    lead_days=get_map_lead_days(self))
+
+                if results:
+                    grid_data, grid_lat, grid_lon = results
+                else:
+                    grid_data, grid_lat, grid_lon = None, None, None
+
                 # make map plot
                 self.plotting.make_map(
                     relevant_axis,
@@ -2763,6 +2794,9 @@ class Report:
                     zstat=zstat,
                     labela=z1_label,
                     labelb=z2_label,
+                    var=grid_data,
+                    lat=grid_lat,
+                    lon=grid_lon,
                     map_extent=self.map_extent,
                 )
 

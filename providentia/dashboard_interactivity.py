@@ -539,6 +539,13 @@ def _toggle_legend_visibility(canvas_instance, legend_label, data_label):
             # lock legend pick
             canvas_instance.lock_legend_pick = True
 
+            # the legend drops the ' (gridded)' suffix when only the gridded version is
+            # loaded (the square handle already marks it), so map the text back to the data label
+            if data_label not in canvas_instance.read_instance.data_labels:
+                gridded_label = "{} (gridded)".format(data_label)
+                if gridded_label in canvas_instance.read_instance.data_labels:
+                    data_label = gridded_label
+
             if data_label not in canvas_instance.plot_elements["data_labels_active"]:
                 visible = True
                 # put observations label always first in pop-ups on hover
@@ -571,9 +578,6 @@ def _toggle_legend_visibility(canvas_instance, legend_label, data_label):
                         "statsummary",
                         "boxplot",
                     ]:
-                        # get currently selected options for plot
-                        plot_options = canvas_instance.current_plot_options[plot_type]
-
                         # get active (absolute / bias)
                         active = canvas_instance.plot_elements[plot_type]["active"]
 
@@ -592,6 +596,23 @@ def _toggle_legend_visibility(canvas_instance, legend_label, data_label):
                                         plot_element.set_visible(True)
                                     else:
                                         plot_element.set_visible(False)
+                        
+                        # remake plot if data label is not within active
+                        # example of when this happens:
+                        # 1. User picks label to remove and plots update
+                        # 2. User changes plot type in one position
+                        # 3. User picks label to add back and plots update
+                        # 4. New plot from change in step 2 does not have data label in active
+                        elif visible:
+                            canvas_instance.update_associated_active_dashboard_plot(
+                                plot_type
+                            )
+
+                    # plots that are entirely remade on legend interaction
+                    elif plot_type in ["statsummary", "heatmap", "table"]:
+                        canvas_instance.update_associated_active_dashboard_plot(
+                            plot_type
+                        )
 
                 # the boxplot's categories - position, spacing and tick
                 # labels alike - depend on which data labels are currently
@@ -871,7 +892,7 @@ def rename_legend_label(canvas_instance, legend_label, data_label):
         # also re-decides whether its labels now fit (see
         # fit_boxplot_xticklabels()), as a new name can be shorter or longer
         # than the one it last measured
-        for plot_type in ("statsummary", "boxplot"):
+        for plot_type in ("statsummary", "table", "boxplot"):
             if plot_type in read_instance.dashboard_plots:
                 canvas_instance.update_associated_active_dashboard_plot(plot_type)
 
@@ -899,7 +920,6 @@ def rename_legend_label(canvas_instance, legend_label, data_label):
     QApplication.instance().installEventFilter(commit_filter)
 
     return None
-
 
 class HoverAnnotation(object):
     def __init__(self, canvas_instance):
@@ -1873,7 +1893,7 @@ class HoverAnnotation(object):
         # corr stat
         text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(
             hex_colour,
-            self.canvas_instance.plot_characteristics["taylor"]["corr_stat"],
+            self.canvas_instance.taylor_corr_stat.currentText(),
             np.cos(corr_stat),
             self.canvas_instance.plot_characteristics["taylor"][
                 "marker_annotate_rounding"

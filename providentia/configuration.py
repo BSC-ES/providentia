@@ -44,9 +44,7 @@ wildcard = yaml.safe_load(
 available_inputs = yaml.safe_load(
     open(join(PROVIDENTIA_ROOT, "settings", "available_inputs.yaml"))
 )
-init = yaml.safe_load(
-    open(join(PROVIDENTIA_ROOT, "settings", "internal", "init.yaml"))
-)
+init = yaml.safe_load(open(join(PROVIDENTIA_ROOT, "settings", "internal", "init.yaml")))
 # named presets a single "report_plots" or "dashboard_plots" entry can refer
 # to (see Report.run() and check_validity()'s "dashboard_plots" handling)
 report_plots_presets = yaml.safe_load(
@@ -118,7 +116,7 @@ class ProvConfiguration:
             non_library = [m for m in active_modes if m not in "library"]
             self.read_instance.mode = non_library[0]
 
-        # initialise command line values or empty values in empty_init, otherwise 
+        # initialise command line values or empty values in empty_init, otherwise
         self.init = init["empty_init"]
         self.init.update(self.required_init)
         self.init.update(available_inputs)
@@ -866,8 +864,24 @@ class ProvConfiguration:
             If True, suppresses user-facing warnings.
         """
 
+        # the conf can carry the interpolation mode in a '::' tag (e.g. 'mod-eu-000::gridded'),
+        # it is taken off before splitting and re-attached once the final model str is built
+        model_types = []
+        untagged_models = []
+        for mod in self.read_instance.experiments:
+            mod_untagged, _, mod_type = mod.rpartition("::")
+            if not mod_untagged:
+                mod_untagged, mod_type = mod, ""
+            elif mod_type not in ["interpolated", "gridded"]:
+                error = (f"Invalid interpolation mode '{mod_type}' for model {mod}. "
+                         "Valid modes are 'interpolated' and 'gridded'.")
+                self.read_instance.logger.error(error)
+                sys.exit(1)
+            untagged_models.append(mod_untagged)
+            model_types.append(mod_type)
+
         # get separated model parts list
-        split_models = [mod.split("-") for mod in self.read_instance.experiments]
+        split_models = [mod.split("-") for mod in untagged_models]
 
         # get default ensemble
         default_ensemble = self.read_instance.default_values["ensemble"]
@@ -1074,6 +1088,12 @@ class ProvConfiguration:
                                         mod_id_alt, d_alt, e_alt
                                     )
 
+                                # re-attach the interpolation mode tag taken off above
+                                if model_types[mod_ii]:
+                                    final_model = "{}::{}".format(
+                                        final_model, model_types[mod_ii]
+                                    )
+
                                 # append domain, ensemble, and forecast to arrays if not None, and not already set
                                 if (d_alt is not None) & (d_alt not in domains):
                                     domains.append(d_alt)
@@ -1092,10 +1112,61 @@ class ProvConfiguration:
         # it is mandatory to have the same number of models and alises, otherwise alises are dropped
         if (len(models) == len(aliases)) & (len(models) > 0):
             self.read_instance.alias_flag = True
+
+            # the gridded and non-gridded versions of an experiment are the same model, so
+            # they cannot be given different names, get the first alias given for each of them
+            alias_per_base_model = {}
+            model_inds_per_base_model = {}
+            overwritten_aliases = []
+            for mod_ii, (mod, alias) in enumerate(zip(models, aliases)):
+                base_model = mod.replace("::gridded", "").replace("::interpolated", "")
+                model_inds_per_base_model.setdefault(base_model, []).append(mod_ii)
+                if base_model not in alias_per_base_model:
+                    alias_per_base_model[base_model] = alias
+                elif alias != alias_per_base_model[base_model]:
+                    overwritten_aliases.append(
+                        "{} ({} --> {})".format(
+                            mod, alias, alias_per_base_model[base_model]
+                        )
+                    )
+
+            # set the shared alias for the models loaded in both interpolation modes, marking
+            # the gridded version, as the data labels have to stay unique to index the data
+            for base_model, mod_inds in model_inds_per_base_model.items():
+                if len(mod_inds) == 1:
+                    continue
+                for mod_ii in mod_inds:
+                    alias = alias_per_base_model[base_model]
+                    if models[mod_ii].endswith("::gridded"):
+                        alias = "{} (gridded)".format(alias)
+                    aliases[mod_ii] = alias
+
+            # inform that some of the aliases given have been overwritten
+            if overwritten_aliases:
+                msg = (
+                    "The gridded and non-gridded versions of a model cannot be given "
+                    "different aliases, keeping the first one given: {}.".format(
+                        ", ".join(overwritten_aliases)
+                    )
+                )
+                show_message(
+                    self.read_instance,
+                    msg,
+                    from_conf=self.read_instance.from_conf,
+                    deactivate=deactivate_warning,
+                )
+
             models = {mod: alias for mod, alias in zip(models, aliases)}
         else:
             self.read_instance.alias_flag = False
-            models = {mod: mod for mod in models}
+            models = {
+                mod: (
+                    "{} (gridded)".format(mod.rpartition("::")[0])
+                    if mod.endswith("::gridded")
+                    else (mod.rpartition("::")[0] or mod)
+                )
+                for mod in models
+            }
 
         # show warning if alias not possible to be set
         if (not self.read_instance.alias_flag) & (len(aliases) > 0):
@@ -1750,21 +1821,10 @@ class ProvConfiguration:
                     sys.exit(1)
                 self.read_instance.reading_ghost = is_ghost
 
-        # if are using dashboard then just take first network/species pair, as multivar not supported yet
-        if (
-            (len(self.read_instance.network) > 1)
-            and (len(self.read_instance.species) > 1)
-            and (self.read_instance.mode == "dashboard")
-        ):
-            msg = "Multiple networks/species are not supported in the dashboard. First ones will be taken."
-            show_message(
-                self.read_instance,
-                msg,
-                from_conf=self.read_instance.from_conf,
-                deactivate=deactivate_warning,
-            )
-
+        # if only one network or species, save in list
+        if len(self.read_instance.network) == 1:
             self.read_instance.network = [self.read_instance.network[0]]
+        if len(self.read_instance.species) == 1:
             self.read_instance.species = [self.read_instance.species[0]]
 
         # initialise networkspeci as first network and species pair
@@ -1922,11 +1982,7 @@ class ProvConfiguration:
                 deactivate=deactivate_warning,
             )
             self.read_instance.interp_multiprocessing = True
-            if (
-                1
-                <= self.read_instance.n_cpus
-                <= self.read_instance.available_cpus
-            ):
+            if 1 <= self.read_instance.n_cpus <= self.read_instance.available_cpus:
                 default = self.read_instance.n_cpus
             else:
                 default = self.read_instance.available_cpus

@@ -707,7 +707,7 @@ def export_configuration(prv, cname, separator="||"):
     )
 
     # merge defaults
-    merged_defaults = init["required_init"].copy() 
+    merged_defaults = init["required_init"].copy()
     merged_defaults.update(init["empty_init"].copy())
     merged_defaults.update(defaults[prv.mode])
     merged_defaults.update(available_inputs)
@@ -733,17 +733,13 @@ def export_configuration(prv, cname, separator="||"):
     options["subsection"] = {}
 
     # default variables
-    if prv.mode in ["report", "library"]:
-        if len(np.unique(prv.network)) > 1:
-            network = ",".join(str(i) for i in prv.network)
-        else:
-            network = prv.network[0]
-        if len(np.unique(prv.species)) > 1:
-            species = ",".join(str(i) for i in prv.species)
-        else:
-            species = prv.species[0]
+    if len(np.unique(prv.network)) > 1:
+        network = ",".join(str(i) for i in prv.network)
     else:
         network = prv.network[0]
+    if len(np.unique(prv.species)) > 1:
+        species = ",".join(str(i) for i in prv.species)
+    else:
         species = prv.species[0]
 
     options["section"] = {

@@ -124,7 +124,34 @@ def join(*args):
     """
     return os.path.join(*args).replace("\\", "/")
 
+    
+def correct_plot_type_name(plot_type):
+    """
+    Correct plot type name by replacing underscores with dashes for specific plot types.
 
+    Parameters
+    ----------
+    plot_type : str
+        Plot type
+
+    Returns
+    -------
+    str
+        Corrected plot type
+    """
+    
+    # correct names
+    if '_' in plot_type:
+        from_format = '_'
+        to_format = '-'
+        return plot_type.replace(from_format, to_format)
+    elif '-' in plot_type:
+        from_format = '-'
+        to_format = '_'
+        return plot_type.replace(from_format, to_format)
+    else:
+        return plot_type
+    
 def deep_merge(dict1, dict2):
     """
     Merge dictionaries recursively to avoid values getting replaced
@@ -201,8 +228,6 @@ def expand_plot_characteristics(plot_characteristics, mode):
                         # since we select the statistics from other dropdowns
                         if ("bias" in value) and (plot_type[:4] == "map"):
                             value.remove("bias")
-                    if (mode == "dashboard") and ("multispecies" in value):
-                        value.remove("multispecies")
                     plot_type_characteristics[key] = value
 
         # remove mode keys

@@ -41,6 +41,7 @@ from .plot_formatting import (
 from .read import DataReader
 from .read_aux import (
     generate_file_trees,
+    get_map_lead_days,
     get_possible_resampling_resolutions,
     get_periodic_nonrelevant_temporal_resolutions,
     get_periodic_relevant_temporal_resolutions,
@@ -1090,6 +1091,16 @@ class Providentia:
             elif z_statistic_sign == "bias":
                 map_title = "{}".format(labelb)
 
+            # if there is grid data, read it
+            results = self.datareader.read_gridded_data(
+                speci, zstat=zstat, date_range=None,
+                lead_days=get_map_lead_days(self))
+
+            if results:
+                grid_data, grid_lat, grid_lon = results
+            else:
+                grid_data, grid_lat, grid_lon = None, None, None
+
             func(
                 relevant_ax,
                 networkspeci,
@@ -1098,8 +1109,12 @@ class Providentia:
                 zstat=zstat,
                 labela=labela,
                 labelb=labelb,
+                var=grid_data,
+                lat=grid_lat,
+                lon=grid_lon,
                 map_extent=map_extent,
             )
+        
         # periodic plot
         elif base_plot_type == "periodic":
             func(
@@ -2222,18 +2237,23 @@ class Providentia:
             self.start_date,
             self.end_date,
             self.resolution,
-            self.network,
-            self.species,
+            self.networkspecies
         )
 
         # reset configuration variables in case new data has been downloaded
         self.valid_config = self.set_config(**self.kwargs)
-        self.data_labels = [self.observations_data_label] + list(
-            self.experiments.values()
-        )
-        self.data_labels_raw = [self.observations_data_label] + list(
-            self.experiments.keys()
-        )
+
+        # if no obs are loaded (when MODEL is active), remove observations from labels
+        if not self.obs_active:
+            self.data_labels = list(self.experiments.values())
+            self.data_labels_raw = list(self.experiments.keys())
+        else:
+            self.data_labels = [self.observations_data_label] + list(
+                self.experiments.values()
+            )
+            self.data_labels_raw = [self.observations_data_label] + list(
+                self.experiments.keys()
+            )
         self.networkspecies = [
             "{}|{}".format(network, speci)
             for network, speci in zip(self.network, self.species)

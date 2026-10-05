@@ -151,7 +151,6 @@ def get_selected_station_data(
             canvas_instance.selected_station_data_labels[networkspeci] = list(
                 np.array(read_instance.data_labels)[valid_data_labels_mask]
             )
-
             # cut data array for valid data labels
             data_array = data_array[valid_data_labels_mask]
 
@@ -517,6 +516,39 @@ def do_resampling(read_instance, data_array, update=True):
             return data_array, read_instance.time_index_after_filter
 
 
+def get_date_range_mask(read_instance, time_index, date_range):
+    """
+    Get mask of time steps inside a date range.
+    Time steps are labelled by their start, so they are kept if their interval overlaps
+    the date range (e.g. when resampling to daily, a day is kept if any of its hours is inside).
+
+    Parameters
+    ----------
+    read_instance : object
+        The instance containing the data and resampling resolutions.
+    time_index : pandas.DatetimeIndex
+        Time steps of the data array (after resampling).
+    date_range : tuple
+        Start (inclusive) and end (exclusive) of date range, as datetimes.
+
+    Returns
+    -------
+    numpy.ndarray
+        Boolean mask, True for time steps inside the date range.
+    """
+
+    start, end = pd.Timestamp(date_range[0]), pd.Timestamp(date_range[1])
+    time_index = pd.DatetimeIndex(time_index)
+
+    # get length of each time step, from the active (resampled or original) resolution
+    resolution = read_instance.resampling_resolution
+    if resolution == "None":
+        resolution = read_instance.resolution
+    offset = pd.tseries.frequencies.to_offset(get_frequency_code(resolution))
+
+    return np.asarray((time_index < end) & ((time_index + offset) > start))
+
+
 def merge_forecast_days(
     read_instance, networkspeci, data_labels, unique_base_data_labels, data_array
 ):
@@ -564,7 +596,12 @@ def merge_forecast_days(
     for base_label_ii, base_label in enumerate(unique_base_data_labels):
         # Find indices of all data_labels that match this base label
         relevant_inds = np.array(
-            [i for i, lbl in enumerate(data_labels) if lbl.startswith(base_label)],
+            [
+                i
+                for i, lbl in enumerate(data_labels)
+                if lbl.startswith(base_label)
+                and not read_instance.data_labels_raw[i].endswith("::gridded")
+            ],
             dtype=np.int32,
         )
 
@@ -1100,6 +1137,7 @@ def calculate_statistic(
     periodic_statistic_mode=None,
     periodic_statistic_aggregation=None,
     forecast_type=None,
+    date_range=None,
 ):
     """
     Calculates statistical metrics for absolute values or model biases across various aggregation modes.
@@ -1140,6 +1178,9 @@ def calculate_statistic(
         Aggregation method for periodic groups.
     forecast_type : str, optional
         Identifier for forecast-specific handling (e.g., 'daily').
+    date_range : tuple, optional
+        Start (inclusive) and end (exclusive) of date range, as datetimes.
+        Data outside the period is ignored. By default None (all loaded period).
 
     Returns
     -------
@@ -1251,7 +1292,14 @@ def calculate_statistic(
 
         # do resampling
         if map:
-            data_array_a, _ = do_resampling(read_instance, data_array_a, update=False)
+            data_array_a, map_time_index = do_resampling(read_instance, data_array_a, update=False)
+
+            # ignore data outside date range selected for map
+            if date_range is not None:
+                outside_date_range = ~get_date_range_mask(
+                    read_instance, map_time_index, date_range
+                )
+                data_array_a[:, :, outside_date_range] = np.nan
 
         # if have second data array, read it
         if len(data_labels_b) != 0:
@@ -1278,6 +1326,9 @@ def calculate_statistic(
                 data_array_b, _ = do_resampling(
                     read_instance, data_array_b, update=False
                 )
+                # ignore data outside date range selected for map
+                if date_range is not None:
+                    data_array_b[:, :, outside_date_range] = np.nan
 
     # for other cases, get cut of selected station data for data_labels_a
     else:
@@ -1504,6 +1555,15 @@ def calculate_statistic(
                 data_array_a,
                 return_nan_padding_counts=True,
             )
+
+        # for Data% on map, do not count time steps outside selected date range as missing data
+        if (
+            (map)
+            and (date_range is not None)
+            and (base_zstat == "Data%")
+            and (nan_padding_counts_a is None)
+        ):
+            nan_padding_counts_a = np.count_nonzero(outside_date_range)
 
         # if have no data_labels_b, calculate 'absolute' basic statistic
         if len(data_labels_b) == 0:
@@ -2048,6 +2108,7 @@ def generate_colourbar_detail(
     plot_characteristics,
     speci,
     only_label=False,
+    label_units=None,
     cmap_override=None,
     vmin_override=None,
     vmax_override=None,
@@ -2113,22 +2174,26 @@ def generate_colourbar_detail(
     """
 
     # get zstat information
-    (
-        zstat,
-        base_zstat,
-        z_statistic_type,
-        z_statistic_sign,
-        z_statistic_period,
-    ) = get_z_statistic_info(zstat=zstat)
+    if zstat is not None:
+        (
+            zstat,
+            base_zstat,
+            z_statistic_type,
+            z_statistic_sign,
+            z_statistic_period,
+        ) = get_z_statistic_info(zstat=zstat)
 
-    # get dictionary containing necessary information for calculation of selected statistic
-    if z_statistic_type == "basic":
-        stats_dict = basic_stats[base_zstat]
+        # get dictionary containing necessary information for calculation of selected statistic
+        if z_statistic_type == "basic":
+            stats_dict = basic_stats[base_zstat]
+        else:
+            stats_dict = modbias_stats[base_zstat]
+        label_units = stats_dict["units"]
+        if label_units == "[measurement_units]":
+            label_units = read_instance.measurement_units[speci]
     else:
-        stats_dict = modbias_stats[base_zstat]
-    label_units = stats_dict["units"]
-    if label_units == "[measurement_units]":
-        label_units = read_instance.measurement_units[speci]
+        stats_dict = {"label": speci}
+        z_statistic_sign = "absolute"
 
     # generate z colourbar label
     # first check if have defined label (in this order: 1. specific for z statistic 2. specific for species 3. configuration file)
@@ -2349,7 +2414,8 @@ def generate_colourbar(
     cb_axs,
     zstat,
     plot_characteristics,
-    speci,
+    speci, 
+    label_units=None,
     cmap_override=None,
     vmin_override=None,
     vmax_override=None,
@@ -2425,7 +2491,8 @@ def generate_colourbar(
         plotted_min,
         plotted_max,
         plot_characteristics,
-        speci,
+        speci, 
+        label_units=label_units,
         cmap_override=cmap_override,
         vmin_override=vmin_override,
         vmax_override=vmax_override,

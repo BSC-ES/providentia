@@ -190,6 +190,54 @@ def search_field_labels(query, labels):
     return [label_ii for _, label_ii in sorted(scored)]
 
 
+def define_style(defined_style, is_base_widget, format_name, format_val, PyQt5_obj):
+    """Set or append style to a PyQt5 object.
+
+    Parameters
+    ----------
+    defined_style : str
+        Style
+    is_base_widget : bool
+        If the object is a base widget (i.e. not a pseudo-element)
+    format_name : str
+        Style key to edit
+    format_val : str
+        Style value to apply
+    PyQt5_obj : PyQt5 object
+        Object to edit style of
+
+    Returns
+    -------
+    str
+        Updated defined style
+    """
+
+    if is_base_widget and format_name in [
+        "height",
+        "width",
+        "min-height",
+        "min-width",
+        "max-height",
+        "max-width",
+    ]:
+        if format_name == "height":
+            PyQt5_obj.setFixedHeight(int(format_val))
+        elif format_name == "width":
+            PyQt5_obj.setFixedWidth(int(format_val))
+        elif format_name == "min-height":
+            PyQt5_obj.setMinimumHeight(int(format_val))
+        elif format_name == "min-width":
+            PyQt5_obj.setMinimumWidth(int(format_val))
+        elif format_name == "max-height":
+            PyQt5_obj.setMaximumHeight(int(format_val))
+        elif format_name == "max-width":
+            PyQt5_obj.setMaximumWidth(int(format_val))
+    else:
+        defined_style += "{}: {};".format(format_name, format_val)
+
+    return defined_style
+
+
 def set_formatting(
     PyQt5_obj, format, valid_obj=None, disabled=False, extra_arguments={}
 ):
@@ -223,7 +271,6 @@ def set_formatting(
         if valid_obj:
             if obj_type not in valid_obj:
                 continue
-
         if len(extra_arguments) > 0:
             if obj_type in extra_arguments:
                 cut_extra_arguments = extra_arguments[obj_type]
@@ -232,45 +279,35 @@ def set_formatting(
         else:
             cut_extra_arguments = {}
 
-        defined_style = ""
+        # check if the object is a base widget (i.e. not a pseudo-element like QComboBox::down-arrow)
+        is_base_widget = "::" not in obj_type
 
+        defined_style = ""
         for format_name, format_val in format[obj_type].items():
             if format_name in cut_extra_arguments:
                 format_val = cut_extra_arguments[format_name]
                 del cut_extra_arguments[format_name]
-
-            if format_name == "height":
-                PyQt5_obj.setFixedHeight(int(format_val))
-            elif format_name == "width":
-                PyQt5_obj.setFixedWidth(int(format_val))
-            elif format_name == "min-height":
-                PyQt5_obj.setMinimumHeight(int(format_val))
-            elif format_name == "min-width":
-                PyQt5_obj.setMinimumWidth(int(format_val))
-            elif format_name == "max-height":
-                PyQt5_obj.setMaximumHeight(int(format_val))
-            elif format_name == "max-width":
-                PyQt5_obj.setMaximumWidth(int(format_val))
-            else:
-                defined_style += "{}: {};".format(format_name, format_val)
+            defined_style = define_style(
+                defined_style, is_base_widget, format_name, format_val, PyQt5_obj
+            )
 
         # have remaining extra arguments to add?
         if len(cut_extra_arguments) > 0:
             for format_name, format_val in cut_extra_arguments.items():
-                if format_name == "height":
-                    PyQt5_obj.setFixedHeight(int(format_val))
-                elif format_name == "width":
-                    PyQt5_obj.setFixedWidth(int(format_val))
-                elif format_name == "min-height":
-                    PyQt5_obj.setMinimumHeight(int(format_val))
-                elif format_name == "min-width":
-                    PyQt5_obj.setMinimumWidth(int(format_val))
-                elif format_name == "max-height":
-                    PyQt5_obj.setMaximumHeight(int(format_val))
-                elif format_name == "max-width":
-                    PyQt5_obj.setMaximumWidth(int(format_val))
-                else:
-                    defined_style += "{}: {};".format(format_name, format_val)
+                defined_style = define_style(
+                    defined_style, is_base_widget, format_name, format_val, PyQt5_obj
+                )
+
+        # inject arrow image path for any down-arrow pseudo-element
+        if "::down-arrow" in obj_type:
+            # when dropdown is open, show arrow looking up
+            if obj_type.endswith(":on"):
+                arrow_file = "arrow_up.png"
+            # when closed, arrow looking down
+            else:
+                arrow_file = "arrow_down.png"
+            arrow_path = join(PROVIDENTIA_ROOT, f"assets/{arrow_file}")
+            defined_style += f'image: url("{arrow_path}");'
 
         if disabled:
             defined_style = "{}:disabled {{ {} }} ".format(obj_type, defined_style)
@@ -845,6 +882,28 @@ class MenuLineEdit(QtWidgets.QLineEdit):
         super().focusOutEvent(event)
 
 
+def set_highlight_color(widget, highlight_color):
+    """
+    Set colour used to highlight selected items and text in a widget and its children,
+    instead of the dashboard palette highlight colour.
+    A style sheet is used, as palettes are ignored in widgets whose parents have a
+    style sheet (e.g. the canvas, which has a style sheet for its tooltips)
+
+    Parameters
+    ----------
+    widget : QtWidgets.QWidget
+        Widget
+    highlight_color : str
+        Colour name or hex code
+    """
+
+    widget.setStyleSheet(
+        "* {{ selection-background-color: {0}; selection-color: white; }}".format(
+            highlight_color
+        )
+    )
+
+
 class ComboBox(QtWidgets.QComboBox):
     """Modify default class of PyQT5 combobox."""
 
@@ -959,8 +1018,17 @@ class ComboBox(QtWidgets.QComboBox):
         # add vertical scroll bar
         self.view().setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
 
-
+    def getItems(self):
+        """
+        Return all items in the combobox as a list of strings
+        """
+        
+        return [self.itemText(i) for i in range(self.count())]
+    
 class CheckableComboBox(QtWidgets.QComboBox):
+
+    checkedItemsChanged = QtCore.pyqtSignal()
+
     def __init__(self, *args, **kwargs):
         """
         Initialise class
@@ -981,7 +1049,7 @@ class CheckableComboBox(QtWidgets.QComboBox):
         self.lineEdit().setPalette(palette)
 
         # update the text when an item is toggled
-        self.model().dataChanged.connect(self.updateText)
+        self.model().dataChanged.connect(self.handleDataChanged)
 
         # hide and show popup when clicking the line edit
         self.lineEdit().installEventFilter(self)
@@ -989,6 +1057,31 @@ class CheckableComboBox(QtWidgets.QComboBox):
 
         # prevent popup from closing when clicking on an item
         self.view().viewport().installEventFilter(self)
+
+    def handleDataChanged(self, topLeft, bottomRight, roles):
+        """
+        Detect when an item is checked or unchecked and update the text accordingly.
+
+        Parameters
+        ----------
+        topLeft : QtCore.QModelIndex
+            Model index of the block's top-left corner
+        bottomRight : QtCore.QModelIndex
+            Model index of the block's bottom-right corner
+        roles : list, int
+            Data roles that changed for those items, e.g.
+            QtCore.Qt.CheckStateRole for a check toggle
+        """
+
+        # dataChanged also fires for colors/flags, only react to check toggles
+        if roles and QtCore.Qt.CheckStateRole not in roles:
+            return
+        
+        # display the checked items as a string
+        self.updateText()
+
+        # emit a signal to notify that the checked items have changed
+        self.checkedItemsChanged.emit()
 
     def fixCursorPosition(self):
         """
@@ -1030,6 +1123,11 @@ class CheckableComboBox(QtWidgets.QComboBox):
             Event
         """
 
+        # filters run before Qt's own enabled check, so without this a
+        # disabled combo still opens its popup
+        if not self.isEnabled():
+            return False
+    
         if obj == self.lineEdit():
             if event.type() == QtCore.QEvent.MouseButtonRelease:
                 if self.closeOnLineEditClick:
@@ -1396,6 +1494,78 @@ class LegendEditorCommitFilter(QtCore.QObject):
                 self.on_outside_press()
         return False
 
+class DateLineEdit(QtWidgets.QLineEdit):
+    """
+    Define class that generates line edit showing dates as YYYY-MM-DD,
+    while text is still read and set as YYYYMMDD
+    """
+
+    # emitted when date changes, with date as YYYYMMDD
+    dateTextChanged = QtCore.pyqtSignal(str)
+
+    def __init__(self, parent=None):
+        """
+        Initialise class
+
+        Parameters
+        ----------
+        parent : object
+            Parent widget
+        """
+
+        super(DateLineEdit, self).__init__(parent)
+
+        # accept only digits, with or without dashes
+        self.setMaxLength(10)
+        self.setValidator(
+            QtGui.QRegularExpressionValidator(
+                QtCore.QRegularExpression(r"\d{0,4}-?\d{0,2}-?\d{0,2}"), self
+            )
+        )
+
+        # emit date without dashes only when it changes (not when only dashes are added)
+        self.last_date_text = ""
+        self.textChanged.connect(self.emit_date_text_changed)
+
+        # add dashes once editing is finished
+        self.editingFinished.connect(lambda: self.setText(self.text()))
+
+    def emit_date_text_changed(self):
+        """
+        Emit dateTextChanged with date as YYYYMMDD, if date has changed
+        """
+
+        date_text = self.text()
+        if date_text != self.last_date_text:
+            self.last_date_text = date_text
+            self.dateTextChanged.emit(date_text)
+
+    def text(self):
+        """
+        Get date without dashes
+
+        Returns
+        -------
+        str
+            Date as YYYYMMDD
+        """
+
+        return super(DateLineEdit, self).text().replace("-", "")
+
+    def setText(self, text):
+        """
+        Set date, showing it as YYYY-MM-DD if it is complete
+
+        Parameters
+        ----------
+        text : str
+            Date as YYYYMMDD or YYYY-MM-DD
+        """
+
+        date_text = str(text).replace("-", "")
+        if len(date_text) == 8:
+            text = "{}-{}-{}".format(date_text[:4], date_text[4:6], date_text[6:])
+        super(DateLineEdit, self).setText(text)
 
 class Switch(QtWidgets.QPushButton):
     """Define class that generates switch buttons."""
@@ -1460,6 +1630,514 @@ class Switch(QtWidgets.QPushButton):
         painter.setPen(QtGui.QPen(text_colour))
         painter.drawText(sw_rect, QtCore.Qt.AlignCenter, label)
 
+class MultiSwitch(QtWidgets.QPushButton):
+    """Switch button that selects between multiple labelled options."""
+
+    stateChanged = QtCore.pyqtSignal(int)
+
+    def __init__(self, parent=None, options=None, highlight_color="steelblue", tooltips=None):
+        """
+        Initialise class
+
+        Parameters
+        ----------
+        parent : object
+            Dashboard instance
+        options : list
+            Labels of the selectable options, in display order
+        highlight_color : str
+            Background colour of selected option
+        tooltips : dict
+            Tooltip text per option label, shown when hovering that segment
+        """
+
+        super(MultiSwitch, self).__init__(parent)
+        if not options:
+            raise ValueError(
+                "MultiSwitch requires a list of options"
+            )
+        self.options = options
+        self.highlight_color = highlight_color
+        self.tooltips = tooltips if tooltips else {}
+        self.state = 0
+        self.setCursor(QtCore.Qt.PointingHandCursor)
+
+    def event(self, event):
+        """
+        Show tooltip of the option whose segment is hovered.
+        """
+
+        if event.type() == QtCore.QEvent.ToolTip and self.tooltips:
+            segment_width = self.rect().width() / len(self.options)
+            option_ii = min(int(event.pos().x() // segment_width), len(self.options) - 1)
+            text = self.tooltips.get(self.options[option_ii], self.toolTip())
+            if text:
+                QtWidgets.QToolTip.showText(event.globalPos(), text, self)
+            else:
+                QtWidgets.QToolTip.hideText()
+            return True
+        return super(MultiSwitch, self).event(event)
+
+    def currentOption(self):
+        """
+        Return label of selected option.
+        """
+        
+        return self.options[self.state]
+
+    def setState(self, state, emit=True):
+        """
+        Select option by index, optionally without emitting stateChanged.
+        """
+        
+        state = int(state)
+        if not (0 <= state < len(self.options)):
+            raise ValueError(f"state must be in 0..{len(self.options) - 1}")
+        if state != self.state:
+            self.state = state
+            self.update()
+            if emit:
+                self.stateChanged.emit(self.state)
+
+    def mousePressEvent(self, event):
+        """
+        Select the option whose segment was clicked.
+        """
+
+        if event.button() == QtCore.Qt.LeftButton:
+            segment_width = self.rect().width() / len(self.options)
+            self.setState(int(event.pos().x() // segment_width))
+        super(MultiSwitch, self).mousePressEvent(event)
+
+    def paintEvent(self, event):
+        """
+        Draw flat segmented switch matching menu widget styling.
+        """
+
+        painter = QtGui.QPainter(self)
+
+        # half-pixel inset so 1px strokes sit crisply on the pixel grid
+        rect = QtCore.QRectF(self.rect()).adjusted(0.5, 0.5, -0.5, -0.5)
+        segment_width = rect.width() / len(self.options)
+
+        # white background for all combobox which is seen in unselected options
+        painter.setPen(QtGui.QPen(QtGui.QColor("lightgrey")))
+        painter.setBrush(QtGui.QColor("white"))
+        painter.drawRect(rect)
+
+        for option_ii, option in enumerate(self.options):
+            segment = QtCore.QRectF(
+                rect.x() + option_ii * segment_width,
+                rect.y(),
+                segment_width,
+                rect.height(),
+            )
+
+            # selected option in blue background with white text
+            if option_ii == self.state:
+                fill = segment.adjusted(0, 0, 0, 0)
+                painter.setPen(QtGui.QPen(QtCore.Qt.NoPen))
+                painter.setBrush(QtGui.QBrush(QtGui.QColor(self.highlight_color)))
+                painter.drawRect(fill)
+                painter.setPen(QtGui.QPen(QtCore.Qt.white))
+            else:
+                painter.setPen(QtGui.QPen(QtGui.QColor("black")))
+
+            # add each option text
+            painter.drawText(segment, QtCore.Qt.AlignCenter, option)
+
+            # add separator between options
+            if option_ii > 0:
+                painter.setPen(QtGui.QPen(QtGui.QColor("lightgrey")))
+                painter.drawLine(
+                    QtCore.QPointF(segment.left(), rect.top()),
+                    QtCore.QPointF(segment.left(), rect.bottom()),
+                )
+
+
+class HourClock(QtWidgets.QWidget):
+    """Define class that generates clock to select hour of day."""
+
+    hourSelected = QtCore.pyqtSignal(int)
+
+    def __init__(self, parent=None, size=180):
+        """
+        Initialise class
+
+        Parameters
+        ----------
+        parent : object
+            Parent widget
+        size : int
+            Clock diameter in pixels
+        """
+
+        super(HourClock, self).__init__(parent)
+        self.setFixedSize(size, size)
+        self.setMouseTracking(True)
+        self.hour = 0
+        self.hover_hour = None
+        self.label_radius = 11
+        self.min_hour = 0
+        self.max_hour = 23
+        
+    def set_hour(self, hour):
+        """
+        Set selected hour
+
+        Parameters
+        ----------
+        hour : int
+            Hour to select
+        """
+
+        self.hour = hour
+        self.update()
+
+    def set_hour_range(self, min_hour, max_hour):
+        """
+        Set range of selectable hours (other hours are greyed out),
+        moving selected hour inside it
+
+        Parameters
+        ----------
+        min_hour : int
+            First selectable hour
+        max_hour : int
+            Last selectable hour
+        """
+
+        self.min_hour = min_hour
+        self.max_hour = max_hour
+        self.hour = min(max(self.hour, min_hour), max_hour)
+        self.update()
+
+    def get_hour_positions(self):
+        """
+        Get centre of clock and position of each hour label
+        (00-11 in outer ring, 12-23 in inner ring, 00 and 12 at top)
+
+        Returns
+        -------
+        QtCore.QPointF, dict
+            Centre of clock and position per hour
+        """
+
+        centre = QtCore.QPointF(self.width() / 2, self.height() / 2)
+        outer_radius = self.width() / 2 - self.label_radius - 3
+        inner_radius = outer_radius - 2 * self.label_radius - 4
+        positions = {}
+        for hour in range(24):
+            radius = outer_radius if hour < 12 else inner_radius
+            angle = np.deg2rad((hour % 12) * 30 - 90)
+            positions[hour] = centre + QtCore.QPointF(
+                radius * np.cos(angle), radius * np.sin(angle)
+            )
+
+        return centre, positions
+
+    def get_hour_at(self, pos):
+        """
+        Get hour label under position (None if there is no label)
+
+        Parameters
+        ----------
+        pos : QtCore.QPoint
+            Position in widget coordinates
+        """
+
+        _, positions = self.get_hour_positions()
+        distances = {
+            hour: np.hypot(pos.x() - position.x(), pos.y() - position.y())
+            for hour, position in positions.items()
+        }
+        hour = min(distances, key=distances.get)
+        if (distances[hour] <= self.label_radius) and (
+            self.min_hour <= hour <= self.max_hour
+        ):
+            return hour
+
+        return None
+
+    def paintEvent(self, event):
+        """
+        Draw clock face, hand and hour labels
+
+        Parameters
+        ----------
+        event : QtCore.QEvent
+            Event
+        """
+
+        centre, positions = self.get_hour_positions()
+        painter = QtGui.QPainter(self)
+        painter.setRenderHint(QtGui.QPainter.Antialiasing)
+        font = painter.font()
+        font.setPointSize(8)
+        painter.setFont(font)
+
+        # draw clock face
+        painter.setPen(QtGui.QPen(QtCore.Qt.gray))
+        painter.setBrush(QtCore.Qt.white)
+        painter.drawEllipse(centre, self.width() / 2 - 1, self.height() / 2 - 1)
+
+        # draw hand pointing to selected hour
+        painter.setPen(QtGui.QPen(QtCore.Qt.black, 2))
+        painter.drawLine(centre, positions[self.hour])
+        painter.setBrush(QtCore.Qt.black)
+        painter.drawEllipse(centre, 3, 3)
+
+        # draw hour labels, highlighting selected and hovered hours
+        for hour, position in positions.items():
+            if hour == self.hour:
+                bg_colour, text_colour = QtCore.Qt.black, QtCore.Qt.white
+            elif hour == self.hover_hour:
+                bg_colour, text_colour = QtCore.Qt.lightGray, QtCore.Qt.black
+            elif not (self.min_hour <= hour <= self.max_hour):
+                bg_colour, text_colour = None, QtGui.QColor("gainsboro")
+            else:
+                bg_colour = None
+                text_colour = QtCore.Qt.black if hour < 12 else QtCore.Qt.darkGray
+            if bg_colour is not None:
+                painter.setPen(QtCore.Qt.NoPen)
+                painter.setBrush(bg_colour)
+                painter.drawEllipse(position, self.label_radius, self.label_radius)
+            painter.setPen(QtGui.QPen(text_colour))
+            label_rect = QtCore.QRectF(
+                position.x() - self.label_radius,
+                position.y() - self.label_radius,
+                2 * self.label_radius,
+                2 * self.label_radius,
+            )
+            painter.drawText(label_rect, QtCore.Qt.AlignCenter, "{:02d}".format(hour))
+
+    def mouseMoveEvent(self, event):
+        """
+        Highlight hour under cursor
+
+        Parameters
+        ----------
+        event : QtGui.QMouseEvent
+            Event
+        """
+
+        hover_hour = self.get_hour_at(event.pos())
+        if hover_hour != self.hover_hour:
+            self.hover_hour = hover_hour
+            self.update()
+
+    def leaveEvent(self, event):
+        """
+        Remove hour highlight when cursor leaves clock
+
+        Parameters
+        ----------
+        event : QtCore.QEvent
+            Event
+        """
+
+        self.hover_hour = None
+        self.update()
+
+    def mousePressEvent(self, event):
+        """
+        Select clicked hour
+
+        Parameters
+        ----------
+        event : QtGui.QMouseEvent
+            Event
+        """
+
+        hour = self.get_hour_at(event.pos())
+        if hour is not None:
+            self.set_hour(hour)
+            self.hourSelected.emit(hour)
+
+
+class DateTimePicker(QtWidgets.QWidget):
+    """Define class that generates popup to select date and hour at the same time."""
+
+    accepted = QtCore.pyqtSignal(QtCore.QDateTime)
+
+    def __init__(self, parent=None, highlight_color="steelblue", show_clock=True):
+        """
+        Initialise class
+
+        Parameters
+        ----------
+        parent : object
+            Parent widget
+        highlight_color : str
+            Colour of selected day and month/year bar
+        show_clock : bool
+            Show clock to select hour, with OK and Cancel buttons to accept
+            (if False, only date is selected, by clicking on a day)
+        """
+
+        super(DateTimePicker, self).__init__(parent, QtCore.Qt.Popup)
+
+        # create calendar and clock
+        self.calendar = QtWidgets.QCalendarWidget(self)
+        self.calendar.setVerticalHeaderFormat(
+            QtWidgets.QCalendarWidget.NoVerticalHeader
+        )
+
+        # set colour of selected day and month/year bar
+        set_highlight_color(self.calendar, highlight_color)
+
+        # month dropdown is a separate popup, so does not get calendar palette
+        for month_menu in self.calendar.findChildren(QtWidgets.QMenu):
+            set_highlight_color(month_menu, highlight_color)
+
+        # show weekend days as normal days
+        weekend_format = QtGui.QTextCharFormat()
+        weekend_format.setForeground(self.calendar.palette().color(QtGui.QPalette.Text))
+        for day in [QtCore.Qt.Saturday, QtCore.Qt.Sunday]:
+            self.calendar.setWeekdayTextFormat(day, weekend_format)
+
+        # show month navigation arrows as < > instead of green icons
+        month_button = self.calendar.findChild(
+            QtWidgets.QToolButton, "qt_calendar_monthbutton"
+        )
+        for button_name, text in [
+            ("qt_calendar_prevmonth", "<"),
+            ("qt_calendar_nextmonth", ">"),
+        ]:
+            button = self.calendar.findChild(QtWidgets.QToolButton, button_name)
+            button.setIcon(QtGui.QIcon())
+            button.setText(text)
+            button.setToolButtonStyle(QtCore.Qt.ToolButtonTextOnly)
+            button.setFont(month_button.font())
+
+        # show text of month/year bar buttons always in white, also when hovering
+        # (by default buttons turn white with black text when hovering)
+        # also remove arrow next month name
+        for button_name in [
+            "qt_calendar_prevmonth",
+            "qt_calendar_monthbutton",
+            "qt_calendar_yearbutton",
+            "qt_calendar_nextmonth",
+        ]:
+            self.calendar.findChild(QtWidgets.QToolButton, button_name).setStyleSheet(
+                "QToolButton { color: white; background-color: transparent; border: none; }"
+                "QToolButton:hover { background-color: rgba(255, 255, 255, 60); border-radius: 3px; }"
+                "QToolButton::menu-indicator { image: none; width: 0px; }"
+            )
+
+        self.clock = HourClock(self)
+
+        # limits of selectable date and hour (set when showing picker)
+        self.minimum_date_time = None
+        self.maximum_date_time = None
+
+        # on first and last selectable days, only allow hours inside limits
+        self.calendar.selectionChanged.connect(self.update_clock_hour_range)
+
+        # double click (or enter) on a day accepts with the hour in the clock
+        self.calendar.activated.connect(self.accept)
+
+        # place calendar and clock side by side
+        pickers_layout = QtWidgets.QHBoxLayout()
+        pickers_layout.addWidget(self.calendar)
+        pickers_layout.addWidget(self.clock, alignment=QtCore.Qt.AlignVCenter)
+        layout = QtWidgets.QVBoxLayout(self)
+        layout.addLayout(pickers_layout)
+
+        # with clock, add buttons below to accept or cancel date and hour
+        if show_clock:
+            ok_button = QtWidgets.QPushButton("OK", self)
+            ok_button.clicked.connect(self.accept)
+            cancel_button = QtWidgets.QPushButton("Cancel", self)
+            cancel_button.clicked.connect(self.close)
+            buttons_layout = QtWidgets.QHBoxLayout()
+            buttons_layout.addStretch()
+            buttons_layout.addWidget(cancel_button)
+            buttons_layout.addWidget(ok_button)
+            layout.addLayout(buttons_layout)
+        # without clock, clicking on a day accepts
+        else:
+            self.clock.hide()
+            self.calendar.clicked.connect(self.accept)
+
+    def show_at(self, global_pos, date_time, minimum_date_time=None, maximum_date_time=None):
+        """
+        Show picker at position with date and hour selected
+
+        Parameters
+        ----------
+        global_pos : QtCore.QPoint
+            Top left position of picker in screen coordinates
+        date_time : QtCore.QDateTime
+            Currently selected date and hour
+        minimum_date_time : QtCore.QDateTime, optional
+            First selectable date and hour, by default None (no limit)
+        maximum_date_time : QtCore.QDateTime, optional
+            Last selectable date and hour, by default None (no limit)
+        """
+
+        self.minimum_date_time = minimum_date_time
+        self.maximum_date_time = maximum_date_time
+
+        # limit selectable days (removing limits of previous use if not given)
+        self.calendar.setDateRange(
+            minimum_date_time.date() if minimum_date_time is not None else QtCore.QDate(100, 1, 1),
+            maximum_date_time.date() if maximum_date_time is not None else QtCore.QDate(9999, 12, 31),
+        )
+        self.calendar.setSelectedDate(date_time.date())
+        self.clock.set_hour(date_time.time().hour())
+        self.update_clock_hour_range()
+
+        # place it on the screen
+        self.move(global_pos)
+        self.show()
+
+    def update_clock_hour_range(self):
+        """
+        Limit selectable hours in clock on first and last selectable days
+        """
+
+        min_hour, max_hour = 0, 23
+        selected_date = self.calendar.selectedDate()
+        if (self.minimum_date_time is not None) and (
+            selected_date == self.minimum_date_time.date()
+        ):
+            min_hour = self.minimum_date_time.time().hour()
+        if (self.maximum_date_time is not None) and (
+            selected_date == self.maximum_date_time.date()
+        ):
+            max_hour = self.maximum_date_time.time().hour()
+        self.clock.set_hour_range(min_hour, max_hour)
+
+    def accept(self):
+        """
+        Close picker and emit selected date and hour
+        """
+
+        date_time = QtCore.QDateTime(
+            self.calendar.selectedDate(),
+            QtCore.QTime(self.clock.hour, 0),
+            QtCore.Qt.UTC,
+        )
+
+        # close before emitting, so picker is not left open while map is updated
+        self.close()
+        self.accepted.emit(date_time)
+
+    def keyPressEvent(self, event):
+        """
+        Close picker on escape
+
+        Parameters
+        ----------
+        event : QtGui.QKeyEvent
+            Event
+        """
+
+        if event.key() == QtCore.Qt.Key_Escape:
+            self.close()
+        else:
+            super(DateTimePicker, self).keyPressEvent(event)
 
 class MessageBox(QtWidgets.QWidget):
     def __init__(self, msg, parent=None, confirmation=False):
