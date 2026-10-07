@@ -1047,7 +1047,6 @@ def fit_xticklabels(
         install(rotation)
         ax.figure.canvas.draw()
         if _xticklabels_fit(ax, renderer, container):
-            print('rotation', rotation)
             return True
 
     # nothing fitted whole - forcing them on anyway falls back to a
