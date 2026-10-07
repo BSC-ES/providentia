@@ -826,20 +826,7 @@ def _centre_view_on(ax, moment, span_seconds):
 
     return None
 
-
-# rotations tried, in order, when the boxplot's category labels don't fit
-# horizontally. Each is anchored at the tick (ha="right") so the label reads
-# with its right end at the tick and its left end lower, the conventional
-# way a rotated x-tick label is drawn
-_BOXPLOT_LABEL_ROTATIONS = (0, 15, 30, 45, 60, 75, 90)
-
-# rotation used when the labels are switched on by hand despite none of the
-# above fitting - a tilt rather than the near-vertical top of that list, so
-# a long label is spread over some width instead of clipping straight down
-_BOXPLOT_LABEL_FALLBACK_ROTATION = 45
-
-
-def _boxplot_labels_fit(ax, renderer, container):
+def _xticklabels_fit(ax, renderer, container):
     """
     Whether every x-tick label currently installed on `ax` sits fully inside
     `container` and doesn't overlap any of its neighbours.
@@ -866,33 +853,84 @@ def _boxplot_labels_fit(ax, renderer, container):
         Whether they all fit.
     """
 
+    # get x axis labels
+    labels = ax.xaxis.get_majorticklabels()
+
+    # get rectangles that contain the x axis labels
     boxes = [
-        label.get_window_extent(renderer) for label in ax.xaxis.get_majorticklabels()
+        label.get_window_extent(renderer) for label in labels
     ]
 
-    for box in boxes:
+    for i, box in enumerate(boxes):
+        # check if each label rectangle fits horizontally inside the container of all labels
         if (box.x0 < container.x0) or (box.x1 > container.x1):
             return False
+    
+        # check if each label rectangle fits vertically inside the container of all labels
         if (box.y0 < container.y0) or (box.y1 > container.y1):
             return False
-
-    for i, box in enumerate(boxes):
+        
+        # check if there is overlap between label rectangle and other label rectangles
         for other in boxes[i + 1 :]:
             if box.overlaps(other):
                 return False
-
     return True
 
+def _dashboard_widget_boxes(figure):
+    """
+    Boxes, in figure display pixels, of the Qt widgets the dashboard lays
+    over the figure above each panel (layout selectors, and the menu / save
+    buttons of the plots currently shown). Empty outside the dashboard.
+    """
 
-def fit_boxplot_xticklabels(
-    ax, xticks, xtick_labels, xtick_params, xticklabel_params, forced=None
+    canvas = figure.canvas
+    read_instance = getattr(canvas, "read_instance", None)
+    if (read_instance is None) or (not hasattr(canvas, "menu_buttons")):
+        return []
+
+    # layout selectors are never hidden; buttons exist for every plot type,
+    # so only those of the plots on screen count
+    widgets = [
+        getattr(read_instance, "cb_position_{}".format(position), None)
+        for position in range(2, 6)
+    ]
+    widgets += [
+        button
+        for button in canvas.menu_buttons
+        + canvas.save_buttons
+        + canvas.save_data_buttons
+        if button.isVisible()
+    ]
+
+    # Qt measures from the top left in logical pixels, matplotlib from the
+    # bottom left in physical ones
+    ratio = canvas.devicePixelRatioF()
+    figure_height = figure.bbox.height
+    boxes = []
+    for widget in widgets:
+        if widget is None:
+            continue
+        boxes.append(
+            mtransforms.Bbox.from_extents(
+                widget.x() * ratio,
+                figure_height - (widget.y() + widget.height()) * ratio,
+                (widget.x() + widget.width()) * ratio,
+                figure_height - widget.y() * ratio,
+            )
+        )
+
+    return boxes
+
+def fit_xticklabels(
+    ax, xtick_labels, xtick_params, xticklabel_params, xticks=None,
+    forced=None
 ):
     """
     Show the boxplot's category labels along the x-axis if they can be made
     to fit, and hide them altogether otherwise.
 
-    Horizontal is tried first, then progressively steeper rotations (see
-    _BOXPLOT_LABEL_ROTATIONS), stopping at the first one under which no
+    Horizontal is tried first, then progressively steeper rotations, 
+    stopping at the first one under which no
     label runs off the figure and no two neighbouring labels overlap. If
     none of them fit, the labels are hidden rather than left to clash or
     spill off screen - the dashboard's panels are narrow enough, and vary
@@ -902,8 +940,6 @@ def fit_boxplot_xticklabels(
     ----------
     ax : matplotlib.axes.Axes
         Axis to set the boxplot's x-ticks/labels on.
-    xticks : list
-        Tick positions.
     xtick_labels : list
         Label text for each tick.
     xtick_params : dict
@@ -912,6 +948,9 @@ def fit_boxplot_xticklabels(
     xticklabel_params : dict
         Base label parameters, as passed to set_xticklabels() - "ha" and
         "rotation_mode" are overwritten per candidate tried.
+    xticks : list, optional
+        Tick positions to set. Left as None, the axis's existing ticks are
+        kept (e.g. in the heatmap the ticks are placed by seaborn).
     forced : bool, optional
         Skip the fitting search and show (True) or hide (False) the labels
         regardless of whether they fit - a manual override of what the
@@ -937,15 +976,17 @@ def fit_boxplot_xticklabels(
         else:
             label_params["ha"] = "right"
             label_params["rotation_mode"] = "anchor"
-        ax.set_xticks(xticks)
-        ax.set_xticklabels(xtick_labels, rotation=rotation, **label_params)
+        if xticks is not None:
+            ax.set_xticks(xticks)
         ax.xaxis.set_tick_params(**params)
+        ax.set_xticklabels(xtick_labels, rotation=rotation, **label_params)
 
     def hide():
-        ax.set_xticks(xticks)
-        ax.set_xticklabels(xtick_labels)
+        if xticks is not None:
+            ax.set_xticks(xticks)
         ax.xaxis.set_tick_params(labelbottom=False)
-
+        ax.set_xticklabels(xtick_labels)
+    
     if forced is False:
         hide()
         return False
@@ -968,19 +1009,45 @@ def fit_boxplot_xticklabels(
     # - into a neighbouring panel, or past the window's edge if it is the
     # outermost one - not merely once it clears the whole figure, which
     # would let it run straight through whatever panel sits next to it.
-    # Horizontally bounded to the axis itself; vertically bounded to the
-    # whole figure, as a label is drawn below its own axis in any case but
-    # a steep rotation on a long label can still run past the bottom of a
-    # dashboard panel tucked into the last row
+    # Horizontally bounded to the axis itself; vertically bounded below by
+    # the top of whatever panel sits underneath this one (its title
+    # included), or by the bottom of the figure if this is the last row
     axis_box = ax.get_window_extent(renderer)
+    floor = ax.figure.bbox.y0
+    for other in ax.figure.axes:
+        if (other is ax) or (not other.get_visible()):
+            continue
+        other_box = other.get_window_extent(renderer)
+        # only panels wholly below this axis, and sharing some of its column
+        if other_box.y1 > axis_box.y0:
+            continue
+        if (other_box.x1 <= axis_box.x0) or (other_box.x0 >= axis_box.x1):
+            continue
+        # tight box rather than the bare axis, so the panel's title counts
+        other_tight = other.get_tightbbox(renderer)
+        if other_tight is not None:
+            other_box = other_tight
+        floor = max(floor, other_box.y1)
+
+    # the buttons and layout selector of the panel underneath are Qt widgets
+    # sitting above its axis, so they raise the floor further
+    for widget_box in _dashboard_widget_boxes(ax.figure):
+        if widget_box.y1 > axis_box.y0:
+            continue
+        if (widget_box.x1 <= axis_box.x0) or (widget_box.x0 >= axis_box.x1):
+            continue
+        floor = max(floor, widget_box.y1)
+
     container = mtransforms.Bbox.from_extents(
-        axis_box.x0, ax.figure.bbox.y0, axis_box.x1, ax.figure.bbox.y1
+        axis_box.x0, floor, axis_box.x1, ax.figure.bbox.y1
     )
 
-    for rotation in _BOXPLOT_LABEL_ROTATIONS:
+    # try different rotations: 0, 5, 10, ..., 90
+    for rotation in np.arange(0, 91, 5):
         install(rotation)
         ax.figure.canvas.draw()
-        if _boxplot_labels_fit(ax, renderer, container):
+        if _xticklabels_fit(ax, renderer, container):
+            print('rotation', rotation)
             return True
 
     # nothing fitted whole - forcing them on anyway falls back to a
@@ -990,7 +1057,7 @@ def fit_boxplot_xticklabels(
     # width. Not the most compact option, but the most legible of the ones
     # that clip
     if forced:
-        install(_BOXPLOT_LABEL_FALLBACK_ROTATION)
+        install(45)
         return True
 
     hide()
