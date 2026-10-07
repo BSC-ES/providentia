@@ -609,7 +609,10 @@ def _toggle_legend_visibility(canvas_instance, legend_label, data_label):
                             )
 
                     # plots that are entirely remade on legend interaction
-                    elif plot_type in ["statsummary", "heatmap", "table"]:
+                    # (only if still on the dashboard)
+                    elif (plot_type in ["statsummary", "heatmap", "table"]) and (
+                        plot_type in canvas_instance.read_instance.dashboard_plots
+                    ):
                         canvas_instance.update_associated_active_dashboard_plot(
                             plot_type
                         )

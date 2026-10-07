@@ -921,6 +921,23 @@ def _dashboard_widget_boxes(figure):
 
     return boxes
 
+def _xticklabels_within_columns(ax, renderer):
+    """
+    Whether every x-tick label is no wider than the gap between neighbouring
+    ticks, i.e. it stays under its own column when drawn horizontally.
+    """
+
+    # get tick positions in display pixels
+    centres = [ax.transData.transform((xtick, 0))[0] for xtick in ax.get_xticks()]
+    if len(centres) < 2:
+        return True
+    column_width = np.min(np.abs(np.diff(centres)))
+
+    return all(
+        label.get_window_extent(renderer).width <= column_width
+        for label in ax.xaxis.get_majorticklabels()
+    )
+
 def fit_xticklabels(
     ax, xtick_labels, xtick_params, xticklabel_params, xticks=None,
     forced=None
@@ -1042,10 +1059,13 @@ def fit_xticklabels(
         axis_box.x0, floor, axis_box.x1, ax.figure.bbox.y1
     )
 
-    # try different rotations: 0, 5, 10, ..., 90
-    for rotation in np.arange(0, 91, 5):
+    # try different rotations: 0, 10, ..., 90
+    for rotation in np.arange(0, 91, 10):
         install(rotation)
         ax.figure.canvas.draw()
+        # horizontal labels must also stay under their own column
+        if (rotation == 0) and (not _xticklabels_within_columns(ax, renderer)):
+            continue
         if _xticklabels_fit(ax, renderer, container):
             return True
 
