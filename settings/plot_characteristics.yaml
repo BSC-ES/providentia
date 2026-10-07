@@ -1838,7 +1838,7 @@
           "axis_title": { "fontsize": 8.5, "loc": "left" },
           "cb_tick_params": { "labelsize": 8 },
           "cb_label": { "fontsize": 8 },
-          "xtick_params": { "labelsize": 7, "labelbottom": false },
+          "xtick_params": { "labelsize": 7 },
           "ytick_params": { "labelsize": 7, "labelrotation": 0 },
           "xticklabels": { "ha": "right", "rotation_mode": "anchor", "fontsize": 9 },
           "yticklabels": { "rotation": 0, "fontsize": 9 },

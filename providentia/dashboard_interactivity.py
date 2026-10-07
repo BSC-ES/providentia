@@ -609,7 +609,10 @@ def _toggle_legend_visibility(canvas_instance, legend_label, data_label):
                             )
 
                     # plots that are entirely remade on legend interaction
-                    elif plot_type in ["statsummary", "heatmap", "table"]:
+                    # (only if still on the dashboard)
+                    elif (plot_type in ["statsummary", "heatmap", "table"]) and (
+                        plot_type in canvas_instance.read_instance.dashboard_plots
+                    ):
                         canvas_instance.update_associated_active_dashboard_plot(
                             plot_type
                         )
@@ -890,9 +893,9 @@ def rename_legend_label(canvas_instance, legend_label, data_label):
         # update_associated_dashboard_plots() re-fetches station data
         # and redraws every active plot, which felt slow. The boxplot redraw
         # also re-decides whether its labels now fit (see
-        # fit_boxplot_xticklabels()), as a new name can be shorter or longer
+        # fit_xticklabels()), as a new name can be shorter or longer
         # than the one it last measured
-        for plot_type in ("statsummary", "table", "boxplot"):
+        for plot_type in ("statsummary", "table", "boxplot", "heatmap"):
             if plot_type in read_instance.dashboard_plots:
                 canvas_instance.update_associated_active_dashboard_plot(plot_type)
 

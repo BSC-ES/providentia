@@ -2415,7 +2415,7 @@
         {
           "element_type": "container",
           "formatting_dict": "settings_container",
-          "size": [250, 180],
+          "size": [250, 205],
           "relative_position": [-230, 25],
         },
 
@@ -2465,12 +2465,23 @@
           "function": "handle_networkspeci_update",
         },
 
+      "xlabels":
+        {
+          "element_type": "checkbox",
+          "formatting_dict": "menu_checkbox",
+          "fixed_width": 230,
+          "relative_position": [-220, 150],
+          "object_name": "heatmap_xlabels",
+          "text": "X-axis labels",
+          "function": "handle_heatmap_xlabels_update",
+        },
+
       "options_label":
         {
           "element_type": "label",
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
-          "relative_position": [-220, 150],
+          "relative_position": [-220, 175],
           "text": "Options",
         },
 
@@ -2479,7 +2490,7 @@
           "element_type": "checkable_combobox",
           "formatting_dict": "menu_checkable_combobox",
           "size": [230, 20],
-          "relative_position": [-220, 175],
+          "relative_position": [-220, 200],
           "object_name": "heatmap_options",
           "function": "update_plot_option",
         },

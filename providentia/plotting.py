@@ -3458,17 +3458,18 @@ class Plotting:
             # change width with the layout, so work out whether the category
             # labels can be shown without clashing or running off screen,
             # rather than always drawing them at the fixed rotation used
-            # elsewhere (see fit_boxplot_xticklabels())
-            shown = plot_formatting.fit_boxplot_xticklabels(
-                relevant_axis, xticks, xtick_labels, xtick_params, xticklabel_params
+            # elsewhere
+            shown = plot_formatting.fit_xticklabels(
+                relevant_axis, xtick_labels, xtick_params, xticklabel_params,
+                xticks=xticks,
             )
-            self.canvas_instance.boxplot_xtick_cache = {
+            self.canvas_instance.xtick_cache["boxplot"] = {
                 "xticks": xticks,
                 "xtick_labels": xtick_labels,
                 "xtick_params": xtick_params,
                 "xticklabel_params": xticklabel_params,
             }
-            self.canvas_instance.sync_boxplot_xlabels_checkbox(shown)
+            self.canvas_instance.sync_xlabels_checkbox("boxplot", shown)
         else:
             relevant_axis.set_xticks(xticks)
             relevant_axis.xaxis.set_tick_params(**xtick_params)
@@ -3718,14 +3719,19 @@ class Plotting:
         )
 
         # set xticklabels
-        if plot_characteristics["xtick_params"].get("labelbottom", True):
-            relevant_axis.set_xticklabels(
-                stats_df.columns,
-                **plot_characteristics["xticklabels"]
-            )
-        else:
-            relevant_axis.set_xticklabels([])
-            relevant_axis.set_xlabel("")
+        dashboard_slot = getattr(self.canvas_instance, "heatmap_slot", None)
+        fit_heatmap_labels = (self.read_instance.mode == "dashboard") and (
+            dashboard_slot is not None
+        )
+        if not fit_heatmap_labels:
+            if plot_characteristics["xtick_params"].get("labelbottom", True):
+                relevant_axis.set_xticklabels(
+                    stats_df.columns,
+                    **plot_characteristics["xticklabels"]
+                )
+            else:
+                relevant_axis.set_xticklabels([])
+                relevant_axis.set_xlabel("")
 
         # axis cuts off due to bug in matplotlib 3.1.1 - hack fix
         if Version(matplotlib.__version__) <= Version("3.1.1"):
@@ -3827,7 +3833,24 @@ class Plotting:
                     ]
                 )
                 relevant_axis.apply_aspect()
-                
+            
+            relevant_axis.set_xlabel("")
+            xtick_labels = [
+                get_display_label(self.read_instance, data_label)
+                for data_label in stats_df.columns
+            ]
+            xtick_params = copy.deepcopy(plot_characteristics["xtick_params"])
+            xticklabel_params = copy.deepcopy(plot_characteristics["xticklabels"])
+            shown = plot_formatting.fit_xticklabels(
+                relevant_axis, xtick_labels, xtick_params, xticklabel_params,
+            )
+            self.canvas_instance.xtick_cache["heatmap"] = {
+                "xtick_labels": xtick_labels,
+                "xtick_params": xtick_params,
+                "xticklabel_params": xticklabel_params,
+            }
+            self.canvas_instance.sync_xlabels_checkbox("heatmap", shown)
+  
         # track plot elements
         if self.read_instance.mode not in ["report"]:
             self.track_plot_elements(
