@@ -4,13 +4,17 @@ import copy
 from functools import partial
 import platform
 import time
+import random
+import os
+import sys
 
 import numpy as np
+import pandas as pd
 from PyQt5 import QtCore, QtWidgets, QtGui
 import yaml
 
-from providentia.auxiliar import CURRENT_PATH, join
-from .read_aux import get_default_qa
+from providentia.auxiliar import CURRENT_PATH, join, Tee
+from .read_aux import get_default_qa, get_valid_models
 from .dashboard_elements import (
     set_formatting,
     wrap_tooltip_text,
@@ -19,6 +23,7 @@ from .dashboard_elements import (
     CheckableComboBox,
 )
 from .warnings_prv import show_message
+from .writing import export_basic_configuration
 
 
 PROVIDENTIA_ROOT = "/".join(CURRENT_PATH.split("/")[:-1])
@@ -476,6 +481,7 @@ class PopUpWindow(QtWidgets.QWidget):
                 format_type = [
                     "popup_checkbox",
                     "popup_checkbox",
+                    "popup_button_run",
                     "popup_combobox",
                     "popup_combobox",
                 ]
@@ -484,18 +490,21 @@ class PopUpWindow(QtWidgets.QWidget):
                 self.page_memory["models"] = {
                     "interpolated": [],
                     "gridded": [],
+                    "run": [],
                     "forecast": [],
                     "forecast_days": [],
                     "n_column_consumed": 4,
                     "ordered_elements": [
                         "interpolated",
                         "gridded",
+                        "run",
                         "forecast",
                         "forecast_days",
                     ],
                     "widget": [
                         QtWidgets.QCheckBox,
                         QtWidgets.QCheckBox,
+                        QtWidgets.QPushButton,
                         CheckableComboBox,
                         CheckableComboBox,
                     ],
@@ -663,8 +672,10 @@ class PopUpWindow(QtWidgets.QWidget):
                         element_format = formatting_dict[format_type]
 
                     # if menu type ==  'rangeboxes' then add 1 to element ii, because placed a label in first column
+                    element_label = ""
                     if menu_type in ["checkboxes", "rangeboxes", "models"]:
-                        element_label = ""
+                        if element == "run":
+                            element_label = "Run"
                         element_ii += 1
                     elif menu_type in ["multispecies"]:
                         element_ii -= 1
@@ -672,7 +683,7 @@ class PopUpWindow(QtWidgets.QWidget):
                         element_label = label
 
                     # append widget to page memory dictionary
-                    if menu_type in ["multispecies", "models"]:
+                    if element_label == "":
                         self.page_memory[menu_type][element].append(
                             set_formatting(widget(), element_format)
                         )
@@ -768,7 +779,7 @@ class PopUpWindow(QtWidgets.QWidget):
 
                     # if menu type == models
                     elif menu_type == "models":
-                        if element in ['interpolated', 'gridded']:
+                        if element in ['interpolated', 'gridded', 'run']:
                             model_checkbox = self.page_memory[menu_type][element][
                                 label_ii
                             ]
@@ -798,9 +809,16 @@ class PopUpWindow(QtWidgets.QWidget):
                                 model_checkbox.setCheckState(QtCore.Qt.Checked)
 
                             # connect checkbox to handle model being checked
-                            model_checkbox.stateChanged.connect(
-                                self.handle_model_checked
-                            )
+                            if element in ['interpolated', 'gridded']:
+                                model_checkbox.stateChanged.connect(
+                                    self.handle_model_checked
+                                )
+                            else:
+                                # fix width so button does not resize when text changes to "Interpolating..."
+                                model_checkbox.clicked.connect(
+                                    self.handle_model_interp_clicked
+                                )
+
                         # update forecast options combobox back to previously available and selected values
                         elif element == "forecast":
                             # gather all forecast options, selected options and disabled options
@@ -1036,7 +1054,7 @@ class PopUpWindow(QtWidgets.QWidget):
                                 QtCore.Qt.AlignCenter,
                             )
                     elif menu_type == "models":
-                        texts = ["Interpolated", "Gridded"]
+                        texts = ["Interpolated", "Gridded", "Interpolation"]
                         for i, text in enumerate(texts):
                             column_label = set_formatting(
                                 QtWidgets.QLabel(self, text=text),
@@ -2539,6 +2557,152 @@ class PopUpWindow(QtWidgets.QWidget):
                 networkspeci not in self.read_instance.selected_filter_species.keys()
             ):
                 del self.read_instance.qa_per_species[speci]
+
+    def handle_model_interp_clicked(self, event):
+        """
+        Manages the interpolation of a gridded model when its RUN button is clicked.
+
+        The current dashboard selection (network, species, resolution and dates) is written to a
+        temporary configuration file, which is used to run the interpolation from the dashboard.
+        The call is blocking, and its output is written both to the terminal and to a log in
+        logs/interpolation/management_logs. Once finished, the configuration file is removed,
+        the available models are updated and a message reports what was interpolated per
+        networkspeci, as the interpolation can be partial.
+
+        Parameters
+        ----------
+        event : bool
+            Checked state emitted by the clicked signal of the button (not used).
+        """
+
+        # Get the source widget that triggered the event (the checkbox)
+        event_source = self.sender()
+
+        # Disable all available RUN buttons while interpolating and update text
+        # (unavailable ones are already disabled and must stay that way)
+        run_buttons = [button for button in self.page_memory["models"]["run"] if button.isEnabled()]
+        for button in run_buttons:
+            self.read_instance.disable_element(button, "button_run", prefix="popup")
+        event_source.setText("Interpolating...")
+
+        # Force repaint before the blocking interpolation call
+        QtWidgets.QApplication.processEvents()
+
+        # Extract the numeric index from the checkbox object (e.g. expcheckboxes_run_2) to get the model
+        object_name = event_source.objectName().split("_")
+        label_ii = int(object_name[-1])
+        model_id = self.menu_current["models"]["map_vars"][label_ii]
+
+        # Assign unique ID to experiment
+        unique_id = f"{random.randint(0, 999999):06d}"
+
+        # Get currently selected parameters (not read into memory)
+        start_date = self.read_instance.le_start_date.text()
+        end_date = self.read_instance.le_end_date.text()
+        resolution = self.read_instance.selected_resolution
+        networkspecies = self.read_instance.selected_networkspecies
+        species = self.read_instance.selected_species
+        network = self.read_instance.selected_network
+
+        # Store configuration
+        configuration_name = join(self.read_instance.config_dir, f"dashboard_run_{unique_id}.conf")
+        export_basic_configuration(self.read_instance, configuration_name, 
+                                   network=network,
+                                   species=species,
+                                   resolution=resolution,
+                                   start_date=start_date,
+                                   end_date=end_date,
+                                   experiment=model_id)
+
+        # save original stdout
+        from .interpolation import experiment_interpolation_submission as interpolation
+        orig_stdout = sys.stdout
+        log_path = join(
+            PROVIDENTIA_ROOT,
+            "logs",
+            "interpolation",
+            "management_logs",
+            f"{unique_id}.out",
+        )
+        with open(log_path, "w") as f:
+            sys.stdout = Tee(orig_stdout, f)
+            try:
+                # do interpolation
+                kwargs = {"interpolation": True,
+                          "from_dashboard": True,
+                          "config": configuration_name, 
+                          "slurm_job_id": unique_id}
+                interpolation.main(**kwargs)
+            finally:
+                # reset stdout
+                sys.stdout = orig_stdout
+
+        # Reuse logger
+        self.read_instance.provconf.switch_logging()
+
+        # Remove configuration
+        os.remove(configuration_name)
+
+        # Update text 
+        event_source.setText("Run")
+
+        # Update available models, now that the interpolated files exist
+        get_valid_models(
+            self.read_instance,
+            start_date,
+            end_date,
+            resolution,
+            networkspecies,
+        )
+        # Update forecast menus
+        self.read_instance.update_models_menu()
+
+        if model_id in self.menu_current["models"]["enabled"]["interpolated"]:
+            # Enable interpolated model checkbox
+            model_checkbox = self.page_memory["models"]["interpolated"][label_ii]
+            model_checkbox.setEnabled(True)
+            model_checkbox.setGraphicsEffect(None)
+            model_checkbox.setToolTip("")
+
+            # Report what is available per networkspeci, as interpolation can be partial
+            # (e.g. no observations or no gridded files for some species / months)
+            available = self.read_instance.available_model_data["interpolated"]
+            done = []
+            missing = []
+
+            # Months requested (end date is exclusive, same rule as in get_valid_interpolated_models)
+            requested_yearmonths = [
+                ym for ym in pd.date_range(start_date[:6] + "01", end_date, freq="MS").strftime("%Y%m")
+                if int(ym + "01") < int(end_date)
+            ]
+            for networkspeci in networkspecies:
+                net, speci = networkspeci.split("|")
+                yearmonths = available.get(net, {}).get(resolution, {}).get(speci, {}).get(model_id, [])
+                missing_yearmonths = [ym for ym in requested_yearmonths if ym not in yearmonths]
+                if not yearmonths:
+                    missing.append(networkspeci)
+                elif missing_yearmonths:
+                    done.append(f"{networkspeci} ({len(yearmonths)} of {len(requested_yearmonths)} months, "
+                                f"missing: {', '.join(missing_yearmonths)})")
+                else:
+                    done.append(f"{networkspeci} (all {len(requested_yearmonths)} months)")
+
+            msg = f"Interpolation of {model_id} ({resolution}, {start_date} to {end_date}) finished. "
+            msg += f"Available: {', '.join(done)}."
+            if missing:
+                msg += f" Nothing interpolated for: {', '.join(missing)}. Check the log in {log_path}."
+            show_message(self.read_instance, msg)
+        else:
+            # Interpolation did not produce files, allow retrying
+            msg = f"Interpolation of {model_id} failed. Check the terminal and log in {log_path}."
+            show_message(self.read_instance, msg)
+
+        # Allow re-interpolating (e.g. after changing dates or species)
+        for button in run_buttons:
+            self.read_instance.enable_element(button, "button_run", prefix="popup")
+
+        return None
+    
     def handle_model_checked(self, event):
         """
         Manages the visibility and population of forecast-related widgets when a model checkbox is toggled.
@@ -2546,7 +2710,7 @@ class PopUpWindow(QtWidgets.QWidget):
         Parameters
         ----------
         event : int
-            The check state of the checkbox (standard PyQt5 signal argument).
+            The check state of the checkbox.
         """
 
         # Get the source widget that triggered the event (the checkbox)
@@ -2605,7 +2769,7 @@ class PopUpWindow(QtWidgets.QWidget):
                         all_forecast_vars
                     )
 
-                    # Set an identifiable name for the model (useful for debugging or tracking)
+                    # Set an identifiable name for the model
                     forecast_model.setObjectName("forecastcheckboxes_" + str(label_ii))
 
                     # Connect dataChanged signal to the handler for checking/unchecking forecast options

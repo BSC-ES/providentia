@@ -11,6 +11,7 @@ import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join
 from .configuration import write_conf
+from .auxiliar import join_unique
 from .read_aux import get_default_qa
 from .statistics import do_resampling, merge_forecast_days
 
@@ -666,6 +667,80 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
 
     return True
 
+def export_basic_configuration(prv, cname, network=None, species=None, resolution=None,
+                               start_date=None, end_date=None, experiment=None):
+    """
+    Generates and writes a minimal configuration file (section DASHBOARD) containing only
+    the fields network, species, resolution, start_date, end_date and experiments.
+
+    Any field that is not passed is taken from the current state of prv.
+
+    Parameters
+    ----------
+    prv : object
+        Instance of the application (Dashboard or Library) providing current state and settings.
+    cname : str
+        The filename or path for the configuration file to be created.
+    network : list of str, optional
+        Networks to write, paired by position with species. If None, prv.network is used.
+    species : list of str, optional
+        Species to write, paired by position with network. If None, prv.species is used.
+    resolution : str, optional
+        Temporal resolution (e.g. 'hourly', 'daily'). If None, prv.resolution is used.
+    start_date : str, optional
+        Start date in 'YYYYMMDD' format. If None, prv.start_date is used.
+    end_date : str, optional
+        End date in 'YYYYMMDD' format (exclusive). If None, prv.end_date is used.
+    experiment : str, optional
+        Experiment name, coming from model to interpolate on dashboard. If None, it is built
+        from prv.experiments as a comma-separated list, followed by the aliases in brackets
+        if there are any.
+
+    Returns
+    -------
+    None
+        Writes the configuration file to `cname`.
+    """
+
+    section = "DASHBOARD"
+    subsection = None
+
+    options = {}
+    options["section"] = {}
+    options["subsection"] = {}
+
+    network = join_unique(prv.network if network is None else network)
+    species = join_unique(prv.species if species is None else species)
+    resolution = prv.resolution if resolution is None else resolution
+    start_date = prv.start_date if start_date is None else start_date
+    end_date = prv.end_date if end_date is None else end_date
+
+    if experiment is None and prv.experiments:
+        mods = []
+        aliases = []
+        for mod_raw, mod in prv.experiments.items():
+            mods.append(mod_raw)
+            if mod_raw != mod:
+                aliases.append(mod)
+        experiment = ",".join(str(i) for i in mods)
+        if len(aliases) > 0:
+            alias_str = ",".join(str(i) for i in aliases)
+            experiment = "{} ({})".format(experiment, alias_str)
+
+    options["section"] = {
+        "network": network,
+        "species": species,
+        "resolution": resolution,
+        "start_date": start_date,
+        "end_date": end_date,
+        "experiments": experiment
+    }
+    print('options', options)
+
+    # write .conf file
+    write_conf(section, subsection, cname, options)
+
+    return None
 
 def export_configuration(prv, cname, separator="||"):
     """
@@ -733,14 +808,8 @@ def export_configuration(prv, cname, separator="||"):
     options["subsection"] = {}
 
     # default variables
-    if len(np.unique(prv.network)) > 1:
-        network = ",".join(str(i) for i in prv.network)
-    else:
-        network = prv.network[0]
-    if len(np.unique(prv.species)) > 1:
-        species = ",".join(str(i) for i in prv.species)
-    else:
-        species = prv.species[0]
+    network = join_unique(prv.network)
+    species = join_unique(prv.species)
 
     options["section"] = {
         "network": network,

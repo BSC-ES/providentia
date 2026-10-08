@@ -792,7 +792,7 @@ class Report:
                     reports_path, reports_path_temp
                 )
             )
-            os.system("rm {}".format(reports_path_temp))
+            os.remove(reports_path_temp)
         else:
             os.system("mv {} {}".format(reports_path_temp, reports_path))
 
@@ -1513,7 +1513,7 @@ class Report:
             input_doi_pdf = PdfReader(open(reports_doi_path_temp, "rb"))
             for page_number in range(len(input_doi_pdf.pages)):
                 output_pdf_file.add_page(input_doi_pdf.pages[page_number])
-            os.system("rm {}".format(reports_doi_path_temp))
+            os.remove(reports_doi_path_temp)
 
         # Write the rearranged pages to a new PDF file
         self.logger.info(f"Writing {output_pdf}")

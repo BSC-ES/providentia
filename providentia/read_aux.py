@@ -272,7 +272,8 @@ def read_netcdf_data(tuple_arguments):
                 # set read_qa to False to not filter by them
                 read_qa = False
             else:
-                species_data = ncdf_root[speci][fsi:lsi, valid_file_time_indices]
+                species_data = ncdf_root[speci][fsi:lsi,
+                                                valid_file_time_indices]
                 species_data = species_data[current_file_station_indices_adjusted]
                 read_qa = True
         # non-GHOST
@@ -283,7 +284,8 @@ def read_netcdf_data(tuple_arguments):
                 species_data = species_data[current_file_station_indices_adjusted]
             # do not transpose
             else:
-                species_data = ncdf_root[speci][fsi:lsi, valid_file_time_indices]
+                species_data = ncdf_root[speci][fsi:lsi,
+                                                valid_file_time_indices]
                 species_data = species_data[current_file_station_indices_adjusted]
 
             # if network is actris then read qa
@@ -312,14 +314,16 @@ def read_netcdf_data(tuple_arguments):
             if read_qa:
                 if len(qa) > 0:
                     # screen out observations which are associated with any of the selected qa flags
-                    qa_data = ncdf_root["qa"][fsi:lsi, valid_file_time_indices, :]
+                    qa_data = ncdf_root["qa"][fsi:lsi,
+                                              valid_file_time_indices, :]
                     qa_data = qa_data[current_file_station_indices_adjusted]
                     species_data[np.isin(qa_data, qa).any(axis=2)] = np.nan
 
             # if some data provider flags selected then screen observations
             if len(flags) > 0:
                 # screen out observations which are associated with any of the selected data provider flags
-                flag_data = ncdf_root["flag"][fsi:lsi, valid_file_time_indices, :]
+                flag_data = ncdf_root["flag"][fsi:lsi,
+                                              valid_file_time_indices, :]
                 flag_data = flag_data[current_file_station_indices_adjusted]
                 species_data[np.isin(flag_data, flags).any(axis=2)] = np.nan
 
@@ -400,7 +404,8 @@ def read_netcdf_data(tuple_arguments):
                     ]:
                         if len(meta_shape) == 2:
                             if meta_val_dtype == np.dtype(object):
-                                meta_val = np.array(["".join(val) for val in meta_val])
+                                meta_val = np.array(
+                                    ["".join(val) for val in meta_val])
                             else:
                                 meta_val = chartostring(meta_val)
 
@@ -421,7 +426,8 @@ def read_netcdf_data(tuple_arguments):
                     meta_val = meta_val[current_file_station_indices_adjusted]
 
                 # put metadata in array
-                file_metadata[meta_var][full_array_station_indices, 0] = meta_val
+                file_metadata[meta_var][full_array_station_indices,
+                                        0] = meta_val
 
     # model data
     else:
@@ -477,7 +483,8 @@ def read_netcdf_data(tuple_arguments):
 
             # else if forecast day not available in the netCDF, then just take the data as it is
             else:
-                relevant_data = ncdf_root[speci][fsi:lsi, valid_file_time_indices]
+                relevant_data = ncdf_root[speci][fsi:lsi,
+                                                 valid_file_time_indices]
                 relevant_data = relevant_data[current_file_station_indices_adjusted]
                 data_label_forecast = data_label
 
@@ -570,7 +577,8 @@ def read_netcdf_metadata(tuple_arguments):
 
                 # if have zero non-NaN station indices, then return from function without reading
                 if len(non_nan_station_indices) == 0:
-                    metadata_read = [np.array([]), np.array([]), np.array([]), [], []]
+                    metadata_read = [np.array([]), np.array(
+                        []), np.array([]), [], []]
                     ncdf_root.close()
                     return metadata_read
 
@@ -609,7 +617,8 @@ def read_netcdf_metadata(tuple_arguments):
                     meta_val_dtype = np.array([meta_val[0]]).dtype
                     if len(meta_shape) == 2:
                         if meta_val_dtype == np.dtype(object):
-                            meta_val = np.array(["".join(val) for val in meta_val])
+                            meta_val = np.array(["".join(val)
+                                                for val in meta_val])
                         else:
                             meta_val = chartostring(meta_val)
                 else:
@@ -835,6 +844,8 @@ def get_ghost_observational_tree(instance, ghost_version):
     ----------
     instance : object
         An instance of the application class containing GHOST configuration and versioning.
+    ghost_version : str
+        GHOST version of the data to scan, also used in the name of the exported JSON file.
 
     Returns
     -------
@@ -896,7 +907,8 @@ def get_ghost_observational_tree(instance, ghost_version):
 
                 # get monthly start date (YYYYMM) of all files
                 file_yearmonths = sorted(
-                    [f.split("_")[-1][:6] for f in available_files if f != "temporary"]
+                    [f.split("_")[-1][:6]
+                     for f in available_files if f != "temporary"]
                 )
 
                 # get matrix for current species
@@ -904,7 +916,8 @@ def get_ghost_observational_tree(instance, ghost_version):
                     matrix = instance.parameter_dictionary[speci]["matrix"]
                     if matrix not in ghost_observation_data[network][resolution]:
                         # write nested empty dictionary for matrix
-                        ghost_observation_data[network][resolution][matrix] = {}
+                        ghost_observation_data[network][resolution][matrix] = {
+                        }
 
                     # write nested dictionary for species, with associated file yearmonths
                     ghost_observation_data[network][resolution][matrix][
@@ -991,7 +1004,8 @@ def get_nonghost_observational_tree(instance):
                     matrix = instance.parameter_dictionary[speci]["matrix"]
                     if matrix not in nonghost_observation_data[network][resolution]:
                         # write nested empty dictionary for matrix
-                        nonghost_observation_data[network][resolution][matrix] = {}
+                        nonghost_observation_data[network][resolution][matrix] = {
+                        }
 
                     # write nested dictionary for species, with associated file yearmonths
                     nonghost_observation_data[network][resolution][matrix][
@@ -1099,6 +1113,7 @@ def get_valid_obs_files_in_date_range(instance, start_date, end_date):
                             matrix
                         ][speci] = valid_file_yearmonths
 
+
 def get_valid_interpolated_models(instance, start_date, end_date, resolution, networkspecies):
     """
     Get interpolated models in mod_root for current GHOST version
@@ -1115,7 +1130,7 @@ def get_valid_interpolated_models(instance, start_date, end_date, resolution, ne
         The temporal resolution (e.g. 'hourly', 'daily').
     networkspecies : list of str
         The monitoring networks|species to match against model data.
-    
+
     Returns
     -------
     dict
@@ -1144,15 +1159,15 @@ def get_valid_interpolated_models(instance, start_date, end_date, resolution, ne
     models_path = join(instance.mod_root, instance.ghost_version)
     if os.path.exists(models_path):
         available_models = os.listdir(
-                "%s/%s" % (instance.mod_root, instance.ghost_version)
-            )      
+            "%s/%s" % (instance.mod_root, instance.ghost_version)
+        )
     else:
         msg = (
             f"Cannot access interpolated model path, mod_root defined as {models_path} in data_paths.yaml."
         )
         show_message(instance, msg, print=True)
         return models, available_model_data, file_roots
-    
+
     # get start date on first of month
     start_date_firstdayofmonth = int(str(start_date)[:6] + "01")
 
@@ -1195,7 +1210,8 @@ def get_valid_interpolated_models(instance, start_date, end_date, resolution, ne
                     continue
 
             # get monthly start date (YYYYMM) of all files
-            file_yearmonths = sorted([f.split("_")[-1][:6] for f in available_files])
+            file_yearmonths = sorted([f.split("_")[-1][:6]
+                                     for f in available_files])
 
             # write nested dictionary for model, with associated file yearmonths
             if len(file_yearmonths) > 0:
@@ -1236,10 +1252,11 @@ def get_valid_interpolated_models(instance, start_date, end_date, resolution, ne
 
     return models, available_model_data, file_roots
 
+
 def parse_model_filename(filename, speci):
     """
     Split a gridded model filename into speci, ensemble, date and statistic information (av, av_an).
-    
+
     Parameters
     ----------
     filename : str
@@ -1249,13 +1266,20 @@ def parse_model_filename(filename, speci):
 
     Returns
     -------
-    dict 
+    Returns
+    -------
+    dict or None
+        None if the filename does not match the expected pattern. Otherwise a dictionary with:
+        'speci' (str), 'ensemble' (three digit str, or None if the filename has none),
+        'date' (str, 'YYYYMM', 'YYYYMMDD' or 'YYYYMMDDHH'), 'tags' (list of str after the date,
+        e.g. ['av', 'an']), and 'prefix' / 'suffix' (str, text before and after the date,
+        used to rebuild paths).
     """
 
     pattern = (r'^' + re.escape(speci) +
-                r'(?:[-_](?P<ensemble>\d{3}))?'
-                r'_(?P<date>\d{10}|\d{8}|\d{6})'
-                r'(?P<extra>(?:_[a-zA-Z0-9]+)*)\.nc$')
+               r'(?:[-_](?P<ensemble>\d{3}))?'
+               r'_(?P<date>\d{10}|\d{8}|\d{6})'
+               r'(?P<extra>(?:_[a-zA-Z0-9]+)*)\.nc$')
     match = re.match(pattern, filename)
     if match is None:
         return None
@@ -1268,6 +1292,7 @@ def parse_model_filename(filename, speci):
             # prefix/suffix around the date, for rebuilding paths
             'prefix': filename[:match.start('date')],
             'suffix': parsed['extra']}
+
 
 def model_file_overlaps_period(timestep, start, end, lead_days):
     """
@@ -1336,7 +1361,7 @@ def get_forecast_run_mask(file_timestamps, run_start, lead_days):
     # calculate time elapsed since model initialised for each timestep (ns)
     day = pd.Timedelta(days=1).value
     lead_offset = file_timestamps - run_start.value
-    
+
     mask = np.zeros(file_timestamps.shape, dtype=bool)
 
     # add timesteps of each wanted lead day
@@ -1346,7 +1371,8 @@ def get_forecast_run_mask(file_timestamps, run_start, lead_days):
     # lead time = N: at least (N−1)×24 h after run start, but less than N×24 h
     for lead_day in lead_days:
         window_start = (lead_day - 1) * day
-        mask |= (lead_offset >= window_start) & (lead_offset < window_start + day)
+        mask |= (lead_offset >= window_start) & (
+            lead_offset < window_start + day)
 
     return mask
 
@@ -1388,7 +1414,8 @@ def get_valid_gridded_models(instance, start_date, end_date, resolution, network
     """
 
     # track which species each model has data for
-    species = np.unique([networkspeci.split('|')[1] for networkspeci in networkspecies])
+    species = np.unique([networkspeci.split('|')[1]
+                        for networkspeci in networkspecies])
     models = {
         speci: set() for speci in species
     }
@@ -1417,12 +1444,12 @@ def get_valid_gridded_models(instance, start_date, end_date, resolution, network
         for model in available_models:
             for domain in instance.available_domains:
                 files_directory = "%s/%s/%s/%s/%s" % (
-                            instance.mod_to_interp_root,
-                            model,
-                            domain,
-                            resolution,
-                            speci,
-                        )
+                    instance.mod_to_interp_root,
+                    model,
+                    domain,
+                    resolution,
+                    speci,
+                )
 
                 # test if non interpolated directory exists for model
                 # if it does not exit, continue
@@ -1442,8 +1469,10 @@ def get_valid_gridded_models(instance, start_date, end_date, resolution, network
                 # - pm10_2017092100.nc
                 # - sconco3-000_2019050900.nc
                 # - od550du_2020061400_av_an.nc
-                parsed_files = [parse_model_filename(f, speci) for f in sorted(available_files)]
-                parsed_files = [parsed for parsed in parsed_files if parsed is not None]
+                parsed_files = [parse_model_filename(
+                    f, speci) for f in sorted(available_files)]
+                parsed_files = [
+                    parsed for parsed in parsed_files if parsed is not None]
                 if len(parsed_files) == 0:
                     continue
 
@@ -1454,7 +1483,8 @@ def get_valid_gridded_models(instance, start_date, end_date, resolution, network
                     # ensemble member, keeping any statistic tag so that, for example,
                     # od550du-006_2018082003.nc and od550du-006_2018082003_an.nc are kept apart
                     if parsed["ensemble"] is not None:
-                        ensemble = "_".join([parsed["ensemble"]] + parsed["tags"])
+                        ensemble = "_".join(
+                            [parsed["ensemble"]] + parsed["tags"])
                     # no ensemble member, so the statistic tags define the ensemble option
                     elif parsed["tags"]:
                         ensemble = "_".join(parsed["tags"])
@@ -1466,7 +1496,8 @@ def get_valid_gridded_models(instance, start_date, end_date, resolution, network
                 for ensemble, ensemble_files in files_per_ensemble.items():
 
                     # get timestep start date of all files
-                    file_timesteps = sorted({parsed["date"] for parsed in ensemble_files})
+                    file_timesteps = sorted(
+                        {parsed["date"] for parsed in ensemble_files})
 
                     # initialise valid timesteps
                     valid_file_timesteps = []
@@ -1487,7 +1518,8 @@ def get_valid_gridded_models(instance, start_date, end_date, resolution, network
                         # keep files from previous month, as later lead days of forecast runs
                         # can fall inside period
                         prev_month_firstday = int(
-                            (pd.Timestamp(str(start_date)[:6] + "01") - pd.DateOffset(months=1)).strftime("%Y%m%d")
+                            (pd.Timestamp(str(start_date)[
+                             :6] + "01") - pd.DateOffset(months=1)).strftime("%Y%m%d")
                         )
                         valid_file_timesteps = sorted(
                             [
@@ -1500,7 +1532,7 @@ def get_valid_gridded_models(instance, start_date, end_date, resolution, network
                         # do not show model if it only has files from previous month
                         if not any(int(ym[0:8]) >= start_date_firstdayofmonth for ym in valid_file_timesteps):
                             valid_file_timesteps = []
-                        
+
                     # if have valid files, then add model to pop-up menu,
                     # and add yearmonths to available model data
                     if len(valid_file_timesteps) > 0:
@@ -1514,7 +1546,8 @@ def get_valid_gridded_models(instance, start_date, end_date, resolution, network
                         if resolution not in available_model_data[domain]:
                             available_model_data[domain][resolution] = {}
                         if speci not in available_model_data[domain][resolution]:
-                            available_model_data[domain][resolution][speci] = {}
+                            available_model_data[domain][resolution][speci] = {
+                            }
                         if (
                             model_id
                             not in available_model_data[domain][resolution][speci]
@@ -1539,6 +1572,7 @@ def get_valid_gridded_models(instance, start_date, end_date, resolution, network
                         ] = "{}/{}{{date}}{}.nc".format(files_directory, prefix, suffix)
 
     return models, available_model_data, file_roots
+
 
 def get_valid_models(instance, start_date, end_date, resolution, networkspecies):
     """
@@ -1567,24 +1601,26 @@ def get_valid_models(instance, start_date, end_date, resolution, networkspecies)
         "interpolated": available_interpolated_model_data,
         "gridded": available_gridded_model_data,
     }
-    
+
     instance.available_model_data_file_roots = {
         **interpolated_file_roots,
         **gridded_file_roots,
     }
-    
+
     # set list of model names to add on models pop-up
     # models interpolated for at least one networkspeci
     if instance.mode not in ["report", "library"]:
         gridded_available_models = set.union(*gridded_models.values())
-        interpolated_available_models = set.union(*interpolated_models.values())
+        interpolated_available_models = set.union(
+            *interpolated_models.values())
         if networkspecies:
             models_to_add = sorted(
-                set(gridded_available_models) | set(interpolated_available_models)
+                set(gridded_available_models) | set(
+                    interpolated_available_models)
             )
         else:
             models_to_add = []
-        
+
         models_to_add = np.array(models_to_add)
         instance.models_menu["models"]["labels"] = models_to_add
         instance.models_menu["models"]["map_vars"] = models_to_add
@@ -1597,7 +1633,12 @@ def get_valid_models(instance, start_date, end_date, resolution, networkspecies)
                 model_id: model_id in gridded_available_models
                 for model_id in models_to_add
             },
+            "run": {
+                model_id: model_id in gridded_available_models
+                for model_id in models_to_add
+            }
         }
+
 
 def get_possible_temporal_resolutions():
     """
@@ -1681,7 +1722,8 @@ def get_possible_resampling_resolutions(resolution, daily_forecast=False):
             resolutions = []
     else:
         if resolution in ["hourly", "hourly_instantaneous"]:
-            resolutions = ["hourly", "3hourly", "6hourly", "daily", "monthly", "annual"]
+            resolutions = ["hourly", "3hourly",
+                           "6hourly", "daily", "monthly", "annual"]
         elif resolution in ["3hourly", "3hourly_instantaneous"]:
             resolutions = ["3hourly", "6hourly", "daily", "monthly", "annual"]
         elif resolution in ["6hourly", "6hourly_instantaneous"]:
@@ -1780,6 +1822,12 @@ def generate_file_trees(instance, ghost_version=None, only_ghost=False):
     ----------
     instance : object
         An instance of the application class containing configuration flags and versioning.
+    ghost_version : str, optional
+        GHOST version of the filetree to generate or load. If None, instance.ghost_version is used.
+        Only passed when updating the version from the dashboard dropdown.
+    only_ghost : bool, optional
+        If True, only the GHOST filetree is generated or loaded, and the previously loaded
+        non-GHOST filetree is reused (default is False).
     """
 
     # get dictionaries of observational GHOST and non-GHOST filetrees, either created dynamically or loaded
@@ -1810,10 +1858,13 @@ def generate_file_trees(instance, ghost_version=None, only_ghost=False):
     if gft or (not os.path.exists(ghost_filetree_path)):
         instance.logger.info("")
         if not os.path.exists(ghost_filetree_path):
-            instance.logger.info(f"Generating file tree {ghost_filetree_path}...")
+            instance.logger.info(
+                f"Generating file tree {ghost_filetree_path}...")
         else:
-            instance.logger.info(f"Updating file tree {ghost_filetree_path}...")
-        instance.all_observation_data = get_ghost_observational_tree(instance, ghost_version)
+            instance.logger.info(
+                f"Updating file tree {ghost_filetree_path}...")
+        instance.all_observation_data = get_ghost_observational_tree(
+            instance, ghost_version)
     # load file trees
     else:
         instance.logger.info(f"Loading file tree {ghost_filetree_path}...")
@@ -1846,11 +1897,14 @@ def generate_file_trees(instance, ghost_version=None, only_ghost=False):
                     f"Generating file tree {nonghost_filetree_path}..."
                 )
             else:
-                instance.logger.info(f"Updating file tree {nonghost_filetree_path}...")
-            instance.nonghost_observation_data = get_nonghost_observational_tree(instance)
+                instance.logger.info(
+                    f"Updating file tree {nonghost_filetree_path}...")
+            instance.nonghost_observation_data = get_nonghost_observational_tree(
+                instance)
         # load file trees
         else:
-            instance.logger.info(f"Loading file tree {nonghost_filetree_path}...")
+            instance.logger.info(
+                f"Loading file tree {nonghost_filetree_path}...")
             try:
                 instance.nonghost_observation_data = json.load(
                     open(
@@ -2148,7 +2202,8 @@ def _dates_to_asi8_seconds(dates, calendar):
         seconds = cftime.date2num(
             dates.tolist(), units="seconds since 1970-01-01 00:00:00", calendar=calendar
         )
-        seconds = np.floor(np.asarray(seconds, dtype=np.float64)).astype(np.int64)
+        seconds = np.floor(np.asarray(
+            seconds, dtype=np.float64)).astype(np.int64)
         return _seconds_to_asi8(seconds)
 
     # ------------------------------------------------------
@@ -2228,7 +2283,8 @@ def time_var_to_asi8(time_var):
 
     if calendar in standard_cals and unit in sec_per_unit:
         try:
-            origin_s = np.datetime64(origin_str.replace(" ", "T"), "s").astype(np.int64)
+            origin_s = np.datetime64(origin_str.replace(
+                " ", "T"), "s").astype(np.int64)
             delta_s = np.floor(values * sec_per_unit[unit]).astype(np.int64)
             return _seconds_to_asi8(origin_s + delta_s)
         except Exception:

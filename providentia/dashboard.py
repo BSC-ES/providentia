@@ -2051,7 +2051,7 @@ class Dashboard(QtWidgets.QWidget):
             self.data_labels_raw = copy.deepcopy(selected_data_labels_raw)
             self.experiments = copy.deepcopy(selected_models)
 
-    def enable_element(self, element, element_type, extra_arguments={}):
+    def enable_element(self, element, element_type, extra_arguments={}, prefix="menu"):
         """
         Make element active and update its formatting.
 
@@ -2060,21 +2060,25 @@ class Dashboard(QtWidgets.QWidget):
         element : QtWidget (QtWidgets.QPushButton, QtWidgets.QComboBox)
             PyQt object
         element_type : str
-            PyQt object type (button, combobox, )
-
+            PyQt object type (button, combobox, etc.)
+        extra_arguments : dict
+            Extra arguments
+        prefix : str
+            Prefix of the format name in the stylesheet (menu, popup)
+        
         Returns
         -------
         QtWidget (QtWidgets.QPushButton, QtWidgets.QComboBox)
             Updated PyQt object
         """
 
-        element = set_formatting(element, self.formatting_dict[f"menu_{element_type}"],
+        element = set_formatting(element, self.formatting_dict[f"{prefix}_{element_type}"],
                                  extra_arguments=extra_arguments)
         element.setEnabled(True)
 
         return element
     
-    def disable_element(self, element, element_type):
+    def disable_element(self, element, element_type, prefix="menu"):
         """
         Make element inactive and update its formatting.
 
@@ -2083,8 +2087,10 @@ class Dashboard(QtWidgets.QWidget):
         element : QtWidget (QtWidgets.QPushButton, QtWidgets.QComboBox)
             PyQt object
         element_type : str
-            PyQt object type (button, combobox, )
-
+            PyQt object type (button, combobox, etc.)
+        prefix : str
+            Prefix of the format name in the stylesheet (menu, popup)
+        
         Returns
         -------
         QtWidget (QtWidgets.QPushButton, QtWidgets.QComboBox)
@@ -2093,7 +2099,7 @@ class Dashboard(QtWidgets.QWidget):
 
         element = set_formatting(
             element,
-            self.formatting_dict[f"menu_{element_type}_disabled"],
+            self.formatting_dict[f"{prefix}_{element_type}_disabled"],
             disabled=True,
         )
         element.setEnabled(False)

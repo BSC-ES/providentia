@@ -1998,7 +1998,7 @@ class Actris:
 
                                 # remove file if it exists
                                 if os.path.isfile(filepath):
-                                    os.system("rm {}".format(filepath))
+                                    os.remove(filepath)
 
                                 # do not save if empty
                                 if len(combined_ds_yearmonth[var].values) == 0:
