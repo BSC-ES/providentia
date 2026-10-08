@@ -12,6 +12,7 @@ from netCDF4 import Dataset, num2date, chartostring
 import numpy as np
 import pandas as pd
 import re
+import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join
 from providentia.warnings_prv import show_message
@@ -33,6 +34,10 @@ shared_memory_vars = {}
 
 PROVIDENTIA_ROOT = "/".join(CURRENT_PATH.split("/")[:-1])
 
+# load the defined models paths
+interp_models = yaml.safe_load(
+    open(join(PROVIDENTIA_ROOT, "settings", "interp_models.yaml"))
+)
 
 def drop_nans(data):
     """
@@ -1425,12 +1430,31 @@ def get_valid_gridded_models(instance, start_date, end_date, resolution, network
     file_roots = {}
 
     # get all different model names
+    available_models = {}
+
+    # on HPC, from interp_models, taking the paths of the model ids defined there
+    if instance.machine != "local":
+        for model_dict in interp_models.values():
+            for model in model_dict["models"]:
+                for models_path in model_dict["paths"]:
+                    if os.path.exists(join(models_path, model)):
+                        if model not in available_models:
+                            available_models[model] = []
+                        available_models[model].append(models_path)
+
+    # from data_paths mod_to_interp_root
     models_path = instance.mod_to_interp_root
     if os.path.exists(models_path):
-        available_models = os.listdir(models_path)
-    else:
+        for model in os.listdir(models_path):
+            if model not in available_models:
+                available_models[model] = []
+            if models_path not in available_models[model]:
+                available_models[model].append(models_path)
+
+    if len(available_models) == 0:
         msg = (
-            f"Cannot access gridded model path, mod_to_interp_root defined as {models_path} in data_paths.yaml."
+            f"Cannot access gridded models, neither in the paths specified in {join('settings', 'interp_models.yaml')} "
+            f"nor in mod_to_interp_root, defined as {models_path} in data_paths.yaml."
         )
         show_message(instance, msg, print=True)
         return models, available_model_data, file_roots
@@ -1441,26 +1465,26 @@ def get_valid_gridded_models(instance, start_date, end_date, resolution, network
     # iterate through species
     for speci in species:
         # iterate through available models
-        for model in available_models:
+        for model, models_paths in available_models.items():
             for domain in instance.available_domains:
-                files_directory = "%s/%s/%s/%s/%s" % (
-                    instance.mod_to_interp_root,
-                    model,
-                    domain,
-                    resolution,
-                    speci,
-                )
+                # take first root where non interpolated directory exists for model
+                files_directory = None
+                for models_path in models_paths:
+                    temp_files_directory = join(
+                        models_path, model, domain, resolution, speci)
+                    if os.path.exists(temp_files_directory):
+                        files_directory = temp_files_directory
+                        break
 
-                # test if non interpolated directory exists for model
-                # if it does not exit, continue
-                if not os.path.exists(files_directory):
+                # if it does not exist in any root, continue
+                if files_directory is None:
                     continue
-                else:
-                    # get all available netCDF files (handling potential permissions issues)
-                    try:
-                        available_files = os.listdir(files_directory)
-                    except PermissionError:
-                        continue
+
+                # get all available netCDF files (handling potential permissions issues)
+                try:
+                    available_files = os.listdir(files_directory)
+                except PermissionError:
+                    continue
 
                 # models can be formatted like:
                 # - sconcno2_006_2022101900.nc
