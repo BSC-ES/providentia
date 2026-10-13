@@ -185,7 +185,8 @@ class PopUpWindow(QtWidgets.QWidget):
             )
             button_row.addWidget(add_row_button)
 
-            add_row_button.clicked.connect(lambda: self.add_multispecies_widgets())
+            add_row_button.clicked.connect(
+                lambda: self.add_multispecies_widgets())
 
         # check if page has fields a search could narrow down
         self.searchable_menu_types = [
@@ -221,7 +222,8 @@ class PopUpWindow(QtWidgets.QWidget):
             # debounced so rapid typing only searches once it pauses
             self._search_debounce_timer = QtCore.QTimer(self)
             self._search_debounce_timer.setSingleShot(True)
-            self._search_debounce_timer.timeout.connect(self._run_debounced_search)
+            self._search_debounce_timer.timeout.connect(
+                self._run_debounced_search)
             self.search_box.textChanged.connect(self._schedule_search)
             button_row.addWidget(self.search_box)
 
@@ -296,7 +298,8 @@ class PopUpWindow(QtWidgets.QWidget):
         horizontal_parent.setSpacing(25)
 
         # align grids to centre and top
-        horizontal_parent.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignTop)
+        horizontal_parent.setAlignment(
+            QtCore.Qt.AlignCenter | QtCore.Qt.AlignTop)
 
         # layout the menu's own columns are placed in
         column_parent = horizontal_parent
@@ -535,7 +538,8 @@ class PopUpWindow(QtWidgets.QWidget):
             )
             if self.have_buttons:
                 occupied_vertical_space_before_grid += (
-                    int(formatting_dict["popup_button"]["QPushButton"]["height"])
+                    int(formatting_dict["popup_button"]
+                        ["QPushButton"]["height"])
                     + self.layout_spacing
                 )
             if have_column_headers:
@@ -548,8 +552,10 @@ class PopUpWindow(QtWidgets.QWidget):
 
             # set horizontal scroll properties
             scroll_area = QtWidgets.QScrollArea()
-            scroll_area.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-            scroll_area.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+            scroll_area.setVerticalScrollBarPolicy(
+                QtCore.Qt.ScrollBarAlwaysOff)
+            scroll_area.setHorizontalScrollBarPolicy(
+                QtCore.Qt.ScrollBarAsNeeded)
             scroll_area.setWidgetResizable(True)
             scroll_area.setFrameShape(0)
 
@@ -678,6 +684,12 @@ class PopUpWindow(QtWidgets.QWidget):
                     if menu_type in ["checkboxes", "rangeboxes", "models"]:
                         if element == "run":
                             element_label = "Run"
+                            # When we close the MODELS menu during an interpolation and reopen it again
+                            # The buttons take the label Run unless we explicitly set it to Interpolating...
+                            if hasattr(self.read_instance, "active_interpolations"):
+                                model_id = self.menu_current[menu_type]["map_vars"][label_ii]
+                                if model_id in self.read_instance.active_interpolations:
+                                    element_label = "Interpolating..."
                         element_ii += 1
                     elif menu_type in ["multispecies"]:
                         element_ii -= 1
@@ -691,7 +703,8 @@ class PopUpWindow(QtWidgets.QWidget):
                         )
                     else:
                         self.page_memory[menu_type][element].append(
-                            set_formatting(widget(element_label), element_format)
+                            set_formatting(
+                                widget(element_label), element_format)
                         )
 
                     # set checkboxes / rangeboxes to previous values
@@ -714,7 +727,8 @@ class PopUpWindow(QtWidgets.QWidget):
                                 rangebox = self.page_memory[menu_type][element][
                                     label_ii
                                 ]
-                                rangebox.setText(menu_current_type[element][label_ii])
+                                rangebox.setText(
+                                    menu_current_type[element][label_ii])
                                 # show the value from its start, not its end
                                 rangebox.setCursorPosition(0)
                             else:
@@ -788,27 +802,37 @@ class PopUpWindow(QtWidgets.QWidget):
                             model_id = menu_current_type["map_vars"][label_ii]
 
                             model_checkbox.setObjectName(
-                                "expcheckboxes_" + element + "_" + str(label_ii)
+                                "expcheckboxes_" + element +
+                                "_" + str(label_ii)
                             )
-                            model_checkbox.setEnabled(
-                                menu_current_type["enabled"][element].get(
-                                    model_id, False
-                                )
-                            )
-                            if not model_checkbox.isEnabled():
-                                # fade the box so it is obvious it cannot be clicked
-                                fade = QtWidgets.QGraphicsOpacityEffect(model_checkbox)
-                                fade.setOpacity(0.5)
-                                model_checkbox.setGraphicsEffect(fade)
-                                model_checkbox.setToolTip(
-                                    wrap_tooltip_text(
-                                        "Unavailable",
-                                        self.full_window_geometry.width(),
-                                        "popup_label",
+                            
+                            # When we close the MODELS menu during an interpolation and reopen it again
+                            # We need to keep button disabled
+                            if element == "run":
+                                if hasattr(self.read_instance, "active_interpolations"):
+                                    if model_id in self.read_instance.active_interpolations:
+                                        model_checkbox.setEnabled(False)
+                            else:
+                                model_checkbox.setEnabled(
+                                    menu_current_type["enabled"][element].get(
+                                        model_id, False
                                     )
                                 )
-                            elif model_id in menu_current_type["keep_selected"][element]:
-                                model_checkbox.setCheckState(QtCore.Qt.Checked)
+                                if not model_checkbox.isEnabled():
+                                    # fade the box so it is obvious it cannot be clicked
+                                    fade = QtWidgets.QGraphicsOpacityEffect(
+                                        model_checkbox)
+                                    fade.setOpacity(0.5)
+                                    model_checkbox.setGraphicsEffect(fade)
+                                    model_checkbox.setToolTip(
+                                        wrap_tooltip_text(
+                                            "Unavailable",
+                                            self.full_window_geometry.width(),
+                                            "popup_label",
+                                        )
+                                    )
+                                elif model_id in menu_current_type["keep_selected"][element]:
+                                    model_checkbox.setCheckState(QtCore.Qt.Checked)
 
                             # connect checkbox to handle model being checked
                             if element in ['interpolated', 'gridded']:
@@ -873,7 +897,8 @@ class PopUpWindow(QtWidgets.QWidget):
                                     ].hide()
                                 # iterate through forecast options and select or disable options if they were previously so
                                 for forecast_var in all_forecast_vars:
-                                    item_index = all_forecast_vars.index(forecast_var)
+                                    item_index = all_forecast_vars.index(
+                                        forecast_var)
                                     item = (
                                         self.page_memory[menu_type]["forecast"][
                                             label_ii
@@ -890,7 +915,8 @@ class PopUpWindow(QtWidgets.QWidget):
                                             item.flags() & ~QtCore.Qt.ItemIsEnabled
                                         )
                                         item.setData(
-                                            QtGui.QBrush(QtGui.QColor(150, 150, 150)),
+                                            QtGui.QBrush(
+                                                QtGui.QColor(150, 150, 150)),
                                             QtCore.Qt.ForegroundRole,
                                         )
 
@@ -908,7 +934,8 @@ class PopUpWindow(QtWidgets.QWidget):
 
                             # if not yet initialised hide combobox
                             else:
-                                self.page_memory[menu_type]["forecast"][label_ii].hide()
+                                self.page_memory[menu_type]["forecast"][label_ii].hide(
+                                )
 
                         # update forecast days combobox back to previously available and selected values
                         elif element == "forecast_days":
@@ -1027,7 +1054,8 @@ class PopUpWindow(QtWidgets.QWidget):
                 self.place_column_headers(menu_type, column_n)
 
                 for column_number in np.arange(
-                    0, column_n + 1, self.page_memory[menu_type]["n_column_consumed"]
+                    0, column_n +
+                        1, self.page_memory[menu_type]["n_column_consumed"]
                 ):
                     if menu_type == "checkboxes":
                         texts = ["K", "R"]
@@ -1104,7 +1132,6 @@ class PopUpWindow(QtWidgets.QWidget):
 
         # return horizontally concatenated menu type grids
         return horizontal_parent
-
 
     def submenu_fields(self):
         """
@@ -1216,7 +1243,8 @@ class PopUpWindow(QtWidgets.QWidget):
         container = scroll_area.takeWidget()
         container.setUpdatesEnabled(False)
         try:
-            self._filter_grid_relayout(menu_type, grid_info, grid, visible_labels)
+            self._filter_grid_relayout(
+                menu_type, grid_info, grid, visible_labels)
         finally:
             container.setUpdatesEnabled(True)
             scroll_area.setWidget(container)
@@ -1259,7 +1287,8 @@ class PopUpWindow(QtWidgets.QWidget):
         def show_row_widget(widget, column, alignment):
             """Place one widget back in the grid, showing it if the search hid it."""
 
-            grid.addWidget(widget, grid_info["start_row_n"] + row_n, column, alignment)
+            grid.addWidget(
+                widget, grid_info["start_row_n"] + row_n, column, alignment)
             if widget in grid_info["hidden_by_search"]:
                 grid_info["hidden_by_search"].discard(widget)
                 widget.show()
@@ -1280,10 +1309,12 @@ class PopUpWindow(QtWidgets.QWidget):
             ) <= int(grid_info["obj_height"]):
                 column_n += n_column_consumed
                 row_n = 0
-                occupied_vertical_space = copy.deepcopy(grid_info["space_before_grid"])
+                occupied_vertical_space = copy.deepcopy(
+                    grid_info["space_before_grid"])
 
             if pending_subtitle is not None:
-                show_row_widget(pending_subtitle, column_n, QtCore.Qt.AlignLeft)
+                show_row_widget(pending_subtitle, column_n,
+                                QtCore.Qt.AlignLeft)
                 pending_subtitle = None
                 occupied_vertical_space += (
                     int(formatting_dict["popup_subtitle"]["QLabel"]["height"])
@@ -1297,8 +1328,10 @@ class PopUpWindow(QtWidgets.QWidget):
             for element_ii, widget in enumerate(row["elements"]):
                 # the label of a row takes the first column of the group, so
                 # its elements start one along - as they were first placed
-                column_offset = element_ii + 1 if row["label"] is not None else element_ii
-                show_row_widget(widget, column_n + column_offset, QtCore.Qt.AlignLeft)
+                column_offset = element_ii + \
+                    1 if row["label"] is not None else element_ii
+                show_row_widget(widget, column_n +
+                                column_offset, QtCore.Qt.AlignLeft)
 
             row_n += 1
             occupied_vertical_space += (
@@ -1323,7 +1356,8 @@ class PopUpWindow(QtWidgets.QWidget):
             Index of the last column in use
         """
 
-        header_texts = {"checkboxes": ["K", "R"], "rangeboxes": ["Min", "Max", "A"]}
+        header_texts = {"checkboxes": ["K", "R"],
+                        "rangeboxes": ["Min", "Max", "A"]}
         if menu_type not in header_texts:
             return None
 
@@ -1343,7 +1377,6 @@ class PopUpWindow(QtWidgets.QWidget):
                 grid_info["column_headers"].append(column_label)
 
         return None
-
 
     def build_search_results(self, query):
         """
@@ -1404,7 +1437,8 @@ class PopUpWindow(QtWidgets.QWidget):
 
         # results run into further columns once one is full, as the menu's own
         # grids do, rather than off the bottom of the window
-        row_height = int(formatting_dict["popup_button"]["QPushButton"]["height"]) + 3
+        row_height = int(
+            formatting_dict["popup_button"]["QPushButton"]["height"]) + 3
         occupied_vertical_space = (
             (self.page_margin * 2)
             + int(formatting_dict["popup_title"]["QLabel"]["height"])
@@ -1412,7 +1446,8 @@ class PopUpWindow(QtWidgets.QWidget):
             + int(formatting_dict["popup_button"]["QPushButton"]["height"])
             + int(formatting_dict["popup_subtitle"]["QLabel"]["height"])
             + 3
-            + int(formatting_dict["popup_label_column_header"]["QLabel"]["height"])
+            + int(formatting_dict["popup_label_column_header"]
+                  ["QLabel"]["height"])
             + 3
             + (self.search_results["scroll_area"].horizontalScrollBar().height() * 2.0)
         )
@@ -1450,7 +1485,8 @@ class PopUpWindow(QtWidgets.QWidget):
             tooltip = ""
             if len(submenu.get("tooltips", [])) > label_ii:
                 tooltip = wrap_tooltip_text(
-                    "{} ({})".format(submenu["tooltips"][label_ii], menu_level),
+                    "{} ({})".format(
+                        submenu["tooltips"][label_ii], menu_level),
                     self.full_window_geometry.width(),
                     "popup_label",
                 )
@@ -1459,7 +1495,8 @@ class PopUpWindow(QtWidgets.QWidget):
             # result is the button onto that page
             if menu_type == "navigation_buttons":
                 result_button = set_formatting(
-                    QtWidgets.QPushButton(str(label)), formatting_dict["popup_button"]
+                    QtWidgets.QPushButton(
+                        str(label)), formatting_dict["popup_button"]
                 )
                 result_button.setToolTip(tooltip)
                 result_button.clicked.connect(
@@ -1473,7 +1510,8 @@ class PopUpWindow(QtWidgets.QWidget):
             # a numeric field is set by its bounds, so those are shown here
             # and written straight back to the page they belong to
             result_label = set_formatting(
-                QtWidgets.QLabel(self, text=str(label)), formatting_dict["popup_label"]
+                QtWidgets.QLabel(self, text=str(
+                    label)), formatting_dict["popup_label"]
             )
             result_label.setToolTip(tooltip)
             results_grid.addWidget(
@@ -1482,13 +1520,15 @@ class PopUpWindow(QtWidgets.QWidget):
 
             for element_ii, element in enumerate(["current_lower", "current_upper"]):
                 rangebox = set_formatting(
-                    QtWidgets.QLineEdit(), formatting_dict["popup_lineedit_rangebox"]
+                    QtWidgets.QLineEdit(
+                    ), formatting_dict["popup_lineedit_rangebox"]
                 )
                 rangebox.setText(str(submenu[element][label_ii]))
                 # show the value from its start, not its end
                 rangebox.setCursorPosition(0)
                 rangebox.textChanged.connect(
-                    partial(self.handle_search_result_range, submenu, element, label_ii)
+                    partial(self.handle_search_result_range,
+                            submenu, element, label_ii)
                 )
                 results_grid.addWidget(
                     rangebox, row_n, column_n + element_ii + 1, QtCore.Qt.AlignLeft
@@ -1502,7 +1542,8 @@ class PopUpWindow(QtWidgets.QWidget):
             apply_box.stateChanged.connect(
                 partial(self.handle_search_result_apply, submenu, label)
             )
-            results_grid.addWidget(apply_box, row_n, column_n + 3, QtCore.Qt.AlignLeft)
+            results_grid.addWidget(
+                apply_box, row_n, column_n + 3, QtCore.Qt.AlignLeft)
 
         # left to the next turn of the event loop, as a widget only settles on
         # the size it needs once it has been through one
@@ -1789,7 +1830,7 @@ class PopUpWindow(QtWidgets.QWidget):
                     if not checkbox.isEnabled():
                         continue
                     checkbox.setCheckState(QtCore.Qt.Checked)
-                    
+
                     # only one gridded model can be loaded, so select the first available one
                     if element == "gridded":
                         break
@@ -1843,7 +1884,8 @@ class PopUpWindow(QtWidgets.QWidget):
             ]
         else:
             default_inds = [
-                np.where(self.menu_current["checkboxes"]["labels"] == default_var)[0][0]
+                np.where(self.menu_current["checkboxes"]
+                         ["labels"] == default_var)[0][0]
                 for default_var in self.menu_current["checkboxes"]["remove_default"]
             ]
 
@@ -1866,7 +1908,8 @@ class PopUpWindow(QtWidgets.QWidget):
 
         # initalise labels
         if len(self.menu_current["multispecies"]["labels"]) == 0:
-            texts = ["Network", "Matrix", "Species", "Min", "Max", "Fill value", "A"]
+            texts = ["Network", "Matrix", "Species",
+                     "Min", "Max", "Fill value", "A"]
             for i, text in enumerate(texts):
                 column_label = set_formatting(
                     QtWidgets.QLabel(self, text=text),
@@ -1929,7 +1972,8 @@ class PopUpWindow(QtWidgets.QWidget):
                 # add element to memory
                 self.page_memory["multispecies"][element].append(
                     set_formatting(
-                        widget(), formatting_dict["popup_lineedit_multispecies"]
+                        widget(
+                        ), formatting_dict["popup_lineedit_multispecies"]
                     )
                 )
 
@@ -2010,8 +2054,10 @@ class PopUpWindow(QtWidgets.QWidget):
             self.page_memory["multispecies"]["network"][label_ii].clear()
             self.page_memory["multispecies"]["matrix"][label_ii].clear()
             self.page_memory["multispecies"]["species"][label_ii].clear()
-            self.page_memory["multispecies"]["current_lower"][label_ii].setText(":")
-            self.page_memory["multispecies"]["current_upper"][label_ii].setText(":")
+            self.page_memory["multispecies"]["current_lower"][label_ii].setText(
+                ":")
+            self.page_memory["multispecies"]["current_upper"][label_ii].setText(
+                ":")
             self.page_memory["multispecies"]["current_filter_species_fill_value"][
                 label_ii
             ].setText(str(np.nan))
@@ -2374,7 +2420,8 @@ class PopUpWindow(QtWidgets.QWidget):
                 msg = "filter_species lower bound ({}) for {} cannot contain < or <=. ".format(
                     current_lower, networkspeci
                 )
-                current_lower = ">=" + current_lower.replace("<", "").replace("=", "")
+                current_lower = ">=" + \
+                    current_lower.replace("<", "").replace("=", "")
                 msg += "Setting it to be {}.".format(current_lower)
                 self.page_memory["multispecies"]["current_lower"][
                     label_ii
@@ -2407,7 +2454,8 @@ class PopUpWindow(QtWidgets.QWidget):
                 msg = "filter_species upper bound ({}) for {} cannot contain > or >=. ".format(
                     current_upper, networkspeci
                 )
-                current_upper = "<=" + current_upper.replace(">", "").replace("=", "")
+                current_upper = "<=" + \
+                    current_upper.replace(">", "").replace("=", "")
                 msg += "Setting it to be {}.".format(current_upper)
                 self.page_memory["multispecies"]["current_upper"][
                     label_ii
@@ -2515,7 +2563,8 @@ class PopUpWindow(QtWidgets.QWidget):
                 filter_species = [
                     val.split("|")[1]
                     for val in list(
-                        copy.deepcopy(self.read_instance.selected_filter_species).keys()
+                        copy.deepcopy(
+                            self.read_instance.selected_filter_species).keys()
                     )
                 ]
 
@@ -2560,6 +2609,125 @@ class PopUpWindow(QtWidgets.QWidget):
             ):
                 del self.read_instance.qa_per_species[speci]
 
+    def check_interpolation(self, process, timer, configuration_name, job_id, log_path, model_id,
+                            start_date, end_date, resolution, networkspecies, label_ii):
+        """
+        Checks if an interpolation launched from the dashboard has finished, and if so, updates the
+        dashboard accordingly.
+
+        It is called periodically by the timer created in handle_model_interp_clicked. Locally, the
+        interpolation is finished when its process has exited; in the rest of machines, when the
+        Slurm job is no longer listed by squeue. While it is still running, nothing is done.
+
+        Once finished, the timer is stopped, the model is removed from the active interpolations,
+        the temporary configuration file is deleted, the RUN button is restored and the available
+        models and menus are updated. If interpolated files were found for the model, its checkbox
+        is enabled and a message reports what is available per networkspeci, as the interpolation
+        can be partial. Otherwise, a message reports that the interpolation failed.
+
+        Parameters
+        ----------
+        process : subprocess.Popen
+            Process running the interpolation (only used in local runs).
+        timer : QtCore.QTimer
+            Timer calling this function, stopped once the interpolation has finished.
+        configuration_name : str
+            Path to the temporary configuration file used for the interpolation.
+        job_id : int or str
+            Process ID in local runs, or Slurm job ID in the rest of machines.
+        log_path : str
+            Path to the interpolation log, shown in the messages to the user.
+        model_id : str
+            Name of the model being interpolated.
+        start_date : str
+            Start date of the interpolation (YYYYMMDD).
+        end_date : str
+            End date of the interpolation (YYYYMMDD), exclusive.
+        resolution : str
+            Temporal resolution of the interpolation.
+        networkspecies : list of str
+            Network and species combinations requested, as network|species.
+        label_ii : int
+            Position of the model within the interpolated models menu, used to get its checkbox.
+        """
+
+        if self.read_instance.machine == "local":
+            finished = process.poll() is not None
+        else:
+            result = subprocess.run(["squeue", "-h", "-j", job_id],
+                                    capture_output=True, text=True)
+            finished = not result.stdout.strip()
+
+        # If no longer running
+        if finished:
+
+            timer.stop()
+
+            # Remove from active interpolations
+            self.read_instance.active_interpolations.remove(model_id)
+
+            # Remove configuration
+            os.remove(configuration_name)
+
+            # Update available models, now that the interpolated files exist
+            get_valid_models(
+                self.read_instance,
+                start_date,
+                end_date,
+                resolution,
+                networkspecies,
+            )
+            # Update forecast menus
+            self.read_instance.update_models_menu()
+
+            if model_id in self.menu_current["models"]["enabled"]["interpolated"]:
+                # Enable interpolated model checkbox
+                model_checkbox = self.read_instance.pop_up_window.page_memory["models"]["interpolated"][label_ii]
+                model_checkbox.setEnabled(True)
+                model_checkbox.setGraphicsEffect(None)
+                model_checkbox.setToolTip("")
+
+                # Report what is available per networkspeci, as interpolation can be partial
+                # (e.g. no observations or no gridded files for some species / months)
+                available = self.read_instance.available_model_data["interpolated"]
+                done = []
+                missing = []
+
+                # Months requested (end date is exclusive, same rule as in get_valid_interpolated_models)
+                requested_yearmonths = [
+                    ym for ym in pd.date_range(start_date[:6] + "01", end_date, freq="MS").strftime("%Y%m")
+                    if int(ym + "01") < int(end_date)
+                ]
+                for networkspeci in networkspecies:
+                    net, speci = networkspeci.split("|")
+                    yearmonths = available.get(net, {}).get(
+                        resolution, {}).get(speci, {}).get(model_id, [])
+                    missing_yearmonths = [
+                        ym for ym in requested_yearmonths if ym not in yearmonths]
+                    if not yearmonths:
+                        missing.append(networkspeci)
+                    elif missing_yearmonths:
+                        done.append(f"{networkspeci} ({len(yearmonths)} of {len(requested_yearmonths)} months, "
+                                    f"missing: {', '.join(missing_yearmonths)})")
+                    else:
+                        done.append(
+                            f"{networkspeci} (all {len(requested_yearmonths)} months)")
+
+                msg = f"Interpolation job {job_id} finished. "
+                msg += f"Available: {', '.join(done)}."
+                if missing:
+                    msg += f" Nothing interpolated for: {', '.join(missing)}. Check the log in {log_path}."
+                show_message(self.read_instance, msg)
+            else:
+                # Interpolation did not produce files, allow retrying
+                msg = f"Interpolation of {model_id} failed. Check the terminal and log in {log_path}."
+                show_message(self.read_instance, msg)
+
+            # Enable interpolation button and update its text
+            run_button = self.read_instance.pop_up_window.page_memory["models"]["run"][label_ii]
+            self.read_instance.enable_element(run_button, "button_run", prefix="popup")
+            run_button.setText("Run")
+
     def handle_model_interp_clicked(self, event):
         """
         Manages the interpolation of a gridded model when its RUN button is clicked.
@@ -2580,11 +2748,8 @@ class PopUpWindow(QtWidgets.QWidget):
         # Get the source widget that triggered the event (the checkbox)
         event_source = self.sender()
 
-        # Disable all available RUN buttons while interpolating and update text
-        # (unavailable ones are already disabled and must stay that way)
-        run_buttons = [button for button in self.page_memory["models"]["run"] if button.isEnabled()]
-        for button in run_buttons:
-            self.read_instance.disable_element(button, "button_run", prefix="popup")
+        # Disable interpolation button and update its text
+        self.read_instance.disable_element(event_source, "button_run", prefix="popup")
         event_source.setText("Interpolating...")
 
         # Force repaint before the blocking interpolation call
@@ -2607,8 +2772,9 @@ class PopUpWindow(QtWidgets.QWidget):
         network = self.read_instance.selected_network
 
         # Store configuration
-        configuration_name = join(self.read_instance.config_dir, f"dashboard_run_{unique_id}.conf")
-        export_basic_configuration(self.read_instance, configuration_name, 
+        configuration_name = join(
+            self.read_instance.config_dir, f"dashboard_run_{unique_id}.conf")
+        export_basic_configuration(self.read_instance, configuration_name,
                                    network=network,
                                    species=species,
                                    resolution=resolution,
@@ -2616,22 +2782,37 @@ class PopUpWindow(QtWidgets.QWidget):
                                    end_date=end_date,
                                    experiment=model_id)
 
-        # Submit the interpolation through the launcher, as done from the command line
-        arguments = ["./bin/providentia", "--interpolation", f"--config={configuration_name}"]
+        # Submit the interpolation as done from the command line
+        arguments = ["./bin/providentia", "--interpolation",
+                     f"--config={configuration_name}"]
         if self.read_instance.machine == "local":
-            process = subprocess.Popen(arguments, cwd=PROVIDENTIA_ROOT, start_new_session=True)
+            process = subprocess.Popen(arguments,
+                                       cwd=PROVIDENTIA_ROOT,
+                                       start_new_session=True,
+                                       stdout=subprocess.DEVNULL,
+                                       stderr=subprocess.DEVNULL)
             job_id = process.pid
         else:
-            submission_result = subprocess.run(arguments, cwd=PROVIDENTIA_ROOT, capture_output=True, text=True)
+            submission_result = subprocess.run(arguments,
+                                               cwd=PROVIDENTIA_ROOT,
+                                               capture_output=True,
+                                               text=True)
 
             # Extract the Slurm job ID from the log path
-            match = re.search(r"management_logs/(\d+)\.out", submission_result.stdout)
+            match = re.search(r"management_logs/(\d+)\.out",
+                              submission_result.stdout)
             if not match:
-                raise RuntimeError("Could not find Slurm job ID in launcher output")
+                raise RuntimeError(
+                    "Could not find Slurm job ID in launcher output")
 
             job_id = match.group(1)
-        
-        print(f"Submitted interpolation job {job_id}")
+
+        msg = f"Submitted interpolation job {job_id} with the following configuration: "
+        msg += f"\n- Network: {network}\n- Species: {species}\n- Resolution: {resolution}"
+        msg += f"\n- Start date: {start_date}\n- End date: {end_date}\n- Experiment: {model_id}"
+        show_message(self.read_instance, msg)
+
+        # Check if interpolation has finished every 10 seconds
         log_path = join(
             PROVIDENTIA_ROOT,
             "logs",
@@ -2639,90 +2820,23 @@ class PopUpWindow(QtWidgets.QWidget):
             "management_logs",
             f"{job_id}.out",
         )
+        timer = QtCore.QTimer(self)
+        timer.timeout.connect(
+            lambda: self.check_interpolation(
+                process, timer, configuration_name, job_id, log_path, model_id,
+                start_date, end_date, resolution, networkspecies, label_ii
+            )
+        )
+        timer.start(10000)
 
-        finished = False
-        while True:
-            print("Checking if interpolation has finished...")
+        # Store active interpolations into list
+        self.read_instance.active_interpolations = getattr(
+            self.read_instance, "active_interpolations", []
+        )
+        self.read_instance.active_interpolations.append(model_id)
 
-            if self.read_instance.machine == "local":
-                result = process.poll()
-                finished = process.poll() is not None
-            else:
-                result = subprocess.run(["squeue", "-h", "-j", job_id],
-                                        capture_output=True, text=True)
-                finished = not result.stdout.strip()
-
-            if finished:
-                print("Job is no longer pending or running.")
-
-                # Remove configuration
-                os.remove(configuration_name)
-
-                # Update text 
-                event_source.setText("Run")
-
-                # Update available models, now that the interpolated files exist
-                get_valid_models(
-                    self.read_instance,
-                    start_date,
-                    end_date,
-                    resolution,
-                    networkspecies,
-                )
-                # Update forecast menus
-                self.read_instance.update_models_menu()
-
-                if model_id in self.menu_current["models"]["enabled"]["interpolated"]:
-                    # Enable interpolated model checkbox
-                    model_checkbox = self.page_memory["models"]["interpolated"][label_ii]
-                    model_checkbox.setEnabled(True)
-                    model_checkbox.setGraphicsEffect(None)
-                    model_checkbox.setToolTip("")
-
-                    # Report what is available per networkspeci, as interpolation can be partial
-                    # (e.g. no observations or no gridded files for some species / months)
-                    available = self.read_instance.available_model_data["interpolated"]
-                    done = []
-                    missing = []
-
-                    # Months requested (end date is exclusive, same rule as in get_valid_interpolated_models)
-                    requested_yearmonths = [
-                        ym for ym in pd.date_range(start_date[:6] + "01", end_date, freq="MS").strftime("%Y%m")
-                        if int(ym + "01") < int(end_date)
-                    ]
-                    for networkspeci in networkspecies:
-                        net, speci = networkspeci.split("|")
-                        yearmonths = available.get(net, {}).get(resolution, {}).get(speci, {}).get(model_id, [])
-                        missing_yearmonths = [ym for ym in requested_yearmonths if ym not in yearmonths]
-                        if not yearmonths:
-                            missing.append(networkspeci)
-                        elif missing_yearmonths:
-                            done.append(f"{networkspeci} ({len(yearmonths)} of {len(requested_yearmonths)} months, "
-                                        f"missing: {', '.join(missing_yearmonths)})")
-                        else:
-                            done.append(f"{networkspeci} (all {len(requested_yearmonths)} months)")
-
-                    msg = f"Interpolation of {model_id} ({resolution}, {start_date} to {end_date}) finished. "
-                    msg += f"Available: {', '.join(done)}."
-                    if missing:
-                        msg += f" Nothing interpolated for: {', '.join(missing)}. Check the log in {log_path}."
-                    show_message(self.read_instance, msg)
-                else:
-                    # Interpolation did not produce files, allow retrying
-                    msg = f"Interpolation of {model_id} failed. Check the terminal and log in {log_path}."
-                    show_message(self.read_instance, msg)
-
-                # Allow re-interpolating (e.g. after changing dates or species)
-                for button in run_buttons:
-                    self.read_instance.enable_element(button, "button_run", prefix="popup")
-
-                break
-
-            print(f"Job is still running or pending.")
-            time.sleep(10)
-            
         return None
-    
+
     def handle_model_checked(self, event):
         """
         Manages the visibility and population of forecast-related widgets when a model checkbox is toggled.
@@ -2790,10 +2904,12 @@ class PopUpWindow(QtWidgets.QWidget):
                     )
 
                     # Set an identifiable name for the model
-                    forecast_model.setObjectName("forecastcheckboxes_" + str(label_ii))
+                    forecast_model.setObjectName(
+                        "forecastcheckboxes_" + str(label_ii))
 
                     # Connect dataChanged signal to the handler for checking/unchecking forecast options
-                    forecast_model.dataChanged.connect(self.forecast_option_checked)
+                    forecast_model.dataChanged.connect(
+                        self.forecast_option_checked)
 
                 # --- Add available forecast days (secondary combobox) ---
                 forecast_day_model = self.page_memory["models"]["forecast_days"][
@@ -2827,7 +2943,8 @@ class PopUpWindow(QtWidgets.QWidget):
 
                         # If any forecast option is already checked, show forecast days as well
                         if item.checkState() == QtCore.Qt.Checked:
-                            self.page_memory["models"]["forecast_days"][label_ii].show()
+                            self.page_memory["models"]["forecast_days"][label_ii].show(
+                            )
                             break
 
         # --- CASE 2: Model is unchecked for both model types ---
@@ -2892,7 +3009,8 @@ class PopUpWindow(QtWidgets.QWidget):
             if deactivate:
                 item.setFlags(item.flags() & ~QtCore.Qt.ItemIsEnabled)
                 item.setData(
-                    QtGui.QBrush(QtGui.QColor(150, 150, 150)), QtCore.Qt.ForegroundRole
+                    QtGui.QBrush(QtGui.QColor(150, 150, 150)
+                                 ), QtCore.Qt.ForegroundRole
                 )
             else:
                 item.setFlags(item.flags() | QtCore.Qt.ItemIsEnabled)
