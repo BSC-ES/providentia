@@ -735,7 +735,6 @@ def export_basic_configuration(prv, cname, network=None, species=None, resolutio
         "end_date": end_date,
         "experiments": experiment
     }
-    print('options', options)
 
     # write .conf file
     write_conf(section, subsection, cname, options)

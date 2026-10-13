@@ -7,6 +7,8 @@ import time
 import random
 import os
 import sys
+import subprocess
+import re
 
 import numpy as np
 import pandas as pd
@@ -2614,93 +2616,111 @@ class PopUpWindow(QtWidgets.QWidget):
                                    end_date=end_date,
                                    experiment=model_id)
 
-        # save original stdout
-        from .interpolation import experiment_interpolation_submission as interpolation
-        orig_stdout = sys.stdout
+        # Submit the interpolation through the launcher, as done from the command line
+        arguments = ["./bin/providentia", "--interpolation", f"--config={configuration_name}"]
+        if self.read_instance.machine == "local":
+            process = subprocess.Popen(arguments, cwd=PROVIDENTIA_ROOT, start_new_session=True)
+            job_id = process.pid
+        else:
+            submission_result = subprocess.run(arguments, cwd=PROVIDENTIA_ROOT, capture_output=True, text=True)
+
+            # Extract the Slurm job ID from the log path
+            match = re.search(r"management_logs/(\d+)\.out", submission_result.stdout)
+            if not match:
+                raise RuntimeError("Could not find Slurm job ID in launcher output")
+
+            job_id = match.group(1)
+        
+        print(f"Submitted interpolation job {job_id}")
         log_path = join(
             PROVIDENTIA_ROOT,
             "logs",
             "interpolation",
             "management_logs",
-            f"{unique_id}.out",
+            f"{job_id}.out",
         )
-        with open(log_path, "w") as f:
-            sys.stdout = Tee(orig_stdout, f)
-            try:
-                # do interpolation
-                kwargs = {"interpolation": True,
-                          "from_dashboard": True,
-                          "config": configuration_name, 
-                          "slurm_job_id": unique_id}
-                interpolation.main(**kwargs)
-            finally:
-                # reset stdout
-                sys.stdout = orig_stdout
 
-        # Reuse logger
-        self.read_instance.provconf.switch_logging()
+        finished = False
+        while True:
+            print("Checking if interpolation has finished...")
 
-        # Remove configuration
-        os.remove(configuration_name)
+            if self.read_instance.machine == "local":
+                result = process.poll()
+                finished = process.poll() is not None
+            else:
+                result = subprocess.run(["squeue", "-h", "-j", job_id],
+                                        capture_output=True, text=True)
+                finished = not result.stdout.strip()
 
-        # Update text 
-        event_source.setText("Run")
+            if finished:
+                print("Job is no longer pending or running.")
 
-        # Update available models, now that the interpolated files exist
-        get_valid_models(
-            self.read_instance,
-            start_date,
-            end_date,
-            resolution,
-            networkspecies,
-        )
-        # Update forecast menus
-        self.read_instance.update_models_menu()
+                # Remove configuration
+                os.remove(configuration_name)
 
-        if model_id in self.menu_current["models"]["enabled"]["interpolated"]:
-            # Enable interpolated model checkbox
-            model_checkbox = self.page_memory["models"]["interpolated"][label_ii]
-            model_checkbox.setEnabled(True)
-            model_checkbox.setGraphicsEffect(None)
-            model_checkbox.setToolTip("")
+                # Update text 
+                event_source.setText("Run")
 
-            # Report what is available per networkspeci, as interpolation can be partial
-            # (e.g. no observations or no gridded files for some species / months)
-            available = self.read_instance.available_model_data["interpolated"]
-            done = []
-            missing = []
+                # Update available models, now that the interpolated files exist
+                get_valid_models(
+                    self.read_instance,
+                    start_date,
+                    end_date,
+                    resolution,
+                    networkspecies,
+                )
+                # Update forecast menus
+                self.read_instance.update_models_menu()
 
-            # Months requested (end date is exclusive, same rule as in get_valid_interpolated_models)
-            requested_yearmonths = [
-                ym for ym in pd.date_range(start_date[:6] + "01", end_date, freq="MS").strftime("%Y%m")
-                if int(ym + "01") < int(end_date)
-            ]
-            for networkspeci in networkspecies:
-                net, speci = networkspeci.split("|")
-                yearmonths = available.get(net, {}).get(resolution, {}).get(speci, {}).get(model_id, [])
-                missing_yearmonths = [ym for ym in requested_yearmonths if ym not in yearmonths]
-                if not yearmonths:
-                    missing.append(networkspeci)
-                elif missing_yearmonths:
-                    done.append(f"{networkspeci} ({len(yearmonths)} of {len(requested_yearmonths)} months, "
-                                f"missing: {', '.join(missing_yearmonths)})")
+                if model_id in self.menu_current["models"]["enabled"]["interpolated"]:
+                    # Enable interpolated model checkbox
+                    model_checkbox = self.page_memory["models"]["interpolated"][label_ii]
+                    model_checkbox.setEnabled(True)
+                    model_checkbox.setGraphicsEffect(None)
+                    model_checkbox.setToolTip("")
+
+                    # Report what is available per networkspeci, as interpolation can be partial
+                    # (e.g. no observations or no gridded files for some species / months)
+                    available = self.read_instance.available_model_data["interpolated"]
+                    done = []
+                    missing = []
+
+                    # Months requested (end date is exclusive, same rule as in get_valid_interpolated_models)
+                    requested_yearmonths = [
+                        ym for ym in pd.date_range(start_date[:6] + "01", end_date, freq="MS").strftime("%Y%m")
+                        if int(ym + "01") < int(end_date)
+                    ]
+                    for networkspeci in networkspecies:
+                        net, speci = networkspeci.split("|")
+                        yearmonths = available.get(net, {}).get(resolution, {}).get(speci, {}).get(model_id, [])
+                        missing_yearmonths = [ym for ym in requested_yearmonths if ym not in yearmonths]
+                        if not yearmonths:
+                            missing.append(networkspeci)
+                        elif missing_yearmonths:
+                            done.append(f"{networkspeci} ({len(yearmonths)} of {len(requested_yearmonths)} months, "
+                                        f"missing: {', '.join(missing_yearmonths)})")
+                        else:
+                            done.append(f"{networkspeci} (all {len(requested_yearmonths)} months)")
+
+                    msg = f"Interpolation of {model_id} ({resolution}, {start_date} to {end_date}) finished. "
+                    msg += f"Available: {', '.join(done)}."
+                    if missing:
+                        msg += f" Nothing interpolated for: {', '.join(missing)}. Check the log in {log_path}."
+                    show_message(self.read_instance, msg)
                 else:
-                    done.append(f"{networkspeci} (all {len(requested_yearmonths)} months)")
+                    # Interpolation did not produce files, allow retrying
+                    msg = f"Interpolation of {model_id} failed. Check the terminal and log in {log_path}."
+                    show_message(self.read_instance, msg)
 
-            msg = f"Interpolation of {model_id} ({resolution}, {start_date} to {end_date}) finished. "
-            msg += f"Available: {', '.join(done)}."
-            if missing:
-                msg += f" Nothing interpolated for: {', '.join(missing)}. Check the log in {log_path}."
-            show_message(self.read_instance, msg)
-        else:
-            # Interpolation did not produce files, allow retrying
-            msg = f"Interpolation of {model_id} failed. Check the terminal and log in {log_path}."
-            show_message(self.read_instance, msg)
+                # Allow re-interpolating (e.g. after changing dates or species)
+                for button in run_buttons:
+                    self.read_instance.enable_element(button, "button_run", prefix="popup")
 
-        # Allow re-interpolating (e.g. after changing dates or species)
-        for button in run_buttons:
-            self.read_instance.enable_element(button, "button_run", prefix="popup")
+                break
 
+            print(f"Job is still running or pending.")
+            time.sleep(10)
+            
         return None
     
     def handle_model_checked(self, event):
