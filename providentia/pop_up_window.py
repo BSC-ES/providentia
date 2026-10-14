@@ -2803,8 +2803,11 @@ class PopUpWindow(QtWidgets.QWidget):
                               submission_result.stdout)
             if not match:
                 raise RuntimeError(
-                    "Could not find Slurm job ID in launcher output")
-
+                    "Could not find Slurm job ID in launcher output\n"
+                    f"Return code: {submission_result.returncode}\n"
+                    f"STDOUT:\n{submission_result.stdout}\n"
+                    f"STDERR:\n{submission_result.stderr}")
+            
             job_id = match.group(1)
 
         msg = f"Submitted interpolation job {job_id} with the following configuration: "
