@@ -2613,8 +2613,8 @@ class PopUpWindow(QtWidgets.QWidget):
             ):
                 del self.read_instance.qa_per_species[speci]
 
-    def check_interpolation(self, process, timer, configuration_name, job_id, log_path, model_id,
-                            start_date, end_date, resolution, networkspecies, label_ii):
+    def check_interpolation(self, timer, configuration_name, job_id, log_path, model_id,
+                            start_date, end_date, resolution, networkspecies, label_ii, process=None):
         """
         Checks if an interpolation launched from the dashboard has finished, and if so, updates the
         dashboard accordingly.
@@ -2631,8 +2631,6 @@ class PopUpWindow(QtWidgets.QWidget):
 
         Parameters
         ----------
-        process : subprocess.Popen
-            Process running the interpolation (only used in local runs).
         timer : QtCore.QTimer
             Timer calling this function, stopped once the interpolation has finished.
         configuration_name : str
@@ -2653,6 +2651,8 @@ class PopUpWindow(QtWidgets.QWidget):
             Network and species combinations requested, as network|species.
         label_ii : int
             Position of the model within the interpolated models menu, used to get its checkbox.
+        process : subprocess.Popen
+            Process running the interpolation (only used in local runs).
         """
 
         if self.read_instance.machine == "local":
@@ -2797,6 +2797,7 @@ class PopUpWindow(QtWidgets.QWidget):
                                        stderr=subprocess.DEVNULL)
             job_id = process.pid
         else:
+            process = None
             submission_result = subprocess.run(arguments,
                                                cwd=PROVIDENTIA_ROOT,
                                                capture_output=True,
@@ -2830,8 +2831,9 @@ class PopUpWindow(QtWidgets.QWidget):
         timer = QtCore.QTimer(self)
         timer.timeout.connect(
             lambda: self.check_interpolation(
-                process, timer, configuration_name, job_id, log_path, model_id,
-                start_date, end_date, resolution, networkspecies, label_ii
+                timer, configuration_name, job_id, log_path, model_id,
+                start_date, end_date, resolution, networkspecies, label_ii, 
+                process
             )
         )
         timer.start(10000)
