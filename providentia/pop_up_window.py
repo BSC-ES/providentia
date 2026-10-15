@@ -688,8 +688,8 @@ class PopUpWindow(QtWidgets.QWidget):
                             # The buttons take the label Run unless we explicitly set it to Interpolating...
                             if hasattr(self.read_instance, "active_interpolations"):
                                 model_id = self.menu_current[menu_type]["map_vars"][label_ii]
-                                if model_id in self.read_instance.active_interpolations:
-                                    element_label = "Interpolating..."
+                                if model_id in self.read_instance.active_interpolations.keys():
+                                    element_label = self.read_instance.active_interpolations[model_id]
                         element_ii += 1
                     elif menu_type in ["multispecies"]:
                         element_ii -= 1
@@ -2656,11 +2656,12 @@ class PopUpWindow(QtWidgets.QWidget):
         """
 
         run_button = self.read_instance.pop_up_window.page_memory["models"]["run"][label_ii]
-        
+
         if self.read_instance.machine == "local":
             finished = process.poll() is not None
             if not finished:
                 run_button.setText("Running...")
+                self.read_instance.active_interpolations[model_id] = "Running..."
         else:
             result = subprocess.run(["squeue", "-h", "-j", job_id],
                                     capture_output=True, text=True)
@@ -2668,9 +2669,11 @@ class PopUpWindow(QtWidgets.QWidget):
 
             finished = False
             if status == "PENDING":
-                run_button.setText("Pending...")
+                run_button.setText("Pending")
+                self.read_instance.active_interpolations[model_id] = "Pending"
             elif status == "RUNNING":
                 run_button.setText("Running...")
+                self.read_instance.active_interpolations[model_id] = "Running..."
             else:
                 finished = True
 
@@ -2680,7 +2683,7 @@ class PopUpWindow(QtWidgets.QWidget):
             timer.stop()
 
             # Remove from active interpolations
-            self.read_instance.active_interpolations.remove(model_id)
+            self.read_instance.active_interpolations.pop(model_id, None)
 
             # Remove configuration
             os.remove(configuration_name)
@@ -2765,7 +2768,6 @@ class PopUpWindow(QtWidgets.QWidget):
 
         # Disable interpolation button and update its text
         self.read_instance.disable_element(event_source, "button_run", prefix="popup")
-        event_source.setText("Interpolating...")
 
         # Force repaint before the blocking interpolation call
         QtWidgets.QApplication.processEvents()
@@ -2831,7 +2833,12 @@ class PopUpWindow(QtWidgets.QWidget):
         msg += f"\n- Start date: {start_date}\n- End date: {end_date}\n- Experiment: {model_id}"
         show_message(self.read_instance, msg)
 
-        # Check if interpolation has finished every 10 seconds
+        # Store active interpolations into list
+        self.read_instance.active_interpolations = getattr(
+            self.read_instance, "active_interpolations", {}
+        )
+
+        # Check interpolation status
         log_path = join(
             PROVIDENTIA_ROOT,
             "logs",
@@ -2847,13 +2854,16 @@ class PopUpWindow(QtWidgets.QWidget):
                 process
             )
         )
-        timer.start(10000)
 
-        # Store active interpolations into list
-        self.read_instance.active_interpolations = getattr(
-            self.read_instance, "active_interpolations", []
+        # Check immediately at 0 seconds
+        self.check_interpolation(
+            timer, configuration_name, job_id, log_path, model_id,
+            start_date, end_date, resolution, networkspecies, label_ii,
+            process
         )
-        self.read_instance.active_interpolations.append(model_id)
+
+        # Repeat check every 10 seconds
+        timer.start(10000)
 
         return None
 
