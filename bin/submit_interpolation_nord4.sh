@@ -5,7 +5,7 @@
 #SBATCH --output=logs/interpolation/submission_logs/%J.out
 #SBATCH --error=/dev/null
 #SBATCH --account=bsc32
-#SBATCH --qos=gp_bsces
+#SBATCH --qos=bsc_es
 
 # load modules from conda environment
 module load Miniconda3/24.7.1-0

@@ -804,35 +804,39 @@ class PopUpWindow(QtWidgets.QWidget):
                             model_checkbox.setObjectName(
                                 "expcheckboxes_" + element +
                                 "_" + str(label_ii)
-                            )
-                            
+                            )       
+
                             # When we close the MODELS menu during an interpolation and reopen it again
                             # We need to keep button disabled
+                            is_interpolating = model_id in getattr(
+                                self.read_instance, "active_interpolations", []
+                            )
+
                             if element == "run":
-                                if hasattr(self.read_instance, "active_interpolations"):
-                                    if model_id in self.read_instance.active_interpolations:
-                                        model_checkbox.setEnabled(False)
+                                has_gridded_data = menu_current_type["enabled"]["gridded"].get(
+                                    model_id, False
+                                )
+                                model_checkbox.setEnabled(has_gridded_data and not is_interpolating)
                             else:
                                 model_checkbox.setEnabled(
-                                    menu_current_type["enabled"][element].get(
-                                        model_id, False
+                                    menu_current_type["enabled"][element].get(model_id, False)
+                                )
+                            
+                            if not model_checkbox.isEnabled() and not is_interpolating:
+                                # fade the box so it is obvious it cannot be clicked
+                                fade = QtWidgets.QGraphicsOpacityEffect(
+                                    model_checkbox)
+                                fade.setOpacity(0.5)
+                                model_checkbox.setGraphicsEffect(fade)
+                                model_checkbox.setToolTip(
+                                    wrap_tooltip_text(
+                                        "Unavailable",
+                                        self.full_window_geometry.width(),
+                                        "popup_label",
                                     )
                                 )
-                                if not model_checkbox.isEnabled():
-                                    # fade the box so it is obvious it cannot be clicked
-                                    fade = QtWidgets.QGraphicsOpacityEffect(
-                                        model_checkbox)
-                                    fade.setOpacity(0.5)
-                                    model_checkbox.setGraphicsEffect(fade)
-                                    model_checkbox.setToolTip(
-                                        wrap_tooltip_text(
-                                            "Unavailable",
-                                            self.full_window_geometry.width(),
-                                            "popup_label",
-                                        )
-                                    )
-                                elif model_id in menu_current_type["keep_selected"][element]:
-                                    model_checkbox.setCheckState(QtCore.Qt.Checked)
+                            elif model_id in menu_current_type["keep_selected"][element] and element != "run":
+                                model_checkbox.setCheckState(QtCore.Qt.Checked)
 
                             # connect checkbox to handle model being checked
                             if element in ['interpolated', 'gridded']:
