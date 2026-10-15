@@ -44,6 +44,17 @@ elif operating_system in ["Windows", "MINGW32_NT", "MINGW64_NT"]:
         open(join(PROVIDENTIA_ROOT, "settings/internal/stylesheet_windows.yaml"))
     )
 
+# Status code definitions from https://www.bsc.es/supportkc/docs/MareNostrum5/slurm
+slurm_states = {
+    "CD": "Completed",
+    "CG": "Completing",
+    "F": "Failed",
+    "PD": "Pending",
+    "PR": "Preempted",
+    "R": "Running",
+    "S": "Suspended",
+    "ST": "Stopped",
+}
 
 class PopUpWindow(QtWidgets.QWidget):
     """Class that generates generalised pop-up window."""
@@ -2613,8 +2624,8 @@ class PopUpWindow(QtWidgets.QWidget):
             ):
                 del self.read_instance.qa_per_species[speci]
 
-    def check_interpolation(self, timer, configuration_name, job_id, log_path, model_id,
-                            start_date, end_date, resolution, networkspecies, label_ii, process=None):
+    def check_interpolation(self, timer, job_id, log_path, model_id, start_date, end_date, 
+                            resolution, networkspecies, label_ii, process=None):
         """
         Checks if an interpolation launched from the dashboard has finished, and if so, updates the
         dashboard accordingly.
@@ -2633,8 +2644,6 @@ class PopUpWindow(QtWidgets.QWidget):
         ----------
         timer : QtCore.QTimer
             Timer calling this function, stopped once the interpolation has finished.
-        configuration_name : str
-            Path to the temporary configuration file used for the interpolation.
         job_id : int or str
             Process ID in local runs, or Slurm job ID in the rest of machines.
         log_path : str
@@ -2661,21 +2670,20 @@ class PopUpWindow(QtWidgets.QWidget):
             finished = process.poll() is not None
             if not finished:
                 run_button.setText("Running...")
-                self.read_instance.active_interpolations[model_id] = "Running..."
+                self.read_instance.active_interpolations[model_id] = f"Running {job_id}"
         else:
             result = subprocess.run(["squeue", "-h", "-j", job_id],
                                     capture_output=True, text=True)
-            status = result.stdout.strip()
+            fields = result.stdout.split()
+            status = fields[4] if len(fields) > 4 else None
 
             finished = False
-            if status == "PENDING":
-                run_button.setText("Pending")
-                self.read_instance.active_interpolations[model_id] = "Pending"
-            elif status == "RUNNING":
-                run_button.setText("Running...")
-                self.read_instance.active_interpolations[model_id] = "Running..."
-            else:
+            if not status:
                 finished = True
+            else:
+                status_long_name = slurm_states[status]
+                run_button.setText(f"{status_long_name} ({job_id})")
+                self.read_instance.active_interpolations[model_id] = f"{status_long_name} ({job_id})"
 
         # If no longer running
         if finished:
@@ -2684,9 +2692,6 @@ class PopUpWindow(QtWidgets.QWidget):
 
             # Remove from active interpolations
             self.read_instance.active_interpolations.pop(model_id, None)
-
-            # Remove configuration
-            os.remove(configuration_name)
 
             # Update available models, now that the interpolated files exist
             get_valid_models(
@@ -2833,6 +2838,9 @@ class PopUpWindow(QtWidgets.QWidget):
         msg += f"\n- Start date: {start_date}\n- End date: {end_date}\n- Experiment: {model_id}"
         show_message(self.read_instance, msg)
 
+        # Remove configuration
+        os.remove(configuration_name)
+
         # Store active interpolations into list
         self.read_instance.active_interpolations = getattr(
             self.read_instance, "active_interpolations", {}
@@ -2849,17 +2857,15 @@ class PopUpWindow(QtWidgets.QWidget):
         timer = QtCore.QTimer(self)
         timer.timeout.connect(
             lambda: self.check_interpolation(
-                timer, configuration_name, job_id, log_path, model_id,
-                start_date, end_date, resolution, networkspecies, label_ii, 
-                process
+                timer, job_id, log_path, model_id, start_date, end_date, 
+                resolution, networkspecies, label_ii, process
             )
         )
 
         # Check immediately at 0 seconds
         self.check_interpolation(
-            timer, configuration_name, job_id, log_path, model_id,
-            start_date, end_date, resolution, networkspecies, label_ii,
-            process
+            timer, job_id, log_path, model_id, start_date, end_date, 
+            resolution, networkspecies, label_ii, process
         )
 
         # Repeat check every 10 seconds
