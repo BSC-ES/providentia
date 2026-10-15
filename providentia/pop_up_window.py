@@ -2655,12 +2655,24 @@ class PopUpWindow(QtWidgets.QWidget):
             Process running the interpolation (only used in local runs).
         """
 
+        run_button = self.read_instance.pop_up_window.page_memory["models"]["run"][label_ii]
+        
         if self.read_instance.machine == "local":
             finished = process.poll() is not None
+            if not finished:
+                run_button.setText("Running...")
         else:
             result = subprocess.run(["squeue", "-h", "-j", job_id],
                                     capture_output=True, text=True)
-            finished = not result.stdout.strip()
+            status = result.stdout.strip()
+
+            finished = False
+            if status == "PENDING":
+                run_button.setText("Pending...")
+            elif status == "RUNNING":
+                run_button.setText("Running...")
+            else:
+                finished = True
 
         # If no longer running
         if finished:
@@ -2728,7 +2740,6 @@ class PopUpWindow(QtWidgets.QWidget):
                 show_message(self.read_instance, msg)
 
             # Enable interpolation button and update its text
-            run_button = self.read_instance.pop_up_window.page_memory["models"]["run"][label_ii]
             self.read_instance.enable_element(run_button, "button_run", prefix="popup")
             run_button.setText("Run")
 
