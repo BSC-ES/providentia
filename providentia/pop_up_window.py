@@ -2680,7 +2680,7 @@ class PopUpWindow(QtWidgets.QWidget):
         if self.read_instance.machine == "local":
             finished = process.poll() is not None
             if not finished:
-                run_button.setText("Running...")
+                run_button.setText(f"Running ({job_id})")
                 self.read_instance.active_interpolations[model_id] = f"Running {job_id}"
         else:
             result = subprocess.run(["squeue", "-h", "-j", job_id],
