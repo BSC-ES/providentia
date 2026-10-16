@@ -3,7 +3,7 @@
 #SBATCH --job-name=PRVI                                         
 #SBATCH --ntasks=1                                                
 #SBATCH --output=logs/interpolation/submission_logs/%J.out
-#SBATCH --error=/dev/null
+#SBATCH --error=logs/interpolation/submission_logs/%J.err
 #SBATCH --account=bsc32
 #SBATCH --qos=bsc_es
 

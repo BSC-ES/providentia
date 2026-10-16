@@ -525,6 +525,10 @@ class PopUpWindow(QtWidgets.QWidget):
                         CheckableComboBox,
                     ],
                 }
+                # TODO: When we solve issues on nord4, remove this
+                if self.read_instance.machine == 'nord4':
+                    self.page_memory["models"]["ordered_elements"].remove("run")
+                    self.page_memory["models"]["widget"].remove(QtWidgets.QPushButton)
 
             # if have more than 1 column per label, need column headers
             if len(self.page_memory[menu_type]["ordered_elements"]) > 1:
@@ -1099,7 +1103,11 @@ class PopUpWindow(QtWidgets.QWidget):
                                 QtCore.Qt.AlignCenter,
                             )
                     elif menu_type == "models":
-                        texts = ["Interpolated", "Gridded", "Interpolation"]
+                        # TODO: When we solve issues on nord4, bring Interpolation back
+                        if self.read_instance.machine == "nord4":
+                            texts = ["Interpolated", "Gridded"]
+                        else:
+                            texts = ["Interpolated", "Gridded", "Interpolation"]
                         for i, text in enumerate(texts):
                             column_label = set_formatting(
                                 QtWidgets.QLabel(self, text=text),
@@ -2625,7 +2633,8 @@ class PopUpWindow(QtWidgets.QWidget):
                 del self.read_instance.qa_per_species[speci]
 
     def check_interpolation(self, timer, job_id, log_path, model_id, start_date, end_date, 
-                            resolution, networkspecies, label_ii, process=None):
+                            resolution, networkspecies, label_ii, configuration_name,
+                            process=None):
         """
         Checks if an interpolation launched from the dashboard has finished, and if so, updates the
         dashboard accordingly.
@@ -2660,6 +2669,8 @@ class PopUpWindow(QtWidgets.QWidget):
             Network and species combinations requested, as network|species.
         label_ii : int
             Position of the model within the interpolated models menu, used to get its checkbox.
+        configuration_name : str
+            Configuration file name (created only for the interpolation)
         process : subprocess.Popen
             Process running the interpolation (only used in local runs).
         """
@@ -2692,6 +2703,9 @@ class PopUpWindow(QtWidgets.QWidget):
 
             # Remove from active interpolations
             self.read_instance.active_interpolations.pop(model_id, None)
+
+            # Remove configuration
+            os.remove(configuration_name)
 
             # Update available models, now that the interpolated files exist
             get_valid_models(
@@ -2825,6 +2839,9 @@ class PopUpWindow(QtWidgets.QWidget):
             match = re.search(r"management_logs/(\d+)\.out",
                               submission_result.stdout)
             if not match:
+                # Remove configuration
+                os.remove(configuration_name)
+
                 raise RuntimeError(
                     "Could not find Slurm job ID in launcher output\n"
                     f"Return code: {submission_result.returncode}\n"
@@ -2837,9 +2854,6 @@ class PopUpWindow(QtWidgets.QWidget):
         msg += f"\n- Network: {network}\n- Species: {species}\n- Resolution: {resolution}"
         msg += f"\n- Start date: {start_date}\n- End date: {end_date}\n- Experiment: {model_id}"
         show_message(self.read_instance, msg)
-
-        # Remove configuration
-        os.remove(configuration_name)
 
         # Store active interpolations into list
         self.read_instance.active_interpolations = getattr(
@@ -2858,14 +2872,14 @@ class PopUpWindow(QtWidgets.QWidget):
         timer.timeout.connect(
             lambda: self.check_interpolation(
                 timer, job_id, log_path, model_id, start_date, end_date, 
-                resolution, networkspecies, label_ii, process
+                resolution, networkspecies, label_ii, configuration_name, process
             )
         )
 
         # Check immediately at 0 seconds
         self.check_interpolation(
             timer, job_id, log_path, model_id, start_date, end_date, 
-            resolution, networkspecies, label_ii, process
+            resolution, networkspecies, label_ii, configuration_name, process
         )
 
         # Repeat check every 10 seconds
