@@ -92,11 +92,13 @@ class SubmitInterpolation(object):
                 load_conf(self, self.config)
                 self.from_conf = True
             else:
-                error = "Error: The path to the configuration file specified in the command line does not exist."
-                sys.exit(error)
+                msg = "Error: The path to the configuration file specified in the command line does not exist."
+                self.logger.error(msg)
+                sys.exit(1)
         else:
-            error = "Error: No configuration file found. The path to the config file must be added as an argument."
-            sys.exit(error)
+            msg = "Error: No configuration file found. The path to the config file must be added as an argument."
+            self.logger.error(msg)
+            sys.exit(1)
 
         # update variables from config file
         if self.config != "":

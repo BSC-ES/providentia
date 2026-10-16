@@ -2,13 +2,11 @@
 # init
 jobname="PRV"
 time="02:00:00"
-mem="20Gb"
 constraint="medmem"
 
 function usage () {
 echo "Usage: providentia [-u|--usage] [-c|--n_cpus)]"
 echo "    [-J|--jobname JOB_NAME (default=PRV)] [-q|--queue QUEUE_NAME (default=debug)]"
-echo "    [-m|--mem MEMORY (only valid on P9, default=20Gb)]"
 echo "    [--constraint CONSTRAINT (default=medmem)]"
 }
 
@@ -128,8 +126,6 @@ if [[ $PARSED =~ "--interp" || $PARSED =~ "--interpolation" || $PARSED =~ "--int
     # define qos in interpolation
     if [ "${BSC_MACHINE}" == "mn5" ]; then
         queue="gp_bsces"
-    elif [ "${BSC_MACHINE}" == "grace" ]; then
-        queue="ngp_bsces"
     else
         queue="bsc_es"
     fi
@@ -137,8 +133,6 @@ else
     # define qos in every mode but interpolation
     if [ "${BSC_MACHINE}" == "mn5" ]; then
         queue="gp_debug"
-    elif [ "${BSC_MACHINE}" == "grace" ]; then
-        queue="ngp_debug"
     else
         queue="debug"
     fi 
@@ -191,7 +185,6 @@ done
 
 account_option="--account=bsc32"
 queue_option="--qos=$queue"
-memory_option="--mem=$mem"
 n_cpus_option="--cpus-per-task=$n_cpus"
 n_cpus_explicit_option="--n_cpus_explicit=$n_cpus_explicit"
 constraint_option="--constraint=$constraint"
@@ -388,7 +381,7 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
     initialise_conda
 
     if $interpolation; then
-        echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
+        echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}, time ${time}"
         echo "INFO: Loading dependencies..."
         eval "${load_command}"
         sanitise_python_environment
@@ -415,7 +408,7 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
 
         if $active_env; then
             if $notebook; then
-                echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+                echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}, time ${time}"
                 echo "INFO: Starting Jupyter session."
                 echo "INFO: Check 'notebook.out' for information on how to connect to session."
                 
@@ -426,7 +419,7 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
                 fi
 
             elif $debug; then
-                echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+                echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}, time ${time}"
                 echo "INFO: Entering debug mode"
                 if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
                     eval "${salloc_command} ${account_option} ${queue_option}"
@@ -438,7 +431,7 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
                 if $debugexec; then
                     eval "srun ${account_option} ${python_command}"
                 else
-                    echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+                    echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}, time ${time}"
                     if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
                         eval "${salloc_command} ${account_option} ${queue_option} srun ${python_command}"
                     else
@@ -485,7 +478,7 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
     initialise_conda
 
     if $interpolation; then
-        echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
+        echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}, time ${time}"
         echo "INFO: Loading dependencies..."
         eval "${load_command}"
         sanitise_python_environment
@@ -512,7 +505,7 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
 
         if $active_env; then
             if $notebook; then
-                echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+                echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}, time ${time}"
                 echo "INFO: Starting Jupyter session."
                 echo "INFO: Check 'notebook.out' for information on how to connect to session."
                 
@@ -523,7 +516,7 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
                 fi
 
             elif $debug; then
-                echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+                echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}, time ${time}"
                 echo "INFO: Entering debug mode"
                 if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
                     eval "${salloc_command} ${account_option} ${queue_option}"
@@ -535,7 +528,7 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
                 if $debugexec; then
                     eval "srun ${account_option} ${python_command}"
                 else
-                    echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+                    echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}, time ${time}"
                     if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
                         eval "${salloc_command} ${account_option} ${queue_option} srun nord3_singu_es ${python_command}"
                     else

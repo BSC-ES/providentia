@@ -601,3 +601,25 @@ def is_same_or_view(child, parent):
 
     # Otherwise: independent copy
     return False
+
+def join_unique(values):
+    """
+    Joins values into a comma-separated string, collapsing to a single value if all are the same.
+
+    Duplicates are only dropped when every value is identical. Otherwise all values are kept,
+    in order, so that lists paired by position (e.g. network and species) stay aligned.
+
+    Parameters
+    ----------
+    values : list
+        Values to join (e.g. networks or species). Each one is converted to str.
+
+    Returns
+    -------
+    str
+        The single value if all values are the same, otherwise all values joined by commas.
+        An empty string if values is empty.
+    """
+
+    values = [str(v) for v in values]
+    return values[0] if len(set(values)) == 1 else ",".join(values)
