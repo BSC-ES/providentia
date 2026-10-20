@@ -602,9 +602,9 @@ def is_same_or_view(child, parent):
     # Otherwise: independent copy
     return False
 
-def join_unique(values):
+def join_unique(values, separator=","):
     """
-    Joins values into a comma-separated string, collapsing to a single value if all are the same.
+    Joins values into a separated string, collapsing to a single value if all are the same.
 
     Duplicates are only dropped when every value is identical. Otherwise all values are kept,
     in order, so that lists paired by position (e.g. network and species) stay aligned.
@@ -613,6 +613,8 @@ def join_unique(values):
     ----------
     values : list
         Values to join (e.g. networks or species). Each one is converted to str.
+    separator : str
+        String to separate by
 
     Returns
     -------
@@ -622,4 +624,4 @@ def join_unique(values):
     """
 
     values = [str(v) for v in values]
-    return values[0] if len(set(values)) == 1 else ",".join(values)
+    return values[0] if len(set(values)) == 1 else separator.join(values)

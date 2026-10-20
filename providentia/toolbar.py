@@ -11,6 +11,7 @@ from packaging.version import Version
 from PyQt5 import QtGui, QtWidgets
 
 from providentia.auxiliar import CURRENT_PATH, join
+from .auxiliar import join_unique
 from .configuration import ProvConfiguration
 from .configuration import load_conf
 from .dashboard_elements import InputDialog, set_cursor, unset_cursor
@@ -172,7 +173,8 @@ class NavigationToolbar(NavigationToolbar2QT):
             + "_"
             + self.read_instance.le_end_date.text()
         )
-        default_name = "PRV_" + str(self.read_instance.species) + "_" + daterange
+        species = join_unique(self.read_instance.species, separator="_")
+        default_name = "PRV_" + species + "_" + daterange
         start = join(startpath, default_name)
 
         filter_ext = [
