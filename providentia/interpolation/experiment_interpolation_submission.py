@@ -978,8 +978,6 @@ class SubmitInterpolation(object):
                    sys.executable, self.working_directory, str_to_write
                 )
             )
-            if self.machine == "nord4":
-                command = "nord3_singu_es {}".format(command)
             arguments_file.write(command)
 
             # iterate n lines written
@@ -1579,8 +1577,6 @@ class SubmitInterpolation(object):
             ),
             flush=True,
         )
-        if self.machine == "nord4":
-            arguments_list.insert(0, "nord3_singu_es")
         result = subprocess.run(arguments_list, capture_output=True, text=True)
 
         if result.returncode != 0:

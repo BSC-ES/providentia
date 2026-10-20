@@ -530,9 +530,9 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
                 else
                     echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}, time ${time}"
                     if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
-                        eval "${salloc_command} ${account_option} ${queue_option} srun nord3_singu_es ${python_command}"
+                        eval "${salloc_command} ${account_option} ${queue_option} srun ${python_command}"
                     else
-                        eval "${salloc_command} ${account_option} ${constraint_option} ${queue_option} srun nord3_singu_es ${python_command}"
+                        eval "${salloc_command} ${account_option} ${constraint_option} ${queue_option} srun ${python_command}"
                     fi
                 fi
             fi

@@ -23,4 +23,5 @@ fi
 
 JOB_ID="--slurm_job_id=$SLURM_JOB_ID"
 
-srun --output=logs/interpolation/management_logs/$SLURM_JOB_ID.out python3 -u -c "from providentia.main import main; main()" $@ $JOB_ID
+# Disable CPU binding to avoid affinity conflicts with the CPUs allocated to the job step when launching interpolation from dashboard
+srun --cpu-bind=none --output=logs/interpolation/management_logs/$SLURM_JOB_ID.out python3 -u -c "from providentia.main import main; main()" $@ $JOB_ID

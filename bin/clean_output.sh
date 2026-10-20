@@ -9,6 +9,7 @@ rm -rf ./notebooks/.ipynb_checkpoints
 rm -f  ./notebook.out
 
 # interpolation
+rm -rf ./configurations/dashboard/run_*
 rm -rf ./logs/interpolation/arguments/*
 rm -rf ./logs/interpolation/interpolation_logs/*
 rm -rf ./logs/interpolation/management_logs/*

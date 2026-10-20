@@ -382,14 +382,20 @@ class Dashboard(QtWidgets.QWidget):
             The close event object.
         """
 
-        if hasattr(self, "active_interpolations"):
-            if self.active_interpolations:
-                QtWidgets.QMessageBox.warning(
-                    self,
-                    "Interpolations in progress",
-                    "There are still interpolation jobs queued or running. "
-                    "Closing the dashboard will not cancel those jobs."
-                )
+        if hasattr(self, "active_interpolations") and self.active_interpolations:
+            reply = QtWidgets.QMessageBox.warning(
+                self,
+                "Interpolations in progress",
+                "There are still interpolation jobs queued or running.\n"
+                "Closing the dashboard will not cancel those jobs.\n"
+                "Click OK to close the dashboard or Cancel to keep it open.",
+                QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel,
+                QtWidgets.QMessageBox.Cancel,
+            )
+
+            if reply == QtWidgets.QMessageBox.Cancel:
+                event.ignore()
+                return
 
         event.accept()
 
