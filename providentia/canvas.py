@@ -64,7 +64,7 @@ from .plot_aux import (
 )
 from .plot_formatting import (
     format_axis,
-    fit_boxplot_xticklabels,
+    fit_xticklabels,
     harmonise_xy_lims_paradigm,
     log_validity,
     set_axis_label,
@@ -6332,12 +6332,12 @@ class Canvas(FigureCanvas):
 
         # whether the category labels fit along the x-axis (horizontal, or
         # rotated) is worked out fresh every time the boxplot is drawn (see
-        # Plotting.make_boxplot() / fit_boxplot_xticklabels()); this
+        # Plotting.make_boxplot() / fit_xticklabels()); this
         # checkbox just reports what was decided, and lets that decision be
         # overridden for what is currently on screen without redoing the
-        # whole plot (see handle_boxplot_xlabels_update())
+        # whole plot (see handle_xlabels_update())
         self.boxplot_xlabels = self.boxplot_menu.checkboxes["xlabels"]
-        self.boxplot_xtick_cache = None
+        self.xtick_cache = {"boxplot": None, "heatmap": None}
 
         # get boxplot interactive dictionary
         self.interactive_elements["boxplot"] = {"hidden": True}
@@ -6388,6 +6388,7 @@ class Canvas(FigureCanvas):
         self.heatmap_options = self.heatmap_menu.checkable_comboboxes["options"]
         self.heatmap_networkspecies = self.heatmap_menu.checkable_comboboxes["networkspecies"]
         self.heatmap_elements = self.heatmap_menu.get_elements()
+        self.heatmap_xlabels = self.heatmap_menu.checkboxes["xlabels"]
 
         # get stats
         self.heatmap_stat = self.heatmap_menu.comboboxes["stat"]
@@ -6757,60 +6758,53 @@ class Canvas(FigureCanvas):
 
         return None
 
-    def handle_boxplot_xlabels_update(self):
+    def handle_xlabels_update(self, plot_type):
         """
-        Function which handles toggling the boxplot's x-axis labels upon
-        interaction with the boxplot settings menu's checkbox.
-
-        Applies the click directly to what is already on screen (showing at
-        whatever rotation last fitted, or the steepest tried if none did, or
-        hiding outright) rather than remaking the whole plot, as nothing
-        about the boxplot itself has changed
+        Toggle a plot's x-axis category labels (boxplot / heatmap) upon
+        interaction with its settings menu's checkbox, directly on what is
+        already on screen rather than remaking the whole plot.
         """
 
         if not self.read_instance.block_config_bar_handling_updates:
-            if self.boxplot_xtick_cache is not None:
+            cache = self.xtick_cache[plot_type]
+            if cache is not None:
                 self.read_instance.cursor_function = set_cursor(
-                    self.read_instance.cursor_function,
-                    "handle_boxplot_xlabels_update",
+                    self.read_instance.cursor_function, "handle_xlabels_update"
                 )
                 QtCore.QCoreApplication.processEvents(
                     QtCore.QEventLoop.ExcludeUserInputEvents
                 )
 
-                fit_boxplot_xticklabels(
-                    self.plot_axes["boxplot"],
-                    forced=self.boxplot_xlabels.isChecked(),
-                    **self.boxplot_xtick_cache,
+                fit_xticklabels(
+                    self.plot_axes[plot_type],
+                    forced=getattr(self, "{}_xlabels".format(plot_type)).isChecked(),
+                    **cache,
                 )
                 self.figure.canvas.draw()
 
                 unset_cursor(
-                    self.read_instance.cursor_function,
-                    "handle_boxplot_xlabels_update",
+                    self.read_instance.cursor_function, "handle_xlabels_update"
                 )
 
         return None
 
-    def sync_boxplot_xlabels_checkbox(self, shown):
-        """
-        Function which points the boxplot's "X-axis labels" checkbox at
-        whether the labels were actually drawn on this pass, so it always
-        reports what is on screen rather than a choice nothing was drawn
-        with.
+    def handle_boxplot_xlabels_update(self):
+        return self.handle_xlabels_update("boxplot")
 
-        Parameters
-        ----------
-        shown : bool
-            Whether the boxplot's x-axis category labels are currently shown
+    def handle_heatmap_xlabels_update(self):
+        return self.handle_xlabels_update("heatmap")
+
+    def sync_xlabels_checkbox(self, plot_type, shown):
+        """
+        Point a plot's "X-axis labels" checkbox at whether the labels were
+        actually drawn on this pass (see sync note in the boxplot docs: signals
+        are blocked so the outcome doesn't read as a user choice).
         """
 
-        # showing the outcome must not read as the user having set it, or
-        # the next click would toggle away from whatever the automatic fit
-        # just decided rather than overriding it
-        self.boxplot_xlabels.blockSignals(True)
-        self.boxplot_xlabels.setChecked(shown)
-        self.boxplot_xlabels.blockSignals(False)
+        checkbox = getattr(self, "{}_xlabels".format(plot_type))
+        checkbox.blockSignals(True)
+        checkbox.setChecked(shown)
+        checkbox.blockSignals(False)
 
         return None
 
