@@ -2666,6 +2666,9 @@ def write_conf(section, subsection, fpath, opts):
 
     config = configparser.RawConfigParser()
 
+    # keep option names case-sensitive (e.g. GSFC_coastline_proximity)
+    config.optionxform = str
+    
     # update configuration
     for section, section_name in zip(["section", "subsection"], [section, subsection]):
         if opts[section]:
