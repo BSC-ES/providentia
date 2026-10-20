@@ -525,10 +525,6 @@ class PopUpWindow(QtWidgets.QWidget):
                         CheckableComboBox,
                     ],
                 }
-                # TODO: When we solve issues on nord4, remove this
-                if self.read_instance.machine == 'nord4':
-                    self.page_memory["models"]["ordered_elements"].remove("run")
-                    self.page_memory["models"]["widget"].remove(QtWidgets.QPushButton)
 
             # if have more than 1 column per label, need column headers
             if len(self.page_memory[menu_type]["ordered_elements"]) > 1:
@@ -1103,11 +1099,7 @@ class PopUpWindow(QtWidgets.QWidget):
                                 QtCore.Qt.AlignCenter,
                             )
                     elif menu_type == "models":
-                        # TODO: When we solve issues on nord4, bring Interpolation back
-                        if self.read_instance.machine == "nord4":
-                            texts = ["Interpolated", "Gridded"]
-                        else:
-                            texts = ["Interpolated", "Gridded", "Interpolation"]
+                        texts = ["Interpolated", "Gridded", "Interpolation"]
                         for i, text in enumerate(texts):
                             column_label = set_formatting(
                                 QtWidgets.QLabel(self, text=text),
@@ -2687,7 +2679,6 @@ class PopUpWindow(QtWidgets.QWidget):
                                     capture_output=True, text=True)
             fields = result.stdout.split()
             status = fields[4] if len(fields) > 4 else None
-
             finished = False
             if not status:
                 finished = True
@@ -2719,12 +2710,6 @@ class PopUpWindow(QtWidgets.QWidget):
             self.read_instance.update_models_menu()
 
             if model_id in self.menu_current["models"]["enabled"]["interpolated"]:
-                # Enable interpolated model checkbox
-                model_checkbox = self.read_instance.pop_up_window.page_memory["models"]["interpolated"][label_ii]
-                model_checkbox.setEnabled(True)
-                model_checkbox.setGraphicsEffect(None)
-                model_checkbox.setToolTip("")
-
                 # Report what is available per networkspeci, as interpolation can be partial
                 # (e.g. no observations or no gridded files for some species / months)
                 available = self.read_instance.available_model_data["interpolated"]
@@ -2755,6 +2740,12 @@ class PopUpWindow(QtWidgets.QWidget):
                 msg += f"Available: {', '.join(done)}."
                 if missing:
                     msg += f" Nothing interpolated for: {', '.join(missing)}. Check the log in {log_path}."
+                else:
+                    # Enable interpolated model checkbox if anything was interpolated
+                    model_checkbox = self.read_instance.pop_up_window.page_memory["models"]["interpolated"][label_ii]
+                    model_checkbox.setEnabled(True)
+                    model_checkbox.setGraphicsEffect(None)
+                    model_checkbox.setToolTip("")
                 show_message(self.read_instance, msg)
             else:
                 # Interpolation did not produce files, allow retrying
@@ -2809,7 +2800,7 @@ class PopUpWindow(QtWidgets.QWidget):
 
         # Store configuration
         configuration_name = join(
-            self.read_instance.config_dir, f"dashboard_run_{unique_id}.conf")
+            self.read_instance.config_dir, f"dashboard/run_{unique_id}.conf")
         export_basic_configuration(self.read_instance, configuration_name,
                                    network=network,
                                    species=species,
