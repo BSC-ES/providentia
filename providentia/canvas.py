@@ -1256,21 +1256,59 @@ class Canvas(FigureCanvas):
         else:
             zstat = get_z_statistic_comboboxes(base_zstat, bias=True)
 
-        # restrict map statistic (stations and grid) to period selected under the map colourbar
-        # (if all loaded period is selected, use all data)
-        date_range = None
-        if self.map_date_range_selection != self.map_date_range_full:
-            date_range = self.map_date_range_selection
+        # Use selected period, or full period if all loaded data is selected
+        date_range = (
+            self.map_date_range_full
+            if self.map_date_range_selection == self.map_date_range_full
+            else self.map_date_range_selection
+        )
 
-        # if there is grid data, read it
-        results = self.read_instance.datareader.read_gridded_data(
-            speci, zstat=zstat, date_range=date_range,
-            lead_days=get_map_lead_days(self.read_instance))
+        start, end = pd.Timestamp(date_range[0]), pd.Timestamp(date_range[1])
 
-        if results:
-            grid_data, grid_lat, grid_lon = results
-        else:
-            grid_data, grid_lat, grid_lon = None, None, None
+        grid_stat, grid_lat, grid_lon = None, None, None
+
+        # TODO: Create date and hour selectors
+        date = None
+        hour = None
+        
+        # Get read gridded data for this species
+        gridded_data = self.read_instance.gridded_var_data.get(speci)
+        if gridded_data is not None:
+            grid_var, grid_lat, grid_lon = (
+                gridded_data[key] for key in ("data", "lat", "lon")
+            )
+            # read specific timestep
+            if date and hour is not None:
+                target_timestamp = pd.Timestamp(date) + pd.Timedelta(hours=int(hour))
+
+                selected_data = [
+                    values
+                    for timestamp, values in grid_var.items()
+                    if timestamp == target_timestamp
+                ]
+
+                if selected_data:
+                    grid_stat = selected_data[0]
+
+            # calculate statistic
+            elif zstat:
+                if zstat not in ['Mean']:
+                    msg = f"Statistic '{zstat}' is not supported for gridded data. Only 'Mean' is supported."
+                    show_message(self.read_instance, msg)
+                else:
+                    # Select the requested period
+                    selected_data = [
+                        values
+                        for timestamp, values in grid_var.items()
+                        if start <= timestamp < end
+                    ]
+
+                    if selected_data:
+                        # Calculate the mean at each grid cell
+                        grid_stat = np.nanmean(
+                            np.stack(selected_data, axis=0),
+                            axis=0,
+                        )
 
         # ensure label that have in memory still exists
 
@@ -1283,7 +1321,7 @@ class Canvas(FigureCanvas):
             zstat=zstat,
             labela=self.map_z1.currentText(),
             labelb=self.map_z2.currentText(),
-            var=grid_data,
+            var=grid_stat,
             lat=grid_lat,
             lon=grid_lon,
             date_range=date_range
