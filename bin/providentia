@@ -381,7 +381,7 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
     initialise_conda
 
     if $interpolation; then
-        echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}, time ${time}"
+        echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, time ${time}"
         echo "INFO: Loading dependencies..."
         eval "${load_command}"
         sanitise_python_environment
@@ -478,7 +478,7 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
     initialise_conda
 
     if $interpolation; then
-        echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}, time ${time}"
+        echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, time ${time}"
         echo "INFO: Loading dependencies..."
         eval "${load_command}"
         sanitise_python_environment

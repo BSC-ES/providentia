@@ -863,19 +863,11 @@ class PopUpWindow(QtWidgets.QWidget):
                         # update forecast options combobox back to previously available and selected values
                         elif element == "forecast":
                             # gather all forecast options, selected options and disabled options
-                            var_to_check_raw = menu_current_type["map_vars"][label_ii]
-                            if var_to_check_raw in self.read_instance.init_models:
-                                var_to_check = self.read_instance.init_models[
-                                    var_to_check_raw
-                                ]
-                            else:
-                                var_to_check = None
-
-                            if var_to_check_raw in menu_current_type["forecast"]:
-                                matched_var = var_to_check_raw
-                            elif var_to_check in menu_current_type["forecast"]:
-                                matched_var = var_to_check
-                            else:
+                            # only interpolated models have forecast options (gridded follows their forecast days)
+                            matched_var = self.get_forecast_data_label(
+                                menu_current_type["map_vars"][label_ii], "interpolated"
+                            )
+                            if matched_var not in menu_current_type["forecast"]:
                                 matched_var = None
 
                             # only proceed if have previously intialised
@@ -955,19 +947,11 @@ class PopUpWindow(QtWidgets.QWidget):
                         # update forecast days combobox back to previously available and selected values
                         elif element == "forecast_days":
                             # gather all forecast options, selected forecast options, forecast days, and selected forecast days
-                            var_to_check_raw = menu_current_type["map_vars"][label_ii]
-                            if var_to_check_raw in self.read_instance.init_models:
-                                var_to_check = self.read_instance.init_models[
-                                    var_to_check_raw
-                                ]
-                            else:
-                                var_to_check = None
-
-                            if var_to_check_raw in menu_current_type["forecast"]:
-                                matched_var = var_to_check_raw
-                            elif var_to_check in menu_current_type["forecast"]:
-                                matched_var = var_to_check
-                            else:
+                            # only interpolated models have forecast options (gridded follows their forecast days)
+                            matched_var = self.get_forecast_data_label(
+                                menu_current_type["map_vars"][label_ii], "interpolated"
+                            )
+                            if matched_var not in menu_current_type["forecast"]:
                                 matched_var = None
 
                             # only proceed if have previously intialised
@@ -2878,6 +2862,32 @@ class PopUpWindow(QtWidgets.QWidget):
 
         return None
 
+    def get_forecast_data_label(self, model_id, model_type):
+        """
+        Get the data label the forecast options of a model row are stored under.
+
+        Parameters
+        ----------
+        model_id : str
+            Model on the row (e.g. 'a59g-regional-000').
+        model_type : str
+            Interpolation mode, 'interpolated' or 'gridded'.
+
+        Returns
+        -------
+        str
+            Data label (the alias set in the .conf file when there is one).
+        """
+
+        model = "{}::{}".format(model_id, model_type)
+        if model in self.menu_current["models"]["forecast"]:
+            return model
+        if model in self.read_instance.init_models:
+            return self.read_instance.init_models[model]
+        if model_type == "gridded":
+            return "{} (gridded)".format(model_id)
+        return model_id
+
     def handle_model_checked(self, event):
         """
         Manages the visibility and population of forecast-related widgets when a model checkbox is toggled.
@@ -2900,14 +2910,7 @@ class PopUpWindow(QtWidgets.QWidget):
         # Get the model on the row, and the data label its forecast options are stored
         # under (the alias set in the .conf file when there is one)
         model_id = self.menu_current["models"]["map_vars"][label_ii]
-        model = "{}::{}".format(model_id, model_type)
-        if model not in self.menu_current["models"]["forecast"]:
-            if model in self.read_instance.init_models:
-                model = self.read_instance.init_models[model]
-            elif model_type == "gridded":
-                model = "{} (gridded)".format(model_id)
-            else:
-                model = model_id
+        model = self.get_forecast_data_label(model_id, model_type)
 
         # The forecast comboboxes are shared by both modes of the row, so they stay
         # visible while the model is still checked in the other mode
@@ -3007,10 +3010,11 @@ class PopUpWindow(QtWidgets.QWidget):
         # get widget line
         event_source = self.sender()
         label_ii = int(event_source.objectName().split("_")[1])
-        model = self.menu_current["models"]["map_vars"][label_ii]
-        if model not in self.menu_current["models"]["forecast"]:
-            if model in self.read_instance.init_models:
-                model = self.read_instance.init_models[model]
+        
+        # only interpolated models have forecast options (gridded follows their forecast days)
+        model = self.get_forecast_data_label(
+            self.menu_current["models"]["map_vars"][label_ii], "interpolated"
+        )
 
         # disconnect the combobox event while inside event so it is not infinitely called
         self.page_memory["models"]["forecast"][label_ii].model().dataChanged.disconnect(
@@ -3223,14 +3227,7 @@ class PopUpWindow(QtWidgets.QWidget):
                             selected_vars.append(model_id)
 
                             # get the data label the forecast options are stored under
-                            model = "{}::{}".format(model_id, element)
-                            if model not in self.menu_current[menu_type]["forecast"]:
-                                if model in self.read_instance.init_models:
-                                    model = self.read_instance.init_models[model]
-                                elif element == "gridded":
-                                    model = "{} (gridded)".format(model_id)
-                                else:
-                                    model = model_id
+                            model = self.get_forecast_data_label(model_id, element)
 
                             # model has no forecast options initialised, nothing to save
                             if model not in self.menu_current[menu_type]["forecast"]:

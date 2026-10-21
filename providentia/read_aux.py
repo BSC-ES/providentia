@@ -2335,15 +2335,18 @@ def get_map_lead_days(read_instance):
     as interpolated models (day 1 if no forecast option is loaded)
     """
 
-    # daily and combined forecasts use all active forecast days
-    if read_instance.daily_forecast or read_instance.combined_forecast:
-        return list(read_instance.active_forecast_days)
-
-    # N day forecast(s)
+    # use the forecast days selected for the loaded models (all if none selected),
+    # taken from the forecast indices set when reading
+    # base labels of the loaded models, without the forecast suffix
+    # (e.g. 'fc-day3', 'fc-daily1' and 'fc-daily' all give 'fc')
+    base_data_labels = {
+        re.sub(r"-(daily|combined|day)\d*$", "", data_label)
+        for data_label in read_instance.data_labels
+    }
     lead_days = set()
-    for data_label_raw in read_instance.data_labels_raw:
-        match = re.search(r"::interpolated-day(\d+)$", data_label_raw)
-        if match:
-            lead_days.add(int(match.group(1)))
+    for forecast_indices in read_instance.forecast_indices_per_data_label.values():
+        for base_data_label, indices in forecast_indices.items():
+            if base_data_label in base_data_labels:
+                lead_days.update(index + 1 for index in indices.values())
 
     return sorted(lead_days) if lead_days else [1]

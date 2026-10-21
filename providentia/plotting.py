@@ -538,6 +538,53 @@ class Plotting:
             r"::(interpolated|gridded)(-(daily|combined|day\d+))?$", "", data_label_raw
         )
 
+    def make_model_handles(self, plot_characteristics_legend, data_label):
+        """
+        Make the legend handles of a model data label, in its colour.
+
+        Parameters
+        ----------
+        plot_characteristics_legend : dict
+            Plot characteristics for relevant legend.
+        data_label : str
+            Model data label, also used for the legend text.
+
+        Returns
+        -------
+        square_handle : Line2D
+            Empty square with coloured border, for gridded models.
+        dot_handle : Line2D
+            Filled dot, for interpolated models.
+        """
+
+        colour = self.read_instance.plotting_params[data_label]["colour"]
+        display_label = get_display_label(
+            self.read_instance, data_label.replace(" (gridded)", "")
+        )
+
+        # empty square with coloured border, for gridded models
+        square_handle = Line2D(
+            [0], [0],
+            marker="s",
+            linestyle="none",
+            markerfacecolor="none",
+            markeredgecolor=colour,
+            markeredgewidth=1.2,
+            markersize=plot_characteristics_legend["handles"]["markersize"] * 1.15,
+            label=display_label,
+        )
+        # filled dot, for interpolated models
+        dot_handle = Line2D(
+            [0], [0],
+            marker=plot_characteristics_legend["handles"]["marker"],
+            color=plot_characteristics_legend["handles"]["color"],
+            markerfacecolor=colour,
+            markersize=plot_characteristics_legend["handles"]["markersize"],
+            label=display_label,
+        )
+
+        return square_handle, dot_handle
+
     def make_legend_handles(
         self, plot_characteristics_legend, data_labels=None, set_obs=True
     ):
@@ -626,49 +673,36 @@ class Plotting:
                 and self.get_model_id(label_raw) == model_id
             ]
 
-            # pair only if there is a single interpolated version
-            # (with several forecast days, e.g. -day1 and -day2, gridded is shown on its own)
-            paired = (len(gridded_labels) == 1) and (len(non_gridded_labels) == 1)
+            # the gridded model is read for the same forecast days as its interpolated
+            # versions, so every interpolated version (e.g. -day2 and -day4) is paired with it
+            paired = (len(gridded_labels) == 1) and (len(non_gridded_labels) > 0)
             if paired:
-                processed_labels.update({gridded_labels[0], non_gridded_labels[0]})
-
+                processed_labels.update(gridded_labels + non_gridded_labels)
             else:
                 processed_labels.add(data_label)
-            colour = self.read_instance.plotting_params[data_label]["colour"]
 
-            # empty square with coloured border, for gridded models
-            square_handle = Line2D(
-                [0], [0],
-                marker="s",
-                linestyle="none",
-                markerfacecolor="none",
-                markeredgecolor=colour,
-                markeredgewidth=1.2,
-                markersize=plot_characteristics_legend["handles"]["markersize"] * 1.15,
-                label=get_display_label(self.read_instance, data_label.replace(" (gridded)", "")),
-            )
-            # filled dot, for interpolated models
-            dot_handle = Line2D(
-                [0], [0],
-                marker=plot_characteristics_legend["handles"]["marker"],
-                color=plot_characteristics_legend["handles"]["color"],
-                markerfacecolor=colour,
-                markersize=plot_characteristics_legend["handles"]["markersize"],
-                label=get_display_label(self.read_instance, data_label.replace(" (gridded)", "")),
-            )
-
-            # gridded and interpolated show combined square+dot entry, with interpolated label
-            # (including forecast suffix)
+            # gridded and interpolated show combined square+dot entry per interpolated
+            # label (including forecast suffix), in that label's colour
             if paired:
-                legend_elements.append((square_handle, dot_handle))
-                legend_labels.append(non_gridded_labels[0])
+                for label in non_gridded_labels:
+                    square_handle, dot_handle = self.make_model_handles(
+                        plot_characteristics_legend, label
+                    )
+                    legend_elements.append((square_handle, dot_handle))
+                    legend_labels.append(label)
             # only gridded show square only
             # the ' (gridded)' suffix is dropped from the legend text (an alias has none)
             elif is_gridded:
+                square_handle, _ = self.make_model_handles(
+                    plot_characteristics_legend, data_label
+                )
                 legend_elements.append(square_handle)
                 legend_labels.append(data_label.replace(" (gridded)", ""))
             # only interpolated loaded show dot only
             else:
+                _, dot_handle = self.make_model_handles(
+                    plot_characteristics_legend, data_label
+                )
                 legend_elements.append(dot_handle)
                 legend_labels.append(data_label)
 

@@ -5,7 +5,6 @@ import functools
 import inspect
 import datetime
 import math
-import re
 import sys
 import yaml
 from weakref import WeakKeyDictionary
@@ -74,7 +73,7 @@ from .plot_formatting import (
     draw_map_gridlines,
 )
 from .plot_options import annotation, linear_regression, log_axes, smooth, threshold
-from .read_aux import get_map_lead_days, get_possible_resampling_resolutions, get_frequency_code
+from .read_aux import get_possible_resampling_resolutions, get_frequency_code
 from .statistics import (
     get_z_statistic_comboboxes,
     generate_colourbar,
@@ -1195,25 +1194,6 @@ class Canvas(FigureCanvas):
             self.read_instance.ch_extent.setCheckState(QtCore.Qt.Unchecked)
 
         self.read_instance.block_MPL_canvas_updates = False
-
-    def get_map_lead_days(self):
-        """
-        Get forecast lead days loaded, so gridded model uses the same forecast days
-        as interpolated models (day 1 if no forecast option is loaded)
-        """
-
-        # daily and combined forecasts use all active forecast days
-        if self.read_instance.daily_forecast or self.read_instance.combined_forecast:
-            return list(self.read_instance.active_forecast_days)
-
-        # N day forecast(s)
-        lead_days = set()
-        for data_label_raw in self.read_instance.data_labels_raw:
-            match = re.search(r"::interpolated-day(\d+)$", data_label_raw)
-            if match:
-                lead_days.add(int(match.group(1)))
-
-        return sorted(lead_days) if lead_days else [1]
 
     def update_map(self):
         """

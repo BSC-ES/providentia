@@ -1284,7 +1284,16 @@ class DataReader:
                     alias = "{}-combined".format(alias.split("-combined")[0])
                 if model not in mods_printed:
                     str_model = f" - {model}"
-                    if self.read_instance.alias_flag:
+                    # gridded models are read for the forecast days of the interpolated models
+                    if model.endswith("::gridded"):
+                        lead_days = get_map_lead_days(self.read_instance)
+                        lead_days = [str(day) for day in lead_days]
+                        if len(lead_days) > 1:
+                            str_lead_days = "s {} and {}".format(", ".join(lead_days[:-1]), lead_days[-1])
+                        else:
+                            str_lead_days = f" {lead_days[0]}"
+                        str_model += f" (with data from lead day{str_lead_days})"
+                    elif self.read_instance.alias_flag:
                         str_model += f" ({alias})"
                     self.read_instance.logger.info(str_model)
                     mods_printed.append(model)
