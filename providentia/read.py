@@ -37,6 +37,7 @@ from .read_aux import (
     get_default_qa,
     get_forecast_run_mask,
     get_frequency_code,
+    get_map_lead_days,
     get_yearmonths_to_read,
     init_shared_vars_read_netcdf_data,
     model_file_overlaps_period,
@@ -1283,11 +1284,38 @@ class DataReader:
                     alias = "{}-combined".format(alias.split("-combined")[0])
                 if model not in mods_printed:
                     str_model = f" - {model}"
-                    if self.read_instance.alias_flag:
+                    # gridded models are read for the forecast days of the interpolated models
+                    if model.endswith("::gridded"):
+                        lead_days = get_map_lead_days(self.read_instance)
+                        lead_days = [str(day) for day in lead_days]
+                        if len(lead_days) > 1:
+                            str_lead_days = "s {} and {}".format(", ".join(lead_days[:-1]), lead_days[-1])
+                        else:
+                            str_lead_days = f" {lead_days[0]}"
+                        str_model += f" (with data from lead day{str_lead_days})"
+                    elif self.read_instance.alias_flag:
                         str_model += f" ({alias})"
                     self.read_instance.logger.info(str_model)
                     mods_printed.append(model)
 
+        # get data arrays for gridded model if any
+        species = np.unique([networkspeci.split('|')[1]
+                            for networkspeci in self.read_instance.networkspecies])
+        self.read_instance.gridded_var_data = {}
+        for speci in species:      
+            result = self.read_gridded_data(speci)
+
+            if result is None:
+                continue
+
+            data, lat, lon = result
+
+            self.read_instance.gridded_var_data[speci] = {
+                "data": data,
+                "lat": lat,
+                "lon": lon,
+            }
+            
     def read_basic_metadata(self):
         """
         Extracts unique basic station metadata and handles spatial colocation across multiple networkspecies (if set).
@@ -3234,7 +3262,7 @@ class DataReader:
         
         return read_data, lat, lon
 
-    def read_gridded_data(self, speci, date=None, hour=None, zstat=None, date_range=None, lead_days=None):
+    def read_gridded_data(self, speci):
         """
         Read model gridded data
 
@@ -3242,17 +3270,6 @@ class DataReader:
         ----------
         speci : str
             Current speci (e.g. sconco3)
-        date : str, optional
-            Date, by default None
-        hour : int, optional
-            Hour, by default None
-        stat : str, optional
-            Statistic (only Mean accepted), by default None
-        date_range : tuple, optional
-            Start (inclusive) and end (exclusive) datetimes of period used to calculate statistic,
-            by default None (all loaded period)
-        lead_days : list of int, optional
-            Forecast lead days used from forecast runs (YYYYMMDDHH files), by default None ([1])
 
         Returns
         -------
@@ -3265,6 +3282,9 @@ class DataReader:
         str
             Gridded model variable units
         """
+
+        # get lead days
+        lead_days = get_map_lead_days(self.read_instance)
 
         # get gridded model loaded
         selected_gridded_models = [
@@ -3305,14 +3325,11 @@ class DataReader:
         except KeyError:
             return None
 
-        # get start (inclusive) and end (exclusive) of period, all loaded period by default
-        if date_range is not None:
-            start, end = pd.Timestamp(date_range[0]), pd.Timestamp(date_range[1])
-        else:
-            start = self.read_instance.time_array[0]
-            end = self.read_instance.time_array[-1] + pd.tseries.frequencies.to_offset(
-                self.read_instance.active_frequency_code
-            )
+        # get start (inclusive) and end (exclusive) of all loaded period at first
+        start = self.read_instance.time_array[0]
+        end = self.read_instance.time_array[-1] + pd.tseries.frequencies.to_offset(
+            self.read_instance.active_frequency_code
+        )
         
         # keep only files that can have data inside the period
         timesteps_to_read_intersect = [
@@ -3346,98 +3363,51 @@ class DataReader:
         standard_parameter_speci = get_standard_parameters_by_speci(
             speci, self.read_instance.ghost_version
         )
-        
-        if date and hour:
-            # find the file covering the requested date (monthly or daily/hourly files)
-            matching = [ts for ts in timesteps_to_read_intersect if date.startswith(ts[:6])
-                        and (len(ts) == 6 or ts[:8] == date)]
-            if not matching:
-                return None
 
-            filepath = file_root.format(date=matching[0])
+        data = {}
+        lat, lon = None, None
+        for timestep in sorted(timesteps_to_read_intersect):
+            filepath = file_root.format(date=timestep)
             if not os.path.exists(filepath):
-                return None
-            
+                continue
+
             with Dataset(filepath) as ds:
-                t = date2index(datetime.datetime.strptime(date, "%Y%m%d") + datetime.timedelta(hours=hour), 
-                               ds["time"], select="exact")
-                data, lat, lon = self.read_model_dataset(ds, speci, obs_units, standard_parameter_speci)
-                data = data[t]
-        
-        elif zstat:
-            if zstat not in ['Mean']:
-                msg = f"Statistic '{zstat}' is not supported for gridded data. Only 'Mean' is supported."
-                show_message(self.read_instance, msg)
-                return None
-
-            sum_data = None
-            count_data = None
-
-            for timestep in sorted(timesteps_to_read_intersect):
-                filepath = file_root.format(date=timestep)
-                if not os.path.exists(filepath):
-                    continue
-
-                with Dataset(filepath) as ds:
-                    # get timesteps of file inside period
-                    file_timestamps = time_var_to_asi8(ds["time"])
-                    in_period = (file_timestamps >= start.value) & (file_timestamps < end.value)
-                    
-                    # forecast runs: keep only timesteps of wanted lead days
-                    if len(timestep) == 10:
-                        in_period &= get_forecast_run_mask(
-                            file_timestamps,
-                            pd.to_datetime(timestep, format="%Y%m%d%H"),
-                            lead_days,
-                        )
-
-                    # skip file if there are no timesteps to use
-                    if not in_period.any():
-                        continue
-
-                    # first file
-                    if sum_data is None and count_data is None:
-                        # read variable data and get latitudes and longitudes from first file
-                        timestep_data, lat, lon = self.read_model_dataset(ds, speci, obs_units, standard_parameter_speci)
-
-                        # initialise dimensions of sum_data and count_data using the dimensions of first file
-                        sum_data = np.zeros(
-                            timestep_data.shape[1:],
-                            dtype=np.float64
-                        )
-                        count_data = np.zeros(
-                            timestep_data.shape[1:],
-                            dtype=np.int64
-                        )
-                    else:
-                        # read variable data, but not coordinates (already read)
-                        timestep_data, _, _ = self.read_model_dataset(ds, speci, obs_units, standard_parameter_speci, 
-                                                                      first_file=False)
-
-                    # keep only timesteps inside selected period
-                    timestep_data = timestep_data[in_period]
-
-                    # ignore NaNs and append
-                    sum_data += np.nansum(timestep_data, axis=0)
-                    count_data += np.sum(
-                        ~np.isnan(timestep_data),
-                        axis=0
+                # get timesteps of file inside period
+                file_timestamps = time_var_to_asi8(ds["time"])
+                in_period = (file_timestamps >= start.value) & (file_timestamps < end.value)
+                
+                # forecast runs: keep only timesteps of wanted lead days
+                if len(timestep) == 10:
+                    in_period &= get_forecast_run_mask(
+                        file_timestamps,
+                        pd.to_datetime(timestep, format="%Y%m%d%H"),
+                        lead_days,
                     )
 
-            # do not calculate mean if no data files were found
-            if sum_data is None:
-                msg = "No model data files found for the specified date range: "
-                msg += f"{start:%Y-%m-%d %H:%M} to {end:%Y-%m-%d %H:%M}."
-                show_message(self.read_instance, msg)
-                return None
+                # skip file if there are no timesteps to use
+                if not in_period.any():
+                    continue
 
-            # calculate mean
-            data = sum_data / count_data
+                # first file
+                timestep_data, file_lat, file_lon = self.read_model_dataset(
+                    ds,
+                    speci,
+                    obs_units,
+                    standard_parameter_speci,
+                    first_file=False if lat is not None else True
+                )
 
-            # set nan in grid cells where all values are nan
-            data[count_data == 0] = np.nan
+                if lat is None:
+                    lat, lon = file_lat, file_lon
 
-        else:
-            raise ValueError("Either 'date' and 'hour' or 'stat' must be provided.")
+                # keep only timesteps inside selected period
+                selected_timestamps = file_timestamps[in_period]
+                timestep_data = timestep_data[in_period]
+
+                for timestamp, values in zip(selected_timestamps, timestep_data):
+                    data[pd.Timestamp(timestamp, unit="ns")] = values
+
+        if not data:
+            return None
 
         return data, lat, lon

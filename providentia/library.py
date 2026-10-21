@@ -41,7 +41,6 @@ from .plot_formatting import (
 from .read import DataReader
 from .read_aux import (
     generate_file_trees,
-    get_map_lead_days,
     get_possible_resampling_resolutions,
     get_periodic_nonrelevant_temporal_resolutions,
     get_periodic_relevant_temporal_resolutions,
@@ -53,6 +52,7 @@ from .statistics import (
     generate_colourbar,
     generate_colourbar_detail,
     get_fairmode_data,
+    get_gridded_statistic,
     get_selected_station_count,
     get_selected_station_data,
     get_z_statistic_info,
@@ -1091,15 +1091,8 @@ class Providentia:
             elif z_statistic_sign == "bias":
                 map_title = "{}".format(labelb)
 
-            # if there is grid data, read it
-            results = self.datareader.read_gridded_data(
-                speci, zstat=zstat, date_range=None,
-                lead_days=get_map_lead_days(self))
-
-            if results:
-                grid_data, grid_lat, grid_lon = results
-            else:
-                grid_data, grid_lat, grid_lon = None, None, None
+            # get gridded statistic for all loaded period (if there is grid data)
+            grid_data, grid_lat, grid_lon = get_gridded_statistic(self, speci, zstat)
 
             func(
                 relevant_ax,

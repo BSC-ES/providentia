@@ -179,23 +179,9 @@ It is also possible that the default branch is not set to be the master, you can
 
 ## Run tests
 
-To run all the pipeline tests in your local machine and read the data from the folder `tests/data`, first, you will need to change your `get_machine()` function in `auxiliar.py` to this:
+The tests read the data from the folder `tests/data`, which is the path used by the `github` machine. `tests/conftest.py` sets the environment variable `GITHUB_ACTIONS=true` whenever pytest runs, so `get_machine()` returns `github` on any machine. Normal Providentia runs are not affected, since this file is only loaded by pytest.
 
-```python
-def get_machine():
-    """
-    Get machine where code is running
-
-    Returns
-    -------
-    str
-        Machine
-    """
-
-    return "github"
-```
-
-Next, you will need to run:
+To run all the pipeline tests in your local machine, run:
 
 ```bash
 conda activate providentia-env_v[version]

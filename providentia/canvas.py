@@ -5,7 +5,6 @@ import functools
 import inspect
 import datetime
 import math
-import re
 import sys
 import yaml
 from weakref import WeakKeyDictionary
@@ -74,8 +73,9 @@ from .plot_formatting import (
     draw_map_gridlines,
 )
 from .plot_options import annotation, linear_regression, log_axes, smooth, threshold
-from .read_aux import get_map_lead_days, get_possible_resampling_resolutions, get_frequency_code
+from .read_aux import get_possible_resampling_resolutions, get_frequency_code
 from .statistics import (
+    get_gridded_statistic,
     get_z_statistic_comboboxes,
     generate_colourbar,
     get_selected_station_data,
@@ -1196,25 +1196,6 @@ class Canvas(FigureCanvas):
 
         self.read_instance.block_MPL_canvas_updates = False
 
-    def get_map_lead_days(self):
-        """
-        Get forecast lead days loaded, so gridded model uses the same forecast days
-        as interpolated models (day 1 if no forecast option is loaded)
-        """
-
-        # daily and combined forecasts use all active forecast days
-        if self.read_instance.daily_forecast or self.read_instance.combined_forecast:
-            return list(self.read_instance.active_forecast_days)
-
-        # N day forecast(s)
-        lead_days = set()
-        for data_label_raw in self.read_instance.data_labels_raw:
-            match = re.search(r"::interpolated-day(\d+)$", data_label_raw)
-            if match:
-                lead_days.add(int(match.group(1)))
-
-        return sorted(lead_days) if lead_days else [1]
-
     def update_map(self):
         """
         Function that updates plotted z statistic on map, with colourbar
@@ -1256,21 +1237,21 @@ class Canvas(FigureCanvas):
         else:
             zstat = get_z_statistic_comboboxes(base_zstat, bias=True)
 
-        # restrict map statistic (stations and grid) to period selected under the map colourbar
-        # (if all loaded period is selected, use all data)
-        date_range = None
-        if self.map_date_range_selection != self.map_date_range_full:
-            date_range = self.map_date_range_selection
+        # Use selected period, or full period if all loaded data is selected
+        date_range = (
+            self.map_date_range_full
+            if self.map_date_range_selection == self.map_date_range_full
+            else self.map_date_range_selection
+        )
 
-        # if there is grid data, read it
-        results = self.read_instance.datareader.read_gridded_data(
-            speci, zstat=zstat, date_range=date_range,
-            lead_days=get_map_lead_days(self.read_instance))
+        # TODO: Create date and hour selectors
+        date = None
+        hour = None
 
-        if results:
-            grid_data, grid_lat, grid_lon = results
-        else:
-            grid_data, grid_lat, grid_lon = None, None, None
+        # get gridded statistic for selected period (if there is grid data)
+        grid_stat, grid_lat, grid_lon = get_gridded_statistic(
+            self.read_instance, speci, zstat, date_range=date_range, date=date, hour=hour
+        )
 
         # ensure label that have in memory still exists
 
@@ -1283,7 +1264,7 @@ class Canvas(FigureCanvas):
             zstat=zstat,
             labela=self.map_z1.currentText(),
             labelb=self.map_z2.currentText(),
-            var=grid_data,
+            var=grid_stat,
             lat=grid_lat,
             lon=grid_lon,
             date_range=date_range

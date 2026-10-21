@@ -26,6 +26,7 @@ from .read_aux import (
     get_periodic_nonrelevant_temporal_resolutions,
     get_periodic_relevant_temporal_resolutions,
 )
+from .warnings_prv import show_message
 
 
 PROVIDENTIA_ROOT = "/".join(CURRENT_PATH.split("/")[:-1])
@@ -547,6 +548,93 @@ def get_date_range_mask(read_instance, time_index, date_range):
     offset = pd.tseries.frequencies.to_offset(get_frequency_code(resolution))
 
     return np.asarray((time_index < end) & ((time_index + offset) > start))
+
+
+def get_gridded_statistic(read_instance, speci, zstat, date_range=None, date=None, hour=None):
+    """
+    Get gridded model data to plot on map from gridded data read in read_setup,
+    either for a specific timestep (date and hour) or a statistic over a period
+
+    Parameters
+    ----------
+    read_instance : object
+        Instance with gridded_var_data (dashboard, report or library)
+    speci : str
+        Current speci (e.g. sconco3)
+    zstat : str
+        Statistic (only Mean accepted)
+    date_range : tuple, optional
+        Start (inclusive) and end (exclusive) datetimes of period used to calculate statistic,
+        by default None (all loaded period)
+    date : str, optional
+        Date, by default None
+    hour : int, optional
+        Hour, by default None
+
+    Returns
+    -------
+    grid_stat : np.ndarray or None
+        Gridded data for the timestep or statistic over the period
+    grid_lat : np.ndarray or None
+        Gridded latitudes
+    grid_lon : np.ndarray or None
+        Gridded longitudes
+    """
+
+    grid_stat, grid_lat, grid_lon = None, None, None
+
+    # Get read gridded data for this species
+    gridded_data = read_instance.gridded_var_data.get(speci)
+    if gridded_data is None:
+        return grid_stat, grid_lat, grid_lon
+
+    grid_var, grid_lat, grid_lon = (
+        gridded_data[key] for key in ("data", "lat", "lon")
+    )
+
+    # get start (inclusive) and end (exclusive) of period, all loaded period by default
+    if date_range is not None:
+        start, end = pd.Timestamp(date_range[0]), pd.Timestamp(date_range[1])
+    else:
+        start = read_instance.time_array[0]
+        end = read_instance.time_array[-1] + pd.tseries.frequencies.to_offset(
+            read_instance.active_frequency_code
+        )
+
+    # read specific timestep
+    if date and hour is not None:
+        target_timestamp = pd.Timestamp(date) + pd.Timedelta(hours=int(hour))
+
+        selected_data = [
+            values
+            for timestamp, values in grid_var.items()
+            if timestamp == target_timestamp
+        ]
+
+        if selected_data:
+            grid_stat = selected_data[0]
+
+    # calculate statistic
+    elif zstat:
+        if zstat not in ['Mean']:
+            msg = f"Statistic '{zstat}' is not supported for gridded data. Only 'Mean' is supported."
+            show_message(read_instance, msg)
+        else:
+            # Select the requested period
+            selected_data = [
+                values
+                for timestamp, values in grid_var.items()
+                if start <= timestamp < end
+            ]
+
+            if selected_data:
+                # Calculate the mean at each grid cell
+                grid_stat = np.nanmean(
+                    np.stack(selected_data, axis=0),
+                    axis=0,
+                )
+
+    return grid_stat, grid_lat, grid_lon
 
 
 def merge_forecast_days(
