@@ -75,6 +75,7 @@ from .plot_formatting import (
 from .plot_options import annotation, linear_regression, log_axes, smooth, threshold
 from .read_aux import get_possible_resampling_resolutions, get_frequency_code
 from .statistics import (
+    get_gridded_statistic,
     get_z_statistic_comboboxes,
     generate_colourbar,
     get_selected_station_data,
@@ -1243,52 +1244,14 @@ class Canvas(FigureCanvas):
             else self.map_date_range_selection
         )
 
-        start, end = pd.Timestamp(date_range[0]), pd.Timestamp(date_range[1])
-
-        grid_stat, grid_lat, grid_lon = None, None, None
-
         # TODO: Create date and hour selectors
         date = None
         hour = None
-        
-        # Get read gridded data for this species
-        gridded_data = self.read_instance.gridded_var_data.get(speci)
-        if gridded_data is not None:
-            grid_var, grid_lat, grid_lon = (
-                gridded_data[key] for key in ("data", "lat", "lon")
-            )
-            # read specific timestep
-            if date and hour is not None:
-                target_timestamp = pd.Timestamp(date) + pd.Timedelta(hours=int(hour))
 
-                selected_data = [
-                    values
-                    for timestamp, values in grid_var.items()
-                    if timestamp == target_timestamp
-                ]
-
-                if selected_data:
-                    grid_stat = selected_data[0]
-
-            # calculate statistic
-            elif zstat:
-                if zstat not in ['Mean']:
-                    msg = f"Statistic '{zstat}' is not supported for gridded data. Only 'Mean' is supported."
-                    show_message(self.read_instance, msg)
-                else:
-                    # Select the requested period
-                    selected_data = [
-                        values
-                        for timestamp, values in grid_var.items()
-                        if start <= timestamp < end
-                    ]
-
-                    if selected_data:
-                        # Calculate the mean at each grid cell
-                        grid_stat = np.nanmean(
-                            np.stack(selected_data, axis=0),
-                            axis=0,
-                        )
+        # get gridded statistic for selected period (if there is grid data)
+        grid_stat, grid_lat, grid_lon = get_gridded_statistic(
+            self.read_instance, speci, zstat, date_range=date_range, date=date, hour=hour
+        )
 
         # ensure label that have in memory still exists
 
