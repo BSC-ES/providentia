@@ -1353,7 +1353,8 @@ class Plotting:
                 )
         
         # plot model gridded data
-        if var is not None and lon is not None and lat is not None:
+        plot_grid = var is not None and lon is not None and lat is not None
+        if plot_grid:
             grid_mesh = relevant_axis.pcolormesh(
                 lon,
                 lat,
@@ -1389,7 +1390,16 @@ class Plotting:
             relevant_axis.autoscale_view()
 
         # if not only model gridded data is loaded
-        if labela or labelb: 
+        if labela or labelb:
+            # the stations_over_grid style (an edge, by default) only serves to separate
+            # the stations from the gridded field underneath, so apply it only then.
+            # copied, as plot_characteristics is shared between every map a report draws
+            stations_kwargs = copy.deepcopy(plot_characteristics["plot"]["stations"])
+            if plot_grid:
+                stations_kwargs.update(
+                    plot_characteristics["plot"].get("stations_over_grid", {})
+                )
+
             # plot new station points on map - coloured by currently active z statisitic
             self.stations_scatter = relevant_axis.scatter(
                 self.read_instance.station_longitudes[networkspeci][
@@ -1400,9 +1410,9 @@ class Plotting:
                 ],
                 c=z_statistic,
                 transform=self.canvas_instance.datacrs,
-                **plot_characteristics["plot"]["stations"],
+                **stations_kwargs,
             )
-            plot_characteristics["plot"]["s"] = original_markersize
+            plot_characteristics["plot"]["stations"]["s"] = original_markersize
 
             # track plot elements
             if self.read_instance.mode not in ["report"]:
