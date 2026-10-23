@@ -2736,6 +2736,47 @@ class Dashboard(QtWidgets.QWidget):
             if changed_plot_type in canvas_instance.plot_axes:
                 disable_axis_navigation(canvas_instance.plot_axes[changed_plot_type])
 
+    def get_forecast_selections(self):
+        """
+        Get the forecast options and days selected in the models menu for each selected
+        interpolated model with forecast data (gridded models follow their interpolated ones).
+
+        Returns
+        -------
+        forecast_selections : dict
+            Selected forecast options and days per model, e.g. {'a59g-regional-000': (('day',), ('2', '4'))},
+            with days set to 'all' when no days or all days are selected
+        """
+
+        forecast_selections = {}
+        for mod in self.models_menu["models"]["keep_selected"]["interpolated"]:
+            # get the data label the forecast options of the model are stored under
+            # (the alias set in the .conf file when there is one)
+            model = "{}::interpolated".format(mod)
+            if model not in self.models_menu["models"]["forecast"]:
+                model = self.init_models[model] if model in self.init_models else mod
+            if model not in self.models_menu["models"]["forecast"]:
+                continue
+
+            # skip models without forecast data, as forecast options do not apply to them
+            available_forecast_days = self.models_menu["models"]["forecast_days"][model][0]
+            if len(available_forecast_days) == 0:
+                continue
+
+            # get selected forecast options and days, taking all days if none or all are selected
+            selected_forecast_options = tuple(sorted(self.models_menu["models"]["forecast"][model][1]))
+            selected_forecast_days = tuple(sorted(
+                (day.split("day")[-1].strip()
+                 for day in self.models_menu["models"]["forecast_days"][model][1]),
+                key=int,
+            ))
+            if len(selected_forecast_days) in [0, len(available_forecast_days)]:
+                selected_forecast_days = "all"
+
+            forecast_selections[model] = (selected_forecast_options, selected_forecast_days)
+
+        return forecast_selections
+
     def handle_data_selection_update(self):
         """Execute the data reading process and synchronise the interface and canvas based on current selections."""
 
@@ -2762,6 +2803,27 @@ class Dashboard(QtWidgets.QWidget):
         # if have no data to read, then do not read any data
         if self.no_data_to_read:
             return
+
+        # forecast options are applied to all models, so do not read if models with
+        # forecast data have different forecast options or days selected
+        if not self.from_conf:
+            forecast_selections = self.get_forecast_selections()
+            if len(set(forecast_selections.values())) > 1:
+                selections_str = ", ".join(
+                    "{}: {}".format(
+                        model,
+                        "none" if not options else "{} ({})".format(
+                            "/".join(options), "all days" if days == "all"
+                            else "day{} {}".format("s" if len(days) > 1 else "", ", ".join(days))
+                        ),
+                    )
+                    for model, (options, days) in forecast_selections.items()
+                )
+                msg = ("Models with forecast data must have the same forecast option and days "
+                       f"selected, as they are applied to all models ({selections_str}). "
+                       "Data won't be read.")
+                show_message(self, msg)
+                return
 
         # update mouse cursor to a waiting cursor
         self.cursor_function = set_cursor(

@@ -950,6 +950,8 @@ class ProvConfiguration:
         domains = []
         ensembles = []
         forecasts = []
+        # forecast options set in the model field per model, for interpolated and gridded versions
+        model_forecasts = {}
 
         # iterate through each model string
         for mod_ii, split_model in enumerate(split_models):
@@ -1088,6 +1090,11 @@ class ProvConfiguration:
                                         mod_id_alt, d_alt, e_alt
                                     )
 
+                                # save forecast option set in model field for this model and type
+                                model_forecasts.setdefault(
+                                    final_model, {"interpolated": set(), "gridded": set()}
+                                )[model_types[mod_ii] or "interpolated"].add(mod_fct)
+
                                 # re-attach the interpolation mode tag taken off above
                                 if model_types[mod_ii]:
                                     final_model = "{}::{}".format(
@@ -1107,6 +1114,34 @@ class ProvConfiguration:
                                     models.append(final_model)
                                     if alias is not None:
                                         aliases.append(alias)
+
+        # throw error if a gridded model does not have the same forecast option as its
+        # interpolated versions, as gridded models are read for their forecast days,
+        # and a gridded model without interpolated versions cannot have a forecast option
+        for model, model_forecast in model_forecasts.items():
+            if not model_forecast["gridded"]:
+                continue
+            all_forecasts = model_forecast["gridded"] | model_forecast["interpolated"]
+            if (not model_forecast["interpolated"]) and (model_forecast["gridded"] != {None}):
+                error = f"Error: Forecast options cannot be set on gridded model {model}::gridded "
+                error += "without loading it interpolated with the same forecast option."
+                self.read_instance.logger.error(error)
+                sys.exit(1)
+            elif len(all_forecasts) > 1:
+                options = ", ".join(sorted(fct if fct else "none" for fct in all_forecasts))
+                error = f"Error: Model {model} is loaded gridded with different forecast options ({options}). "
+                error += "Its gridded and interpolated versions must have the same forecast option, or none."
+                self.read_instance.logger.error(error)
+                sys.exit(1)
+
+        # save forecast options set in the model field per interpolated model, to check when
+        # reading that models with forecast data do not have different ones, as they are applied
+        # to all models (it is only known when reading which models have forecast data)
+        self.read_instance.forecast_per_model = {
+            model: model_forecast["interpolated"]
+            for model, model_forecast in model_forecasts.items()
+            if model_forecast["interpolated"]
+        }
 
         # set models dictionary mapping models to aliases
         # it is mandatory to have the same number of models and alises, otherwise alises are dropped

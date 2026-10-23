@@ -2907,6 +2907,23 @@ class PopUpWindow(QtWidgets.QWidget):
         model_type = object_name[1]
         label_ii = int(object_name[-1])
 
+        # only one gridded model can be loaded, so refuse a second one on click
+        # (signals blocked so unchecking does not run this handler again)
+        if (model_type == "gridded") and (event == QtCore.Qt.Checked):
+            checked_gridded = [
+                self.menu_current["models"]["map_vars"][checkbox_ii]
+                for checkbox_ii, checkbox in enumerate(self.page_memory["models"]["gridded"])
+                if (checkbox_ii != label_ii) and checkbox.isChecked()
+            ]
+            if checked_gridded:
+                event_source.blockSignals(True)
+                event_source.setCheckState(QtCore.Qt.Unchecked)
+                event_source.blockSignals(False)
+                msg = ("Only one gridded model can be loaded. "
+                       f"Uncheck {checked_gridded[0]} first.")
+                show_message(self.read_instance, msg)
+                return
+
         # Get the model on the row, and the data label its forecast options are stored
         # under (the alias set in the .conf file when there is one)
         model_id = self.menu_current["models"]["map_vars"][label_ii]

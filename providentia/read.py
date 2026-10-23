@@ -37,7 +37,9 @@ from .read_aux import (
     get_default_qa,
     get_forecast_run_mask,
     get_frequency_code,
+    get_gridded_model_base_data_labels,
     get_map_lead_days,
+    get_model_id,
     get_yearmonths_to_read,
     init_shared_vars_read_netcdf_data,
     model_file_overlaps_period,
@@ -1287,6 +1289,19 @@ class DataReader:
                     # gridded models are read for the forecast days of the interpolated models
                     if model.endswith("::gridded"):
                         lead_days = get_map_lead_days(self.read_instance)
+                        # forecast options are taken from the interpolated version of the model,
+                        # without it the grid uses lead day 1
+                        if (len(self.read_instance.forecast) > 0) and (
+                            not get_gridded_model_base_data_labels(self.read_instance)
+                        ):
+                            msg = (
+                                f"Forecast option {', '.join(self.read_instance.forecast)} is only "
+                                f"applied to interpolated models. {model} is not loaded interpolated, "
+                                "so its grid is drawn with lead day 1."
+                            )
+                            show_message(
+                                self.read_instance, msg, from_conf=self.read_instance.from_conf
+                            )
                         lead_days = [str(day) for day in lead_days]
                         if len(lead_days) > 1:
                             str_lead_days = "s {} and {}".format(", ".join(lead_days[:-1]), lead_days[-1])
@@ -1308,10 +1323,12 @@ class DataReader:
             if result is None:
                 continue
 
-            data, lat, lon = result
+            data, time, lead, lat, lon = result
 
             self.read_instance.gridded_var_data[speci] = {
                 "data": data,
+                "time": time,
+                "lead": lead,
                 "lat": lat,
                 "lon": lon,
             }
@@ -1897,6 +1914,36 @@ class DataReader:
                 self.read_instance.models_menu["models"]["forecast_days"][
                     data_label
                 ][1] = []
+
+        # forecast options set in the model field are applied to all models, so throw error if
+        # models with forecast data have different ones (models without forecast data are skipped),
+        # only when reading from a configuration file, as dashboard selections are checked when reading
+        forecast_per_model = getattr(self.read_instance, "forecast_per_model", {})
+        if (self.read_instance.mode in ["report", "library"] or self.read_instance.from_conf) and any(
+            fct is not None for fcts in forecast_per_model.values() for fct in fcts
+        ):
+            forecasts_per_forecast_model = {}
+            for networkspeci in networkspecies:
+                for data_label, data_label_raw in zip(data_labels, data_labels_raw):
+                    if (data_label == self.read_instance.observations_data_label) or (
+                        data_label_raw.endswith("::gridded")
+                    ):
+                        continue
+                    if self.read_instance.forecast_days_per_data_label[networkspeci].get(data_label, 0) == 0:
+                        continue
+                    forecasts_per_forecast_model[get_model_id(data_label_raw)] = frozenset(
+                        forecast_per_model.get(get_model_id(data_label_raw), {None})
+                    )
+            if len(set(forecasts_per_forecast_model.values())) > 1:
+                options = ", ".join(
+                    "{}: {}".format(model, ", ".join(sorted(fct if fct else "none" for fct in fcts)))
+                    for model, fcts in forecasts_per_forecast_model.items()
+                )
+                error = f"Error: Models with forecast data have different forecast options in the model name ({options}). "
+                error += "Forecast options are applied to all models, so they must be the same for all models with "
+                error += "forecast data, or be set in the 'forecast' field."
+                self.read_instance.logger.error(error)
+                sys.exit(1)
 
         # iterate over each network species
         for networkspeci in networkspecies:
@@ -3172,7 +3219,7 @@ class DataReader:
 
         return True
 
-    def read_model_dataset(self, ds, speci, obs_units, standard_parameter_speci, first_file=True):
+    def read_model_dataset(self, ds, speci, obs_units, standard_parameter_speci, time_indices, first_file=True):
         """
         Read model dataset
 
@@ -3186,13 +3233,15 @@ class DataReader:
             Measurement units of observations (and interpolated model)
         standard_parameter_speci : dict
             GHOST standard parameters dictionary
+        time_indices : np.ndarray
+            Sorted indices of the timesteps to read from the file
         first_file : bool, optional
             Indicates if dataset to read comes from first file in files_to_read list, by default True
 
         Returns
         -------
         np.array
-            Gridded model variable data for each file
+            Gridded model variable data of the selected timesteps
         np.array
             Gridded model latitude for first file
         np.array
@@ -3206,12 +3255,12 @@ class DataReader:
             z_varname = speci_object.dimensions[1]
 
             # check if species Z dimension is named correctly, and in correct BSC standard order
-            # if not skip
+            # if not, model grid won't be plotted
             # Z dimension is valid if == 'z' or 'lev' or 'alt' or 'height' or 'level'
             if z_varname not in ["lev", "z", "alt", "height", "level"]:
-                # msg = f"Z dimension incorrectly named in {filepath}. Z={z_varname}. Skipping."
-                # show_message(self.read_instance, msg)
-                return None
+                msg = f"Z dimension incorrectly named in {ds.filepath()}. Z={z_varname}. Model grid won't be plotted."
+                show_message(self.read_instance, msg)
+                return None, None, None
 
             # check if vertical dimension goes up or down to get correct index for surface
             mod_vert_obj = ds[z_varname]
@@ -3223,15 +3272,15 @@ class DataReader:
             # if direction == 'down', surface index is location of maximum value in z var
             elif direction == "down":
                 z_index = np.argmax(mod_vert_obj[:])
-            # if cannot determine a surface index, skip
+            # if cannot determine a surface index, model grid won't be plotted
             else:
-                # msg = f"Cannot determine surface index in vertical dimension in {filepath}. Z={z_varname}. Skipping."
-                # show_message(self.read_instance, msg)
-                return None
+                msg = f"Cannot determine surface index in vertical dimension in {ds.filepath()}. Z={z_varname}. Model grid won't be plotted."
+                show_message(self.read_instance, msg)
+                return None, None, None
 
-            read_data = speci_object[:, z_index, :, :]
+            read_data = speci_object[time_indices, z_index, :, :]
         else:
-            read_data = speci_object[:]
+            read_data = speci_object[time_indices]
 
         # convert model units to observational units
         mod_speci_units = speci_object.units
@@ -3239,6 +3288,10 @@ class DataReader:
             mod_speci_units, obs_units, standard_parameter_speci
         )
         read_data = read_data * conversion_factor
+
+        # replace masked values (fill values) by NaN, as the mask is lost when writing
+        # into the preallocated (non-masked) array in read_gridded_data
+        read_data = np.ma.filled(read_data, np.nan)
 
         lat, lon = None, None
         if first_file:
@@ -3250,7 +3303,7 @@ class DataReader:
             else:
                 msg = "Latitudes cannot be read, model grid won't be plotted."
                 show_message(self.read_instance, msg)
-                return None
+                return None, None, None
             for name in ("lon", "longitude"):
                 if name in ds.variables:
                     lon = ds.variables[name][:]
@@ -3258,7 +3311,7 @@ class DataReader:
             else:
                 msg = "Longitudes cannot be read, model grid won't be plotted."
                 show_message(self.read_instance, msg)
-                return None
+                return None, None, None
         
         return read_data, lat, lon
 
@@ -3274,13 +3327,17 @@ class DataReader:
         Returns
         -------
         np.array
-            Gridded model variable data
+            Gridded model variable data, with shape (time, lat, lon)
+        np.array
+            Sorted datetime64 timestamps of the time dimension, which can be
+            repeated when several lead days cover the same time
+        np.array
+            Lead day of each timestep (1 = first 24 hours after the model
+            initialisation), 0 for files that are not forecast runs
         np.array
             Gridded model latitude
         np.array
             Gridded model longitude
-        str
-            Gridded model variable units
         """
 
         # get lead days
@@ -3364,8 +3421,10 @@ class DataReader:
             speci, self.read_instance.ghost_version
         )
 
-        data = {}
-        lat, lon = None, None
+        # first pass: read only times of each file, to know the size and sorted position
+        # of all timesteps before reading any data, so the data can be written directly
+        # into one preallocated array (instead of joining and sorting copies of it)
+        file_blocks, time_blocks, lead_blocks = [], [], []
         for timestep in sorted(timesteps_to_read_intersect):
             filepath = file_root.format(date=timestep)
             if not os.path.exists(filepath):
@@ -3377,10 +3436,12 @@ class DataReader:
                 in_period = (file_timestamps >= start.value) & (file_timestamps < end.value)
                 
                 # forecast runs: keep only timesteps of wanted lead days
-                if len(timestep) == 10:
+                is_forecast_run = len(timestep) == 10
+                if is_forecast_run:
+                    run_start = pd.to_datetime(timestep, format="%Y%m%d%H")
                     in_period &= get_forecast_run_mask(
                         file_timestamps,
-                        pd.to_datetime(timestep, format="%Y%m%d%H"),
+                        run_start,
                         lead_days,
                     )
 
@@ -3388,26 +3449,66 @@ class DataReader:
                 if not in_period.any():
                     continue
 
-                # first file
+                # get indices of timesteps to read (inside period and, for forecast runs, of wanted lead days)
+                time_indices = np.flatnonzero(in_period)
+
+                # get lead day of each timestep read, or 0 if file is not a forecast run.
+                # As in get_forecast_run_mask, lead day N covers [run start + (N-1) days, run start + N days)
+                selected_timestamps = file_timestamps[time_indices]
+                if is_forecast_run:
+                    file_lead_days = (
+                        (selected_timestamps - run_start.value) // pd.Timedelta(days=1).value + 1
+                    )
+                else:
+                    file_lead_days = np.zeros(selected_timestamps.shape, dtype=np.int64)
+
+                file_blocks.append((filepath, time_indices))
+                time_blocks.append(selected_timestamps)
+                lead_blocks.append(file_lead_days)
+
+        if not file_blocks:
+            return None
+
+        # sort all timesteps by time (stable so that repeated timestamps from
+        # different lead days keep the order they were read)
+        time = np.concatenate(time_blocks).astype("datetime64[ns]")
+        lead = np.concatenate(lead_blocks)
+        order = np.argsort(time, kind="stable")
+
+        # get sorted position of each timestep, in the order they are read
+        sorted_positions = np.empty_like(order)
+        sorted_positions[order] = np.arange(len(order))
+
+        # second pass: read data of each file, writing it into its sorted positions
+        data = None
+        lat, lon = None, None
+        block_start = 0
+        for filepath, time_indices in file_blocks:
+            with Dataset(filepath) as ds:
                 timestep_data, file_lat, file_lon = self.read_model_dataset(
                     ds,
                     speci,
                     obs_units,
                     standard_parameter_speci,
+                    time_indices,
                     first_file=False if lat is not None else True
                 )
 
-                if lat is None:
-                    lat, lon = file_lat, file_lon
+            # stop reading if data could not be read, as files of the same model share structure
+            if timestep_data is None:
+                return None
 
-                # keep only timesteps inside selected period
-                selected_timestamps = file_timestamps[in_period]
-                timestep_data = timestep_data[in_period]
+            if lat is None:
+                lat, lon = file_lat, file_lon
 
-                for timestamp, values in zip(selected_timestamps, timestep_data):
-                    data[pd.Timestamp(timestamp, unit="ns")] = values
+            # create array for all timesteps, taking grid shape and dtype from first file read
+            if data is None:
+                data = np.empty(
+                    (len(order),) + timestep_data.shape[1:], dtype=timestep_data.dtype
+                )
 
-        if not data:
-            return None
+            block_end = block_start + len(time_indices)
+            data[sorted_positions[block_start:block_end]] = timestep_data
+            block_start = block_end
 
-        return data, lat, lon
+        return data, time[order], lead[order], lat, lon

@@ -55,6 +55,7 @@ from .read_aux import (
     get_possible_resampling_resolutions,
     get_periodic_nonrelevant_temporal_resolutions,
     get_periodic_relevant_temporal_resolutions,
+    get_grid_title,
     get_valid_models,
     get_valid_obs_files_in_date_range,
 )
@@ -1204,8 +1205,19 @@ class Report:
                         set_obs = False
                     else:
                         set_obs = True
+                    # gridded models are left out, as the legend is only shown on
+                    # plots of station data (maps describe their grid in the title)
+                    legend_data_labels = [
+                        data_label
+                        for data_label, data_label_raw in zip(
+                            self.data_labels, self.data_labels_raw
+                        )
+                        if not data_label_raw.endswith("::gridded")
+                    ]
                     plot_characteristics["legend"] = self.plotting.make_legend_handles(
-                        plot_characteristics["legend"], set_obs=set_obs
+                        plot_characteristics["legend"],
+                        data_labels=legend_data_labels,
+                        set_obs=set_obs,
                     )
                     fig.legend(**plot_characteristics["legend"]["plot"])
 
@@ -2532,28 +2544,31 @@ class Report:
         # get all data_labels for selected_station_data
         # if multispecies plot then ensure have data_labels from across all networkspecies
         if plot_type_df:
+            # gridded models have no station data, so they would only add empty columns/rows
+            # (filtered on the raw label, as an alias has no ' (gridded)' suffix)
+            experiment_labels = [
+                label
+                for label_raw, label in self.experiments.items()
+                if not label_raw.endswith("::gridded")
+            ]
             if base_plot_type in ["heatmap", "table"]:
                 if z_statistic_sign == "bias":
-                    data_labels = list(self.experiments.values())
+                    data_labels = experiment_labels
                 else:
                     if not self.obs_active:
-                        data_labels = list(self.experiments.values())
+                        data_labels = experiment_labels
                     else:
-                        data_labels = [self.observations_data_label] + list(
-                            self.experiments.values()
-                        )
+                        data_labels = [self.observations_data_label] + experiment_labels
 
             elif base_plot_type == "statsummary":
                 if "bias" in plot_options:
-                    data_labels = list(self.experiments.values())
+                    data_labels = experiment_labels
                 else:
                     # if no obs are loaded (when MODEL is active), remove observations from labels
                     if not self.obs_active:
-                        data_labels = list(self.experiments.values())
+                        data_labels = experiment_labels
                     else:
-                        data_labels = [self.observations_data_label] + list(
-                            self.experiments.values()
-                        )
+                        data_labels = [self.observations_data_label] + experiment_labels
 
         elif "multispecies" in plot_options:
             data_labels = []
@@ -2751,12 +2766,26 @@ class Report:
                     plotting_paradigm, networkspeci, plot_type, axis_ind
                 )
 
+                # get gridded statistic for all loaded period (if there is grid data),
+                # not in bias maps, as the grid is an absolute field
+                speci = networkspeci.split('|')[1]
+                grid_data, grid_lat, grid_lon = None, None, None
+                if z2_label == "":
+                    grid_data, grid_lat, grid_lon = get_gridded_statistic(
+                        self, speci, zstat, data_label=z1_label
+                    )
+
                 # set axis title
                 if relevant_axis.get_title() == "":
                     if z2_label != "":
                         label = copy.deepcopy(z2_label)
                     else:
                         label = copy.deepcopy(z1_label)
+
+                    # describe the grid drawn under the stations, on its own line
+                    # as it does not fit next to the label in the report layout
+                    if grid_data is not None:
+                        label += "\n" + get_grid_title(self, z1_label)
 
                     axis_title_label = "{}\n{} ".format(label, self.subsection)
                     if self.n_stations == 1:
@@ -2773,10 +2802,6 @@ class Report:
                 # set map extent ?
                 if self.map_extent:
                     set_map_extent(self, relevant_axis, self.map_extent)
-
-                # get gridded statistic for all loaded period (if there is grid data)
-                speci = networkspeci.split('|')[1]
-                grid_data, grid_lat, grid_lon = get_gridded_statistic(self, speci, zstat)
 
                 # make map plot
                 self.plotting.make_map(

@@ -2329,20 +2329,55 @@ def time_var_to_asi8(time_var):
     return _dates_to_asi8_seconds(dates, calendar)
 
 
+def get_model_id(data_label_raw):
+    """
+    Get model id of a raw data label, without interpolation mode or forecast suffix
+    (e.g. 'fc::gridded' and 'fc::interpolated-day3' both give 'fc')
+    """
+    return re.sub(
+        r"(::(interpolated|gridded))?(-(daily|combined|day)\d*)?$", "", data_label_raw
+    )
+
+
+def get_gridded_model_base_data_labels(read_instance):
+    """
+    Get base labels of the interpolated versions of the gridded model loaded, without
+    the forecast suffix (e.g. 'fc-day3', 'fc-daily1' and 'fc-daily' all give 'fc'),
+    empty if the gridded model is not loaded interpolated
+    """
+
+    # take the first gridded model, as it is the only one read
+    gridded_model_ids = [
+        get_model_id(data_label_raw)
+        for data_label_raw in read_instance.data_labels_raw
+        if data_label_raw.endswith("::gridded")
+    ]
+    if len(gridded_model_ids) == 0:
+        return set()
+
+    # match models on the raw label, as the display label can be an alias,
+    # but return the display label, as forecast indices are stored per display label
+    return {
+        re.sub(r"-(daily|combined|day)\d*$", "", data_label)
+        for data_label, data_label_raw in zip(
+            read_instance.data_labels, read_instance.data_labels_raw
+        )
+        if (not data_label_raw.endswith("::gridded"))
+        and (get_model_id(data_label_raw) == gridded_model_ids[0])
+    }
+
+
 def get_map_lead_days(read_instance):
     """
     Get forecast lead days loaded, so gridded model uses the same forecast days
-    as interpolated models (day 1 if no forecast option is loaded)
+    as its interpolated versions (day 1 if it is not loaded interpolated
+    or no forecast option is loaded)
     """
 
-    # use the forecast days selected for the loaded models (all if none selected),
-    # taken from the forecast indices set when reading
-    # base labels of the loaded models, without the forecast suffix
-    # (e.g. 'fc-day3', 'fc-daily1' and 'fc-daily' all give 'fc')
-    base_data_labels = {
-        re.sub(r"-(daily|combined|day)\d*$", "", data_label)
-        for data_label in read_instance.data_labels
-    }
+    # use the forecast days selected for the interpolated versions of the gridded
+    # model (all if none selected), taken from the forecast indices set when reading,
+    # never the ones of other models
+    base_data_labels = get_gridded_model_base_data_labels(read_instance)
     lead_days = set()
     for forecast_indices in read_instance.forecast_indices_per_data_label.values():
         for base_data_label, indices in forecast_indices.items():
@@ -2350,3 +2385,61 @@ def get_map_lead_days(read_instance):
                 lead_days.update(index + 1 for index in indices.values())
 
     return sorted(lead_days) if lead_days else [1]
+
+
+def get_data_label_lead_day(read_instance, data_label):
+    """
+    Get forecast lead day of a data label of the gridded model in day forecast mode
+    (e.g. 'fc-day3' gives 3), or None if the data label is not a single forecast day
+    (e.g. 'fc', 'fc-daily' or 'fc-combined', which merge all loaded lead days)
+    or belongs to another model
+    """
+
+    if not data_label:
+        return None
+
+    # only labels of the interpolated versions of the gridded model, so the grid
+    # never takes the lead day of another model
+    base_data_labels = get_gridded_model_base_data_labels(read_instance)
+
+    # look the label up in the forecast indices set when reading, rather than parsing
+    # its suffix, as an alias could end in '-dayN' without being a forecast day
+    for forecast_indices in read_instance.forecast_indices_per_data_label.values():
+        for base_data_label, indices in forecast_indices.items():
+            if (base_data_label in base_data_labels) and (data_label in indices):
+                return indices[data_label] + 1
+
+    return None
+
+
+def get_grid_title(read_instance, data_label):
+    """
+    Get the text added to the title of a map to describe the grid drawn under it
+    (e.g. 'fc (gridded, mean of lead days 2 and 4)'), with the same lead days
+    get_gridded_statistic uses: the lead day of the data label in day forecast mode,
+    otherwise all loaded lead days
+    """
+
+    # the gridded model is named in every map, as the grid may belong to another model
+    # (first gridded model is the one read). The ' (gridded)' suffix is moved into
+    # the brackets (an alias has none)
+    gridded_label = next(
+        label
+        for label, label_raw in zip(read_instance.data_labels, read_instance.data_labels_raw)
+        if label_raw.endswith("::gridded")
+    )
+    gridded_label = gridded_label.replace(" (gridded)", "")
+
+    lead_day = get_data_label_lead_day(read_instance, data_label)
+    if lead_day is not None:
+        lead_days = [lead_day]
+    else:
+        lead_days = get_map_lead_days(read_instance)
+
+    lead_days = [str(day) for day in lead_days]
+    if len(lead_days) > 1:
+        str_lead_days = "mean of lead days {} and {}".format(", ".join(lead_days[:-1]), lead_days[-1])
+    else:
+        str_lead_days = f"lead day {lead_days[0]}"
+
+    return f"{gridded_label} (gridded, {str_lead_days})"

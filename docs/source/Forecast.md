@@ -16,7 +16,7 @@ If the `forecast` variable is set to a valid value, no matter what it is, then t
 forecast = daily
 ```
 
-The forecast variable can be set to the following options: `day`, `daily`, `combined`. Setting the variable like this will utilise all of the available forecast days. It is also possible to combine a number with the forecast option to limit data to a specific forecast day, e.g. `day1`, `daily2`, `combined3`, and multiple options can set at once, e.g. `day1, day2, day3`. Different options cannot be mixed however, i.e. `day` options cannot be set with `daily` or `combined` options.
+The forecast variable can be set to the following options: `day`, `daily`, `combined`. Setting the variable like this will utilise all of the available forecast days. It is also possible to combine a number with the forecast option to limit data to a specific forecast day, e.g. `day1`, `daily2`, `combined3`, and multiple options can set at once, e.g. `day1, day2, day3`. Different options cannot be mixed however, i.e. `day` options cannot be set with `daily` or `combined` options. Forecast options can also be set in the model name, see [Configuration fields](Configuration-fields.md).
 
 The effects of each forecast option are now explained:  
 
@@ -30,15 +30,11 @@ If no forecast option is set for a model with forecast data, data from the first
 
 It is possible to compare different models where one has forecast data and the other does not, in these cases the non-forecast data is treated as day 1 of a forecast for comparison purposes. Be aware however, if you are loading multiple species, and a model for one species has forecast data, but the same model does not for another, then this could cause Providentia to crash as it is not designed to handle this.
 
-When using the dashboard, models that haveinterpolated forecast data are automatically detected. When clicking on the **MODELS** button on the menu bar, if the model has forecast data, then when you select the model, an extra drop-down menu will appear to the right. This will allow you to select the forecast option, i.e. `combined`, `daily` or `day`. If no option is set, data from the first forecast day will be taken to represent the model (i.e. treating the data as a non-forecast type). If a forecast option is selected, another drop-down menu will then appear to the right of that, allowing you to select specific forecast days. If no specific forecast days are selected but a forecast option is, then all forecast days will be utilised.
+When using the dashboard, models that have interpolated forecast data are automatically detected. When clicking on the **MODELS** button on the menu bar, if the model has forecast data, then when you select the model, an extra drop-down menu will appear to the right. This will allow you to select the forecast option, i.e. `combined`, `daily` or `day`. If no option is set, data from the first forecast day will be taken to represent the model (i.e. treating the data as a non-forecast type). If a forecast option is selected, another drop-down menu will then appear to the right of that, allowing you to select specific forecast days. If no specific forecast days are selected but a forecast option is, then all forecast days will be utilised. As forecast options are applied to all models, all selected models with forecast data must have the same forecast option and days selected, otherwise a message is shown and the data is not read.
 
 ## Gridded data
 
-In the dashboard, a model can also be loaded as gridded data, by checking the model in the gridded column of the **MODELS** menu. The forecast options only apply to interpolated data: gridded data is read for the same forecast days selected for the interpolated models (e.g. days 2 and 4 for `day2, day4`, or the selected days for `daily` and `combined`). If no forecast option is set, only the first forecast day is read, as for interpolated data. The lead days used are shown next to the gridded model in the terminal when reading, e.g. `a59g-regional-000::gridded (with data from lead days 2 and 4)`.
-
-Gridded data is only read when clicking **READ** (or when loading a configuration file), not when updating filters.
-
-In the legend, interpolated models are shown with a filled dot and gridded models with an empty square. When a model is loaded both interpolated and gridded, each of its interpolated entries (e.g. `fc-day2` and `fc-day4`) is shown with a square and a dot, and the gridded model has no entry of its own. 
+The forecast options only apply to interpolated data: gridded models are read for the same forecast days as their interpolated version. See [Gridded data](Gridded-data.md) for how the grid drawn on the map depends on the forecast option.
 
  
 

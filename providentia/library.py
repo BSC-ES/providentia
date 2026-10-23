@@ -44,6 +44,7 @@ from .read_aux import (
     get_possible_resampling_resolutions,
     get_periodic_nonrelevant_temporal_resolutions,
     get_periodic_relevant_temporal_resolutions,
+    get_grid_title,
     get_valid_models,
     get_valid_obs_files_in_date_range,
 )
@@ -1064,10 +1065,22 @@ class Providentia:
         else:
             networkspecies = [networkspeci]
 
+        # gridded data is only set for maps, used later to describe it in the title
+        grid_data = None
+
+        # gridded models are only shown in the legend of a map drawn over their grid,
+        # as they are not used in any other plot
+        raw_per_data_label = dict(zip(self.data_labels, self.data_labels_raw))
+        legend_data_labels = [
+            data_label
+            for data_label in data_labels
+            if not raw_per_data_label.get(data_label, "").endswith("::gridded")
+        ]
+
         # legend plot (on its own axis)
         if base_plot_type == "legend":
             legend_handles = self.legend(
-                plot_type, data_labels=data_labels, set_obs=set_obs_legend
+                plot_type, data_labels=legend_data_labels, set_obs=set_obs_legend
             )
             relevant_ax.legend(**legend_handles)
 
@@ -1091,8 +1104,13 @@ class Providentia:
             elif z_statistic_sign == "bias":
                 map_title = "{}".format(labelb)
 
-            # get gridded statistic for all loaded period (if there is grid data)
-            grid_data, grid_lat, grid_lon = get_gridded_statistic(self, speci, zstat)
+            # get gridded statistic for all loaded period (if there is grid data),
+            # not in bias maps, as the grid is an absolute field
+            grid_lat, grid_lon = None, None
+            if labelb == "":
+                grid_data, grid_lat, grid_lon = get_gridded_statistic(
+                    self, speci, zstat, data_label=labela
+                )
 
             func(
                 relevant_ax,
@@ -1496,6 +1514,9 @@ class Providentia:
                             )
                             if base_plot_type == "map":
                                 title = "{} {}".format(map_title, title)
+                                # describe the grid drawn under the stations
+                                if grid_data is not None:
+                                    title += " + " + get_grid_title(self, labela)
 
                         else:
                             if zstat in ["NStations", "NUniqueStations"]:
@@ -1506,6 +1527,9 @@ class Providentia:
                                 )
                             if base_plot_type == "map":
                                 title = "{} {}".format(map_title, title)
+                                # describe the grid drawn under the stations
+                                if grid_data is not None:
+                                    title += " + " + get_grid_title(self, labela)
 
             elif base_plot_type not in ["legend", "metadata"]:
                 if "axis_title" in self.plot_characteristics[plot_type]:
@@ -1612,8 +1636,12 @@ class Providentia:
                         valid_legend = False
 
                 if valid_legend:
+                    # keep gridded models only on a map drawn over their grid
+                    if (base_plot_type == "map") and (grid_data is not None):
+                        legend_data_labels = data_labels
                     legend_handles = self.legend(
-                        plot_type, data_labels=data_labels, set_obs=set_obs_legend
+                        plot_type, data_labels=legend_data_labels, set_obs=set_obs_legend,
+                        map_grid_data_label=labela if base_plot_type == "map" else None,
                     )
                     legend_ax = fig.add_subplot(main_gs[1])
                     legend_ax.axis("off")
@@ -1694,7 +1722,7 @@ class Providentia:
 
         return cb_ax
 
-    def legend(self, plot_type, data_labels=None, set_obs=True):
+    def legend(self, plot_type, data_labels=None, set_obs=True, map_grid_data_label=None):
         """
         Wrapper method to make legend.
 
@@ -1706,6 +1734,9 @@ class Providentia:
             Data arrays to plot, by default None.
         set_obs : bool, optional
             Indicates if observations appear on the legend, by default True.
+        map_grid_data_label : str, optional
+            Data label whose lead day is drawn on the map grid, by default None. In day
+            forecast mode the gridded square is only shown next to it.
 
         Returns
         -------
@@ -1723,7 +1754,8 @@ class Providentia:
             return
 
         legend_handles = self.plotting.make_legend_handles(
-            legend_characteristics, data_labels=data_labels, set_obs=set_obs
+            legend_characteristics, data_labels=data_labels, set_obs=set_obs,
+            map_grid_data_label=map_grid_data_label,
         )
 
         return legend_handles["plot"]
