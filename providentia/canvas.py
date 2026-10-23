@@ -73,7 +73,7 @@ from .plot_formatting import (
     draw_map_gridlines,
 )
 from .plot_options import annotation, linear_regression, log_axes, smooth, threshold
-from .read_aux import get_possible_resampling_resolutions, get_frequency_code
+from .read_aux import get_possible_resampling_resolutions, get_frequency_code, get_grid_title
 from .statistics import (
     get_gridded_statistic,
     get_z_statistic_comboboxes,
@@ -214,6 +214,7 @@ class Canvas(FigureCanvas):
         self.filter_data = None
         self.map_date_range_selection = None
         self.map_date_range_full = None
+        self.map_grid_title = ""
 
         # initialise Plotting class
         self.plotting = Plotting(read_instance=self.read_instance, canvas_instance=self)
@@ -374,7 +375,7 @@ class Canvas(FigureCanvas):
         # create map, colorbar and legend plot axes
         self.plot_axes = {}
         self.plot_axes["map"] = self.figure.add_subplot(
-            self.gridspec.new_subplotspec((2, 0), rowspan=40, colspan=42),
+            self.get_map_subplotspec(),
             projection=self.plotcrs,
         )
         self.plot_axes["cb"] = self.figure.add_axes([0.0255, 0.57, 0.3794, 0.02])
@@ -1222,7 +1223,7 @@ class Canvas(FigureCanvas):
                     if "gridded" not in data_label:
                         self.map_z1.setCurrentText(data_label)
                         set_mod_label = True
-                    break
+                        break
                 # if only gridded, set empty                
                 if not set_mod_label:
                     self.map_z1.setCurrentText("")
@@ -1248,10 +1249,22 @@ class Canvas(FigureCanvas):
         date = None
         hour = None
 
-        # get gridded statistic for selected period (if there is grid data)
-        grid_stat, grid_lat, grid_lon = get_gridded_statistic(
-            self.read_instance, speci, zstat, date_range=date_range, date=date, hour=hour
-        )
+        # get gridded statistic for selected period (if there is grid data),
+        # not in bias maps, as the grid is an absolute field
+        grid_stat, grid_lat, grid_lon = None, None, None
+        if self.map_z2.currentText() == "":
+            grid_stat, grid_lat, grid_lon = get_gridded_statistic(
+                self.read_instance, speci, zstat, date_range=date_range, date=date, hour=hour,
+                data_label=self.map_z1.currentText()
+            )
+
+        # save description of the grid for the map title, which is also updated
+        # on station selection (in update_map_station_selection) without redrawing the grid
+        self.map_grid_title = ""
+        if grid_stat is not None:
+            self.map_grid_title = get_grid_title(
+                self.read_instance, self.map_z1.currentText()
+            )
 
         # ensure label that have in memory still exists
 
@@ -1402,6 +1415,9 @@ class Canvas(FigureCanvas):
                 len(self.relative_selected_station_inds),
                 len(self.active_map_valid_station_inds),
             )
+        # describe the grid drawn under the stations, on its own line
+        if self.map_grid_title:
+            axis_title_label += "\n" + self.map_grid_title
         set_axis_title(
             self.read_instance,
             self.plot_axes["map"],
@@ -1980,7 +1996,8 @@ class Canvas(FigureCanvas):
 
         # create legend element handles
         legend_plot_characteristics = self.plotting.make_legend_handles(
-            copy.deepcopy(self.plot_characteristics["legend"])
+            copy.deepcopy(self.plot_characteristics["legend"]),
+            map_grid_data_label=self.map_z1.currentText(),
         )
 
         # plot legend
@@ -2139,13 +2156,14 @@ class Canvas(FigureCanvas):
             # with that choice dropped the basemap may match its preset again
             self.sync_map_colour_preset()
 
-            # update plotted map z statistic and grid
+            # update legend, and plotted map z statistic and grid
             if not self.read_instance.block_MPL_canvas_updates:
+                self.update_legend()
                 self.update_map()
 
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
-            
+
             # restore mouse cursor to normal
             unset_cursor(
                 self.read_instance.cursor_function, "handle_map_z_statistic_update"
@@ -2179,7 +2197,7 @@ class Canvas(FigureCanvas):
 
             # restore mouse cursor to normal
             unset_cursor(
-                self.read_instance.cursor_function, "handle_map_z_statistic_update"
+                self.read_instance.cursor_function, "handle_map_colourmap_update"
             )
 
         return None
@@ -3583,6 +3601,17 @@ class Canvas(FigureCanvas):
 
         return None
 
+    def get_map_subplotspec(self):
+        """
+        Get the gridspec cells of the map axis, shared by its creation and its
+        rebuild on projection change so both have the same position.
+        The map starts 4 rows down to leave space for a 2-line title
+        (the second line describes the grid, if any), and ends just
+        above the colourbar
+        """
+
+        return self.gridspec.new_subplotspec((4, 0), rowspan=38, colspan=42)
+
     def rebuild_map_axes(self, projection_name):
         """
         Recreate the map axes with a different cartopy projection.
@@ -3607,7 +3636,7 @@ class Canvas(FigureCanvas):
 
         self.figure.delaxes(self.plot_axes["map"])
         self.plot_axes["map"] = self.figure.add_subplot(
-            self.gridspec.new_subplotspec((2, 0), rowspan=44, colspan=42),
+            self.get_map_subplotspec(),
             projection=self.plotcrs,
         )
 

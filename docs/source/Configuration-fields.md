@@ -12,7 +12,7 @@ Some of these fields are required depending on the mode. If a parameter required
 | Parameter | Required in | Description | Default
 | ------ | ------ | ------ | ------ |
 | `network`, `observation`, `framework` | Dashboard, Report, Interpolation | Network to load observations from, can be multiple (e.g. `CAPMoN, EBAS`). The networks can be GHOST or non-GHOST. For GHOST see [Available Networks](ghost-networks) for the available options. | — |
-| `model`, `models`, `experiments`, `experiment` | Dashboard, Report, Interpolation | Model to load data from, can be multiple (e.g. `mod1, mod2`). Model IDs can optionally include domain and/or ensemble information in the following formats: `modelID`, `modelID-ensemble`, `modelID-domain` or `modelID-domain-ensemble`. Also, `model`, `domain` and/or `ensemble` can be specified separately. Model IDs can also be mapped to alternative names (aliases) by appending them in parentheses after the ID (e.g. `mod1-dom-ens, mod2-dom-ens (altmod1, altmod2)`). | — |
+| `model`, `models`, `experiments`, `experiment` | Dashboard, Report, Interpolation | Model to load data from, can be multiple (e.g. `mod1, mod2`). Model IDs can optionally include domain and/or ensemble information in the following formats: `modelID`, `modelID-ensemble`, `modelID-domain` or `modelID-domain-ensemble`. Also, `model`, `domain` and/or `ensemble` can be specified separately. A forecast option can also be appended at the end (e.g. `modelID-domain-ensemble-day3`), with the same values as the `forecast` field. As forecast options are applied to all models, all models with forecast data must have the same forecast option(s), and it cannot be set in both the model name and the `forecast` field. A gridded model (`::gridded`) must have the same forecast option as its interpolated version, and cannot have one if it is not loaded interpolated. Model IDs can also be mapped to alternative names (aliases) by appending them in parentheses after the ID (e.g. `mod1-dom-ens, mod2-dom-ens (altmod1, altmod2)`). | — |
 | `species` | All modes | Species to load, can be multiple (e.g. `sconco3, sconcno2`). See the [Available Species](Available-species) page for options. Wildcards (`*`) expand to multiple variables (e.g. `vconcaerobin*` → `vconcaerobin1`, `vconcaerobin2`, etc.). A model species can be optionally interpolated to a different observational species via the syntax: `model_species@observational_species` - see [Interpolating between species](interpolation-between-species). | — |
 | `resolution` | All modes | Temporal resolution of data to load (e.g. `hourly`), cannot be multiple. For GHOST networks, the available resolutions are: `hourly, daily, monthly`, and an optional `hourly_instantaneous` resolution for variables measured instantaenously, e.g. meteorological. For non-GHOST networks, available options are defined under the `nonghost_available_resolutions` key in `available_inputs.yaml` and can be modified by the user. | — |
 | `start_date` | All modes | Data start date in `YYYYMMDD` format (e.g. `20170101`), or `YYYYMM` in the interpolation mode . | — |
@@ -21,7 +21,7 @@ Some of these fields are required depending on the mode. If a parameter required
 | `ghost_features` | Optional | Level of GHOST features to utilise: `max`, `med` or `min`. `max` means all GHOST filter variables and metadata are read, `min` means no GHOST filter variables and very limited metadata are read , and `med` means GHOST native coverage filter variables are not read, and a curated selction is read. | `med` |
 | `domain` | Optional | Domain of the model (e.g. `regional`, `global`). When multiple model IDs and multiple ensembles/domains are provided, all possible combinations of model, domain and ensemble will be used. Options are defined under the `available_domains` key in `available_inputs.yaml` and can be modified by the user. | All available |
 | `ensemble` | Optional | Ensemble member number (e.g. `000`, `001`), or ensemble statistic of the model (e.g. `av` for ensemble average, or `av_an` for ensemble analysis average). When multiple model IDs and multiple ensembles/domains are provided, all possible combinations of model, domain and ensemble will be used. | All available, except in interpolation mode where the default is `000`. |
-| `forecast` | Optional | Controls how forecast data is handled: `day`, `daily`, `combined`, `dayN`, `dailyN`, `combinedN`. Multiple values of the same type can be provided (e.g. `day`, `day2`, `day3`), but different types cannot be mixed (i.e. `day` options cannot be combined with `daily` or `combined`). To limit to specific forecast days, append the day number to the option (e.g. `day1`, `daily2`, `combined3`). This variable must be set to a valid value when performing interpolation for forecast data. | — |
+| `forecast` | Optional | Controls how forecast data is handled: `day`, `daily`, `combined`, `dayN`, `dailyN`, `combinedN`. Multiple values of the same type can be provided (e.g. `day`, `day2`, `day3`), but different types cannot be mixed (i.e. `day` options cannot be combined with `daily` or `combined`). To limit to specific forecast days, append the day number to the option (e.g. `day1`, `daily2`, `combined3`). This variable must be set to a valid value when performing interpolation for forecast data. Forecast options can also be set in the model name (see `model`). | — |
 | `filter_species` | Optional | Filter read species by other species data within a data range. The first value set is the lower bound to filter by, and the second value the upper bound. Place a sign before each bound value to inform if the filter should be inclusive or exclusive of the bound, (e.g. `>` or `>=`). If no sign is set then it is assumed the bound is inclusive, i.e. `>=`. If not wishing to set either the lower or upper bounds, a `:` can be used. Optionally, a fill value can also be given as a third value to impose what the filtered data is set to, by default this is `NaN`. Multiple filters can be  set together separated by a comma (e.g. `network1:species1 (>lowerlim, <=upperlim, fillvalue), network2:species2 (:, <upperlim)`). | — |
 | `ghost_root` | Optional | Root directory for GHOST observations, overwrites `data_paths.yaml` | From `data_paths.yaml` |
 | `nonghost_root` | Optional | Root directory for non-GHOST observations, overwrites `data_paths.yaml` | From `data_paths.yaml` |
@@ -216,3 +216,19 @@ model = cams61_monarch_ph3 (MONARCH)
 domain = eu
 ensemble = allmembers
 ```
+
+### Gridded models
+
+By default, models are read interpolated to the station locations. To read a model on its own grid and draw it on the map, add `::gridded` at the end of its name:
+
+```ini
+model = cams61_emep_ph2-eu-000::gridded
+```
+
+The same model can be loaded both interpolated and gridded by listing it twice:
+
+```ini
+model = cams61_emep_ph2-eu-000, cams61_emep_ph2-eu-000::gridded
+```
+
+Only one gridded model can be loaded at a time. See [Gridded data](Gridded-data.md) for more details.

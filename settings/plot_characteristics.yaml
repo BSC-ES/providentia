@@ -416,7 +416,7 @@
           "plot_options": ["annotate", "domain"],
           "land_polygon": { "edgecolor": null },
           "base_scale": 1.3,
-          "axis_title": { "fontsize": 8.5, "pad": 3, "loc": "center" },
+          "axis_title": { "fontsize": 8.5, "pad": 6, "loc": "center" },
           "cb":
             {
               "vmin_absolute": "",

@@ -21,6 +21,7 @@ from providentia.auxiliar import (
 )
 from .calculate import Stats, ModBias
 from .read_aux import (
+    get_data_label_lead_day,
     get_frequency_code,
     get_chunk_size,
     get_periodic_nonrelevant_temporal_resolutions,
@@ -550,7 +551,9 @@ def get_date_range_mask(read_instance, time_index, date_range):
     return np.asarray((time_index < end) & ((time_index + offset) > start))
 
 
-def get_gridded_statistic(read_instance, speci, zstat, date_range=None, date=None, hour=None):
+def get_gridded_statistic(
+    read_instance, speci, zstat, date_range=None, date=None, hour=None, data_label=None
+):
     """
     Get gridded model data to plot on map from gridded data read in read_setup,
     either for a specific timestep (date and hour) or a statistic over a period
@@ -570,6 +573,9 @@ def get_gridded_statistic(read_instance, speci, zstat, date_range=None, date=Non
         Date, by default None
     hour : int, optional
         Hour, by default None
+    data_label : str, optional
+        Data label selected for the map, by default None. In day forecast mode
+        (e.g. 'fc-day3') only its lead day is used, otherwise all loaded lead days
 
     Returns
     -------
@@ -588,9 +594,19 @@ def get_gridded_statistic(read_instance, speci, zstat, date_range=None, date=Non
     if gridded_data is None:
         return grid_stat, grid_lat, grid_lon
 
-    grid_var, grid_lat, grid_lon = (
-        gridded_data[key] for key in ("data", "lat", "lon")
+    grid_var, grid_time, grid_lead, grid_lat, grid_lon = (
+        gridded_data[key] for key in ("data", "time", "lead", "lat", "lon")
     )
+
+    # in day forecast mode, use only the lead day of the selected data label
+    lead_day = get_data_label_lead_day(read_instance, data_label)
+    if lead_day is not None:
+        # keep timesteps of the lead day and of files that are not forecast runs (lead 0).
+        # Boolean masking keeps the order, so grid_time stays sorted for searchsorted
+        lead_mask = (grid_lead == lead_day) | (grid_lead == 0)
+        if not lead_mask.any():
+            return grid_stat, grid_lat, grid_lon
+        grid_var, grid_time = grid_var[lead_mask], grid_time[lead_mask]
 
     # get start (inclusive) and end (exclusive) of period, all loaded period by default
     if date_range is not None:
@@ -605,14 +621,15 @@ def get_gridded_statistic(read_instance, speci, zstat, date_range=None, date=Non
     if date and hour is not None:
         target_timestamp = pd.Timestamp(date) + pd.Timedelta(hours=int(hour))
 
-        selected_data = [
-            values
-            for timestamp, values in grid_var.items()
-            if timestamp == target_timestamp
-        ]
+        # get start (inclusive) and end (exclusive) index of timestamp in sorted times,
+        # covering all its repetitions (one per lead day that covers it)
+        target = target_timestamp.to_datetime64()
+        start_index = np.searchsorted(grid_time, target, side="left")
+        end_index = np.searchsorted(grid_time, target, side="right")
 
-        if selected_data:
-            grid_stat = selected_data[0]
+        # average all lead days covering the timestamp (only one in day forecast mode)
+        if end_index > start_index:
+            grid_stat = np.nanmean(grid_var[start_index:end_index], axis=0)
 
     # calculate statistic
     elif zstat:
@@ -620,19 +637,14 @@ def get_gridded_statistic(read_instance, speci, zstat, date_range=None, date=Non
             msg = f"Statistic '{zstat}' is not supported for gridded data. Only 'Mean' is supported."
             show_message(read_instance, msg)
         else:
-            # Select the requested period
-            selected_data = [
-                values
-                for timestamp, values in grid_var.items()
-                if start <= timestamp < end
-            ]
+            # get start (inclusive) and end (exclusive) index of period in sorted times
+            start_index, end_index = np.searchsorted(
+                grid_time, [start.to_datetime64(), end.to_datetime64()], side="left"
+            )
 
-            if selected_data:
-                # Calculate the mean at each grid cell
-                grid_stat = np.nanmean(
-                    np.stack(selected_data, axis=0),
-                    axis=0,
-                )
+            # calculate the mean at each grid cell
+            if end_index > start_index:
+                grid_stat = np.nanmean(grid_var[start_index:end_index], axis=0)
 
     return grid_stat, grid_lat, grid_lon
 
