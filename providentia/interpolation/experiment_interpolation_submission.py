@@ -12,10 +12,10 @@ import time
 from netCDF4 import Dataset
 import numpy as np
 import psutil
-from pprint import pprint
+from pprint import pformat
 import yaml
 
-from providentia.auxiliar import CURRENT_PATH, join
+from providentia.auxiliar import CURRENT_PATH, file_in_date_range, join
 
 # get current path and providentia root path
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
@@ -707,7 +707,7 @@ class SubmitInterpolation(object):
                                                 ]
                                             )
 
-                                    # get all observational file start dates (year and month)
+                                    # get all observational file start dates (as in file name)
                                     obs_files_dates = []
                                     for obs_file in obs_files:
                                         obs_file_date = (
@@ -718,10 +718,10 @@ class SubmitInterpolation(object):
                                             .split(".nc")[0]
                                         )
                                         obs_files_dates = np.append(
-                                            obs_files_dates, obs_file_date[:6]
+                                            obs_files_dates, obs_file_date
                                         )
 
-                                    # get all model file start dates (year and month)
+                                    # get all model file start dates (as in file name)
                                     mod_files_dates = []
                                     for mod_file in mod_files:
                                         mod_file_date = (
@@ -732,27 +732,18 @@ class SubmitInterpolation(object):
                                             .split(".nc")[0]
                                         )
                                         mod_files_dates = np.append(
-                                            mod_files_dates, mod_file_date[:6]
+                                            mod_files_dates, mod_file_date
                                         )
 
-                                    # remove observational files outside date ranges
+                                    # remove observational files whose period does not overlap date range
                                     obs_files_ii = np.array(
                                         [
                                             obs_files_ii
                                             for obs_files_ii, obs_files_date in enumerate(
                                                 obs_files_dates
                                             )
-                                            if (
-                                                (
-                                                    self.start_date == "*"
-                                                    or int(obs_files_date)
-                                                    >= int(self.start_date)
-                                                )
-                                                and (
-                                                    self.end_date == "*"
-                                                    or int(obs_files_date)
-                                                    < int(self.end_date)
-                                                )
+                                            if file_in_date_range(
+                                                obs_files_date, self.start_date, self.end_date
                                             )
                                         ]
                                     )
@@ -761,26 +752,20 @@ class SubmitInterpolation(object):
                                         obs_files_dates = []
                                         continue
                                     obs_files = obs_files[obs_files_ii]
-                                    obs_files_dates = obs_files_dates[obs_files_ii]
+                                    # keep year and month only, to intersect with model
+                                    obs_files_dates = np.array(
+                                        [d[:6] for d in obs_files_dates[obs_files_ii]]
+                                    )
 
-                                    # remove model files outside date ranges
+                                    # remove model files whose period does not overlap date range
                                     mod_files_ii = np.array(
                                         [
                                             mod_files_ii
                                             for mod_files_ii, mod_files_date in enumerate(
                                                 mod_files_dates
                                             )
-                                            if (
-                                                (
-                                                    self.start_date == "*"
-                                                    or int(mod_files_date)
-                                                    >= int(self.start_date)
-                                                )
-                                                and (
-                                                    self.end_date == "*"
-                                                    or int(mod_files_date)
-                                                    < int(self.end_date)
-                                                )
+                                            if file_in_date_range(
+                                                mod_files_date, self.start_date, self.end_date
                                             )
                                         ]
                                     )
@@ -789,7 +774,10 @@ class SubmitInterpolation(object):
                                         mod_files_dates = []
                                         continue
                                     mod_files = mod_files[mod_files_ii]
-                                    mod_files_dates = mod_files_dates[mod_files_ii]
+                                    # keep year and month only, to intersect with observations
+                                    mod_files_dates = np.array(
+                                        [d[:6] for d in mod_files_dates[mod_files_ii]]
+                                    )
 
                                     # get intersection of file yearmonths between observations and model
                                     intersect_yearmonths = np.intersect1d(
@@ -877,7 +865,7 @@ class SubmitInterpolation(object):
                 msg = "\nNO INTERSECTING OBSERVATIONAL AND EXPERIMENT DATA FOR INTERPOLATION. \n"
                 if not have_valid_resolution:
                     # show paths where we have searched for data
-                    msg += f"\nSearched paths for model data: {pprint(searched_paths, width=120)}"
+                    msg += f"\nSearched paths for model data:\n{pformat(searched_paths, width=120)}"
             else:
                 msg = "\n***INTERSECTING OBSERVATIONAL AND EXPERIMENTAL DATA IS AVAILABLE FOR INTERPOLATION.***"
 

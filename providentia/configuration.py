@@ -1911,6 +1911,12 @@ class ProvConfiguration:
             # YYYYMMDD
             elif len(date) == 8:
                 if self.read_instance.mode == "interpolation":
+                    # interpolation works per month, so round end date up to the next month
+                    # when it is not the first day (end date is exclusive)
+                    if date_var_name == "end_date" and date[6:8] != "01":
+                        date = (
+                            datetime.strptime(date[:6], "%Y%m") + relativedelta(months=1)
+                        ).strftime("%Y%m%d")
                     setattr(self.read_instance, date_var_name, date[:-2])
             # YYYYMM
             elif len(date) == 6:
