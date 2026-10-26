@@ -6,6 +6,7 @@ import datetime
 import multiprocessing
 import os
 import sys
+import time
 
 from dateutil.relativedelta import relativedelta
 from netCDF4 import Dataset, chartostring, date2index
@@ -1323,14 +1324,16 @@ class DataReader:
             if result is None:
                 continue
 
-            data, time, lead, lat, lon = result
+            grid_sum, grid_count, days, leads, lat, lon, files = result
 
             self.read_instance.gridded_var_data[speci] = {
-                "data": data,
-                "time": time,
-                "lead": lead,
+                "sum": grid_sum,
+                "count": grid_count,
+                "day": days,
+                "lead": leads,
                 "lat": lat,
                 "lon": lon,
+                "files": files,
             }
             
     def read_basic_metadata(self):
@@ -3219,7 +3222,8 @@ class DataReader:
 
         return True
 
-    def read_model_dataset(self, ds, speci, obs_units, standard_parameter_speci, time_indices, first_file=True):
+    def read_model_dataset(self, ds, speci, obs_units, standard_parameter_speci, time_indices, 
+                           first_file=True):
         """
         Read model dataset
 
@@ -3327,17 +3331,22 @@ class DataReader:
         Returns
         -------
         np.array
-            Gridded model variable data, with shape (time, lat, lon)
+            Sum of gridded model variable data per day and lead day, with shape
+            (day, lead, lat, lon)
         np.array
-            Sorted datetime64 timestamps of the time dimension, which can be
-            repeated when several lead days cover the same time
+            Number of valid (non-NaN) values added to each sum, with the same shape
         np.array
-            Lead day of each timestep (1 = first 24 hours after the model
+            datetime64 start of each day of the day dimension
+        np.array
+            Lead day of the lead dimension (1 = first 24 hours after the model
             initialisation), 0 for files that are not forecast runs
         np.array
             Gridded model latitude
         np.array
             Gridded model longitude
+        list
+            (filepath, time indices, timestamps, lead days) of the timesteps read from
+            each file, to read them again on the fly in read_gridded_timesteps
         """
 
         # get lead days
@@ -3421,10 +3430,14 @@ class DataReader:
             speci, self.read_instance.ghost_version
         )
 
-        # first pass: read only times of each file, to know the size and sorted position
-        # of all timesteps before reading any data, so the data can be written directly
-        # into one preallocated array (instead of joining and sorting copies of it)
-        file_blocks, time_blocks, lead_blocks = [], [], []
+        # get start of first day of the period, to get the day of each timestep
+        first_day = start.floor("D")
+        day_length = pd.Timedelta(days=1).value
+
+        # first pass: read only times of each file, to know the day and lead day of
+        # all timesteps before reading any data, so the sums and counts per day and
+        # lead day can be allocated once and filled while reading
+        file_blocks, day_blocks, lead_blocks, files = [], [], [], []
         for timestep in sorted(timesteps_to_read_intersect):
             filepath = file_root.format(date=timestep)
             if not os.path.exists(filepath):
@@ -3463,27 +3476,28 @@ class DataReader:
                     file_lead_days = np.zeros(selected_timestamps.shape, dtype=np.int64)
 
                 file_blocks.append((filepath, time_indices))
-                time_blocks.append(selected_timestamps)
+                day_blocks.append((selected_timestamps - first_day.value) // day_length)
                 lead_blocks.append(file_lead_days)
+                files.append((filepath, time_indices, selected_timestamps, file_lead_days))
 
         if not file_blocks:
             return None
 
-        # sort all timesteps by time (stable so that repeated timestamps from
-        # different lead days keep the order they were read)
-        time = np.concatenate(time_blocks).astype("datetime64[ns]")
-        lead = np.concatenate(lead_blocks)
-        order = np.argsort(time, kind="stable")
+        # get start of each day covered by the period (end is exclusive)
+        n_days = int(np.ceil((end - first_day) / pd.Timedelta(days=1)))
+        days = first_day.to_datetime64() + np.arange(n_days) * np.timedelta64(1, "D")
 
-        # get sorted position of each timestep, in the order they are read
-        sorted_positions = np.empty_like(order)
-        sorted_positions[order] = np.arange(len(order))
+        # get lead days read (0 for files that are not forecast runs)
+        leads = np.unique(np.concatenate(lead_blocks))
 
-        # second pass: read data of each file, writing it into its sorted positions
-        data = None
+        # second pass: read data of each file, adding it to the sums and counts
+        # of the day and lead day of each timestep
+        grid_sum, grid_count = None, None
         lat, lon = None, None
-        block_start = 0
-        for filepath, time_indices in file_blocks:
+        cell_loop_time = 0
+        for (filepath, time_indices), day_indices, file_lead_days in zip(
+            file_blocks, day_blocks, lead_blocks
+        ):
             with Dataset(filepath) as ds:
                 timestep_data, file_lat, file_lon = self.read_model_dataset(
                     ds,
@@ -3501,14 +3515,102 @@ class DataReader:
             if lat is None:
                 lat, lon = file_lat, file_lon
 
-            # create array for all timesteps, taking grid shape and dtype from first file read
-            if data is None:
-                data = np.empty(
-                    (len(order),) + timestep_data.shape[1:], dtype=timestep_data.dtype
+            # create sum and count arrays for all days and lead days, taking grid shape
+            # and dtype from first file read. A day has at most 24 hourly values per
+            # lead day, so the count fits in uint8
+            if grid_sum is None:
+                shape = (n_days, len(leads)) + timestep_data.shape[1:]
+                grid_sum = np.zeros(shape, dtype=timestep_data.dtype)
+                grid_count = np.zeros(shape, dtype=np.uint8)
+
+            # get position of lead day of each timestep in leads
+            lead_indices = np.searchsorted(leads, file_lead_days)
+
+            # add the timesteps of each (day, lead day) cell to its sum and count.
+            # NaN values (fill values) add nothing to the sum or to the count
+            cell_loop_start = time.perf_counter()
+            for day_index, lead_index in set(zip(day_indices, lead_indices)):
+                in_cell = (day_indices == day_index) & (lead_indices == lead_index)
+                cell_data = timestep_data[in_cell]
+                grid_sum[day_index, lead_index] += np.nansum(cell_data, axis=0)
+                grid_count[day_index, lead_index] += np.sum(~np.isnan(cell_data), axis=0, dtype=np.uint8)
+            cell_loop_time += time.perf_counter() - cell_loop_start
+
+            # faster alternative without the loop over cells. np.add.at is needed instead of
+            # grid_sum[idx] += values because many timesteps share a cell, and += would only
+            # keep the last of them
+            # valid = ~np.isnan(timestep_data)
+            # np.add.at(grid_sum, (day_indices, lead_indices), np.where(valid, timestep_data, 0))
+            # np.add.at(grid_count, (day_indices, lead_indices), valid.astype(np.uint8))
+
+        print(f"Time adding timesteps to (day, lead day) cells: {cell_loop_time:.2f} s")
+
+        return grid_sum, grid_count, days, leads, lat, lon, files
+
+    def read_gridded_timesteps(self, speci, start, end, lead_day=None):
+        """
+        Read on the fly the gridded model timesteps inside a period, from the files
+        found in read_gridded_data, without keeping them in memory
+
+        Parameters
+        ----------
+        speci : str
+            Current speci (e.g. sconco3)
+        start : pd.Timestamp
+            Start of period (inclusive)
+        end : pd.Timestamp
+            End of period (exclusive)
+        lead_day : int, optional
+            Lead day to read (plus files that are not forecast runs), by default None
+            (all loaded lead days)
+
+        Returns
+        -------
+        np.array or None
+            Sum of gridded model variable data of the timesteps, with shape (lat, lon)
+        np.array or None
+            Number of valid (non-NaN) values added to the sum, with the same shape
+        """
+
+        gridded_data = self.read_instance.gridded_var_data.get(speci)
+        if gridded_data is None:
+            return None, None
+
+        obs_units = self.read_instance.measurement_units[speci]
+        standard_parameter_speci = get_standard_parameters_by_speci(
+            speci, self.read_instance.ghost_version
+        )
+
+        grid_sum, grid_count = None, None
+        for filepath, time_indices, timestamps, file_lead_days in gridded_data["files"]:
+            # get timesteps of file inside period and of wanted lead day
+            wanted = (timestamps >= start.value) & (timestamps < end.value)
+            if lead_day is not None:
+                wanted &= (file_lead_days == lead_day) | (file_lead_days == 0)
+            if not wanted.any():
+                continue
+
+            with Dataset(filepath) as ds:
+                timestep_data, _, _ = self.read_model_dataset(
+                    ds,
+                    speci,
+                    obs_units,
+                    standard_parameter_speci,
+                    time_indices[wanted],
+                    first_file=False
                 )
 
-            block_end = block_start + len(time_indices)
-            data[sorted_positions[block_start:block_end]] = timestep_data
-            block_start = block_end
+            # stop reading if data could not be read, as files of the same model share structure
+            if timestep_data is None:
+                return None, None
 
-        return data, time[order], lead[order], lat, lon
+            # NaN values (fill values) add nothing to the sum or to the count
+            file_sum = np.nansum(timestep_data, axis=0, dtype=np.float64)
+            file_count = np.sum(~np.isnan(timestep_data), axis=0, dtype=np.int64)
+            if grid_sum is None:
+                grid_sum, grid_count = file_sum, file_count
+            else:
+                grid_sum += file_sum
+                grid_count += file_count
+
+        return grid_sum, grid_count
