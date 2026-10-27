@@ -1291,13 +1291,26 @@ class DataReader:
                         lead_days = get_map_lead_days(self.read_instance)
                         # forecast options are taken from the interpolated version of the model,
                         # without it the grid uses lead day 1
-                        if (len(self.read_instance.forecast) > 0) and (
-                            not get_gridded_model_base_data_labels(self.read_instance)
-                        ):
+                        base_data_labels = get_gridded_model_base_data_labels(self.read_instance)
+                        if (len(self.read_instance.forecast) > 0) and (not base_data_labels):
                             msg = (
                                 f"Forecast option {', '.join(self.read_instance.forecast)} is only "
                                 f"applied to interpolated models. {model} is not loaded interpolated, "
                                 "so its grid is drawn with lead day 1."
+                            )
+                            show_message(
+                                self.read_instance, msg, from_conf=self.read_instance.from_conf
+                            )
+                        # interpolated versions without data in the period have no forecast
+                        # days either, so the grid also falls back to lead day 1
+                        elif base_data_labels and not any(
+                            base_data_label in forecast_days
+                            for forecast_days in self.read_instance.forecast_days_per_data_label.values()
+                            for base_data_label in base_data_labels
+                        ):
+                            msg = (
+                                f"{', '.join(sorted(base_data_labels))} has no interpolated data "
+                                f"in the selected period, so the grid of {model} is drawn with lead day 1."
                             )
                             show_message(
                                 self.read_instance, msg, from_conf=self.read_instance.from_conf

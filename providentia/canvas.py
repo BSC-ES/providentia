@@ -1352,7 +1352,9 @@ class Canvas(FigureCanvas):
                 )
             ).T
 
-            # generate colourbar
+        # generate colourbar if there are valid stations or a grid, as the grid
+        # is drawn even when the selected data label has no valid stations
+        if (len(self.active_map_valid_station_inds) > 0) or (grid_stat is not None):
             resolved_vmin, resolved_vmax = generate_colourbar(
                 self.read_instance,
                 [self.plot_axes["map"]],
