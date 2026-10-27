@@ -115,9 +115,9 @@ if [[ $PARSED =~ "--interp" || $PARSED =~ "--interpolation" || $PARSED =~ "--int
 # 12 for download mode
 elif [[ $PARSED =~ "--download" || $PARSED =~ "--dl" ]]; then
     n_cpus=12
-# 1 for dashboard and report modes
+# 2 for dashboard and report modes
 else
-    n_cpus=1
+    n_cpus=2
 fi
 n_cpus_explicit=false
 
