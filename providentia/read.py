@@ -6,10 +6,9 @@ import datetime
 import multiprocessing
 import os
 import sys
-import time
 
 from dateutil.relativedelta import relativedelta
-from netCDF4 import Dataset, chartostring, date2index
+from netCDF4 import Dataset, chartostring
 import numpy as np
 import pandas as pd
 import yaml
@@ -1728,8 +1727,6 @@ class DataReader:
                 # only check model data labels
                 if data_label != self.read_instance.observations_data_label:
                     # split raw data label into model id and type
-                    # only the dashboard tags the interpolation mode onto the raw data
-                    # TODO: Remove separation when report / library can read gridded data
                     if "::" in data_label_raw:
                         # e.g. 'cams61_emep_ph2-eu-000::interpolated
                         model_id, _, model_type = data_label_raw.rpartition("::")
@@ -1738,7 +1735,7 @@ class DataReader:
                         # read here, it is read per date when the gridded map is drawn
                         if model_type == "gridded":
                             continue
-                    # in report and library modes read interpolated data only
+                    # if nothing is saved next to ::, assume it is interpolated
                     else:
                         model_id, model_type = data_label_raw, "interpolated"
 
@@ -2354,8 +2351,6 @@ class DataReader:
 
                     else:
                         # split raw data label into model id and type
-                        # only the dashboard tags the interpolation mode onto the raw data
-                        # TODO: Remove separation when report / library can read gridded data
                         if "::" in base_data_label_raw:
                             # e.g. 'cams61_emep_ph2-eu-000::interpolated
                             model_id, _, model_type = base_data_label_raw.rpartition("::")
@@ -2364,7 +2359,7 @@ class DataReader:
                             # read here, it is read per date when the gridded map is drawn
                             if model_type == "gridded":
                                 continue
-                        # in report and library modes read interpolated data only
+                        # if nothing is saved next to ::, assume it is interpolated
                         else:
                             model_id, model_type = base_data_label_raw, "interpolated"
 
@@ -3408,23 +3403,6 @@ class DataReader:
         if len(timesteps_to_read_intersect) == 0:
             return None
 
-        # warn if forecast runs are not 24 hours apart, as lead day N of each run is taken
-        # as the 24 hours from run start + (N-1) days, e.g. for lead day 1 the run of
-        # 2023010100 covers 2023-01-01 00:00 to 2023-01-01 23:00 and the run of
-        # 2023010200 covers 2023-01-02 00:00 to 2023-01-02 23:00
-        run_starts = pd.to_datetime(
-            sorted(ts for ts in timesteps_to_read_intersect if len(ts) == 10),
-            format="%Y%m%d%H",
-        )
-        run_diffs = run_starts[1:] - run_starts[:-1]
-        wrong_diffs = run_diffs[run_diffs != pd.Timedelta(days=1)]
-        if len(wrong_diffs) > 0:
-            msg = (
-                f"Forecast runs of {model_id} are expected to be 24 hours apart, "
-                f"but found differences of {', '.join(sorted({str(d) for d in wrong_diffs}))}."
-            )
-            show_message(self.read_instance, msg)
-
         obs_units = self.read_instance.measurement_units[speci]
         standard_parameter_speci = get_standard_parameters_by_speci(
             speci, self.read_instance.ghost_version
@@ -3494,7 +3472,6 @@ class DataReader:
         # of the day and lead day of each timestep
         grid_sum, grid_count = None, None
         lat, lon = None, None
-        cell_loop_time = 0
         for (filepath, time_indices), day_indices, file_lead_days in zip(
             file_blocks, day_blocks, lead_blocks
         ):
@@ -3528,22 +3505,11 @@ class DataReader:
 
             # add the timesteps of each (day, lead day) cell to its sum and count.
             # NaN values (fill values) add nothing to the sum or to the count
-            cell_loop_start = time.perf_counter()
             for day_index, lead_index in set(zip(day_indices, lead_indices)):
                 in_cell = (day_indices == day_index) & (lead_indices == lead_index)
                 cell_data = timestep_data[in_cell]
                 grid_sum[day_index, lead_index] += np.nansum(cell_data, axis=0)
                 grid_count[day_index, lead_index] += np.sum(~np.isnan(cell_data), axis=0, dtype=np.uint8)
-            cell_loop_time += time.perf_counter() - cell_loop_start
-
-            # faster alternative without the loop over cells. np.add.at is needed instead of
-            # grid_sum[idx] += values because many timesteps share a cell, and += would only
-            # keep the last of them
-            # valid = ~np.isnan(timestep_data)
-            # np.add.at(grid_sum, (day_indices, lead_indices), np.where(valid, timestep_data, 0))
-            # np.add.at(grid_count, (day_indices, lead_indices), valid.astype(np.uint8))
-
-        print(f"Time adding timesteps to (day, lead day) cells: {cell_loop_time:.2f} s")
 
         return grid_sum, grid_count, days, leads, lat, lon, files
 
