@@ -3511,6 +3511,10 @@ class DataReader:
                 grid_sum[day_index, lead_index] += np.nansum(cell_data, axis=0)
                 grid_count[day_index, lead_index] += np.sum(~np.isnan(cell_data), axis=0, dtype=np.uint8)
 
+            # free data of this file before reading the next one, so the data of
+            # two files is never in memory at the same time
+            del timestep_data, cell_data
+
         return grid_sum, grid_count, days, leads, lat, lon, files
 
     def read_gridded_timesteps(self, speci, start, end, lead_day=None):
