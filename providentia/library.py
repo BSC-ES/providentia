@@ -1387,8 +1387,17 @@ class Providentia:
         else:
             inds_array = self.valid_station_inds
 
-        if labela != "":
-            labela_station_inds = inds_array[networkspeci][labela]
+        # a gridded forecast label has no station data, so its map shows the observations
+        # over its grid (see make_map), whose stations are counted
+        station_labela = labela
+        if (base_plot_type == "map") and raw_per_data_label.get(labela, "").endswith("::gridded"):
+            if self.observations_data_label in self.data_labels:
+                station_labela = self.observations_data_label
+            else:
+                station_labela = ""
+
+        if station_labela != "":
+            labela_station_inds = inds_array[networkspeci][station_labela]
             if labelb == "":
                 station_inds = copy.deepcopy(labela_station_inds)
             else:

@@ -698,6 +698,14 @@ class Plotting:
             # only gridded show square only
             # the ' (gridded)' suffix is dropped from the legend text (an alias has none)
             elif is_gridded:
+                # in day forecast mode the grid only has the map label's lead day,
+                # so other forecast days of a gridded model loaded alone are left out
+                if (
+                    (map_grid_lead_day is not None)
+                    and (data_label != map_grid_data_label)
+                    and (get_data_label_lead_day(self.read_instance, data_label) is not None)
+                ):
+                    continue
                 square_handle, _ = self.make_model_handles(
                     plot_characteristics_legend, data_label
                 )
@@ -744,6 +752,11 @@ class Plotting:
 
         grid_edge_polygons = []
 
+        # get raw data labels, as only they carry the interpolation mode (an alias has no ' (gridded)')
+        raw_per_data_label = dict(
+            zip(self.read_instance.data_labels, self.read_instance.data_labels_raw)
+        )
+
         # iterate through read models and plot grid domain edges on map
         for model in data_labels:
             if model != self.read_instance.observations_data_label:
@@ -757,7 +770,7 @@ class Plotting:
                     continue
                 
                 # grid domain is plotted only from interpolated data label if loaded
-                if 'gridded' in model:
+                if raw_per_data_label.get(model, "").endswith("::gridded"):
                     continue
 
                 # create matplotlib polygon object from model grid edge map projection coordinates
@@ -1355,6 +1368,17 @@ class Plotting:
             Extent the map will be shown at, used to size the markers against
             the stations that will actually be on show.
         """
+
+        # a gridded forecast label has no station data, so its map shows the observations
+        # (if loaded) over the grid of its lead day (passed in var)
+        raw_per_data_label = dict(
+            zip(self.read_instance.data_labels, self.read_instance.data_labels_raw)
+        )
+        if raw_per_data_label.get(labela, "").endswith("::gridded"):
+            if self.read_instance.observations_data_label in self.read_instance.data_labels:
+                labela = self.read_instance.observations_data_label
+            else:
+                labela = ""
 
         # if not only model gridded data is loaded
         if labela or labelb:

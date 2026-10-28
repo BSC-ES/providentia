@@ -56,6 +56,8 @@ from .read_aux import (
     check_for_ghost,
     get_default_qa,
     generate_file_trees,
+    get_data_label_lead_day,
+    get_model_id,
     get_valid_models,
     get_valid_obs_files_in_date_range,
     get_temporal_resolution_order,
@@ -2739,7 +2741,7 @@ class Dashboard(QtWidgets.QWidget):
     def get_forecast_selections(self):
         """
         Get the forecast options and days selected in the models menu for each selected
-        interpolated model with forecast data (gridded models follow their interpolated ones).
+        model with forecast data (gridded models loaded interpolated follow their interpolated ones).
 
         Returns
         -------
@@ -2749,31 +2751,42 @@ class Dashboard(QtWidgets.QWidget):
         """
 
         forecast_selections = {}
-        for mod in self.models_menu["models"]["keep_selected"]["interpolated"]:
-            # get the data label the forecast options of the model are stored under
-            # (the alias set in the .conf file when there is one)
-            model = "{}::interpolated".format(mod)
-            if model not in self.models_menu["models"]["forecast"]:
-                model = self.init_models[model] if model in self.init_models else mod
-            if model not in self.models_menu["models"]["forecast"]:
-                continue
+        selected_models = self.models_menu["models"]["keep_selected"]
+        for model_type in ["interpolated", "gridded"]:
+            for mod in selected_models[model_type]:
+                # gridded models loaded interpolated follow the forecast options of their interpolated versions
+                if (model_type == "gridded") and (mod in selected_models["interpolated"]):
+                    continue
 
-            # skip models without forecast data, as forecast options do not apply to them
-            available_forecast_days = self.models_menu["models"]["forecast_days"][model][0]
-            if len(available_forecast_days) == 0:
-                continue
+                # get the data label the forecast options of the model are stored under
+                # (the alias set in the .conf file when there is one)
+                model = "{}::{}".format(mod, model_type)
+                if model not in self.models_menu["models"]["forecast"]:
+                    if model in self.init_models:
+                        model = self.init_models[model]
+                    elif model_type == "gridded":
+                        model = "{} (gridded)".format(mod)
+                    else:
+                        model = mod
+                if model not in self.models_menu["models"]["forecast"]:
+                    continue
 
-            # get selected forecast options and days, taking all days if none or all are selected
-            selected_forecast_options = tuple(sorted(self.models_menu["models"]["forecast"][model][1]))
-            selected_forecast_days = tuple(sorted(
-                (day.split("day")[-1].strip()
-                 for day in self.models_menu["models"]["forecast_days"][model][1]),
-                key=int,
-            ))
-            if len(selected_forecast_days) in [0, len(available_forecast_days)]:
-                selected_forecast_days = "all"
+                # skip models without forecast data, as forecast options do not apply to them
+                available_forecast_days = self.models_menu["models"]["forecast_days"][model][0]
+                if len(available_forecast_days) == 0:
+                    continue
 
-            forecast_selections[model] = (selected_forecast_options, selected_forecast_days)
+                # get selected forecast options and days, taking all days if none or all are selected
+                selected_forecast_options = tuple(sorted(self.models_menu["models"]["forecast"][model][1]))
+                selected_forecast_days = tuple(sorted(
+                    (day.split("day")[-1].strip()
+                     for day in self.models_menu["models"]["forecast_days"][model][1]),
+                    key=int,
+                ))
+                if len(selected_forecast_days) in [0, len(available_forecast_days)]:
+                    selected_forecast_days = "all"
+
+                forecast_selections[model] = (selected_forecast_options, selected_forecast_days)
 
         return forecast_selections
 
@@ -2958,9 +2971,23 @@ class Dashboard(QtWidgets.QWidget):
                 data_labels_raw = [self.observations_data_label] + list(models.keys())
             self.forecast = []
 
+            # models selected interpolated, as their gridded versions follow their forecast options
+            interpolated_model_ids = {
+                get_model_id(model_raw)
+                for model_raw in models
+                if not model_raw.endswith("::gridded")
+            }
+
             for model_raw, model in models.items():
-                # skip gridded models as they have no forecast options
-                if model_raw.endswith("::gridded"):
+                # skip gridded models loaded interpolated, as they follow the forecast
+                # options of their interpolated versions
+                if model_raw.endswith("::gridded") and (
+                    get_model_id(model_raw) in interpolated_model_ids
+                ):
+                    continue
+
+                # skip models without forecast options in the menu (no data in the period)
+                if model not in self.models_menu["models"]["forecast"]:
                     continue
 
                 # get available and selected forecast options
@@ -3245,13 +3272,28 @@ class Dashboard(QtWidgets.QWidget):
             # generate list of sorted z1/z2 data arrays names in memory, putting observations
             # before models if they are loaded, and empty string item as first element in z2 array list
             # (for changing from 'difference' statistics to 'absolute')
-            # do not include gridded data labels as options
-            label_options = [label for label in self.data_labels if "gridded" not in label]
+            # do not include gridded data labels as options, except the forecast days of a gridded
+            # model loaded without its interpolated version for z1 (drawn over the observations),
+            # as they have no station data to compute a bias with
+            raw_per_data_label = dict(zip(self.data_labels, self.data_labels_raw))
+            label_options = [
+                label
+                for label in self.data_labels
+                if (not raw_per_data_label[label].endswith("::gridded"))
+                or (get_data_label_lead_day(self, label) is not None)
+            ]
             if self.observations_data_label in label_options:
                 label_options.remove(self.observations_data_label)
                 label_options.insert(0, self.observations_data_label)
             self.z1_arrays = np.array(label_options)
-            self.z2_arrays = np.append([""], self.z1_arrays)
+            self.z2_arrays = np.append(
+                [""],
+                [
+                    label
+                    for label in label_options
+                    if not raw_per_data_label[label].endswith("::gridded")
+                ],
+            )
 
             # get elements whose abilities depend on having or not only gridded model data
             elements = {self.mpl_canvas.map_z1: "combobox", 

@@ -1957,6 +1957,15 @@ class DataReader:
                     data_label
                 ][1] = []
 
+        # models loaded interpolated, as their gridded versions are read for the forecast
+        # days of the interpolated versions, so are not split into forecast labels
+        interpolated_model_ids = {
+            get_model_id(data_label_raw)
+            for data_label_raw in selected_data_labels_raw
+            if (data_label_raw != self.read_instance.observations_data_label)
+            and (not data_label_raw.endswith("::gridded"))
+        }
+
         # forecast options set in the model field are applied to all models, so throw error if
         # models with forecast data have different ones (models without forecast data are skipped),
         # only when reading from a configuration file, as dashboard selections are checked when reading
@@ -1967,8 +1976,11 @@ class DataReader:
             forecasts_per_forecast_model = {}
             for networkspeci in networkspecies:
                 for data_label, data_label_raw in zip(data_labels, data_labels_raw):
-                    if (data_label == self.read_instance.observations_data_label) or (
-                        data_label_raw.endswith("::gridded")
+                    if data_label == self.read_instance.observations_data_label:
+                        continue
+                    # gridded models loaded interpolated follow their interpolated versions
+                    if data_label_raw.endswith("::gridded") and (
+                        get_model_id(data_label_raw) in interpolated_model_ids
                     ):
                         continue
                     if self.read_instance.forecast_days_per_data_label[networkspeci].get(data_label, 0) == 0:
@@ -1986,15 +1998,6 @@ class DataReader:
                 error += "forecast data, or be set in the 'forecast' field."
                 self.read_instance.logger.error(error)
                 sys.exit(1)
-
-        # models loaded interpolated, as their gridded versions are read for the forecast
-        # days of the interpolated versions, so are not split into forecast labels
-        interpolated_model_ids = {
-            get_model_id(data_label_raw)
-            for data_label_raw in selected_data_labels_raw
-            if (data_label_raw != self.read_instance.observations_data_label)
-            and (not data_label_raw.endswith("::gridded"))
-        }
 
         # iterate over each network species
         for networkspeci in networkspecies:
