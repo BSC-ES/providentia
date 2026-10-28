@@ -18,6 +18,7 @@ from .calculate import Stats, ModBias
 from .configuration import split_options
 from .fields_menus import update_metadata_fields
 from .plot_aux import update_plotting_parameters
+from .read_aux import remove_forecast_suffix, replace_forecast_suffix
 from .statistics import merge_forecast_days, get_z_statistic_info, exceedance_lim
 from .warnings_prv import show_message
 
@@ -1259,7 +1260,7 @@ class DataFilter:
 
         # Extract base labels by removing '-daily' and '-combined' suffixes from data_labels
         base_data_labels = [
-            label.split("-daily")[0].split("-combined")[0]
+            remove_forecast_suffix(label)
             for label in self.read_instance.data_labels
         ]
         # Keep unique base labels while preserving order
@@ -1342,11 +1343,11 @@ class DataFilter:
         for mod_raw, mod in self.read_instance.experiments.items():
             if ("-daily" in mod) or ("-combined" in mod):
                 if self.read_instance.daily_forecast:
-                    new_mod = f"{mod.split('-daily')[0]}-daily"
-                    new_mod_raw = f"{mod_raw.split('-daily')[0]}-daily"
+                    new_mod = replace_forecast_suffix(mod, "daily")
+                    new_mod_raw = replace_forecast_suffix(mod_raw, "daily")
                 elif self.read_instance.combined_forecast:
-                    new_mod = f"{mod.split('-combined')[0]}-combined"
-                    new_mod_raw = f"{mod_raw.split('-combined')[0]}-combined"
+                    new_mod = replace_forecast_suffix(mod, "combined")
+                    new_mod_raw = replace_forecast_suffix(mod_raw, "combined")
                 if new_mod_raw not in new_models:
                     new_models[new_mod_raw] = new_mod
                 data_labels_to_remove.append(mod)

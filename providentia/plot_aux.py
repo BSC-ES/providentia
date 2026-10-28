@@ -27,6 +27,7 @@ from providentia.auxiliar import (
     get_standard_parameters_by_speci,
 )
 from .dashboard_elements import CheckDialog, MessageBox
+from .read_aux import remove_forecast_suffix
 from .statistics import (
     boxplot_inner_fences,
     calculate_statistic,
@@ -309,7 +310,7 @@ def update_plotting_parameters(
         # Extract unique base labels, stripping '-day', '-daily', '-combined' suffixes
         unique_base_data_labels = np.unique(
             [
-                data_label.split("-day")[0].split("-daily")[0].split("-combined")[0]
+                remove_forecast_suffix(data_label)
                 for data_label in data_labels_to_add
             ]
         )
@@ -345,11 +346,7 @@ def update_plotting_parameters(
 
                     # iterate through data labels to add
                     for data_label in data_labels_to_add:
-                        base_data_label = (
-                            data_label.split("-day")[0]
-                            .split("-daily")[0]
-                            .split("-combined")[0]
-                        )
+                        base_data_label = remove_forecast_suffix(data_label)
 
                         if (base_data_label == unique_base_data_label) & (
                             data_label not in processed_data_labels

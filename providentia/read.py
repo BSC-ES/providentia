@@ -33,6 +33,7 @@ from .fields_menus import (
 )
 from .plot_aux import update_plotting_parameters
 from .read_aux import (
+    add_forecast_suffix,
     check_for_ghost,
     get_default_qa,
     get_forecast_run_mask,
@@ -45,6 +46,8 @@ from .read_aux import (
     model_file_overlaps_period,
     read_netcdf_data,
     read_netcdf_metadata,
+    remove_forecast_suffix,
+    replace_forecast_suffix,
     check_forecast_dimension,
     time_var_to_asi8,
 )
@@ -1279,11 +1282,11 @@ class DataReader:
             mods_printed = []
             for model, alias in self.read_instance.experiments.items():
                 if "-daily" in model:
-                    model = "{}-daily".format(model.split("-daily")[0])
-                    alias = "{}-daily".format(alias.split("-daily")[0])
+                    model = replace_forecast_suffix(model, "daily")
+                    alias = replace_forecast_suffix(alias, "daily")
                 if "-combined" in model:
-                    model = "{}-combined".format(model.split("-combined")[0])
-                    alias = "{}-combined".format(alias.split("-combined")[0])
+                    model = replace_forecast_suffix(model, "combined")
+                    alias = replace_forecast_suffix(alias, "combined")
                 if model not in mods_printed:
                     str_model = f" - {model}"
                     # gridded models are read for the forecast days of the interpolated models
@@ -1744,9 +1747,38 @@ class DataReader:
                         # e.g. 'cams61_emep_ph2-eu-000::interpolated
                         model_id, _, model_type = data_label_raw.rpartition("::")
 
-                        # gridded data has no stations, so it is not
-                        # read here, it is read per date when the gridded map is drawn
+                        # gridded files have no forecast_day dimension, so their lead days
+                        # are counted from the time axis of the first file in the period
                         if model_type == "gridded":
+                            domain = model_id.rsplit("-", 2)[1]
+                            file_root_key = (model_type, model_id, speci)
+                            if (
+                                file_root_key
+                                not in self.read_instance.available_model_data_file_roots
+                            ):
+                                continue
+                            try:
+                                available_timesteps = self.read_instance.available_model_data[
+                                    model_type
+                                ][domain][resolution][speci][model_id]
+                            except KeyError:
+                                continue
+
+                            # get files inside the months to read
+                            yearmonths_to_read_str = {str(yyyymm) for yyyymm in yearmonths_to_read}
+                            timesteps_to_read_intersect = sorted(
+                                ts for ts in available_timesteps
+                                if ts[:6] in yearmonths_to_read_str
+                            )
+                            if len(timesteps_to_read_intersect) == 0:
+                                continue
+
+                            files_to_read[data_label] = (
+                                self.read_instance.available_model_data_file_roots[
+                                    file_root_key
+                                ].format(date=timesteps_to_read_intersect[0]),
+                                timesteps_to_read_intersect[0],
+                            )
                             continue
                     # if nothing is saved next to ::, assume it is interpolated
                     else:
@@ -1781,13 +1813,17 @@ class DataReader:
                     if len(yearmonths_to_read_intersect) == 0:
                         continue
 
-                    files_to_read[data_label] = sorted(
-                        [
-                            file_root + str(yyyymm) + ".nc"
-                            for yyyymm in yearmonths_to_read_intersect
-                        ]
-                    )[0]
-            
+                    # interpolated files have no timestep, their lead days are in the forecast dimension
+                    files_to_read[data_label] = (
+                        sorted(
+                            [
+                                file_root + str(yyyymm) + ".nc"
+                                for yyyymm in yearmonths_to_read_intersect
+                            ]
+                        )[0],
+                        None,
+                    )
+
             # read forecast dimension for each model
             if len(files_to_read) == 0:
                 continue
@@ -1981,6 +2017,9 @@ class DataReader:
                     not in self.read_instance.forecast_days_per_data_label[networkspeci]
                 ):
                     continue
+                # TODO: remove when gridded labels get their own forecast options
+                if data_label_raw.endswith("::gridded"):
+                    continue
                 # get number of forecast days for this label
                 n_forecast_days = self.read_instance.forecast_days_per_data_label[
                     networkspeci
@@ -2020,13 +2059,13 @@ class DataReader:
                         if wanted_forecast_days[0] in ["combined", "daily", "day"]:
                             for wanted_forecast_index in range(n_forecast_days):
                                 # create new label names with forecast day index
-                                new_data_label = "{}-{}{}".format(
-                                    data_label, forecast_type, wanted_forecast_index + 1
+                                new_data_label = add_forecast_suffix(
+                                    data_label,
+                                    "{}{}".format(forecast_type, wanted_forecast_index + 1),
                                 )
-                                new_data_label_raw = "{}-{}{}".format(
+                                new_data_label_raw = add_forecast_suffix(
                                     data_label_raw,
-                                    forecast_type,
-                                    wanted_forecast_index + 1,
+                                    "{}{}".format(forecast_type, wanted_forecast_index + 1),
                                 )
                                 # map new labels to forecast indices
                                 self.read_instance.forecast_indices_per_data_label[
@@ -2050,13 +2089,13 @@ class DataReader:
                             for wanted_forecast_day in wanted_forecast_days:
                                 if wanted_forecast_day <= n_forecast_days:
                                     # create new forecast label for that specific day
-                                    new_data_label = "{}-{}{}".format(
-                                        data_label, forecast_type, wanted_forecast_day
+                                    new_data_label = add_forecast_suffix(
+                                        data_label,
+                                        "{}{}".format(forecast_type, wanted_forecast_day),
                                     )
-                                    new_data_label_raw = "{}-{}{}".format(
+                                    new_data_label_raw = add_forecast_suffix(
                                         data_label_raw,
-                                        forecast_type,
-                                        wanted_forecast_day,
+                                        "{}{}".format(forecast_type, wanted_forecast_day),
                                     )
                                     # store forecast index (zero-based)
                                     self.read_instance.forecast_indices_per_data_label[
@@ -2117,11 +2156,7 @@ class DataReader:
                         unique_data_labels_to_add, unique_data_labels_raw_to_add
                     ):
                         # find base label before forecast suffix
-                        base_data_label_to_add = (
-                            data_label_to_add.split("-day")[0]
-                            .split("-daily")[0]
-                            .split("-combined")[0]
-                        )
+                        base_data_label_to_add = remove_forecast_suffix(data_label_to_add)
                         if base_data_label_to_add == data_label:
                             new_data_labels.append(data_label_to_add)
                             new_data_labels_raw.append(data_label_raw_to_add)
@@ -2300,14 +2335,8 @@ class DataReader:
                 ]
 
                 # get base data label and data label raw (i.e. without -dayN or -daily or -combined suffix for forecast data)
-                base_data_label = (
-                    data_label.split("-day")[0].split("-daily")[0].split("-combined")[0]
-                )
-                base_data_label_raw = (
-                    data_label_raw.split("-day")[0]
-                    .split("-daily")[0]
-                    .split("-combined")[0]
-                )
+                base_data_label = remove_forecast_suffix(data_label)
+                base_data_label_raw = remove_forecast_suffix(data_label_raw)
 
                 # if already have base data label in files_to_read, then continue
                 if base_data_label in self.read_instance.files_to_read[networkspeci]:
