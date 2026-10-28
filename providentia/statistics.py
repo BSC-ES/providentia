@@ -594,19 +594,19 @@ def get_gridded_statistic(
     if gridded_data is None:
         return grid_stat, grid_lat, grid_lon
 
-    grid_var, grid_time, grid_lead, grid_lat, grid_lon = (
-        gridded_data[key] for key in ("data", "time", "lead", "lat", "lon")
+    grid_sum, grid_count, grid_day, grid_lead, grid_lat, grid_lon = (
+        gridded_data[key] for key in ("sum", "count", "day", "lead", "lat", "lon")
     )
 
     # in day forecast mode, use only the lead day of the selected data label
     lead_day = get_data_label_lead_day(read_instance, data_label)
     if lead_day is not None:
-        # keep timesteps of the lead day and of files that are not forecast runs (lead 0).
-        # Boolean masking keeps the order, so grid_time stays sorted for searchsorted
-        lead_mask = (grid_lead == lead_day) | (grid_lead == 0)
-        if not lead_mask.any():
+        # keep the lead day and files that are not forecast runs (lead 0)
+        lead_indices = np.flatnonzero((grid_lead == lead_day) | (grid_lead == 0))
+        if len(lead_indices) == 0:
             return grid_stat, grid_lat, grid_lon
-        grid_var, grid_time = grid_var[lead_mask], grid_time[lead_mask]
+    else:
+        lead_indices = np.arange(len(grid_lead))
 
     # get start (inclusive) and end (exclusive) of period, all loaded period by default
     if date_range is not None:
@@ -617,19 +617,16 @@ def get_gridded_statistic(
             read_instance.active_frequency_code
         )
 
-    # read specific timestep
+    # sum and count of valid values at each grid cell, to calculate the mean
+    total_sum, total_count = None, None
+
+    # read specific timestep on the fly, as only daily sums are kept in memory.
+    # All lead days covering the timestamp are averaged (only one in day forecast mode)
     if date and hour is not None:
         target_timestamp = pd.Timestamp(date) + pd.Timedelta(hours=int(hour))
-
-        # get start (inclusive) and end (exclusive) index of timestamp in sorted times,
-        # covering all its repetitions (one per lead day that covers it)
-        target = target_timestamp.to_datetime64()
-        start_index = np.searchsorted(grid_time, target, side="left")
-        end_index = np.searchsorted(grid_time, target, side="right")
-
-        # average all lead days covering the timestamp (only one in day forecast mode)
-        if end_index > start_index:
-            grid_stat = np.nanmean(grid_var[start_index:end_index], axis=0)
+        total_sum, total_count = read_instance.datareader.read_gridded_timesteps(
+            speci, target_timestamp, target_timestamp + pd.Timedelta(hours=1), lead_day
+        )
 
     # calculate statistic
     elif zstat:
@@ -637,14 +634,47 @@ def get_gridded_statistic(
             msg = f"Statistic '{zstat}' is not supported for gridded data. Only 'Mean' is supported."
             show_message(read_instance, msg)
         else:
-            # get start (inclusive) and end (exclusive) index of period in sorted times
-            start_index, end_index = np.searchsorted(
-                grid_time, [start.to_datetime64(), end.to_datetime64()], side="left"
-            )
+            # full days inside the period are taken from the daily sums, and partial days
+            # at its edges (e.g. starting at 10:00) are read on the fly, so the mean is exact
+            first_full_day, end_full_day = start.ceil("D"), end.floor("D")
+            if first_full_day < end_full_day:
+                day_start, day_end = np.searchsorted(
+                    grid_day, [first_full_day.to_datetime64(), end_full_day.to_datetime64()]
+                )
 
-            # calculate the mean at each grid cell
-            if end_index > start_index:
-                grid_stat = np.nanmean(grid_var[start_index:end_index], axis=0)
+                # sum one lead day at a time, as slices are views and the daily sums are
+                # not copied (indexing with lead_indices would copy them). Counts are summed
+                # as int64, as their uint8 would overflow over more than 10 days
+                total_sum = np.zeros(grid_sum.shape[2:], dtype=np.float64)
+                total_count = np.zeros(grid_count.shape[2:], dtype=np.int64)
+                for lead_index in lead_indices:
+                    total_sum += grid_sum[day_start:day_end, lead_index].sum(axis=0, dtype=np.float64)
+                    total_count += grid_count[day_start:day_end, lead_index].sum(axis=0, dtype=np.int64)
+
+                partial_periods = [(start, first_full_day), (end_full_day, end)]
+
+            # no full day inside the period (e.g. from 10:00 to 14:00), read all on the fly
+            else:
+                partial_periods = [(start, end)]
+
+            for partial_start, partial_end in partial_periods:
+                if partial_start >= partial_end:
+                    continue
+                partial_sum, partial_count = read_instance.datareader.read_gridded_timesteps(
+                    speci, partial_start, partial_end, lead_day
+                )
+                if partial_sum is None:
+                    continue
+                if total_sum is None:
+                    total_sum, total_count = partial_sum, partial_count
+                else:
+                    total_sum += partial_sum
+                    total_count += partial_count
+
+    # calculate the mean at each grid cell, NaN where there are no valid values
+    if (total_count is not None) and (total_count > 0).any():
+        grid_stat = np.full(total_sum.shape, np.nan)
+        np.divide(total_sum, total_count, out=grid_stat, where=total_count > 0)
 
     return grid_stat, grid_lat, grid_lon
 

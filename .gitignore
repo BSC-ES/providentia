@@ -25,3 +25,4 @@ trainings/.ipynb_checkpoints
 trainings/data/output/**/*.nc
 trainings/data/output/**/*.png
 trainings/data/.ipynb_checkpoints
+CLAUDE.md

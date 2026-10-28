@@ -115,9 +115,9 @@ if [[ $PARSED =~ "--interp" || $PARSED =~ "--interpolation" || $PARSED =~ "--int
 # 12 for download mode
 elif [[ $PARSED =~ "--download" || $PARSED =~ "--dl" ]]; then
     n_cpus=12
-# 1 for dashboard and report modes
+# 2 for dashboard and report modes
 else
-    n_cpus=1
+    n_cpus=2
 fi
 n_cpus_explicit=false
 
@@ -370,6 +370,31 @@ initialise_conda() {
     fi
 }
 
+# run a command that executes Providentia in a SLURM job, and if the job is killed for
+# running out of memory, suggest to request more CPUs (memory is assigned per CPU)
+run_with_oom_hint() {
+    local command="$1"
+    local stderr_log=$(mktemp)
+    local status=0
+
+    # keep showing stderr in the terminal while saving a copy to look for the OOM message
+    eval "${command}" 2> >(tee "$stderr_log" >&2) || status=$?
+    # wait for tee to finish writing before reading the copy
+    wait $! 2>/dev/null || true
+
+    # only suggest more CPUs in dashboard and report modes
+    if ! $download && grep -qE "oom_kill|Out Of Memory" "$stderr_log"; then
+        suggested_cpus=$(( n_cpus < 4 ? 4 : n_cpus * 2 ))
+        echo ""
+        echo "ERROR: Providentia was killed because it ran out of memory (job had ${n_cpus} CPUs)."
+        echo "On HPC machines memory is assigned per CPU, so request more CPUs, e.g. --n_cpus=${suggested_cpus},"
+        echo "or use a high memory node with --constraint=highmem."
+    fi
+
+    rm -f "$stderr_log"
+    return $status
+}
+
 # execution
 # Marenostrum5
 if [ "${BSC_MACHINE}" == "mn5" ]; then
@@ -429,13 +454,13 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
             
             else
                 if $debugexec; then
-                    eval "srun ${account_option} ${python_command}"
+                    run_with_oom_hint "srun ${account_option} ${python_command}"
                 else
                     echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}, time ${time}"
                     if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
-                        eval "${salloc_command} ${account_option} ${queue_option} srun ${python_command}"
+                        run_with_oom_hint "${salloc_command} ${account_option} ${queue_option} srun ${python_command}"
                     else
-                        eval "${salloc_command} ${account_option} ${constraint_option} ${queue_option} srun ${python_command}"
+                        run_with_oom_hint "${salloc_command} ${account_option} ${constraint_option} ${queue_option} srun ${python_command}"
                     fi
                 fi
             fi
@@ -526,13 +551,13 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
             
             else
                 if $debugexec; then
-                    eval "srun ${account_option} ${python_command}"
+                    run_with_oom_hint "srun ${account_option} ${python_command}"
                 else
                     echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}, time ${time}"
                     if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
-                        eval "${salloc_command} ${account_option} ${queue_option} srun ${python_command}"
+                        run_with_oom_hint "${salloc_command} ${account_option} ${queue_option} srun ${python_command}"
                     else
-                        eval "${salloc_command} ${account_option} ${constraint_option} ${queue_option} srun ${python_command}"
+                        run_with_oom_hint "${salloc_command} ${account_option} ${constraint_option} ${queue_option} srun ${python_command}"
                     fi
                 fi
             fi

@@ -1,5 +1,6 @@
 """ Auxiliary functions """
 
+import datetime
 import os
 import socket
 import sys
@@ -625,3 +626,61 @@ def join_unique(values, separator=","):
 
     values = [str(v) for v in values]
     return values[0] if len(set(values)) == 1 else separator.join(values)
+
+
+def to_datetime(date):
+    """
+    Converts a yyyymm, yyyymmdd or yyyymmddhh string to a datetime.
+    A yyyymm date is taken as the first day of that month.
+
+    Parameters
+    ----------
+    date : str
+        Date string
+
+    Returns
+    -------
+    datetime.datetime
+        Parsed date
+    """
+
+    if len(date) == 6:
+        date = f"{date}01"
+    return datetime.datetime.strptime(date[:8], "%Y%m%d")
+
+
+def file_in_date_range(file_date, start_date, end_date):
+    """
+    Checks if the period covered by a file overlaps [start_date, end_date).
+
+    A yyyymm file date is taken to cover that whole month, and a yyyymmdd(hh) file date
+    to cover that day. This keeps monthly files whose month starts before start_date
+    (e.g. a 202310 file for start_date 20231021).
+
+    Parameters
+    ----------
+    file_date : str
+        Date in the file name, as yyyymm, yyyymmdd or yyyymmddhh
+    start_date : str
+        Start date (inclusive), as yyyymm or yyyymmdd, or "*" for no limit
+    end_date : str
+        End date (exclusive), as yyyymm or yyyymmdd, or "*" for no limit
+
+    Returns
+    -------
+    bool
+        True if the file period overlaps the date range
+    """
+
+    file_start = to_datetime(file_date)
+    if len(file_date) == 6:
+        # first day of the next month
+        file_end = (file_start + datetime.timedelta(days=32)).replace(day=1)
+    else:
+        file_end = file_start + datetime.timedelta(days=1)
+
+    if start_date != "*" and file_end <= to_datetime(start_date):
+        return False
+    if end_date != "*" and file_start >= to_datetime(end_date):
+        return False
+    return True

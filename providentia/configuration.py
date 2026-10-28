@@ -1640,7 +1640,8 @@ class ProvConfiguration:
 
             # falls back to "plots", then the hardcoded default. Either way,
             # a single entry can be a report_plots.yaml preset name (a real
-            # plot type wins first) - only the first 4 are kept
+            # plot type wins first) - only the first 4 are kept, and if there are
+            # fewer, the empty positions are filled with "None"
             elif field == "dashboard_plots":
                 if current_value in [[], "", None]:
                     dashboard_plots = (
@@ -1661,7 +1662,12 @@ class ProvConfiguration:
                             + dashboard_plots.get("station", [])
                         )
                     )
-                setattr(self.read_instance, field, dashboard_plots[:4])
+                # the map is always in the first position of the dashboard, so drop it
+                dashboard_plots = [
+                    plot for plot in dashboard_plots if plot.split("-")[0] != "map"
+                ][:4]
+                dashboard_plots += ["None"] * (4 - len(dashboard_plots))
+                setattr(self.read_instance, field, dashboard_plots)
 
             # same as above, for report mode
             elif (field == "report_plots") and (current_value in [[], "", None]):
@@ -1911,6 +1917,12 @@ class ProvConfiguration:
             # YYYYMMDD
             elif len(date) == 8:
                 if self.read_instance.mode == "interpolation":
+                    # interpolation works per month, so round end date up to the next month
+                    # when it is not the first day (end date is exclusive)
+                    if date_var_name == "end_date" and date[6:8] != "01":
+                        date = (
+                            datetime.strptime(date[:6], "%Y%m") + relativedelta(months=1)
+                        ).strftime("%Y%m%d")
                     setattr(self.read_instance, date_var_name, date[:-2])
             # YYYYMM
             elif len(date) == 6:
@@ -2035,16 +2047,6 @@ class ProvConfiguration:
 
         # visualisation only validity checks
         if self.read_instance.mode not in ["download", "interpolation"]:
-            # check have 4 dashboard plots
-            if (
-                len(self.read_instance.dashboard_plots) != 4
-                and "dashboard_plots" in self.read_instance.default_values
-                and self.read_instance.mode == "dashboard"
-            ):
-                error = 'Error: There must be 4 dashboard plots set via "plots" or "dashboard_plots".'
-                self.read_instance.logger.error(error)
-                sys.exit(1)
-
             # do checks on filter_species
             filter_species_copy = copy.deepcopy(self.read_instance.filter_species)
             invalid_filter_species = []

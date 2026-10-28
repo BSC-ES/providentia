@@ -17,7 +17,7 @@ import yaml
 
 from .actris import Actris
 from .cams import Cams, cams_options
-from providentia.auxiliar import CURRENT_PATH, join
+from providentia.auxiliar import CURRENT_PATH, file_in_date_range, join
 from .configuration import ProvConfiguration, load_conf
 from .icap import ICAP
 from .read_aux import check_for_ghost
@@ -1969,17 +1969,10 @@ class Download(object):
 
         for nc_file in sorted(nc_files):
             if nc_file.endswith(".nc"):
-                ym = nc_file[:-3].split("_")[1]
+                file_date = nc_file[:-3].split("_")[1]
 
-                # from yyyymm to yyyymmdd
-                if len(ym) == 6:
-                    ym = "{}01".format(ym)
-                # from yyyymmddhh to yyyymmdd
-                elif len(ym) == 10:
-                    ym = ym[:-2]
-
-                # filter files out of the data range
-                if int(ym) >= int(self.start_date) and int(ym) < int(self.end_date):
+                # filter files whose period does not overlap the date range
+                if file_in_date_range(file_date, self.start_date, self.end_date):
                     valid_nc_files.append(nc_file)
 
         return valid_nc_files
