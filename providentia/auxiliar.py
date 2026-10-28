@@ -14,6 +14,18 @@ from .unit_converter import UnitConverter, get_molecular_mass
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = "/".join(CURRENT_PATH.split("/")[:-1])
 
+# timesteps per day of the model resolutions that can have forecast data, used to count
+# complete forecast days in the same way when reading and when interpolating
+TIMESTEPS_PER_DAY = {
+    "hourly": 24,
+    "hourly_instantaneous": 24,
+    "3hourly": 8,
+    "3hourly_instantaneous": 8,
+    "6hourly": 4,
+    "6hourly_instantaneous": 4,
+    "daily": 1,
+}
+
 # colourmap roles a statistic can need - see settings/colourmaps.yaml
 COLOURMAP_ROLES = [
     "sequential",

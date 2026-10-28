@@ -1837,7 +1837,7 @@ class DataReader:
                 continue
             else:
                 returned_data = [
-                    check_forecast_dimension(files) for files in files_to_read.values()
+                    check_forecast_dimension((*files, resolution)) for files in files_to_read.values()
                 ]
 
             # unzip returned data

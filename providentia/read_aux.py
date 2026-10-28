@@ -14,7 +14,7 @@ import pandas as pd
 import re
 import yaml
 
-from providentia.auxiliar import CURRENT_PATH, join
+from providentia.auxiliar import CURRENT_PATH, join, TIMESTEPS_PER_DAY
 from providentia.warnings_prv import show_message
 
 _CFTIME_CLASS = {
@@ -660,8 +660,9 @@ def check_forecast_dimension(tuple_arguments):
     Parameters
     ----------
     tuple_arguments : tuple
-        The file path to the NetCDF file being inspected, and the date in its filename
-        ('YYYYMM', 'YYYYMMDD' or 'YYYYMMDDHH') for gridded files, None for interpolated files.
+        The file path to the NetCDF file being inspected, the date in its filename
+        ('YYYYMM', 'YYYYMMDD' or 'YYYYMMDDHH') for gridded files, None for interpolated files,
+        and the resolution of the file (e.g. 'hourly'), the one gridded files are found under.
 
     Returns
     -------
@@ -670,7 +671,7 @@ def check_forecast_dimension(tuple_arguments):
     """
 
     # assign arguments from tuple to variables
-    relevant_file, timestep = tuple_arguments
+    relevant_file, timestep, resolution = tuple_arguments
 
     # read netCDF frame
     ncdf_root = Dataset(relevant_file)
@@ -680,14 +681,15 @@ def check_forecast_dimension(tuple_arguments):
         n_forecast_days = ncdf_root.dimensions["forecast_day"].size
     # gridded forecast runs (YYYYMMDDHH) have their lead days along the time axis
     elif (timestep is not None) and (len(timestep) == 10):
-        # get time elapsed from model initialisation to last timestep (ns)
-        run_start = pd.to_datetime(timestep, format="%Y%m%d%H")
-        last_offset = time_var_to_asi8(ncdf_root["time"]).max() - run_start.value
-
-        # as in get_forecast_run_mask, lead day N covers [run start + (N-1) days, run start + N days).
-        # Rounded up, so runs ending exactly at run start + N days (e.g. steps 0-96 h)
-        # have N lead days, not a 1-hour lead day N+1
-        n_forecast_days = max(1, int(np.ceil(last_offset / pd.Timedelta(days=1).value)))
+        # count complete lead days as the interpolation module does (number of timesteps
+        # divided by timesteps per day, rounded down), so a gridded model and its interpolated
+        # version agree. Runs shorter than a day, or in resolutions without forecasts
+        # (e.g. monthly), are taken as 1 lead day
+        n_timesteps = ncdf_root.dimensions["time"].size
+        if resolution in TIMESTEPS_PER_DAY:
+            n_forecast_days = max(1, n_timesteps // TIMESTEPS_PER_DAY[resolution])
+        else:
+            n_forecast_days = 1
     else:
         n_forecast_days = 0
 
