@@ -668,7 +668,8 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
     return True
 
 def export_basic_configuration(prv, cname, network=None, species=None, resolution=None,
-                               start_date=None, end_date=None, experiment=None):
+                               start_date=None, end_date=None, experiment=None,
+                               ghost_version=None):
     """
     Generates and writes a minimal configuration file (section DASHBOARD) containing only
     the fields network, species, resolution, start_date, end_date and experiments.
@@ -695,6 +696,8 @@ def export_basic_configuration(prv, cname, network=None, species=None, resolutio
         Experiment name, coming from model to interpolate on dashboard. If None, it is built
         from prv.experiments as a comma-separated list, followed by the aliases in brackets
         if there are any.
+    ghost_version : str, optional
+        GHOST version of the observations. If None, prv.ghost_version is used.
 
     Returns
     -------
@@ -714,6 +717,7 @@ def export_basic_configuration(prv, cname, network=None, species=None, resolutio
     resolution = prv.resolution if resolution is None else resolution
     start_date = prv.start_date if start_date is None else start_date
     end_date = prv.end_date if end_date is None else end_date
+    ghost_version = prv.ghost_version if ghost_version is None else ghost_version
 
     if experiment is None and prv.experiments:
         mods = []
@@ -733,7 +737,8 @@ def export_basic_configuration(prv, cname, network=None, species=None, resolutio
         "resolution": resolution,
         "start_date": start_date,
         "end_date": end_date,
-        "experiments": experiment
+        "experiments": experiment,
+        "ghost_version": ghost_version,
     }
 
     # write .conf file
