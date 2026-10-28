@@ -784,6 +784,35 @@ class Providentia:
                 show_message(self, msg)
                 return
 
+        # a gridded lead day has no station data to compute a bias with,
+        # so it can only be drawn as an absolute map (observations over its grid)
+        if base_plot_type == "map":
+            raw_per_data_label = dict(zip(self.data_labels, self.data_labels_raw))
+            gridded_label = next(
+                (
+                    label
+                    for label in (labela, labelb)
+                    if raw_per_data_label.get(label, "").endswith("::gridded")
+                ),
+                None,
+            )
+            if gridded_label is not None:
+                if z_statistic_sign == "bias":
+                    msg = (
+                        f"{gridded_label} is gridded data, which has no station data to compute "
+                        "a bias with. Not making plot."
+                    )
+                    show_message(self, msg)
+                    return
+                if (labela != "") and (labelb != ""):
+                    msg = (
+                        f"{gridded_label} is gridded data, which has no station data to compare "
+                        f"{labela if gridded_label == labelb else labelb} with. "
+                        f"Ignoring labelb ({labelb}) and plotting the map of {labela} only."
+                    )
+                    show_message(self, msg)
+                    labelb = ""
+
         # a stat-less taylor plot defaults to "r", as the dashboard does
         if (base_plot_type == "taylor") and (zstat is None):
             (

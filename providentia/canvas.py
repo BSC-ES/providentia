@@ -2100,6 +2100,15 @@ class Canvas(FigureCanvas):
                     if nonsensical_map_stat in z_stat_items:
                         z_stat_items = z_stat_items[z_stat_items != nonsensical_map_stat]
 
+            # a gridded lead day has no station data to compute a bias with,
+            # so it can only be drawn as an absolute map (observations over its grid)
+            raw_per_data_label = dict(
+                zip(self.read_instance.data_labels, self.read_instance.data_labels_raw)
+            )
+            z1_is_gridded = raw_per_data_label.get(selected_z1_array, "").endswith("::gridded")
+            if z1_is_gridded:
+                selected_z2_array = ""
+
             # remove selected z1/z2 items from opposite z2/z1 comboboxes (if have value
             # selected, i.e. z2 array not empty string)
             if selected_z2_array != "":
@@ -2109,10 +2118,13 @@ class Canvas(FigureCanvas):
                 )
             else:
                 z1_items = self.read_instance.z1_arrays
-            z2_items = np.delete(
-                self.read_instance.z2_arrays,
-                np.where(self.read_instance.z2_arrays == selected_z1_array)[0],
-            )
+            if z1_is_gridded:
+                z2_items = np.array([""])
+            else:
+                z2_items = np.delete(
+                    self.read_instance.z2_arrays,
+                    np.where(self.read_instance.z2_arrays == selected_z1_array)[0],
+                )
 
             # update all comboboxes (clear, then add items)
             self.map_z_stat.clear()
@@ -2129,6 +2141,13 @@ class Canvas(FigureCanvas):
             # maintain currently selected z1/z2 arrays
             self.map_z1.setCurrentText(selected_z1_array)
             self.map_z2.setCurrentText(selected_z2_array)
+
+            # disable z2 when it has nothing to choose apart from the empty item
+            # (gridded z1, only gridded data or only observations loaded)
+            if len(z2_items) > 1:
+                self.read_instance.enable_element(self.map_z2, "combobox")
+            else:
+                self.read_instance.disable_element(self.map_z2, "combobox")
 
             # a manually-typed colourbar limit rarely makes sense carried
             # over to a different statistic (a concentration range typed for
