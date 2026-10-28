@@ -953,6 +953,18 @@ class ProvConfiguration:
         # forecast options set in the model field per model, for interpolated and gridded versions
         model_forecasts = {}
 
+        # throw error if an alias contains the words used in data labels to find forecast options
+        # and gridded models (e.g. 'fc-daily', 'fc-day3', 'fc (gridded)'), as they would be taken as such
+        for alias in self.read_instance.alias:
+            forbidden_words = [
+                word for word in ["-daily", "-combined", "-day", "gridded"] if word in alias
+            ]
+            if forbidden_words:
+                error = f"Error: Model alias '{alias}' cannot contain {' or '.join(forbidden_words)}, "
+                error += "as these words mark forecast options and gridded models in data labels."
+                self.read_instance.logger.error(error)
+                sys.exit(1)
+
         # iterate through each model string
         for mod_ii, split_model in enumerate(split_models):
             # if model is composed by more than 4 parts, exit

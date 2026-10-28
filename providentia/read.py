@@ -1316,7 +1316,22 @@ class DataReader:
                             str_lead_days = "s {} and {}".format(", ".join(lead_days[:-1]), lead_days[-1])
                         else:
                             str_lead_days = f" {lead_days[0]}"
-                        str_model += f" (with data from lead day{str_lead_days})"
+                        # name the forecast option the lead days come from, only if it was applied to the
+                        # gridded model (it has forecast indices), otherwise lead day 1 is used by default.
+                        # The option type is taken from the first forecast entry, as in update_forecast_indices
+                        str_forecast = ""
+                        if any(
+                            indices
+                            for forecast_indices in self.read_instance.forecast_indices_per_data_label.values()
+                            for base_data_label, indices in forecast_indices.items()
+                            if base_data_label in base_data_labels
+                        ):
+                            forecast_type = next(
+                                fct for fct in ["day", "combined", "daily"]
+                                if fct in self.read_instance.forecast[0]
+                            )
+                            str_forecast = f"{forecast_type} option "
+                        str_model += f" ({str_forecast}with data from lead day{str_lead_days})"
                     elif self.read_instance.alias_flag:
                         str_model += f" ({alias})"
                     self.read_instance.logger.info(str_model)
@@ -2057,8 +2072,18 @@ class DataReader:
                             networkspeci, data_label, "", n_forecast_days, ""
                         )
                     else:
+                        # a gridded model loaded alone has no station data to merge per lead day,
+                        # so with daily and combined it is not split into forecast labels: its
+                        # forecast labels are only mapped to their indices below, which is where
+                        # its lead days are read from (get_map_lead_days). With day, each lead day
+                        # gets its own label, to be selected for the map
+                        split_data_label = not (
+                            data_label_raw.endswith("::gridded")
+                            and (forecast_type in ["daily", "combined"])
+                        )
+
                         # mark the data label for removal if it was selected (will be replaced by forecast versions)
-                        if data_label in selected_data_labels:
+                        if (data_label in selected_data_labels) and split_data_label:
                             data_labels_to_remove.append(data_label)
                             data_labels_raw_to_remove.append(data_label_raw)
 
@@ -2087,7 +2112,7 @@ class DataReader:
                                     wanted_forecast_days[0],
                                 )
                                 # if label was selected, add the new one to be displayed
-                                if data_label in selected_data_labels:
+                                if (data_label in selected_data_labels) and split_data_label:
                                     data_labels_to_add.append(new_data_label)
                                     data_labels_raw_to_add.append(new_data_label_raw)
 
@@ -2119,7 +2144,7 @@ class DataReader:
                                         wanted_forecast_day,
                                     )
                                     # if label was selected, add new label to lists
-                                    if data_label in selected_data_labels:
+                                    if (data_label in selected_data_labels) and split_data_label:
                                         data_labels_to_add.append(new_data_label)
                                         data_labels_raw_to_add.append(
                                             new_data_label_raw
