@@ -2476,9 +2476,34 @@ class PopUpWindow(QtWidgets.QWidget):
             ):
                 del self.read_instance.qa_per_species[speci]
 
-    def check_interpolation(self, timer, job_id, log_path, model_id, start_date, end_date, 
-                            resolution, networkspecies, label_ii, configuration_name,
-                            process=None):
+    def get_open_models_widget(self, element, model_id):
+        """
+        Get the widget of a model row in the models popup currently open.
+
+        Parameters
+        ----------
+        element : str
+            Type of widget in the model row ("run", "interpolated", "gridded", ...).
+        model_id : str
+            Name of the model of the row.
+
+        Returns
+        -------
+        QtWidget or None
+            Widget of the model row, or None if the popup currently open is not the
+            models menu or does not show that model.
+        """
+
+        open_window = self.read_instance.pop_up_window
+        if "models" not in open_window.page_memory:
+            return None
+        map_vars = open_window.menu_current["models"]["map_vars"]
+        if model_id not in map_vars:
+            return None
+        return open_window.page_memory["models"][element][list(map_vars).index(model_id)]
+
+    def check_interpolation(self, timer, job_id, log_path, model_id, start_date, end_date,
+                            resolution, networkspecies, configuration_name, process=None):
         """
         Checks if an interpolation launched from the dashboard has finished, and if so, updates the
         dashboard accordingly.
@@ -2511,8 +2536,6 @@ class PopUpWindow(QtWidgets.QWidget):
             Temporal resolution of the interpolation.
         networkspecies : list of str
             Network and species combinations requested, as network|species.
-        label_ii : int
-            Position of the model within the interpolated models menu, used to get its checkbox.
         configuration_name : str
             Configuration file name (created only for the interpolation)
         process : subprocess.Popen
@@ -2524,13 +2547,17 @@ class PopUpWindow(QtWidgets.QWidget):
             True if the interpolation has finished.
         """
 
-        run_button =self.read_instance.pop_up_window.page_memory["models"]["run"][label_ii]
+        # the models menu may have been closed, or replaced by another popup, while the
+        # interpolation runs: its widgets are only updated if it is the popup currently open
+        # (if not, they are rebuilt from active_interpolations when it is opened again)
+        run_button = self.get_open_models_widget("run", model_id)
 
         if self.read_instance.machine == "local":
             finished = process.poll() is not None
             if not finished:
-                run_button.setText(f"Running ({job_id})")
-                self.read_instance.active_interpolations[model_id] = f"Running {job_id}"
+                self.read_instance.active_interpolations[model_id] = f"Running ({job_id})"
+                if run_button is not None:
+                    run_button.setText(f"Running ({job_id})")
         else:
             result = subprocess.run(["squeue", "-h", "-j", job_id],
                                     capture_output=True, text=True)
@@ -2541,13 +2568,17 @@ class PopUpWindow(QtWidgets.QWidget):
                 finished = True
             else:
                 status_long_name = slurm_states[status]
-                run_button.setText(f"{status_long_name} ({job_id})")
                 self.read_instance.active_interpolations[model_id] = f"{status_long_name} ({job_id})"
+                if run_button is not None:
+                    run_button.setText(f"{status_long_name} ({job_id})")
 
         # If no longer running
         if finished:
 
             timer.stop()
+            
+            # free the timer (and the popup it keeps alive) now that it is no longer needed
+            timer.deleteLater()
 
             # Remove from active interpolations
             self.read_instance.active_interpolations.pop(model_id, None)
@@ -2599,10 +2630,11 @@ class PopUpWindow(QtWidgets.QWidget):
                     msg += f" Nothing interpolated for: {', '.join(missing)}. Check the log in {log_path}."
                 else:
                     # Enable interpolated model checkbox if anything was interpolated
-                    model_checkbox = self.read_instance.pop_up_window.page_memory["models"]["interpolated"][label_ii]
-                    model_checkbox.setEnabled(True)
-                    model_checkbox.setGraphicsEffect(None)
-                    model_checkbox.setToolTip("")
+                    model_checkbox = self.get_open_models_widget("interpolated", model_id)
+                    if model_checkbox is not None:
+                        model_checkbox.setEnabled(True)
+                        model_checkbox.setGraphicsEffect(None)
+                        model_checkbox.setToolTip("")
                 show_message(self.read_instance, msg)
             else:
                 # Interpolation did not produce files, allow retrying
@@ -2610,8 +2642,9 @@ class PopUpWindow(QtWidgets.QWidget):
                 show_message(self.read_instance, msg)
 
             # Enable interpolation button and update its text
-            self.read_instance.enable_element(run_button, "button_run", prefix="popup")
-            run_button.setText("Run")
+            if run_button is not None:
+                self.read_instance.enable_element(run_button, "button_run", prefix="popup")
+                run_button.setText("Run")
 
         return finished
 
@@ -2720,11 +2753,14 @@ class PopUpWindow(QtWidgets.QWidget):
             "management_logs",
             f"{job_id}.out",
         )
-        timer = QtCore.QTimer(self)
+        # the timer belongs to the dashboard, not to this popup: once another popup is
+        # opened, this one is no longer referenced and is garbage collected, which would
+        # delete its timer and silently stop checking the interpolation
+        timer = QtCore.QTimer(self.read_instance)
         timer.timeout.connect(
             lambda: self.check_interpolation(
-                timer, job_id, log_path, model_id, start_date, end_date, 
-                resolution, networkspecies, label_ii, configuration_name, process
+                timer, job_id, log_path, model_id, start_date, end_date,
+                resolution, networkspecies, configuration_name, process
             )
         )
 
@@ -2732,7 +2768,7 @@ class PopUpWindow(QtWidgets.QWidget):
         # (an interpolation can finish before the first check, e.g. if there is nothing to interpolate)
         finished = self.check_interpolation(
             timer, job_id, log_path, model_id, start_date, end_date,
-            resolution, networkspecies, label_ii, configuration_name, process
+            resolution, networkspecies, configuration_name, process
         )
         if not finished:
             timer.start(10000)
