@@ -3305,10 +3305,14 @@ class Dashboard(QtWidgets.QWidget):
                 toolbar_actions = self.navi_toolbar.actions()
 
             # only gridded model data is loaded?
-            if all("gridded" in label for label in self.data_labels):
+            if all(label_raw.endswith("::gridded") for label_raw in self.data_labels_raw):
                 # disable statistic comboboxes and station selection options on menu
                 for element, element_type in elements.items():
                     self.disable_element(element, element_type)
+                # except z1 if it lets choose the lead day whose grid is drawn
+                # (gridded model loaded alone in day forecast mode)
+                if len(self.z1_arrays) > 1:
+                    self.enable_element(self.mpl_canvas.map_z1, "combobox")
 
                 # disable lasso
                 if hasattr(self, 'navi_toolbar'):
