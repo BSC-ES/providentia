@@ -36,7 +36,7 @@ Gridded data is only read when clicking **READ** or when loading a configuration
 
 ## Forecast data
 
-Gridded data is read for the same forecast days selected for its interpolated version (e.g. days 2 and 4 for `day2, day4`, or the selected days for `daily` and `combined`), never for the ones of other models. If no forecast option is set, only the first forecast day is read, as for interpolated data. When forecast options are set in the model name, the gridded model must have the same one as its interpolated version (e.g. `a59g-regional-000-day3, a59g-regional-000-day3::gridded`), and cannot have one if it is not loaded interpolated. The lead days used are shown next to the gridded model in the terminal when reading, e.g. `a59g-regional-000::gridded (with data from lead days 2 and 4)`.
+Gridded data is read for the same forecast days selected for its interpolated version (e.g. days 2 and 4 for `day2, day4`, or the selected days for `daily` and `combined`), never for the ones of other models. If no forecast option is set, only the first forecast day is read, as for interpolated data. When forecast options are set in the model name, a gridded model loaded with its interpolated version must have the same one as it (e.g. `a59g-regional-000-day3, a59g-regional-000-day3::gridded`). The forecast option and lead days used are shown next to the gridded model in the terminal when reading, e.g. `a59g-regional-000::gridded (day option with data from lead days 2 and 4)`, or `a59g-regional-000::gridded (with data from lead day 1)` when no forecast option is applied to it.
 
 Lead day N of a forecast run covers the 24 hours that start N-1 days after the run starts, e.g. lead day 1 of the run of `2023010100` covers 2023-01-01 00:00 to 2023-01-01 23:00. Forecast runs are expected to be 24 hours apart, and a warning is shown if they are not.
 
@@ -65,7 +65,7 @@ When the observations or another model are selected for the map, they have no le
 
 `daily` and `combined` only differ in the timeseries plot: on the map, both the stations and the grid show the mean over all loaded lead days.
 
-If a model is loaded gridded only, forecast options set in the `forecast` field or for other models do not apply to it: its grid uses lead day 1 and a warning is shown. Where gridded models are shown in the legend, its entry is shown with a square only.
+If a model is loaded gridded only, it has its own forecast options, and its grid uses their lead days. With `day`, it gets one label per lead day, e.g. `fc-day2 (gridded)` and `fc-day4 (gridded)` for `day2, day4`, and each lead day gets its own map, in the dashboard (selected in `z1`) and in reports, showing the observations over the grid of that lead day, as the gridded model has no data at the stations. With `daily` and `combined`, it keeps its label (e.g. `fc (gridded)`) and the grid shows the average of the selected lead days. As it has no data at the stations, it does not switch the plots of station data to the forecast layout (e.g. the `daily` timeseries per forecast day): only models with forecast data at the stations do. Where gridded models are shown in the legend, its entry is shown with a square only. In `day` mode, only the lead day selected for the map is shown.
 
 ### Period
 

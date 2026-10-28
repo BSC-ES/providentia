@@ -26,6 +26,7 @@ from .read_aux import (
     get_chunk_size,
     get_periodic_nonrelevant_temporal_resolutions,
     get_periodic_relevant_temporal_resolutions,
+    remove_forecast_suffix,
 )
 from .warnings_prv import show_message
 
@@ -729,7 +730,7 @@ def merge_forecast_days(
             [
                 i
                 for i, lbl in enumerate(data_labels)
-                if lbl.startswith(base_label)
+                if remove_forecast_suffix(lbl) == base_label
                 and not read_instance.data_labels_raw[i].endswith("::gridded")
             ],
             dtype=np.int32,

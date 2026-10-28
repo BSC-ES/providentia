@@ -33,6 +33,7 @@ from .fields_menus import (
 )
 from .plot_aux import update_plotting_parameters
 from .read_aux import (
+    add_forecast_suffix,
     check_for_ghost,
     get_default_qa,
     get_forecast_run_mask,
@@ -45,6 +46,8 @@ from .read_aux import (
     model_file_overlaps_period,
     read_netcdf_data,
     read_netcdf_metadata,
+    remove_forecast_suffix,
+    replace_forecast_suffix,
     check_forecast_dimension,
     time_var_to_asi8,
 )
@@ -1279,39 +1282,45 @@ class DataReader:
             mods_printed = []
             for model, alias in self.read_instance.experiments.items():
                 if "-daily" in model:
-                    model = "{}-daily".format(model.split("-daily")[0])
-                    alias = "{}-daily".format(alias.split("-daily")[0])
+                    model = replace_forecast_suffix(model, "daily")
+                    alias = replace_forecast_suffix(alias, "daily")
                 if "-combined" in model:
-                    model = "{}-combined".format(model.split("-combined")[0])
-                    alias = "{}-combined".format(alias.split("-combined")[0])
+                    model = replace_forecast_suffix(model, "combined")
+                    alias = replace_forecast_suffix(alias, "combined")
+                # gridded models split into forecast labels are printed once, with their lead days
+                if model.endswith("::gridded"):
+                    model = remove_forecast_suffix(model)
                 if model not in mods_printed:
                     str_model = f" - {model}"
-                    # gridded models are read for the forecast days of the interpolated models
+                    # gridded models are read for the forecast days of their interpolated
+                    # versions, or of their own forecast labels when not loaded interpolated
                     if model.endswith("::gridded"):
                         lead_days = get_map_lead_days(self.read_instance)
-                        # forecast options are taken from the interpolated version of the model,
-                        # without it the grid uses lead day 1
                         base_data_labels = get_gridded_model_base_data_labels(self.read_instance)
-                        if (len(self.read_instance.forecast) > 0) and (not base_data_labels):
-                            msg = (
-                                f"Forecast option {', '.join(self.read_instance.forecast)} is only "
-                                f"applied to interpolated models. {model} is not loaded interpolated, "
-                                "so its grid is drawn with lead day 1."
-                            )
-                            show_message(
-                                self.read_instance, msg, from_conf=self.read_instance.from_conf
-                            )
-                        # interpolated versions without data in the period have no forecast
-                        # days either, so the grid also falls back to lead day 1
-                        elif base_data_labels and not any(
+                        # versions without data in the period have no forecast days,
+                        # so the grid falls back to lead day 1
+                        if base_data_labels and not any(
                             base_data_label in forecast_days
                             for forecast_days in self.read_instance.forecast_days_per_data_label.values()
                             for base_data_label in base_data_labels
                         ):
-                            msg = (
-                                f"{', '.join(sorted(base_data_labels))} has no interpolated data "
-                                f"in the selected period, so the grid of {model} is drawn with lead day 1."
+                            # base labels are the interpolated versions of the gridded model,
+                            # or the gridded model itself when it is not loaded interpolated
+                            loaded_interpolated = any(
+                                (not data_label_raw.endswith("::gridded"))
+                                and (get_model_id(data_label_raw) == get_model_id(model))
+                                for data_label_raw in self.read_instance.data_labels_raw
                             )
+                            if loaded_interpolated:
+                                msg = (
+                                    f"{', '.join(sorted(base_data_labels))} has no interpolated data "
+                                    f"in the selected period, so the grid of {model} is drawn with lead day 1."
+                                )
+                            else:
+                                msg = (
+                                    f"{model} has no forecast data in the selected period, "
+                                    "so its grid is drawn with lead day 1."
+                                )
                             show_message(
                                 self.read_instance, msg, from_conf=self.read_instance.from_conf
                             )
@@ -1320,7 +1329,22 @@ class DataReader:
                             str_lead_days = "s {} and {}".format(", ".join(lead_days[:-1]), lead_days[-1])
                         else:
                             str_lead_days = f" {lead_days[0]}"
-                        str_model += f" (with data from lead day{str_lead_days})"
+                        # name the forecast option the lead days come from, only if it was applied to the
+                        # gridded model (it has forecast indices), otherwise lead day 1 is used by default.
+                        # The option type is taken from the first forecast entry, as in update_forecast_indices
+                        str_forecast = ""
+                        if any(
+                            indices
+                            for forecast_indices in self.read_instance.forecast_indices_per_data_label.values()
+                            for base_data_label, indices in forecast_indices.items()
+                            if base_data_label in base_data_labels
+                        ):
+                            forecast_type = next(
+                                fct for fct in ["day", "combined", "daily"]
+                                if fct in self.read_instance.forecast[0]
+                            )
+                            str_forecast = f"{forecast_type} option "
+                        str_model += f" ({str_forecast}with data from lead day{str_lead_days})"
                     elif self.read_instance.alias_flag:
                         str_model += f" ({alias})"
                     self.read_instance.logger.info(str_model)
@@ -1744,9 +1768,38 @@ class DataReader:
                         # e.g. 'cams61_emep_ph2-eu-000::interpolated
                         model_id, _, model_type = data_label_raw.rpartition("::")
 
-                        # gridded data has no stations, so it is not
-                        # read here, it is read per date when the gridded map is drawn
+                        # gridded files have no forecast_day dimension, so their lead days
+                        # are counted from the time axis of the first file in the period
                         if model_type == "gridded":
+                            domain = model_id.rsplit("-", 2)[1]
+                            file_root_key = (model_type, model_id, speci)
+                            if (
+                                file_root_key
+                                not in self.read_instance.available_model_data_file_roots
+                            ):
+                                continue
+                            try:
+                                available_timesteps = self.read_instance.available_model_data[
+                                    model_type
+                                ][domain][resolution][speci][model_id]
+                            except KeyError:
+                                continue
+
+                            # get files inside the months to read
+                            yearmonths_to_read_str = {str(yyyymm) for yyyymm in yearmonths_to_read}
+                            timesteps_to_read_intersect = sorted(
+                                ts for ts in available_timesteps
+                                if ts[:6] in yearmonths_to_read_str
+                            )
+                            if len(timesteps_to_read_intersect) == 0:
+                                continue
+
+                            files_to_read[data_label] = (
+                                self.read_instance.available_model_data_file_roots[
+                                    file_root_key
+                                ].format(date=timesteps_to_read_intersect[0]),
+                                timesteps_to_read_intersect[0],
+                            )
                             continue
                     # if nothing is saved next to ::, assume it is interpolated
                     else:
@@ -1781,19 +1834,23 @@ class DataReader:
                     if len(yearmonths_to_read_intersect) == 0:
                         continue
 
-                    files_to_read[data_label] = sorted(
-                        [
-                            file_root + str(yyyymm) + ".nc"
-                            for yyyymm in yearmonths_to_read_intersect
-                        ]
-                    )[0]
-            
+                    # interpolated files have no timestep, their lead days are in the forecast dimension
+                    files_to_read[data_label] = (
+                        sorted(
+                            [
+                                file_root + str(yyyymm) + ".nc"
+                                for yyyymm in yearmonths_to_read_intersect
+                            ]
+                        )[0],
+                        None,
+                    )
+
             # read forecast dimension for each model
             if len(files_to_read) == 0:
                 continue
             else:
                 returned_data = [
-                    check_forecast_dimension(files) for files in files_to_read.values()
+                    check_forecast_dimension((*files, resolution)) for files in files_to_read.values()
                 ]
 
             # unzip returned data
@@ -1928,6 +1985,15 @@ class DataReader:
                     data_label
                 ][1] = []
 
+        # models loaded interpolated, as their gridded versions are read for the forecast
+        # days of the interpolated versions, so are not split into forecast labels
+        interpolated_model_ids = {
+            get_model_id(data_label_raw)
+            for data_label_raw in selected_data_labels_raw
+            if (data_label_raw != self.read_instance.observations_data_label)
+            and (not data_label_raw.endswith("::gridded"))
+        }
+
         # forecast options set in the model field are applied to all models, so throw error if
         # models with forecast data have different ones (models without forecast data are skipped),
         # only when reading from a configuration file, as dashboard selections are checked when reading
@@ -1938,8 +2004,11 @@ class DataReader:
             forecasts_per_forecast_model = {}
             for networkspeci in networkspecies:
                 for data_label, data_label_raw in zip(data_labels, data_labels_raw):
-                    if (data_label == self.read_instance.observations_data_label) or (
-                        data_label_raw.endswith("::gridded")
+                    if data_label == self.read_instance.observations_data_label:
+                        continue
+                    # gridded models loaded interpolated follow their interpolated versions
+                    if data_label_raw.endswith("::gridded") and (
+                        get_model_id(data_label_raw) in interpolated_model_ids
                     ):
                         continue
                     if self.read_instance.forecast_days_per_data_label[networkspeci].get(data_label, 0) == 0:
@@ -1981,6 +2050,10 @@ class DataReader:
                     not in self.read_instance.forecast_days_per_data_label[networkspeci]
                 ):
                     continue
+                # gridded models loaded interpolated follow the forecast days of their interpolated versions
+                gridded_follows_interpolated = data_label_raw.endswith("::gridded") and (
+                    get_model_id(data_label_raw) in interpolated_model_ids
+                )
                 # get number of forecast days for this label
                 n_forecast_days = self.read_instance.forecast_days_per_data_label[
                     networkspeci
@@ -2005,14 +2078,25 @@ class DataReader:
                         networkspeci, data_label, "", n_forecast_days, ""
                     )
                 else:
-                    # if no specific forecast requested, still update empty menu entry
-                    if len(wanted_forecast_days) == 0:
+                    # if no specific forecast requested, or gridded model follows its
+                    # interpolated versions, still update empty menu entry
+                    if (len(wanted_forecast_days) == 0) or gridded_follows_interpolated:
                         self.update_forecast_menu(
                             networkspeci, data_label, "", n_forecast_days, ""
                         )
                     else:
+                        # a gridded model loaded alone has no station data to merge per lead day,
+                        # so with daily and combined it is not split into forecast labels: its
+                        # forecast labels are only mapped to their indices below, which is where
+                        # its lead days are read from (get_map_lead_days). With day, each lead day
+                        # gets its own label, to be selected for the map
+                        split_data_label = not (
+                            data_label_raw.endswith("::gridded")
+                            and (forecast_type in ["daily", "combined"])
+                        )
+
                         # mark the data label for removal if it was selected (will be replaced by forecast versions)
-                        if data_label in selected_data_labels:
+                        if (data_label in selected_data_labels) and split_data_label:
                             data_labels_to_remove.append(data_label)
                             data_labels_raw_to_remove.append(data_label_raw)
 
@@ -2020,13 +2104,13 @@ class DataReader:
                         if wanted_forecast_days[0] in ["combined", "daily", "day"]:
                             for wanted_forecast_index in range(n_forecast_days):
                                 # create new label names with forecast day index
-                                new_data_label = "{}-{}{}".format(
-                                    data_label, forecast_type, wanted_forecast_index + 1
+                                new_data_label = add_forecast_suffix(
+                                    data_label,
+                                    "{}{}".format(forecast_type, wanted_forecast_index + 1),
                                 )
-                                new_data_label_raw = "{}-{}{}".format(
+                                new_data_label_raw = add_forecast_suffix(
                                     data_label_raw,
-                                    forecast_type,
-                                    wanted_forecast_index + 1,
+                                    "{}{}".format(forecast_type, wanted_forecast_index + 1),
                                 )
                                 # map new labels to forecast indices
                                 self.read_instance.forecast_indices_per_data_label[
@@ -2041,7 +2125,7 @@ class DataReader:
                                     wanted_forecast_days[0],
                                 )
                                 # if label was selected, add the new one to be displayed
-                                if data_label in selected_data_labels:
+                                if (data_label in selected_data_labels) and split_data_label:
                                     data_labels_to_add.append(new_data_label)
                                     data_labels_raw_to_add.append(new_data_label_raw)
 
@@ -2050,13 +2134,13 @@ class DataReader:
                             for wanted_forecast_day in wanted_forecast_days:
                                 if wanted_forecast_day <= n_forecast_days:
                                     # create new forecast label for that specific day
-                                    new_data_label = "{}-{}{}".format(
-                                        data_label, forecast_type, wanted_forecast_day
+                                    new_data_label = add_forecast_suffix(
+                                        data_label,
+                                        "{}{}".format(forecast_type, wanted_forecast_day),
                                     )
-                                    new_data_label_raw = "{}-{}{}".format(
+                                    new_data_label_raw = add_forecast_suffix(
                                         data_label_raw,
-                                        forecast_type,
-                                        wanted_forecast_day,
+                                        "{}{}".format(forecast_type, wanted_forecast_day),
                                     )
                                     # store forecast index (zero-based)
                                     self.read_instance.forecast_indices_per_data_label[
@@ -2073,7 +2157,7 @@ class DataReader:
                                         wanted_forecast_day,
                                     )
                                     # if label was selected, add new label to lists
-                                    if data_label in selected_data_labels:
+                                    if (data_label in selected_data_labels) and split_data_label:
                                         data_labels_to_add.append(new_data_label)
                                         data_labels_raw_to_add.append(
                                             new_data_label_raw
@@ -2117,11 +2201,7 @@ class DataReader:
                         unique_data_labels_to_add, unique_data_labels_raw_to_add
                     ):
                         # find base label before forecast suffix
-                        base_data_label_to_add = (
-                            data_label_to_add.split("-day")[0]
-                            .split("-daily")[0]
-                            .split("-combined")[0]
-                        )
+                        base_data_label_to_add = remove_forecast_suffix(data_label_to_add)
                         if base_data_label_to_add == data_label:
                             new_data_labels.append(data_label_to_add)
                             new_data_labels_raw.append(data_label_raw_to_add)
@@ -2300,14 +2380,8 @@ class DataReader:
                 ]
 
                 # get base data label and data label raw (i.e. without -dayN or -daily or -combined suffix for forecast data)
-                base_data_label = (
-                    data_label.split("-day")[0].split("-daily")[0].split("-combined")[0]
-                )
-                base_data_label_raw = (
-                    data_label_raw.split("-day")[0]
-                    .split("-daily")[0]
-                    .split("-combined")[0]
-                )
+                base_data_label = remove_forecast_suffix(data_label)
+                base_data_label_raw = remove_forecast_suffix(data_label_raw)
 
                 # if already have base data label in files_to_read, then continue
                 if base_data_label in self.read_instance.files_to_read[networkspeci]:
@@ -3189,18 +3263,18 @@ class DataReader:
                 if have_forecast:
                     # daily forecast
                     if daily_forecast:
-                        data_label_forecast = "{}-daily{}".format(
-                            data_label, forecast_index + 1
+                        data_label_forecast = add_forecast_suffix(
+                            data_label, "daily{}".format(forecast_index + 1)
                         )
                     # combined forecast
                     elif combined_forecast:
-                        data_label_forecast = "{}-combined{}".format(
-                            data_label, forecast_index + 1
+                        data_label_forecast = add_forecast_suffix(
+                            data_label, "combined{}".format(forecast_index + 1)
                         )
                     # N day forecast
                     elif day_forecast:
-                        data_label_forecast = "{}-day{}".format(
-                            data_label, forecast_index + 1
+                        data_label_forecast = add_forecast_suffix(
+                            data_label, "day{}".format(forecast_index + 1)
                         )
                     else:
                         data_label_forecast = data_label
@@ -3361,8 +3435,9 @@ class DataReader:
         lead_days = get_map_lead_days(self.read_instance)
 
         # get gridded model loaded
+        # model id without forecast suffix, as gridded models loaded alone are split into forecast labels
         selected_gridded_models = [
-            data_label_raw.rpartition("::")[0]
+            get_model_id(data_label_raw)
             for data_label_raw in self.read_instance.data_labels_raw
             if data_label_raw.endswith("::gridded")
         ]

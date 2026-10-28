@@ -27,6 +27,7 @@ from providentia.auxiliar import (
     get_standard_parameters_by_speci,
 )
 from .dashboard_elements import CheckDialog, MessageBox
+from .read_aux import remove_forecast_suffix
 from .statistics import (
     boxplot_inner_fences,
     calculate_statistic,
@@ -309,7 +310,7 @@ def update_plotting_parameters(
         # Extract unique base labels, stripping '-day', '-daily', '-combined' suffixes
         unique_base_data_labels = np.unique(
             [
-                data_label.split("-day")[0].split("-daily")[0].split("-combined")[0]
+                remove_forecast_suffix(data_label)
                 for data_label in data_labels_to_add
             ]
         )
@@ -345,11 +346,7 @@ def update_plotting_parameters(
 
                     # iterate through data labels to add
                     for data_label in data_labels_to_add:
-                        base_data_label = (
-                            data_label.split("-day")[0]
-                            .split("-daily")[0]
-                            .split("-combined")[0]
-                        )
+                        base_data_label = remove_forecast_suffix(data_label)
 
                         if (base_data_label == unique_base_data_label) & (
                             data_label not in processed_data_labels
@@ -364,22 +361,20 @@ def update_plotting_parameters(
                                     for ii, data_label_to_remove in enumerate(
                                         data_labels_to_remove
                                     )
-                                    if data_label in data_label_to_remove
+                                    if remove_forecast_suffix(data_label_to_remove)
+                                    == remove_forecast_suffix(data_label)
                                 ]
-                                instance.plotting_params[data_label][
-                                    "grid_edge_longitude"
-                                ] = instance.plotting_params[
+                                removed_plotting_params = instance.plotting_params[
                                     data_labels_to_remove[relevant_inds[0]]
-                                ][
-                                    "grid_edge_longitude"
                                 ]
-                                instance.plotting_params[data_label][
-                                    "grid_edge_latitude"
-                                ] = instance.plotting_params[
-                                    data_labels_to_remove[relevant_inds[0]]
-                                ][
-                                    "grid_edge_latitude"
-                                ]
+                                # gridded labels have no grid edges, as they are not read at stations
+                                if "grid_edge_longitude" in removed_plotting_params:
+                                    instance.plotting_params[data_label][
+                                        "grid_edge_longitude"
+                                    ] = removed_plotting_params["grid_edge_longitude"]
+                                    instance.plotting_params[data_label][
+                                        "grid_edge_latitude"
+                                    ] = removed_plotting_params["grid_edge_latitude"]
                                 processed_data_labels.append(data_label)
 
                             # otherwise open netCDF file to extract grid edges

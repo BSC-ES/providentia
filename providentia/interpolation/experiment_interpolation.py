@@ -46,6 +46,7 @@ from providentia.auxiliar import (
     get_machine,
     get_conversion_factor,
     get_standard_parameters_by_speci,
+    TIMESTEPS_PER_DAY,
 )
 
 # set current MACHINE
@@ -356,20 +357,7 @@ class ModelInterpolation(object):
                 n_timesteps = mod_nc_root.dimensions["time"].size
 
                 # get number of complete forecast days
-                if self.model_temporal_resolution in ["hourly", "hourly_instantaneous"]:
-                    forecast_days = int(n_timesteps / 24.0)
-                elif self.model_temporal_resolution in [
-                    "3hourly",
-                    "3hourly_instantaneous",
-                ]:
-                    forecast_days = int(n_timesteps / (24.0 / 3.0))
-                elif self.model_temporal_resolution in [
-                    "6hourly",
-                    "6hourly_instantaneous",
-                ]:
-                    forecast_days = int(n_timesteps / (24.0 / 6.0))
-                elif self.model_temporal_resolution == "daily":
-                    forecast_days = int(n_timesteps)
+                forecast_days = n_timesteps // TIMESTEPS_PER_DAY[self.model_temporal_resolution]
 
                 # determine if current file has more complete forecast days than the previous maximum
                 if forecast_days > max_forecast_days:

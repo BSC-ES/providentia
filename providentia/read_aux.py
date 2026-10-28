@@ -14,7 +14,7 @@ import pandas as pd
 import re
 import yaml
 
-from providentia.auxiliar import CURRENT_PATH, join
+from providentia.auxiliar import CURRENT_PATH, join, TIMESTEPS_PER_DAY
 from providentia.warnings_prv import show_message
 
 _CFTIME_CLASS = {
@@ -466,18 +466,18 @@ def read_netcdf_data(tuple_arguments):
             if have_forecast:
                 # daily forecast
                 if daily_forecast:
-                    data_label_forecast = "{}-daily{}".format(
-                        data_label, forecast_index + 1
+                    data_label_forecast = add_forecast_suffix(
+                        data_label, "daily{}".format(forecast_index + 1)
                     )
                 # combined forecast
                 elif combined_forecast:
-                    data_label_forecast = "{}-combined{}".format(
-                        data_label, forecast_index + 1
+                    data_label_forecast = add_forecast_suffix(
+                        data_label, "combined{}".format(forecast_index + 1)
                     )
                 # N day forecast
                 elif day_forecast:
-                    data_label_forecast = "{}-day{}".format(
-                        data_label, forecast_index + 1
+                    data_label_forecast = add_forecast_suffix(
+                        data_label, "day{}".format(forecast_index + 1)
                     )
                 else:
                     data_label_forecast = data_label
@@ -653,21 +653,25 @@ def read_netcdf_metadata(tuple_arguments):
 
 def check_forecast_dimension(tuple_arguments):
     """
-    Determines if a NetCDF file contains a forecast dimension and returns the number of lead days.
+    Determines the number of lead days of a NetCDF file, from its forecast dimension
+    (interpolated files) or from its time axis (gridded forecast runs, which have no
+    forecast dimension).
 
     Parameters
     ----------
-    tuple_arguments : str
-        The file path to the NetCDF file being inspected.
+    tuple_arguments : tuple
+        The file path to the NetCDF file being inspected, the date in its filename
+        ('YYYYMM', 'YYYYMMDD' or 'YYYYMMDDHH') for gridded files, None for interpolated files,
+        and the resolution of the file (e.g. 'hourly'), the one gridded files are found under.
 
     Returns
     -------
     int
-        The size of the 'forecast_day' dimension, or 0 if the dimension is not present.
+        The number of lead days, or 0 if the file has no forecast data.
     """
 
     # assign arguments from tuple to variables
-    relevant_file = tuple_arguments
+    relevant_file, timestep, resolution = tuple_arguments
 
     # read netCDF frame
     ncdf_root = Dataset(relevant_file)
@@ -675,6 +679,17 @@ def check_forecast_dimension(tuple_arguments):
     # check if forecast day dimension exists
     if "forecast_day" in ncdf_root.dimensions:
         n_forecast_days = ncdf_root.dimensions["forecast_day"].size
+    # gridded forecast runs (YYYYMMDDHH) have their lead days along the time axis
+    elif (timestep is not None) and (len(timestep) == 10):
+        # count complete lead days as the interpolation module does (number of timesteps
+        # divided by timesteps per day, rounded down), so a gridded model and its interpolated
+        # version agree. Runs shorter than a day, or in resolutions without forecasts
+        # (e.g. monthly), are taken as 1 lead day
+        n_timesteps = ncdf_root.dimensions["time"].size
+        if resolution in TIMESTEPS_PER_DAY:
+            n_forecast_days = max(1, n_timesteps // TIMESTEPS_PER_DAY[resolution])
+        else:
+            n_forecast_days = 1
     else:
         n_forecast_days = 0
 
@@ -2331,19 +2346,51 @@ def time_var_to_asi8(time_var):
 
 def get_model_id(data_label_raw):
     """
-    Get model id of a raw data label, without interpolation mode or forecast suffix
-    (e.g. 'fc::gridded' and 'fc::interpolated-day3' both give 'fc')
+    Get model id of a raw data label, without forecast suffix or interpolation mode
+    (e.g. 'fc::gridded' and 'fc-day3::interpolated' both give 'fc')
     """
     return re.sub(
-        r"(::(interpolated|gridded))?(-(daily|combined|day)\d*)?$", "", data_label_raw
+        r"(-(daily|combined|day)\d*)?(::(interpolated|gridded))?$", "", data_label_raw
     )
+
+
+def add_forecast_suffix(data_label, forecast_suffix):
+    """
+    Add forecast suffix to a data label, before its interpolation mode tag
+    (e.g. 'fc::gridded' and 'day3' give 'fc-day3::gridded', 'fc (gridded)' gives
+    'fc-day3 (gridded)', 'fc' gives 'fc-day3'), the order the model field is read in
+    """
+    for mode_tag in ["::interpolated", "::gridded", " (gridded)"]:
+        if data_label.endswith(mode_tag):
+            return "{}-{}{}".format(data_label[: -len(mode_tag)], forecast_suffix, mode_tag)
+    return "{}-{}".format(data_label, forecast_suffix)
+
+
+def remove_forecast_suffix(data_label):
+    """
+    Remove forecast suffix from a data label, keeping its interpolation mode tag
+    (e.g. 'fc-day3::gridded' gives 'fc::gridded', 'fc-daily (gridded)' gives 'fc (gridded)')
+    """
+    return re.sub(
+        r"-(daily|combined|day)\d*(?=(::interpolated|::gridded| \(gridded\))?$)", "", data_label
+    )
+
+
+def replace_forecast_suffix(data_label, forecast_suffix):
+    """
+    Replace forecast suffix of a data label, keeping its interpolation mode tag
+    (e.g. 'fc-daily3::interpolated' and 'daily' give 'fc-daily::interpolated')
+    """
+    return add_forecast_suffix(remove_forecast_suffix(data_label), forecast_suffix)
 
 
 def get_gridded_model_base_data_labels(read_instance):
     """
-    Get base labels of the interpolated versions of the gridded model loaded, without
-    the forecast suffix (e.g. 'fc-day3', 'fc-daily1' and 'fc-daily' all give 'fc'),
-    empty if the gridded model is not loaded interpolated
+    Get base labels whose forecast days the gridded model loaded is read for, without
+    the forecast suffix (e.g. 'fc-day3', 'fc-daily1' and 'fc-daily' all give 'fc'):
+    its interpolated versions, or the gridded model itself when it is not loaded
+    interpolated (e.g. 'fc-day3 (gridded)' gives 'fc (gridded)'), empty if no gridded
+    model is loaded
     """
 
     # take the first gridded model, as it is the only one read
@@ -2357,14 +2404,27 @@ def get_gridded_model_base_data_labels(read_instance):
 
     # match models on the raw label, as the display label can be an alias,
     # but return the display label, as forecast indices are stored per display label
-    return {
-        re.sub(r"-(daily|combined|day)\d*$", "", data_label)
+    base_data_labels = {
+        remove_forecast_suffix(data_label)
         for data_label, data_label_raw in zip(
             read_instance.data_labels, read_instance.data_labels_raw
         )
         if (not data_label_raw.endswith("::gridded"))
         and (get_model_id(data_label_raw) == gridded_model_ids[0])
     }
+
+    # gridded model not loaded interpolated is split into its own forecast labels
+    if not base_data_labels:
+        base_data_labels = {
+            remove_forecast_suffix(data_label)
+            for data_label, data_label_raw in zip(
+                read_instance.data_labels, read_instance.data_labels_raw
+            )
+            if data_label_raw.endswith("::gridded")
+            and (get_model_id(data_label_raw) == gridded_model_ids[0])
+        }
+
+    return base_data_labels
 
 
 def get_map_lead_days(read_instance):
@@ -2428,7 +2488,7 @@ def get_grid_title(read_instance, data_label):
         for label, label_raw in zip(read_instance.data_labels, read_instance.data_labels_raw)
         if label_raw.endswith("::gridded")
     )
-    gridded_label = gridded_label.replace(" (gridded)", "")
+    gridded_label = remove_forecast_suffix(gridded_label).replace(" (gridded)", "")
 
     lead_day = get_data_label_lead_day(read_instance, data_label)
     if lead_day is not None:

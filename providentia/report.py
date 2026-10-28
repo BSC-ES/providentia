@@ -55,6 +55,7 @@ from .read_aux import (
     get_possible_resampling_resolutions,
     get_periodic_nonrelevant_temporal_resolutions,
     get_periodic_relevant_temporal_resolutions,
+    get_data_label_lead_day,
     get_grid_title,
     get_valid_models,
     get_valid_obs_files_in_date_range,
@@ -2735,10 +2736,19 @@ class Report:
                 z2 = [""] * len(data_labels)
 
             # iterate through relevant data labels making plots
+            raw_per_data_label = dict(zip(self.data_labels, self.data_labels_raw))
             for z1_label, z2_label in zip(z1, z2):
+                # forecast days of a gridded model loaded without its interpolated version
+                # have no station data, but get a map of the observations over their lead day grid
+                gridded_lead_day_map = (
+                    (z2_label == "")
+                    and raw_per_data_label.get(z1_label, "").endswith("::gridded")
+                    and (get_data_label_lead_day(self, z1_label) is not None)
+                )
+
                 # skip map if we have no data for a specific label
                 skip_map = False
-                if (z2_label == "") and (
+                if (z2_label == "") and (not gridded_lead_day_map) and (
                     z1_label not in self.selected_station_data_labels[networkspeci]
                 ):
                     skip_map = True
