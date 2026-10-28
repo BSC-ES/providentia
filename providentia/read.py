@@ -3250,18 +3250,18 @@ class DataReader:
                 if have_forecast:
                     # daily forecast
                     if daily_forecast:
-                        data_label_forecast = "{}-daily{}".format(
-                            data_label, forecast_index + 1
+                        data_label_forecast = add_forecast_suffix(
+                            data_label, "daily{}".format(forecast_index + 1)
                         )
                     # combined forecast
                     elif combined_forecast:
-                        data_label_forecast = "{}-combined{}".format(
-                            data_label, forecast_index + 1
+                        data_label_forecast = add_forecast_suffix(
+                            data_label, "combined{}".format(forecast_index + 1)
                         )
                     # N day forecast
                     elif day_forecast:
-                        data_label_forecast = "{}-day{}".format(
-                            data_label, forecast_index + 1
+                        data_label_forecast = add_forecast_suffix(
+                            data_label, "day{}".format(forecast_index + 1)
                         )
                     else:
                         data_label_forecast = data_label
