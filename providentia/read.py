@@ -1304,10 +1304,23 @@ class DataReader:
                             for forecast_days in self.read_instance.forecast_days_per_data_label.values()
                             for base_data_label in base_data_labels
                         ):
-                            msg = (
-                                f"{', '.join(sorted(base_data_labels))} has no interpolated data "
-                                f"in the selected period, so the grid of {model} is drawn with lead day 1."
+                            # base labels are the interpolated versions of the gridded model,
+                            # or the gridded model itself when it is not loaded interpolated
+                            loaded_interpolated = any(
+                                (not data_label_raw.endswith("::gridded"))
+                                and (get_model_id(data_label_raw) == get_model_id(model))
+                                for data_label_raw in self.read_instance.data_labels_raw
                             )
+                            if loaded_interpolated:
+                                msg = (
+                                    f"{', '.join(sorted(base_data_labels))} has no interpolated data "
+                                    f"in the selected period, so the grid of {model} is drawn with lead day 1."
+                                )
+                            else:
+                                msg = (
+                                    f"{model} has no forecast data in the selected period, "
+                                    "so its grid is drawn with lead day 1."
+                                )
                             show_message(
                                 self.read_instance, msg, from_conf=self.read_instance.from_conf
                             )
