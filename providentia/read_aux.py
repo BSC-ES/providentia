@@ -2384,9 +2384,11 @@ def replace_forecast_suffix(data_label, forecast_suffix):
 
 def get_gridded_model_base_data_labels(read_instance):
     """
-    Get base labels of the interpolated versions of the gridded model loaded, without
-    the forecast suffix (e.g. 'fc-day3', 'fc-daily1' and 'fc-daily' all give 'fc'),
-    empty if the gridded model is not loaded interpolated
+    Get base labels whose forecast days the gridded model loaded is read for, without
+    the forecast suffix (e.g. 'fc-day3', 'fc-daily1' and 'fc-daily' all give 'fc'):
+    its interpolated versions, or the gridded model itself when it is not loaded
+    interpolated (e.g. 'fc-day3 (gridded)' gives 'fc (gridded)'), empty if no gridded
+    model is loaded
     """
 
     # take the first gridded model, as it is the only one read
@@ -2400,7 +2402,7 @@ def get_gridded_model_base_data_labels(read_instance):
 
     # match models on the raw label, as the display label can be an alias,
     # but return the display label, as forecast indices are stored per display label
-    return {
+    base_data_labels = {
         remove_forecast_suffix(data_label)
         for data_label, data_label_raw in zip(
             read_instance.data_labels, read_instance.data_labels_raw
@@ -2408,6 +2410,19 @@ def get_gridded_model_base_data_labels(read_instance):
         if (not data_label_raw.endswith("::gridded"))
         and (get_model_id(data_label_raw) == gridded_model_ids[0])
     }
+
+    # gridded model not loaded interpolated is split into its own forecast labels
+    if not base_data_labels:
+        base_data_labels = {
+            remove_forecast_suffix(data_label)
+            for data_label, data_label_raw in zip(
+                read_instance.data_labels, read_instance.data_labels_raw
+            )
+            if data_label_raw.endswith("::gridded")
+            and (get_model_id(data_label_raw) == gridded_model_ids[0])
+        }
+
+    return base_data_labels
 
 
 def get_map_lead_days(read_instance):
@@ -2471,7 +2486,7 @@ def get_grid_title(read_instance, data_label):
         for label, label_raw in zip(read_instance.data_labels, read_instance.data_labels_raw)
         if label_raw.endswith("::gridded")
     )
-    gridded_label = gridded_label.replace(" (gridded)", "")
+    gridded_label = remove_forecast_suffix(gridded_label).replace(" (gridded)", "")
 
     lead_day = get_data_label_lead_day(read_instance, data_label)
     if lead_day is not None:

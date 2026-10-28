@@ -1278,10 +1278,7 @@ class DataFilter:
                         self.read_instance.data_labels,
                         self.read_instance.data_labels_raw,
                     ):
-                        # gridded models have no forecast dimension, skip
-                        if data_label_raw.endswith("::gridded"):
-                            continue
-                        if data_label.startswith(base_data_label):
+                        if remove_forecast_suffix(data_label) == base_data_label:
                             current_count += 1
                             # Check if this label has forecast indices for the current network
                             if (

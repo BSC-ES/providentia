@@ -1287,26 +1287,19 @@ class DataReader:
                 if "-combined" in model:
                     model = replace_forecast_suffix(model, "combined")
                     alias = replace_forecast_suffix(alias, "combined")
+                # gridded models split into forecast labels are printed once, with their lead days
+                if model.endswith("::gridded"):
+                    model = remove_forecast_suffix(model)
                 if model not in mods_printed:
                     str_model = f" - {model}"
-                    # gridded models are read for the forecast days of the interpolated models
+                    # gridded models are read for the forecast days of their interpolated
+                    # versions, or of their own forecast labels when not loaded interpolated
                     if model.endswith("::gridded"):
                         lead_days = get_map_lead_days(self.read_instance)
-                        # forecast options are taken from the interpolated version of the model,
-                        # without it the grid uses lead day 1
                         base_data_labels = get_gridded_model_base_data_labels(self.read_instance)
-                        if (len(self.read_instance.forecast) > 0) and (not base_data_labels):
-                            msg = (
-                                f"Forecast option {', '.join(self.read_instance.forecast)} is only "
-                                f"applied to interpolated models. {model} is not loaded interpolated, "
-                                "so its grid is drawn with lead day 1."
-                            )
-                            show_message(
-                                self.read_instance, msg, from_conf=self.read_instance.from_conf
-                            )
-                        # interpolated versions without data in the period have no forecast
-                        # days either, so the grid also falls back to lead day 1
-                        elif base_data_labels and not any(
+                        # versions without data in the period have no forecast days,
+                        # so the grid falls back to lead day 1
+                        if base_data_labels and not any(
                             base_data_label in forecast_days
                             for forecast_days in self.read_instance.forecast_days_per_data_label.values()
                             for base_data_label in base_data_labels
@@ -1994,6 +1987,15 @@ class DataReader:
                 self.read_instance.logger.error(error)
                 sys.exit(1)
 
+        # models loaded interpolated, as their gridded versions are read for the forecast
+        # days of the interpolated versions, so are not split into forecast labels
+        interpolated_model_ids = {
+            get_model_id(data_label_raw)
+            for data_label_raw in selected_data_labels_raw
+            if (data_label_raw != self.read_instance.observations_data_label)
+            and (not data_label_raw.endswith("::gridded"))
+        }
+
         # iterate over each network species
         for networkspeci in networkspecies:
             # temporary lists for each species
@@ -2017,9 +2019,10 @@ class DataReader:
                     not in self.read_instance.forecast_days_per_data_label[networkspeci]
                 ):
                     continue
-                # TODO: remove when gridded labels get their own forecast options
-                if data_label_raw.endswith("::gridded"):
-                    continue
+                # gridded models loaded interpolated follow the forecast days of their interpolated versions
+                gridded_follows_interpolated = data_label_raw.endswith("::gridded") and (
+                    get_model_id(data_label_raw) in interpolated_model_ids
+                )
                 # get number of forecast days for this label
                 n_forecast_days = self.read_instance.forecast_days_per_data_label[
                     networkspeci
@@ -2044,8 +2047,9 @@ class DataReader:
                         networkspeci, data_label, "", n_forecast_days, ""
                     )
                 else:
-                    # if no specific forecast requested, still update empty menu entry
-                    if len(wanted_forecast_days) == 0:
+                    # if no specific forecast requested, or gridded model follows its
+                    # interpolated versions, still update empty menu entry
+                    if (len(wanted_forecast_days) == 0) or gridded_follows_interpolated:
                         self.update_forecast_menu(
                             networkspeci, data_label, "", n_forecast_days, ""
                         )
@@ -3390,8 +3394,9 @@ class DataReader:
         lead_days = get_map_lead_days(self.read_instance)
 
         # get gridded model loaded
+        # model id without forecast suffix, as gridded models loaded alone are split into forecast labels
         selected_gridded_models = [
-            data_label_raw.rpartition("::")[0]
+            get_model_id(data_label_raw)
             for data_label_raw in self.read_instance.data_labels_raw
             if data_label_raw.endswith("::gridded")
         ]

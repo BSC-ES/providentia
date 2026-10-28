@@ -361,22 +361,20 @@ def update_plotting_parameters(
                                     for ii, data_label_to_remove in enumerate(
                                         data_labels_to_remove
                                     )
-                                    if data_label in data_label_to_remove
+                                    if remove_forecast_suffix(data_label_to_remove)
+                                    == remove_forecast_suffix(data_label)
                                 ]
-                                instance.plotting_params[data_label][
-                                    "grid_edge_longitude"
-                                ] = instance.plotting_params[
+                                removed_plotting_params = instance.plotting_params[
                                     data_labels_to_remove[relevant_inds[0]]
-                                ][
-                                    "grid_edge_longitude"
                                 ]
-                                instance.plotting_params[data_label][
-                                    "grid_edge_latitude"
-                                ] = instance.plotting_params[
-                                    data_labels_to_remove[relevant_inds[0]]
-                                ][
-                                    "grid_edge_latitude"
-                                ]
+                                # gridded labels have no grid edges, as they are not read at stations
+                                if "grid_edge_longitude" in removed_plotting_params:
+                                    instance.plotting_params[data_label][
+                                        "grid_edge_longitude"
+                                    ] = removed_plotting_params["grid_edge_longitude"]
+                                    instance.plotting_params[data_label][
+                                        "grid_edge_latitude"
+                                    ] = removed_plotting_params["grid_edge_latitude"]
                                 processed_data_labels.append(data_label)
 
                             # otherwise open netCDF file to extract grid edges
