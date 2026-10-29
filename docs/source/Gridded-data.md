@@ -32,13 +32,13 @@ Only one gridded model can be loaded at a time. If more are set, the first one i
 
 Gridded files are searched for in the paths defined in `settings/interp_models.yaml`, and in `mod_to_interp_root`, defined in `settings/data_paths.yaml`.
 
-Gridded data is only read when clicking **READ** or when loading a configuration file.
+Gridded data is only read when clicking **READ** or when loading a configuration file. If some days of the selected period have no valid gridded data (e.g. a forecast run or a file is missing), a warning is shown, as they are not drawn on the grid.
 
 ## Forecast data
 
 Gridded data is read for the same forecast days selected for its interpolated version (e.g. days 2 and 4 for `day2, day4`, or the selected days for `daily` and `combined`), never for the ones of other models. If no forecast option is set, only the first forecast day is read, as for interpolated data. When forecast options are set in the model name, a gridded model loaded with its interpolated version must have the same one as it (e.g. `a59g-regional-000-day3, a59g-regional-000-day3::gridded`). The forecast option and lead days used are shown next to the gridded model in the terminal when reading, e.g. `a59g-regional-000::gridded (day option with data from lead days 2 and 4)`, or `a59g-regional-000::gridded (with data from lead day 1)` when no forecast option is applied to it.
 
-Lead day N of a forecast run covers the 24 hours that start N-1 days after the run starts, e.g. lead day 1 of the run of `2023010100` covers 2023-01-01 00:00 to 2023-01-01 23:00. Forecast runs are expected to be 24 hours apart, and a warning is shown if they are not.
+Lead day N of a forecast run covers the 24 hours that start N-1 days after the run starts, e.g. lead day 1 of the run of `2023010100` covers 2023-01-01 00:00 to 2023-01-01 23:00. Forecast runs are expected to be 24 hours apart: a missing run leaves days without data for its lead days (see above).
 
 See [Forecast](Forecast.md) for the forecast options.
 

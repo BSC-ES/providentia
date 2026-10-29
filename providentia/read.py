@@ -1791,14 +1791,25 @@ class DataReader:
                                 ts for ts in available_timesteps
                                 if ts[:6] in yearmonths_to_read_str
                             )
-                            if len(timesteps_to_read_intersect) == 0:
+
+                            # take the first file that exists, as missing files are only
+                            # reported when reading (in read_gridded_data)
+                            file_root = self.read_instance.available_model_data_file_roots[
+                                file_root_key
+                            ]
+                            first_timestep = next(
+                                (
+                                    ts for ts in timesteps_to_read_intersect
+                                    if os.path.exists(file_root.format(date=ts))
+                                ),
+                                None,
+                            )
+                            if first_timestep is None:
                                 continue
 
                             files_to_read[data_label] = (
-                                self.read_instance.available_model_data_file_roots[
-                                    file_root_key
-                                ].format(date=timesteps_to_read_intersect[0]),
-                                timesteps_to_read_intersect[0],
+                                file_root.format(date=first_timestep),
+                                first_timestep,
                             )
                             continue
                     # if nothing is saved next to ::, assume it is interpolated
@@ -1834,16 +1845,22 @@ class DataReader:
                     if len(yearmonths_to_read_intersect) == 0:
                         continue
 
-                    # interpolated files have no timestep, their lead days are in the forecast dimension
-                    files_to_read[data_label] = (
-                        sorted(
-                            [
+                    # interpolated files have no timestep, their lead days are in the forecast dimension.
+                    # Take the first file that exists
+                    first_file = next(
+                        (
+                            relevant_file
+                            for relevant_file in sorted(
                                 file_root + str(yyyymm) + ".nc"
                                 for yyyymm in yearmonths_to_read_intersect
-                            ]
-                        )[0],
+                            )
+                            if os.path.exists(relevant_file)
+                        ),
                         None,
                     )
+                    if first_file is None:
+                        continue
+                    files_to_read[data_label] = (first_file, None)
 
             # read forecast dimension for each model
             if len(files_to_read) == 0:
@@ -3505,6 +3522,7 @@ class DataReader:
         # lead day can be allocated once and filled while reading
         file_blocks, day_blocks, lead_blocks, files = [], [], [], []
         for timestep in sorted(timesteps_to_read_intersect):
+            # skip files not found, the days they cover are reported as days without data
             filepath = file_root.format(date=timestep)
             if not os.path.exists(filepath):
                 continue
@@ -3602,6 +3620,22 @@ class DataReader:
             # free data of this file before reading the next one, so the data of
             # two files is never in memory at the same time
             del timestep_data, cell_data
+
+        # warn if some days of the period have no valid gridded data (e.g. forecast runs
+        # not found), as they are not drawn on the grid. Forecast runs are checked per
+        # lead day read, and files that are not forecast runs (lead 0) as a whole
+        has_data = grid_count.reshape(n_days, len(leads), -1).any(axis=2)
+        checked_lead_days = [0] if leads.tolist() == [0] else lead_days
+        some_data_missing = any(
+            (lead_day not in leads) or (not has_data[:, np.searchsorted(leads, lead_day)].all())
+            for lead_day in checked_lead_days
+        )
+        if some_data_missing:
+            msg = (
+                f"Some gridded data of {model_id} ({speci}) is missing in the selected period, "
+                "so it is not drawn on the grid for those days."
+            )
+            show_message(self.read_instance, msg)
 
         return grid_sum, grid_count, days, leads, lat, lon, files
 

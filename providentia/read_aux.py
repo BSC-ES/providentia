@@ -673,28 +673,24 @@ def check_forecast_dimension(tuple_arguments):
     # assign arguments from tuple to variables
     relevant_file, timestep, resolution = tuple_arguments
 
-    # read netCDF frame
-    ncdf_root = Dataset(relevant_file)
-
-    # check if forecast day dimension exists
-    if "forecast_day" in ncdf_root.dimensions:
-        n_forecast_days = ncdf_root.dimensions["forecast_day"].size
-    # gridded forecast runs (YYYYMMDDHH) have their lead days along the time axis
-    elif (timestep is not None) and (len(timestep) == 10):
-        # count complete lead days as the interpolation module does (number of timesteps
-        # divided by timesteps per day, rounded down), so a gridded model and its interpolated
-        # version agree. Runs shorter than a day, or in resolutions without forecasts
-        # (e.g. monthly), are taken as 1 lead day
-        n_timesteps = ncdf_root.dimensions["time"].size
-        if resolution in TIMESTEPS_PER_DAY:
-            n_forecast_days = max(1, n_timesteps // TIMESTEPS_PER_DAY[resolution])
+    # read netCDF frame, closed even if reading it fails
+    with Dataset(relevant_file) as ncdf_root:
+        # check if forecast day dimension exists
+        if "forecast_day" in ncdf_root.dimensions:
+            n_forecast_days = ncdf_root.dimensions["forecast_day"].size
+        # gridded forecast runs (YYYYMMDDHH) have their lead days along the time axis
+        elif (timestep is not None) and (len(timestep) == 10):
+            # count complete lead days as the interpolation module does (number of timesteps
+            # divided by timesteps per day, rounded down), so a gridded model and its interpolated
+            # version agree. Runs shorter than a day, or in resolutions without forecasts
+            # (e.g. monthly), are taken as 1 lead day
+            n_timesteps = ncdf_root.dimensions["time"].size
+            if resolution in TIMESTEPS_PER_DAY:
+                n_forecast_days = max(1, n_timesteps // TIMESTEPS_PER_DAY[resolution])
+            else:
+                n_forecast_days = 1
         else:
-            n_forecast_days = 1
-    else:
-        n_forecast_days = 0
-
-    # close netCDF
-    ncdf_root.close()
+            n_forecast_days = 0
 
     return n_forecast_days
 
@@ -2470,6 +2466,35 @@ def get_data_label_lead_day(read_instance, data_label):
                 return indices[data_label] + 1
 
     return None
+
+
+def is_on_map_grid(read_instance, data_label, map_grid_lead_days):
+    """
+    Check if the lead day of a data label is drawn on the map grid. Labels that are
+    not a single forecast day (e.g. 'fc-daily') are, unless no lead day is drawn
+
+    Parameters
+    ----------
+    read_instance : object
+        Instance with the forecast indices set when reading (dashboard, report or library)
+    data_label : str
+        Data label to check
+    map_grid_lead_days : list of int or None
+        Lead days drawn on the map grid, None if all loaded lead days are drawn
+
+    Returns
+    -------
+    bool
+        True if the data label is drawn on the map grid
+    """
+
+    if map_grid_lead_days is None:
+        return True
+    lead_day = get_data_label_lead_day(read_instance, data_label)
+    if lead_day is None:
+        return len(map_grid_lead_days) > 0
+
+    return lead_day in map_grid_lead_days
 
 
 def get_grid_title(read_instance, data_label, lead_days=None):

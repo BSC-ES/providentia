@@ -46,7 +46,9 @@ from .statistics import (
     resolve_colourmap,
 )
 
-from .read_aux import drop_nans, get_data_label_lead_day, get_model_id, get_valid_metadata
+from .read_aux import (
+    drop_nans, get_data_label_lead_day, get_model_id, get_valid_metadata, is_on_map_grid
+)
 from .plot_aux import (
     get_display_label,
     create_statistical_timeseries,
@@ -635,19 +637,6 @@ class Plotting:
             if map_grid_lead_day is not None:
                 map_grid_lead_days = [map_grid_lead_day]
 
-        def is_on_map_grid(data_label):
-            """
-            Check if the lead day of a data label is drawn on the map grid. Labels that are
-            not a single forecast day (e.g. 'fc-daily') are, unless no lead day is drawn
-            """
-
-            if map_grid_lead_days is None:
-                return True
-            lead_day = get_data_label_lead_day(self.read_instance, data_label)
-            if lead_day is None:
-                return len(map_grid_lead_days) > 0
-            return lead_day in map_grid_lead_days
-
         for data_label, data_label_raw in label_pairs:
             if data_label in processed_labels:
                 continue
@@ -711,7 +700,7 @@ class Plotting:
                     square_handle, dot_handle = self.make_model_handles(
                         plot_characteristics_legend, label
                     )
-                    if is_on_map_grid(label):
+                    if is_on_map_grid(self.read_instance, label, map_grid_lead_days):
                         legend_elements.append((square_handle, dot_handle))
                     else:
                         legend_elements.append(dot_handle)
@@ -721,7 +710,7 @@ class Plotting:
             elif is_gridded:
                 # in day forecast mode the grid only has the lead days drawn on it,
                 # so other forecast days of a gridded model loaded alone are left out
-                if not is_on_map_grid(data_label):
+                if not is_on_map_grid(self.read_instance, data_label, map_grid_lead_days):
                     continue
                 square_handle, _ = self.make_model_handles(
                     plot_characteristics_legend, data_label
