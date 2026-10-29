@@ -906,6 +906,13 @@ class Canvas(FigureCanvas):
         """
 
         return None
+
+    def handle_map_grid_lead_days_update(self):
+        """
+        Function that handles the update of the lead days averaged in the grid
+        """
+
+        return None
     
 
     def handle_map_play_button_toggle(self, checked):
@@ -3143,7 +3150,7 @@ class Canvas(FigureCanvas):
         panel_left = settings_button.x() - 220
         panel_width = 230
         gap = 6
-        row_y = settings_button.y() + 310
+        row_y = settings_button.y() + 360
         row_height = 20
 
         buttons = [
@@ -3192,7 +3199,7 @@ class Canvas(FigureCanvas):
         # the row is the last thing in the panel, so a wrapped second line
         # only needs the panel itself to grow to keep it inside
         container = self.map_menu.containers["container"]
-        container.resize(container.width(), 320 + (row_height + 5 if wrapped else 0))
+        container.resize(container.width(), 370 + (row_height + 5 if wrapped else 0))
 
         return None
 
@@ -5578,6 +5585,12 @@ class Canvas(FigureCanvas):
         self.map_view_mode.setToolTip(
             "Aggregated: one statistic over the selected period. "
             "Instantaneous: one timestep at a time"
+        )
+
+        # get grid lead days, to choose which lead days the grid averages
+        self.map_grid_lead_days = self.map_menu.checkable_comboboxes["grid_lead_days"]
+        self.map_grid_lead_days.setToolTip(
+            "Lead days averaged in the gridded model field drawn on the map"
         )
 
         # get colourbar limit fields - populated with the actual resolved
