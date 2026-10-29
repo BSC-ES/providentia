@@ -3295,6 +3295,9 @@ class Dashboard(QtWidgets.QWidget):
                 ],
             )
 
+            # fill grid lead days with the lead days read for the gridded model
+            self.mpl_canvas.update_map_grid_lead_days()
+
             # get elements whose abilities depend on having or not only gridded model data
             elements = {self.mpl_canvas.map_z1: "combobox", 
                         self.mpl_canvas.map_z2: "combobox", 

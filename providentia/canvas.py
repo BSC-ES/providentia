@@ -73,7 +73,9 @@ from .plot_formatting import (
     draw_map_gridlines,
 )
 from .plot_options import annotation, linear_regression, log_axes, smooth, threshold
-from .read_aux import get_possible_resampling_resolutions, get_frequency_code, get_grid_title
+from .read_aux import (
+    get_possible_resampling_resolutions, get_frequency_code, get_grid_title, get_map_lead_days
+)
 from .statistics import (
     get_gridded_statistic,
     get_z_statistic_comboboxes,
@@ -911,6 +913,45 @@ class Canvas(FigureCanvas):
         """
         Function that handles the update of the lead days averaged in the grid
         """
+
+        return None
+
+    def update_map_grid_lead_days(self):
+        """
+        Function which fills the grid lead days combobox with the lead days the
+        gridded model was read for (only day 1 if it is not forecast data), keeping
+        the ones checked before if they are still loaded (all of them otherwise).
+        It is empty and disabled when there is no gridded data to draw
+        """
+
+        # get lead days checked before reading
+        previous_lead_days = self.map_grid_lead_days.currentData()
+
+        # get lead days read, the same ones the grid title describes (none without gridded data)
+        if self.read_instance.gridded_var_data:
+            lead_days = get_map_lead_days(self.read_instance)
+        else:
+            lead_days = []
+        checked_lead_days = [day for day in lead_days if day in previous_lead_days]
+        if not checked_lead_days:
+            checked_lead_days = lead_days
+
+        # update items without emitting checkedItemsChanged, as the map is drawn after reading
+        self.map_grid_lead_days.blockSignals(True)
+        self.map_grid_lead_days.clear()
+        self.map_grid_lead_days.addItems(
+            [f"day {day}" for day in lead_days], datalist=lead_days
+        )
+        for day_ii, day in enumerate(lead_days):
+            if day in checked_lead_days:
+                self.map_grid_lead_days.model().item(day_ii).setCheckState(QtCore.Qt.Checked)
+        self.map_grid_lead_days.blockSignals(False)
+        self.map_grid_lead_days.updateText()
+
+        if self.read_instance.gridded_var_data:
+            self.read_instance.enable_element(self.map_grid_lead_days, "checkable_combobox")
+        else:
+            self.read_instance.disable_element(self.map_grid_lead_days, "checkable_combobox")
 
         return None
     
