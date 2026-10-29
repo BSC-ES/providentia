@@ -46,7 +46,9 @@ from .statistics import (
     resolve_colourmap,
 )
 
-from .read_aux import drop_nans, get_data_label_lead_day, get_model_id, get_valid_metadata
+from .read_aux import (
+    drop_nans, get_data_label_lead_day, get_model_id, get_valid_metadata, is_on_map_grid
+)
 from .plot_aux import (
     get_display_label,
     create_statistical_timeseries,
@@ -579,7 +581,8 @@ class Plotting:
         return square_handle, dot_handle
 
     def make_legend_handles(
-        self, plot_characteristics_legend, data_labels=None, set_obs=True, map_grid_data_label=None
+        self, plot_characteristics_legend, data_labels=None, set_obs=True, map_grid_data_label=None,
+        map_grid_lead_days=None
     ):
         """
         Constructs Matplotlib legend handle objects for observational and model data labels.
@@ -593,9 +596,12 @@ class Plotting:
         set_obs : bool, optional
             Indicates if to set observations in legend or not.
         map_grid_data_label : str, optional
-            Data label whose lead day is drawn on the map grid. In day forecast mode
-            (e.g. 'fc-day3'), the gridded square is only shown next to it, as the grid
-            only has its lead day.
+            Data label whose lead day is drawn on the map grid, if map_grid_lead_days is
+            not given. In day forecast mode (e.g. 'fc-day3'), the gridded square is only
+            shown next to it, as the grid only has its lead day.
+        map_grid_lead_days : list of int, optional
+            Lead days drawn on the map grid (e.g. chosen in the dashboard). In day forecast
+            mode, the gridded square is only shown next to the labels of these lead days.
 
         Returns
         -------
@@ -624,8 +630,12 @@ class Plotting:
         # initialise labels that are already in legend
         processed_labels = set()
 
-        # get lead day drawn on map grid (None if all loaded lead days are drawn)
-        map_grid_lead_day = get_data_label_lead_day(self.read_instance, map_grid_data_label)
+        # get lead days drawn on map grid: the ones given, or the lead day of the map grid
+        # data label in day forecast mode (None if all loaded lead days are drawn)
+        if map_grid_lead_days is None:
+            map_grid_lead_day = get_data_label_lead_day(self.read_instance, map_grid_data_label)
+            if map_grid_lead_day is not None:
+                map_grid_lead_days = [map_grid_lead_day]
 
         for data_label, data_label_raw in label_pairs:
             if data_label in processed_labels:
@@ -683,14 +693,14 @@ class Plotting:
 
             # gridded and interpolated show combined square+dot entry per interpolated
             # label (including forecast suffix), in that label's colour.
-            # In day forecast mode the grid only has the map label's lead day,
+            # In day forecast mode the grid only has the lead days drawn on it,
             # so other forecast days show dot only
             if paired:
                 for label in non_gridded_labels:
                     square_handle, dot_handle = self.make_model_handles(
                         plot_characteristics_legend, label
                     )
-                    if (map_grid_lead_day is None) or (label == map_grid_data_label):
+                    if is_on_map_grid(self.read_instance, label, map_grid_lead_days):
                         legend_elements.append((square_handle, dot_handle))
                     else:
                         legend_elements.append(dot_handle)
@@ -698,13 +708,9 @@ class Plotting:
             # only gridded show square only
             # the ' (gridded)' suffix is dropped from the legend text (an alias has none)
             elif is_gridded:
-                # in day forecast mode the grid only has the map label's lead day,
+                # in day forecast mode the grid only has the lead days drawn on it,
                 # so other forecast days of a gridded model loaded alone are left out
-                if (
-                    (map_grid_lead_day is not None)
-                    and (data_label != map_grid_data_label)
-                    and (get_data_label_lead_day(self.read_instance, data_label) is not None)
-                ):
+                if not is_on_map_grid(self.read_instance, data_label, map_grid_lead_days):
                     continue
                 square_handle, _ = self.make_model_handles(
                     plot_characteristics_legend, data_label

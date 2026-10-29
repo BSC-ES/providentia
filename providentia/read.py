@@ -324,7 +324,7 @@ class DataReader:
                     self.read_instance.data_labels,
                     self.read_instance.data_labels_raw,
                     self.read_instance.experiments,
-                ) = self.update_forecast_indices(init=True)
+                ) = self.update_forecast_indices(init=True, show_warnings=True)
 
             # create data in memory array
             self.read_instance.data_in_memory = {
@@ -1791,14 +1791,25 @@ class DataReader:
                                 ts for ts in available_timesteps
                                 if ts[:6] in yearmonths_to_read_str
                             )
-                            if len(timesteps_to_read_intersect) == 0:
+
+                            # take the first file that exists, as missing files are only
+                            # reported when reading (in read_gridded_data)
+                            file_root = self.read_instance.available_model_data_file_roots[
+                                file_root_key
+                            ]
+                            first_timestep = next(
+                                (
+                                    ts for ts in timesteps_to_read_intersect
+                                    if os.path.exists(file_root.format(date=ts))
+                                ),
+                                None,
+                            )
+                            if first_timestep is None:
                                 continue
 
                             files_to_read[data_label] = (
-                                self.read_instance.available_model_data_file_roots[
-                                    file_root_key
-                                ].format(date=timesteps_to_read_intersect[0]),
-                                timesteps_to_read_intersect[0],
+                                file_root.format(date=first_timestep),
+                                first_timestep,
                             )
                             continue
                     # if nothing is saved next to ::, assume it is interpolated
@@ -1834,16 +1845,22 @@ class DataReader:
                     if len(yearmonths_to_read_intersect) == 0:
                         continue
 
-                    # interpolated files have no timestep, their lead days are in the forecast dimension
-                    files_to_read[data_label] = (
-                        sorted(
-                            [
+                    # interpolated files have no timestep, their lead days are in the forecast dimension.
+                    # Take the first file that exists
+                    first_file = next(
+                        (
+                            relevant_file
+                            for relevant_file in sorted(
                                 file_root + str(yyyymm) + ".nc"
                                 for yyyymm in yearmonths_to_read_intersect
-                            ]
-                        )[0],
+                            )
+                            if os.path.exists(relevant_file)
+                        ),
                         None,
                     )
+                    if first_file is None:
+                        continue
+                    files_to_read[data_label] = (first_file, None)
 
             # read forecast dimension for each model
             if len(files_to_read) == 0:
@@ -1873,6 +1890,7 @@ class DataReader:
         selected_data_labels_raw=None,
         networkspecies=None,
         init=False,
+        show_warnings=False,
     ):
         """
         Updates forecast-related indices, labels, and model configurations based on current settings and selections.
@@ -1891,6 +1909,9 @@ class DataReader:
             List of networkspecies pairs; defaults to instance networkspecies.
         init : bool, optional
             Flag indicating if this is an initialisation call to reset menu structures.
+        show_warnings : bool, optional
+            Warn about the selected forecast days a selected model does not have, only
+            when reading (not when updating the models menu), by default False.
 
         Returns
         -------
@@ -2130,6 +2151,29 @@ class DataReader:
                                     data_labels_raw_to_add.append(new_data_label_raw)
 
                         else:
+                            # warn about the wanted forecast days the model does not have
+                            missing_forecast_days = [
+                                str(wanted_forecast_day)
+                                for wanted_forecast_day in wanted_forecast_days
+                                if wanted_forecast_day > n_forecast_days
+                            ]
+                            if show_warnings and missing_forecast_days and (
+                                data_label in selected_data_labels
+                            ):
+                                if len(missing_forecast_days) == len(wanted_forecast_days):
+                                    msg = (
+                                        f"{data_label} has {n_forecast_days} lead day(s) for "
+                                        f"{networkspeci}, none of the selected forecast days "
+                                        f"({', '.join(missing_forecast_days)})."
+                                    )
+                                else:
+                                    msg = (
+                                        f"{data_label} has {n_forecast_days} lead day(s) for "
+                                        f"{networkspeci}, so forecast day(s) "
+                                        f"{', '.join(missing_forecast_days)} cannot be loaded for it."
+                                    )
+                                show_message(self.read_instance, msg)
+
                             # otherwise, handle explicit list of wanted forecast days
                             for wanted_forecast_day in wanted_forecast_days:
                                 if wanted_forecast_day <= n_forecast_days:
@@ -3505,6 +3549,7 @@ class DataReader:
         # lead day can be allocated once and filled while reading
         file_blocks, day_blocks, lead_blocks, files = [], [], [], []
         for timestep in sorted(timesteps_to_read_intersect):
+            # skip files not found, the days they cover are reported as days without data
             filepath = file_root.format(date=timestep)
             if not os.path.exists(filepath):
                 continue
@@ -3603,9 +3648,25 @@ class DataReader:
             # two files is never in memory at the same time
             del timestep_data, cell_data
 
+        # warn if some days of the period have no valid gridded data (e.g. forecast runs
+        # not found), as they are not drawn on the grid. Forecast runs are checked per
+        # lead day read, and files that are not forecast runs (lead 0) as a whole
+        has_data = grid_count.reshape(n_days, len(leads), -1).any(axis=2)
+        checked_lead_days = [0] if leads.tolist() == [0] else lead_days
+        some_data_missing = any(
+            (lead_day not in leads) or (not has_data[:, np.searchsorted(leads, lead_day)].all())
+            for lead_day in checked_lead_days
+        )
+        if some_data_missing:
+            msg = (
+                f"Some gridded data of {model_id} ({speci}) is missing in the selected period, "
+                "so it is not drawn on the grid for those days."
+            )
+            show_message(self.read_instance, msg)
+
         return grid_sum, grid_count, days, leads, lat, lon, files
 
-    def read_gridded_timesteps(self, speci, start, end, lead_day=None):
+    def read_gridded_timesteps(self, speci, start, end, lead_days=None):
         """
         Read on the fly the gridded model timesteps inside a period, from the files
         found in read_gridded_data, without keeping them in memory
@@ -3618,8 +3679,8 @@ class DataReader:
             Start of period (inclusive)
         end : pd.Timestamp
             End of period (exclusive)
-        lead_day : int, optional
-            Lead day to read (plus files that are not forecast runs), by default None
+        lead_days : list of int, optional
+            Lead days to read (plus files that are not forecast runs), by default None
             (all loaded lead days)
 
         Returns
@@ -3643,8 +3704,8 @@ class DataReader:
         for filepath, time_indices, timestamps, file_lead_days in gridded_data["files"]:
             # get timesteps of file inside period and of wanted lead day
             wanted = (timestamps >= start.value) & (timestamps < end.value)
-            if lead_day is not None:
-                wanted &= (file_lead_days == lead_day) | (file_lead_days == 0)
+            if lead_days is not None:
+                wanted &= np.isin(file_lead_days, lead_days) | (file_lead_days == 0)
             if not wanted.any():
                 continue
 

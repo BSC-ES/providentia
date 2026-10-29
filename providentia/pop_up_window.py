@@ -12,7 +12,7 @@ import re
 
 import numpy as np
 import pandas as pd
-from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5 import QtCore, QtWidgets
 import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join, Tee
@@ -524,7 +524,7 @@ class PopUpWindow(QtWidgets.QWidget):
                         QtWidgets.QCheckBox,
                         QtWidgets.QCheckBox,
                         QtWidgets.QPushButton,
-                        CheckableComboBox,
+                        ComboBox,
                         CheckableComboBox,
                     ],
                 }
@@ -863,14 +863,14 @@ class PopUpWindow(QtWidgets.QWidget):
                                     self.handle_model_interp_clicked
                                 )
 
-                        # connect forecast options combobox to handle forecast option being checked
+                        # connect forecast options combobox to handle forecast option being selected
                         elif element == "forecast":
                             self.page_memory["models"]["forecast"][
                                 label_ii
-                            ].model().setObjectName("forecastcheckboxes_" + str(label_ii))
+                            ].setObjectName("forecastcombobox_" + str(label_ii))
                             self.page_memory["models"]["forecast"][
                                 label_ii
-                            ].model().dataChanged.connect(self.forecast_option_checked)
+                            ].currentTextChanged.connect(self.forecast_option_changed)
 
                         # fill forecast option and day comboboxes back with previously selected values
                         # (done with forecast days, as both comboboxes of the row exist by then)
@@ -2845,9 +2845,15 @@ class PopUpWindow(QtWidgets.QWidget):
         # and days selected, as far as they are available for it (both versions have the same
         # lead days, but only lead day 1 is shown for an interpolated version without them)
         model, all_forecast_vars, _ = self.get_forecast_options(label_ii)
-        if (previous_model is not None) and (model is not None) and (model != previous_model):
-            forecast_menu = self.menu_current["models"]["forecast"]
-            forecast_days_menu = self.menu_current["models"]["forecast_days"]
+        forecast_menu = self.menu_current["models"]["forecast"]
+        forecast_days_menu = self.menu_current["models"]["forecast_days"]
+        if (
+            (previous_model is not None)
+            and (model is not None)
+            and (model != previous_model)
+            and (previous_model in forecast_menu)
+            and (previous_model in forecast_days_menu)
+        ):
             forecast_menu[model][1] = [
                 forecast_var
                 for forecast_var in forecast_menu[previous_model][1]
@@ -2873,7 +2879,8 @@ class PopUpWindow(QtWidgets.QWidget):
         lead days, but the interpolated version only has them when it was interpolated with the
         forecast option, so its options are shown when it is checked (only lead day 1 when it was
         not interpolated with the forecast option, as it cannot load other lead days), otherwise
-        the options of the gridded version.
+        the options of the gridded version. When the model is not checked, the options of the
+        interpolated version are shown if it has forecast days, otherwise of the gridded version.
 
         Parameters
         ----------
@@ -2908,6 +2915,13 @@ class PopUpWindow(QtWidgets.QWidget):
             model_type, days = "gridded", forecast_days["gridded"][:1]
         elif checked["gridded"] and forecast_days["gridded"]:
             model_type, days = "gridded", forecast_days["gridded"]
+        # model not checked: show the options of the interpolated version if it has
+        # forecast days, otherwise of the gridded version, so they can be seen and set
+        # before checking it (they are only used once it is checked)
+        elif (not checked["interpolated"]) and (not checked["gridded"]) and forecast_days["interpolated"]:
+            model_type, days = "interpolated", forecast_days["interpolated"]
+        elif (not checked["interpolated"]) and (not checked["gridded"]) and forecast_days["gridded"]:
+            model_type, days = "gridded", forecast_days["gridded"]
         else:
             return None, [], []
 
@@ -2933,44 +2947,69 @@ class PopUpWindow(QtWidgets.QWidget):
         # remember which data label the comboboxes show, to save the selection under it
         self.forecast_data_labels[label_ii] = model
 
-        # disconnect the combobox event while filling it, so it is not called per item
-        forecast_combobox.model().dataChanged.disconnect(self.forecast_option_checked)
+        # block the dropdown signal while filling it, so it is not handled per item
+        forecast_combobox.blockSignals(True)
 
-        # add available forecast options and days
+        # add available forecast options (after None, to load no forecast option)
         forecast_combobox.clear()
-        forecast_days_combobox.clear()
-        forecast_combobox.addItems(all_forecast_vars)
-        forecast_days_combobox.addItems(all_forecast_day_vars)
+        forecast_combobox.addItems(["None"] + all_forecast_vars)
 
-        # select and disable forecast options and select forecast days previously so
-        selected_forecast_vars = []
+        # select forecast option and days previously selected
+        selected_forecast_vars, selected_forecast_day_vars = [], []
         if model is not None:
             selected_forecast_vars = self.menu_current["models"]["forecast"][model][1]
-            disabled_forecast_vars = self.menu_current["models"]["forecast"][model][2]
             selected_forecast_day_vars = self.menu_current["models"]["forecast_days"][model][1]
-            for forecast_ii, forecast_var in enumerate(all_forecast_vars):
-                item = forecast_combobox.model().item(forecast_ii, 0)
-                if forecast_var in selected_forecast_vars:
-                    item.setCheckState(QtCore.Qt.Checked)
-                if forecast_var in disabled_forecast_vars:
-                    item.setFlags(item.flags() & ~QtCore.Qt.ItemIsEnabled)
-                    item.setData(
-                        QtGui.QBrush(QtGui.QColor(150, 150, 150)), QtCore.Qt.ForegroundRole
-                    )
-            for forecast_day_ii, forecast_day_var in enumerate(all_forecast_day_vars):
-                if forecast_day_var in selected_forecast_day_vars:
-                    forecast_days_combobox.model().item(forecast_day_ii, 0).setCheckState(
-                        QtCore.Qt.Checked
-                    )
-        forecast_combobox.updateText()
+        forecast_var = selected_forecast_vars[0] if selected_forecast_vars else "None"
+        forecast_combobox.setCurrentText(forecast_var)
+        self.fill_forecast_days_combobox(
+            label_ii, forecast_var, all_forecast_day_vars, selected_forecast_day_vars
+        )
+
+        forecast_combobox.blockSignals(False)
+
+        # show forecast options and days if there are any
+        forecast_combobox.setVisible(len(all_forecast_vars) > 0)
+        forecast_days_combobox.setVisible(len(all_forecast_vars) > 0)
+
+    def fill_forecast_days_combobox(
+        self, label_ii, forecast_var, all_forecast_day_vars, selected_forecast_day_vars
+    ):
+        """
+        Fill the forecast days combobox of a model row. With no forecast option (None), only
+        lead day 1 is shown, checked and disabled, as it is the lead day read. Otherwise all
+        the forecast days are shown, checking the ones selected.
+
+        Parameters
+        ----------
+        label_ii : int
+            Row of the model.
+        forecast_var : str
+            Forecast option selected (e.g. 'day', or 'None').
+        all_forecast_day_vars : list
+            Forecast days of the model (e.g. ['day 1', 'day 2']).
+        selected_forecast_day_vars : list
+            Forecast days selected (e.g. ['day 2']).
+        """
+
+        forecast_days_combobox = self.page_memory["models"]["forecast_days"][label_ii]
+        forecast_days_combobox.clear()
+        if forecast_var == "None":
+            forecast_days_combobox.addItems(all_forecast_day_vars[:1])
+            checked_forecast_day_vars = all_forecast_day_vars[:1]
+        else:
+            forecast_days_combobox.addItems(all_forecast_day_vars)
+            checked_forecast_day_vars = selected_forecast_day_vars
+        for forecast_day_ii in range(forecast_days_combobox.model().rowCount()):
+            item = forecast_days_combobox.model().item(forecast_day_ii, 0)
+            if item.text() in checked_forecast_day_vars:
+                item.setCheckState(QtCore.Qt.Checked)
         forecast_days_combobox.updateText()
 
-        # reconnect the combobox event
-        forecast_combobox.model().dataChanged.connect(self.forecast_option_checked)
-
-        # show forecast options if there are any, and forecast days if an option is selected
-        forecast_combobox.setVisible(len(all_forecast_vars) > 0)
-        forecast_days_combobox.setVisible(len(selected_forecast_vars) > 0)
+        # with None the forecast days cannot be changed, so the dropdown is disabled
+        if forecast_var == "None":
+            self.read_instance.disable_element(forecast_days_combobox, "combobox", prefix="popup")
+        else:
+            self.read_instance.enable_element(forecast_days_combobox, "combobox", prefix="popup")
 
     def save_forecast_comboboxes(self, label_ii):
         """
@@ -2984,14 +3023,17 @@ class PopUpWindow(QtWidgets.QWidget):
             Row of the model.
         """
 
+        # nothing to save if the row shows no forecast options, or if its data label is no
+        # longer in the menu (the models menu can be updated while this window is open,
+        # e.g. when an interpolation finishes)
         model = self.forecast_data_labels.get(label_ii)
-        if model is None:
+        if (
+            (model is None)
+            or (model not in self.menu_current["models"]["forecast"])
+            or (model not in self.menu_current["models"]["forecast_days"])
+        ):
             return
 
-        forecast_items = [
-            self.page_memory["models"]["forecast"][label_ii].model().item(item_ii, 0)
-            for item_ii in range(self.page_memory["models"]["forecast"][label_ii].model().rowCount())
-        ]
         forecast_day_items = [
             self.page_memory["models"]["forecast_days"][label_ii].model().item(item_ii, 0)
             for item_ii in range(
@@ -2999,11 +3041,16 @@ class PopUpWindow(QtWidgets.QWidget):
             )
         ]
 
-        selected_forecast_vars = [
-            item.text() for item in forecast_items if item.checkState() == QtCore.Qt.Checked
-        ]
+        # selected forecast option (None selects none), the others are disabled
+        # as they cannot be combined
+        forecast_combobox = self.page_memory["models"]["forecast"][label_ii]
+        selected_forecast_vars = []
+        if forecast_combobox.currentText() != "None":
+            selected_forecast_vars = [forecast_combobox.currentText()]
         disabled_forecast_vars = [
-            item.text() for item in forecast_items if not (item.flags() & QtCore.Qt.ItemIsEnabled)
+            forecast_var
+            for forecast_var in self.menu_current["models"]["forecast"][model][0]
+            if selected_forecast_vars and (forecast_var not in selected_forecast_vars)
         ]
         # forecast days are only kept when a forecast option is selected. Days saved before
         # that are not shown now (only lead day 1 is shown while the interpolated version
@@ -3031,74 +3078,35 @@ class PopUpWindow(QtWidgets.QWidget):
         self.menu_current["models"]["forecast"][model][2] = disabled_forecast_vars
         self.menu_current["models"]["forecast_days"][model][1] = selected_forecast_day_vars
 
-    def forecast_option_checked(self, event):
+    def forecast_option_changed(self, forecast_var):
         """
-        Manages the selection logic for forecast types, enforcing mutual exclusivity and toggling lead-time visibility.
+        Update the forecast days of a model row when its forecast option changes: only lead
+        day 1 (checked and disabled) when None is selected, or all the forecast days when
+        changing from None to a forecast option. The days checked are kept when changing
+        between forecast options.
 
         Parameters
         ----------
-        event : QModelIndex
-            The index of the data item that was changed.
+        forecast_var : str
+            Forecast option selected (e.g. 'day', or 'None').
         """
 
-        # get widget line
-        event_source = self.sender()
-        label_ii = int(event_source.objectName().split("_")[1])
+        label_ii = int(self.sender().objectName().split("_")[1])
+        forecast_days_combobox = self.page_memory["models"]["forecast_days"][label_ii]
 
-        # disconnect the combobox event while inside event so it is not infinitely called
-        self.page_memory["models"]["forecast"][label_ii].model().dataChanged.disconnect(
-            self.forecast_option_checked
-        )
+        # the forecast days dropdown is disabled while None is selected
+        showing_none_days = not forecast_days_combobox.isEnabled()
+        if (forecast_var != "None") and (not showing_none_days):
+            return
 
-        # get all forecast options shown on the row (of the interpolated or gridded version)
-        _, all_forecast_vars, _ = self.get_forecast_options(label_ii)
-
-        # work out which forecast option is selected currently
-        checked_var = "None"
-        for forecast_ii, forecast_var in enumerate(all_forecast_vars):
-            item = (
-                self.page_memory["models"]["forecast"][label_ii]
-                .model()
-                .item(forecast_ii, 0)
-            )
-            if item.checkState() == QtCore.Qt.Checked:
-                checked_var = forecast_var
-                break
-
-        # deactivate other forecast options when one is selected
-        for forecast_ii, forecast_var in enumerate(all_forecast_vars):
-            deactivate = False
-            if (checked_var == "daily") & (forecast_var != "daily"):
-                deactivate = True
-            elif (checked_var == "combined") & (forecast_var != "combined"):
-                deactivate = True
-            elif (checked_var == "day") & (forecast_var != "day"):
-                deactivate = True
-
-            item = (
-                self.page_memory["models"]["forecast"][label_ii]
-                .model()
-                .item(forecast_ii, 0)
-            )
-            if deactivate:
-                item.setFlags(item.flags() & ~QtCore.Qt.ItemIsEnabled)
-                item.setData(
-                    QtGui.QBrush(QtGui.QColor(150, 150, 150)
-                                 ), QtCore.Qt.ForegroundRole
-                )
-            else:
-                item.setFlags(item.flags() | QtCore.Qt.ItemIsEnabled)
-                item.setData(None, QtCore.Qt.ForegroundRole)
-
-        # hide or show the forecast days depending if have forecast option selected or not
-        if checked_var == "None":
-            self.page_memory["models"]["forecast_days"][label_ii].hide()
-        else:
-            self.page_memory["models"]["forecast_days"][label_ii].show()
-
-        # reconnect the combobox event
-        self.page_memory["models"]["forecast"][label_ii].model().dataChanged.connect(
-            self.forecast_option_checked
+        # refill the forecast days, checking the ones saved for the model
+        _, _, all_forecast_day_vars = self.get_forecast_options(label_ii)
+        model = self.forecast_data_labels.get(label_ii)
+        selected_forecast_day_vars = []
+        if (model is not None) and (model in self.menu_current["models"]["forecast_days"]):
+            selected_forecast_day_vars = self.menu_current["models"]["forecast_days"][model][1]
+        self.fill_forecast_days_combobox(
+            label_ii, forecast_var, all_forecast_day_vars, selected_forecast_day_vars
         )
 
     def closeEvent(self, event):

@@ -436,14 +436,6 @@ class SettingsMenu(object):
         if sliders:
             sliders[0].fit_group()
 
-        # the menu's sliders are fitted together, so they all end at the same
-        # point - see ValueSlider.fit_group()
-        sliders = list(self.sliders.values())
-        for slider in sliders:
-            slider.group = sliders
-        if sliders:
-            sliders[0].fit_group()
-
     def add_button(self, element_settings):
         """
         Add button as settings menu
