@@ -56,7 +56,6 @@ from .read_aux import (
     check_for_ghost,
     get_default_qa,
     generate_file_trees,
-    get_data_label_lead_day,
     get_model_id,
     get_valid_models,
     get_valid_obs_files_in_date_range,
@@ -3272,31 +3271,25 @@ class Dashboard(QtWidgets.QWidget):
             # generate list of sorted z1/z2 data arrays names in memory, putting observations
             # before models if they are loaded, and empty string item as first element in z2 array list
             # (for changing from 'difference' statistics to 'absolute')
-            # do not include gridded data labels as options, except the forecast days of a gridded
-            # model loaded without its interpolated version for z1 (drawn over the observations),
-            # as they have no station data to compute a bias with
+            # do not include gridded data labels as options, as they have no station data
+            # (the lead days drawn on the grid are chosen in the grid lead days combobox)
             raw_per_data_label = dict(zip(self.data_labels, self.data_labels_raw))
             label_options = [
                 label
                 for label in self.data_labels
-                if (not raw_per_data_label[label].endswith("::gridded"))
-                or (get_data_label_lead_day(self, label) is not None)
+                if not raw_per_data_label[label].endswith("::gridded")
             ]
             if self.observations_data_label in label_options:
                 label_options.remove(self.observations_data_label)
                 label_options.insert(0, self.observations_data_label)
             self.z1_arrays = np.array(label_options)
-            self.z2_arrays = np.append(
-                [""],
-                [
-                    label
-                    for label in label_options
-                    if not raw_per_data_label[label].endswith("::gridded")
-                ],
-            )
+            self.z2_arrays = np.append([""], label_options)
 
-            # fill grid lead days with the lead days read for the gridded model
-            self.mpl_canvas.update_map_grid_lead_days()
+            # fill grid lead days with the lead days read for the gridded model,
+            # checking all of them only if models have changed
+            self.mpl_canvas.update_map_grid_lead_days(
+                check_all=(len(models_to_remove) > 0) or (len(models_to_read) > 0)
+            )
 
             # get elements whose abilities depend on having or not only gridded model data
             elements = {self.mpl_canvas.map_z1: "combobox", 
@@ -3312,10 +3305,6 @@ class Dashboard(QtWidgets.QWidget):
                 # disable statistic comboboxes and station selection options on menu
                 for element, element_type in elements.items():
                     self.disable_element(element, element_type)
-                # except z1 if it lets choose the lead day whose grid is drawn
-                # (gridded model loaded alone in day forecast mode)
-                if len(self.z1_arrays) > 1:
-                    self.enable_element(self.mpl_canvas.map_z1, "combobox")
 
                 # disable lasso
                 if hasattr(self, 'navi_toolbar'):

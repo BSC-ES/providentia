@@ -937,16 +937,20 @@ class Canvas(FigureCanvas):
 
         return None
 
-    def update_map_grid_lead_days(self):
+    def update_map_grid_lead_days(self, check_all=True):
         """
         Function which fills the grid lead days combobox with the lead days the
-        gridded model was read for (only day 1 if it is not forecast data), all of
-        them checked, unless the same lead days were read before, then keeping the
-        ones checked. It is empty and disabled when there is no gridded data to draw
+        gridded model was read for (only day 1 if it is not forecast data).
+        It is empty and disabled when there is no gridded data to draw
+
+        Parameters
+        ----------
+        check_all : bool, default True
+            Check all lead days (e.g. when models have changed), otherwise keep
+            the ones checked before that are still loaded (all if none is)
         """
 
-        # get lead days available and checked before reading
-        previous_available_lead_days = self.map_grid_lead_days.currentData(all=True)
+        # get lead days checked before reading
         previous_lead_days = self.map_grid_lead_days.currentData()
 
         # get lead days read, the same ones the grid title describes (none without gridded data)
@@ -955,17 +959,18 @@ class Canvas(FigureCanvas):
         else:
             lead_days = []
 
-        # check all lead days if they have changed (or none was checked), otherwise keep checked ones
-        if (lead_days == previous_available_lead_days) and previous_lead_days:
-            checked_lead_days = previous_lead_days
-        else:
-            checked_lead_days = lead_days
+        # get lead days to check
+        checked_lead_days = lead_days
+        if not check_all:
+            kept_lead_days = [day for day in lead_days if day in previous_lead_days]
+            if kept_lead_days:
+                checked_lead_days = kept_lead_days
 
         # update items without emitting checkedItemsChanged, as the map is drawn after reading
         self.map_grid_lead_days.blockSignals(True)
         self.map_grid_lead_days.clear()
         self.map_grid_lead_days.addItems(
-            [f"day {day}" for day in lead_days], datalist=lead_days
+            [str(day) for day in lead_days], datalist=lead_days
         )
         for day_ii, day in enumerate(lead_days):
             if day in checked_lead_days:
@@ -2141,13 +2146,13 @@ class Canvas(FigureCanvas):
                     selected_z_stat = self.read_instance.map_z
 
             # if z1 is initialised or labels have changed (by setting data label through a conf
-            # for instance, we will reset z1)
-            if (selected_z1_array == "") or (
-                selected_z1_array not in self.read_instance.data_labels
-            ):
-                selected_z1_array = copy.deepcopy(
-                    self.read_instance.observations_data_label
-                )
+            # for instance, we will reset z1) to its first option (observations if loaded),
+            # or leave it empty if it has none (only gridded data loaded)
+            if selected_z1_array not in self.read_instance.z1_arrays:
+                if len(self.read_instance.z1_arrays) > 0:
+                    selected_z1_array = self.read_instance.z1_arrays[0]
+                else:
+                    selected_z1_array = ""
 
             # check if we have any gridded dataset
             has_gridded = False
@@ -2175,15 +2180,6 @@ class Canvas(FigureCanvas):
                     if nonsensical_map_stat in z_stat_items:
                         z_stat_items = z_stat_items[z_stat_items != nonsensical_map_stat]
 
-            # a gridded lead day has no station data to compute a bias with,
-            # so it can only be drawn as an absolute map (observations over its grid)
-            raw_per_data_label = dict(
-                zip(self.read_instance.data_labels, self.read_instance.data_labels_raw)
-            )
-            z1_is_gridded = raw_per_data_label.get(selected_z1_array, "").endswith("::gridded")
-            if z1_is_gridded:
-                selected_z2_array = ""
-
             # remove selected z1/z2 items from opposite z2/z1 comboboxes (if have value
             # selected, i.e. z2 array not empty string)
             if selected_z2_array != "":
@@ -2193,13 +2189,10 @@ class Canvas(FigureCanvas):
                 )
             else:
                 z1_items = self.read_instance.z1_arrays
-            if z1_is_gridded:
-                z2_items = np.array([""])
-            else:
-                z2_items = np.delete(
-                    self.read_instance.z2_arrays,
-                    np.where(self.read_instance.z2_arrays == selected_z1_array)[0],
-                )
+            z2_items = np.delete(
+                self.read_instance.z2_arrays,
+                np.where(self.read_instance.z2_arrays == selected_z1_array)[0],
+            )
 
             # update all comboboxes (clear, then add items)
             self.map_z_stat.clear()
@@ -2218,7 +2211,7 @@ class Canvas(FigureCanvas):
             self.map_z2.setCurrentText(selected_z2_array)
 
             # disable z2 when it has nothing to choose apart from the empty item
-            # (gridded z1, only gridded data or only observations loaded)
+            # (only gridded data or only observations loaded)
             if len(z2_items) > 1:
                 self.read_instance.enable_element(self.map_z2, "combobox")
             else:
