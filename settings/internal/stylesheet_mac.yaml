@@ -505,6 +505,30 @@
         },
     },
 
+  "popup_combobox_disabled":
+    {
+      "QComboBox":
+        {
+          "font-family": ".AppleSystemUIFont",
+          "font-style": "normal",
+          "font-size": "9.5pt",
+          "height": "18",
+          "width": "100",
+          "color": "black",
+          "background-color": "#DCDCDC",
+          "selection-color": "white",
+          "selection-background-color": "grey",
+          "border": "1px solid lightgrey",
+        },
+      "QToolTip":
+        {
+          "font-family": ".AppleSystemUIFont",
+          "font-style": "normal",
+          "font-size": "9.5pt",
+          "color": "black",
+        },
+    },
+
   "popup_lineedit_multispecies":
     {
       "QLineEdit":
