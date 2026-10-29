@@ -324,7 +324,7 @@ class DataReader:
                     self.read_instance.data_labels,
                     self.read_instance.data_labels_raw,
                     self.read_instance.experiments,
-                ) = self.update_forecast_indices(init=True)
+                ) = self.update_forecast_indices(init=True, show_warnings=True)
 
             # create data in memory array
             self.read_instance.data_in_memory = {
@@ -1890,6 +1890,7 @@ class DataReader:
         selected_data_labels_raw=None,
         networkspecies=None,
         init=False,
+        show_warnings=False,
     ):
         """
         Updates forecast-related indices, labels, and model configurations based on current settings and selections.
@@ -1908,6 +1909,9 @@ class DataReader:
             List of networkspecies pairs; defaults to instance networkspecies.
         init : bool, optional
             Flag indicating if this is an initialisation call to reset menu structures.
+        show_warnings : bool, optional
+            Warn about the selected forecast days a selected model does not have, only
+            when reading (not when updating the models menu), by default False.
 
         Returns
         -------
@@ -2147,6 +2151,29 @@ class DataReader:
                                     data_labels_raw_to_add.append(new_data_label_raw)
 
                         else:
+                            # warn about the wanted forecast days the model does not have
+                            missing_forecast_days = [
+                                str(wanted_forecast_day)
+                                for wanted_forecast_day in wanted_forecast_days
+                                if wanted_forecast_day > n_forecast_days
+                            ]
+                            if show_warnings and missing_forecast_days and (
+                                data_label in selected_data_labels
+                            ):
+                                if len(missing_forecast_days) == len(wanted_forecast_days):
+                                    msg = (
+                                        f"{data_label} has {n_forecast_days} lead day(s) for "
+                                        f"{networkspeci}, none of the selected forecast days "
+                                        f"({', '.join(missing_forecast_days)})."
+                                    )
+                                else:
+                                    msg = (
+                                        f"{data_label} has {n_forecast_days} lead day(s) for "
+                                        f"{networkspeci}, so forecast day(s) "
+                                        f"{', '.join(missing_forecast_days)} cannot be loaded for it."
+                                    )
+                                show_message(self.read_instance, msg)
+
                             # otherwise, handle explicit list of wanted forecast days
                             for wanted_forecast_day in wanted_forecast_days:
                                 if wanted_forecast_day <= n_forecast_days:

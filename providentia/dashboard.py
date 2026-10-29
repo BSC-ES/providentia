@@ -2074,6 +2074,7 @@ class Dashboard(QtWidgets.QWidget):
             selected_data_labels_raw=selected_data_labels_raw,
             networkspecies=self.selected_networkspecies,
             init=True,
+            show_warnings=self.from_conf,
         )
 
         # if are loading from a .conf file then set data labels and models
@@ -3042,6 +3043,7 @@ class Dashboard(QtWidgets.QWidget):
                 data_labels=data_labels,
                 data_labels_raw=data_labels_raw,
                 networkspecies=self.networkspecies,
+                show_warnings=True,
             )
 
         # remove bias plot options if have no models loaded
