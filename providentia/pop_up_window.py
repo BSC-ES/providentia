@@ -506,6 +506,9 @@ class PopUpWindow(QtWidgets.QWidget):
                 # data label whose forecast options are shown on each model row
                 # (interpolated or gridded version of the model), to save them under it
                 self.forecast_data_labels = {}
+                # models listed when the window was opened, as its rows are tied to them
+                # (see models_list_changed)
+                self.opened_models = list(self.menu_current["models"]["map_vars"])
                 self.page_memory["models"] = {
                     "interpolated": [],
                     "gridded": [],
@@ -2820,6 +2823,10 @@ class PopUpWindow(QtWidgets.QWidget):
         model_type = object_name[1]
         label_ii = int(object_name[-1])
 
+        # the rows no longer match the models listed, so the model of the row is unknown
+        if self.models_list_changed():
+            return
+
         # only one gridded model can be loaded, so refuse a second one on click
         # (signals blocked so unchecking does not run this handler again)
         if (model_type == "gridded") and (event == QtCore.Qt.Checked):
@@ -2872,6 +2879,28 @@ class PopUpWindow(QtWidgets.QWidget):
 
         # show the options of the version shown now
         self.update_forecast_comboboxes(label_ii)
+
+    def models_list_changed(self):
+        """
+        Check if the list of models changed while the models window was open (e.g. by
+        changing the period in the dashboard), as its rows are tied to the models listed
+        when it was opened. If so, warn that its selections cannot be used.
+
+        Returns
+        -------
+        bool
+            True if the list of models changed.
+        """
+
+        if list(self.menu_current["models"]["map_vars"]) == self.opened_models:
+            return False
+
+        msg = (
+            "The list of models changed while the MODELS window was open, so the "
+            "selections made in it are not saved. Open it again to select models."
+        )
+        show_message(self.read_instance, msg)
+        return True
 
     def get_forecast_options(self, label_ii):
         """
@@ -3245,6 +3274,9 @@ class PopUpWindow(QtWidgets.QWidget):
                                 )
 
                 elif menu_type == "models":
+                    # do not save the models page if its rows no longer match the models listed
+                    if self.models_list_changed():
+                        break
                     # save the models checked for each model type
                     if element in ["interpolated", "gridded"]:
                         selected_vars = []
