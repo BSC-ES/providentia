@@ -923,8 +923,9 @@ class Canvas(FigureCanvas):
             QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
             self.read_instance.block_config_bar_handling_updates = True
 
-            # update plotted grid and its title
+            # update legend, and plotted grid and its title
             if not self.read_instance.block_MPL_canvas_updates:
+                self.update_legend()
                 self.update_map()
 
             # allow handling updates to the configuration bar again
@@ -2079,7 +2080,7 @@ class Canvas(FigureCanvas):
         # create legend element handles
         legend_plot_characteristics = self.plotting.make_legend_handles(
             copy.deepcopy(self.plot_characteristics["legend"]),
-            map_grid_data_label=self.map_z1.currentText(),
+            map_grid_lead_days=self.map_grid_lead_days.currentData(),
         )
 
         # plot legend
