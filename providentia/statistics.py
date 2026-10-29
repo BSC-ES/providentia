@@ -553,7 +553,8 @@ def get_date_range_mask(read_instance, time_index, date_range):
 
 
 def get_gridded_statistic(
-    read_instance, speci, zstat, date_range=None, date=None, hour=None, data_label=None
+    read_instance, speci, zstat, date_range=None, date=None, hour=None, data_label=None,
+    lead_days=None
 ):
     """
     Get gridded model data to plot on map from gridded data read in read_setup,
@@ -575,8 +576,12 @@ def get_gridded_statistic(
     hour : int, optional
         Hour, by default None
     data_label : str, optional
-        Data label selected for the map, by default None. In day forecast mode
-        (e.g. 'fc-day3') only its lead day is used, otherwise all loaded lead days
+        Data label selected for the map, by default None. If lead_days is not given,
+        in day forecast mode (e.g. 'fc-day3') only its lead day is used,
+        otherwise all loaded lead days
+    lead_days : list of int, optional
+        Lead days to average (e.g. chosen in the dashboard), by default None
+        (taken from data_label)
 
     Returns
     -------
@@ -599,11 +604,15 @@ def get_gridded_statistic(
         gridded_data[key] for key in ("sum", "count", "day", "lead", "lat", "lon")
     )
 
-    # in day forecast mode, use only the lead day of the selected data label
-    lead_day = get_data_label_lead_day(read_instance, data_label)
-    if lead_day is not None:
-        # keep the lead day and files that are not forecast runs (lead 0)
-        lead_indices = np.flatnonzero((grid_lead == lead_day) | (grid_lead == 0))
+    # use the lead days given, or in day forecast mode only the lead day of the
+    # selected data label (all loaded lead days otherwise)
+    if lead_days is None:
+        lead_day = get_data_label_lead_day(read_instance, data_label)
+        if lead_day is not None:
+            lead_days = [lead_day]
+    if lead_days is not None:
+        # keep the lead days and files that are not forecast runs (lead 0)
+        lead_indices = np.flatnonzero(np.isin(grid_lead, lead_days) | (grid_lead == 0))
         if len(lead_indices) == 0:
             return grid_stat, grid_lat, grid_lon
     else:
@@ -626,7 +635,7 @@ def get_gridded_statistic(
     if date and hour is not None:
         target_timestamp = pd.Timestamp(date) + pd.Timedelta(hours=int(hour))
         total_sum, total_count = read_instance.datareader.read_gridded_timesteps(
-            speci, target_timestamp, target_timestamp + pd.Timedelta(hours=1), lead_day
+            speci, target_timestamp, target_timestamp + pd.Timedelta(hours=1), lead_days
         )
 
     # calculate statistic
@@ -662,7 +671,7 @@ def get_gridded_statistic(
                 if partial_start >= partial_end:
                     continue
                 partial_sum, partial_count = read_instance.datareader.read_gridded_timesteps(
-                    speci, partial_start, partial_end, lead_day
+                    speci, partial_start, partial_end, lead_days
                 )
                 if partial_sum is None:
                     continue

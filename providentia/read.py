@@ -3605,7 +3605,7 @@ class DataReader:
 
         return grid_sum, grid_count, days, leads, lat, lon, files
 
-    def read_gridded_timesteps(self, speci, start, end, lead_day=None):
+    def read_gridded_timesteps(self, speci, start, end, lead_days=None):
         """
         Read on the fly the gridded model timesteps inside a period, from the files
         found in read_gridded_data, without keeping them in memory
@@ -3618,8 +3618,8 @@ class DataReader:
             Start of period (inclusive)
         end : pd.Timestamp
             End of period (exclusive)
-        lead_day : int, optional
-            Lead day to read (plus files that are not forecast runs), by default None
+        lead_days : list of int, optional
+            Lead days to read (plus files that are not forecast runs), by default None
             (all loaded lead days)
 
         Returns
@@ -3643,8 +3643,8 @@ class DataReader:
         for filepath, time_indices, timestamps, file_lead_days in gridded_data["files"]:
             # get timesteps of file inside period and of wanted lead day
             wanted = (timestamps >= start.value) & (timestamps < end.value)
-            if lead_day is not None:
-                wanted &= (file_lead_days == lead_day) | (file_lead_days == 0)
+            if lead_days is not None:
+                wanted &= np.isin(file_lead_days, lead_days) | (file_lead_days == 0)
             if not wanted.any():
                 continue
 

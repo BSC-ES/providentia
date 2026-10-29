@@ -2472,12 +2472,12 @@ def get_data_label_lead_day(read_instance, data_label):
     return None
 
 
-def get_grid_title(read_instance, data_label):
+def get_grid_title(read_instance, data_label, lead_days=None):
     """
     Get the text added to the title of a map to describe the grid drawn under it
     (e.g. 'fc (gridded, mean of lead days 2 and 4)'), with the same lead days
-    get_gridded_statistic uses: the lead day of the data label in day forecast mode,
-    otherwise all loaded lead days
+    get_gridded_statistic uses: the lead days given, or if none are given the lead day
+    of the data label in day forecast mode, otherwise all loaded lead days
     """
 
     # the gridded model is named in every map, as the grid may belong to another model
@@ -2490,11 +2490,12 @@ def get_grid_title(read_instance, data_label):
     )
     gridded_label = remove_forecast_suffix(gridded_label).replace(" (gridded)", "")
 
-    lead_day = get_data_label_lead_day(read_instance, data_label)
-    if lead_day is not None:
-        lead_days = [lead_day]
-    else:
-        lead_days = get_map_lead_days(read_instance)
+    if lead_days is None:
+        lead_day = get_data_label_lead_day(read_instance, data_label)
+        if lead_day is not None:
+            lead_days = [lead_day]
+        else:
+            lead_days = get_map_lead_days(read_instance)
 
     lead_days = [str(day) for day in lead_days]
     if len(lead_days) > 1:
