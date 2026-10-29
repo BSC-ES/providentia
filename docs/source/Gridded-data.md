@@ -61,9 +61,9 @@ The table describes report and library modes, where the data selected for the ma
 
 `X` is any number from 1 to N. In the legend, a filled dot marks the interpolated data and an empty square the gridded data. Gridded models are only shown in the legend next to a map drawn over their grid: in the dashboard, and in library mode on maps with the `domain` option (the only maps with a legend). In other library plots, in the library `legend` plot, and in reports, where the legend is only shown on plots of station data, gridded models are left out of the legend. Each map also describes its grid in its title (see [Map title](#map-title)).
 
-With `day`, each lead day is a separate entry, so the grid always shows a single lead day: the one of the selected entry. With `daily` and `combined`, all lead days are merged into one entry, so the grid shows the average of the loaded lead days, which is that same day when only one is loaded.
+With `day`, each lead day is a separate entry, so in report and library modes the grid always shows a single lead day: the one of the selected entry. With `daily` and `combined`, all lead days are merged into one entry, so the grid shows the average of the loaded lead days, which is that same day when only one is loaded.
 
-When the observations or another model are selected for the map, they have no lead day of their own, so the grid shows the average of the loaded lead days (lead day 1 if no forecast option is set). For example, with `day2, day4`, the grid under the `fc-day2` map shows lead day 2, while the grid under the observations map shows the average of lead days 2 and 4.
+In report and library modes, when the observations or another model are selected for the map, they have no lead day of their own, so the grid shows the average of the loaded lead days (lead day 1 if no forecast option is set). For example, with `day2, day4`, the grid under the `fc-day2` map shows lead day 2, while the grid under the observations map shows the average of lead days 2 and 4.
 
 `daily` and `combined` only differ in the timeseries plot: on the map, both the stations and the grid show the mean over all loaded lead days.
 
