@@ -909,22 +909,44 @@ class Canvas(FigureCanvas):
 
         return None
 
+    @restores_settings_guard
     def handle_map_grid_lead_days_update(self):
         """
         Function that handles the update of the lead days averaged in the grid
+        upon interaction with the grid lead days combobox
         """
+
+        if not self.read_instance.block_config_bar_handling_updates:
+            self.read_instance.cursor_function = set_cursor(
+                self.read_instance.cursor_function, "handle_map_grid_lead_days_update"
+            )
+            QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
+            self.read_instance.block_config_bar_handling_updates = True
+
+            # update plotted grid and its title
+            if not self.read_instance.block_MPL_canvas_updates:
+                self.update_map()
+
+            # allow handling updates to the configuration bar again
+            self.read_instance.block_config_bar_handling_updates = False
+
+            # restore mouse cursor to normal
+            unset_cursor(
+                self.read_instance.cursor_function, "handle_map_grid_lead_days_update"
+            )
 
         return None
 
     def update_map_grid_lead_days(self):
         """
         Function which fills the grid lead days combobox with the lead days the
-        gridded model was read for (only day 1 if it is not forecast data), keeping
-        the ones checked before if they are still loaded (all of them otherwise).
-        It is empty and disabled when there is no gridded data to draw
+        gridded model was read for (only day 1 if it is not forecast data), all of
+        them checked, unless the same lead days were read before, then keeping the
+        ones checked. It is empty and disabled when there is no gridded data to draw
         """
 
-        # get lead days checked before reading
+        # get lead days available and checked before reading
+        previous_available_lead_days = self.map_grid_lead_days.currentData(all=True)
         previous_lead_days = self.map_grid_lead_days.currentData()
 
         # get lead days read, the same ones the grid title describes (none without gridded data)
@@ -932,8 +954,11 @@ class Canvas(FigureCanvas):
             lead_days = get_map_lead_days(self.read_instance)
         else:
             lead_days = []
-        checked_lead_days = [day for day in lead_days if day in previous_lead_days]
-        if not checked_lead_days:
+
+        # check all lead days if they have changed (or none was checked), otherwise keep checked ones
+        if (lead_days == previous_available_lead_days) and previous_lead_days:
+            checked_lead_days = previous_lead_days
+        else:
             checked_lead_days = lead_days
 
         # update items without emitting checkedItemsChanged, as the map is drawn after reading
@@ -1297,13 +1322,15 @@ class Canvas(FigureCanvas):
         date = None
         hour = None
 
-        # get gridded statistic for selected period (if there is grid data),
-        # not in bias maps, as the grid is an absolute field
+        # get gridded statistic for selected period and lead days checked in the grid
+        # lead days combobox (if there is grid data), not in bias maps, as the grid is
+        # an absolute field, nor when no lead day is checked
+        grid_lead_days = self.map_grid_lead_days.currentData()
         grid_stat, grid_lat, grid_lon = None, None, None
-        if self.map_z2.currentText() == "":
+        if (self.map_z2.currentText() == "") and grid_lead_days:
             grid_stat, grid_lat, grid_lon = get_gridded_statistic(
                 self.read_instance, speci, zstat, date_range=date_range, date=date, hour=hour,
-                data_label=self.map_z1.currentText()
+                lead_days=grid_lead_days
             )
 
         # save description of the grid for the map title, which is also updated
@@ -1311,7 +1338,7 @@ class Canvas(FigureCanvas):
         self.map_grid_title = ""
         if grid_stat is not None:
             self.map_grid_title = get_grid_title(
-                self.read_instance, self.map_z1.currentText()
+                self.read_instance, None, lead_days=grid_lead_days
             )
 
         # ensure label that have in memory still exists
@@ -2196,20 +2223,6 @@ class Canvas(FigureCanvas):
                 self.read_instance.enable_element(self.map_z2, "combobox")
             else:
                 self.read_instance.disable_element(self.map_z2, "combobox")
-
-            # a manually-typed colourbar limit rarely makes sense carried
-            # over to a different statistic (a concentration range typed for
-            # "Mean" would mis-scale "Bias"), so clear it back to auto
-            self.map_cb_min.clear()
-            self.map_cb_max.clear()
-            self.read_instance.map_vmin_override = None
-            self.read_instance.map_vmax_override = None
-            # the colourmap suited to one statistic rarely suits the next, so
-            # fall back to the statistic's own - see sync_map_colourmap()
-            self.read_instance.map_colourmap_override = None
-            self.sync_map_colourmap()
-            # with that choice dropped the basemap may match its preset again
-            self.sync_map_colour_preset()
 
             # a manually-typed colourbar limit rarely makes sense carried
             # over to a different statistic (a concentration range typed for
@@ -4149,6 +4162,7 @@ class Canvas(FigureCanvas):
 
         return ["None"] + stats
 
+    @restores_settings_guard
     def _handle_station_statistic_update(self, plot_type, combobox):
         """
         Shared implementation behind handle_distribution_station_statistic_update()
