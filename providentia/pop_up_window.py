@@ -2845,9 +2845,15 @@ class PopUpWindow(QtWidgets.QWidget):
         # and days selected, as far as they are available for it (both versions have the same
         # lead days, but only lead day 1 is shown for an interpolated version without them)
         model, all_forecast_vars, _ = self.get_forecast_options(label_ii)
-        if (previous_model is not None) and (model is not None) and (model != previous_model):
-            forecast_menu = self.menu_current["models"]["forecast"]
-            forecast_days_menu = self.menu_current["models"]["forecast_days"]
+        forecast_menu = self.menu_current["models"]["forecast"]
+        forecast_days_menu = self.menu_current["models"]["forecast_days"]
+        if (
+            (previous_model is not None)
+            and (model is not None)
+            and (model != previous_model)
+            and (previous_model in forecast_menu)
+            and (previous_model in forecast_days_menu)
+        ):
             forecast_menu[model][1] = [
                 forecast_var
                 for forecast_var in forecast_menu[previous_model][1]
@@ -2984,8 +2990,15 @@ class PopUpWindow(QtWidgets.QWidget):
             Row of the model.
         """
 
+        # nothing to save if the row shows no forecast options, or if its data label is no
+        # longer in the menu (the models menu can be updated while this window is open,
+        # e.g. when an interpolation finishes)
         model = self.forecast_data_labels.get(label_ii)
-        if model is None:
+        if (
+            (model is None)
+            or (model not in self.menu_current["models"]["forecast"])
+            or (model not in self.menu_current["models"]["forecast_days"])
+        ):
             return
 
         forecast_items = [
