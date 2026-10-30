@@ -2766,7 +2766,7 @@ class Report:
                     if 'gridded' not in z1_label and 'gridded' not in z2_label:
                         msg = f"{plot_type} cannot be created because there is no available data of {unavailable_label}."
                         show_message(self, msg)
-                    return plot_indices
+                    continue
 
                 # get relevant page/axis to plot on
                 axis_ind = (
