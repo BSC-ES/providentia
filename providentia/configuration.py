@@ -624,6 +624,33 @@ class ProvConfiguration:
                 else:
                     return [value.strip().lower()]
 
+        elif key == "gridded_map_lead_days":
+            # parse lead days averaged on the map grid, given as numbers or
+            # forecast days (e.g. '2, 4' or 'day2, day4'). Numbers arrive as int or tuple,
+            # as .conf values are evaluated when read, or as a list in library mode
+            if isinstance(value, (list, tuple)):
+                value = ",".join(str(lead_day) for lead_day in value)
+            value = str(value).strip()
+
+            # treat leaving the field blank as default (all loaded lead days)
+            if value == "":
+                return []
+
+            lead_days = []
+            for lead_day in value.split(","):
+                lead_day = lead_day.strip().lower().removeprefix("day")
+                if (not lead_day.isdigit()) or (int(lead_day) == 0):
+                    error = (
+                        f"Error: '{value}' is not valid for 'gridded_map_lead_days'. "
+                        "Give lead days as numbers or forecast days, e.g. '2, 4' or 'day2, day4'. "
+                        "Lead days start at 1, so 0 is not accepted."
+                    )
+                    self.read_instance.logger.error(error)
+                    sys.exit(1)
+                lead_days.append(int(lead_day))
+
+            return sorted(set(lead_days))
+
         elif key in ["experiments", "experiment", "model", "models"]:
             # parse models
 

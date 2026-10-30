@@ -10,7 +10,7 @@
         "dashboard_plots": ["active_dashboard_plots"],
         "report_plots": ["report_type"],
       },
-    "fixed_section_vars":
+    "fixed_section_vars": # report and library: cannot change per subsection, the section value is used instead and kept between subsections (not used in the dashboard, which loads a subsection on its own, with its own values)
       [
         "ghost_version",
         "ghost_features",
@@ -46,6 +46,7 @@
         "domain",
         "ensemble",
         "forecast",
+        "gridded_map_lead_days",
         "temporal_colocation",
         "spatial_colocation",
         "spatial_colocation_tolerance",
@@ -125,6 +126,7 @@
         "temporal_colocation_active",
         "spatial_colocation",
         "map_extent",
+        "gridded_map_lead_days",
         "filter_species",
         "calibration_factor",
         "lower_bound",
@@ -186,6 +188,7 @@
     "spatial_colocation_validation": null,
     "spatial_colocation_validation_tolerance": null,
     "map_extent": null,
+    "gridded_map_lead_days": [],
     "filter_species": {},
     "calibration_factor": {},
     "lower_bound": null,

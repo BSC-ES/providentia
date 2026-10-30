@@ -293,6 +293,11 @@ class ProvArgumentParser(object):
                 help="map extent for plots involving any maps",
             )
             self.parser.add_argument(
+                "--gridded_map_lead_days",
+                dest="gridded_map_lead_days",
+                help="lead days averaged on the map grid, from the ones loaded (e.g. '2, 4' or 'day2, day4')",
+            )
+            self.parser.add_argument(
                 "--filter_species",
                 dest="filter_species",
                 help="filter read species by other species within a given data range",
