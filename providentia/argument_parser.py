@@ -293,8 +293,8 @@ class ProvArgumentParser(object):
                 help="map extent for plots involving any maps",
             )
             self.parser.add_argument(
-                "--gridded_map_lead_days",
-                dest="gridded_map_lead_days",
+                "--map_grid_forecast_lead_days",
+                dest="map_grid_forecast_lead_days",
                 help="lead days averaged on the map grid, from the ones loaded (e.g. '2, 4' or 'day2, day4')",
             )
             self.parser.add_argument(

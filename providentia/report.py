@@ -57,6 +57,7 @@ from .read_aux import (
     get_periodic_relevant_temporal_resolutions,
     get_data_label_lead_day,
     get_grid_title,
+    get_map_grid_forecast_lead_days,
     get_valid_models,
     get_valid_obs_files_in_date_range,
 )
@@ -2780,9 +2781,11 @@ class Report:
                 # not in bias maps, as the grid is an absolute field
                 speci = networkspeci.split('|')[1]
                 grid_data, grid_lat, grid_lon = None, None, None
+                grid_lead_days = None
                 if z2_label == "":
+                    grid_lead_days = get_map_grid_forecast_lead_days(self, z1_label)
                     grid_data, grid_lat, grid_lon = get_gridded_statistic(
-                        self, speci, zstat, data_label=z1_label
+                        self, speci, zstat, data_label=z1_label, lead_days=grid_lead_days
                     )
 
                 # set axis title
@@ -2795,7 +2798,7 @@ class Report:
                     # describe the grid drawn under the stations, on its own line
                     # as it does not fit next to the label in the report layout
                     if grid_data is not None:
-                        label += "\n" + get_grid_title(self, z1_label)
+                        label += "\n" + get_grid_title(self, z1_label, lead_days=grid_lead_days)
 
                     axis_title_label = "{}\n{} ".format(label, self.subsection)
                     if self.n_stations == 1:

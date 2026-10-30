@@ -42,6 +42,7 @@ from .read_aux import (
     get_map_lead_days,
     get_model_id,
     get_yearmonths_to_read,
+    is_gridded_model_forecast,
     init_shared_vars_read_netcdf_data,
     model_file_overlaps_period,
     read_netcdf_data,
@@ -1293,8 +1294,9 @@ class DataReader:
                 if model not in mods_printed:
                     str_model = f" - {model}"
                     # gridded models are read for the forecast days of their interpolated
-                    # versions, or of their own forecast labels when not loaded interpolated
-                    if model.endswith("::gridded"):
+                    # versions, or of their own forecast labels when not loaded interpolated.
+                    # Gridded models that are not forecast experiments have no lead days
+                    if model.endswith("::gridded") and is_gridded_model_forecast(self.read_instance):
                         lead_days = get_map_lead_days(self.read_instance)
                         base_data_labels = get_gridded_model_base_data_labels(self.read_instance)
                         # versions without data in the period have no forecast days,
@@ -1371,7 +1373,47 @@ class DataReader:
                 "lon": lon,
                 "files": files,
             }
-            
+
+        # warn if map_grid_forecast_lead_days is not used: no gridded data loaded,
+        # gridded model not a forecast experiment, or some of its lead days were not loaded
+        if self.read_instance.map_grid_forecast_lead_days:
+            if not self.read_instance.gridded_var_data:
+                msg = "'map_grid_forecast_lead_days' is set, but no gridded data is loaded, so it is not used."
+                show_message(self.read_instance, msg)
+            elif not is_gridded_model_forecast(self.read_instance):
+                # first gridded model is the one read
+                model_id = next(
+                    get_model_id(data_label_raw)
+                    for data_label_raw in self.read_instance.data_labels_raw
+                    if data_label_raw.endswith("::gridded")
+                )
+                msg = (
+                    f"'map_grid_forecast_lead_days' is not used because {model_id} "
+                    "is not a forecast experiment."
+                )
+                show_message(self.read_instance, msg)
+            else:
+                loaded_lead_days = get_map_lead_days(self.read_instance)
+                not_loaded = [
+                    lead_day for lead_day in self.read_instance.map_grid_forecast_lead_days
+                    if lead_day not in loaded_lead_days
+                ]
+                if not_loaded:
+                    str_not_loaded = ", ".join(str(lead_day) for lead_day in not_loaded)
+                    str_loaded = ", ".join(str(lead_day) for lead_day in loaded_lead_days)
+                    if len(not_loaded) == len(self.read_instance.map_grid_forecast_lead_days):
+                        consequence = "so the grid uses all loaded lead days"
+                    elif len(not_loaded) == 1:
+                        consequence = "so it is not used on the grid"
+                    else:
+                        consequence = "so they are not used on the grid"
+                    if len(not_loaded) == 1:
+                        str_not_loaded = f"Lead day {str_not_loaded} of 'map_grid_forecast_lead_days' was"
+                    else:
+                        str_not_loaded = f"Lead days {str_not_loaded} of 'map_grid_forecast_lead_days' were"
+                    msg = f"{str_not_loaded} not loaded (loaded: {str_loaded}), {consequence}."
+                    show_message(self.read_instance, msg)
+
     def read_basic_metadata(self):
         """
         Extracts unique basic station metadata and handles spatial colocation across multiple networkspecies (if set).

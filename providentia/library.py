@@ -45,6 +45,7 @@ from .read_aux import (
     get_periodic_nonrelevant_temporal_resolutions,
     get_periodic_relevant_temporal_resolutions,
     get_grid_title,
+    get_map_grid_forecast_lead_days,
     get_valid_models,
     get_valid_obs_files_in_date_range,
 )
@@ -1136,9 +1137,11 @@ class Providentia:
             # get gridded statistic for all loaded period (if there is grid data),
             # not in bias maps, as the grid is an absolute field
             grid_lat, grid_lon = None, None
+            grid_lead_days = None
             if labelb == "":
+                grid_lead_days = get_map_grid_forecast_lead_days(self, labela)
                 grid_data, grid_lat, grid_lon = get_gridded_statistic(
-                    self, speci, zstat, data_label=labela
+                    self, speci, zstat, data_label=labela, lead_days=grid_lead_days
                 )
 
             func(
@@ -1554,7 +1557,7 @@ class Providentia:
                                 title = "{} {}".format(map_title, title)
                                 # describe the grid drawn under the stations
                                 if grid_data is not None:
-                                    title += " + " + get_grid_title(self, labela)
+                                    title += " + " + get_grid_title(self, labela, lead_days=grid_lead_days)
 
                         else:
                             if zstat in ["NStations", "NUniqueStations"]:
@@ -1567,7 +1570,7 @@ class Providentia:
                                 title = "{} {}".format(map_title, title)
                                 # describe the grid drawn under the stations
                                 if grid_data is not None:
-                                    title += " + " + get_grid_title(self, labela)
+                                    title += " + " + get_grid_title(self, labela, lead_days=grid_lead_days)
 
             elif base_plot_type not in ["legend", "metadata"]:
                 if "axis_title" in self.plot_characteristics[plot_type]:

@@ -67,6 +67,12 @@ In report and library modes, when the observations or another model are selected
 
 `daily` and `combined` only differ in the timeseries plot: on the map, both the stations and the grid show the mean over all loaded lead days.
 
+### Choosing the grid lead days
+
+In report and library modes, `map_grid_forecast_lead_days` chooses which of the loaded lead days are averaged on the grid, given as numbers or forecast days (e.g. `2, 4` or `day2, day4`). It is set per section and replaces the average of all loaded lead days on maps that have no lead day of their own: maps of the observations, of other models, and of `daily` or `combined` entries. Maps of a single forecast day in `day` mode (e.g. `fc-day2`) keep their own lead day. For example, with `day1, day2, day4` and `map_grid_forecast_lead_days = 2, 4`, the grid under the observations map shows the average of lead days 2 and 4, while the grid under the `fc-day1` map still shows lead day 1.
+
+Lead days that were not loaded are left out with a warning, and if none of them was loaded, the grid uses all loaded lead days. If no gridded data is loaded, the field is not used and a warning is shown.
+
 If a model is loaded gridded only, it has its own forecast options, and its grid uses their lead days. With `day`, it gets one label per lead day, e.g. `fc-day2 (gridded)` and `fc-day4 (gridded)` for `day2, day4`, and each lead day gets its own map in reports, showing the observations over the grid of that lead day, as the gridded model has no data at the stations. With `daily` and `combined`, it keeps its label (e.g. `fc (gridded)`) and the grid shows the average of the selected lead days. As it has no data at the stations, it does not switch the plots of station data to the forecast layout (e.g. the `daily` timeseries per forecast day): only models with forecast data at the stations do. Where gridded models are shown in the legend, its entry is shown with a square only. In `day` mode, only the lead days drawn on the grid are shown.
 
 ### Dashboard: grid lead days

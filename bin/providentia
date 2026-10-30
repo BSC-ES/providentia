@@ -115,7 +115,7 @@ LONG+="spatial_colocation_station_reference:,spatial_colocation_station_name:,"
 LONG+="spatial_colocation_longitude_latitude:,spatial_colocation_measurement_altitude:,"
 LONG+="spatial_colocation_validation:,spatial_colocation_validation_tolerance:,"
 # maps and filters
-LONG+="map_extent:,gridded_map_lead_days:,filter_species:,calibration_factor:,lower_bound:,upper_bound:,remove_extreme_stations:,"
+LONG+="map_extent:,map_grid_forecast_lead_days:,filter_species:,calibration_factor:,lower_bound:,upper_bound:,remove_extreme_stations:,"
 # report
 LONG+="report_type:,report_summary:,report_stations:,report_title:,report_filename:,harmonise_summary:,harmonise_stations:,"
 # dashboard and statistics
