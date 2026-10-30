@@ -2443,6 +2443,39 @@ def get_map_lead_days(read_instance):
     return sorted(lead_days) if lead_days else [1]
 
 
+def is_gridded_model_forecast(read_instance):
+    """
+    Check if the gridded model loaded is a forecast experiment: any of its available
+    files for the loaded species is a forecast run (timestep with hour, e.g. '2023010100'),
+    as read_gridded_data decides. Known from the file tree, so it can be used before
+    the gridded data is read
+    """
+
+    # take the first gridded model, as it is the only one read
+    gridded_model_ids = [
+        get_model_id(data_label_raw)
+        for data_label_raw in read_instance.data_labels_raw
+        if data_label_raw.endswith("::gridded")
+    ]
+    if len(gridded_model_ids) == 0:
+        return False
+    model_id = gridded_model_ids[0]
+    domain = model_id.rsplit("-", 2)[1]
+
+    species = {networkspeci.split("|")[1] for networkspeci in read_instance.networkspecies}
+    available_species = (
+        read_instance.available_model_data.get("gridded", {})
+        .get(domain, {})
+        .get(read_instance.resolution, {})
+    )
+
+    return any(
+        len(timestep) == 10
+        for speci in species
+        for timestep in available_species.get(speci, {}).get(model_id, [])
+    )
+
+
 def get_data_label_lead_day(read_instance, data_label):
     """
     Get forecast lead day of a data label of the gridded model in day forecast mode
@@ -2466,6 +2499,47 @@ def get_data_label_lead_day(read_instance, data_label):
                 return indices[data_label] + 1
 
     return None
+
+
+def get_map_grid_forecast_lead_days(read_instance, data_label):
+    """
+    Get the lead days of map_grid_forecast_lead_days that were loaded, to average on the grid
+    drawn under the map of a data label, or None to keep the default (the lead day of
+    the data label in day forecast mode, otherwise all loaded lead days)
+
+    Parameters
+    ----------
+    read_instance : object
+        Instance with the configuration and forecast indices (dashboard, report or library)
+    data_label : str
+        Data label of the map
+
+    Returns
+    -------
+    list of int or None
+        Lead days to average on the grid, None to keep the default
+    """
+
+    if not read_instance.map_grid_forecast_lead_days:
+        return None
+
+    # gridded models that are not forecast experiments have no lead days to choose
+    # (warned about after reading)
+    if not is_gridded_model_forecast(read_instance):
+        return None
+
+    # maps of a single forecast day (e.g. 'fc-day3') keep their own lead day
+    if get_data_label_lead_day(read_instance, data_label) is not None:
+        return None
+
+    # only lead days loaded (the ones not loaded are warned about after reading)
+    loaded_lead_days = get_map_lead_days(read_instance)
+    lead_days = [
+        lead_day for lead_day in read_instance.map_grid_forecast_lead_days
+        if lead_day in loaded_lead_days
+    ]
+
+    return lead_days if lead_days else None
 
 
 def is_on_map_grid(read_instance, data_label, map_grid_lead_days):
@@ -2502,7 +2576,8 @@ def get_grid_title(read_instance, data_label, lead_days=None):
     Get the text added to the title of a map to describe the grid drawn under it
     (e.g. 'fc (gridded, mean of lead days 2 and 4)'), with the same lead days
     get_gridded_statistic uses: the lead days given, or if none are given the lead day
-    of the data label in day forecast mode, otherwise all loaded lead days
+    of the data label in day forecast mode, otherwise all loaded lead days. Gridded models
+    that are not forecast experiments are described without lead days (e.g. 'fc (gridded)')
     """
 
     # the gridded model is named in every map, as the grid may belong to another model
@@ -2514,6 +2589,10 @@ def get_grid_title(read_instance, data_label, lead_days=None):
         if label_raw.endswith("::gridded")
     )
     gridded_label = remove_forecast_suffix(gridded_label).replace(" (gridded)", "")
+
+    # gridded models that are not forecast experiments have no lead days
+    if not is_gridded_model_forecast(read_instance):
+        return f"{gridded_label} (gridded)"
 
     if lead_days is None:
         lead_day = get_data_label_lead_day(read_instance, data_label)

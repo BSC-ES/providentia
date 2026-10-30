@@ -121,12 +121,16 @@ class ProvConfiguration:
         self.init.update(self.required_init)
         self.init.update(available_inputs)
 
+        # direct output to filescreen before parsing the rest of values, so errors
+        # found while parsing command line values can be logged (only needs mode and logfile)
+        self.read_instance.logfile = self.parse_parameter(
+            "logfile", kwargs.get("logfile", self.init["logfile"])
+        )
+        self.switch_logging()
+
         for k, val in self.init.items():
             val = kwargs.get(k, val)
             setattr(self.read_instance, k, self.parse_parameter(k, val))
-
-        # direct output to filescreen
-        self.switch_logging()
 
         # set default values of the current mode
         self.read_instance.default_values = (
@@ -623,6 +627,33 @@ class ProvConfiguration:
                     return [fct.strip().lower() for fct in value.split(",")]
                 else:
                     return [value.strip().lower()]
+
+        elif key == "map_grid_forecast_lead_days":
+            # parse lead days averaged on the map grid, given as numbers or
+            # forecast days (e.g. '2, 4' or 'day2, day4'). Numbers arrive as int or tuple,
+            # as .conf values are evaluated when read, or as a list in library mode
+            if isinstance(value, (list, tuple)):
+                value = ",".join(str(lead_day) for lead_day in value)
+            value = str(value).strip()
+
+            # treat leaving the field blank as default (all loaded lead days)
+            if value == "":
+                return []
+
+            lead_days = []
+            for lead_day in value.split(","):
+                lead_day = lead_day.strip().lower().removeprefix("day")
+                if (not lead_day.isdigit()) or (int(lead_day) == 0):
+                    error = (
+                        f"Error: '{value}' is not valid for 'map_grid_forecast_lead_days'. "
+                        "Give lead days as numbers or forecast days, e.g. '2, 4' or 'day2, day4'. "
+                        "Lead days start at 1, so 0 is not accepted."
+                    )
+                    self.read_instance.logger.error(error)
+                    sys.exit(1)
+                lead_days.append(int(lead_day))
+
+            return sorted(set(lead_days))
 
         elif key in ["experiments", "experiment", "model", "models"]:
             # parse models
@@ -1670,6 +1701,18 @@ class ProvConfiguration:
                         )
                     )
                 # the map is always in the first position of the dashboard, so drop it
+                map_plots = [plot for plot in dashboard_plots if plot.split("-")[0] == "map"]
+                if map_plots:
+                    msg = (
+                        f"{', '.join(map_plots)} ignored in the dashboard, as the map is always "
+                        "shown in its first position and its statistic is chosen in the map settings menu."
+                    )
+                    show_message(
+                        self.read_instance,
+                        msg,
+                        from_conf=self.read_instance.from_conf,
+                        deactivate=deactivate_warning,
+                    )
                 dashboard_plots = [
                     plot for plot in dashboard_plots if plot.split("-")[0] != "map"
                 ][:4]

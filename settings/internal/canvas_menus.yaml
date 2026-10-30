@@ -184,7 +184,7 @@
           "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 255],
-          "text": "Grid lead days",
+          "text": "Forecast grid lead days",
         },
 
       "grid_lead_days":

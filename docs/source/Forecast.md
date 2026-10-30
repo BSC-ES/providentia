@@ -30,7 +30,17 @@ If no forecast option is set for a model with forecast data, data from the first
 
 It is possible to compare different models where one has forecast data and the other does not, in these cases the non-forecast data is treated as day 1 of a forecast for comparison purposes. Be aware however, if you are loading multiple species, and a model for one species has forecast data, but the same model does not for another, then this could cause Providentia to crash as it is not designed to handle this.
 
-When using the dashboard, models that have forecast data, interpolated or gridded, are automatically detected. When clicking on the **MODELS** button on the menu bar, a drop-down menu is shown to the right of every model that has forecast data, to select its forecast option: `None`, `combined`, `daily` or `day`. With `None`, data from the first forecast day will be taken to represent the model (i.e. treating the data as a non-forecast type), so the forecast days drop-down only shows `day 1`, which cannot be changed. The options set on a model are only used once it is selected (interpolated or gridded), and they are kept when it is unselected. If a forecast option is selected, another drop-down menu will then appear to the right of that, allowing you to select specific forecast days. If no specific forecast days are selected but a forecast option is, then all forecast days will be utilised. As forecast options are applied to all models, all selected models with forecast data must have the same forecast option and days selected, otherwise a message is shown and the data is not read. When both versions of a model are selected, the options of the interpolated version are shown: if it was interpolated without the `forecast` option, only lead day 1 can be selected. The selected options are kept when switching between the interpolated and gridded versions, as far as they are available.
+When using the dashboard, models that have forecast data, interpolated or gridded, are automatically detected. When clicking on the **MODELS** button on the menu bar, a drop-down menu is shown to the right of every model that has forecast data, to select its forecast option: `None`, `combined`, `daily` or `day`.
+
+With `None`, data from the first forecast day will be taken to represent the model (i.e. treating the data as a non-forecast type), so the forecast days drop-down only shows `day 1`, which cannot be changed.
+
+If a forecast option is selected, another drop-down menu will then appear to the right of that, allowing you to select specific forecast days. If no specific forecast days are selected but a forecast option is, then all forecast days will be utilised.
+
+The options set on a model are only used once it is selected (interpolated or gridded), and they are kept when it is unselected.
+
+As forecast options are applied to all models, all selected models with forecast data must have the same forecast option and days selected, otherwise a message is shown and the data is not read. For this reason, when loading a configuration file with the `forecast` field (e.g. `forecast = day1, day3`), its option and days are also set on every other model with forecast data, even if it is not loaded, so it can be selected later without changing them.
+
+When both versions of a model are selected, the options of the interpolated version are shown: if it was interpolated without the `forecast` option, only lead day 1 can be selected. The selected options are kept when switching between the interpolated and gridded versions, as far as they are available.
 
 ## Gridded data
 
