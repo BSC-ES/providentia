@@ -99,6 +99,8 @@ For example, with `day1, day2, day4` and `map_grid_forecast_lead_days = 2, 4`, t
 
 Lead days that were not loaded are left out with a warning, and if none of them was loaded, the grid uses all loaded lead days. If no gridded data is loaded, or the gridded model is not a forecast experiment, the field is not used and a warning is shown.
 
+In the dashboard, the field sets the lead days checked in **Forecast grid lead days** when the configuration file is loaded (at launch or from the toolbar), following the same rules. Afterwards, the lead days checked follow the drop-down (see below): reading again does not apply the field, and it is not written when saving a configuration file.
+
 ### Dashboard: forecast grid lead days
 
 In the dashboard, the **Forecast grid lead days** drop-down in the map settings menu lists the lead days read for the gridded model (`1` if it is not read with a forecast option), and the grid shows the average of the checked ones. If the gridded model is not a forecast experiment, the drop-down is empty and disabled, and the grid is always drawn.
@@ -107,7 +109,7 @@ It does not depend on the data selected in **Dataset 1**: for example, with `day
 
 The map title and the legend follow the checked lead days. If none is checked, no grid is drawn.
 
-After reading, all lead days are checked if the models have changed (e.g. a model added or its forecast days changed in the **MODELS** menu), otherwise the previous selection is kept.
+After reading, all lead days are checked if the models have changed (e.g. a model added or its forecast days changed in the **MODELS** menu), otherwise the previous selection is kept. When a configuration file with `map_grid_forecast_lead_days` is loaded, its lead days are checked instead (see [Choosing the grid lead days](#choosing-the-grid-lead-days)).
 
 ### Period
 

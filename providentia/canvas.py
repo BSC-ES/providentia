@@ -950,7 +950,9 @@ class Canvas(FigureCanvas):
         ----------
         check_all : bool, default True
             Check all lead days (e.g. when models have changed), otherwise keep
-            the ones checked before that are still loaded (all if none is)
+            the ones checked before that are still loaded (all if none is). When reading
+            from a configuration file with map_grid_forecast_lead_days, its loaded lead
+            days are checked instead
         """
 
         # get lead days checked before reading
@@ -965,7 +967,15 @@ class Canvas(FigureCanvas):
 
         # get lead days to check
         checked_lead_days = lead_days
-        if not check_all:
+        # when reading from a configuration file, check the lead days of map_grid_forecast_lead_days
+        # that were loaded (all if none was, as warned about after reading)
+        if self.read_instance.from_conf and self.read_instance.map_grid_forecast_lead_days:
+            conf_lead_days = [
+                day for day in lead_days if day in self.read_instance.map_grid_forecast_lead_days
+            ]
+            if conf_lead_days:
+                checked_lead_days = conf_lead_days
+        elif not check_all:
             kept_lead_days = [day for day in lead_days if day in previous_lead_days]
             if kept_lead_days:
                 checked_lead_days = kept_lead_days
