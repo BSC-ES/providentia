@@ -74,7 +74,8 @@ from .plot_formatting import (
 )
 from .plot_options import annotation, linear_regression, log_axes, smooth, threshold
 from .read_aux import (
-    get_possible_resampling_resolutions, get_frequency_code, get_grid_title, get_map_lead_days
+    get_possible_resampling_resolutions, get_frequency_code, get_grid_title, get_map_lead_days,
+    is_gridded_model_forecast
 )
 from .statistics import (
     get_gridded_statistic,
@@ -941,8 +942,9 @@ class Canvas(FigureCanvas):
     def update_map_grid_lead_days(self, check_all=True):
         """
         Function which fills the grid lead days combobox with the lead days the
-        gridded model was read for (only day 1 if it is not forecast data).
-        It is empty and disabled when there is no gridded data to draw
+        gridded model was read for (only day 1 if it is not read with a forecast option).
+        It is empty and disabled when there is no gridded data to draw, or the gridded
+        model is not a forecast experiment (the grid is still drawn, see get_map_grid_lead_days)
 
         Parameters
         ----------
@@ -954,8 +956,9 @@ class Canvas(FigureCanvas):
         # get lead days checked before reading
         previous_lead_days = self.map_grid_lead_days.currentData()
 
-        # get lead days read, the same ones the grid title describes (none without gridded data)
-        if self.read_instance.gridded_var_data:
+        # get lead days read, the same ones the grid title describes (none without gridded
+        # data, or if the gridded model is not a forecast experiment)
+        if self.read_instance.gridded_var_data and is_gridded_model_forecast(self.read_instance):
             lead_days = get_map_lead_days(self.read_instance)
         else:
             lead_days = []
@@ -979,12 +982,29 @@ class Canvas(FigureCanvas):
         self.map_grid_lead_days.blockSignals(False)
         self.map_grid_lead_days.updateText()
 
-        if self.read_instance.gridded_var_data:
+        if lead_days:
             self.read_instance.enable_element(self.map_grid_lead_days, "checkable_combobox")
         else:
             self.read_instance.disable_element(self.map_grid_lead_days, "checkable_combobox")
 
         return None
+
+    def get_map_grid_lead_days(self):
+        """
+        Function which gets the lead days to draw on the map grid: the ones checked in
+        the grid lead days combobox, or None (all loaded data) if the gridded model is
+        not a forecast experiment, as its combobox is empty but its grid is drawn
+
+        Returns
+        -------
+        list of int or None
+            Lead days checked, None if the gridded model is not a forecast experiment
+        """
+
+        if self.read_instance.gridded_var_data and not is_gridded_model_forecast(self.read_instance):
+            return None
+
+        return self.map_grid_lead_days.currentData()
     
 
     def handle_map_play_button_toggle(self, checked):
@@ -1330,10 +1350,11 @@ class Canvas(FigureCanvas):
 
         # get gridded statistic for selected period and lead days checked in the grid
         # lead days combobox (if there is grid data), not in bias maps, as the grid is
-        # an absolute field, nor when no lead day is checked
-        grid_lead_days = self.map_grid_lead_days.currentData()
+        # an absolute field, nor when no lead day is checked. Gridded models that are
+        # not forecast experiments have no lead days to check (None) and are always drawn
+        grid_lead_days = self.get_map_grid_lead_days()
         grid_stat, grid_lat, grid_lon = None, None, None
-        if (self.map_z2.currentText() == "") and grid_lead_days:
+        if (self.map_z2.currentText() == "") and (grid_lead_days is None or grid_lead_days):
             grid_stat, grid_lat, grid_lon = get_gridded_statistic(
                 self.read_instance, speci, zstat, date_range=date_range, date=date, hour=hour,
                 lead_days=grid_lead_days
@@ -2080,7 +2101,7 @@ class Canvas(FigureCanvas):
         # create legend element handles
         legend_plot_characteristics = self.plotting.make_legend_handles(
             copy.deepcopy(self.plot_characteristics["legend"]),
-            map_grid_lead_days=self.map_grid_lead_days.currentData(),
+            map_grid_lead_days=self.get_map_grid_lead_days(),
         )
 
         # plot legend

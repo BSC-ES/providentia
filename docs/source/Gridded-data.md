@@ -10,7 +10,7 @@ Gridded data can be used in the dashboard, report and library modes. It is only 
 
 In the **MODELS** menu, each model has an interpolated and a gridded column. A model can be checked in both columns at the same time, to compare its interpolated values at the stations with its grid. Only one gridded model can be loaded at a time: if a second one is checked, it is unchecked again and a warning names the gridded model already checked.
 
-If only gridded data is loaded (no observations or interpolated models), the map statistic menus and the station selection options are disabled, as there are no stations to show. Gridded models are never offered in the map **Dataset 1** and **Dataset 2** menus, as they have no data at the stations: the lead days drawn on the grid are chosen with **Grid lead days** in the map settings menu (see [Forecast data](#forecast-data)).
+If only gridded data is loaded (no observations or interpolated models), the map statistic menus and the station selection options are disabled, as there are no stations to show. Gridded models are never offered in the map **Dataset 1** and **Dataset 2** menus, as they have no data at the stations: the lead days drawn on the grid are chosen with **Forecast grid lead days** in the map settings menu (see [Forecast data](#forecast-data)).
 
 ### Configuration files (dashboard, report and library)
 
@@ -36,9 +36,20 @@ Gridded data is only read when clicking **READ** or when loading a configuration
 
 ## Forecast data
 
-Gridded data is read for the same forecast days selected for its interpolated version (e.g. days 2 and 4 for `day2, day4`, or the selected days for `daily` and `combined`), never for the ones of other models. If no forecast option is set, only the first forecast day is read, as for interpolated data. When forecast options are set in the model name, a gridded model loaded with its interpolated version must have the same one as it (e.g. `a59g-regional-000-day3, a59g-regional-000-day3::gridded`). The forecast option and lead days used are shown next to the gridded model in the terminal when reading, e.g. `a59g-regional-000::gridded (day option with data from lead days 2 and 4)`, or `a59g-regional-000::gridded (with data from lead day 1)` when no forecast option is applied to it.
+Gridded data is read for the same forecast days selected for its interpolated version (e.g. days 2 and 4 for `day2, day4`, or the selected days for `daily` and `combined`), never for the ones of other models. If no forecast option is set, only the first forecast day is read, as for interpolated data.
+
+When forecast options are set in the model name, a gridded model loaded with its interpolated version must have the same one as it (e.g. `a59g-regional-000-day3, a59g-regional-000-day3::gridded`).
+
+The forecast option and lead days used are shown next to the gridded model in the terminal when reading, e.g. `a59g-regional-000::gridded (day option with data from lead days 2 and 4)`, or `a59g-regional-000::gridded (with data from lead day 1)` when no forecast option is applied to it.
 
 Lead day N of a forecast run covers the 24 hours that start N-1 days after the run starts, e.g. lead day 1 of the run of `2023010100` covers 2023-01-01 00:00 to 2023-01-01 23:00. Forecast runs are expected to be 24 hours apart: a missing run leaves days without data for its lead days (see above).
+
+Gridded models that are not forecast experiments (their files are not forecast runs, e.g. `cams61_emep_ph2-eu-000`) have no lead days, so what follows about lead days does not apply to them:
+
+* nothing is shown next to them in the terminal (e.g. `cams61_emep_ph2-eu-000::gridded`),
+* their map title has no lead day (e.g. `cams61_emep_ph2-eu-000 (gridded)`),
+* `map_grid_forecast_lead_days` is not used (with a warning),
+* in the dashboard, the **Forecast grid lead days** drop-down is empty and disabled, while their grid is still drawn.
 
 See [Forecast](Forecast.md) for the forecast options.
 
@@ -57,9 +68,13 @@ The table below uses the same model `fc`, loaded both interpolated and gridded, 
 | `combined`    | 1                  | `fc-combined`                          | Day 1                       | `fc-combined`: square and dot                            |
 | `combined`    | 1 and 3            | `fc-combined`                          | Average of days 1 and 3     | `fc-combined`: square and dot                            |
 
-The table describes report and library modes, where the data selected for the map (`z1` in reports, `labela` in library) chooses the lead day drawn. In the dashboard, the grid shows the lead days checked in **Grid lead days** instead, whatever is selected for the map (see "Dashboard: grid lead days" below).
+The table describes report and library modes, where the data selected for the map (`z1` in reports, `labela` in library) chooses the lead day drawn. In the dashboard, the grid shows the lead days checked in **Forecast grid lead days** instead, whatever is selected for the map (see "Dashboard: forecast grid lead days" below).
 
-`X` is any number from 1 to N. In the legend, a filled dot marks the interpolated data and an empty square the gridded data. Gridded models are only shown in the legend next to a map drawn over their grid: in the dashboard, and in library mode on maps with the `domain` option (the only maps with a legend). In other library plots, in the library `legend` plot, and in reports, where the legend is only shown on plots of station data, gridded models are left out of the legend. Each map also describes its grid in its title (see [Map title](#map-title)).
+`X` is any number from 1 to N. In the legend, a filled dot marks the interpolated data and an empty square the gridded data.
+
+Gridded models are only shown in the legend next to a map drawn over their grid: in the dashboard, and in library mode on maps with the `domain` option (the only maps with a legend). In other library plots, in the library `legend` plot, and in reports, where the legend is only shown on plots of station data, gridded models are left out of the legend.
+
+Each map also describes its grid in its title (see [Map title](#map-title)).
 
 With `day`, each lead day is a separate entry, so in report and library modes the grid always shows a single lead day: the one of the selected entry. With `daily` and `combined`, all lead days are merged into one entry, so the grid shows the average of the loaded lead days, which is that same day when only one is loaded.
 
@@ -67,17 +82,30 @@ In report and library modes, when the observations or another model are selected
 
 `daily` and `combined` only differ in the timeseries plot: on the map, both the stations and the grid show the mean over all loaded lead days.
 
+If a model is loaded gridded only, it has its own forecast options, and its grid uses their lead days:
+
+* With `day`, it gets one label per lead day, e.g. `fc-day2 (gridded)` and `fc-day4 (gridded)` for `day2, day4`, and each lead day gets its own map in reports, showing the observations over the grid of that lead day, as the gridded model has no data at the stations.
+* With `daily` and `combined`, it keeps its label (e.g. `fc (gridded)`) and the grid shows the average of the selected lead days.
+
+As it has no data at the stations, it does not switch the plots of station data to the forecast layout (e.g. the `daily` timeseries per forecast day): only models with forecast data at the stations do. Where gridded models are shown in the legend, its entry is shown with a square only. In `day` mode, only the lead days drawn on the grid are shown.
+
 ### Choosing the grid lead days
 
-In report and library modes, `map_grid_forecast_lead_days` chooses which of the loaded lead days are averaged on the grid, given as numbers or forecast days (e.g. `2, 4` or `day2, day4`). It is set per section and replaces the average of all loaded lead days on maps that have no lead day of their own: maps of the observations, of other models, and of `daily` or `combined` entries. Maps of a single forecast day in `day` mode (e.g. `fc-day2`) keep their own lead day. For example, with `day1, day2, day4` and `map_grid_forecast_lead_days = 2, 4`, the grid under the observations map shows the average of lead days 2 and 4, while the grid under the `fc-day1` map still shows lead day 1.
+In report and library modes, `map_grid_forecast_lead_days` chooses which of the loaded lead days are averaged on the grid, given as numbers or forecast days (e.g. `2, 4` or `day2, day4`).
 
-Lead days that were not loaded are left out with a warning, and if none of them was loaded, the grid uses all loaded lead days. If no gridded data is loaded, the field is not used and a warning is shown.
+It is set per section and replaces the average of all loaded lead days on maps that have no lead day of their own: maps of the observations, of other models, and of `daily` or `combined` entries. Maps of a single forecast day in `day` mode (e.g. `fc-day2`) keep their own lead day.
 
-If a model is loaded gridded only, it has its own forecast options, and its grid uses their lead days. With `day`, it gets one label per lead day, e.g. `fc-day2 (gridded)` and `fc-day4 (gridded)` for `day2, day4`, and each lead day gets its own map in reports, showing the observations over the grid of that lead day, as the gridded model has no data at the stations. With `daily` and `combined`, it keeps its label (e.g. `fc (gridded)`) and the grid shows the average of the selected lead days. As it has no data at the stations, it does not switch the plots of station data to the forecast layout (e.g. the `daily` timeseries per forecast day): only models with forecast data at the stations do. Where gridded models are shown in the legend, its entry is shown with a square only. In `day` mode, only the lead days drawn on the grid are shown.
+For example, with `day1, day2, day4` and `map_grid_forecast_lead_days = 2, 4`, the grid under the observations map shows the average of lead days 2 and 4, while the grid under the `fc-day1` map still shows lead day 1.
 
-### Dashboard: grid lead days
+Lead days that were not loaded are left out with a warning, and if none of them was loaded, the grid uses all loaded lead days. If no gridded data is loaded, or the gridded model is not a forecast experiment, the field is not used and a warning is shown.
 
-In the dashboard, the **Grid lead days** drop-down in the map settings menu lists the lead days read for the gridded model (`1` if it is not read with a forecast option), and the grid shows the average of the checked ones. It does not depend on the data selected in **Dataset 1**: for example, with `day2, day4`, the grid shows the average of lead days 2 and 4 under every map until one of them is unchecked. The map title and the legend follow the checked lead days. If none is checked, no grid is drawn.
+### Dashboard: forecast grid lead days
+
+In the dashboard, the **Forecast grid lead days** drop-down in the map settings menu lists the lead days read for the gridded model (`1` if it is not read with a forecast option), and the grid shows the average of the checked ones. If the gridded model is not a forecast experiment, the drop-down is empty and disabled, and the grid is always drawn.
+
+It does not depend on the data selected in **Dataset 1**: for example, with `day2, day4`, the grid shows the average of lead days 2 and 4 under every map until one of them is unchecked.
+
+The map title and the legend follow the checked lead days. If none is checked, no grid is drawn.
 
 After reading, all lead days are checked if the models have changed (e.g. a model added or its forecast days changed in the **MODELS** menu), otherwise the previous selection is kept.
 
@@ -87,7 +115,9 @@ In the dashboard, the grid shows the period selected for the map. In report and 
 
 ## Map title
 
-When a grid is drawn under a map, the map title names the gridded model and the lead days drawn, so it is clear what the grid shows even when it belongs to another model. The gridded model is shown by its alias if one is set in the configuration file. Maps without a grid (e.g. bias maps) keep their usual title.
+When a grid is drawn under a map, the map title names the gridded model and the lead days drawn (no lead days if the gridded model is not a forecast experiment, e.g. `cams61_emep_ph2-eu-000 (gridded)`), so it is clear what the grid shows even when it belongs to another model.
+
+The gridded model is shown by its alias if one is set in the configuration file. Maps without a grid (e.g. bias maps) keep their usual title.
 
 * **Report**: on its own line, under the data label:
   ```
