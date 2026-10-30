@@ -40,6 +40,7 @@ from .read_aux import (
     get_frequency_code,
     get_gridded_model_base_data_labels,
     get_map_lead_days,
+    get_data_label_lead_day,
     get_model_id,
     get_yearmonths_to_read,
     is_gridded_model_forecast,
@@ -1412,6 +1413,28 @@ class DataReader:
                     else:
                         str_not_loaded = f"Lead days {str_not_loaded} of 'map_grid_forecast_lead_days' were"
                     msg = f"{str_not_loaded} not loaded (loaded: {str_loaded}), {consequence}."
+                    show_message(self.read_instance, msg)
+
+                # in report and library modes, maps of a single forecast day (day mode) keep
+                # their own lead day, so warn that the field is only used on the other maps
+                # (not in the dashboard, where the grid lead days do not depend on the map).
+                # The forecast type is taken from the first forecast entry, as in update_forecast_indices,
+                # as daily and combined labels are still split per lead day until they are merged
+                day_mode = bool(self.read_instance.forecast) and ("day" in self.read_instance.forecast[0])
+                single_day_labels = [
+                    data_label for data_label in self.read_instance.data_labels
+                    if day_mode and (get_data_label_lead_day(self.read_instance, data_label) is not None)
+                ]
+                if (
+                    (self.read_instance.mode in ["report", "library"])
+                    and single_day_labels
+                    and (len(not_loaded) < len(self.read_instance.map_grid_forecast_lead_days))
+                ):
+                    msg = (
+                        "'map_grid_forecast_lead_days' is not used on maps of a single forecast day "
+                        f"(e.g. {single_day_labels[0]}), which keep their own lead day. "
+                        "It is only used on the other maps."
+                    )
                     show_message(self.read_instance, msg)
 
     def read_basic_metadata(self):

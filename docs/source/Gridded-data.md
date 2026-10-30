@@ -93,7 +93,7 @@ As it has no data at the stations, it does not switch the plots of station data 
 
 In report and library modes, `map_grid_forecast_lead_days` chooses which of the loaded lead days are averaged on the grid, given as numbers or forecast days (e.g. `2, 4` or `day2, day4`).
 
-It is set per section and replaces the average of all loaded lead days on maps that have no lead day of their own: maps of the observations, of other models, and of `daily` or `combined` entries. Maps of a single forecast day in `day` mode (e.g. `fc-day2`) keep their own lead day.
+It is set per section and replaces the average of all loaded lead days on maps that have no lead day of their own: maps of the observations, of other models, and of `daily` or `combined` entries. Maps of a single forecast day in `day` mode (e.g. `fc-day2`) keep their own lead day, and a warning says so.
 
 For example, with `day1, day2, day4` and `map_grid_forecast_lead_days = 2, 4`, the grid under the observations map shows the average of lead days 2 and 4, while the grid under the `fc-day1` map still shows lead day 1.
 
