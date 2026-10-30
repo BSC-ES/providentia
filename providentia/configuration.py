@@ -121,12 +121,16 @@ class ProvConfiguration:
         self.init.update(self.required_init)
         self.init.update(available_inputs)
 
+        # direct output to filescreen before parsing the rest of values, so errors
+        # found while parsing command line values can be logged (only needs mode and logfile)
+        self.read_instance.logfile = self.parse_parameter(
+            "logfile", kwargs.get("logfile", self.init["logfile"])
+        )
+        self.switch_logging()
+
         for k, val in self.init.items():
             val = kwargs.get(k, val)
             setattr(self.read_instance, k, self.parse_parameter(k, val))
-
-        # direct output to filescreen
-        self.switch_logging()
 
         # set default values of the current mode
         self.read_instance.default_values = (
