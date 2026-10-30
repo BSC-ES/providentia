@@ -1701,6 +1701,18 @@ class ProvConfiguration:
                         )
                     )
                 # the map is always in the first position of the dashboard, so drop it
+                map_plots = [plot for plot in dashboard_plots if plot.split("-")[0] == "map"]
+                if map_plots:
+                    msg = (
+                        f"{', '.join(map_plots)} ignored in the dashboard, as the map is always "
+                        "shown in its first position and its statistic is chosen in the map settings menu."
+                    )
+                    show_message(
+                        self.read_instance,
+                        msg,
+                        from_conf=self.read_instance.from_conf,
+                        deactivate=deactivate_warning,
+                    )
                 dashboard_plots = [
                     plot for plot in dashboard_plots if plot.split("-")[0] != "map"
                 ][:4]
