@@ -2908,8 +2908,7 @@ class PopUpWindow(QtWidgets.QWidget):
         lead days, but the interpolated version only has them when it was interpolated with the
         forecast option, so its options are shown when it is checked (only lead day 1 when it was
         not interpolated with the forecast option, as it cannot load other lead days), otherwise
-        the options of the gridded version. When the model is not checked, the options of the
-        interpolated version are shown if it has forecast days, otherwise of the gridded version.
+        the options of the gridded version. When the model is not checked, no options are shown.
 
         Parameters
         ----------
@@ -2943,13 +2942,6 @@ class PopUpWindow(QtWidgets.QWidget):
         elif checked["interpolated"] and checked["gridded"] and forecast_days["gridded"]:
             model_type, days = "gridded", forecast_days["gridded"][:1]
         elif checked["gridded"] and forecast_days["gridded"]:
-            model_type, days = "gridded", forecast_days["gridded"]
-        # model not checked: show the options of the interpolated version if it has
-        # forecast days, otherwise of the gridded version, so they can be seen and set
-        # before checking it (they are only used once it is checked)
-        elif (not checked["interpolated"]) and (not checked["gridded"]) and forecast_days["interpolated"]:
-            model_type, days = "interpolated", forecast_days["interpolated"]
-        elif (not checked["interpolated"]) and (not checked["gridded"]) and forecast_days["gridded"]:
             model_type, days = "gridded", forecast_days["gridded"]
         else:
             return None, [], []
