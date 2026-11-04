@@ -52,6 +52,13 @@ provi = prv.Providentia('interactive_template.conf')
 
 Providentia looks for configuration files in the `configurations` folder by default, if your configuration file is saved elsewhere, pass the complete path.
 
+The configuration file is optional. Instead, the configuration fields can be passed as arguments:
+```
+provi = prv.Providentia(network='EBAS', species='sconco3', start_date='20180101', end_date='20180201')
+```
+
+Fields that are not passed take the same defaults as the dashboard when it is launched without a configuration file (network `GHOST`, species `sconco3`, resolution `hourly`, from `20180101` to `20190101`). Without a configuration file there are no sections or subsections.
+
 The configuration will become part of the object, therefere you can call the modes as explained below. You can pass any arguments you wish when calling each function to override what is set in the loaded configuration file. 
 
 When using Providentia inside a Python script, instead of through the terminal or in a Jupyter notebook, we need to call its functions with the main guard:

@@ -70,6 +70,30 @@ actris_standard_metadata = yaml.safe_load(
 MACHINE = get_machine()
 
 
+def get_data_path(machine, path_key):
+    """
+    Get a root data path for a machine from settings/data_paths.yaml.
+
+    Parameters
+    ----------
+    machine : str
+        Machine name as defined in data_paths.yaml (e.g. "local", "mn5")
+    path_key : str
+        One of "ghost_root", "nonghost_root", "mod_root", "mod_to_interp_root"
+
+    Returns
+    -------
+    str
+        Path with "~" expanded, or "" if the path is undefined for that machine
+    """
+
+    path = data_paths[machine][path_key]
+    if path == "":
+        return path
+
+    return os.path.expanduser(path[0]) + path[1:]
+
+
 def parse_path(dir, f):
     if os.path.isabs(f):
         return f
@@ -133,9 +157,10 @@ class ProvConfiguration:
             setattr(self.read_instance, k, self.parse_parameter(k, val))
 
         # set default values of the current mode
+        # (dashboard and library can be launched without configuration file)
         self.read_instance.default_values = (
             defaults["dashboard_empty"]
-            if self.read_instance.mode == "dashboard"
+            if self.read_instance.mode in ["dashboard", "library"]
             and self.read_instance.config == ""
             else defaults[self.read_instance.mode]
         )
@@ -275,8 +300,7 @@ class ProvConfiguration:
 
             # set default if left undefined
             if value == "":
-                ghost_root = data_paths[MACHINE]["ghost_root"]
-                return os.path.expanduser(ghost_root[0]) + ghost_root[1:]
+                return get_data_path(MACHINE, "ghost_root")
 
         elif key == "nonghost_root":
             # define non-GHOST observational root data directory (if undefined it is
@@ -284,26 +308,19 @@ class ProvConfiguration:
 
             # set default if left undefined
             if value == "":
-                nonghost_root = data_paths[MACHINE]["nonghost_root"]
-                return os.path.expanduser(nonghost_root[0]) + nonghost_root[1:]
+                return get_data_path(MACHINE, "nonghost_root")
 
         elif key == "mod_root":
             # define model root data directory
             # set model root data directory if left undefined
             if value == "":
-                mod_root = data_paths[MACHINE]["mod_root"]
-                return os.path.expanduser(mod_root[0]) + mod_root[1:]
+                return get_data_path(MACHINE, "mod_root")
 
         elif key == "mod_to_interp_root":
             # define model root data directory
             # set model root data directory if left undefined
             if value == "":
-                mod_to_interp_root = data_paths[MACHINE]["mod_to_interp_root"]
-                if mod_to_interp_root != "":
-                    return (
-                        os.path.expanduser(mod_to_interp_root[0])
-                        + mod_to_interp_root[1:]
-                    )
+                return get_data_path(MACHINE, "mod_to_interp_root")
 
         elif key == "ghost_version":
             # parse GHOST version
@@ -661,6 +678,7 @@ class ProvConfiguration:
             if isinstance(value, str):
                 # empty string
                 if value == "":
+                    self.read_instance.alias = []
                     return []
                 # split models
                 else:
@@ -683,6 +701,9 @@ class ProvConfiguration:
                         self.read_instance.alias = []
 
                     return mods
+            # lists have no legend names in brackets (e.g. passed as argument from the library)
+            else:
+                self.read_instance.alias = []
 
         elif key == "map_extent":
             # parse map extent

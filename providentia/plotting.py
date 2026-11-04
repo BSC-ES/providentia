@@ -10,6 +10,7 @@ import cartopy
 import cartopy.crs as ccrs
 import matplotlib
 from matplotlib.backends.backend_pdf import PdfPages
+from matplotlib.colors import to_hex
 import matplotlib.lines as mlines
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch, Polygon
@@ -20,6 +21,7 @@ import numpy as np
 from packaging.version import Version
 import pandas as pd
 from PIL import Image
+import plotly.graph_objects as go
 import pyproj
 import seaborn as sns
 import yaml
@@ -1502,6 +1504,7 @@ class Plotting:
         plot_options,
         chunk_stat=None,
         chunk_resolution=None,
+        fig=None
     ):
         """
         Renders temporal data as a line plot, optionally applying statistical chunking or bias calculations.
@@ -1634,13 +1637,30 @@ class Plotting:
                 )
 
             # make timeseries plot
-            self.timeseries_plot.append(
-                relevant_axis.plot(
-                    ts,
-                    color=self.read_instance.plotting_params[data_label]["colour"],
-                    **plot_characteristics["plot"],
+            # library passes its figure for both backends, only plotly figures are filled here
+            if isinstance(fig, go.Figure):
+                # drop missing values, otherwise plotly fits the time axis to the whole period
+                # (matplotlib skips them when autoscaling)
+                ts_valid = ts.dropna()
+                fig.add_trace(
+                    go.Scatter(
+                        x=ts_valid.index,
+                        y=ts_valid.values,
+                        # markers only, as in Providentia timeseries
+                        mode="markers",
+                        name=data_label,
+                        # model colours are RGB tuples (0-1), which plotly does not accept
+                        marker_color=to_hex(self.read_instance.plotting_params[data_label]["colour"]),
+                    )
                 )
-            )
+            else:
+                self.timeseries_plot.append(
+                    relevant_axis.plot(
+                        ts,
+                        color=self.read_instance.plotting_params[data_label]["colour"],
+                        **plot_characteristics["plot"],
+                    )
+                )
 
             # update maximum smooth value
             if self.read_instance.mode not in ["report", "library"]:
@@ -1653,7 +1673,7 @@ class Plotting:
                 #     self.canvas_instance.timeseries_smooth_window_sl.setMaximum(int(len(ts)*2 - 1))
 
             # track plot elements
-            if self.read_instance.mode not in ["report"]:
+            if self.read_instance.mode not in ["report"] and (not isinstance(fig, go.Figure)):
                 self.track_plot_elements(
                     data_label,
                     "timeseries",
