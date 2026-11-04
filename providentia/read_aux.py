@@ -1618,7 +1618,7 @@ def get_valid_models(instance, start_date, end_date, resolution, networkspecies)
     instance : object
         An instance of the application class containing directory roots and menu configurations.
     start_date : str
-        The start date in 'YYYYMMDD' formafor parsed in parsed_filet.
+        The start date in 'YYYYMMDD' format.
     end_date : str
         The end date in 'YYYYMMDD' format.
     resolution : str
