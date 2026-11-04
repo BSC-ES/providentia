@@ -403,12 +403,12 @@ conda install -n base conda=24.4.0 conda-build=24.3.0
 
 Check what the latest versions of [conda](https://github.com/conda/conda/releases) and [conda-build](https://github.com/conda/conda-build/releases) are.
 
-What the first command does is creating an environment called `providentia-env_v3.1.0` with the Python version 3.11.5, and installing `cartopy`, `jupyterlab`, `ghostscript`, `dask`, `nco`, `pyproj` and `proj` with conda, and the Python packages from `requirements.txt` using pip. The equivalent would be:
+What the first command does is creating an environment called `providentia-env_v3.1.0` with the Python version 3.11.5, and installing `cartopy`, `jupyterlab`, `ghostscript`, `dask`, `nco`, `pyproj`, `proj` and `scipy` with conda, and the Python packages from `requirements.txt` using pip. The equivalent would be:
 
 ```bash
 conda create -n providentia-env_v3.1.0 python=3.11.5 -c conda-forge --override-channels
 conda activate providentia-env_v3.1.0
-conda install -c conda-forge cartopy==0.25.0 jupyterlab==4.5.3 ghostscript==10.06.0 dask==2026.1.2 nco==5.3.6 pyproj==3.7.2 proj==9.7.1 openssh==10.5p1 --override-channels
+conda install -c conda-forge cartopy==0.25.0 jupyterlab==4.5.3 ghostscript==10.06.0 dask==2026.1.2 nco==5.3.6 pyproj==3.7.2 proj==9.7.1 openssh==10.5p1 scipy==1.17.1 --override-channels
 pip install --no-user -r requirements.txt
 ```
 
@@ -419,7 +419,7 @@ module unload intel
 module load GCC/10.2.0
 conda create -p /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.1.0-nord4 -y python=3.11.5 -c conda-forge --override-channels
 conda activate /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.1.0-nord4
-conda install -c conda-forge cartopy==0.25.0 jupyterlab==4.5.3 ghostscript==10.06.0 dask==2026.1.2 nco==5.3.6 pyproj==3.7.2 proj==9.7.1 openssh==10.5p1 --override-channels
+conda install -c conda-forge cartopy==0.25.0 jupyterlab==4.5.3 ghostscript==10.06.0 dask==2026.1.2 nco==5.3.6 pyproj==3.7.2 proj==9.7.1 openssh==10.5p1 scipy==1.17.1 --override-channels
 pip install --no-user -r requirements.txt
 ```
 
@@ -428,7 +428,7 @@ pip install --no-user -r requirements.txt
 ```bash
 conda create -p /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.1.0 -y python=3.11.5 -c conda-forge --override-channels
 conda activate /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.1.0
-conda install -c conda-forge cartopy==0.25.0 jupyterlab==4.5.3 ghostscript==10.06.0 dask==2026.1.2 nco==5.3.6 pyproj==3.7.2 proj==9.7.1 openssh==10.5p1 --override-channels
+conda install -c conda-forge cartopy==0.25.0 jupyterlab==4.5.3 ghostscript==10.06.0 dask==2026.1.2 nco==5.3.6 pyproj==3.7.2 proj==9.7.1 openssh==10.5p1 scipy==1.17.1 --override-channels
 pip install --no-user -r requirements.txt
 ```
 
