@@ -8,7 +8,7 @@ numpy==2.3.5
 pandas==2.3.3
 PyQt5==5.15.11
 seaborn==0.13.2
-scipy==1.16.3
+scipy==1.17.1
 ConfigArgParse==1.7.1
 cftime==1.6.5
 xarray==2025.11.0
