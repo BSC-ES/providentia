@@ -1931,9 +1931,21 @@ class DataReader:
             if len(files_to_read) == 0:
                 continue
             else:
-                returned_data = [
-                    check_forecast_dimension((*files, resolution)) for files in files_to_read.values()
-                ]
+                returned_data = []
+                for files in files_to_read.values():
+                    # files that cannot be opened (e.g. corrupted) are taken as having no
+                    # forecast data, so that they do not stop the mode
+                    try:
+                        returned_data.append(check_forecast_dimension((*files, resolution)))
+                    except OSError as error:
+                        # in the dashboard this only fills the models menu, nothing is being read yet
+                        msg = f"Cannot check forecast days, the file cannot be opened: {error}"
+                        show_message(
+                            self.read_instance,
+                            msg,
+                            deactivate=self.read_instance.mode == "dashboard",
+                        )
+                        returned_data.append(0)
 
             # unzip returned data
             n_forecast_days = np.array(returned_data, dtype=np.int32)
