@@ -12,6 +12,8 @@ dependencies:
   - pyproj==3.7.2 
   - proj==9.7.1 
   - openssh==10.5p1
+  - numpy==2.3.5
+  - scipy==1.17.1
   - pip
   - pip:
     - -r requirements.txt
