@@ -198,6 +198,8 @@ To run a specific test, you will need to edit these files and comment the functi
 
 If you want to recreate the expected data in the tests, set the variable `GENERATE_OUTPUT` in `tests/aux_functions.py` to True temporarily and run the tests once before reverting it back to False.
 
+If you use Claude Code, `.claude/settings.json` stops its file-editing tools from changing `tests/data` and `tests/reference`, so any changes to these folders need to be made by you. This does not cover shell commands that Claude Code runs, such as a test run with `GENERATE_OUTPUT` set to True.
+
 If you want to see the coverage report use:
 
 ```bash
