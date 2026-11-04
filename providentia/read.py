@@ -1938,8 +1938,13 @@ class DataReader:
                     try:
                         returned_data.append(check_forecast_dimension((*files, resolution)))
                     except OSError as error:
-                        # msg = f"Cannot check forecast days, the file cannot be opened: {error}"
-                        # show_message(self.read_instance, msg, print=True)
+                        # in the dashboard this only fills the models menu, nothing is being read yet
+                        msg = f"Cannot check forecast days, the file cannot be opened: {error}"
+                        show_message(
+                            self.read_instance,
+                            msg,
+                            deactivate=self.read_instance.mode == "dashboard",
+                        )
                         returned_data.append(0)
 
             # unzip returned data
