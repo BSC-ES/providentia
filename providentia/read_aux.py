@@ -12,6 +12,7 @@ from netCDF4 import Dataset, num2date, chartostring
 import numpy as np
 import pandas as pd
 import re
+import socket
 import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join, TIMESTEPS_PER_DAY
@@ -38,6 +39,25 @@ PROVIDENTIA_ROOT = "/".join(CURRENT_PATH.split("/")[:-1])
 interp_models = yaml.safe_load(
     open(join(PROVIDENTIA_ROOT, "settings", "interp_models.yaml"))
 )
+
+def write_json_file(path, data):
+    """
+    Writes data to a JSON file all at once, so that other processes reading it
+    at the same time always get a complete file.
+
+    Parameters
+    ----------
+    path : str
+        Path of the JSON file.
+    data : dict
+        Data to write.
+    """
+
+    # the temporary file name is unique to this process, also across nodes of a machine
+    temporary_path = f"{path}.{socket.gethostname()}.{os.getpid()}.tmp"
+    with open(temporary_path, "w") as json_file:
+        json.dump(data, json_file, indent=4)
+    os.replace(temporary_path, path)
 
 def drop_nans(data):
     """
@@ -941,14 +961,13 @@ def get_ghost_observational_tree(instance, ghost_version):
                     ] = file_yearmonths
 
     # save file tree out to yaml
-    with open(
+    write_json_file(
         join(
             PROVIDENTIA_ROOT,
             "settings/internal/ghost_filetree_{}.json".format(ghost_version),
         ),
-        "w",
-    ) as json_file:
-        json.dump(ghost_observation_data, json_file, indent=4)
+        ghost_observation_data,
+    )
 
     return ghost_observation_data
 
@@ -1029,10 +1048,10 @@ def get_nonghost_observational_tree(instance):
                     ] = file_yearmonths
 
     # save file tree out to yaml
-    with open(
-        join(PROVIDENTIA_ROOT, "settings/internal/nonghost_filetree.json"), "w"
-    ) as json_file:
-        json.dump(nonghost_observation_data, json_file, indent=4)
+    write_json_file(
+        join(PROVIDENTIA_ROOT, "settings/internal/nonghost_filetree.json"),
+        nonghost_observation_data,
+    )
 
     return nonghost_observation_data
 
