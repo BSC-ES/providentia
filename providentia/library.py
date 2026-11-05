@@ -709,6 +709,20 @@ class Providentia:
             return
         speci = networkspeci.split("|")[-1]
 
+        # do not make plot if no valid data is left, unless it does not need the data of
+        # this networkspeci (as in report mode)
+        if (
+            base_plot_type not in ["table", "heatmap", "statsummary", "legend", "metadata"]
+            and "multispecies" not in plot_options
+            and not self.selected_station_data[networkspeci]
+        ):
+            msg = f"There is no valid data for {networkspeci}, not making {plot_type}."
+            if self.temporal_colocation:
+                msg += " With temporal colocation, all data needs to be valid at the same"
+                msg += " times and stations, try deactivating it."
+            show_message(self, msg)
+            return
+
         if (multispecies) and (
             len(np.unique(list(self.measurement_units.values()))) > 1
         ):

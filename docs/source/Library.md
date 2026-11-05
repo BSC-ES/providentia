@@ -375,6 +375,8 @@ plot_obj = provi.plot(plot_type, return_plot=True)
 
 where `plot_obj` is the object of the plot returned.
 
+If no valid data is left for the plot (for example, when temporal colocation removes all of it because the models do not have data at the same times and stations), a warning is shown, no plot is made and `plot_obj` is `None`.
+
 To save the plot, the following argument can be passed:
 
 ```
