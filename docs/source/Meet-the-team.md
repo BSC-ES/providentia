@@ -17,7 +17,7 @@ Dene is a researcher in the Atmospheric Composition group. Dene created Providen
 
 **Research Engineer**  
 
-Alba is a member of the Data and Diagnostics Team inside Computational Earth Sciences. She has been working on Providentia since March 2022 up until today. Her main work on Providentia has been the development of the Report mode.
+Alba is a member of the Data and Diagnostics Team inside Computational Earth Sciences. She has been working across all modes in Providentia since March 2022 up until today.
 
 [LinkedIn](https://linkedin.com/in/albavilanova) | [Email](mailto:alba.vilanova@bsc.es)
 
