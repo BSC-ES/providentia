@@ -57,6 +57,13 @@ class ProvArgumentParser(object):
                 help="run Providentia dashboard",
             )
             self.parser.add_argument(
+                "--website",
+                dest="website",
+                default=False,
+                action="store_true",
+                help="run Providentia website and its backend on this machine",
+            )
+            self.parser.add_argument(
                 "-V",
                 "--version",
                 action="version",

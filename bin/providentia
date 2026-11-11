@@ -103,7 +103,7 @@ LONG="usage,n_cpus:,time:,jobname:,queue:,mem:,constraint:,help,version,debug,cl
 LONG+="ghost_version:,ghost_features:,conf:,config:,config_dir:,cartopy_data_dir:,ghost_root:,nonghost_root:,"
 LONG+="exp_root:,exp_to_interp_root:,generate_file_tree,gft,disable_file_tree,dft,"
 # modes
-LONG+="report,reports,offline,download,dl,interpolation,interp,interpolate,notebook,nb,jupyter,dir_merge,slurm_job_id:,"
+LONG+="report,reports,offline,download,dl,interpolation,interp,interpolate,notebook,nb,jupyter,dir_merge,slurm_job_id:,website,"
 # data selection
 LONG+="network:,framework:,observation:,species:,resolution:,model_resolution:,start_date:,end_date:,"
 LONG+="observations_data_label:,experiments:,experiment:,model:,models:,domain:,ensemble:,forecast:,"
@@ -291,8 +291,15 @@ else
     report=false
 fi
 
+# if using website mode then
+if [[ $PARSED =~ "--website" ]]; then
+    website=true
+else
+    website=false
+fi
+
 # check for incompatible modes
-mode_bools=("$debug" "$notebook" "$interpolation" "$download" "$report")
+mode_bools=("$debug" "$notebook" "$interpolation" "$download" "$report" "$website")
 mode_count=0
 
 for i in "${!mode_bools[@]}"; do
@@ -330,6 +337,14 @@ fi
 if $download; then
     if [[ "${BSC_MACHINE}" == "mn5" || "${BSC_MACHINE}" == "84.88.185.48" ]]; then
         echo "Download mode not available in $BSC_MACHINE. Exiting..."
+        exit 1
+    fi
+fi
+
+# website mode runs only on local machines, as it opens the browser of the machine
+if $website; then
+    if [[ "${BSC_MACHINE}" == "mn5" || "${BSC_MACHINE}" == "nord4" || "${BSC_MACHINE}" == "stg" || "${ip}" == "84.88.185.205" ]]; then
+        echo "ERROR: Website mode is only available on local machines. Exiting..."
         exit 1
     fi
 fi
