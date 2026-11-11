@@ -412,24 +412,24 @@ conda install -c conda-forge cartopy==0.25.0 jupyterlab==4.5.3 ghostscript==10.0
 pip install --no-user -r requirements.txt
 ```
 
-MN5, Nord4 and the operational machine still use `providentia-env_v3.1.0`.
+`requirements.txt` installs ines-core and ines-providentia from BSC's GitLab (https://gitlab.earth.bsc.es), so you need access to it.
 
-### Create providentia-env_v3.1.0-nord4 in Nord4
+### Create providentia-env_v4.0.0-nord4 in Nord4
 
 ```bash
 module unload intel
 module load GCC/10.2.0
-conda create -p /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.1.0-nord4 -y python=3.11.5 -c conda-forge --override-channels
-conda activate /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.1.0-nord4
+conda create -p /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v4.0.0-nord4 -y python=3.11.5 -c conda-forge --override-channels
+conda activate /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v4.0.0-nord4
 conda install -c conda-forge cartopy==0.25.0 jupyterlab==4.5.3 ghostscript==10.06.0 dask==2026.1.2 nco==5.3.6 pyproj==3.7.2 proj==9.7.1 openssh==10.5p1 numpy==2.3.5 scipy==1.17.1 --override-channels
 pip install --no-user -r requirements.txt
 ```
 
-### Create providentia-env_v3.1.0 in MN5
+### Create providentia-env_v4.0.0 in MN5
 
 ```bash
-conda create -p /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.1.0 -y python=3.11.5 -c conda-forge --override-channels
-conda activate /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.1.0
+conda create -p /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v4.0.0 -y python=3.11.5 -c conda-forge --override-channels
+conda activate /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v4.0.0
 conda install -c conda-forge cartopy==0.25.0 jupyterlab==4.5.3 ghostscript==10.06.0 dask==2026.1.2 nco==5.3.6 pyproj==3.7.2 proj==9.7.1 openssh==10.5p1 numpy==2.3.5 scipy==1.17.1 --override-channels
 pip install --no-user -r requirements.txt
 ```

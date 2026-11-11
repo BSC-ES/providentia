@@ -454,7 +454,7 @@ class Download(object):
                 "OpenSSL version mismatch detected while running ssh-keyscan.\n\n"
                 "Please activate the conda environment and install "
                 "OpenSSH from conda-forge using:\n\n"
-                "conda activate providentia-env_v3.1.0\n"
+                "conda activate providentia-env_v4.0.0\n"
                 "conda install -c conda-forge openssh --override-channels\n\n"
                 "Then restart the download."
             )

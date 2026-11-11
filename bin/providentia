@@ -334,27 +334,21 @@ if $download; then
     fi
 fi
 
-# environment of MN5, Nord4 and the operational machine, which keep the older one for now
-ENV_NAME="providentia-env_v3.1.0"
-# environment of local machines
-LOCAL_ENV_NAME="providentia-env_v4.0.0"
-
-# activate or create the conda environment for local and operational machines, the name
-# of the environment is the first argument
+# activate or create the conda environment for local and operational machines
+ENV_NAME="providentia-env_v4.0.0"
 setup_providentia_env_locally() {
-    local env_name="$1"
     active_env=false
     eval "$(conda shell.bash hook)"
 
     # check if environment exists
-    if conda env list | grep -q "^$env_name"; then
-        echo "INFO: Activating conda environment $env_name..."
-        conda activate "$env_name"
+    if conda env list | grep -q "^$ENV_NAME"; then
+        echo "INFO: Activating conda environment $ENV_NAME..."
+        conda activate "$ENV_NAME"
         export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
         active_env=true
     else
         # create it if it doesn't exist
-        echo "INFO: Environment $env_name does not exist."
+        echo "INFO: Environment $ENV_NAME does not exist."
         echo "INFO: Creating environment..."
 
         # ensure conda-forge is in channels
@@ -364,12 +358,19 @@ setup_providentia_env_locally() {
         fi
 
         # create environment
-        conda create -n "$env_name" python=3.11.5 -c conda-forge --override-channels -y
-        conda activate "$env_name"
+        conda create -n "$ENV_NAME" python=3.11.5 -c conda-forge --override-channels -y
+        conda activate "$ENV_NAME"
         export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
         conda install -c conda-forge cartopy==0.25.0 jupyterlab==4.5.3 ghostscript==10.06.0 dask==2026.1.2 nco==5.3.6 pyproj==3.7.2 proj==9.7.1 openssh==10.5p1 numpy==2.3.5 scipy==1.17.1 --override-channels -y
         if [ -f requirements.txt ]; then
-            pip install --no-user -r requirements.txt
+            # remove the environment if it cannot be completed, so that it is created again
+            # on the next run
+            if ! pip install --no-user -r requirements.txt; then
+                echo "ERROR: Could not install the Python packages of $ENV_NAME. The website packages (ines-core and ines-providentia) come from BSC's GitLab (https://gitlab.earth.bsc.es), so creating the environment needs access to it."
+                conda deactivate
+                conda env remove -n "$ENV_NAME" -y
+                exit 1
+            fi
         fi
         active_env=true
     fi
@@ -609,7 +610,7 @@ elif [ "${ip}" == "84.88.185.205" ]; then
     # initialize conda if not already initialised
     initialise_conda
     sanitise_python_environment
-    setup_providentia_env_locally "$ENV_NAME"
+    setup_providentia_env_locally
 
     if $notebook; then
         echo "INFO: Starting Jupyter session."
@@ -636,7 +637,7 @@ else
     initialise_conda
 
     # load modules from conda environment
-    setup_providentia_env_locally "$LOCAL_ENV_NAME"
+    setup_providentia_env_locally
 
     # merge exp and exp_to_interp directories to mod and mod_to_interp       
     if [[ $PARSED =~ "--dir_merge" ]]; then
