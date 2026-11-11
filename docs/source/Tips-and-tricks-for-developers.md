@@ -414,25 +414,31 @@ pip install --no-user -r requirements.txt
 
 `requirements.txt` installs ines-providentia from BSC's GitLab (https://gitlab.earth.bsc.es).
 
+### Create providentia-env_v4.0.0 in MN5
+
+```bash
+ENV=/gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v4.0.0
+conda create -p $ENV -y python=3.11.5 -c conda-forge --override-channels
+conda activate $ENV
+conda install -c conda-forge cartopy==0.25.0 jupyterlab==4.5.3 ghostscript==10.06.0 dask==2026.1.2 nco==5.3.6 pyproj==3.7.2 proj==9.7.1 openssh==10.5p1 numpy==2.3.5 scipy==1.17.1 --override-channels
+$ENV/bin/python -m pip install --no-user -r requirements.txt
+```
+
+pip is run with the environment's Python by its full path. If a module with its own Python is loaded, such as `anaconda`, its folder can come before the environment's in `PATH` even after `conda activate`, and a plain `pip` then installs into the module and fails with `Permission denied: '/apps/GPP/ANACONDA/...'`. Using `--user` is not the fix. `which python` shows which Python the shell uses.
+
 ### Create providentia-env_v4.0.0-nord4 in Nord4
 
 ```bash
 module unload intel
 module load GCC/10.2.0
-conda create -p /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v4.0.0-nord4 -y python=3.11.5 -c conda-forge --override-channels
-conda activate /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v4.0.0-nord4
+ENV=/gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v4.0.0-nord4
+conda create -p $ENV -y python=3.11.5 -c conda-forge --override-channels
+conda activate $ENV
 conda install -c conda-forge cartopy==0.25.0 jupyterlab==4.5.3 ghostscript==10.06.0 dask==2026.1.2 nco==5.3.6 pyproj==3.7.2 proj==9.7.1 openssh==10.5p1 numpy==2.3.5 scipy==1.17.1 --override-channels
-pip install --no-user -r requirements.txt
+$ENV/bin/python -m pip install --no-user -r requirements.txt
 ```
 
-### Create providentia-env_v4.0.0 in MN5
-
-```bash
-conda create -p /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v4.0.0 -y python=3.11.5 -c conda-forge --override-channels
-conda activate /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v4.0.0
-conda install -c conda-forge cartopy==0.25.0 jupyterlab==4.5.3 ghostscript==10.06.0 dask==2026.1.2 nco==5.3.6 pyproj==3.7.2 proj==9.7.1 openssh==10.5p1 numpy==2.3.5 scipy==1.17.1 --override-channels
-pip install --no-user -r requirements.txt
-```
+pip is run with the environment's Python by its full path, as in MN5 above.
 
 ## Memory Profiling Code
 
