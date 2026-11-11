@@ -1,0 +1,327 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gridded data &mdash; Providentia 3.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=dd1205ac"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Plotting" href="Plotting.html" />
+    <link rel="prev" title="Forecast" href="Forecast.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Providentia
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Home.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Modes.html">Modes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Colocation.html">Colocation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Filtering.html">Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Forecast.html">Forecast</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Gridded data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#loading-gridded-data">Loading gridded data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#dashboard">Dashboard</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configuration-files-dashboard-report-and-library">Configuration files (dashboard, report and library)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#where-gridded-files-are-read-from">Where gridded files are read from</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#forecast-data">Forecast data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#choosing-the-grid-lead-days">Choosing the grid lead days</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dashboard-forecast-grid-lead-days">Dashboard: forecast grid lead days</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#period">Period</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#map-title">Map title</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#stations-over-the-grid">Stations over the grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#limitations">Limitations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Statistics.html">Statistics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Skills.html">Skills</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the team</a></li>
+<li class="toctree-l1"><a class="reference internal" href="History.html">History of Providentia</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tips-and-tricks-for-developers.html">Tips and tricks for developers</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Providentia</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Gridded data</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Gridded-data.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="gridded-data">
+<h1>Gridded data<a class="headerlink" href="#gridded-data" title="Link to this heading"></a></h1>
+<p>Besides being interpolated to the station locations, a model can be loaded as gridded data: its original output, read on the model grid.</p>
+<p>Gridded data can be used in the dashboard, report and library modes. It is only drawn on the map: it is not used in any other plot type or in the statistics.</p>
+<section id="loading-gridded-data">
+<h2>Loading gridded data<a class="headerlink" href="#loading-gridded-data" title="Link to this heading"></a></h2>
+<section id="dashboard">
+<h3>Dashboard<a class="headerlink" href="#dashboard" title="Link to this heading"></a></h3>
+<p>In the <strong>MODELS</strong> menu, each model has an interpolated and a gridded column. A model can be checked in both columns at the same time, to compare its interpolated values at the stations with its grid. Only one gridded model can be loaded at a time: if a second one is checked, it is unchecked again and a warning names the gridded model already checked.</p>
+<p>If only gridded data is loaded (no observations or interpolated models), the map statistic menus and the station selection options are disabled, as there are no stations to show. Gridded models are never offered in the map <strong>Dataset 1</strong> and <strong>Dataset 2</strong> menus, as they have no data at the stations: the lead days drawn on the grid are chosen with <strong>Forecast grid lead days</strong> in the map settings menu (see <a class="reference internal" href="#forecast-data">Forecast data</a>).</p>
+</section>
+<section id="configuration-files-dashboard-report-and-library">
+<h3>Configuration files (dashboard, report and library)<a class="headerlink" href="#configuration-files-dashboard-report-and-library" title="Link to this heading"></a></h3>
+<p>Add <code class="docutils literal notranslate"><span class="pre">::gridded</span></code> at the end of the model name:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams61_emep_ph2-eu-000::gridded</span>
+</pre></div>
+</div>
+<p>To load the same model both interpolated and gridded, list it twice. Models without a tag are read as interpolated, which can also be set explicitly with <code class="docutils literal notranslate"><span class="pre">::interpolated</span></code>:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams61_emep_ph2-eu-000, cams61_emep_ph2-eu-000::gridded</span>
+</pre></div>
+</div>
+<p>Only one gridded model can be loaded at a time. If more are set, the first one is used.</p>
+</section>
+<section id="where-gridded-files-are-read-from">
+<h3>Where gridded files are read from<a class="headerlink" href="#where-gridded-files-are-read-from" title="Link to this heading"></a></h3>
+<p>Gridded files are searched for in the paths defined in <code class="docutils literal notranslate"><span class="pre">settings/interp_models.yaml</span></code>, and in <code class="docutils literal notranslate"><span class="pre">mod_to_interp_root</span></code>, defined in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p>
+<p>Gridded data is only read when clicking <strong>READ</strong> or when loading a configuration file. If some days of the selected period have no valid gridded data (e.g. a forecast run or a file is missing), a warning is shown, as they are not drawn on the grid.</p>
+</section>
+</section>
+<section id="forecast-data">
+<h2>Forecast data<a class="headerlink" href="#forecast-data" title="Link to this heading"></a></h2>
+<p>Gridded data is read for the same forecast days selected for its interpolated version (e.g. days 2 and 4 for <code class="docutils literal notranslate"><span class="pre">day2,</span> <span class="pre">day4</span></code>, or the selected days for <code class="docutils literal notranslate"><span class="pre">daily</span></code> and <code class="docutils literal notranslate"><span class="pre">combined</span></code>), never for the ones of other models. If no forecast option is set, only the first forecast day is read, as for interpolated data.</p>
+<p>When forecast options are set in the model name, a gridded model loaded with its interpolated version must have the same one as it (e.g. <code class="docutils literal notranslate"><span class="pre">a59g-regional-000-day3,</span> <span class="pre">a59g-regional-000-day3::gridded</span></code>).</p>
+<p>The forecast option and lead days used are shown next to the gridded model in the terminal when reading, e.g. <code class="docutils literal notranslate"><span class="pre">a59g-regional-000::gridded</span> <span class="pre">(day</span> <span class="pre">option</span> <span class="pre">with</span> <span class="pre">data</span> <span class="pre">from</span> <span class="pre">lead</span> <span class="pre">days</span> <span class="pre">2</span> <span class="pre">and</span> <span class="pre">4)</span></code>, or <code class="docutils literal notranslate"><span class="pre">a59g-regional-000::gridded</span> <span class="pre">(with</span> <span class="pre">data</span> <span class="pre">from</span> <span class="pre">lead</span> <span class="pre">day</span> <span class="pre">1)</span></code> when no forecast option is applied to it.</p>
+<p>Lead day N of a forecast run covers the 24 hours that start N-1 days after the run starts, e.g. lead day 1 of the run of <code class="docutils literal notranslate"><span class="pre">2023010100</span></code> covers 2023-01-01 00:00 to 2023-01-01 23:00. Forecast runs are expected to be 24 hours apart: a missing run leaves days without data for its lead days (see above).</p>
+<p>Gridded models that are not forecast experiments (their files are not forecast runs, e.g. <code class="docutils literal notranslate"><span class="pre">cams61_emep_ph2-eu-000</span></code>) have no lead days, so what follows about lead days does not apply to them:</p>
+<ul class="simple">
+<li><p>nothing is shown next to them in the terminal (e.g. <code class="docutils literal notranslate"><span class="pre">cams61_emep_ph2-eu-000::gridded</span></code>),</p></li>
+<li><p>their map title has no lead day (e.g. <code class="docutils literal notranslate"><span class="pre">cams61_emep_ph2-eu-000</span> <span class="pre">(gridded)</span></code>),</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">map_grid_forecast_lead_days</span></code> is not used (with a warning),</p></li>
+<li><p>in the dashboard, the <strong>Forecast grid lead days</strong> drop-down is empty and disabled, while their grid is still drawn.</p></li>
+</ul>
+<p>See <a class="reference internal" href="Forecast.html"><span class="std std-doc">Forecast</span></a> for the forecast options.</p>
+<p>The table below uses the same model <code class="docutils literal notranslate"><span class="pre">fc</span></code>, loaded both interpolated and gridded, with forecast data for lead days 1 to N. For each forecast mode, it shows what happens when no lead days are set (all are loaded), when only lead day 1 is set, and when lead days 1 and 3 are set:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Forecast mode</p></th>
+<th class="head"><p>Selected lead days</p></th>
+<th class="head"><p>Data selected for the map</p></th>
+<th class="head"><p>Lead days drawn on the grid</p></th>
+<th class="head"><p>Legend</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>None</p></td>
+<td><p>None</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fc</span></code></p></td>
+<td><p>Day 1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fc</span></code>: square and dot</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">day</span></code></p></td>
+<td><p>None</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fc-dayX</span></code> selected in <code class="docutils literal notranslate"><span class="pre">z1</span></code> or <code class="docutils literal notranslate"><span class="pre">labela</span></code></p></td>
+<td><p>Day X only</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fc-dayX</span></code>: square and dot<br>Other <code class="docutils literal notranslate"><span class="pre">fc-day</span></code>: dot only</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">day</span></code></p></td>
+<td><p>1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fc-day1</span></code></p></td>
+<td><p>Day 1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fc-day1</span></code>: square and dot</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">day</span></code></p></td>
+<td><p>1 and 3</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fc-day1</span></code> or <code class="docutils literal notranslate"><span class="pre">fc-day3</span></code> selected in <code class="docutils literal notranslate"><span class="pre">z1</span></code> or <code class="docutils literal notranslate"><span class="pre">labela</span></code></p></td>
+<td><p>Day of the selected entry (1 or 3)</p></td>
+<td><p>Selected entry: square and dot<br>Other <code class="docutils literal notranslate"><span class="pre">fc-day</span></code>: dot only</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">daily</span></code></p></td>
+<td><p>None</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fc-daily</span></code></p></td>
+<td><p>Average of days 1 to N</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fc-daily</span></code>: square and dot</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">daily</span></code></p></td>
+<td><p>1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fc-daily</span></code></p></td>
+<td><p>Day 1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fc-daily</span></code>: square and dot</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">daily</span></code></p></td>
+<td><p>1 and 3</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fc-daily</span></code></p></td>
+<td><p>Average of days 1 and 3</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fc-daily</span></code>: square and dot</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">combined</span></code></p></td>
+<td><p>None</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fc-combined</span></code></p></td>
+<td><p>Average of days 1 to N</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fc-combined</span></code>: square and dot</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">combined</span></code></p></td>
+<td><p>1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fc-combined</span></code></p></td>
+<td><p>Day 1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fc-combined</span></code>: square and dot</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">combined</span></code></p></td>
+<td><p>1 and 3</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fc-combined</span></code></p></td>
+<td><p>Average of days 1 and 3</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fc-combined</span></code>: square and dot</p></td>
+</tr>
+</tbody>
+</table>
+<p>The table describes report and library modes, where the data selected for the map (<code class="docutils literal notranslate"><span class="pre">z1</span></code> in reports, <code class="docutils literal notranslate"><span class="pre">labela</span></code> in library) chooses the lead day drawn. In the dashboard, the grid shows the lead days checked in <strong>Forecast grid lead days</strong> instead, whatever is selected for the map (see “Dashboard: forecast grid lead days” below).</p>
+<p><code class="docutils literal notranslate"><span class="pre">X</span></code> is any number from 1 to N. In the legend, a filled dot marks the interpolated data and an empty square the gridded data.</p>
+<p>Gridded models are only shown in the legend next to a map drawn over their grid: in the dashboard, and in library mode on maps with the <code class="docutils literal notranslate"><span class="pre">domain</span></code> option (the only maps with a legend). In other library plots, in the library <code class="docutils literal notranslate"><span class="pre">legend</span></code> plot, and in reports, where the legend is only shown on plots of station data, gridded models are left out of the legend.</p>
+<p>Each map also describes its grid in its title (see <a class="reference internal" href="#map-title">Map title</a>).</p>
+<p>With <code class="docutils literal notranslate"><span class="pre">day</span></code>, each lead day is a separate entry, so in report and library modes the grid always shows a single lead day: the one of the selected entry. With <code class="docutils literal notranslate"><span class="pre">daily</span></code> and <code class="docutils literal notranslate"><span class="pre">combined</span></code>, all lead days are merged into one entry, so the grid shows the average of the loaded lead days, which is that same day when only one is loaded.</p>
+<p>In report and library modes, when the observations or another model are selected for the map, they have no lead day of their own, so the grid shows the average of the loaded lead days (lead day 1 if no forecast option is set). For example, with <code class="docutils literal notranslate"><span class="pre">day2,</span> <span class="pre">day4</span></code>, the grid under the <code class="docutils literal notranslate"><span class="pre">fc-day2</span></code> map shows lead day 2, while the grid under the observations map shows the average of lead days 2 and 4.</p>
+<p><code class="docutils literal notranslate"><span class="pre">daily</span></code> and <code class="docutils literal notranslate"><span class="pre">combined</span></code> only differ in the timeseries plot: on the map, both the stations and the grid show the mean over all loaded lead days.</p>
+<p>If a model is loaded gridded only, it has its own forecast options, and its grid uses their lead days:</p>
+<ul class="simple">
+<li><p>With <code class="docutils literal notranslate"><span class="pre">day</span></code>, it gets one label per lead day, e.g. <code class="docutils literal notranslate"><span class="pre">fc-day2</span> <span class="pre">(gridded)</span></code> and <code class="docutils literal notranslate"><span class="pre">fc-day4</span> <span class="pre">(gridded)</span></code> for <code class="docutils literal notranslate"><span class="pre">day2,</span> <span class="pre">day4</span></code>, and each lead day gets its own map in reports, showing the observations over the grid of that lead day, as the gridded model has no data at the stations.</p></li>
+<li><p>With <code class="docutils literal notranslate"><span class="pre">daily</span></code> and <code class="docutils literal notranslate"><span class="pre">combined</span></code>, it keeps its label (e.g. <code class="docutils literal notranslate"><span class="pre">fc</span> <span class="pre">(gridded)</span></code>) and the grid shows the average of the selected lead days.</p></li>
+</ul>
+<p>As it has no data at the stations, it does not switch the plots of station data to the forecast layout (e.g. the <code class="docutils literal notranslate"><span class="pre">daily</span></code> timeseries per forecast day): only models with forecast data at the stations do. Where gridded models are shown in the legend, its entry is shown with a square only. In <code class="docutils literal notranslate"><span class="pre">day</span></code> mode, only the lead days drawn on the grid are shown.</p>
+<section id="choosing-the-grid-lead-days">
+<span id="id1"></span><h3>Choosing the grid lead days<a class="headerlink" href="#choosing-the-grid-lead-days" title="Link to this heading"></a></h3>
+<p>In report and library modes, <code class="docutils literal notranslate"><span class="pre">map_grid_forecast_lead_days</span></code> chooses which of the loaded lead days are averaged on the grid, given as numbers or forecast days (e.g. <code class="docutils literal notranslate"><span class="pre">2,</span> <span class="pre">4</span></code> or <code class="docutils literal notranslate"><span class="pre">day2,</span> <span class="pre">day4</span></code>).</p>
+<p>It is set per section and replaces the average of all loaded lead days on maps that have no lead day of their own: maps of the observations, of other models, and of <code class="docutils literal notranslate"><span class="pre">daily</span></code> or <code class="docutils literal notranslate"><span class="pre">combined</span></code> entries. Maps of a single forecast day in <code class="docutils literal notranslate"><span class="pre">day</span></code> mode (e.g. <code class="docutils literal notranslate"><span class="pre">fc-day2</span></code>) keep their own lead day, and a warning says so.</p>
+<p>For example, with <code class="docutils literal notranslate"><span class="pre">day1,</span> <span class="pre">day2,</span> <span class="pre">day4</span></code> and <code class="docutils literal notranslate"><span class="pre">map_grid_forecast_lead_days</span> <span class="pre">=</span> <span class="pre">2,</span> <span class="pre">4</span></code>, the grid under the observations map shows the average of lead days 2 and 4, while the grid under the <code class="docutils literal notranslate"><span class="pre">fc-day1</span></code> map still shows lead day 1.</p>
+<p>Lead days that were not loaded are left out with a warning, and if none of them was loaded, the grid uses all loaded lead days. If no gridded data is loaded, or the gridded model is not a forecast experiment, the field is not used and a warning is shown.</p>
+<p>In the dashboard, the field sets the lead days checked in <strong>Forecast grid lead days</strong> when the configuration file is loaded (at launch or from the toolbar), following the same rules. Afterwards, the lead days checked follow the drop-down (see below): reading again does not apply the field, and it is not written when saving a configuration file.</p>
+</section>
+<section id="dashboard-forecast-grid-lead-days">
+<h3>Dashboard: forecast grid lead days<a class="headerlink" href="#dashboard-forecast-grid-lead-days" title="Link to this heading"></a></h3>
+<p>In the dashboard, the <strong>Forecast grid lead days</strong> drop-down in the map settings menu lists the lead days read for the gridded model (<code class="docutils literal notranslate"><span class="pre">1</span></code> if it is not read with a forecast option), and the grid shows the average of the checked ones. If the gridded model is not a forecast experiment, the drop-down is empty and disabled, and the grid is always drawn.</p>
+<p>It does not depend on the data selected in <strong>Dataset 1</strong>: for example, with <code class="docutils literal notranslate"><span class="pre">day2,</span> <span class="pre">day4</span></code>, the grid shows the average of lead days 2 and 4 under every map until one of them is unchecked.</p>
+<p>The map title and the legend follow the checked lead days. If none is checked, no grid is drawn.</p>
+<p>After reading, all lead days are checked if the models have changed (e.g. a model added or its forecast days changed in the <strong>MODELS</strong> menu), otherwise the previous selection is kept. When a configuration file with <code class="docutils literal notranslate"><span class="pre">map_grid_forecast_lead_days</span></code> is loaded, its lead days are checked instead (see <a class="reference internal" href="#choosing-the-grid-lead-days">Choosing the grid lead days</a>).</p>
+</section>
+<section id="period">
+<h3>Period<a class="headerlink" href="#period" title="Link to this heading"></a></h3>
+<p>In the dashboard, the grid shows the period selected for the map. In report and library modes, it shows all the loaded period.</p>
+</section>
+</section>
+<section id="map-title">
+<h2>Map title<a class="headerlink" href="#map-title" title="Link to this heading"></a></h2>
+<p>When a grid is drawn under a map, the map title names the gridded model and the lead days drawn (no lead days if the gridded model is not a forecast experiment, e.g. <code class="docutils literal notranslate"><span class="pre">cams61_emep_ph2-eu-000</span> <span class="pre">(gridded)</span></code>), so it is clear what the grid shows even when it belongs to another model.</p>
+<p>The gridded model is shown by its alias if one is set in the configuration file. Maps without a grid (e.g. bias maps) keep their usual title.</p>
+<ul>
+<li><p><strong>Report</strong>: on its own line, under the data label:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fc</span><span class="o">-</span><span class="n">day2</span>
+<span class="n">fc</span> <span class="p">(</span><span class="n">gridded</span><span class="p">,</span> <span class="n">lead</span> <span class="n">day</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">SECTION</span> <span class="p">(</span><span class="mi">1751</span> <span class="n">stations</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Library</strong>: at the end of the title, after a <code class="docutils literal notranslate"><span class="pre">+</span></code>, e.g. <code class="docutils literal notranslate"><span class="pre">observations</span> <span class="pre">Mean</span> <span class="pre">at</span> <span class="pre">1751</span> <span class="pre">stations</span> <span class="pre">+</span> <span class="pre">fc</span> <span class="pre">(gridded,</span> <span class="pre">mean</span> <span class="pre">of</span> <span class="pre">lead</span> <span class="pre">days</span> <span class="pre">2</span> <span class="pre">and</span> <span class="pre">4)</span></code>. It is not added when a title is passed with <code class="docutils literal notranslate"><span class="pre">title</span></code>.</p></li>
+<li><p><strong>Dashboard</strong>: on its own line, under the number of selected stations, e.g. <code class="docutils literal notranslate"><span class="pre">fc</span> <span class="pre">(gridded,</span> <span class="pre">mean</span> <span class="pre">of</span> <span class="pre">lead</span> <span class="pre">days</span> <span class="pre">2</span> <span class="pre">and</span> <span class="pre">4)</span></code>.</p></li>
+</ul>
+</section>
+<section id="stations-over-the-grid">
+<h2>Stations over the grid<a class="headerlink" href="#stations-over-the-grid" title="Link to this heading"></a></h2>
+<p>When a grid is drawn under the stations, the station markers get an edge to tell them apart from the grid. On maps without a grid, the stations are drawn without it. The edge is set with the <code class="docutils literal notranslate"><span class="pre">stations_over_grid</span></code> variable, under <code class="docutils literal notranslate"><span class="pre">plot</span></code> in the <code class="docutils literal notranslate"><span class="pre">map</span></code> section of the plot characteristics file, for each mode:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="s">&quot;plot&quot;</span><span class="p p-Indicator">:</span>
+<span class="w">  </span><span class="p p-Indicator">{</span>
+<span class="w">    </span><span class="s">&quot;stations&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="w"> </span><span class="s">&quot;s&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="nv">20</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;picker&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;zorder&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="nv">5</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;linewidth&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="nv">0</span><span class="w"> </span><span class="p p-Indicator">},</span>
+<span class="w">    </span><span class="s">&quot;stations_over_grid&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="w"> </span><span class="s">&quot;edgecolor&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;black&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;linewidth&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="nv">0.4</span><span class="w"> </span><span class="p p-Indicator">},</span>
+<span class="w">    </span><span class="s">&quot;grid&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="w"> </span><span class="s">&quot;zorder&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;alpha&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="nv">null</span><span class="w"> </span><span class="p p-Indicator">},</span>
+<span class="w">  </span><span class="p p-Indicator">}</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">stations_over_grid</span></code> is applied on top of <code class="docutils literal notranslate"><span class="pre">stations</span></code> when a grid is drawn, so any marker property can be changed over the grid. If it is not set (e.g. in a custom plot characteristics file made before it was added), the stations look the same with and without a grid.</p>
+</section>
+<section id="limitations">
+<h2>Limitations<a class="headerlink" href="#limitations" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Only the <code class="docutils literal notranslate"><span class="pre">Mean</span></code> statistic can be drawn on the grid. Other statistics show a message and no grid is drawn.</p></li>
+<li><p>The grid is not drawn on bias maps (when two datasets are selected for the map), as it is an absolute field.</p></li>
+<li><p>Resampling and temporal colocation are not applied to gridded data. A warning is shown in the dashboard if they are active.</p></li>
+<li><p>Filters only apply to stations, so they do not change the grid.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Forecast.html" class="btn btn-neutral float-left" title="Forecast" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Plotting.html" class="btn btn-neutral float-right" title="Plotting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2026, Dene Bowdalo, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa, Amalia Vradi.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

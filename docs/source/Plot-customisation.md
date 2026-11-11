@@ -21,6 +21,7 @@ The projection the map is drawn in can be set by changing the `projection` varia
 
 `Aitoff`, `AzimuthalEquidistant`, `EckertI`, `EckertII`, `EckertIII`, `EckertIV`, `EckertV`, `EckertVI`, `EqualEarth`, `Hammer`, `InterruptedGoodeHomolosine`, `LambertAzimuthalEqualArea`, `LambertCylindrical`, `Mercator`, `Miller`, `Mollweide`, `NorthPolarStereo`, `Orthographic`, `PlateCarree`, `Robinson` (default), `Sinusoidal`, `SouthPolarStereo`, `Stereographic`
 
+(map-colour-presets)=
 ### Map colour presets
 
 A colour preset sets the land and ocean colours together with the colourmaps used for the map points. It can be set by changing the `colour_preset` variable under the `map` section, and applies to every mode.

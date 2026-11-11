@@ -21,6 +21,8 @@ Alba is a member of the Data and Diagnostics Team inside Computational Earth Sci
 
 [LinkedIn](https://linkedin.com/in/albavilanova) | [Email](mailto:alba.vilanova@bsc.es)
 
+## Former team members
+
 ### Paula Serrano Sierra
 
 ![Paula Serrano Sierra](uploads/paula_serrano.jpg)
@@ -30,8 +32,6 @@ Alba is a member of the Data and Diagnostics Team inside Computational Earth Sci
 Paula is a member of the Data and Diagnostics Team inside Computational Earth Sciences. She has been working on Providentia since March 2024 up until today. Her main work on Providentia has been the development of the Download mode.
 
 [LinkedIn](https://linkedin.com/in/paula-serrano-sierra/) | [Email](mailto:paula.serrano@bsc.es)
-
-## Former team members
 
 ### Francesco Benincasa
 

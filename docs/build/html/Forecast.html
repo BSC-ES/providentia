@@ -20,7 +20,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Plotting" href="Plotting.html" />
+    <link rel="next" title="Gridded data" href="Gridded-data.html" />
     <link rel="prev" title="Filtering" href="Filtering.html" /> 
 </head>
 
@@ -53,10 +53,13 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Forecast</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#interpolation">Interpolation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#forecast-options">Forecast options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gridded-data">Gridded data</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="Gridded-data.html">Gridded data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Statistics.html">Statistics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Skills.html">Skills</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
@@ -103,7 +106,7 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">forecast</span> <span class="o">=</span> <span class="n">daily</span>
 </pre></div>
 </div>
-<p>The forecast variable can be set to the following options: <code class="docutils literal notranslate"><span class="pre">day</span></code>, <code class="docutils literal notranslate"><span class="pre">daily</span></code>, <code class="docutils literal notranslate"><span class="pre">combined</span></code>. Setting the variable like this will utilise all of the available forecast days. It is also possible to combine a number with the forecast option to limit data to a specific forecast day, e.g. <code class="docutils literal notranslate"><span class="pre">day1</span></code>, <code class="docutils literal notranslate"><span class="pre">daily2</span></code>, <code class="docutils literal notranslate"><span class="pre">combined3</span></code>, and multiple options can set at once, e.g. <code class="docutils literal notranslate"><span class="pre">day1,</span> <span class="pre">day2,</span> <span class="pre">day3</span></code>. Different options cannot be mixed however, i.e. <code class="docutils literal notranslate"><span class="pre">day</span></code> options cannot be set with <code class="docutils literal notranslate"><span class="pre">daily</span></code> or <code class="docutils literal notranslate"><span class="pre">combined</span></code> options.</p>
+<p>The forecast variable can be set to the following options: <code class="docutils literal notranslate"><span class="pre">day</span></code>, <code class="docutils literal notranslate"><span class="pre">daily</span></code>, <code class="docutils literal notranslate"><span class="pre">combined</span></code>. Setting the variable like this will utilise all of the available forecast days. It is also possible to combine a number with the forecast option to limit data to a specific forecast day, e.g. <code class="docutils literal notranslate"><span class="pre">day1</span></code>, <code class="docutils literal notranslate"><span class="pre">daily2</span></code>, <code class="docutils literal notranslate"><span class="pre">combined3</span></code>, and multiple options can set at once, e.g. <code class="docutils literal notranslate"><span class="pre">day1,</span> <span class="pre">day2,</span> <span class="pre">day3</span></code>. Different options cannot be mixed however, i.e. <code class="docutils literal notranslate"><span class="pre">day</span></code> options cannot be set with <code class="docutils literal notranslate"><span class="pre">daily</span></code> or <code class="docutils literal notranslate"><span class="pre">combined</span></code> options. Forecast options can also be set in the model name, see <a class="reference internal" href="Configuration-fields.html"><span class="std std-doc">Configuration fields</span></a>.</p>
 <p>The effects of each forecast option are now explained:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">day</span></code> is used when wanting to compare different forecast days. The effect this has in Providentia is essentially to treat each forecast day as an independent model. Thus statistics for each forecast day can be directly compared.</p></li>
@@ -112,7 +115,16 @@
 </ul>
 <p>If no forecast option is set for a model with forecast data, data from the first forecast day will simply be taken to represent the model (i.e. treating the data as a non-forecast type).</p>
 <p>It is possible to compare different models where one has forecast data and the other does not, in these cases the non-forecast data is treated as day 1 of a forecast for comparison purposes. Be aware however, if you are loading multiple species, and a model for one species has forecast data, but the same model does not for another, then this could cause Providentia to crash as it is not designed to handle this.</p>
-<p>When using the dashboard, models that have have interpolated forecast data are automatically detected. When clicking on the <strong>MODELS</strong> button on the menu bar, if the model has forecast data, then when you select the model, an extra drop-down menu will appear to the right. This will allow you to select the forecast option, i.e. <code class="docutils literal notranslate"><span class="pre">combined</span></code>, <code class="docutils literal notranslate"><span class="pre">daily</span></code> or <code class="docutils literal notranslate"><span class="pre">day</span></code>. If no option is set, data from the first forecast day will be taken to represent the model (i.e. treating the data as a non-forecast type). If a forecast option is selected, another drop-down menu will then appear to the right of that, allowing you to select specific forecast days. If no specific forecast days are selected but a forecast option is, then all forecast days will be utilised.</p>
+<p>When using the dashboard, models that have forecast data, interpolated or gridded, are automatically detected. When clicking on the <strong>MODELS</strong> button on the menu bar, a drop-down menu is shown to the right of every model that has forecast data, to select its forecast option: <code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="docutils literal notranslate"><span class="pre">combined</span></code>, <code class="docutils literal notranslate"><span class="pre">daily</span></code> or <code class="docutils literal notranslate"><span class="pre">day</span></code>.</p>
+<p>With <code class="docutils literal notranslate"><span class="pre">None</span></code>, data from the first forecast day will be taken to represent the model (i.e. treating the data as a non-forecast type), so the forecast days drop-down only shows <code class="docutils literal notranslate"><span class="pre">day</span> <span class="pre">1</span></code>, which cannot be changed.</p>
+<p>If a forecast option is selected, another drop-down menu will then appear to the right of that, allowing you to select specific forecast days. If no specific forecast days are selected but a forecast option is, then all forecast days will be utilised.</p>
+<p>The options set on a model are only used once it is selected (interpolated or gridded), and they are kept when it is unselected.</p>
+<p>As forecast options are applied to all models, all selected models with forecast data must have the same forecast option and days selected, otherwise a message is shown and the data is not read. For this reason, when loading a configuration file with the <code class="docutils literal notranslate"><span class="pre">forecast</span></code> field (e.g. <code class="docutils literal notranslate"><span class="pre">forecast</span> <span class="pre">=</span> <span class="pre">day1,</span> <span class="pre">day3</span></code>), its option and days are also set on every other model with forecast data, even if it is not loaded, so it can be selected later without changing them.</p>
+<p>When both versions of a model are selected, the options of the interpolated version are shown: if it was interpolated without the <code class="docutils literal notranslate"><span class="pre">forecast</span></code> option, only lead day 1 can be selected. The selected options are kept when switching between the interpolated and gridded versions, as far as they are available.</p>
+</section>
+<section id="gridded-data">
+<h2>Gridded data<a class="headerlink" href="#gridded-data" title="Link to this heading"></a></h2>
+<p>Gridded models loaded with their interpolated version are read for the same forecast days as it. Gridded models loaded without it have their own forecast options. See <a class="reference internal" href="Gridded-data.html"><span class="std std-doc">Gridded data</span></a> for how the grid drawn on the map depends on the forecast option.</p>
 </section>
 </section>
 
@@ -121,7 +133,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Filtering.html" class="btn btn-neutral float-left" title="Filtering" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Plotting.html" class="btn btn-neutral float-right" title="Plotting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Gridded-data.html" class="btn btn-neutral float-right" title="Gridded data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

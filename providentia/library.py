@@ -2382,7 +2382,7 @@ class Providentia:
 
         Parameters
         ----------
-        **kwargs : dict
+        \\*\\*kwargs : dict
             Optional command-line arguments that override default configuration values.
         """
 
@@ -2404,7 +2404,7 @@ class Providentia:
 
         Parameters
         ----------
-        **kwargs : dict
+        \\*\\*kwargs : dict
             Optional command-line arguments that override default configuration values.
         """
 
@@ -2421,7 +2421,7 @@ class Providentia:
 
         Parameters
         ----------
-        **kwargs : dict
+        \\*\\*kwargs : dict
             Optional command-line arguments that override default configuration values.
         """
 
@@ -2467,7 +2467,7 @@ class Providentia:
 
         Parameters
         ----------
-        **kwargs : dict
+        \\*\\*kwargs : dict
             Optional command-line arguments that override default configuration values.
         """
 
