@@ -47,7 +47,7 @@ cd providentia
 ./bin/providentia
 ```
 
-The first time the software runs in a local machine it will create a conda environment called `providentia-env_v[version]` with all the modules needed. Some of them come from BSC's GitLab (https://gitlab.earth.bsc.es), so this needs access to it. If you encountered any other problem, feel free to [contact us](Meet-the-team).
+The first time the software runs in a local machine it will create a conda environment called `providentia-env_v[version]` with all the modules needed. Some of them come from BSC's GitLab (https://gitlab.earth.bsc.es). If you encountered any other problem, feel free to [contact us](Meet-the-team).
 
 In HPC, the environment is not created by the user as it is stored in a shared folder. Every time we run Providentia on HPC, a wall time of 2 hours is requested, with 12 CPUs and 30Gb of total memory. This can be modified as desired using the bash options. You can check the available options with:
 

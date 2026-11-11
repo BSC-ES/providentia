@@ -64,7 +64,6 @@ dependencies = [
     "pycountry==24.6.1",
     "xskillscore==0.0.28",
     "plotly==7.1.0",
-    "ines-core @ git+https://gitlab.earth.bsc.es/es/ines-core.git@v0.9.5",
     "ines-providentia @ git+https://gitlab.earth.bsc.es/es/ines-providentia.git@main"
 ]
 

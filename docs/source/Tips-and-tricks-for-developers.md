@@ -412,7 +412,7 @@ conda install -c conda-forge cartopy==0.25.0 jupyterlab==4.5.3 ghostscript==10.0
 pip install --no-user -r requirements.txt
 ```
 
-`requirements.txt` installs ines-core and ines-providentia from BSC's GitLab (https://gitlab.earth.bsc.es), so you need access to it.
+`requirements.txt` installs ines-providentia from BSC's GitLab (https://gitlab.earth.bsc.es).
 
 ### Create providentia-env_v4.0.0-nord4 in Nord4
 

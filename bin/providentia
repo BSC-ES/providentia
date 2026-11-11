@@ -381,7 +381,7 @@ setup_providentia_env_locally() {
             # remove the environment if it cannot be completed, so that it is created again
             # on the next run
             if ! pip install --no-user -r requirements.txt; then
-                echo "ERROR: Could not install the Python packages of $ENV_NAME. The website packages (ines-core and ines-providentia) come from BSC's GitLab (https://gitlab.earth.bsc.es), so creating the environment needs access to it."
+                echo "ERROR: Could not install the Python packages of $ENV_NAME, see the pip error above."
                 conda deactivate
                 conda env remove -n "$ENV_NAME" -y
                 exit 1
