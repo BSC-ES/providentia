@@ -82,6 +82,34 @@ After some seconds you will have entered onto an allocated node and the dashboar
 ./bin/providentia
 ```
 
+(Requesting-more-memory)=
+## Requesting more memory
+
+On Marenostrum 5 and Nord4, the memory of a job depends on the number of CPUs requested: each CPU comes with a fixed amount of memory (about 1.8 GB per CPU requested on the standard nodes of both machines). By default, the dashboard, report and library modes request 2 CPUs, which is enough for most cases. Loading long periods or gridded models (`::gridded`) or forecast data can need several GB, and if the job runs out of memory it will be killed, showing this message:
+
+```
+ERROR: Providentia was killed because it ran out of memory (job had 2 CPUs).
+On HPC machines memory is assigned per CPU, so request more CPUs, e.g. --n_cpus=4,
+or use a high memory node with --constraint=highmem.
+```
+
+A job that slightly exceeds its memory can sometimes survive by using the swap space of the node, so the same run may work on one node and be killed on another. If this happens, request more memory as explained below.
+
+To get more memory, request more CPUs with `--n_cpus`:
+
+```
+./bin/providentia --conf=my_conf --n_cpus=4
+```
+
+If even more memory is needed, you can request a high memory node with `--constraint=highmem`. Note that these nodes are fewer, so the job may wait longer in the queue.
+
+If you are using the debug mode, the CPUs must be requested when creating the allocation, as the next runs use the CPUs of the existing allocation:
+
+```
+./bin/providentia --debug --n_cpus=4
+./bin/providentia
+```
+
 (Mounting-filesystems)=
 ## Mounting HPC filesystems
 

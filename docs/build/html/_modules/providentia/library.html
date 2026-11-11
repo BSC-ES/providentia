@@ -48,8 +48,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../Colocation.html">Colocation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Filtering.html">Filtering</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Forecast.html">Forecast</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Gridded-data.html">Gridded data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Statistics.html">Statistics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Skills.html">Skills</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../FAQ.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Presentations.html">Presentations</a></li>
@@ -129,6 +131,8 @@
     <span class="n">get_possible_resampling_resolutions</span><span class="p">,</span>
     <span class="n">get_periodic_nonrelevant_temporal_resolutions</span><span class="p">,</span>
     <span class="n">get_periodic_relevant_temporal_resolutions</span><span class="p">,</span>
+    <span class="n">get_grid_title</span><span class="p">,</span>
+    <span class="n">get_map_grid_forecast_lead_days</span><span class="p">,</span>
     <span class="n">get_valid_models</span><span class="p">,</span>
     <span class="n">get_valid_obs_files_in_date_range</span><span class="p">,</span>
 <span class="p">)</span>
@@ -137,6 +141,7 @@
     <span class="n">generate_colourbar</span><span class="p">,</span>
     <span class="n">generate_colourbar_detail</span><span class="p">,</span>
     <span class="n">get_fairmode_data</span><span class="p">,</span>
+    <span class="n">get_gridded_statistic</span><span class="p">,</span>
     <span class="n">get_selected_station_count</span><span class="p">,</span>
     <span class="n">get_selected_station_data</span><span class="p">,</span>
     <span class="n">get_z_statistic_info</span><span class="p">,</span>
@@ -880,6 +885,35 @@
                 <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
                 <span class="k">return</span>
 
+        <span class="c1"># a gridded lead day has no station data to compute a bias with,</span>
+        <span class="c1"># so it can only be drawn as an absolute map (observations over its grid)</span>
+        <span class="k">if</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s2">&quot;map&quot;</span><span class="p">:</span>
+            <span class="n">raw_per_data_label</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_labels_raw</span><span class="p">))</span>
+            <span class="n">gridded_label</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="n">label</span>
+                    <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="p">(</span><span class="n">labela</span><span class="p">,</span> <span class="n">labelb</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">raw_per_data_label</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;::gridded&quot;</span><span class="p">)</span>
+                <span class="p">),</span>
+                <span class="kc">None</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">gridded_label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">z_statistic_sign</span> <span class="o">==</span> <span class="s2">&quot;bias&quot;</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">gridded_label</span><span class="si">}</span><span class="s2"> is gridded data, which has no station data to compute &quot;</span>
+                        <span class="s2">&quot;a bias with. Not making plot.&quot;</span>
+                    <span class="p">)</span>
+                    <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+                    <span class="k">return</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">labela</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">labelb</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">gridded_label</span><span class="si">}</span><span class="s2"> is gridded data, which has no station data to compare &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">labela</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">gridded_label</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">labelb</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="n">labelb</span><span class="si">}</span><span class="s2"> with. &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;Ignoring labelb (</span><span class="si">{</span><span class="n">labelb</span><span class="si">}</span><span class="s2">) and plotting the map of </span><span class="si">{</span><span class="n">labela</span><span class="si">}</span><span class="s2"> only.&quot;</span>
+                    <span class="p">)</span>
+                    <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+                    <span class="n">labelb</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
         <span class="c1"># a stat-less taylor plot defaults to &quot;r&quot;, as the dashboard does</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">base_plot_type</span> <span class="o">==</span> <span class="s2">&quot;taylor&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">zstat</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
             <span class="p">(</span>
@@ -1161,10 +1195,22 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">networkspecies</span> <span class="o">=</span> <span class="p">[</span><span class="n">networkspeci</span><span class="p">]</span>
 
+        <span class="c1"># gridded data is only set for maps, used later to describe it in the title</span>
+        <span class="n">grid_data</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># gridded models are only shown in the legend of a map drawn over their grid,</span>
+        <span class="c1"># as they are not used in any other plot</span>
+        <span class="n">raw_per_data_label</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_labels_raw</span><span class="p">))</span>
+        <span class="n">legend_data_labels</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">data_label</span>
+            <span class="k">for</span> <span class="n">data_label</span> <span class="ow">in</span> <span class="n">data_labels</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">raw_per_data_label</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">data_label</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;::gridded&quot;</span><span class="p">)</span>
+        <span class="p">]</span>
+
         <span class="c1"># legend plot (on its own axis)</span>
         <span class="k">if</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s2">&quot;legend&quot;</span><span class="p">:</span>
             <span class="n">legend_handles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span>
-                <span class="n">plot_type</span><span class="p">,</span> <span class="n">data_labels</span><span class="o">=</span><span class="n">data_labels</span><span class="p">,</span> <span class="n">set_obs</span><span class="o">=</span><span class="n">set_obs_legend</span>
+                <span class="n">plot_type</span><span class="p">,</span> <span class="n">data_labels</span><span class="o">=</span><span class="n">legend_data_labels</span><span class="p">,</span> <span class="n">set_obs</span><span class="o">=</span><span class="n">set_obs_legend</span>
             <span class="p">)</span>
             <span class="n">relevant_ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="o">**</span><span class="n">legend_handles</span><span class="p">)</span>
 
@@ -1188,6 +1234,16 @@
             <span class="k">elif</span> <span class="n">z_statistic_sign</span> <span class="o">==</span> <span class="s2">&quot;bias&quot;</span><span class="p">:</span>
                 <span class="n">map_title</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">labelb</span><span class="p">)</span>
 
+            <span class="c1"># get gridded statistic for all loaded period (if there is grid data),</span>
+            <span class="c1"># not in bias maps, as the grid is an absolute field</span>
+            <span class="n">grid_lat</span><span class="p">,</span> <span class="n">grid_lon</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+            <span class="n">grid_lead_days</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">labelb</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                <span class="n">grid_lead_days</span> <span class="o">=</span> <span class="n">get_map_grid_forecast_lead_days</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">labela</span><span class="p">)</span>
+                <span class="n">grid_data</span><span class="p">,</span> <span class="n">grid_lat</span><span class="p">,</span> <span class="n">grid_lon</span> <span class="o">=</span> <span class="n">get_gridded_statistic</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="p">,</span> <span class="n">speci</span><span class="p">,</span> <span class="n">zstat</span><span class="p">,</span> <span class="n">data_label</span><span class="o">=</span><span class="n">labela</span><span class="p">,</span> <span class="n">lead_days</span><span class="o">=</span><span class="n">grid_lead_days</span>
+                <span class="p">)</span>
+
             <span class="n">func</span><span class="p">(</span>
                 <span class="n">relevant_ax</span><span class="p">,</span>
                 <span class="n">networkspeci</span><span class="p">,</span>
@@ -1196,8 +1252,12 @@
                 <span class="n">zstat</span><span class="o">=</span><span class="n">zstat</span><span class="p">,</span>
                 <span class="n">labela</span><span class="o">=</span><span class="n">labela</span><span class="p">,</span>
                 <span class="n">labelb</span><span class="o">=</span><span class="n">labelb</span><span class="p">,</span>
+                <span class="n">var</span><span class="o">=</span><span class="n">grid_data</span><span class="p">,</span>
+                <span class="n">lat</span><span class="o">=</span><span class="n">grid_lat</span><span class="p">,</span>
+                <span class="n">lon</span><span class="o">=</span><span class="n">grid_lon</span><span class="p">,</span>
                 <span class="n">map_extent</span><span class="o">=</span><span class="n">map_extent</span><span class="p">,</span>
             <span class="p">)</span>
+        
         <span class="c1"># periodic plot</span>
         <span class="k">elif</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s2">&quot;periodic&quot;</span><span class="p">:</span>
             <span class="n">func</span><span class="p">(</span>
@@ -1459,8 +1519,17 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">inds_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid_station_inds</span>
 
-        <span class="k">if</span> <span class="n">labela</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-            <span class="n">labela_station_inds</span> <span class="o">=</span> <span class="n">inds_array</span><span class="p">[</span><span class="n">networkspeci</span><span class="p">][</span><span class="n">labela</span><span class="p">]</span>
+        <span class="c1"># a gridded forecast label has no station data, so its map shows the observations</span>
+        <span class="c1"># over its grid (see make_map), whose stations are counted</span>
+        <span class="n">station_labela</span> <span class="o">=</span> <span class="n">labela</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">base_plot_type</span> <span class="o">==</span> <span class="s2">&quot;map&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">raw_per_data_label</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">labela</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;::gridded&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations_data_label</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_labels</span><span class="p">:</span>
+                <span class="n">station_labela</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations_data_label</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">station_labela</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">station_labela</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">labela_station_inds</span> <span class="o">=</span> <span class="n">inds_array</span><span class="p">[</span><span class="n">networkspeci</span><span class="p">][</span><span class="n">station_labela</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">labelb</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
                 <span class="n">station_inds</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">labela_station_inds</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -1586,6 +1655,9 @@
                             <span class="p">)</span>
                             <span class="k">if</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s2">&quot;map&quot;</span><span class="p">:</span>
                                 <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">map_title</span><span class="p">,</span> <span class="n">title</span><span class="p">)</span>
+                                <span class="c1"># describe the grid drawn under the stations</span>
+                                <span class="k">if</span> <span class="n">grid_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                                    <span class="n">title</span> <span class="o">+=</span> <span class="s2">&quot; + &quot;</span> <span class="o">+</span> <span class="n">get_grid_title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">labela</span><span class="p">,</span> <span class="n">lead_days</span><span class="o">=</span><span class="n">grid_lead_days</span><span class="p">)</span>
 
                         <span class="k">else</span><span class="p">:</span>
                             <span class="k">if</span> <span class="n">zstat</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;NStations&quot;</span><span class="p">,</span> <span class="s2">&quot;NUniqueStations&quot;</span><span class="p">]:</span>
@@ -1596,6 +1668,9 @@
                                 <span class="p">)</span>
                             <span class="k">if</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s2">&quot;map&quot;</span><span class="p">:</span>
                                 <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">map_title</span><span class="p">,</span> <span class="n">title</span><span class="p">)</span>
+                                <span class="c1"># describe the grid drawn under the stations</span>
+                                <span class="k">if</span> <span class="n">grid_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                                    <span class="n">title</span> <span class="o">+=</span> <span class="s2">&quot; + &quot;</span> <span class="o">+</span> <span class="n">get_grid_title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">labela</span><span class="p">,</span> <span class="n">lead_days</span><span class="o">=</span><span class="n">grid_lead_days</span><span class="p">)</span>
 
             <span class="k">elif</span> <span class="n">base_plot_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;legend&quot;</span><span class="p">,</span> <span class="s2">&quot;metadata&quot;</span><span class="p">]:</span>
                 <span class="k">if</span> <span class="s2">&quot;axis_title&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">]:</span>
@@ -1702,8 +1777,12 @@
                         <span class="n">valid_legend</span> <span class="o">=</span> <span class="kc">False</span>
 
                 <span class="k">if</span> <span class="n">valid_legend</span><span class="p">:</span>
+                    <span class="c1"># keep gridded models only on a map drawn over their grid</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">base_plot_type</span> <span class="o">==</span> <span class="s2">&quot;map&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">grid_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+                        <span class="n">legend_data_labels</span> <span class="o">=</span> <span class="n">data_labels</span>
                     <span class="n">legend_handles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span>
-                        <span class="n">plot_type</span><span class="p">,</span> <span class="n">data_labels</span><span class="o">=</span><span class="n">data_labels</span><span class="p">,</span> <span class="n">set_obs</span><span class="o">=</span><span class="n">set_obs_legend</span>
+                        <span class="n">plot_type</span><span class="p">,</span> <span class="n">data_labels</span><span class="o">=</span><span class="n">legend_data_labels</span><span class="p">,</span> <span class="n">set_obs</span><span class="o">=</span><span class="n">set_obs_legend</span><span class="p">,</span>
+                        <span class="n">map_grid_data_label</span><span class="o">=</span><span class="n">labela</span> <span class="k">if</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s2">&quot;map&quot;</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
                     <span class="p">)</span>
                     <span class="n">legend_ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">main_gs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
                     <span class="n">legend_ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
@@ -1790,7 +1869,7 @@
 
 <div class="viewcode-block" id="Providentia.legend">
 <a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.legend">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">legend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">,</span> <span class="n">data_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">set_obs</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">legend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">,</span> <span class="n">data_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">set_obs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">map_grid_data_label</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Wrapper method to make legend.</span>
 
@@ -1802,6 +1881,9 @@
 <span class="sd">            Data arrays to plot, by default None.</span>
 <span class="sd">        set_obs : bool, optional</span>
 <span class="sd">            Indicates if observations appear on the legend, by default True.</span>
+<span class="sd">        map_grid_data_label : str, optional</span>
+<span class="sd">            Data label whose lead day is drawn on the map grid, by default None. In day</span>
+<span class="sd">            forecast mode the gridded square is only shown next to it.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -1819,7 +1901,8 @@
             <span class="k">return</span>
 
         <span class="n">legend_handles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotting</span><span class="o">.</span><span class="n">make_legend_handles</span><span class="p">(</span>
-            <span class="n">legend_characteristics</span><span class="p">,</span> <span class="n">data_labels</span><span class="o">=</span><span class="n">data_labels</span><span class="p">,</span> <span class="n">set_obs</span><span class="o">=</span><span class="n">set_obs</span>
+            <span class="n">legend_characteristics</span><span class="p">,</span> <span class="n">data_labels</span><span class="o">=</span><span class="n">data_labels</span><span class="p">,</span> <span class="n">set_obs</span><span class="o">=</span><span class="n">set_obs</span><span class="p">,</span>
+            <span class="n">map_grid_data_label</span><span class="o">=</span><span class="n">map_grid_data_label</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">legend_handles</span><span class="p">[</span><span class="s2">&quot;plot&quot;</span><span class="p">]</span></div>
@@ -2344,18 +2427,23 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">start_date</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">end_date</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">networkspecies</span>
         <span class="p">)</span>
 
         <span class="c1"># reset configuration variables in case new data has been downloaded</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">valid_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_config</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_labels</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">observations_data_label</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_labels_raw</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">observations_data_label</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
-        <span class="p">)</span>
+
+        <span class="c1"># if no obs are loaded (when MODEL is active), remove observations from labels</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_active</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_labels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_labels_raw</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_labels</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">observations_data_label</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_labels_raw</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">observations_data_label</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">networkspecies</span> <span class="o">=</span> <span class="p">[</span>
             <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">|</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">speci</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">network</span><span class="p">,</span> <span class="n">speci</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">)</span>
@@ -2427,7 +2515,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        **kwargs : dict</span>
+<span class="sd">        \\*\\*kwargs : dict</span>
 <span class="sd">            Optional command-line arguments that override default configuration values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -2452,7 +2540,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        **kwargs : dict</span>
+<span class="sd">        \\*\\*kwargs : dict</span>
 <span class="sd">            Optional command-line arguments that override default configuration values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -2472,7 +2560,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        **kwargs : dict</span>
+<span class="sd">        \\*\\*kwargs : dict</span>
 <span class="sd">            Optional command-line arguments that override default configuration values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -2521,7 +2609,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        **kwargs : dict</span>
+<span class="sd">        \\*\\*kwargs : dict</span>
 <span class="sd">            Optional command-line arguments that override default configuration values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 

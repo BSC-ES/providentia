@@ -89,6 +89,7 @@ If a model is loaded gridded only, it has its own forecast options, and its grid
 
 As it has no data at the stations, it does not switch the plots of station data to the forecast layout (e.g. the `daily` timeseries per forecast day): only models with forecast data at the stations do. Where gridded models are shown in the legend, its entry is shown with a square only. In `day` mode, only the lead days drawn on the grid are shown.
 
+(choosing-the-grid-lead-days)=
 ### Choosing the grid lead days
 
 In report and library modes, `map_grid_forecast_lead_days` chooses which of the loaded lead days are averaged on the grid, given as numbers or forecast days (e.g. `2, 4` or `day2, day4`).
@@ -140,7 +141,7 @@ When a grid is drawn under the stations, the station markers get an edge to tell
     "stations": { "s": 20, "picker": 1, "zorder": 5, "linewidth": 0 },
     "stations_over_grid": { "edgecolor": "black", "linewidth": 0.4 },
     "grid": { "zorder": 2, "alpha": null },
-  },
+  }
 ```
 
 `stations_over_grid` is applied on top of `stations` when a grid is drawn, so any marker property can be changed over the grid. If it is not set (e.g. in a custom plot characteristics file made before it was added), the stations look the same with and without a grid.

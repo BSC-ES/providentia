@@ -51,6 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Colocation.html">Colocation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Filtering.html">Filtering</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Forecast.html">Forecast</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Gridded-data.html">Gridded data</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="Plotting.html">Plotting</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Plot-types-and-options.html">Plot types and options</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Plot customisation</a><ul>
@@ -83,6 +84,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Statistics.html">Statistics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Skills.html">Skills</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
@@ -140,7 +142,7 @@
 <p><code class="docutils literal notranslate"><span class="pre">Aitoff</span></code>, <code class="docutils literal notranslate"><span class="pre">AzimuthalEquidistant</span></code>, <code class="docutils literal notranslate"><span class="pre">EckertI</span></code>, <code class="docutils literal notranslate"><span class="pre">EckertII</span></code>, <code class="docutils literal notranslate"><span class="pre">EckertIII</span></code>, <code class="docutils literal notranslate"><span class="pre">EckertIV</span></code>, <code class="docutils literal notranslate"><span class="pre">EckertV</span></code>, <code class="docutils literal notranslate"><span class="pre">EckertVI</span></code>, <code class="docutils literal notranslate"><span class="pre">EqualEarth</span></code>, <code class="docutils literal notranslate"><span class="pre">Hammer</span></code>, <code class="docutils literal notranslate"><span class="pre">InterruptedGoodeHomolosine</span></code>, <code class="docutils literal notranslate"><span class="pre">LambertAzimuthalEqualArea</span></code>, <code class="docutils literal notranslate"><span class="pre">LambertCylindrical</span></code>, <code class="docutils literal notranslate"><span class="pre">Mercator</span></code>, <code class="docutils literal notranslate"><span class="pre">Miller</span></code>, <code class="docutils literal notranslate"><span class="pre">Mollweide</span></code>, <code class="docutils literal notranslate"><span class="pre">NorthPolarStereo</span></code>, <code class="docutils literal notranslate"><span class="pre">Orthographic</span></code>, <code class="docutils literal notranslate"><span class="pre">PlateCarree</span></code>, <code class="docutils literal notranslate"><span class="pre">Robinson</span></code> (default), <code class="docutils literal notranslate"><span class="pre">Sinusoidal</span></code>, <code class="docutils literal notranslate"><span class="pre">SouthPolarStereo</span></code>, <code class="docutils literal notranslate"><span class="pre">Stereographic</span></code></p>
 </section>
 <section id="map-colour-presets">
-<h3>Map colour presets<a class="headerlink" href="#map-colour-presets" title="Link to this heading"></a></h3>
+<span id="id1"></span><h3>Map colour presets<a class="headerlink" href="#map-colour-presets" title="Link to this heading"></a></h3>
 <p>A colour preset sets the land and ocean colours together with the colourmaps used for the map points. It can be set by changing the <code class="docutils literal notranslate"><span class="pre">colour_preset</span></code> variable under the <code class="docutils literal notranslate"><span class="pre">map</span></code> section, and applies to every mode.</p>
 <p>The available presets are defined in <code class="docutils literal notranslate"><span class="pre">settings/colourmaps.yaml</span></code>:</p>
 <ul class="simple">
@@ -170,7 +172,7 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">sequential_high_best</span></code>: the statistic is a skill score and its maximum is perfect, e.g. <code class="docutils literal notranslate"><span class="pre">r2</span></code></p></li>
 </ul>
 <p>The absolute view of a statistic is always drawn sequentially, so <code class="docutils literal notranslate"><span class="pre">cmap_type_bias</span></code> only describes the bias view.</p>
-<p>The colourmap each of these types gets comes from the active colour preset in <code class="docutils literal notranslate"><span class="pre">settings/colourmaps.yaml</span></code>, each of which sets one per type, chosen to stay legible against that preset’s land and ocean colours (see <a class="reference internal" href="#map-colour-presets"><span class="xref myst">Map colour presets</span></a>). Between them these cover every statistic, without anything having to be set per statistic, and changing the preset changes all of them together.</p>
+<p>The colourmap each of these types gets comes from the active colour preset in <code class="docutils literal notranslate"><span class="pre">settings/colourmaps.yaml</span></code>, each of which sets one per type, chosen to stay legible against that preset’s land and ocean colours (see <a class="reference internal" href="#map-colour-presets">Map colour presets</a>). Between them these cover every statistic, without anything having to be set per statistic, and changing the preset changes all of them together.</p>
 <p>To use a particular colourmap for one statistic instead of the one its type would give it, set <code class="docutils literal notranslate"><span class="pre">cmap_absolute</span></code> or <code class="docutils literal notranslate"><span class="pre">cmap_bias</span></code> for that statistic in the <code class="docutils literal notranslate"><span class="pre">basic_stats.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">model_bias_stats.yaml</span></code> files. They can be given as a string, which applies to every species, or as a dictionary per species, which then needs to cover <strong>each of the species</strong> loaded or an error will appear. Left empty, the statistic’s type decides.</p>
 <p>Colourmaps are therefore resolved in this order:</p>
 <ol class="arabic simple">
