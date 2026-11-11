@@ -15,6 +15,7 @@ Contents
    Gridded-data.md
    Plotting.rst
    Statistics.md
+   Skills.md
    Other-topics.rst
    FAQ.md
    Presentations.md

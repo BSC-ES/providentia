@@ -25,4 +25,8 @@ trainings/.ipynb_checkpoints
 trainings/data/output/**/*.nc
 trainings/data/output/**/*.png
 trainings/data/.ipynb_checkpoints
+!/.claude/skills/
 CLAUDE.md
+MINIMAP.md
+WIP.md
+DECISIONS.md
