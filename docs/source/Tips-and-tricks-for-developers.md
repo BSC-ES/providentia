@@ -370,7 +370,7 @@ Trigger a build from your latest commit containing this file and you should be r
 Edit the files under `docs/source`, then navigate to docs and simply run:
 
 ```bash
-conda activate providentia-env_v3.1.0
+conda activate providentia-env_v4.0.0
 cd docs
 make clean
 make html
@@ -403,14 +403,16 @@ conda install -n base conda=24.4.0 conda-build=24.3.0
 
 Check what the latest versions of [conda](https://github.com/conda/conda/releases) and [conda-build](https://github.com/conda/conda-build/releases) are.
 
-What the first command does is creating an environment called `providentia-env_v3.1.0` with the Python version 3.11.5, and installing `cartopy`, `jupyterlab`, `ghostscript`, `dask`, `nco`, `pyproj`, `proj`, `numpy` and `scipy` with conda, and the Python packages from `requirements.txt` using pip. The equivalent would be:
+What the first command does is creating an environment called `providentia-env_v4.0.0` with the Python version 3.11.5, and installing `cartopy`, `jupyterlab`, `ghostscript`, `dask`, `nco`, `pyproj`, `proj`, `numpy` and `scipy` with conda, and the Python packages from `requirements.txt` using pip. The equivalent would be:
 
 ```bash
-conda create -n providentia-env_v3.1.0 python=3.11.5 -c conda-forge --override-channels
-conda activate providentia-env_v3.1.0
+conda create -n providentia-env_v4.0.0 python=3.11.5 -c conda-forge --override-channels
+conda activate providentia-env_v4.0.0
 conda install -c conda-forge cartopy==0.25.0 jupyterlab==4.5.3 ghostscript==10.06.0 dask==2026.1.2 nco==5.3.6 pyproj==3.7.2 proj==9.7.1 openssh==10.5p1 numpy==2.3.5 scipy==1.17.1 --override-channels
 pip install --no-user -r requirements.txt
 ```
+
+MN5, Nord4 and the operational machine still use `providentia-env_v3.1.0`.
 
 ### Create providentia-env_v3.1.0-nord4 in Nord4
 
