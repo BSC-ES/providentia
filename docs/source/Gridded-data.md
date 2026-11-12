@@ -44,7 +44,7 @@ The forecast option and lead days used are shown next to the gridded model in th
 
 Lead day N of a forecast run covers the 24 hours that start N-1 days after the run starts, e.g. lead day 1 of the run of `2023010100` covers 2023-01-01 00:00 to 2023-01-01 23:00. Forecast runs are expected to be 24 hours apart: a missing run leaves days without data for its lead days (see above).
 
-Gridded models that are not forecast experiments (their files are not forecast runs, e.g. `cams61_emep_ph2-eu-000`) have no lead days, so what follows about lead days does not apply to them:
+Gridded models that are not forecast models (their files are not forecast runs, e.g. `cams61_emep_ph2-eu-000`) have no lead days, so what follows about lead days does not apply to them:
 
 * nothing is shown next to them in the terminal (e.g. `cams61_emep_ph2-eu-000::gridded`),
 * their map title has no lead day (e.g. `cams61_emep_ph2-eu-000 (gridded)`),
@@ -98,13 +98,13 @@ It is set per section and replaces the average of all loaded lead days on maps t
 
 For example, with `day1, day2, day4` and `map_grid_forecast_lead_days = 2, 4`, the grid under the observations map shows the average of lead days 2 and 4, while the grid under the `fc-day1` map still shows lead day 1.
 
-Lead days that were not loaded are left out with a warning, and if none of them was loaded, the grid uses all loaded lead days. If no gridded data is loaded, or the gridded model is not a forecast experiment, the field is not used and a warning is shown.
+Lead days that were not loaded are left out with a warning, and if none of them was loaded, the grid uses all loaded lead days. If no gridded data is loaded, or the gridded model is not a forecast model, the field is not used and a warning is shown.
 
 In the dashboard, the field sets the lead days checked in **Forecast grid lead days** when the configuration file is loaded (at launch or from the toolbar), following the same rules. Afterwards, the lead days checked follow the drop-down (see below): reading again does not apply the field, and it is not written when saving a configuration file.
 
 ### Dashboard: forecast grid lead days
 
-In the dashboard, the **Forecast grid lead days** drop-down in the map settings menu lists the lead days read for the gridded model (`1` if it is not read with a forecast option), and the grid shows the average of the checked ones. If the gridded model is not a forecast experiment, the drop-down is empty and disabled, and the grid is always drawn.
+In the dashboard, the **Forecast grid lead days** drop-down in the map settings menu lists the lead days read for the gridded model (`1` if it is not read with a forecast option), and the grid shows the average of the checked ones. If the gridded model is not a forecast model, the drop-down is empty and disabled, and the grid is always drawn.
 
 It does not depend on the data selected in **Dataset 1**: for example, with `day2, day4`, the grid shows the average of lead days 2 and 4 under every map until one of them is unchecked.
 
@@ -118,7 +118,7 @@ In the dashboard, the grid shows the period selected for the map. In report and 
 
 ## Map title
 
-When a grid is drawn under a map, the map title names the gridded model and the lead days drawn (no lead days if the gridded model is not a forecast experiment, e.g. `cams61_emep_ph2-eu-000 (gridded)`), so it is clear what the grid shows even when it belongs to another model.
+When a grid is drawn under a map, the map title names the gridded model and the lead days drawn (no lead days if the gridded model is not a forecast model, e.g. `cams61_emep_ph2-eu-000 (gridded)`), so it is clear what the grid shows even when it belongs to another model.
 
 The gridded model is shown by its alias if one is set in the configuration file. Maps without a grid (e.g. bias maps) keep their usual title.
 

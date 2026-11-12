@@ -479,6 +479,7 @@ class SubmitInterpolation(object):
                                                     mod_speci_to_process,
                                                 )
                                                 have_valid_resolution = True
+                                                break
                                         else:
                                             mod_speci_to_process = copy.deepcopy(
                                                 speci_to_map
@@ -488,6 +489,7 @@ class SubmitInterpolation(object):
                                                 mod_speci_to_process,
                                             )
                                             have_valid_resolution = True
+                                            break
 
                         # for some variables it is possible to extract the variable information by mapping to a different variable name, with a higher dimensionality
                         # this currently is implemented for 2 cases:
@@ -540,6 +542,7 @@ class SubmitInterpolation(object):
                                                     mod_speci_to_process,
                                                 )
                                                 have_valid_resolution = True
+                                                break
                                         else:
                                             mod_speci_to_process = copy.deepcopy(
                                                 speci_to_map
@@ -549,6 +552,7 @@ class SubmitInterpolation(object):
                                                 mod_speci_to_process,
                                             )
                                             have_valid_resolution = True
+                                            break
 
                         # only proceed if have valid resolution
                         if have_valid_resolution:
