@@ -1083,9 +1083,21 @@ class ModelInterpolation(object):
         )
         self.station_references = self.station_references[non_nan_station_indices]
 
-        # get valid longitude and latitudes
-        self.obs_lons = obs_lon_obj[non_nan_station_indices]
-        self.obs_lats = obs_lat_obj[non_nan_station_indices]
+        # get longitude and latitudes, with masked values as NaN
+        obs_lons = np.ma.filled(obs_lon_obj[non_nan_station_indices], np.nan)
+        obs_lats = np.ma.filled(obs_lat_obj[non_nan_station_indices], np.nan)
+
+        # drop stations without valid coordinates (some non-GHOST files have named stations with NaN longitude/latitude)
+        # non_nan_station_indices only drops stations whose reference is "nan" (padding), not named stations
+        # with NaN coordinates, so these are still in obs_lons/obs_lats and must be checked here
+        valid_coords = np.isfinite(obs_lons) & np.isfinite(obs_lats)
+        if not np.all(valid_coords):
+            self.log_file_str += "{} stations dropped as they have no valid longitude/latitude: {}\n".format(
+                np.sum(~valid_coords), ", ".join(self.station_references[~valid_coords])
+            )
+        self.station_references = self.station_references[valid_coords]
+        self.obs_lons = obs_lons[valid_coords]
+        self.obs_lats = obs_lats[valid_coords]
 
         # close the nc file
         obs_nc_root.close()

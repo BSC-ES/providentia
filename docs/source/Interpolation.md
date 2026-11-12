@@ -2,7 +2,7 @@
 
 This mode allows users to spatially interpolate model output against available observational stations, allowing it to be subsequently evaluated in **Providentia**. 
 
-Interpolation consists of spatially interpolating gridded model outputs to observational station locations using a nearest-neighbour approach.
+Interpolation consists of spatially interpolating gridded model outputs to observational station locations using a nearest-neighbour approach. Stations without a valid longitude or latitude in the observational file are skipped, and listed in the interpolation log.
 
 The Interpolation mode allows to interpolate models against **GHOST** and **non-GHOST** observations.
 
