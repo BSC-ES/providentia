@@ -167,9 +167,9 @@ The `settings/` directory contains the main configuration files that control Pro
 ├── basic_stats.yaml                 Defines the stats properties
 ├── color_palettes.yaml              Defines the possible color palettes
 ├── data_paths.yaml                  Defines dataset paths categorized by machine.              	
-├── experiment_bias_stats.yaml       Defines the experiment stats properties
+├── model_bias_stats.yaml            Defines the model stats properties
 ├── init_prov.yaml                   Stores initialization settings, including non-ghost available networks and resolutions.             
-├── interp_experiments.yaml          Specifies locations for non-interpolated experiments. 
+├── interp_models.yaml               Model names and the paths to their non-interpolated versions searched for them on HPC machines.
 ├── remove_extreme_stations.yaml     Defines criteria for filtering stations if you want to automatically remove them. 
 ├── exceedances.yaml                 Stores threshold values for exceedance statistics             	 
 ├── fairmode.yaml                    Stores configurations for the Fairmode plots.                

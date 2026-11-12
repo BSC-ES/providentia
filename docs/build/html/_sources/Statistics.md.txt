@@ -108,7 +108,7 @@ Model bias statistics are calculated between paired observational and model data
 | RMSE      | Root mean square error                                                  |
 | NRMSE     | Normalised root mean square error                                       |
 | COE       | Coefficient of efficiency                                               |
-| FAC2      | Fraction of experiment values within a factor of two of observed values |
+| FAC2      | Fraction of model values within a factor of two of observed values |
 | IOA       | Index of agreement                                                      |
 | R         | Pearson correlation coefficient                                         |
 | R2        | Coefficient of determination                                            |
