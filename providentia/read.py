@@ -196,7 +196,9 @@ class DataReader:
                 )
 
                 # get time array as integer timestamps
-                self.read_instance.timestamp_array = self.read_instance.time_array.asi8
+                # make sure time array is always in nanoseconds
+                # pandas >= 3.0.0 considers the time units to be microseconds (us) instead of nanoseconds (ns)
+                self.read_instance.timestamp_array = self.read_instance.time_array.as_unit("ns").asi8
 
                 # get N indices per yearmonth
                 self.read_instance.N_inds_per_yearmonth = np.array(
