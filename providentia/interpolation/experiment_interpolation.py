@@ -1919,19 +1919,27 @@ class ModelInterpolation(object):
             )
             create_output_logfile(1, self.log_file_str)
 
-        # compress netCDF file
+        # compress netCDF file (wait for it, as ncks replaces the file and
+        # the permissions set below would otherwise be lost)
         try:
-            subprocess.Popen(
+            ncks_result = subprocess.run(
                 ["ncks", "-O", "--dfl_lvl", "1", netCDF_fname, netCDF_fname],
                 stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
             )
-        except:
+        except FileNotFoundError:
             self.log_file_str += (
                 "NCO could not be found, please install it in your system "
             )
             self.log_file_str += (
                 "with conda install -c conda-forge nco --override-channels.\n"
             )
+        else:
+            if ncks_result.returncode != 0:
+                self.log_file_str += "File {} could not be compressed with ncks (return code {}). Error: {}\n".format(
+                    netCDF_fname, ncks_result.returncode, ncks_result.stderr.strip()
+                )
 
         # give 770 permissions for file and make owner bsc32 if machine isn't local
         if MACHINE != "local":
