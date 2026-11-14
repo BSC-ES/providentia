@@ -2334,7 +2334,7 @@ class Canvas(FigureCanvas):
 
             # update plotted map z statistic (re-generates the colourbar too)
             if not self.read_instance.block_MPL_canvas_updates:
-                self.update_map_z_statistic()
+                self.update_map()
 
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
@@ -2369,7 +2369,7 @@ class Canvas(FigureCanvas):
 
             # update plotted map z statistic (re-generates the colourbar too)
             if not self.read_instance.block_MPL_canvas_updates:
-                self.update_map_z_statistic()
+                self.update_map()
 
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
@@ -2402,7 +2402,7 @@ class Canvas(FigureCanvas):
 
             # update plotted map z statistic (re-generates the colourbar too)
             if not self.read_instance.block_MPL_canvas_updates:
-                self.update_map_z_statistic()
+                self.update_map()
 
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
@@ -2465,7 +2465,7 @@ class Canvas(FigureCanvas):
                 # colours are cartopy features and need their own refresh
                 self.refresh_map_features()
                 self.refresh_map_gridlines()
-                self.update_map_z_statistic()
+                self.update_map()
 
             self.read_instance.block_config_bar_handling_updates = False
 
@@ -2516,7 +2516,7 @@ class Canvas(FigureCanvas):
             return None
 
         if not resolved:
-            # compose the statistic exactly as update_map_z_statistic() does:
+            # compose the statistic exactly as update_map() does:
             # with a second dataset selected the map shows the bias form, which
             # needs a different colourmap to the absolute one of the same name
             zstat = get_z_statistic_comboboxes(
@@ -2644,7 +2644,7 @@ class Canvas(FigureCanvas):
                 self.refresh_map_gridlines()
             # the colourmap is reset here too, so the colourbar and the
             # points' colours need rebuilding either way
-            self.update_map_z_statistic()
+            self.update_map()
 
         self._reset_map_subpanel(
             "handle_map_panel_reset", self._apply_map_panel_defaults, redraw
@@ -2664,7 +2664,7 @@ class Canvas(FigureCanvas):
         self._reset_map_subpanel(
             "handle_map_colourbar_panel_reset",
             self._apply_map_colourbar_defaults,
-            self.update_map_z_statistic,
+            self.update_map,
         )
 
         return None
@@ -2897,7 +2897,7 @@ class Canvas(FigureCanvas):
         edits, since going back to automatic is much the most common
         thing to want after trying a manual limit. The fields are
         repopulated with the newly resolved numbers by
-        update_map_z_statistic(), so they don't stay blank.
+        update_map(), so they don't stay blank.
         """
 
         if not self.read_instance.block_config_bar_handling_updates:
@@ -2920,7 +2920,7 @@ class Canvas(FigureCanvas):
 
             # update plotted map z statistic (re-generates the colourbar too)
             if not self.read_instance.block_MPL_canvas_updates:
-                self.update_map_z_statistic()
+                self.update_map()
 
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
@@ -2938,7 +2938,7 @@ class Canvas(FigureCanvas):
         Function which handles update of the map colourbar's min/max limits
         upon editing the colourbar limit fields. Each field is kept
         populated with the actual resolved limit (see
-        update_map_z_statistic()), so editing one starts from the real
+        update_map()), so editing one starts from the real
         current number; clearing a field back to blank falls back to
         whichever limit would otherwise be resolved (the plotted data's
         range, or any per-statistic/configuration-file default) - see
@@ -2995,7 +2995,7 @@ class Canvas(FigureCanvas):
 
             # update plotted map z statistic (re-generates the colourbar too)
             if not self.read_instance.block_MPL_canvas_updates:
-                self.update_map_z_statistic()
+                self.update_map()
 
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
@@ -3761,7 +3761,7 @@ class Canvas(FigureCanvas):
 
         # redraw station data, colourbar, and any toggled options (domain
         # edges/annotations) onto the new axes
-        self.update_map_z_statistic()
+        self.update_map()
 
         # the toolbar's back/forward view history still references the
         # removed axes - reset it rather than leave it holding a dead one
@@ -5674,7 +5674,7 @@ class Canvas(FigureCanvas):
         )
 
         # get colourbar limit fields - populated with the actual resolved
-        # limits after each redraw (see update_map_z_statistic()), not a
+        # limits after each redraw (see update_map()), not a
         # generic "auto" placeholder; no override until the user edits one
         # away from that - see handle_map_cb_limits_update()
         self.map_cb_min = self.map_menu.lineedits["cb_min"]
