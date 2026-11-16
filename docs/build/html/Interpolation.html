@@ -116,7 +116,7 @@
   <section class="tex2jax_ignore mathjax_ignore" id="interpolation">
 <h1>Interpolation<a class="headerlink" href="#interpolation" title="Link to this heading"></a></h1>
 <p>This mode allows users to spatially interpolate model output against available observational stations, allowing it to be subsequently evaluated in <strong>Providentia</strong>.</p>
-<p>Interpolation consists of spatially interpolating gridded model outputs to observational station locations using a nearest-neighbour approach.</p>
+<p>Interpolation consists of spatially interpolating gridded model outputs to observational station locations using a nearest-neighbour approach. Stations without a valid longitude or latitude in the observational file are skipped, and listed in the interpolation log.</p>
 <p>The Interpolation mode allows to interpolate models against <strong>GHOST</strong> and <strong>non-GHOST</strong> observations.</p>
 <section id="getting-started">
 <h2>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h2>
