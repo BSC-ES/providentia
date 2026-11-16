@@ -1521,6 +1521,184 @@ class Plotting:
 
         return timeseries, bias_line_y, bias
 
+    def get_fairmode_statsummary_data(
+        self, networkspeci, data_labels, plot_characteristics
+    ):
+        """
+        Gets the data of the FAIRMODE statistical summary plot: the statistics of
+        every row for each data label, and the stations they were calculated for.
+        The drawing is done by make_fairmode_statsummary in PlottingPyQt.
+
+        Parameters
+        ----------
+        networkspeci : str
+            Current networkspeci (e.g. EBAS|sconco3).
+        data_labels : list
+            Data arrays to plot.
+        plot_characteristics : dict
+            Plot characteristics.
+
+        Returns
+        -------
+        cut_data_labels : list
+            Data labels that have valid data for the networkspeci.
+        statistics : dict
+            For each data label, the list with the statistics of each row (one value
+            per station, or one value for the two summary rows).
+        subplots : dict
+            Rows of the plot, as in plot_characteristics["auxiliar"]["subplots"].
+        stations : tuple
+            Station names, references, area classifications and station type
+            classifications, in the order of the statistics.
+        exc_threshold : float or None
+            Exceedance threshold, in the units of the data.
+        None is returned instead if there is no valid data in the dashboard.
+        """
+        # resample to daily for PM10 and PM2.5 if data is hourly
+        # get MDA8 for ozone if data is hourly
+        # finally filter by coverage
+        data, valid_station_idxs = get_fairmode_data(
+            self.read_instance, self.canvas_instance, networkspeci, data_labels
+        )
+
+        # skip if there is no valid data (the dashboard tells the user and clears the plot)
+        # library and report modes are already handling this in advance
+        if (self.read_instance.mode not in ["report", "library"]) and (
+            not any(valid_station_idxs)
+        ):
+            return None
+
+        observations_data = data[0, :, :]
+
+        # get settings
+        speci = networkspeci.split("|")[1]
+        u_95r_RV = fairmode_settings[speci].get("u_95r_RV")
+        RV = fairmode_settings[speci].get("RV")
+        alpha = fairmode_settings[speci].get("alpha")
+        beta = fairmode_settings[speci].get("beta")
+        exc_threshold = fairmode_settings[speci].get("exc_threshold")
+        percentile = fairmode_settings[speci].get("percentile")
+        units = fairmode_settings[speci].get("units")
+
+        # get RV and exceedance threshold per units
+        RV, exc_threshold = get_fairmode_RV_exceendance(
+            self.read_instance, speci, RV, exc_threshold, units
+        )
+
+        # get station references
+        valid_station_references = get_valid_metadata(
+            self, "station_reference", valid_station_idxs, networkspeci
+        )
+        valid_station_names = get_valid_metadata(
+            self, "station_name", valid_station_idxs, networkspeci
+        )
+        # same area/station classifications the target plot's legend shows
+        valid_area_classifications = None
+        valid_station_type_classifications = None
+        for other_type in ("area", "station"):
+            try:
+                fetched = get_valid_metadata(
+                    self,
+                    f"{other_type}_classification",
+                    valid_station_idxs,
+                    networkspeci,
+                )
+            except:
+                fetched = np.full(
+                    len(valid_station_references), np.nan, dtype=np.float32
+                )
+            if other_type == "area":
+                valid_area_classifications = fetched
+            else:
+                valid_station_type_classifications = fetched
+
+        # every row is built from arrays in this same station order -
+        # kept so the hover annotation can name a hovered station
+        stations = (
+            valid_station_names,
+            valid_station_references,
+            valid_area_classifications,
+            valid_station_type_classifications,
+        )
+
+        # get valid data labels for networkspeci
+        valid_data_labels = self.canvas_instance.selected_station_data_labels[
+            networkspeci
+        ]
+
+        # cut data_labels for those in valid data labels
+        cut_data_labels = [
+            data_label for data_label in data_labels if data_label in valid_data_labels
+        ]
+
+        # get subplots dictionary
+        subplots = dict(plot_characteristics["auxiliar"]["subplots"])
+
+        # get the variable that tells you if there are exceedances in this species
+        has_exceedances = exc_threshold is not None
+
+        # if there is no threshold don't create the exceedances row
+        if not has_exceedances:
+            subplots.pop("observed exceedances", None)
+
+        # iterate through data labels
+        statistics = {}
+        for data_label in cut_data_labels:
+            # get model data
+            model_data = data[valid_data_labels.index(data_label), :, :]
+
+            # calculate MQI for the current station
+            exceedances = []
+            means = []
+            t_biases = []
+            t_R_list = []
+            t_sd_list = []
+            h_perc_list = []
+
+            for station_idx, station in enumerate(valid_station_references):
+                st_observations_data = observations_data[station_idx, :]
+                st_model_data = model_data[station_idx, :]
+
+                mean, exc, t_bias, t_R, t_sd, h_perc = ModBias.calculate_fairmode_stats(
+                    st_observations_data,
+                    st_model_data,
+                    u_95r_RV,
+                    RV,
+                    alpha,
+                    beta,
+                    exc_threshold,
+                    percentile,
+                    "summary",
+                )
+
+                means.append(mean)
+                exceedances.append(exc)
+                t_biases.append(t_bias)
+                t_R_list.append(t_R)
+                t_sd_list.append(t_sd)
+                h_perc_list.append(h_perc)
+
+            # plot data
+            # join all statistics in one list
+            statistics_list = [
+                np.array(means),
+                np.array(exceedances),
+                np.array(t_biases),
+                np.array(t_R_list),
+                np.array(t_sd_list),
+                np.array(h_perc_list),
+                np.nanmean(t_sd_list),
+                np.nanmean(t_R_list),
+            ]
+
+            # if there is no threshold don't create the exceedances row
+            if not has_exceedances:
+                statistics_list.pop(1)
+
+            statistics[data_label] = statistics_list
+
+        return cut_data_labels, statistics, subplots, stations, exc_threshold
+
     def make_periodic(
         self,
         relevant_axis,
