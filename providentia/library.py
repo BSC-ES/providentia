@@ -1036,23 +1036,30 @@ class Providentia:
         if (not map_extent) and (self.map_extent):
             map_extent = copy.deepcopy(self.map_extent)
 
+        # get plotting function, stopping if the backend cannot draw this plot
+        if base_plot_type == "statsummary":
+            func_name = "make_table"
+        elif base_plot_type in ["fairmode-target", "fairmode-statsummary"]:
+            func_name = "make_{}".format(base_plot_type.replace("-", "_"))
+        elif base_plot_type != "legend":
+            func_name = "make_{}".format(base_plot_type.split("-")[0])
+        
+        # check if function exists for selected backend
+        if base_plot_type != "legend":
+            func = getattr(self.plotting, func_name, None)
+            if func is None:
+                self.logger.error(
+                    "Plot type {} is not available with the {} backend".format(
+                        plot_type, self.backend
+                    )
+                )
+                return
+
         # create figure, and axes if the backend has them (main_gs is the matplotlib grid
         # that has the plot in its first row and room for the legend in the second)
         fig, relevant_ax, main_gs = self.plotting.create_figure(
             plot_type, base_plot_type, networkspeci, width, height, legend
         )
-
-        # get plotting function
-        if base_plot_type == "statsummary":
-            func = getattr(self.plotting, "make_table")
-        elif base_plot_type in ["fairmode-target", "fairmode-statsummary"]:
-            func = getattr(
-                self.plotting, "make_{}".format(base_plot_type.replace("-", "_"))
-            )
-        elif base_plot_type != "legend":
-            func = getattr(
-                self.plotting, "make_{}".format(base_plot_type.split("-")[0])
-            )
 
         # set boolean on whether to plot obs in legend or not, and relevant data labels (data labels plotted)
         if (
