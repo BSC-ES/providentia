@@ -209,7 +209,7 @@ def expand_plot_characteristics(plot_characteristics, mode):
         Plot characteristics dictionary
     """
 
-    keys_to_remove = ["dashboard", "report", "library", "tests"]
+    keys_to_remove = ["dashboard", "report", "library", "website", "tests"]
     for plot_type in plot_characteristics:
         # get all keys
         plot_type_characteristics = plot_characteristics[plot_type]

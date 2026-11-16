@@ -7,11 +7,9 @@ import random
 import sys
 
 import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
-import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
 import pandas as pd
-import plotly.graph_objects as go
+import cartopy.crs as ccrs
 import yaml
 import warnings
 
@@ -30,15 +28,9 @@ from .fields_menus import (
     coverage_conf,
 )
 from .filter import DataFilter
-from .plotting import Plotting
-from .plot_aux import get_taylor_diagram_ghelper, download_plot_data_to_csv
-from .plot_formatting import (
-    format_plot_options,
-    format_axis,
-    set_axis_label,
-    set_axis_title,
-    harmonise_xy_lims_paradigm,
-)
+from .plotting_dash import PlottingDash
+from .plotting_pyqt import PlottingPyQt
+from .plot_aux import download_plot_data_to_csv
 from .read import DataReader
 from .read_aux import (
     generate_file_trees,
@@ -83,7 +75,7 @@ except NameError:
 class Providentia:
     """Class for Providentia Library mode"""
 
-    def __init__(self, config="", **kwargs):
+    def __init__(self, config="", backend="matplotlib", **kwargs):
         """
         Initialize the library mode environment
 
@@ -92,6 +84,8 @@ class Providentia:
         config : str, optional
             Path to the configuration file. If not given, the configuration is
             taken from the passed arguments and the defaults.
+        backend : str, optional
+            Library that draws the plots, 'matplotlib' (default) or 'plotly'.
         **kwargs : dict
             Optional command-line arguments that override default configuration values.
         """
@@ -132,7 +126,10 @@ class Providentia:
         self.datareader = DataReader(self)
 
         # check for self defined plot characteristics file
-        if self.tests:
+        # the plot characteristics of plotly figures are those of the website
+        if backend == "plotly":
+            mode = "website"
+        elif self.tests:
             mode = "tests"
         else:
             mode = "library"
@@ -145,8 +142,17 @@ class Providentia:
             plot_characteristics, mode
         )
 
-        # initialise Plotting class
-        self.plotting = Plotting(read_instance=self, canvas_instance=self)
+        # initialise Plotting class of the backend (PlottingPyQt draws with matplotlib,
+        # PlottingDash with plotly)
+        self.backend = backend
+        if self.backend == "matplotlib":
+            self.plotting = PlottingPyQt(read_instance=self, canvas_instance=self)
+        elif self.backend == "plotly":
+            self.plotting = PlottingDash(read_instance=self, canvas_instance=self)
+        else:
+            self.logger.error(f"Backend {self.backend} is not available")
+            self.valid_config = False
+            return
 
         # add general plot characteristics to self
         for k, val in self.plot_characteristics_templates["general"].items():
@@ -519,7 +525,7 @@ class Providentia:
         save_data=False,
         save_data_path="saved_data",
         tests_generate_output=False,
-        backend="matplotlib"
+        projection=None,
     ):
         """
         Wrapper method to make a Providentia plot.
@@ -594,6 +600,9 @@ class Providentia:
             Path to save data, defaults to folder saved_data
         tests_generate_output : bool, optional
             Indicates if tests need to regenerate CSV files with plot data
+        projection : str, optional
+            Projection of the map (name of a cartopy.crs projection, e.g. Mollweide), defaults
+            to None, which keeps the current one. It is kept for the maps made afterwards.
 
         Returns
         -------
@@ -1013,85 +1022,26 @@ class Providentia:
         ):
             self.plot_characteristics[plot_type]["smooth"]["window"] = smooth_window
 
+        # set the projection of maps if passed, which is kept for the maps made afterwards
+        if (projection is not None) and (base_plot_type == "map"):
+            if not hasattr(ccrs, str(projection)):
+                self.logger.error(
+                    "Projection {} is not available in cartopy.crs".format(projection)
+                )
+                return
+            self.plot_characteristics_templates["map"]["projection"] = projection
+            self.plotcrs = getattr(ccrs, projection)()
+
         # if map extent passed not passed as argument, set it as value from .conf in memory
         if (not map_extent) and (self.map_extent):
             map_extent = copy.deepcopy(self.map_extent)
 
-        # create figure
-        if backend == "matplotlib":
-            if (width is not None) and (height is not None):
-                fig = plt.figure(figsize=(width, height))
-            else:
-                msg = "Width and/or height have not been passed. The default values will be set."
-                show_message(self, msg)
-                fig = plt.figure(figsize=self.plot_characteristics[plot_type]["figsize"])
+        # create figure, and axes if the backend has them (main_gs is the matplotlib grid
+        # that has the plot in its first row and room for the legend in the second)
+        fig, relevant_ax, main_gs = self.plotting.create_figure(
+            plot_type, base_plot_type, networkspeci, width, height, legend
+        )
 
-            # create axes
-            main_gs = gridspec.GridSpec(
-                2, 1, **self.plot_characteristics[plot_type]["main_gs"]
-            )
-            if base_plot_type == "map":
-                ax = fig.add_subplot(main_gs[0], projection=self.plotcrs)
-            elif base_plot_type == "taylor":
-                reference_stddev = 7.5
-                ghelper = get_taylor_diagram_ghelper(
-                    reference_stddev, self.plot_characteristics[plot_type]
-                )
-                ax = fig.add_subplot(
-                    main_gs[0], axes_class=fa.FloatingAxes, grid_helper=ghelper
-                )
-            elif base_plot_type == "fairmode-statsummary":
-                # get current species
-                speci = networkspeci.split("|")[1]
-
-                # get number of rows and columns
-                ncols = 4
-                nrows = 8 if speci in ["sconco3", "sconcno2", "pm10"] else 7
-
-                # create gridspec and add it to a list
-                gs = gridspec.GridSpecFromSubplotSpec(
-                    nrows,
-                    ncols,
-                    subplot_spec=main_gs[0],
-                    **self.plot_characteristics["fairmode-statsummary"]["gridspec_kw"],
-                )
-                ax = [fig.add_subplot(gs[i, j]) for i in range(nrows) for j in range(ncols)]
-            else:
-                ax = fig.add_subplot(main_gs[0])
-
-            if base_plot_type in ["periodic", "periodic-violin"]:
-                gs = gridspec.GridSpecFromSubplotSpec(
-                    100, 100, subplot_spec=ax.get_subplotspec()
-                )
-                grid_dict = dict()
-                grid_dict["hour"] = fig.add_subplot(gs[:46, :])
-                grid_dict["dayofweek"] = fig.add_subplot(gs[54:, 64:])
-                grid_dict["month"] = fig.add_subplot(gs[54:, :62])
-                ax.spines["top"].set_color("none")
-                ax.spines["bottom"].set_color("none")
-                ax.spines["left"].set_color("none")
-                ax.spines["right"].set_color("none")
-                ax.tick_params(
-                    labelcolor="w", top=False, bottom=False, left=False, right=False
-                )
-                relevant_ax = grid_dict
-            else:
-                relevant_ax = ax
-
-            # adjust margings and subplot spacing if defined
-            if "subplots_adjust" in self.plot_characteristics[plot_type]:
-                fig.subplots_adjust(
-                    **self.plot_characteristics[plot_type]["subplots_adjust"]
-                )
-        elif backend == "plotly":
-            fig = go.Figure()
-            relevant_ax = None
-        else:
-            self.logger.error(
-                f"Backend {backend} is not available"
-            )
-            return
-        
         # get plotting function
         if base_plot_type == "statsummary":
             func = getattr(self.plotting, "make_table")
@@ -1172,7 +1122,8 @@ class Providentia:
                 )
 
             func(
-                relevant_ax,
+                # PlottingDash draws on the plotly figure, PlottingPyQt on the matplotlib axis
+                fig if self.backend == "plotly" else relevant_ax,
                 networkspeci,
                 self.plot_characteristics[plot_type],
                 plot_options,
@@ -1188,7 +1139,7 @@ class Providentia:
         # periodic plot
         elif base_plot_type == "periodic":
             func(
-                grid_dict,
+                relevant_ax,
                 networkspeci,
                 data_labels,
                 self.plot_characteristics[plot_type],
@@ -1396,14 +1347,14 @@ class Providentia:
         # make timeseries plot
         elif base_plot_type == "timeseries":
             func(
-                relevant_ax,
+                # PlottingDash draws on the plotly figure, PlottingPyQt on the matplotlib axis
+                fig if self.backend == "plotly" else relevant_ax,
                 networkspeci,
                 data_labels,
                 self.plot_characteristics[plot_type],
                 plot_options,
                 chunk_stat=chunk_stat,
                 chunk_resolution=chunk_resolution,
-                fig=fig
             )
 
         # make taylor diagram plot
@@ -1624,111 +1575,34 @@ class Providentia:
                         speci = networkspeci.split("|")[1]
                         title += "\n{}".format(fairmode_settings[speci]["title"])
 
-        # overwrite passed xlabels and ylabels
-        # plotly figures have no matplotlib axes, so the title is set on the figure layout
-        if title:
-            if backend == "plotly":
-                fig.update_layout(title_text=title.replace("\n", "<br>"))
-            else:
-                set_axis_title(
-                    self, relevant_ax, title, self.plot_characteristics[plot_type]
-                )
+        # keep gridded models in the legend only on a map drawn over their grid
+        if (base_plot_type == "map") and (grid_data is not None):
+            legend_data_labels = data_labels
 
-        # the formatting below only works on matplotlib axes, it is skipped for plotly
-        if backend == "matplotlib":
-            if xlabel:
-                set_axis_label(
-                    relevant_ax, "x", xlabel, self.plot_characteristics[plot_type]
-                )
-            if ylabel:
-                set_axis_label(
-                    relevant_ax, "y", ylabel, self.plot_characteristics[plot_type]
-                )
-
-            # format plot axis/axes
-            format_axis(
-                self,
-                self,
-                relevant_ax,
-                base_plot_type,
-                self.plot_characteristics[plot_type],
-                map_extent=map_extent,
-            )
-
-            # format plot options
-            format_plot_options(
-                self,
-                self,
-                relevant_ax,
-                [relevant_data_labels],
-                networkspeci,
-                base_plot_type,
-                plot_type,
-                plot_options,
-                map_extent=map_extent,
-                chunk_stat=chunk_stat,
-                chunk_resolution=chunk_resolution,
-            )
-
-            # handle harmonisation of axes
-            if base_plot_type == "scatter":
-                harmonise_xy_lims_paradigm(
-                    self,
-                    self,
-                    relevant_ax,
-                    base_plot_type,
-                    self.plot_characteristics[plot_type],
-                    plot_options,
-                    relim=True,
-                )
-            elif base_plot_type not in [
-                "legend",
-                "metadata",
-                "map",
-                "taylor",
-                "fairmode-statsummary",
-            ]:
-                harmonise_xy_lims_paradigm(
-                    self,
-                    self,
-                    relevant_ax,
-                    base_plot_type,
-                    self.plot_characteristics[plot_type],
-                    plot_options,
-                    relim=True,
-                    autoscale=True,
-                )
-
-            # make legend (embedded on plot axis)
-            if (legend) & (base_plot_type != "legend"):
-                if "legend" in self.plot_characteristics[plot_type]:
-                    # only make map legend in 'domain' plot option is a active
-                    # also remove observations from legend
-                    valid_legend = True
-                    if base_plot_type == "map":
-                        if "domain" in plot_options:
-                            set_obs_legend = False
-                        else:
-                            valid_legend = False
-
-                    if valid_legend:
-                        # keep gridded models only on a map drawn over their grid
-                        if (base_plot_type == "map") and (grid_data is not None):
-                            legend_data_labels = data_labels
-                        legend_handles = self.legend(
-                            plot_type, data_labels=legend_data_labels, set_obs=set_obs_legend,
-                            map_grid_data_label=labela if base_plot_type == "map" else None,
-                        )
-                        legend_ax = fig.add_subplot(main_gs[1])
-                        legend_ax.axis("off")
-                        legend_ax.legend(**legend_handles)
-
-            # make colourbar (embedded on plot axis)
-            if "cb" in self.plot_characteristics[plot_type]:
-                cb_ax = self.colourbar(fig, relevant_ax, zstat, speci, plot_type)
-                # hide colourbar if requested, we still need to create it to get the correct cmap / bounds in the maps
-                if not cb:
-                    cb_ax.set_visible(False)
+        # set title and, where the backend has axes, format them and add legend and colourbar
+        self.plotting.format_figure(
+            fig,
+            relevant_ax,
+            main_gs,
+            plot_type,
+            base_plot_type,
+            networkspeci,
+            plot_options,
+            title=title,
+            xlabel=xlabel,
+            ylabel=ylabel,
+            relevant_data_labels=relevant_data_labels,
+            legend_data_labels=legend_data_labels,
+            legend=legend,
+            set_obs_legend=set_obs_legend,
+            cb=cb,
+            zstat=zstat,
+            speci=speci,
+            labela=labela,
+            map_extent=map_extent,
+            chunk_stat=chunk_stat,
+            chunk_resolution=chunk_resolution,
+        )
 
         # download data to CSV file
         if save_data:

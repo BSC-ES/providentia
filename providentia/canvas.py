@@ -55,7 +55,7 @@ from .dashboard_interactivity import (
 )
 from .fields_menus import update_metadata_fields
 from .filter import DataFilter
-from .plotting import Plotting
+from .plotting_pyqt import PlottingPyQt
 from .plot_aux import (
     get_map_extent,
     get_map_marker_size,
@@ -220,7 +220,7 @@ class Canvas(FigureCanvas):
         self.map_grid_title = ""
 
         # initialise Plotting class
-        self.plotting = Plotting(read_instance=self.read_instance, canvas_instance=self)
+        self.plotting = PlottingPyQt(read_instance=self.read_instance, canvas_instance=self)
 
         # setup gridding of canvas
         self.gridspec = gridspec.GridSpec(self.gridspec_nrows, self.gridspec_ncols)

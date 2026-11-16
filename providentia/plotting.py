@@ -10,7 +10,6 @@ import cartopy
 import cartopy.crs as ccrs
 import matplotlib
 from matplotlib.backends.backend_pdf import PdfPages
-from matplotlib.colors import to_hex
 import matplotlib.lines as mlines
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch, Polygon
@@ -21,7 +20,6 @@ import numpy as np
 from packaging.version import Version
 import pandas as pd
 from PIL import Image
-import plotly.graph_objects as go
 import pyproj
 import seaborn as sns
 import yaml
@@ -71,6 +69,7 @@ from .plot_aux import (
 )
 from . import plot_formatting
 from .plot_formatting import set_axis_title
+
 from .warnings_prv import show_message
 
 # speed up transformations in cartopy
@@ -1335,35 +1334,16 @@ class Plotting:
                 bias=False,
             )
 
-    def make_map(
-        self,
-        relevant_axis,
-        networkspeci,
-        plot_characteristics,
-        plot_options,
-        zstat=None,
-        labela="",
-        labelb="",
-        var=None, 
-        lat=None, 
-        lon=None,
-        date_range=None,
-        map_extent=None,
-    ):
+    def get_map_data(self, networkspeci, zstat, labela="", labelb="", date_range=None):
         """
-        Renders a geospatial scatter plot of stations onto a map axis, coloured by a calculated statistical metric.
+        Gets the station data of the map: the statistic per station and the stations it is for.
+        The drawing is done by make_map in each plotting class (PlottingPyQt, PlottingDash).
 
         Parameters
         ----------
-        relevant_axis : object
-            Axis to plot on.
         networkspeci : str
             Current networkspeci (e.g. EBAS|sconco3).
-        plot_characteristics : dict
-            Plot characteristics.
-        plot_options : list
-            Options to configure plot.
-        zstat : str, optional
+        zstat : str
             Statistic to plot.
         labela : str, optional
             Label of first dataset.
@@ -1372,13 +1352,17 @@ class Plotting:
         date_range : tuple, optional
             Start and end (inclusive) datetimes of period used for station statistics,
             by default None (all loaded period).
-        map_extent : array-like, shape (4,), optional
-            Extent the map will be shown at, used to size the markers against
-            the stations that will actually be on show.
+
+        Returns
+        -------
+        z_statistic : np.ndarray or None
+            Statistic per station, None if only gridded data is plotted.
+        active_map_valid_station_inds : np.ndarray or None
+            Indices of the stations of z_statistic, None if only gridded data is plotted.
         """
 
         # a gridded forecast label has no station data, so its map shows the observations
-        # (if loaded) over the grid of its lead day (passed in var)
+        # (if loaded) over the grid of its lead day
         raw_per_data_label = dict(
             zip(self.read_instance.data_labels, self.read_instance.data_labels_raw)
         )
@@ -1388,131 +1372,39 @@ class Plotting:
             else:
                 labela = ""
 
-        # if not only model gridded data is loaded
-        if labela or labelb:
-            # calculate statistic
-            z_statistic, active_map_valid_station_inds = calculate_statistic(
-                self.read_instance,
-                self.canvas_instance,
-                networkspeci,
-                zstat,
-                [labela],
-                [labelb],
-                map=True,
-                date_range=date_range,
-            )
-            
-            # get marker size (for report and library). The size is restored
-            # afterwards, as plot_characteristics is shared between every map a
-            # report draws - left in place, the first map's size would be reused
-            # for all the rest, whatever their own station count and extent
-            original_markersize = plot_characteristics["plot"]["stations"]["s"]
-            if self.read_instance.mode in ["report", "library"]:
-                self.get_markersize(
-                    relevant_axis,
-                    "map",
-                    networkspeci,
-                    plot_characteristics,
-                    active_map_valid_station_inds=active_map_valid_station_inds,
-                    map_extent=map_extent,
-            )
-            # if using dashboard make z_statistic and active_map_valid_station_inds class variables
-            else:
-                self.canvas_instance.z_statistic = z_statistic
-                self.canvas_instance.active_map_valid_station_inds = (
-                    active_map_valid_station_inds
-                )
-        
-        # plot model gridded data
-        plot_grid = var is not None and lon is not None and lat is not None
-        if plot_grid:
-            grid_mesh = relevant_axis.pcolormesh(
-                lon,
-                lat,
-                var,
-                transform=self.canvas_instance.datacrs,
-                **plot_characteristics["plot"]["grid"],
-            )
-            
-            # save grid edges of gridded model (first gridded model is the one read),
-            # from mesh cell corners (bottom, right, top, left edges), to plot model domain
-            gridded_label = next(
-                label
-                for label, label_raw in zip(
-                    self.read_instance.data_labels, self.read_instance.data_labels_raw
-                )
-                if label_raw.endswith("::gridded")
-            )
-            corners = grid_mesh.get_coordinates()
-            grid_edges = np.concatenate(
-                (
-                    corners[0, :],
-                    corners[1:, -1],
-                    corners[-1, -2::-1],
-                    corners[-2:0:-1, 0],
-                )
-            )
-            self.read_instance.plotting_params[gridded_label]["grid_edge_longitude"] = grid_edges[:, 0]
-            self.read_instance.plotting_params[gridded_label]["grid_edge_latitude"] = grid_edges[:, 1]
+        # if only model gridded data is loaded, there is no station data
+        if not (labela or labelb):
+            return None, None
 
-            # allow axis margins around the grid (pcolormesh sticks limits to the grid edges)
-            grid_mesh.sticky_edges.x[:] = []
-            grid_mesh.sticky_edges.y[:] = []
-            relevant_axis.autoscale_view()
+        # calculate statistic
+        z_statistic, active_map_valid_station_inds = calculate_statistic(
+            self.read_instance,
+            self.canvas_instance,
+            networkspeci,
+            zstat,
+            [labela],
+            [labelb],
+            map=True,
+            date_range=date_range,
+        )
 
-        # if not only model gridded data is loaded
-        if labela or labelb:
-            # the stations_over_grid style (an edge, by default) only serves to separate
-            # the stations from the gridded field underneath, so apply it only then.
-            # copied, as plot_characteristics is shared between every map a report draws
-            stations_kwargs = copy.deepcopy(plot_characteristics["plot"]["stations"])
-            if plot_grid:
-                stations_kwargs.update(
-                    plot_characteristics["plot"].get("stations_over_grid", {})
-                )
+        return z_statistic, active_map_valid_station_inds
 
-            # plot new station points on map - coloured by currently active z statisitic
-            self.stations_scatter = relevant_axis.scatter(
-                self.read_instance.station_longitudes[networkspeci][
-                    active_map_valid_station_inds
-                ],
-                self.read_instance.station_latitudes[networkspeci][
-                    active_map_valid_station_inds
-                ],
-                c=z_statistic,
-                transform=self.canvas_instance.datacrs,
-                **stations_kwargs,
-            )
-            plot_characteristics["plot"]["stations"]["s"] = original_markersize
-
-            # track plot elements
-            if self.read_instance.mode not in ["report"]:
-                self.track_plot_elements(
-                    self.read_instance.observations_data_label,
-                    "map",
-                    "plot",
-                    [self.stations_scatter],
-                    bias=False,
-                )
-
-    def make_timeseries(
+    def get_timeseries_data(
         self,
-        relevant_axis,
         networkspeci,
         data_labels,
         plot_characteristics,
         plot_options,
         chunk_stat=None,
         chunk_resolution=None,
-        fig=None
     ):
         """
-        Renders temporal data as a line plot, optionally applying statistical chunking or bias calculations.
+        Gets the data of the timeseries plot, optionally applying statistical chunking or bias calculations.
+        The drawing is done by make_timeseries in each plotting class (PlottingPyQt, PlottingDash).
 
         Parameters
         ----------
-        relevant_axis : object
-            Axis to plot on.
         networkspeci : str
             Current networkspeci (e.g. EBAS|sconco3).
         data_labels : list
@@ -1525,17 +1417,23 @@ class Plotting:
             Chunk statistic.
         chunk_resolution : str, optional
             Chunk resolution.
-        """
 
-        # create list for timeseries plot
-        self.timeseries_plot = []
+        Returns
+        -------
+        timeseries : dict
+            Timeseries to plot (pandas Series) per data label, empty if there is nothing to plot.
+        bias_line_y : float, list or None
+            Position of the bias line in the y axis, None if there is no bias line.
+        bias : bool
+            Indicates if the timeseries are biases.
+        """
 
         # skip making timeseries (points) for report and library mode
         # we do not apply this in the dashboard to avoid being unable to see the points on certain changes
         if (self.read_instance.mode in ["report", "library"]) and (
             "hidedata" in plot_options
         ):
-            return
+            return {}, None, False
 
         # if 'obs' in plot_options, set data labels to just observations data label
         if "obs" in plot_options:
@@ -1590,23 +1488,16 @@ class Plotting:
                 "timeseries"
             ]
 
-        # plot horizontal line across x axis at 0 if bias plot
+        # get position of horizontal line across x axis if bias plot
+        bias_line_y = None
         if add_bias_line:
             if "bias" not in plot_options:
-                mb = self.read_instance.modbias_stats[chunk_stat]["minimum_bias"]
+                bias_line_y = self.read_instance.modbias_stats[chunk_stat]["minimum_bias"]
             else:
-                mb = plot_characteristics["bias_line"]["y"]
-            bias_line_chars = {
-                k: v for k, v in plot_characteristics["bias_line"].items() if k != "y"
-            }
-            bias_line = relevant_axis.axhline(y=mb, **bias_line_chars)
-            # track plot elements
-            if self.read_instance.mode not in ["report"]:
-                self.track_plot_elements(
-                    "ALL", "timeseries", "bias_line", [bias_line], bias=bias
-                )
+                bias_line_y = plot_characteristics["bias_line"]["y"]
 
         # iterate through data labels
+        timeseries = {}
         for data_label in cut_data_labels:
             # bias plot?
             if bias:
@@ -1626,61 +1517,9 @@ class Plotting:
             else:
                 ts = timeseries_data[data_label]
 
-            # get marker size (for report and library)
-            if self.read_instance.mode in ["report", "library"]:
-                self.get_markersize(
-                    relevant_axis,
-                    "timeseries",
-                    networkspeci,
-                    plot_characteristics,
-                    data=ts,
-                )
+            timeseries[data_label] = ts
 
-            # make timeseries plot
-            # library passes its figure for both backends, only plotly figures are filled here
-            if isinstance(fig, go.Figure):
-                # drop missing values, otherwise plotly fits the time axis to the whole period
-                # (matplotlib skips them when autoscaling)
-                ts_valid = ts.dropna()
-                fig.add_trace(
-                    go.Scatter(
-                        x=ts_valid.index,
-                        y=ts_valid.values,
-                        # markers only, as in Providentia timeseries
-                        mode="markers",
-                        name=data_label,
-                        # model colours are RGB tuples (0-1), which plotly does not accept
-                        marker_color=to_hex(self.read_instance.plotting_params[data_label]["colour"]),
-                    )
-                )
-            else:
-                self.timeseries_plot.append(
-                    relevant_axis.plot(
-                        ts,
-                        color=self.read_instance.plotting_params[data_label]["colour"],
-                        **plot_characteristics["plot"],
-                    )
-                )
-
-            # update maximum smooth value
-            if self.read_instance.mode not in ["report", "library"]:
-                self.canvas_instance.timeseries_smooth_window_sl.setMaximum(len(ts))
-                # the window is shown as the time it spans, which changes with
-                # the resolution drawn at whether or not its step count does
-                self.canvas_instance.timeseries_smooth_window_sl.refresh_readout()
-                # To get straight line
-                # if self.canvas_instance.timeseries_smooth_window_sl.value() != (len(ts)*2 - 1):
-                #     self.canvas_instance.timeseries_smooth_window_sl.setMaximum(int(len(ts)*2 - 1))
-
-            # track plot elements
-            if self.read_instance.mode not in ["report"] and (not isinstance(fig, go.Figure)):
-                self.track_plot_elements(
-                    data_label,
-                    "timeseries",
-                    "plot",
-                    self.timeseries_plot[-1],
-                    bias=bias,
-                )
+        return timeseries, bias_line_y, bias
 
     def make_periodic(
         self,

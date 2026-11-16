@@ -59,6 +59,13 @@ provi = prv.Providentia(network='EBAS', species='sconco3', start_date='20180101'
 
 Fields that are not passed take the same defaults as the dashboard when it is launched without a configuration file (network `GHOST`, species `sconco3`, resolution `hourly`, from `20180101` to `20190101`). Without a configuration file there are no sections or subsections.
 
+By default the plots are drawn with matplotlib. To get plotly figures instead, pass `backend='plotly'` when creating the object, which then applies to every plot it makes:
+```
+provi = prv.Providentia('interactive_template.conf', backend='plotly')
+```
+
+At the moment only the timeseries and the map can be drawn with plotly.
+
 The configuration will become part of the object, therefere you can call the modes as explained below. You can pass any arguments you wish when calling each function to override what is set in the loaded configuration file. 
 
 When using Providentia inside a Python script, instead of through the terminal or in a Jupyter notebook, we need to call its functions with the main guard:
@@ -448,6 +455,14 @@ map_extent = [lonmin, lonmax, latmin, latmax]
 ```
 
 where `lonmin`, `lonmax`, `latmin`, and `latmax` are the rectangular bounds of the map extent, e.g.: `map_extent = [-180, 180, -90, 90]`
+
+The projection of the map is the one set in `settings/plot_characteristics.yaml` (see [Plot customisation](Plot-customisation.md)). It can be changed by passing the argument:
+
+```
+projection = 'Mollweide'
+```
+
+with the name of any of the projections listed there. The projection is kept for the maps made afterwards, until another one is passed.
 
 The available plot options are: `annotate` and `domain`.
  

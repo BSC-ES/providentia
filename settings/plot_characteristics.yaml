@@ -536,6 +536,32 @@
             "hspace": 0.1
           }
         },
+      "website":
+        {
+          "plot_options": ["annotate", "domain"],
+          "cb":
+            {
+              "vmin_absolute": "",
+              "vmax_absolute": "",
+              "vmin_bias": "",
+              "vmax_bias": "",
+              "n_ticks": 8,
+              "orientation": "horizontal",
+              "discrete": true,
+              "n_discrete": 15,
+            },
+          "plot":
+            {
+              "stations_over_grid": { "edgecolor": "black", "linewidth": 0.4 },
+              "grid": { "zorder": 2, "alpha": null },
+            },
+          "raster_shape": [500, 800],
+          "marker_size": 7,
+          "land_tolerance": 1000,
+          "colourbar_height": 52,
+          "axis_title": { "fontsize": 12 },
+          "margin": { "l": 5, "r": 5, "t": 30 },
+        },
       "tests":
         {
           "plot_options": ["annotate", "domain"],
@@ -741,6 +767,13 @@
             "height_ratios": [5, 1], 
             "hspace": 0.25
           }
+        },
+      "website":
+        {
+          "plot_options":
+            ["annotate", "bias", "hidedata", "logy", "smooth", "threshold"],
+          "axis_title": { "fontsize": 12 },
+          "margin": { "l": 45, "r": 10, "b": 35, "t": 30 },
         },
       "tests":
         {
