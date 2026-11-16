@@ -1055,17 +1055,19 @@ def get_valid_obs_files_in_date_range(instance, start_date, end_date):
     instance.available_observation_data = {}
 
     # check if start/end date are valid values, if not, return with no valid obs. files
+    # (the dashboard explains these cases in the tooltip of the read button instead of printing them)
+    dashboard_active = instance.mode == "dashboard"
     if (not valid_date(start_date)) or (not valid_date(end_date)):
         msg = (
             f"One of start date ({start_date}) or end date ({end_date}) are not valid."
         )
-        show_message(instance, msg, print=True)
+        show_message(instance, msg, print=True, deactivate=dashboard_active)
         return
 
     # check end date is > start date, if not, return with no valid obs. files
     if int(start_date) >= int(end_date):
         msg = f"Start date ({start_date}) exceeds end date ({end_date})."
-        show_message(instance, msg, print=True)
+        show_message(instance, msg, print=True, deactivate=dashboard_active)
         return
 
     # check start date and end date are both within if valid date range (19000101 - 20500101),
@@ -1079,7 +1081,7 @@ def get_valid_obs_files_in_date_range(instance, start_date, end_date):
         msg = (
             f"One of start date ({start_date}) or end date ({end_date}) are not valid."
         )
-        show_message(instance, msg, print=True)
+        show_message(instance, msg, print=True, deactivate=dashboard_active)
         return
 
     # get start date on first of month

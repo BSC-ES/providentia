@@ -1205,6 +1205,7 @@ class Dashboard(QtWidgets.QWidget):
             else:
                 show_message(self, msg)
                 self.no_data_to_read = True
+                self.bu_read.setToolTip(msg)
                 self.disable_element(self.bu_read, "button")
                 self.block_config_bar_handling_updates = False
                 self.block_MPL_canvas_updates = False
@@ -1272,6 +1273,7 @@ class Dashboard(QtWidgets.QWidget):
             else:
                 show_message(self, msg)
                 self.no_data_to_read = True
+                self.bu_read.setToolTip(msg)
                 self.disable_element(self.bu_read, "button")
                 self.block_config_bar_handling_updates = False
                 self.block_MPL_canvas_updates = False
@@ -1510,15 +1512,49 @@ class Dashboard(QtWidgets.QWidget):
             has_data = len(self.available_observation_data) > 0
         if not has_data:
             self.no_data_to_read = True
-            msg = (f"No observational data available "
-                   f"between {self.le_start_date.text()} and {self.le_end_date.text()}. "
-                   "Please select a different GHOST version or change the date range.")
+            start_date = self.le_start_date.text()
+            end_date = self.le_end_date.text()
             # do not show message while dates are being edited (incomplete dates)
             dates_complete = all(
                 QtCore.QDate.fromString(line_edit.text(), "yyyyMMdd").isValid()
                 for line_edit in [self.le_start_date, self.le_end_date]
             )
-            show_message(self, msg, deactivate=self.date_range_has_changed and not dates_complete)
+            reversed_range = (
+                not self.ghost_version_has_changed
+                and dates_complete
+                and int(start_date) >= int(end_date)
+            )
+            if self.ghost_version_has_changed:
+                msg = (f"No observational data available for GHOST version {self.selected_ghost_version} "
+                       f"between {start_date} and {end_date}. Please select a different GHOST version.")
+            elif reversed_range:
+                msg = (f"Start date {start_date} must be before end date {end_date}. "
+                       "Please change the start date or the end date.")
+            elif not dates_complete:
+                invalid_dates = [
+                    f"{date_name} ('{line_edit.text()}')"
+                    for date_name, line_edit in [
+                        ("start date", self.le_start_date),
+                        ("end date", self.le_end_date),
+                    ]
+                    if not QtCore.QDate.fromString(line_edit.text(), "yyyyMMdd").isValid()
+                ]
+                msg = f"Invalid {' and '.join(invalid_dates)}. Dates must be given as YYYY-MM-DD."
+            else:
+                msg = (f"No observational data available between {start_date} and {end_date}. "
+                       "Please change the date range.")
+            # a reversed range is usually a step while editing the dates, so it is only shown when hovering READ
+            show_message(
+                self, msg,
+                deactivate=reversed_range or (self.date_range_has_changed and not dates_complete)
+            )
+            self.bu_read.setToolTip(msg)
+            
+            # after a date change, empty the lists that depend on the data (selected values stay in memory)
+            if not self.ghost_version_has_changed:
+                self.cb_network.clear()
+                self.cb_resolution.clear()
+            
             self.disable_element(self.bu_read, "button")
             self.block_config_bar_handling_updates = False
             self.block_MPL_canvas_updates = False
@@ -1619,6 +1655,7 @@ class Dashboard(QtWidgets.QWidget):
         # if no network is selected (after a date change), the user has to select one before reading
         if not self.selected_network:
             self.no_data_to_read = True
+            self.bu_read.setToolTip("Select a network to read data")
             self.disable_element(self.bu_read, "button")
             self.block_config_bar_handling_updates = False
             self.block_MPL_canvas_updates = False
@@ -1872,6 +1909,7 @@ class Dashboard(QtWidgets.QWidget):
         self.update_layout_fields(self.mpl_canvas)
 
         self.no_data_to_read = False
+        self.bu_read.setToolTip("Read selected configuration of data into memory")
         self.enable_element(self.bu_read, "button", {"color": "green"})
 
         # unset variable to allow interactive handling from now
@@ -2211,6 +2249,18 @@ class Dashboard(QtWidgets.QWidget):
             The new value of the parameter that was modified in the
             configuration bar.
         """
+
+        # if all the options of the network, matrix or species menu are unticked, there is nothing to read
+        if (changed_param == "") & (not self.block_config_bar_handling_updates):
+            empty_menus = {
+                self.cb_network: "network",
+                self.cb_matrix: "matrix",
+                self.cb_species: "species",
+            }
+            if self.sender() in empty_menus:
+                self.no_data_to_read = True
+                self.bu_read.setToolTip(f"Select a {empty_menus[self.sender()]} to read data")
+                self.disable_element(self.bu_read, "button")
 
         if (changed_param != "") & (not self.block_config_bar_handling_updates):
             # get event origin source
