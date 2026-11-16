@@ -46,6 +46,8 @@ Under this section, to the furthest left there are four drop-down menus and two 
 
 Once the time period had been updated the drop-down menus will update to show the available observational data providers (network), temporal resolutions, matrix (type of observations), and species. Select the desired fields from each menu.
 
+If the network that was selected has no data in the new time period, a message is shown, no network is selected and the **READ** button is disabled until one is chosen from the network menu. The temporal resolutions menu always lists every resolution that has data in the time period, and the network menu only lists the networks that have data for the selected resolution, matrix and species.
+
 Next, there are four pop-up menus:
 * **QA** contains the GHOST quality assurance flags to filter observations by, as explained in [QA](QA-filtering.md).
 * **FLAGS** contain standardised data reporter provided flags to filter observations by, as explained in [Flags](QA-filtering.md).

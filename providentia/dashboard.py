@@ -1238,7 +1238,7 @@ class Dashboard(QtWidgets.QWidget):
         
         return True
 
-    def set_checkable_combobox_options(self, available_options, combobox_type, recovery_hint):
+    def set_checkable_combobox_options(self, available_options, combobox_type, recovery_hint, select_first_option=True):
         """
         Set the available options in a checkable combobox and synchronise the selected values.
 
@@ -1248,6 +1248,11 @@ class Dashboard(QtWidgets.QWidget):
             List of available options (e.g. ['sconco3', 'sconcno2'] for species) in checkable combobox
         combobox_type : str
             Combobox type (e.g. species, network)
+        recovery_hint : str
+            Message shown when there are no options
+        select_first_option : bool
+            If none of the selected values is available, select the first option (default),
+            or select nothing and ask the user to select one
         """
 
         selected_cb = getattr(self, f"cb_{combobox_type}")
@@ -1302,9 +1307,12 @@ class Dashboard(QtWidgets.QWidget):
                 if still_valid_values:
                     selected_values = still_valid_values
                     msg += f" Keeping {', '.join(still_valid_values)}."
-                elif selected_cb.currentText():
+                elif selected_cb.currentText() and select_first_option:
                     msg += f" Choosing {selected_cb.currentText()} as it is the first option in the dropdown."
                     selected_values = [selected_cb.currentText()]
+                else:
+                    msg += f" Please select a {combobox_type.lower()}."
+                    selected_values = []
                 show_message(self, msg)
                 setattr(
                     self,
@@ -1491,9 +1499,9 @@ class Dashboard(QtWidgets.QWidget):
         
         # if have no available observational data, keep previous selection
         # updating only variable informing that we have no data
-        # if GHOST networks are selected, only GHOST data counts (otherwise we would fall back to a
-        # non-GHOST network and the GHOST version could not be changed back)
-        reading_ghost = bool(self.selected_network) and all(
+        # if the GHOST version has changed and GHOST networks are selected, only GHOST data counts
+        # (otherwise no GHOST network would be selected and the GHOST version could not be changed back)
+        reading_ghost = self.ghost_version_has_changed and bool(self.selected_network) and all(
             check_for_ghost(network) for network in self.selected_network
         )
         if reading_ghost:
@@ -1550,6 +1558,24 @@ class Dashboard(QtWidgets.QWidget):
                                             combobox_type='species',
                                             recovery_hint='Please select a different species or change the date range to include available data.')
 
+        # get resolutions that have data in the date range, for any network
+        available_resolutions = sorted(
+            {
+                resolution
+                for network in self.available_observation_data
+                for resolution in self.available_observation_data[network]
+            },
+            key=get_temporal_resolution_order().__getitem__
+        )
+
+        # update resolution field
+        if not self.set_combobox_options(available_options=available_resolutions,
+                                         combobox_type='resolution',
+                                         recovery_hint='Please select a different resolution or change the date range to include available data.'):
+            self.block_config_bar_handling_updates = False
+            self.block_MPL_canvas_updates = False
+            return
+
         # get networks that have data for at least one of the selected species,
         # for the current resolution and matrix
         available_networks = sorted(
@@ -1564,36 +1590,17 @@ class Dashboard(QtWidgets.QWidget):
             )
         )
 
+        # after a date change, no network is selected if the previous one has no data in the new range
         if not self.set_checkable_combobox_options(available_options=available_networks,
                                                    combobox_type='network',
-                                                   recovery_hint='Please select a different network or change the date range to include available data.'):
+                                                   recovery_hint='Please select a different network or change the date range to include available data.',
+                                                   select_first_option=not self.date_range_has_changed):
             self.block_config_bar_handling_updates = False
             self.block_MPL_canvas_updates = False
             return
         
         # update buttons
         self.update_ghost_buttons("update_configuration_bar_fields")
-
-        # get available resolutions for all selected networks
-        resolution_sets = [
-            set(self.available_observation_data[network].keys())
-            for network in self.selected_network
-        ]
-        available_resolutions = set.intersection(*resolution_sets) if resolution_sets else set()
-
-        # set order of available resolutions
-        available_resolutions = sorted(
-            available_resolutions, key=get_temporal_resolution_order().__getitem__
-        )
-
-        # update resolution field
-        if not self.set_combobox_options(available_options=available_resolutions, 
-                                         combobox_type='resolution', 
-                                         recovery_hint='Please select a different resolution or change the date range to include available data.'):
-            self.block_config_bar_handling_updates = False
-            self.block_MPL_canvas_updates = False
-            return
-
 
         # update GHOST version field
         available_ghost_versions = self.available_ghost_versions
@@ -1607,6 +1614,14 @@ class Dashboard(QtWidgets.QWidget):
         if not self.set_combobox_options(available_options=available_ghost_features, 
                                          combobox_type='ghost_features',
                                          recovery_hint='Please select a different GHOST features or change the date range to include available data.'):
+            return
+
+        # if no network is selected (after a date change), the user has to select one before reading
+        if not self.selected_network:
+            self.no_data_to_read = True
+            self.disable_element(self.bu_read, "button")
+            self.block_config_bar_handling_updates = False
+            self.block_MPL_canvas_updates = False
             return
 
         # update selected networkspecies field
@@ -2200,6 +2215,9 @@ class Dashboard(QtWidgets.QWidget):
         if (changed_param != "") & (not self.block_config_bar_handling_updates):
             # get event origin source
             event_source = self.sender()
+
+            # the GHOST version has only changed for the event that changes it
+            self.ghost_version_has_changed = False
 
             # if network, resolution, matrix, species, aggregation mode or resampling resolution have changed
             # then alter respective current selection for the changed param
