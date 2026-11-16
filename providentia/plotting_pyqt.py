@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
 
-from .plot_aux import get_taylor_diagram_ghelper
+from .calculate import ModBias
+from .plot_aux import get_fairmode_RV_exceendance, get_taylor_diagram_ghelper
 from .plot_formatting import (
     format_axis,
     format_plot_options,
@@ -13,7 +14,9 @@ from .plot_formatting import (
     set_axis_label,
     set_axis_title,
 )
-from .plotting import Plotting
+from .plotting import Plotting, fairmode_settings
+from .read_aux import get_valid_metadata
+from .statistics import get_fairmode_data
 from .warnings_prv import show_message
 
 
@@ -533,3 +536,465 @@ class PlottingPyQt(Plotting):
                     self.timeseries_plot[-1],
                     bias=bias,
                 )
+
+    def make_fairmode_statsummary(
+        self,
+        relevant_axis,
+        networkspeci,
+        data_labels,
+        plot_characteristics,
+        plot_options,
+    ):
+        """
+        Renders a FAIRMODE statistical summary plot to provide a detailed breakdown of model performance indicators.
+
+        Parameters
+        ----------
+        relevant_axis : object
+            Axis to plot on.
+        networkspeci : str
+            Current networkspeci (e.g. EBAS|sconco3).
+        data_labels : list
+            Data arrays to plot.
+        plot_characteristics : dict
+            Plot characteristics.
+        plot_options : list
+            Options to configure plot.
+        """
+
+        # resample to daily for PM10 and PM2.5 if data is hourly
+        # get MDA8 for ozone if data is hourly
+        # finally filter by coverage
+        data, valid_station_idxs = get_fairmode_data(
+            self.read_instance, self.canvas_instance, networkspeci, data_labels
+        )
+
+        # skip making plot if there is no valid data
+        # library and report modes are already handling this in advance
+        if (self.read_instance.mode not in ["report", "library"]) and (
+            not any(valid_station_idxs)
+        ):
+            msg = "No valid data to create FAIRMODE statistic summary plot after filtering by coverage."
+            show_message(self.read_instance, msg)
+            self.read_instance.handle_layout_update(
+                "None",
+                sender=self.canvas_instance.get_plot_type_position(
+                    "fairmode-statsummary"
+                ),
+            )
+            return
+
+        observations_data = data[0, :, :]
+
+        # get settings
+        speci = networkspeci.split("|")[1]
+        u_95r_RV = fairmode_settings[speci].get("u_95r_RV")
+        RV = fairmode_settings[speci].get("RV")
+        alpha = fairmode_settings[speci].get("alpha")
+        beta = fairmode_settings[speci].get("beta")
+        exc_threshold = fairmode_settings[speci].get("exc_threshold")
+        percentile = fairmode_settings[speci].get("percentile")
+        units = fairmode_settings[speci].get("units")
+
+        # get RV and exceedance threshold per units
+        RV, exc_threshold = get_fairmode_RV_exceendance(
+            self.read_instance, speci, RV, exc_threshold, units
+        )
+
+        # get station references
+        valid_station_references = get_valid_metadata(
+            self, "station_reference", valid_station_idxs, networkspeci
+        )
+        valid_station_names = get_valid_metadata(
+            self, "station_name", valid_station_idxs, networkspeci
+        )
+        # same area/station classifications the target plot's legend shows
+        valid_area_classifications = None
+        valid_station_type_classifications = None
+        for other_type in ("area", "station"):
+            try:
+                fetched = get_valid_metadata(
+                    self,
+                    f"{other_type}_classification",
+                    valid_station_idxs,
+                    networkspeci,
+                )
+            except:
+                fetched = np.full(
+                    len(valid_station_references), np.nan, dtype=np.float32
+                )
+            if other_type == "area":
+                valid_area_classifications = fetched
+            else:
+                valid_station_type_classifications = fetched
+
+        # every row below is built from arrays in this same station order -
+        # kept here so the hover annotation can name a hovered station
+        self.canvas_instance.fairmode_statsummary_stations = (
+            valid_station_names,
+            valid_station_references,
+            valid_area_classifications,
+            valid_station_type_classifications,
+        )
+
+        # get valid data labels for networkspeci
+        valid_data_labels = self.canvas_instance.selected_station_data_labels[
+            networkspeci
+        ]
+
+        # cut data_labels for those in valid data labels
+        cut_data_labels = [
+            data_label for data_label in data_labels if data_label in valid_data_labels
+        ]
+
+        self.fairmode_statsummary_row_titles = {}
+        # per (data_label, row) station indices behind the middle-zone dots -
+        # the collapsed left/right corner dots stand for more than one
+        # station, so no single index is kept for those
+        self.canvas_instance.fairmode_statsummary_row_station_indices = {}
+
+        # iterate through data labels
+        for data_label in cut_data_labels:
+            self.fairmode_statsummary_row_titles[data_label] = []
+
+            # get model data
+            model_data = data[valid_data_labels.index(data_label), :, :]
+
+            # calculate MQI for the current station
+            exceedances = []
+            means = []
+            t_biases = []
+            t_R_list = []
+            t_sd_list = []
+            h_perc_list = []
+
+            for station_idx, station in enumerate(valid_station_references):
+                st_observations_data = observations_data[station_idx, :]
+                st_model_data = model_data[station_idx, :]
+
+                mean, exc, t_bias, t_R, t_sd, h_perc = ModBias.calculate_fairmode_stats(
+                    st_observations_data,
+                    st_model_data,
+                    u_95r_RV,
+                    RV,
+                    alpha,
+                    beta,
+                    exc_threshold,
+                    percentile,
+                    "summary",
+                )
+
+                means.append(mean)
+                exceedances.append(exc)
+                t_biases.append(t_bias)
+                t_R_list.append(t_R)
+                t_sd_list.append(t_sd)
+                h_perc_list.append(h_perc)
+
+            # plot data
+            # join all statistics in one list
+            statistics_list = [
+                np.array(means),
+                np.array(exceedances),
+                np.array(t_biases),
+                np.array(t_R_list),
+                np.array(t_sd_list),
+                np.array(h_perc_list),
+                np.nanmean(t_sd_list),
+                np.nanmean(t_R_list),
+            ]
+
+            # get subplots dictionary
+            subplots = dict(plot_characteristics["auxiliar"]["subplots"])
+
+            # get the variable that tells you if there are exceedances in this species
+            has_exceedances = exc_threshold is not None
+
+            # if there is no threshold don't create the exceedances row
+            if not has_exceedances:
+                subplots.pop("observed exceedances", None)
+                statistics_list.pop(1)
+
+            # create list for track_plot_elements
+            self.fairmode_statsummary_plot = []
+
+            # apply configuration to each row
+            for i, (row, fairmode_data) in enumerate(zip(subplots, statistics_list)):
+                # for the two firsts rows, skip the models
+                if i < 2 and data_label != self.read_instance.observations_data_label:
+                    continue
+
+                # skip the observations all the rows but the two first ones
+                if i >= 2 and data_label == self.read_instance.observations_data_label:
+                    continue
+
+                # get row dictionary
+                plot_dict = subplots[row]
+
+                # station indices behind fairmode_data, whittled down in
+                # step with it below (None for the two scalar summary rows,
+                # which are not per-station)
+                if isinstance(fairmode_data, np.ndarray):
+                    station_indices = np.arange(len(valid_station_references))
+                else:
+                    station_indices = None
+
+                # remove axis from the dot on right side
+                relevant_axis[i * 4 + 3].set_xticks([])
+
+                # remove the axis of the dot
+                for side in ["bottom", "top", "right"]:
+                    relevant_axis[i * 4 + 3].spines[side].set_linestyle("none")
+
+                # add dashed line on the left
+                relevant_axis[i * 4 + 3].spines["left"].set_linestyle((10, (8, 5)))
+
+                # configure color of the row and the dot on the right for rows 3 to 8
+                if "range_style" in plot_dict:
+                    # get the dictionary with the style of the row and its range
+                    range_style_dict = plot_characteristics["auxiliar"]["range_style"][
+                        plot_dict["range_style"]
+                    ]
+                    for span, color in zip(
+                        range_style_dict["spans"], range_style_dict["colors"]
+                    ):
+                        relevant_axis[i * 4 + 1].axvspan(*span, color=color, lw=0)
+
+                    # dot on the right configuration
+                    # get the lowest and highest number on the range
+                    min_span = range_style_dict["spans"][0][0]
+                    max_span = range_style_dict["spans"][-1][-1]
+
+                    # get the color of the dot on the right
+                    arr = np.array(fairmode_data)[~np.isnan(fairmode_data)]
+                    correct_arr = arr[(arr >= min_span) & (arr <= max_span)]
+
+                    dot_color = plot_characteristics["auxiliar"]["right_dot_colors"][
+                        "red"
+                    ]
+                    if len(arr) > 0 and len(correct_arr) / len(arr) >= 0.9:
+                        dot_color = plot_characteristics["auxiliar"][
+                            "right_dot_colors"
+                        ]["green"]
+
+                    # plot dot on the right
+                    relevant_axis[i * 4 + 3].scatter(
+                        **plot_characteristics["auxiliar"]["right_dot"],
+                        color=dot_color,
+                        edgecolor=dot_color,
+                    )
+
+                # y axis / grid
+                # remove y axis ticks
+                for j in range(4):
+                    relevant_axis[i * 4 + j].set_yticks([])
+                    relevant_axis[i * 4 + j].grid(False)
+
+                # x axis
+                # get the x axis limit for the current row
+                x_limit = plot_dict["x_axis_limits"]
+
+                # set x axis limits
+                relevant_axis[i * 4 + 1].set_xlim(*x_limit)
+
+                # right zone configuration
+                # remove x ticks from the right dashed zone
+                relevant_axis[i * 4 + 2].set_xticks([])
+
+                # remove vertical lines separating middle and right dashed zone
+                relevant_axis[i * 4 + 2].spines["left"].set_linestyle("none")
+                relevant_axis[i * 4 + 1].spines["right"].set_linestyle("none")
+
+                # change the linestyle to dashed
+                for side in ["bottom", "top", "right"]:
+                    relevant_axis[i * 4 + 2].spines[side].set_linestyle((10, (8, 5)))
+
+                # right zone dot configuration
+                # get the points that surpass the limit
+                right_zone_mask = x_limit[1] < fairmode_data
+
+                # set the right dashed zone range to (-1,1)
+                relevant_axis[i * 4 + 2].set_xlim(-1, 1)
+
+                # if there is a dot outside the limits
+                if np.any(right_zone_mask):
+                    # plot it in the middle of the right dashed zone
+                    stations_dots = relevant_axis[i * 4 + 2].plot(
+                        0,
+                        0,
+                        plot_characteristics["auxiliar"]["station_dots"]["marker"],
+                        color=self.read_instance.plotting_params[data_label]["colour"],
+                        markersize=plot_characteristics["auxiliar"]["station_dots"][
+                            "markersize"
+                        ],
+                    )
+
+                    # add the dots to the track plot elements list
+                    self.fairmode_statsummary_plot.append(stations_dots[0])
+                    self.fairmode_statsummary_row_titles[data_label].append(
+                        f"{row}_right"
+                    )
+
+                    # remove it from the data plotted in the middle zone
+                    fairmode_data = (
+                        fairmode_data[~right_zone_mask]
+                        if isinstance(fairmode_data, np.ndarray)
+                        else np.array([])
+                    )
+                    if station_indices is not None:
+                        station_indices = station_indices[~right_zone_mask]
+
+                # left zone configuration
+                # remove x ticks from the left dashed zone
+                relevant_axis[i * 4 + 0].set_xticks([])
+
+                # define left zone line style (can be dashed or no left zone)
+                left_dashed_zone_linestyle = plot_dict["left_dashed_zone_linestyle"]
+
+                # if left dashed zone exists in the current row
+                if left_dashed_zone_linestyle != "none":
+                    # convert to tuple [x,[x,x]] because yaml does not return python tuples
+                    left_dashed_zone_linestyle = (
+                        left_dashed_zone_linestyle[0],
+                        tuple(left_dashed_zone_linestyle[1]),
+                    )
+
+                    # remove vertical lines separating middle and left dashed zone
+                    relevant_axis[i * 4 + 1].spines["left"].set_linestyle("none")
+                    relevant_axis[i * 4 + 0].spines["right"].set_linestyle("none")
+
+                # change the linestyle to dashed or remove the dashed zone
+                for side in ["bottom", "top", "left"]:
+                    relevant_axis[i * 4 + 0].spines[side].set_linestyle(
+                        left_dashed_zone_linestyle
+                    )
+
+                # left zone dot configuration
+                # if left dashed zone exists in the current row
+                if left_dashed_zone_linestyle != "none":
+                    # get the points that surpass the limit
+                    left_zone_mask = x_limit[0] > fairmode_data
+
+                    # set the left dashed zone range to (-1,1)
+                    relevant_axis[i * 4 + 0].set_xlim(-1, 1)
+
+                    # if there is a dot outside the limits
+                    if np.any(left_zone_mask):
+                        # plot it in the middle of the left dashed zone
+                        stations_dots = relevant_axis[i * 4 + 0].plot(
+                            0,
+                            0,
+                            plot_characteristics["auxiliar"]["station_dots"]["marker"],
+                            color=self.read_instance.plotting_params[data_label][
+                                "colour"
+                            ],
+                            markersize=plot_characteristics["auxiliar"]["station_dots"][
+                                "markersize"
+                            ],
+                        )
+
+                        # add the dot to the track plot elements list
+                        self.fairmode_statsummary_plot.append(stations_dots[0])
+                        self.fairmode_statsummary_row_titles[data_label].append(
+                            f"{row}_left"
+                        )
+
+                        # remove it from the data plotted in the middle zone
+                        fairmode_data = (
+                            fairmode_data[~left_zone_mask]
+                            if isinstance(fairmode_data, np.ndarray)
+                            else np.array([])
+                        )
+                        if station_indices is not None:
+                            station_indices = station_indices[~left_zone_mask]
+
+                # plot stations as dots
+                stations_dots = relevant_axis[i * 4 + 1].plot(
+                    fairmode_data,
+                    np.zeros_like(fairmode_data),
+                    plot_characteristics["auxiliar"]["station_dots"]["marker"],
+                    color=self.read_instance.plotting_params[data_label]["colour"],
+                    markersize=plot_characteristics["auxiliar"]["station_dots"][
+                        "markersize"
+                    ],
+                )
+
+                # change the size of the x-axis tick labels
+                relevant_axis[i * 4 + 1].tick_params(
+                    **plot_characteristics["auxiliar"]["station_dots"]["tick_params"]
+                )
+
+                # add the dots to the track plot elements list
+                self.fairmode_statsummary_plot.append(stations_dots[0])
+                self.fairmode_statsummary_row_titles[data_label].append(f"{row}")
+                if station_indices is not None:
+                    self.canvas_instance.fairmode_statsummary_row_station_indices[
+                        (data_label, row)
+                    ] = station_indices
+
+            # track plot elements
+            if self.read_instance.mode not in ["report"]:
+                self.track_plot_elements(
+                    data_label,
+                    "fairmode-statsummary",
+                    "plot",
+                    self.fairmode_statsummary_plot,
+                    bias=False,
+                )
+
+        # plot the row titles, descriptions, separators and units
+        for i, (row, fairmode_data) in enumerate(zip(subplots, statistics_list)):
+            # get row dictionary
+            plot_dict = subplots[row]
+
+            # get the row title
+            row_title = plot_dict["title"]
+
+            # write the threshold on the exceedances row title
+            if row == "observed_exceedances":
+                exc_threshold = round(
+                    exc_threshold, plot_characteristics["round_decimal_places"]["title"]
+                )
+                row_title = row_title.format(exc_threshold)
+
+            # add units to the first two rows
+            if "units" in plot_dict:
+                relevant_axis[i * 4 + 3].text(
+                    *plot_characteristics["auxiliar"]["units"]["position"],
+                    plot_dict["units"],
+                    fontsize=plot_characteristics["auxiliar"]["units"]["fontsize"],
+                )
+
+            # add row title
+            relevant_axis[i * 4 + 0].text(
+                *plot_characteristics["auxiliar"]["row_title"]["position"],
+                row_title,
+                **plot_characteristics["auxiliar"]["row_title"],
+                transform=relevant_axis[i * 4 + 0].transAxes,
+            )
+
+            # add left description
+            relevant_axis[i * 4 + 0].text(
+                *plot_characteristics["auxiliar"]["description"]["position"],
+                plot_dict["description"],
+                **plot_characteristics["auxiliar"]["description"],
+                transform=relevant_axis[i * 4 + 0].transAxes,
+            )
+
+            # add separator
+            if "separator" in plot_dict:
+                relevant_axis[i * 4 + 0].text(
+                    *plot_characteristics["auxiliar"]["separator"]["position"],
+                    plot_characteristics["auxiliar"]["separator_text"],
+                    **plot_characteristics["auxiliar"]["separator"],
+                    transform=relevant_axis[i * 4 + 0].transAxes,
+                )
+
+        # add title if using dashboard
+        if self.read_instance.mode not in ["report", "library"]:
+            set_axis_title(
+                self.read_instance,
+                relevant_axis,
+                fairmode_settings[speci]["title"],
+                plot_characteristics,
+            )
