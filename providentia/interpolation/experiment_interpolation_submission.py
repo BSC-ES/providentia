@@ -384,6 +384,10 @@ class SubmitInterpolation(object):
 
                         # before proceeding check if have already processed jobs for the model-grid_type/species/temporal_resolution_to_output pairing before
                         # if so, continue to next species
+                        # the model species (arg_list[2]) is not compared: it is stored after mapping
+                        # (e.g. od550aero -> od550du), while mod_speci_to_process is not mapped yet here,
+                        # so they would never match and jobs would also be added for coarser model resolutions;
+                        # the species from the configuration (arg_list[6]) is enough to know it was processed
                         processed_species = False
                         for arg in self.arguments:
                             arg_list = arg.split(" ")
@@ -392,7 +396,6 @@ class SubmitInterpolation(object):
                                     "-".join(arg_list[0].split("-")[:2])
                                     == "{}-{}".format(model_to_process, grid_type)
                                 )
-                                & (arg_list[2] == mod_speci_to_process)
                                 & (arg_list[4] == temporal_resolution_to_output)
                                 & (arg_list[6] == speci_to_process)
                             ):
@@ -1560,8 +1563,10 @@ class SubmitInterpolation(object):
 
         arguments_list = commands.strip().split()
         print(
-            "Submitting job with arguments: [{} {} {} {} {}]".format(
+            "Submitting job with arguments: [{} {} {} {} {} {} {}]".format(
                 arguments_list[3],
+                arguments_list[4],
+                arguments_list[5],
                 arguments_list[9],
                 arguments_list[6],
                 arguments_list[7],
