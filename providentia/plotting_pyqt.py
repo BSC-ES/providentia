@@ -1,11 +1,20 @@
 import copy
+from itertools import groupby
 
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
+from packaging.version import Version
+import pandas as pd
 
-from .plot_aux import get_taylor_diagram_ghelper
+from .plot_aux import (
+    convert_multispecies_df_units,
+    get_display_label,
+    get_taylor_diagram_ghelper,
+    merge_cells,
+    round_decimal_places,
+)
 from .plot_formatting import (
     format_axis,
     format_plot_options,
@@ -14,6 +23,7 @@ from .plot_formatting import (
     set_axis_title,
 )
 from .plotting import Plotting, fairmode_settings
+from .statistics import calculate_statistic
 from .warnings_prv import show_message
 
 
@@ -878,3 +888,343 @@ class PlottingPyQt(Plotting):
                 fairmode_settings[speci]["title"],
                 plot_characteristics,
             )
+
+    def make_table(
+        self,
+        relevant_axis,
+        networkspeci,
+        data_labels,
+        plot_characteristics,
+        plot_options,
+        zstats=None,
+        statsummary=False,
+        subsection=None,
+        plotting_paradigm=None,
+        stats_df=None,
+    ):
+        """
+        Constructs a formatted table of statistical metrics, featuring merged cells and dynamic colour-coding.
+
+        Parameters
+        ----------
+        relevant_axis : object
+            Axis to plot on.
+        networkspeci : str
+            Current networkspeci (e.g. EBAS|sconco3).
+        data_labels : list
+            Data arrays to plot.
+        plot_characteristics : dict
+            Plot characteristics.
+        plot_options : list
+            Options to configure plot.
+        zstats : list, optional
+            Statistics.
+        statsummary : boolean, optional
+            To indicate if making alternative statistical summary table plot.
+        subsection : str, optional
+            Currently active subsection.
+        plotting_paradigm : str, optional
+            Plotting paradigm (summary or station report).
+        stats_df : pandas dataframe, optional
+            Dataframe of previously calculated statistics.
+        """
+
+        # turn off axis to make table
+        relevant_axis.axis("off")
+
+        # normalise networkspeci argument - it may be a single networkspeci (str)
+        # or a list of networkspecies to show together (multispecies plots), e.g.
+        # from a plot's checkable networkspecies combobox selection
+        if isinstance(networkspeci, (list, tuple)):
+            all_networkspecies = list(networkspeci)
+            networkspeci = all_networkspecies[0]
+        else:
+            all_networkspecies = [networkspeci]
+
+        # bias plot?
+        if "bias" in plot_options:
+            bias = True
+        else:
+            bias = False
+
+        # always make multispecies plot if there is more than one networkspeci and plot can be multispecies
+        # remove first to make sure we don't use a previous appended multispecies  
+        if self.read_instance.mode == "dashboard":
+            if 'multispecies' in plot_options:
+                plot_options.remove('multispecies')
+            if ((len(all_networkspecies) > 1) 
+                and ('multispecies' not in plot_options)):
+                plot_options.append('multispecies')
+
+        # in the dashboard we need to create statistical dataframe as it is not provided in function arguments
+        if not isinstance(stats_df, pd.DataFrame):
+            if "multispecies" in plot_options:
+                networkspecies = all_networkspecies
+            else:
+                networkspecies = [networkspeci]
+
+            rows = []
+            for selected_networkspeci in networkspecies:
+                # get valid data labels for networkspeci
+                valid_data_labels = self.canvas_instance.selected_station_data_labels[
+                    selected_networkspeci
+                ]
+                # cut data_labels for those in valid data labels
+                cut_data_labels = [
+                    data_label for data_label in data_labels if data_label in valid_data_labels
+                ]
+                for dl in cut_data_labels:
+                    if bias:
+                        stat_per_data_labels = calculate_statistic(
+                                self.read_instance,
+                                self.canvas_instance,
+                                selected_networkspeci,
+                                zstats,
+                                [self.read_instance.observations_data_label],
+                                [dl],
+                            )
+                    else:
+                        stat_per_data_labels = calculate_statistic(
+                                self.read_instance,
+                                self.canvas_instance, 
+                                selected_networkspeci, 
+                                zstats, 
+                                [dl], 
+                                [])
+
+                    if len(zstats) == 1:
+                        stat_per_data_labels = {zstats[0]: stat_per_data_labels}
+
+                    # get floats instead of arrays with 1 element each and save
+                    # convert arrays([x]) -> x
+                    stat_values = {
+                        stat: (
+                            float(value[0])
+                            if isinstance(value, np.ndarray)
+                            else float(value)
+                        )
+                        for stat, value in stat_per_data_labels.items()
+                    }
+                    rows.append({
+                        "subsections": "Unique",
+                        "networkspecies": selected_networkspeci,
+                        "labels": dl,
+                        **stat_values,
+                    })
+
+            stats_df = (
+                pd.DataFrame(rows)
+                .set_index(["subsections", "networkspecies", "labels"])
+            )
+            
+            # for table, set data labels as column and one row per networkspeci
+            if not statsummary:
+                stats_df = stats_df[zstats[0]].unstack("labels")
+                stats_df = stats_df.reindex(networkspecies, level="networkspecies")
+                stats_df = stats_df.reindex(
+                    columns=[dl for dl in data_labels if dl in stats_df.columns]
+                )
+
+        # when we have 1 stat in the statsummary, the column name is 0
+        # we need to rename it to the stat name
+        if (len(stats_df.columns) == 1) and (stats_df.columns[0] == 0):
+            stats_df = stats_df.rename(columns={stats_df.columns[0]: zstats[0]})
+
+        # rename columns to save space
+        columns = {}
+        for column in stats_df.columns:
+            new_colum_name = copy.deepcopy(column)
+            # rename columns to replace Diurnal, Weekly and Monthly by D, W, M
+            if "diurnal" in column:
+                new_colum_name = column.replace("diurnal", "D")
+            elif "weekly" in column:
+                new_colum_name = column.replace("weekly", "W")
+            elif "monthly" in column:
+                new_colum_name = column.replace("monthly", "M")
+            columns[column] = new_colum_name
+        stats_df = stats_df.rename(columns=columns)
+
+        # get column labels
+        col_labels = stats_df.columns.tolist()
+
+        # get relevant data
+        if "multispecies" not in plot_options:
+            # if not multispecies, get data for the current / first networkspeci only
+            stats_df = stats_df.iloc[
+                stats_df.index.get_level_values("networkspecies") == networkspeci
+            ]
+        elif self.read_instance.multispecies_units is not None:
+            # convert units
+            base_plot_type = "statsummary" if statsummary else "table"
+            stats_df = convert_multispecies_df_units(
+                self.read_instance, stats_df, zstats, base_plot_type
+            )
+
+        if plotting_paradigm == "station":
+            stats_df = stats_df.iloc[
+                stats_df.index.get_level_values("subsections") == subsection
+            ]
+
+        # round dataframe
+        decimal_places = plot_characteristics["round_decimal_places"]["table"]
+        if Version(pd.__version__) >= Version("2.1.0"):
+            stats_df = stats_df.map(
+                lambda x: round_decimal_places(x, decimal_places)
+            )
+        else:
+            stats_df = stats_df.applymap(
+                lambda x: round_decimal_places(x, decimal_places)
+            )
+
+        # get labels
+        networkspecies = list(stats_df.index.get_level_values("networkspecies"))
+        subsections = list(stats_df.index.get_level_values("subsections"))
+
+        # reset index after filtering
+        stats_df = stats_df.reset_index()
+        
+        # hide subsections from station plots or if there is only 1 section
+        if plotting_paradigm == "station" or len(np.unique(subsections)) == 1:
+            stats_df = stats_df.drop(columns="subsections")
+
+        # hide networkspecies from plots that are not multispecies
+        if "multispecies" not in plot_options:
+            stats_df = stats_df.drop(columns="networkspecies")
+
+        # remove parent names from subsections
+        if ("subsections" in stats_df.columns) and (
+            not plot_characteristics["parent_section_names"]
+        ):
+            stats_df["subsections"] = [
+                subsection_label.split("·")[1]
+                if "·" in subsection_label
+                else subsection_label
+                for subsection_label in subsections
+            ]
+
+        # remove network names from networkspecies
+        if (
+            ("multispecies" in plot_options)
+            and ("networkspecies" in stats_df.columns)
+            and (not plot_characteristics["multispecies"]["network_names"])
+        ):
+            stats_df["networkspecies"] = [
+                networkspeci_label.split("|")[1]
+                for networkspeci_label in networkspecies
+            ]
+        
+        # get number of "empty" cells (without stats) and
+        # column labels (hide networkspecies, subsections and data labels)
+        if statsummary:
+            empty_cells = len(stats_df.columns) - len(zstats)
+            col_labels = [""] * empty_cells + zstats
+        else:
+            empty_cells = len(stats_df.columns) - len(data_labels)
+            col_labels = [""] * empty_cells + data_labels
+
+        # set cell colors
+        if statsummary:
+            if "cell_colours" in plot_characteristics:
+                if plot_characteristics["cell_colours"]:
+                    # colour rows
+                    label_col = empty_cells - 1
+                    cell_colours = []
+                    for data_label in stats_df.iloc[:, label_col]:
+                        # observations in white background
+                        if data_label == self.read_instance.observations_data_label:
+                            colour = "white"
+                        # models in legend colour background
+                        else:
+                            colour = self.read_instance.plotting_params[data_label]["colour"]
+                        row_colours = ["white"] * stats_df.shape[1]
+                        row_colours[label_col] = colour
+                        cell_colours.append(row_colours)
+                    plot_characteristics["plot"]["cellColours"] = np.array(
+                        cell_colours, dtype=object
+                    )
+        else:
+            if "col_colours" in plot_characteristics:
+                if plot_characteristics["col_colours"]:
+                    col_colours = []
+                    for data_label in data_labels:
+                        # observations in white
+                        if data_label == self.read_instance.observations_data_label:
+                            colour = "white"
+                        # models in legend colors
+                        else:
+                            colour = self.read_instance.plotting_params[data_label][
+                                "colour"
+                            ]
+                        col_colours.extend([colour])
+                    plot_characteristics["plot"]["colColours"] = [
+                        "white"
+                    ] * empty_cells + col_colours
+
+        # show any renamed display text, after the colour lookups above,
+        # which need the real identifiers
+        # statsummary has data labels as rows, table has them as columns
+        if statsummary:
+            stats_df["labels"] = [
+                get_display_label(self.read_instance, data_label)
+                for data_label in stats_df["labels"]
+            ]
+        else:
+            col_labels = [""] * empty_cells + [
+                get_display_label(self.read_instance, data_label)
+                for data_label in data_labels
+            ]
+        
+        # make table
+        table = relevant_axis.table(
+            cellText=stats_df.values,
+            colLabels=col_labels,
+            **plot_characteristics["plot"],
+        )
+
+        # merge cells in networkspecies and subsections columns (if any)
+        column_ii = 0
+        for column, rows in zip(
+            ["networkspecies", "subsections"], (networkspecies, subsections)
+        ):
+            if column in stats_df.columns:
+                # count consecutive duplicates
+                count_dups = [sum(1 for _ in group) for _, group in groupby(rows)]
+
+                # merge cells that have consecutive duplicates
+                current_row = 0
+                for count_ii, count in enumerate(count_dups):
+                    cells_to_merge = [
+                        (current_row + i, column_ii) for i in range(1, count + 1)
+                    ]
+                    merge_cells(table, cells_to_merge)
+                    current_row += count
+                column_ii += 1
+
+        # adjust cell height
+        if "cell_height" in plot_characteristics:
+            table.scale(1, plot_characteristics["cell_height"])
+
+        # adjust fontsize
+        if "fontsize" in plot_characteristics:
+            table.auto_set_font_size(False)
+            table.set_fontsize(plot_characteristics["fontsize"])
+            table.auto_set_column_width(np.arange(-1, len(col_labels) + 1))
+
+        # track plot elements
+        if self.read_instance.mode not in ["report"]:
+            if statsummary:
+                self.track_plot_elements(
+                    self.read_instance.observations_data_label,
+                    "statsummary",
+                    "plot",
+                    [table],
+                    bias=bias,
+                )
+            else:
+                self.track_plot_elements(
+                    self.read_instance.observations_data_label,
+                    "table",
+                    "plot",
+                    [table],
+                    bias=bias,
+                )
