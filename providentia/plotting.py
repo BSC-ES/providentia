@@ -1636,9 +1636,12 @@ class Plotting:
         # get the variable that tells you if there are exceedances in this species
         has_exceedances = exc_threshold is not None
 
-        # if there is no threshold don't create the exceedances row
+        # if there is no threshold don't create the exceedances row, and keep
+        # the separator after the observation rows by moving it to the mean row
+        # (a new dict, so the shared plot characteristics are not changed)
         if not has_exceedances:
-            subplots.pop("observed exceedances", None)
+            subplots.pop("observed_exceedances", None)
+            subplots["observed_mean"] = {**subplots["observed_mean"], "separator": True}
 
         # iterate through data labels
         statistics = {}

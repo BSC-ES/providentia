@@ -579,6 +579,9 @@ class PlottingPyQt(Plotting):
         speci = networkspeci.split("|")[1]
         n_stations = len(stations[1])
 
+        # number of observation rows (no exceedances row for a species without a threshold)
+        n_obs_rows = sum(row.startswith("observed_") for row in subplots)
+
         # every row is built from arrays in this same station order -
         # kept here so the hover annotation can name a hovered station
         self.canvas_instance.fairmode_statsummary_stations = stations
@@ -601,12 +604,12 @@ class PlottingPyQt(Plotting):
 
             # apply configuration to each row
             for i, (row, fairmode_data) in enumerate(zip(subplots, statistics_list)):
-                # for the two firsts rows, skip the models
-                if i < 2 and data_label != self.read_instance.observations_data_label:
+                # for the observation rows, skip the models
+                if i < n_obs_rows and data_label != self.read_instance.observations_data_label:
                     continue
 
-                # skip the observations all the rows but the two first ones
-                if i >= 2 and data_label == self.read_instance.observations_data_label:
+                # skip the observations in all the rows but the observation ones
+                if i >= n_obs_rows and data_label == self.read_instance.observations_data_label:
                     continue
 
                 # get row dictionary
