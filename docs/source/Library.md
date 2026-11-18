@@ -64,7 +64,7 @@ By default the plots are drawn with matplotlib. To get plotly figures instead, p
 provi = prv.Providentia('interactive_template.conf', backend='plotly')
 ```
 
-At the moment only the timeseries and the map can be drawn with plotly.
+At the moment only the timeseries, the map, the table and the statsummary can be drawn with plotly. In the plotly table, a networkspecies or subsection repeated in the rows below is left blank instead of merged.
 
 The configuration will become part of the object, therefere you can call the modes as explained below. You can pass any arguments you wish when calling each function to override what is set in the loaded configuration file. 
 

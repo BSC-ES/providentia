@@ -2097,6 +2097,13 @@
             "hspace": 0.25
           }
         },
+      "website":
+        {
+          "plot_options": ["bias", "multispecies"],
+          "axis_title": { "fontsize": 12 },
+          "fontsize": 12,
+          "margin": { "l": 10, "r": 10, "b": 10, "t": 30 },
+        },
       "tests":
         {
           "plot_options": ["bias", "multispecies"],
@@ -2239,6 +2246,16 @@
             "height_ratios": [5, 1], 
             "hspace": 0.25
           }
+        },
+      "website":
+        {
+          "plot_options": ["bias", "multispecies"],
+          "basic": ["Mean", "StdDev", "p5", "Median", "p95"],
+          "model_bias":
+            ["Mean_bias", "StdDev_bias", "NMB", "NME", "RMSE", "r"],
+          "axis_title": { "fontsize": 12 },
+          "fontsize": 12,
+          "margin": { "l": 10, "r": 10, "b": 10, "t": 30 },
         },
       "tests":
         {

@@ -586,3 +586,115 @@ class PlottingDash(Plotting):
                     marker_color=to_hex(self.read_instance.plotting_params[data_label]["colour"]),
                 )
             )
+
+    def make_table(
+        self,
+        fig,
+        networkspeci,
+        data_labels,
+        plot_characteristics,
+        plot_options,
+        zstats=None,
+        statsummary=False,
+        subsection=None,
+        plotting_paradigm=None,
+        stats_df=None,
+    ):
+        """
+        Renders a table of statistical metrics as a plotly table, with the
+        cells or column labels coloured as the data labels.
+
+        Parameters
+        ----------
+        fig : plotly.graph_objects.Figure
+            Figure to plot on.
+        networkspeci : str
+            Current networkspeci (e.g. EBAS|sconco3).
+        data_labels : list
+            Data arrays to plot.
+        plot_characteristics : dict
+            Plot characteristics.
+        plot_options : list
+            Options to configure plot.
+        zstats : list, optional
+            Statistics.
+        statsummary : boolean, optional
+            To indicate if making alternative statistical summary table plot.
+        subsection : str, optional
+            Currently active subsection.
+        plotting_paradigm : str, optional
+            Plotting paradigm (summary or station report).
+        stats_df : pandas dataframe, optional
+            Dataframe of previously calculated statistics.
+        """
+
+        (
+            stats_df,
+            col_labels,
+            networkspecies,
+            subsections,
+            cell_colours,
+            col_colours,
+            bias,
+        ) = self.get_table_data(
+            networkspeci,
+            data_labels,
+            plot_characteristics,
+            plot_options,
+            zstats=zstats,
+            statsummary=statsummary,
+            subsection=subsection,
+            plotting_paradigm=plotting_paradigm,
+            stats_df=stats_df,
+        )
+
+        # plotly tables are filled column by column, and show values as matplotlib does
+        # when written as text
+        columns = [[str(value) for value in stats_df[column]] for column in stats_df.columns]
+
+        # plotly cannot merge cells: in the networkspecies and subsections columns (if any),
+        # a value repeated in the rows below is left blank instead
+        for column, rows in zip(
+            ["networkspecies", "subsections"], (networkspecies, subsections)
+        ):
+            if column in stats_df.columns:
+                column_ii = list(stats_df.columns).index(column)
+                columns[column_ii] = [
+                    "" if (row_ii > 0) and (row == rows[row_ii - 1]) else value
+                    for row_ii, (row, value) in enumerate(zip(rows, columns[column_ii]))
+                ]
+
+        # model colours are RGB tuples (0-1), which plotly does not accept
+        if cell_colours is not None:
+            cells_fill = [
+                [to_hex(colour) for colour in column] for column in cell_colours.T
+            ]
+        else:
+            cells_fill = "white"
+        if col_colours is not None:
+            header_fill = [to_hex(colour) for colour in col_colours]
+        else:
+            header_fill = "white"
+
+        # plotly leaves 80px on the left, right and bottom and 100px on top by default: only the
+        # room that the title needs is kept, so that the table takes more of the figure
+        fig.update_layout(margin=plot_characteristics["margin"])
+
+        fig.add_trace(
+            go.Table(
+                header=dict(
+                    values=col_labels,
+                    fill_color=header_fill,
+                    line_color="black",
+                    font_size=plot_characteristics["fontsize"],
+                    align="center",
+                ),
+                cells=dict(
+                    values=columns,
+                    fill_color=cells_fill,
+                    line_color="black",
+                    font_size=plot_characteristics["fontsize"],
+                    align="center",
+                ),
+            )
+        )

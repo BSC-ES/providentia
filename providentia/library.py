@@ -1248,7 +1248,8 @@ class Providentia:
 
             # make plot
             func(
-                relevant_ax,
+                # PlottingDash draws on the plotly figure, PlottingPyQt on the matplotlib axis
+                fig if self.backend == "plotly" else relevant_ax,
                 networkspeci,
                 relevant_data_labels,
                 self.plot_characteristics[plot_type],
@@ -1333,7 +1334,8 @@ class Providentia:
 
             # make plot
             func(
-                relevant_ax,
+                # PlottingDash draws on the plotly figure, PlottingPyQt on the matplotlib axis
+                fig if self.backend == "plotly" else relevant_ax,
                 networkspeci,
                 relevant_data_labels,
                 self.plot_characteristics[plot_type],
