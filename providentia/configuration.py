@@ -157,10 +157,10 @@ class ProvConfiguration:
             setattr(self.read_instance, k, self.parse_parameter(k, val))
 
         # set default values of the current mode
-        # (dashboard and library can be launched without configuration file)
+        # (dashboard and website can be launched without configuration file)
         self.read_instance.default_values = (
             defaults["dashboard_empty"]
-            if self.read_instance.mode in ["dashboard", "library"]
+            if self.read_instance.mode in ["dashboard", "website"]
             and self.read_instance.config == ""
             else defaults[self.read_instance.mode]
         )
@@ -374,10 +374,12 @@ class ProvConfiguration:
                     param_dict["bsc_parameter_name"]
                 ] = param_dict
 
-            # get available species
-            self.read_instance.available_species = list(
-                self.read_instance.parameter_dictionary.keys()
-            )
+            # get available species from settings/available_inputs.yaml, not from the GHOST standards of this version
+            self.read_instance.available_species = [
+                speci
+                for species in available_inputs["available_species_per_matrix"].values()
+                for speci in species
+            ]
 
             # get standard metadata dictionary
             self.read_instance.standard_metadata = get_standard_metadata(
