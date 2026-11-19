@@ -17,10 +17,11 @@ import yaml
 from providentia.auxiliar import (
     CURRENT_PATH,
     join,
+    load_species_reference,
     get_machine,
     resolve_plots_or_preset,
 )
-from providentia.read_aux import check_for_ghost, get_default_qa
+from providentia.read_aux import apply_ghost_version_fields, check_for_ghost, get_default_qa
 from providentia.warnings_prv import show_message
 
 # get current path and providentia root path
@@ -367,19 +368,26 @@ class ProvConfiguration:
                 for resolution_dict in standard_temporal_resolutions.values()
             ]
 
-            # modify standard parameter dictionary to have BSC standard parameter names as keys (rather than GHOST)
-            self.read_instance.parameter_dictionary = dict()
-            for _, param_dict in standard_parameters.items():
-                self.read_instance.parameter_dictionary[
-                    param_dict["bsc_parameter_name"]
-                ] = param_dict
+            # standard parameters of this GHOST version, with BSC standard parameter names as keys
+            # (rather than GHOST), only for the fields of its own observations (see
+            # apply_ghost_version_fields in read_aux.py)
+            self.read_instance.ghost_parameter_dictionary = {
+                param_dict["bsc_parameter_name"]: param_dict
+                for param_dict in standard_parameters.values()
+            }
 
-            # get available species from settings/available_inputs.yaml, not from the GHOST standards of this version
-            self.read_instance.available_species = [
-                speci
-                for species in available_inputs["available_species_per_matrix"].values()
-                for speci in species
-            ]
+            # species, with their matrix, units and limits, from the species reference of
+            # Providentia, whatever the GHOST version (a copy, as its fields are replaced by those
+            # of the GHOST version for GHOST observations, and its limits can be changed)
+            self.read_instance.species_reference = load_species_reference()
+            self.read_instance.parameter_dictionary = copy.deepcopy(
+                self.read_instance.species_reference
+            )
+
+            # get available species
+            self.read_instance.available_species = list(
+                self.read_instance.parameter_dictionary.keys()
+            )
 
             # get standard metadata dictionary
             self.read_instance.standard_metadata = get_standard_metadata(
@@ -1934,6 +1942,10 @@ class ProvConfiguration:
                     self.read_instance.logger.error(error)
                     sys.exit(1)
                 self.read_instance.reading_ghost = is_ghost
+
+        # fields of the GHOST version for GHOST observations, of the species reference otherwise
+        if self.read_instance.network:
+            apply_ghost_version_fields(self.read_instance)
 
         # if only one network or species, save in list
         if len(self.read_instance.network) == 1:

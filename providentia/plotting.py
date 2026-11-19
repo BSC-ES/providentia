@@ -28,7 +28,6 @@ from providentia.auxiliar import (
     CURRENT_PATH,
     join,
     get_conversion_factor,
-    get_standard_parameters_by_speci,
 )
 from .calculate import ModBias
 from .statistics import (
@@ -5048,9 +5047,7 @@ class Plotting:
             limits_units = contingency_settings[speci]["units"]
 
         # get input and output units
-        standard_parameter_speci = get_standard_parameters_by_speci(
-            speci, self.read_instance.ghost_version
-        )
+        standard_parameter_speci = self.read_instance.parameter_dictionary[speci]
         initial_units = limits_units
         final_units = self.read_instance.measurement_units[speci]
 

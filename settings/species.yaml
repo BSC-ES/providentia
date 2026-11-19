@@ -1,0 +1,6006 @@
+# Species that Providentia can read, plot and save, whatever the GHOST version (or none, e.g.
+# for gridded data). One entry per species, named as in Providentia (bsc_parameter_name), with:
+#   long_parameter_name      description, written in saved files
+#   matrix                   matrix of the species, as in the menus and in the data folders
+#   standard_units           units of the data
+#   units_quantity           kind of quantity of the units, for unit conversions
+#   chemical_formula         formula, for unit conversions that need the molar mass
+#   chemical_formula_charge  formula with its charge, for ions
+#   extreme_lower_limit      default lower bound, and limit of the negative values QA
+#   extreme_upper_limit      default upper bound
+#   minimum_resolution       resolution of the instruments (.nan if not known)
+#
+# Generated from the GHOST 1.6 standards (providentia/dependencies/GHOST_standards/1.6), which
+# tests/test_species.py checks it against: if GHOST 1.6 changes, regenerate the GHOST species.
+# A species that is not in GHOST can be added with the same fields.
+
+absae370-880:
+  long_parameter_name: angstrom exponent between 370 and 880 nm for total particulate absorption
+  matrix: pm
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 6.0
+  minimum_resolution: .nan
+absae370-950:
+  long_parameter_name: angstrom exponent between 370 and 950 nm for total particulate absorption
+  matrix: pm
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 6.0
+  minimum_resolution: .nan
+absae440-675aero:
+  long_parameter_name: angstrom exponent between 440nm and 675nm for absorption aerosol optical depth
+  matrix: absaod
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 6.0
+  minimum_resolution: .nan
+absae440-870aero:
+  long_parameter_name: angstrom exponent between 440nm and 870nm for absorption aerosol optical depth
+  matrix: absaod
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 6.0
+  minimum_resolution: .nan
+absae440-870bc:
+  long_parameter_name: angstrom exponent between 440nm and 870nm for black carbon absorption aerosol optical depth
+  matrix: absaod-bc
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 6.0
+  minimum_resolution: .nan
+absae467-652:
+  long_parameter_name: angstrom exponent between 467 and 652 nm for total particulate absorption
+  matrix: pm
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 6.0
+  minimum_resolution: .nan
+absae467-660:
+  long_parameter_name: angstrom exponent between 467 and 660 nm for total particulate absorption
+  matrix: pm
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 6.0
+  minimum_resolution: .nan
+absae675-870aero:
+  long_parameter_name: angstrom exponent between 675nm and 870nm for absorption aerosol optical depth
+  matrix: absaod
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 6.0
+  minimum_resolution: .nan
+absco370:
+  long_parameter_name: total particulate aerosol absorption coefficient at 370nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+absco467:
+  long_parameter_name: total particulate aerosol absorption coefficient at 467nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+absco470:
+  long_parameter_name: total particulate aerosol absorption coefficient at 470nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+absco520:
+  long_parameter_name: total particulate aerosol absorption coefficient at 520nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+absco522:
+  long_parameter_name: total particulate aerosol absorption coefficient at 522nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+absco525:
+  long_parameter_name: total particulate aerosol absorption coefficient at 525nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+absco528:
+  long_parameter_name: total particulate aerosol absorption coefficient at 528nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+absco530:
+  long_parameter_name: total particulate aerosol absorption coefficient at 530nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+absco550:
+  long_parameter_name: total particulate aerosol absorption coefficient at 550nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+absco565:
+  long_parameter_name: total particulate aerosol absorption coefficient at 565nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+absco590:
+  long_parameter_name: total particulate aerosol absorption coefficient at 590nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+absco637:
+  long_parameter_name: total particulate aerosol absorption coefficient at 637nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+absco652:
+  long_parameter_name: total particulate aerosol absorption coefficient at 652nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+absco660:
+  long_parameter_name: total particulate aerosol absorption coefficient at 660nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+absco670:
+  long_parameter_name: total particulate aerosol absorption coefficient at 670nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+absco880:
+  long_parameter_name: total particulate aerosol absorption coefficient at 880nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+absco950:
+  long_parameter_name: total particulate aerosol absorption coefficient at 950nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+absod1020aero:
+  long_parameter_name: absorption aerosol optical depth at 1020nm
+  matrix: absaod
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: .nan
+absod440aero:
+  long_parameter_name: absorption aerosol optical depth at 440nm
+  matrix: absaod
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: .nan
+absod440bcbahadur:
+  long_parameter_name: black carbon absorption aerosol optical depth at 440nm following Bahadur 2012
+  matrix: absaod-bc
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 5.0
+  minimum_resolution: .nan
+absod440bcbahadurschuster:
+  long_parameter_name: black carbon absorption aerosol optical depth at 440nm following Bahadur 2012 and Schuster 2016
+  matrix: absaod-bc
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 5.0
+  minimum_resolution: .nan
+absod440bcschuster:
+  long_parameter_name: black carbon absorption aerosol optical depth at 440nm following Schuster 2016
+  matrix: absaod-bc
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 5.0
+  minimum_resolution: .nan
+absod440brcbahadur:
+  long_parameter_name: brown carbon absorption aerosol optical depth at 440nm following Bahadur 2012
+  matrix: absaod-brc
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 5.0
+  minimum_resolution: .nan
+absod440brcbahadurschuster:
+  long_parameter_name: brown carbon absorption aerosol optical depth at 440nm following Bahadur 2012 and Schuster 2016
+  matrix: absaod-brc
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 5.0
+  minimum_resolution: .nan
+absod440brcschuster:
+  long_parameter_name: brown carbon absorption aerosol optical depth at 440nm following Schuster 2016
+  matrix: absaod-brc
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 5.0
+  minimum_resolution: .nan
+absod550aero:
+  long_parameter_name: absorption aerosol optical depth at 550nm
+  matrix: absaod
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: .nan
+absod675aero:
+  long_parameter_name: absorption aerosol optical depth at 675nm
+  matrix: absaod
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: .nan
+absod870aero:
+  long_parameter_name: absorption aerosol optical depth at 870nm
+  matrix: absaod
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: .nan
+abswdaeaero:
+  long_parameter_name: wavelength dependence of the absorption aerosol optical depth angstrom exponent
+  matrix: absaod
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: .nan
+  extreme_upper_limit: .nan
+  minimum_resolution: .nan
+acprec:
+  long_parameter_name: liquid precipitation accumulation
+  matrix: meteo
+  standard_units: mm
+  units_quantity: length
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 2000.0
+  minimum_resolution: 1.0
+acsnow:
+  long_parameter_name: snow accumulation
+  matrix: meteo
+  standard_units: cm
+  units_quantity: length
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 500.0
+  minimum_resolution: 1.0
+ae440-870aero:
+  long_parameter_name: angstrom exponent between 440 and 870nm for aerosol optical depth
+  matrix: aod
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 5.0
+  minimum_resolution: .nan
+aswin:
+  long_parameter_name: surface solar radiation downwards
+  matrix: meteo
+  standard_units: W m-2
+  units_quantity: irradiance
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1200.0
+  minimum_resolution: .nan
+aswincs:
+  long_parameter_name: surface solar radiation downwards with clear-sky conditions
+  matrix: meteo
+  standard_units: W m-2
+  units_quantity: irradiance
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1100.0
+  minimum_resolution: .nan
+aswindir:
+  long_parameter_name: direct surface solar radiation
+  matrix: meteo
+  standard_units: W m-2
+  units_quantity: irradiance
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+aswindircs:
+  long_parameter_name: direct surface solar radiation with clear-sky conditions
+  matrix: meteo
+  standard_units: W m-2
+  units_quantity: irradiance
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+aswtoa:
+  long_parameter_name: top of atmosphere incident solar radiation
+  matrix: meteo
+  standard_units: W m-2
+  units_quantity: irradiance
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1361.0
+  minimum_resolution: .nan
+asy1020aero:
+  long_parameter_name: asymmetry factor at 1020nm
+  matrix: asy
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+asy1020aerocoarse:
+  long_parameter_name: coarse mode asymmetry factor at 1020nm
+  matrix: asy
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+asy1020aerofine:
+  long_parameter_name: fine mode asymmetry factor at 1020nm
+  matrix: asy
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+asy440aero:
+  long_parameter_name: asymmetry factor at 440nm
+  matrix: asy
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+asy440aerocoarse:
+  long_parameter_name: coarse mode asymmetry factor at 440nm
+  matrix: asy
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+asy440aerofine:
+  long_parameter_name: fine mode asymmetry factor at 440nm
+  matrix: asy
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+asy525:
+  long_parameter_name: total particulate asymmetry factor at 525nm
+  matrix: pm
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+asy550:
+  long_parameter_name: total particulate asymmetry factor at 550nm
+  matrix: pm
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+asy675aero:
+  long_parameter_name: asymmetry factor at 675nm
+  matrix: asy
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+asy675aerocoarse:
+  long_parameter_name: coarse mode asymmetry factor at 675nm
+  matrix: asy
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+asy675aerofine:
+  long_parameter_name: fine mode asymmetry factor at 675nm
+  matrix: asy
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+asy870aero:
+  long_parameter_name: asymmetry factor at 870nm
+  matrix: asy
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+asy870aerocoarse:
+  long_parameter_name: coarse mode asymmetry factor at 870nm
+  matrix: asy
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+asy870aerofine:
+  long_parameter_name: fine mode asymmetry factor at 870nm
+  matrix: asy
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+auvin:
+  long_parameter_name: surface downward UV radiation downwards
+  matrix: meteo
+  standard_units: W m-2
+  units_quantity: irradiance
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 120.0
+  minimum_resolution: .nan
+bcmac637:
+  long_parameter_name: mass absorption cross section of total particulate black carbon at 637nm
+  matrix: pm
+  standard_units: m2 g-1
+  units_quantity: mass_absorption_cross_section
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 1.0
+  extreme_upper_limit: 30.0
+  minimum_resolution: .nan
+bcmac880:
+  long_parameter_name: mass absorption cross section of total particulate black carbon at 880nm
+  matrix: pm
+  standard_units: m2 g-1
+  units_quantity: mass_absorption_cross_section
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 1.0
+  extreme_upper_limit: 30.0
+  minimum_resolution: .nan
+cfracmax:
+  long_parameter_name: cloud coverage fraction, taken as maximum cloud coverage across cloud layers
+  matrix: meteo
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 100.0
+  minimum_resolution: .nan
+cldaf:
+  long_parameter_name: cloud attenuation factor
+  matrix: meteo
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.8
+  minimum_resolution: .nan
+cldbot:
+  long_parameter_name: the height above ground level of the lowest cloud or obscuring phenomena layer aloft with 5/8 or more summation total sky cover.
+  matrix: meteo
+  standard_units: m
+  units_quantity: length
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 25000.0
+  minimum_resolution: .nan
+clddf:
+  long_parameter_name: cloud direct factor
+  matrix: meteo
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.1
+  minimum_resolution: .nan
+cldtop:
+  long_parameter_name: the height above ground level of the highest cloud or obscuring phenomena layer aloft with 5/8 or more summation total sky cover.
+  matrix: meteo
+  standard_units: m
+  units_quantity: length
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 25000.0
+  minimum_resolution: .nan
+dir10:
+  long_parameter_name: 10m wind direction
+  matrix: meteo
+  standard_units: degrees
+  units_quantity: angle
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 1.0
+  extreme_upper_limit: 360.0
+  minimum_resolution: 15.0
+extae440-675aero:
+  long_parameter_name: angstrom exponent between 440nm and 675nm for extinction aerosol optical depth
+  matrix: extaod
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 5.0
+  minimum_resolution: .nan
+extae440-870aero:
+  long_parameter_name: angstrom exponent between 440nm and 870nm for extinction aerosol optical depth
+  matrix: extaod
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 5.0
+  minimum_resolution: .nan
+extod1020aero:
+  long_parameter_name: extinction aerosol optical depth at 1020nm
+  matrix: extaod
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: .nan
+extod1020aerocoarse:
+  long_parameter_name: extinction coarse mode aerosol optical depth at 1020nm
+  matrix: extaod
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: .nan
+extod1020aerofine:
+  long_parameter_name: extinction fine mode aerosol optical depth at 1020nm
+  matrix: extaod
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: .nan
+extod440aero:
+  long_parameter_name: extinction aerosol optical depth at 440nm
+  matrix: extaod
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: .nan
+extod440aerocoarse:
+  long_parameter_name: extinction coarse mode aerosol optical depth at 440nm
+  matrix: extaod
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: .nan
+extod440aerofine:
+  long_parameter_name: extinction fine mode aerosol optical depth at 440nm
+  matrix: extaod
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: .nan
+extod550aero:
+  long_parameter_name: extinction aerosol optical depth at 550nm
+  matrix: extaod
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: .nan
+extod675aero:
+  long_parameter_name: extinction aerosol optical depth at 675nm
+  matrix: extaod
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: .nan
+extod675aerocoarse:
+  long_parameter_name: extinction coarse mode aerosol optical depth at 675nm
+  matrix: extaod
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: .nan
+extod675aerofine:
+  long_parameter_name: extinction fine mode aerosol optical depth at 675nm
+  matrix: extaod
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: .nan
+extod870aero:
+  long_parameter_name: extinction aerosol optical depth at 870nm
+  matrix: extaod
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: .nan
+extod870aerocoarse:
+  long_parameter_name: extinction coarse mode aerosol optical depth at 870nm
+  matrix: extaod
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: .nan
+extod870aerofine:
+  long_parameter_name: extinction fine mode aerosol optical depth at 870nm
+  matrix: extaod
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: .nan
+fm500frac:
+  long_parameter_name: fine mode aerosol optical depth fraction at 500nm
+  matrix: aod
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+gust10:
+  long_parameter_name: 10m wind gust
+  matrix: meteo
+  standard_units: m s-1
+  units_quantity: velocity
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 120.0
+  minimum_resolution: 1.0
+lbsco450:
+  long_parameter_name: total particulate aerosol light backscattering coefficient at 450nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+lbsco520:
+  long_parameter_name: total particulate aerosol light backscattering coefficient at 520nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+lbsco525:
+  long_parameter_name: total particulate aerosol light backscattering coefficient at 525nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+lbsco530:
+  long_parameter_name: total particulate aerosol light backscattering coefficient at 530nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+lbsco532:
+  long_parameter_name: total particulate aerosol light backscattering coefficient at 532nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+lbsco550:
+  long_parameter_name: total particulate aerosol light backscattering coefficient at 550nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+lbsco635:
+  long_parameter_name: total particulate aerosol light backscattering coefficient at 635nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+lbsco700:
+  long_parameter_name: total particulate aerosol light backscattering coefficient at 700nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+lbsco850:
+  long_parameter_name: total particulate aerosol light backscattering coefficient at 850nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+lbsf450:
+  long_parameter_name: total particulate aerosol light backscattering fraction at 450nm
+  matrix: pm
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+lbsf520:
+  long_parameter_name: total particulate aerosol light backscattering fraction at 520nm
+  matrix: pm
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+lbsf525:
+  long_parameter_name: total particulate aerosol light backscattering fraction at 525nm
+  matrix: pm
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+lbsf530:
+  long_parameter_name: total particulate aerosol light backscattering fraction at 530nm
+  matrix: pm
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+lbsf532:
+  long_parameter_name: total particulate aerosol light backscattering fraction at 532nm
+  matrix: pm
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+lbsf550:
+  long_parameter_name: total particulate aerosol light backscattering fraction at 550nm
+  matrix: pm
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+lbsf635:
+  long_parameter_name: total particulate aerosol light backscattering fraction at 635nm
+  matrix: pm
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+lbsf700:
+  long_parameter_name: total particulate aerosol light backscattering fraction at 700nm
+  matrix: pm
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+lbsf850:
+  long_parameter_name: total particulate aerosol light backscattering fraction at 850nm
+  matrix: pm
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+lsae440-675aero:
+  long_parameter_name: angstrom exponent between 440nm and 675nm for scattering aerosol optical depth
+  matrix: scataod
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 5.0
+  minimum_resolution: .nan
+lsae450-635:
+  long_parameter_name: angstrom exponent between 450 and 635 nm for total particulate scattering
+  matrix: pm
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 5.0
+  minimum_resolution: .nan
+lsae450-700:
+  long_parameter_name: angstrom exponent between 450 and 700 nm for total particulate scattering
+  matrix: pm
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 5.0
+  minimum_resolution: .nan
+lsco450:
+  long_parameter_name: total particulate aerosol light scattering coefficient at 450nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+lsco520:
+  long_parameter_name: total particulate aerosol light scattering coefficient at 520nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+lsco525:
+  long_parameter_name: total particulate aerosol light scattering coefficient at 525nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+lsco530:
+  long_parameter_name: total particulate aerosol light scattering coefficient at 530nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+lsco532:
+  long_parameter_name: total particulate aerosol light scattering coefficient at 532nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+lsco550:
+  long_parameter_name: total particulate aerosol light scattering coefficient at 550nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+lsco635:
+  long_parameter_name: total particulate aerosol light scattering coefficient at 635nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+lsco700:
+  long_parameter_name: total particulate aerosol light scattering coefficient at 700nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+lsco850:
+  long_parameter_name: total particulate aerosol light scattering coefficient at 850nm
+  matrix: pm
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+od1020aero:
+  long_parameter_name: aerosol optical depth at 1020nm
+  matrix: aod
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: .nan
+od380aero:
+  long_parameter_name: aerosol optical depth at 380nm
+  matrix: aod
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: .nan
+od440aero:
+  long_parameter_name: aerosol optical depth at 440nm
+  matrix: aod
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: .nan
+od500aero:
+  long_parameter_name: aerosol optical depth at 500nm
+  matrix: aod
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: .nan
+od500aerocoarse:
+  long_parameter_name: coarse mode aerosol optical depth at 500nm
+  matrix: aod
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: .nan
+od500aerofine:
+  long_parameter_name: fine mode aerosol optical depth at 500nm
+  matrix: aod
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: .nan
+od550aero:
+  long_parameter_name: aerosol optical depth at 550nm
+  matrix: aod
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: .nan
+od550du:
+  long_parameter_name: dust optical depth at 550nm
+  matrix: aod
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: .nan
+od675aero:
+  long_parameter_name: aerosol optical depth at 675nm
+  matrix: aod
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: .nan
+od870aero:
+  long_parameter_name: aerosol optical depth at 870nm
+  matrix: aod
+  standard_units: unitless
+  units_quantity: optical_depth
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: .nan
+pblh:
+  long_parameter_name: planetary boundary layer height
+  matrix: meteo
+  standard_units: m
+  units_quantity: length
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 6000.0
+  minimum_resolution: .nan
+photi:
+  long_parameter_name: photolysis index
+  matrix: meteo
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.2
+  minimum_resolution: .nan
+pm1:
+  long_parameter_name: PM1 mass
+  matrix: pm1
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: 20.0
+pm10:
+  long_parameter_name: PM10 mass
+  matrix: pm10
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10000.0
+  minimum_resolution: 20.0
+pm10absae370-880:
+  long_parameter_name: angstrom exponent between 370 and 880 nm for PM10 absorption
+  matrix: pm10
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 6.0
+  minimum_resolution: .nan
+pm10absae370-950:
+  long_parameter_name: angstrom exponent between 370 and 950 nm for PM10 absorption
+  matrix: pm10
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 6.0
+  minimum_resolution: .nan
+pm10absae467-652:
+  long_parameter_name: angstrom exponent between 467 and 652 nm for PM10 absorption
+  matrix: pm10
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 6.0
+  minimum_resolution: .nan
+pm10absae467-660:
+  long_parameter_name: angstrom exponent between 467 and 660 nm for PM10 absorption
+  matrix: pm10
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 6.0
+  minimum_resolution: .nan
+pm10absco370:
+  long_parameter_name: PM10 aerosol absorption coefficient at 370nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm10absco467:
+  long_parameter_name: PM10 aerosol absorption coefficient at 467nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm10absco470:
+  long_parameter_name: PM10 aerosol absorption coefficient at 470nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm10absco520:
+  long_parameter_name: PM10 aerosol absorption coefficient at 520nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm10absco522:
+  long_parameter_name: PM10 aerosol absorption coefficient at 522nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm10absco525:
+  long_parameter_name: PM10 aerosol absorption coefficient at 525nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm10absco528:
+  long_parameter_name: PM10 aerosol absorption coefficient at 528nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm10absco530:
+  long_parameter_name: PM10 aerosol absorption coefficient at 530nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm10absco550:
+  long_parameter_name: PM10 aerosol absorption coefficient at 550nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm10absco565:
+  long_parameter_name: PM10 aerosol absorption coefficient at 565nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm10absco590:
+  long_parameter_name: PM10 aerosol absorption coefficient at 590nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm10absco637:
+  long_parameter_name: PM10 aerosol absorption coefficient at 637nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm10absco652:
+  long_parameter_name: PM10 aerosol absorption coefficient at 652nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm10absco660:
+  long_parameter_name: PM10 aerosol absorption coefficient at 660nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm10absco670:
+  long_parameter_name: PM10 aerosol absorption coefficient at 670nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm10absco880:
+  long_parameter_name: PM10 aerosol absorption coefficient at 880nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm10absco950:
+  long_parameter_name: PM10 aerosol absorption coefficient at 950nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm10al:
+  long_parameter_name: PM10 aluminium
+  matrix: pm10
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Al
+  chemical_formula_charge: Al
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 50000.0
+  minimum_resolution: 20.0
+pm10as:
+  long_parameter_name: PM10 arsenic
+  matrix: pm10
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: As
+  chemical_formula_charge: As
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: 1.0
+pm10asy525:
+  long_parameter_name: PM10 asymmetry factor at 525nm
+  matrix: pm10
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+pm10asy550:
+  long_parameter_name: PM10 asymmetry factor at 550nm
+  matrix: pm10
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+pm10bap:
+  long_parameter_name: PM10 benzo[a]pyrene
+  matrix: pm10
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: C20H12
+  chemical_formula_charge: C20H12
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 100.0
+  minimum_resolution: 0.1
+pm10bc:
+  long_parameter_name: PM10 black carbon
+  matrix: pm10
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: C
+  chemical_formula_charge: C
+  extreme_lower_limit: -0.5
+  extreme_upper_limit: 25000.0
+  minimum_resolution: 10.0
+pm10bcmac637:
+  long_parameter_name: mass absorption cross section of PM10 black carbon at 637nm
+  matrix: pm10
+  standard_units: m2 g-1
+  units_quantity: mass_absorption_cross_section
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 1.0
+  extreme_upper_limit: 30.0
+  minimum_resolution: .nan
+pm10bcmac880:
+  long_parameter_name: mass absorption cross section of PM10 black carbon at 880nm
+  matrix: pm10
+  standard_units: m2 g-1
+  units_quantity: mass_absorption_cross_section
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 1.0
+  extreme_upper_limit: 30.0
+  minimum_resolution: .nan
+pm10c:
+  long_parameter_name: PM10 carbon
+  matrix: pm10
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: C
+  chemical_formula_charge: C
+  extreme_lower_limit: -0.5
+  extreme_upper_limit: 50000.0
+  minimum_resolution: 20.0
+pm10ca:
+  long_parameter_name: PM10 calcium
+  matrix: pm10
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: Ca
+  chemical_formula_charge: Ca++
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 100.0
+  minimum_resolution: 0.2
+pm10cd:
+  long_parameter_name: PM10 cadmium
+  matrix: pm10
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Cd
+  chemical_formula_charge: Cd
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 500.0
+  minimum_resolution: 0.2
+pm10cl:
+  long_parameter_name: PM10 chloride
+  matrix: pm10
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: Cl
+  chemical_formula_charge: Cl-
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+pm10cobalt:
+  long_parameter_name: PM10 cobalt
+  matrix: pm10
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Co
+  chemical_formula_charge: Co
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 50.0
+  minimum_resolution: 0.1
+pm10cr:
+  long_parameter_name: PM10 chromium
+  matrix: pm10
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Cr
+  chemical_formula_charge: Cr
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 500.0
+  minimum_resolution: 1.0
+pm10cu:
+  long_parameter_name: PM10 copper
+  matrix: pm10
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Cu
+  chemical_formula_charge: Cu
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 750.0
+  minimum_resolution: 1.0
+pm10du:
+  long_parameter_name: PM10 dust
+  matrix: pm10
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 50000.0
+  minimum_resolution: 20.0
+pm10ec:
+  long_parameter_name: PM10 elemental carbon
+  matrix: pm10
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: C
+  chemical_formula_charge: C
+  extreme_lower_limit: -0.5
+  extreme_upper_limit: 25000.0
+  minimum_resolution: 10.0
+pm10fe:
+  long_parameter_name: PM10 iron
+  matrix: pm10
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Fe
+  chemical_formula_charge: Fe
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 50000.0
+  minimum_resolution: 20.0
+pm10hg:
+  long_parameter_name: PM10 mercury
+  matrix: pm10
+  standard_units: pg m-3
+  units_quantity: mass_concentration
+  chemical_formula: Hg
+  chemical_formula_charge: Hg
+  extreme_lower_limit: -50.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: 10.0
+pm10k:
+  long_parameter_name: PM10 potassium
+  matrix: pm10
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: K
+  chemical_formula_charge: K+
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 50.0
+  minimum_resolution: 0.2
+pm10lbsco450:
+  long_parameter_name: PM10 aerosol light backscattering coefficient at 450nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm10lbsco520:
+  long_parameter_name: PM10 aerosol light backscattering coefficient at 520nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm10lbsco525:
+  long_parameter_name: PM10 aerosol light backscattering coefficient at 525nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm10lbsco530:
+  long_parameter_name: PM10 aerosol light backscattering coefficient at 530nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm10lbsco532:
+  long_parameter_name: PM10 aerosol light backscattering coefficient at 532nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm10lbsco550:
+  long_parameter_name: PM10 aerosol light backscattering coefficient at 550nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm10lbsco635:
+  long_parameter_name: PM10 aerosol light backscattering coefficient at 635nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm10lbsco700:
+  long_parameter_name: PM10 aerosol light backscattering coefficient at 700nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm10lbsco850:
+  long_parameter_name: PM10 aerosol light backscattering coefficient at 850nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm10lbsf450:
+  long_parameter_name: PM10 aerosol light backscattering fraction at 450nm
+  matrix: pm10
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+pm10lbsf520:
+  long_parameter_name: PM10 aerosol light backscattering fraction at 520nm
+  matrix: pm10
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+pm10lbsf525:
+  long_parameter_name: PM10 aerosol light backscattering fraction at 525nm
+  matrix: pm10
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+pm10lbsf530:
+  long_parameter_name: PM10 aerosol light backscattering fraction at 530nm
+  matrix: pm10
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+pm10lbsf532:
+  long_parameter_name: PM10 aerosol light backscattering fraction at 532nm
+  matrix: pm10
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+pm10lbsf550:
+  long_parameter_name: PM10 aerosol light backscattering fraction at 550nm
+  matrix: pm10
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+pm10lbsf635:
+  long_parameter_name: PM10 aerosol light backscattering fraction at 635nm
+  matrix: pm10
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+pm10lbsf700:
+  long_parameter_name: PM10 aerosol light backscattering fraction at 700nm
+  matrix: pm10
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+pm10lbsf850:
+  long_parameter_name: PM10 aerosol light backscattering fraction at 850nm
+  matrix: pm10
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+pm10lsae450-635:
+  long_parameter_name: angstrom exponent between 450 and 635 nm for PM10 scattering
+  matrix: pm10
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 5.0
+  minimum_resolution: .nan
+pm10lsae450-700:
+  long_parameter_name: angstrom exponent between 450 and 700 nm for PM10 scattering
+  matrix: pm10
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 5.0
+  minimum_resolution: .nan
+pm10lsco450:
+  long_parameter_name: PM10 aerosol light scattering coefficient at 450nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+pm10lsco520:
+  long_parameter_name: PM10 aerosol light scattering coefficient at 520nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+pm10lsco525:
+  long_parameter_name: PM10 aerosol light scattering coefficient at 525nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+pm10lsco530:
+  long_parameter_name: PM10 aerosol light scattering coefficient at 530nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+pm10lsco532:
+  long_parameter_name: PM10 aerosol light scattering coefficient at 532nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+pm10lsco550:
+  long_parameter_name: PM10 aerosol light scattering coefficient at 550nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+pm10lsco635:
+  long_parameter_name: PM10 aerosol light scattering coefficient at 635nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+pm10lsco700:
+  long_parameter_name: PM10 aerosol light scattering coefficient at 700nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+pm10lsco850:
+  long_parameter_name: PM10 aerosol light scattering coefficient at 850nm
+  matrix: pm10
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+pm10mg:
+  long_parameter_name: PM10 magnesium
+  matrix: pm10
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: Mg
+  chemical_formula_charge: Mg++
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 50.0
+  minimum_resolution: 0.2
+pm10mn:
+  long_parameter_name: PM10 manganese
+  matrix: pm10
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Mn
+  chemical_formula_charge: Mn
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: 2.0
+pm10msa:
+  long_parameter_name: PM10 methanesulfonic acid
+  matrix: pm10
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: CH4O3S
+  chemical_formula_charge: CH4O3S
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 5.0
+  minimum_resolution: 0.2
+pm10na:
+  long_parameter_name: PM10 sodium
+  matrix: pm10
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: Na
+  chemical_formula_charge: Na+
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+pm10nh4:
+  long_parameter_name: PM10 ammonium
+  matrix: pm10
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: NH4
+  chemical_formula_charge: NH4+
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+pm10nh4no3:
+  long_parameter_name: PM10 ammonium nitrate
+  matrix: pm10
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: NH4NO3
+  chemical_formula_charge: NH4NO3
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+pm10ni:
+  long_parameter_name: PM10 nickel
+  matrix: pm10
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Ni
+  chemical_formula_charge: Ni
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 2000.0
+  minimum_resolution: 2.0
+pm10no3:
+  long_parameter_name: PM10 nitrate
+  matrix: pm10
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: NO3
+  chemical_formula_charge: NO3-
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 250.0
+  minimum_resolution: 0.2
+pm10oc:
+  long_parameter_name: PM10 organic carbon
+  matrix: pm10
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: C
+  chemical_formula_charge: C
+  extreme_lower_limit: -0.5
+  extreme_upper_limit: 25000.0
+  minimum_resolution: 10.0
+pm10pb:
+  long_parameter_name: PM10 lead
+  matrix: pm10
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Pb
+  chemical_formula_charge: Pb
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 10000.0
+  minimum_resolution: 10.0
+pm10sca470:
+  long_parameter_name: PM10 single scattering albedo at 470nm
+  matrix: pm10
+  standard_units: unitless
+  units_quantity: single_scattering_albedo
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+pm10sca520:
+  long_parameter_name: PM10 single scattering albedo at 520nm
+  matrix: pm10
+  standard_units: unitless
+  units_quantity: single_scattering_albedo
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+pm10sca590:
+  long_parameter_name: PM10 single scattering albedo at 590nm
+  matrix: pm10
+  standard_units: unitless
+  units_quantity: single_scattering_albedo
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+pm10sca637:
+  long_parameter_name: PM10 single scattering albedo at 637nm
+  matrix: pm10
+  standard_units: unitless
+  units_quantity: single_scattering_albedo
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+pm10sca660:
+  long_parameter_name: PM10 single scattering albedo at 660nm
+  matrix: pm10
+  standard_units: unitless
+  units_quantity: single_scattering_albedo
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+pm10se:
+  long_parameter_name: PM10 selenium
+  matrix: pm10
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Se
+  chemical_formula_charge: Se
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+pm10so4:
+  long_parameter_name: PM10 sulphate
+  matrix: pm10
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: SO4
+  chemical_formula_charge: SO4--
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+pm10so4nss:
+  long_parameter_name: 'PM10 sulphate : non-sea salt'
+  matrix: pm10
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: SO4
+  chemical_formula_charge: SO4--
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+pm10so4ss:
+  long_parameter_name: 'PM10 sulphate : sea salt'
+  matrix: pm10
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: SO4
+  chemical_formula_charge: SO4--
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+pm10v:
+  long_parameter_name: PM10 vanadium
+  matrix: pm10
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: V
+  chemical_formula_charge: V
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 100.0
+  minimum_resolution: 0.2
+pm10zn:
+  long_parameter_name: PM10 zinc
+  matrix: pm10
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Zn
+  chemical_formula_charge: Zn
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 30000.0
+  minimum_resolution: 20.0
+pm1absae370-880:
+  long_parameter_name: angstrom exponent between 370 and 880 nm for PM1 absorption
+  matrix: pm1
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 6.0
+  minimum_resolution: .nan
+pm1absae370-950:
+  long_parameter_name: angstrom exponent between 370 and 950 nm for PM1 absorption
+  matrix: pm1
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 6.0
+  minimum_resolution: .nan
+pm1absae467-652:
+  long_parameter_name: angstrom exponent between 467 and 652 nm for PM1 absorption
+  matrix: pm1
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 6.0
+  minimum_resolution: .nan
+pm1absae467-660:
+  long_parameter_name: angstrom exponent between 467 and 660 nm for PM1 absorption
+  matrix: pm1
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 6.0
+  minimum_resolution: .nan
+pm1absco370:
+  long_parameter_name: PM1 aerosol absorption coefficient at 370nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm1absco467:
+  long_parameter_name: PM1 aerosol absorption coefficient at 467nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm1absco470:
+  long_parameter_name: PM1 aerosol absorption coefficient at 470nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm1absco520:
+  long_parameter_name: PM1 aerosol absorption coefficient at 520nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm1absco522:
+  long_parameter_name: PM1 aerosol absorption coefficient at 522nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm1absco525:
+  long_parameter_name: PM1 aerosol absorption coefficient at 525nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm1absco528:
+  long_parameter_name: PM1 aerosol absorption coefficient at 528nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm1absco530:
+  long_parameter_name: PM1 aerosol absorption coefficient at 530nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm1absco550:
+  long_parameter_name: PM1 aerosol absorption coefficient at 550nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm1absco565:
+  long_parameter_name: PM1 aerosol absorption coefficient at 565nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm1absco590:
+  long_parameter_name: PM1 aerosol absorption coefficient at 590nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm1absco637:
+  long_parameter_name: PM1 aerosol absorption coefficient at 637nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm1absco652:
+  long_parameter_name: PM1 aerosol absorption coefficient at 652nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm1absco660:
+  long_parameter_name: PM1 aerosol absorption coefficient at 660nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm1absco670:
+  long_parameter_name: PM1 aerosol absorption coefficient at 670nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm1absco880:
+  long_parameter_name: PM1 aerosol absorption coefficient at 880nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm1absco950:
+  long_parameter_name: PM1 aerosol absorption coefficient at 950nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm1al:
+  long_parameter_name: PM1 aluminium
+  matrix: pm1
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Al
+  chemical_formula_charge: Al
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 50000.0
+  minimum_resolution: 20.0
+pm1as:
+  long_parameter_name: PM1 arsenic
+  matrix: pm1
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: As
+  chemical_formula_charge: As
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: 1.0
+pm1asy525:
+  long_parameter_name: PM1 asymmetry factor at 525nm
+  matrix: pm1
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+pm1asy550:
+  long_parameter_name: PM1 asymmetry factor at 550nm
+  matrix: pm1
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+pm1bap:
+  long_parameter_name: PM1 benzo[a]pyrene
+  matrix: pm1
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: C20H12
+  chemical_formula_charge: C20H12
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 100.0
+  minimum_resolution: 0.1
+pm1bc:
+  long_parameter_name: PM1 black carbon
+  matrix: pm1
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: C
+  chemical_formula_charge: C
+  extreme_lower_limit: -0.5
+  extreme_upper_limit: 25000.0
+  minimum_resolution: 10.0
+pm1bcmac637:
+  long_parameter_name: mass absorption cross section of PM1 black carbon at 637nm
+  matrix: pm1
+  standard_units: m2 g-1
+  units_quantity: mass_absorption_cross_section
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 1.0
+  extreme_upper_limit: 30.0
+  minimum_resolution: .nan
+pm1bcmac880:
+  long_parameter_name: mass absorption cross section of PM1 black carbon at 880nm
+  matrix: pm1
+  standard_units: m2 g-1
+  units_quantity: mass_absorption_cross_section
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 1.0
+  extreme_upper_limit: 30.0
+  minimum_resolution: .nan
+pm1c:
+  long_parameter_name: PM1 carbon
+  matrix: pm1
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: C
+  chemical_formula_charge: C
+  extreme_lower_limit: -0.5
+  extreme_upper_limit: 50000.0
+  minimum_resolution: 20.0
+pm1ca:
+  long_parameter_name: PM1 calcium
+  matrix: pm1
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: Ca
+  chemical_formula_charge: Ca++
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 100.0
+  minimum_resolution: 0.2
+pm1cd:
+  long_parameter_name: PM1 cadmium
+  matrix: pm1
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Cd
+  chemical_formula_charge: Cd
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 500.0
+  minimum_resolution: 0.2
+pm1cl:
+  long_parameter_name: PM1 chloride
+  matrix: pm1
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: Cl
+  chemical_formula_charge: Cl-
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+pm1cobalt:
+  long_parameter_name: PM1 cobalt
+  matrix: pm1
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Co
+  chemical_formula_charge: Co
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 50.0
+  minimum_resolution: 0.1
+pm1cr:
+  long_parameter_name: PM1 chromium
+  matrix: pm1
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Cr
+  chemical_formula_charge: Cr
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 500.0
+  minimum_resolution: 1.0
+pm1cu:
+  long_parameter_name: PM1 copper
+  matrix: pm1
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Cu
+  chemical_formula_charge: Cu
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 750.0
+  minimum_resolution: 1.0
+pm1du:
+  long_parameter_name: PM1 dust
+  matrix: pm1
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 50000.0
+  minimum_resolution: 20.0
+pm1ec:
+  long_parameter_name: PM1 elemental carbon
+  matrix: pm1
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: C
+  chemical_formula_charge: C
+  extreme_lower_limit: -0.5
+  extreme_upper_limit: 25000.0
+  minimum_resolution: 10.0
+pm1fe:
+  long_parameter_name: PM1 iron
+  matrix: pm1
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Fe
+  chemical_formula_charge: Fe
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 50000.0
+  minimum_resolution: 20.0
+pm1hg:
+  long_parameter_name: PM1 mercury
+  matrix: pm1
+  standard_units: pg m-3
+  units_quantity: mass_concentration
+  chemical_formula: Hg
+  chemical_formula_charge: Hg
+  extreme_lower_limit: -50.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: 10.0
+pm1k:
+  long_parameter_name: PM1 potassium
+  matrix: pm1
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: K
+  chemical_formula_charge: K+
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 50.0
+  minimum_resolution: 0.2
+pm1lbsco450:
+  long_parameter_name: PM1 aerosol light backscattering coefficient at 450nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm1lbsco520:
+  long_parameter_name: PM1 aerosol light backscattering coefficient at 520nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm1lbsco525:
+  long_parameter_name: PM1 aerosol light backscattering coefficient at 525nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm1lbsco530:
+  long_parameter_name: PM1 aerosol light backscattering coefficient at 530nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm1lbsco532:
+  long_parameter_name: PM1 aerosol light backscattering coefficient at 532nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm1lbsco550:
+  long_parameter_name: PM1 aerosol light backscattering coefficient at 550nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm1lbsco635:
+  long_parameter_name: PM1 aerosol light backscattering coefficient at 635nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm1lbsco700:
+  long_parameter_name: PM1 aerosol light backscattering coefficient at 700nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm1lbsco850:
+  long_parameter_name: PM1 aerosol light backscattering coefficient at 850nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm1lbsf450:
+  long_parameter_name: PM1 aerosol light backscattering fraction at 450nm
+  matrix: pm1
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+pm1lbsf520:
+  long_parameter_name: PM1 aerosol light backscattering fraction at 520nm
+  matrix: pm1
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+pm1lbsf525:
+  long_parameter_name: PM1 aerosol light backscattering fraction at 525nm
+  matrix: pm1
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+pm1lbsf530:
+  long_parameter_name: PM1 aerosol light backscattering fraction at 530nm
+  matrix: pm1
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+pm1lbsf532:
+  long_parameter_name: PM1 aerosol light backscattering fraction at 532nm
+  matrix: pm1
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+pm1lbsf550:
+  long_parameter_name: PM1 aerosol light backscattering fraction at 550nm
+  matrix: pm1
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+pm1lbsf635:
+  long_parameter_name: PM1 aerosol light backscattering fraction at 635nm
+  matrix: pm1
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+pm1lbsf700:
+  long_parameter_name: PM1 aerosol light backscattering fraction at 700nm
+  matrix: pm1
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+pm1lbsf850:
+  long_parameter_name: PM1 aerosol light backscattering fraction at 850nm
+  matrix: pm1
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+pm1lsae450-635:
+  long_parameter_name: angstrom exponent between 450 and 635 nm for PM1 scattering
+  matrix: pm1
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 5.0
+  minimum_resolution: .nan
+pm1lsae450-700:
+  long_parameter_name: angstrom exponent between 450 and 700 nm for PM1 scattering
+  matrix: pm1
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 5.0
+  minimum_resolution: .nan
+pm1lsco450:
+  long_parameter_name: PM1 aerosol light scattering coefficient at 450nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+pm1lsco520:
+  long_parameter_name: PM1 aerosol light scattering coefficient at 520nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+pm1lsco525:
+  long_parameter_name: PM1 aerosol light scattering coefficient at 525nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+pm1lsco530:
+  long_parameter_name: PM1 aerosol light scattering coefficient at 530nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+pm1lsco532:
+  long_parameter_name: PM1 aerosol light scattering coefficient at 532nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+pm1lsco550:
+  long_parameter_name: PM1 aerosol light scattering coefficient at 550nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+pm1lsco635:
+  long_parameter_name: PM1 aerosol light scattering coefficient at 635nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+pm1lsco700:
+  long_parameter_name: PM1 aerosol light scattering coefficient at 700nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+pm1lsco850:
+  long_parameter_name: PM1 aerosol light scattering coefficient at 850nm
+  matrix: pm1
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+pm1mg:
+  long_parameter_name: PM1 magnesium
+  matrix: pm1
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: Mg
+  chemical_formula_charge: Mg++
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 50.0
+  minimum_resolution: 0.2
+pm1mn:
+  long_parameter_name: PM1 manganese
+  matrix: pm1
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Mn
+  chemical_formula_charge: Mn
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: 2.0
+pm1msa:
+  long_parameter_name: PM1 methanesulfonic acid
+  matrix: pm1
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: CH4O3S
+  chemical_formula_charge: CH4O3S
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 5.0
+  minimum_resolution: 0.2
+pm1na:
+  long_parameter_name: PM1 sodium
+  matrix: pm1
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: Na
+  chemical_formula_charge: Na+
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+pm1nh4:
+  long_parameter_name: PM1 ammonium
+  matrix: pm1
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: NH4
+  chemical_formula_charge: NH4+
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+pm1nh4no3:
+  long_parameter_name: PM1 ammonium nitrate
+  matrix: pm1
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: NH4NO3
+  chemical_formula_charge: NH4NO3
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+pm1ni:
+  long_parameter_name: PM1 nickel
+  matrix: pm1
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Ni
+  chemical_formula_charge: Ni
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 2000.0
+  minimum_resolution: 2.0
+pm1no3:
+  long_parameter_name: PM1 nitrate
+  matrix: pm1
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: NO3
+  chemical_formula_charge: NO3-
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 250.0
+  minimum_resolution: 0.2
+pm1oc:
+  long_parameter_name: PM1 organic carbon
+  matrix: pm1
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: C
+  chemical_formula_charge: C
+  extreme_lower_limit: -0.5
+  extreme_upper_limit: 25000.0
+  minimum_resolution: 10.0
+pm1pb:
+  long_parameter_name: PM1 lead
+  matrix: pm1
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Pb
+  chemical_formula_charge: Pb
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 10000.0
+  minimum_resolution: 10.0
+pm1sca470:
+  long_parameter_name: PM1 single scattering albedo at 470nm
+  matrix: pm1
+  standard_units: unitless
+  units_quantity: single_scattering_albedo
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+pm1sca520:
+  long_parameter_name: PM1 single scattering albedo at 520nm
+  matrix: pm1
+  standard_units: unitless
+  units_quantity: single_scattering_albedo
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+pm1sca590:
+  long_parameter_name: PM1 single scattering albedo at 590nm
+  matrix: pm1
+  standard_units: unitless
+  units_quantity: single_scattering_albedo
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+pm1sca637:
+  long_parameter_name: PM1 single scattering albedo at 637nm
+  matrix: pm1
+  standard_units: unitless
+  units_quantity: single_scattering_albedo
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+pm1sca660:
+  long_parameter_name: PM1 single scattering albedo at 660nm
+  matrix: pm1
+  standard_units: unitless
+  units_quantity: single_scattering_albedo
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+pm1se:
+  long_parameter_name: PM1 selenium
+  matrix: pm1
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Se
+  chemical_formula_charge: Se
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+pm1so4:
+  long_parameter_name: PM1 sulphate
+  matrix: pm1
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: SO4
+  chemical_formula_charge: SO4--
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+pm1so4nss:
+  long_parameter_name: 'PM1 sulphate : non-sea salt'
+  matrix: pm1
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: SO4
+  chemical_formula_charge: SO4--
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+pm1so4ss:
+  long_parameter_name: 'PM1 sulphate : sea salt'
+  matrix: pm1
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: SO4
+  chemical_formula_charge: SO4--
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+pm1v:
+  long_parameter_name: PM1 vanadium
+  matrix: pm1
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: V
+  chemical_formula_charge: V
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 100.0
+  minimum_resolution: 0.2
+pm1zn:
+  long_parameter_name: PM1 zinc
+  matrix: pm1
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Zn
+  chemical_formula_charge: Zn
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 30000.0
+  minimum_resolution: 20.0
+pm2p5:
+  long_parameter_name: PM2.5 mass
+  matrix: pm2.5
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 2000.0
+  minimum_resolution: 20.0
+pm2p5absae370-880:
+  long_parameter_name: angstrom exponent between 370 and 880 nm for PM2.5 absorption
+  matrix: pm2.5
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 6.0
+  minimum_resolution: .nan
+pm2p5absae370-950:
+  long_parameter_name: angstrom exponent between 370 and 950 nm for PM2.5 absorption
+  matrix: pm2.5
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 6.0
+  minimum_resolution: .nan
+pm2p5absae467-652:
+  long_parameter_name: angstrom exponent between 467 and 652 nm for PM2.5 absorption
+  matrix: pm2.5
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 6.0
+  minimum_resolution: .nan
+pm2p5absae467-660:
+  long_parameter_name: angstrom exponent between 467 and 660 nm for PM2.5 absorption
+  matrix: pm2.5
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 6.0
+  minimum_resolution: .nan
+pm2p5absco370:
+  long_parameter_name: PM2.5 aerosol absorption coefficient at 370nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm2p5absco467:
+  long_parameter_name: PM2.5 aerosol absorption coefficient at 467nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm2p5absco470:
+  long_parameter_name: PM2.5 aerosol absorption coefficient at 470nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm2p5absco520:
+  long_parameter_name: PM2.5 aerosol absorption coefficient at 520nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm2p5absco522:
+  long_parameter_name: PM2.5 aerosol absorption coefficient at 522nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm2p5absco525:
+  long_parameter_name: PM2.5 aerosol absorption coefficient at 525nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm2p5absco528:
+  long_parameter_name: PM2.5 aerosol absorption coefficient at 528nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm2p5absco530:
+  long_parameter_name: PM2.5 aerosol absorption coefficient at 530nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm2p5absco550:
+  long_parameter_name: PM2.5 aerosol absorption coefficient at 550nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm2p5absco565:
+  long_parameter_name: PM2.5 aerosol absorption coefficient at 565nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm2p5absco590:
+  long_parameter_name: PM2.5 aerosol absorption coefficient at 590nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm2p5absco637:
+  long_parameter_name: PM2.5 aerosol absorption coefficient at 637nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm2p5absco652:
+  long_parameter_name: PM2.5 aerosol absorption coefficient at 652nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm2p5absco660:
+  long_parameter_name: PM2.5 aerosol absorption coefficient at 660nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm2p5absco670:
+  long_parameter_name: PM2.5 aerosol absorption coefficient at 670nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm2p5absco880:
+  long_parameter_name: PM2.5 aerosol absorption coefficient at 880nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm2p5absco950:
+  long_parameter_name: PM2.5 aerosol absorption coefficient at 950nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: absorption_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm2p5al:
+  long_parameter_name: PM2.5 aluminium
+  matrix: pm2.5
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Al
+  chemical_formula_charge: Al
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 50000.0
+  minimum_resolution: 20.0
+pm2p5as:
+  long_parameter_name: PM2.5 arsenic
+  matrix: pm2.5
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: As
+  chemical_formula_charge: As
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: 1.0
+pm2p5asy525:
+  long_parameter_name: PM2.5 asymmetry factor at 525nm
+  matrix: pm2.5
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+pm2p5asy550:
+  long_parameter_name: PM2.5 asymmetry factor at 550nm
+  matrix: pm2.5
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+pm2p5bap:
+  long_parameter_name: PM2.5 benzo[a]pyrene
+  matrix: pm2.5
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: C20H12
+  chemical_formula_charge: C20H12
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 100.0
+  minimum_resolution: 0.1
+pm2p5bc:
+  long_parameter_name: PM2.5 black carbon
+  matrix: pm2.5
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: C
+  chemical_formula_charge: C
+  extreme_lower_limit: -0.5
+  extreme_upper_limit: 25000.0
+  minimum_resolution: 10.0
+pm2p5c:
+  long_parameter_name: PM2.5 carbon
+  matrix: pm2.5
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: C
+  chemical_formula_charge: C
+  extreme_lower_limit: -0.5
+  extreme_upper_limit: 50000.0
+  minimum_resolution: 20.0
+pm2p5ca:
+  long_parameter_name: PM2.5 calcium
+  matrix: pm2.5
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: Ca
+  chemical_formula_charge: Ca++
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 100.0
+  minimum_resolution: 0.2
+pm2p5cd:
+  long_parameter_name: PM2.5 cadmium
+  matrix: pm2.5
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Cd
+  chemical_formula_charge: Cd
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 500.0
+  minimum_resolution: 0.2
+pm2p5cl:
+  long_parameter_name: PM2.5 chloride
+  matrix: pm2.5
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: Cl
+  chemical_formula_charge: Cl-
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+pm2p5cobalt:
+  long_parameter_name: PM2.5 cobalt
+  matrix: pm2.5
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Co
+  chemical_formula_charge: Co
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 50.0
+  minimum_resolution: 0.1
+pm2p5cr:
+  long_parameter_name: PM2.5 chromium
+  matrix: pm2.5
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Cr
+  chemical_formula_charge: Cr
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 500.0
+  minimum_resolution: 1.0
+pm2p5cu:
+  long_parameter_name: PM2.5 copper
+  matrix: pm2.5
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Cu
+  chemical_formula_charge: Cu
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 750.0
+  minimum_resolution: 1.0
+pm2p5du:
+  long_parameter_name: PM2.5 dust
+  matrix: pm2.5
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 50000.0
+  minimum_resolution: 20.0
+pm2p5ec:
+  long_parameter_name: PM2.5 elemental carbon
+  matrix: pm2.5
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: C
+  chemical_formula_charge: C
+  extreme_lower_limit: -0.5
+  extreme_upper_limit: 25000.0
+  minimum_resolution: 10.0
+pm2p5fe:
+  long_parameter_name: PM2.5 iron
+  matrix: pm2.5
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Fe
+  chemical_formula_charge: Fe
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 50000.0
+  minimum_resolution: 20.0
+pm2p5hg:
+  long_parameter_name: PM2.5 mercury
+  matrix: pm2.5
+  standard_units: pg m-3
+  units_quantity: mass_concentration
+  chemical_formula: Hg
+  chemical_formula_charge: Hg
+  extreme_lower_limit: -50.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: 10.0
+pm2p5k:
+  long_parameter_name: PM2.5 potassium
+  matrix: pm2.5
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: K
+  chemical_formula_charge: K+
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 50.0
+  minimum_resolution: 0.2
+pm2p5lbsco450:
+  long_parameter_name: PM2.5 aerosol light backscattering coefficient at 450nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm2p5lbsco520:
+  long_parameter_name: PM2.5 aerosol light backscattering coefficient at 520nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm2p5lbsco525:
+  long_parameter_name: PM2.5 aerosol light backscattering coefficient at 525nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm2p5lbsco530:
+  long_parameter_name: PM2.5 aerosol light backscattering coefficient at 530nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm2p5lbsco532:
+  long_parameter_name: PM2.5 aerosol light backscattering coefficient at 532nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm2p5lbsco550:
+  long_parameter_name: PM2.5 aerosol light backscattering coefficient at 550nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm2p5lbsco635:
+  long_parameter_name: PM2.5 aerosol light backscattering coefficient at 635nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm2p5lbsco700:
+  long_parameter_name: PM2.5 aerosol light backscattering coefficient at 700nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm2p5lbsco850:
+  long_parameter_name: PM2.5 aerosol light backscattering coefficient at 850nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: backscattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: .nan
+pm2p5lbsf450:
+  long_parameter_name: PM2.5 aerosol light backscattering fraction at 450nm
+  matrix: pm2.5
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+pm2p5lbsf520:
+  long_parameter_name: PM2.5 aerosol light backscattering fraction at 520nm
+  matrix: pm2.5
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+pm2p5lbsf525:
+  long_parameter_name: PM2.5 aerosol light backscattering fraction at 525nm
+  matrix: pm2.5
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+pm2p5lbsf530:
+  long_parameter_name: PM2.5 aerosol light backscattering fraction at 530nm
+  matrix: pm2.5
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+pm2p5lbsf532:
+  long_parameter_name: PM2.5 aerosol light backscattering fraction at 532nm
+  matrix: pm2.5
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+pm2p5lbsf550:
+  long_parameter_name: PM2.5 aerosol light backscattering fraction at 550nm
+  matrix: pm2.5
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+pm2p5lbsf635:
+  long_parameter_name: PM2.5 aerosol light backscattering fraction at 635nm
+  matrix: pm2.5
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+pm2p5lbsf700:
+  long_parameter_name: PM2.5 aerosol light backscattering fraction at 700nm
+  matrix: pm2.5
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+pm2p5lbsf850:
+  long_parameter_name: PM2.5 aerosol light backscattering fraction at 850nm
+  matrix: pm2.5
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.6
+  minimum_resolution: .nan
+pm2p5lsae450-635:
+  long_parameter_name: angstrom exponent between 450 and 635 nm for PM2.5 scattering
+  matrix: pm2.5
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 5.0
+  minimum_resolution: .nan
+pm2p5lsae450-700:
+  long_parameter_name: angstrom exponent between 450 and 700 nm for PM2.5 scattering
+  matrix: pm2.5
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 5.0
+  minimum_resolution: .nan
+pm2p5lsco450:
+  long_parameter_name: PM2.5 aerosol light scattering coefficient at 450nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+pm2p5lsco520:
+  long_parameter_name: PM2.5 aerosol light scattering coefficient at 520nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+pm2p5lsco525:
+  long_parameter_name: PM2.5 aerosol light scattering coefficient at 525nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+pm2p5lsco530:
+  long_parameter_name: PM2.5 aerosol light scattering coefficient at 530nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+pm2p5lsco532:
+  long_parameter_name: PM2.5 aerosol light scattering coefficient at 532nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+pm2p5lsco550:
+  long_parameter_name: PM2.5 aerosol light scattering coefficient at 550nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+pm2p5lsco635:
+  long_parameter_name: PM2.5 aerosol light scattering coefficient at 635nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+pm2p5lsco700:
+  long_parameter_name: PM2.5 aerosol light scattering coefficient at 700nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+pm2p5lsco850:
+  long_parameter_name: PM2.5 aerosol light scattering coefficient at 850nm
+  matrix: pm2.5
+  standard_units: Mm-1
+  units_quantity: scattering_coefficient
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -10.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: .nan
+pm2p5mg:
+  long_parameter_name: PM2.5 magnesium
+  matrix: pm2.5
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: Mg
+  chemical_formula_charge: Mg++
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 50.0
+  minimum_resolution: 0.2
+pm2p5mn:
+  long_parameter_name: PM2.5 manganese
+  matrix: pm2.5
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Mn
+  chemical_formula_charge: Mn
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: 2.0
+pm2p5msa:
+  long_parameter_name: PM2.5 methanesulfonic acid
+  matrix: pm2.5
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: CH4O3S
+  chemical_formula_charge: CH4O3S
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 5.0
+  minimum_resolution: 0.2
+pm2p5na:
+  long_parameter_name: PM2.5 sodium
+  matrix: pm2.5
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: Na
+  chemical_formula_charge: Na+
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+pm2p5nh4:
+  long_parameter_name: PM2.5 ammonium
+  matrix: pm2.5
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: NH4
+  chemical_formula_charge: NH4+
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+pm2p5nh4no3:
+  long_parameter_name: PM2.5 ammonium nitrate
+  matrix: pm2.5
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: NH4NO3
+  chemical_formula_charge: NH4NO3
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+pm2p5ni:
+  long_parameter_name: PM2.5 nickel
+  matrix: pm2.5
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Ni
+  chemical_formula_charge: Ni
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 2000.0
+  minimum_resolution: 2.0
+pm2p5no3:
+  long_parameter_name: PM2.5 nitrate
+  matrix: pm2.5
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: NO3
+  chemical_formula_charge: NO3-
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 250.0
+  minimum_resolution: 0.2
+pm2p5oc:
+  long_parameter_name: PM2.5 organic carbon
+  matrix: pm2.5
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: C
+  chemical_formula_charge: C
+  extreme_lower_limit: -0.5
+  extreme_upper_limit: 25000.0
+  minimum_resolution: 10.0
+pm2p5pb:
+  long_parameter_name: PM2.5 lead
+  matrix: pm2.5
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Pb
+  chemical_formula_charge: Pb
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 10000.0
+  minimum_resolution: 10.0
+pm2p5se:
+  long_parameter_name: PM2.5 selenium
+  matrix: pm2.5
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Se
+  chemical_formula_charge: Se
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+pm2p5so4:
+  long_parameter_name: PM2.5 sulphate
+  matrix: pm2.5
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: SO4
+  chemical_formula_charge: SO4--
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+pm2p5so4nss:
+  long_parameter_name: 'PM2.5 sulphate : non-sea salt'
+  matrix: pm2.5
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: SO4
+  chemical_formula_charge: SO4--
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+pm2p5so4ss:
+  long_parameter_name: 'PM2.5 sulphate : sea salt'
+  matrix: pm2.5
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: SO4
+  chemical_formula_charge: SO4--
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+pm2p5v:
+  long_parameter_name: PM2.5 vanadium
+  matrix: pm2.5
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: V
+  chemical_formula_charge: V
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 100.0
+  minimum_resolution: 0.2
+pm2p5zn:
+  long_parameter_name: PM2.5 zinc
+  matrix: pm2.5
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Zn
+  chemical_formula_charge: Zn
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 30000.0
+  minimum_resolution: 20.0
+pmp25bcmac637:
+  long_parameter_name: mass absorption cross section of PM2.5 black carbon at 637nm
+  matrix: pm2.5
+  standard_units: m2 g-1
+  units_quantity: mass_absorption_cross_section
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 1.0
+  extreme_upper_limit: 30.0
+  minimum_resolution: .nan
+pmp25bcmac880:
+  long_parameter_name: mass absorption cross section of PM2.5 black carbon at 880nm
+  matrix: pm2.5
+  standard_units: m2 g-1
+  units_quantity: mass_absorption_cross_section
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 1.0
+  extreme_upper_limit: 30.0
+  minimum_resolution: .nan
+pmp25sca470:
+  long_parameter_name: PM2.5 single scattering albedo at 470nm
+  matrix: pm2.5
+  standard_units: unitless
+  units_quantity: single_scattering_albedo
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+pmp25sca520:
+  long_parameter_name: PM2.5 single scattering albedo at 520nm
+  matrix: pm2.5
+  standard_units: unitless
+  units_quantity: single_scattering_albedo
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+pmp25sca590:
+  long_parameter_name: PM2.5 single scattering albedo at 590nm
+  matrix: pm2.5
+  standard_units: unitless
+  units_quantity: single_scattering_albedo
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+pmp25sca637:
+  long_parameter_name: PM2.5 single scattering albedo at 637nm
+  matrix: pm2.5
+  standard_units: unitless
+  units_quantity: single_scattering_albedo
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+pmp25sca660:
+  long_parameter_name: PM2.5 single scattering albedo at 660nm
+  matrix: pm2.5
+  standard_units: unitless
+  units_quantity: single_scattering_albedo
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+precal:
+  long_parameter_name: aluminium in precipitation
+  matrix: precip
+  standard_units: ug l-1
+  units_quantity: mass_concentration
+  chemical_formula: Al
+  chemical_formula_charge: Al
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 10000.0
+  minimum_resolution: 2.0
+precas:
+  long_parameter_name: arsenic in precipitation
+  matrix: precip
+  standard_units: ug l-1
+  units_quantity: mass_concentration
+  chemical_formula: As
+  chemical_formula_charge: As
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: 1.0
+precbap:
+  long_parameter_name: benzo[a]pyrene in precipitation
+  matrix: precip
+  standard_units: ug l-1
+  units_quantity: mass_concentration
+  chemical_formula: C20H12
+  chemical_formula_charge: C20H12
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: 0.1
+precca:
+  long_parameter_name: calcium in precipitation
+  matrix: precip
+  standard_units: mg l-1
+  units_quantity: mass_concentration
+  chemical_formula: Ca
+  chemical_formula_charge: Ca++
+  extreme_lower_limit: -0.05
+  extreme_upper_limit: 50.0
+  minimum_resolution: 1.0
+preccd:
+  long_parameter_name: cadmium in precipitation
+  matrix: precip
+  standard_units: ug l-1
+  units_quantity: mass_concentration
+  chemical_formula: Cd
+  chemical_formula_charge: Cd
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: 1.0
+preccl:
+  long_parameter_name: chloride in precipitation
+  matrix: precip
+  standard_units: mg l-1
+  units_quantity: mass_concentration
+  chemical_formula: Cl
+  chemical_formula_charge: Cl-
+  extreme_lower_limit: -0.05
+  extreme_upper_limit: 200.0
+  minimum_resolution: 1.0
+preccobalt:
+  long_parameter_name: cobalt in precipitation
+  matrix: precip
+  standard_units: ug l-1
+  units_quantity: mass_concentration
+  chemical_formula: Co
+  chemical_formula_charge: Co
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 300.0
+  minimum_resolution: 1.0
+preccr:
+  long_parameter_name: chromium in precipitation
+  matrix: precip
+  standard_units: ug l-1
+  units_quantity: mass_concentration
+  chemical_formula: Cr
+  chemical_formula_charge: Cr
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 300.0
+  minimum_resolution: 1.0
+preccu:
+  long_parameter_name: copper in precipitation
+  matrix: precip
+  standard_units: ug l-1
+  units_quantity: mass_concentration
+  chemical_formula: Cu
+  chemical_formula_charge: Cu
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: 1.0
+precf:
+  long_parameter_name: flouride in precipitation
+  matrix: precip
+  standard_units: mg l-1
+  units_quantity: mass_concentration
+  chemical_formula: F
+  chemical_formula_charge: F-
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: 0.1
+precfe:
+  long_parameter_name: iron in precipitation
+  matrix: precip
+  standard_units: ug l-1
+  units_quantity: mass_concentration
+  chemical_formula: Fe
+  chemical_formula_charge: Fe
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 25000.0
+  minimum_resolution: 5.0
+prech:
+  long_parameter_name: hydrogen in precipitation
+  matrix: precip
+  standard_units: mg l-1
+  units_quantity: mass_concentration
+  chemical_formula: H
+  chemical_formula_charge: H+
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: .nan
+prechg:
+  long_parameter_name: mercury in precipitation
+  matrix: precip
+  standard_units: ng l-1
+  units_quantity: mass_concentration
+  chemical_formula: Hg
+  chemical_formula_charge: Hg
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 300.0
+  minimum_resolution: 1.0
+preck:
+  long_parameter_name: potassium in precipitation
+  matrix: precip
+  standard_units: mg l-1
+  units_quantity: mass_concentration
+  chemical_formula: K
+  chemical_formula_charge: K+
+  extreme_lower_limit: -0.05
+  extreme_upper_limit: 20.0
+  minimum_resolution: 0.2
+precmg:
+  long_parameter_name: magnesium in precipitation
+  matrix: precip
+  standard_units: mg l-1
+  units_quantity: mass_concentration
+  chemical_formula: Mg
+  chemical_formula_charge: Mg++
+  extreme_lower_limit: -0.05
+  extreme_upper_limit: 20.0
+  minimum_resolution: 1.0
+precmn:
+  long_parameter_name: manganese in precipitation
+  matrix: precip
+  standard_units: ug l-1
+  units_quantity: mass_concentration
+  chemical_formula: Mn
+  chemical_formula_charge: Mn
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 2000.0
+  minimum_resolution: 1.0
+precmsa:
+  long_parameter_name: methanesulfonic acid in precipitation
+  matrix: precip
+  standard_units: ug l-1
+  units_quantity: mass_concentration
+  chemical_formula: CH4O3S
+  chemical_formula_charge: CH4O3S
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 500.0
+  minimum_resolution: 1.0
+precna:
+  long_parameter_name: sodium in precipitation
+  matrix: precip
+  standard_units: mg l-1
+  units_quantity: mass_concentration
+  chemical_formula: Na
+  chemical_formula_charge: Na+
+  extreme_lower_limit: -0.05
+  extreme_upper_limit: 100.0
+  minimum_resolution: 1.0
+precnh4:
+  long_parameter_name: ammonium in precipitation
+  matrix: precip
+  standard_units: mg l-1
+  units_quantity: mass_concentration
+  chemical_formula: NH4
+  chemical_formula_charge: NH4+
+  extreme_lower_limit: -0.05
+  extreme_upper_limit: 50.0
+  minimum_resolution: 1.0
+precnh4no3:
+  long_parameter_name: ammonium nitrate in precipitation
+  matrix: precip
+  standard_units: mg l-1
+  units_quantity: mass_concentration
+  chemical_formula: NH4NO3
+  chemical_formula_charge: NH4NO3
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 50.0
+  minimum_resolution: 1.0
+precni:
+  long_parameter_name: nickel in precipitation
+  matrix: precip
+  standard_units: ug l-1
+  units_quantity: mass_concentration
+  chemical_formula: Ni
+  chemical_formula_charge: Ni
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 300.0
+  minimum_resolution: 1.0
+precno3:
+  long_parameter_name: nitrate in precipitation
+  matrix: precip
+  standard_units: mg l-1
+  units_quantity: mass_concentration
+  chemical_formula: NO3
+  chemical_formula_charge: NO3-
+  extreme_lower_limit: -0.05
+  extreme_upper_limit: 50.0
+  minimum_resolution: 1.0
+precpb:
+  long_parameter_name: lead in precipitation
+  matrix: precip
+  standard_units: ug l-1
+  units_quantity: mass_concentration
+  chemical_formula: Pb
+  chemical_formula_charge: Pb
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: 1.0
+precph:
+  long_parameter_name: pH of precipitation
+  matrix: precip
+  standard_units: unitless
+  units_quantity: pH
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 2.0
+  extreme_upper_limit: 9.0
+  minimum_resolution: 0.01
+precpo4:
+  long_parameter_name: phosphate in precipitation
+  matrix: precip
+  standard_units: mg l-1
+  units_quantity: mass_concentration
+  chemical_formula: PO4
+  chemical_formula_charge: PO4---
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 5.0
+  minimum_resolution: 1.0
+precse:
+  long_parameter_name: selenium in precipitation
+  matrix: precip
+  standard_units: ug l-1
+  units_quantity: mass_concentration
+  chemical_formula: Se
+  chemical_formula_charge: Se
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 20.0
+  minimum_resolution: 0.1
+precso4:
+  long_parameter_name: sulphate in precipitation
+  matrix: precip
+  standard_units: mg l-1
+  units_quantity: mass_concentration
+  chemical_formula: SO4
+  chemical_formula_charge: SO4--
+  extreme_lower_limit: -0.05
+  extreme_upper_limit: 100.0
+  minimum_resolution: 1.0
+precso4nss:
+  long_parameter_name: 'sulphate: non-sea salt in precipitation'
+  matrix: precip
+  standard_units: mg l-1
+  units_quantity: mass_concentration
+  chemical_formula: SO4
+  chemical_formula_charge: SO4--
+  extreme_lower_limit: -0.05
+  extreme_upper_limit: 100.0
+  minimum_resolution: 1.0
+precso4ss:
+  long_parameter_name: 'sulphate: sea salt in precipitation'
+  matrix: precip
+  standard_units: mg l-1
+  units_quantity: mass_concentration
+  chemical_formula: SO4
+  chemical_formula_charge: SO4--
+  extreme_lower_limit: -0.05
+  extreme_upper_limit: 100.0
+  minimum_resolution: 1.0
+precv:
+  long_parameter_name: vanadium in precipitation
+  matrix: precip
+  standard_units: ug l-1
+  units_quantity: mass_concentration
+  chemical_formula: V
+  chemical_formula_charge: V
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: 1.0
+preczn:
+  long_parameter_name: zinc in precipitation
+  matrix: precip
+  standard_units: ug l-1
+  units_quantity: mass_concentration
+  chemical_formula: Zn
+  chemical_formula_charge: Zn
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: 1.0
+pshltr:
+  long_parameter_name: 2m atmospheric pressure
+  matrix: meteo
+  standard_units: hPa
+  units_quantity: pressure
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 450.0
+  extreme_upper_limit: 1090.0
+  minimum_resolution: 1.0
+rh2:
+  long_parameter_name: average relative humidity
+  matrix: meteo
+  standard_units: unitless
+  units_quantity: relative_humidity
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 100.0
+  minimum_resolution: .nan
+rinimag1020:
+  long_parameter_name: imaginary part of the refractive index at 1020nm
+  matrix: rin
+  standard_units: unitless
+  units_quantity: refractive_index
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.5
+  minimum_resolution: .nan
+rinimag440:
+  long_parameter_name: imaginary part of the refractive index at 440nm
+  matrix: rin
+  standard_units: unitless
+  units_quantity: refractive_index
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.5
+  minimum_resolution: .nan
+rinimag675:
+  long_parameter_name: imaginary part of the refractive index at 675nm
+  matrix: rin
+  standard_units: unitless
+  units_quantity: refractive_index
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.5
+  minimum_resolution: .nan
+rinimag870:
+  long_parameter_name: imaginary part of the refractive index at 870nm
+  matrix: rin
+  standard_units: unitless
+  units_quantity: refractive_index
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 0.5
+  minimum_resolution: .nan
+rinreal1020:
+  long_parameter_name: real part of the refractive index at 1020nm
+  matrix: rin
+  standard_units: unitless
+  units_quantity: refractive_index
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 1.0
+  extreme_upper_limit: 2.0
+  minimum_resolution: .nan
+rinreal440:
+  long_parameter_name: real part of the refractive index at 440nm
+  matrix: rin
+  standard_units: unitless
+  units_quantity: refractive_index
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 1.0
+  extreme_upper_limit: 2.0
+  minimum_resolution: .nan
+rinreal675:
+  long_parameter_name: real part of the refractive index at 675nm
+  matrix: rin
+  standard_units: unitless
+  units_quantity: refractive_index
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 1.0
+  extreme_upper_limit: 2.0
+  minimum_resolution: .nan
+rinreal870:
+  long_parameter_name: real part of the refractive index at 870nm
+  matrix: rin
+  standard_units: unitless
+  units_quantity: refractive_index
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 1.0
+  extreme_upper_limit: 2.0
+  minimum_resolution: .nan
+sca1020aero:
+  long_parameter_name: single scattering albedo at 1020nm
+  matrix: ssa
+  standard_units: unitless
+  units_quantity: single_scattering_albedo
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+sca440aero:
+  long_parameter_name: single scattering albedo at 440nm
+  matrix: ssa
+  standard_units: unitless
+  units_quantity: single_scattering_albedo
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+sca470:
+  long_parameter_name: total particulate single scattering albedo at 470nm
+  matrix: pm
+  standard_units: unitless
+  units_quantity: single_scattering_albedo
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+sca520:
+  long_parameter_name: total particulate single scattering albedo at 520nm
+  matrix: pm
+  standard_units: unitless
+  units_quantity: single_scattering_albedo
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+sca550aero:
+  long_parameter_name: single scattering albedo at 550nm
+  matrix: ssa
+  standard_units: unitless
+  units_quantity: single_scattering_albedo
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+sca590:
+  long_parameter_name: total particulate single scattering albedo at 590nm
+  matrix: pm
+  standard_units: unitless
+  units_quantity: single_scattering_albedo
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+sca637:
+  long_parameter_name: total particulate single scattering albedo at 637nm
+  matrix: pm
+  standard_units: unitless
+  units_quantity: single_scattering_albedo
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+sca660:
+  long_parameter_name: total particulate single scattering albedo at 660nm
+  matrix: pm
+  standard_units: unitless
+  units_quantity: single_scattering_albedo
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+sca675aero:
+  long_parameter_name: single scattering albedo at 675nm
+  matrix: ssa
+  standard_units: unitless
+  units_quantity: single_scattering_albedo
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+sca870aero:
+  long_parameter_name: single scattering albedo at 870nm
+  matrix: ssa
+  standard_units: unitless
+  units_quantity: single_scattering_albedo
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: .nan
+scaae440-675aero:
+  long_parameter_name: angstrom exponent between 440nm and 675nm for single scattering albedo
+  matrix: ssa
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 5.0
+  minimum_resolution: .nan
+sconcal:
+  long_parameter_name: total particulate aluminium
+  matrix: pm
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Al
+  chemical_formula_charge: Al
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 50000.0
+  minimum_resolution: 20.0
+sconcald2:
+  long_parameter_name: acetaldehyde
+  matrix: gas
+  standard_units: nmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: C2H4O
+  chemical_formula_charge: C2H4O
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 500.0
+  minimum_resolution: 0.05
+sconcas:
+  long_parameter_name: total particulate arsenic
+  matrix: pm
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: As
+  chemical_formula_charge: As
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: 1.0
+sconcbap:
+  long_parameter_name: benzo[a]pyrene
+  matrix: gas
+  standard_units: pmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: C20H12
+  chemical_formula_charge: C20H12
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: 0.01
+sconcbappm:
+  long_parameter_name: total particulate benzo[a]pyrene
+  matrix: pm
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: C20H12
+  chemical_formula_charge: C20H12
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 100.0
+  minimum_resolution: 0.1
+sconcbc:
+  long_parameter_name: total particulate black carbon
+  matrix: pm
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: C
+  chemical_formula_charge: C
+  extreme_lower_limit: -0.5
+  extreme_upper_limit: 200.0
+  minimum_resolution: 1.0
+sconcc:
+  long_parameter_name: total particulate carbon
+  matrix: pm
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: C
+  chemical_formula_charge: C
+  extreme_lower_limit: -0.5
+  extreme_upper_limit: 700.0
+  minimum_resolution: 1.0
+sconcc10h16:
+  long_parameter_name: monoterpenes
+  matrix: gas
+  standard_units: pmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: C10H16
+  chemical_formula_charge: C10H16
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 20000.0
+  minimum_resolution: 100.0
+sconcc2h2:
+  long_parameter_name: acetylene
+  matrix: gas
+  standard_units: pmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: C2H2
+  chemical_formula_charge: C2H2
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 100000.0
+  minimum_resolution: 100.0
+sconcc2h4:
+  long_parameter_name: ethene
+  matrix: gas
+  standard_units: pmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: C2H4
+  chemical_formula_charge: C2H4
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 100000.0
+  minimum_resolution: 100.0
+sconcc2h6:
+  long_parameter_name: ethane
+  matrix: gas
+  standard_units: pmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: C2H6
+  chemical_formula_charge: C2H6
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 300000.0
+  minimum_resolution: 100.0
+sconcc3h6:
+  long_parameter_name: propene
+  matrix: gas
+  standard_units: pmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: C3H6
+  chemical_formula_charge: C3H6
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 100000.0
+  minimum_resolution: 100.0
+sconcc3h8:
+  long_parameter_name: propane
+  matrix: gas
+  standard_units: pmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: C3H8
+  chemical_formula_charge: C3H8
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 300000.0
+  minimum_resolution: 100.0
+sconcc4h10:
+  long_parameter_name: isobutane
+  matrix: gas
+  standard_units: pmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: C4H10
+  chemical_formula_charge: C4H10
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 300000.0
+  minimum_resolution: 100.0
+sconcc4h6:
+  long_parameter_name: 1,3-butadiene
+  matrix: gas
+  standard_units: pmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: C4H6
+  chemical_formula_charge: C4H6
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 100000.0
+  minimum_resolution: 100.0
+sconcc4h8:
+  long_parameter_name: 1-butene
+  matrix: gas
+  standard_units: pmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: C4H8
+  chemical_formula_charge: C4H8
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 100000.0
+  minimum_resolution: 100.0
+sconcc5h12:
+  long_parameter_name: n-pentane
+  matrix: gas
+  standard_units: pmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: C5H12
+  chemical_formula_charge: C5H12
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 300000.0
+  minimum_resolution: 100.0
+sconcc6h14:
+  long_parameter_name: n-hexane
+  matrix: gas
+  standard_units: pmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: C6H14
+  chemical_formula_charge: C6H14
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 300000.0
+  minimum_resolution: 100.0
+sconcc6h6:
+  long_parameter_name: benzene
+  matrix: gas
+  standard_units: pmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: C6H6
+  chemical_formula_charge: C6H6
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 100000.0
+  minimum_resolution: 100.0
+sconcc7h8:
+  long_parameter_name: toluene
+  matrix: gas
+  standard_units: pmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: C7H8
+  chemical_formula_charge: C7H8
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 100000.0
+  minimum_resolution: 100.0
+sconcc9h12:
+  long_parameter_name: 1,2,4-trimethylbenzene
+  matrix: gas
+  standard_units: pmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: C9H12
+  chemical_formula_charge: C9H12
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 100000.0
+  minimum_resolution: 100.0
+sconcca:
+  long_parameter_name: total particulate calcium
+  matrix: pm
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: Ca
+  chemical_formula_charge: Ca++
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 100.0
+  minimum_resolution: 0.2
+sconccd:
+  long_parameter_name: total particulate cadmium
+  matrix: pm
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Cd
+  chemical_formula_charge: Cd
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 500.0
+  minimum_resolution: 0.2
+sconcch4:
+  long_parameter_name: methane
+  matrix: gas
+  standard_units: nmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: CH4
+  chemical_formula_charge: CH4
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 50000.0
+  minimum_resolution: 20.0
+sconccl:
+  long_parameter_name: total particulate chloride
+  matrix: pm
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: Cl
+  chemical_formula_charge: Cl-
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+sconcco:
+  long_parameter_name: carbon monoxide
+  matrix: gas
+  standard_units: nmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: CO
+  chemical_formula_charge: CO
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 30000.0
+  minimum_resolution: 20.0
+sconccobalt:
+  long_parameter_name: total particulate cobalt
+  matrix: pm
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Co
+  chemical_formula_charge: Co
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 50.0
+  minimum_resolution: 0.1
+sconccr:
+  long_parameter_name: total particulate chromium
+  matrix: pm
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Cr
+  chemical_formula_charge: Cr
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 500.0
+  minimum_resolution: 1.0
+sconccu:
+  long_parameter_name: total particulate copper
+  matrix: pm
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Cu
+  chemical_formula_charge: Cu
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 750.0
+  minimum_resolution: 1.0
+sconcdu:
+  long_parameter_name: total particulate dust
+  matrix: pm
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10000.0
+  minimum_resolution: 20.0
+sconcec:
+  long_parameter_name: total particulate elemental carbon
+  matrix: pm
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: C
+  chemical_formula_charge: C
+  extreme_lower_limit: -0.5
+  extreme_upper_limit: 200.0
+  minimum_resolution: 1.0
+sconcetoh:
+  long_parameter_name: ethanol
+  matrix: gas
+  standard_units: nmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: C2H6O
+  chemical_formula_charge: C2H6O
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 500.0
+  minimum_resolution: 0.1
+sconcfe:
+  long_parameter_name: total particulate iron
+  matrix: pm
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Fe
+  chemical_formula_charge: Fe
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 50000.0
+  minimum_resolution: 20.0
+sconcglyox:
+  long_parameter_name: glyoxal
+  matrix: gas
+  standard_units: nmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: C2H2O2
+  chemical_formula_charge: C2H2O2
+  extreme_lower_limit: -0.02
+  extreme_upper_limit: 5.0
+  minimum_resolution: 0.02
+sconch2s:
+  long_parameter_name: hydrogen sulphide
+  matrix: gas
+  standard_units: nmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: H2S
+  chemical_formula_charge: H2S
+  extreme_lower_limit: -0.5
+  extreme_upper_limit: 500.0
+  minimum_resolution: 1.0
+sconchc:
+  long_parameter_name: total hydrocarbons
+  matrix: gas
+  standard_units: nmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: HC
+  chemical_formula_charge: HC
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 12000.0
+  minimum_resolution: 50.0
+sconchcho:
+  long_parameter_name: formaldehyde
+  matrix: gas
+  standard_units: nmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: CH2O
+  chemical_formula_charge: CH2O
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 100.0
+  minimum_resolution: 0.2
+sconchcl:
+  long_parameter_name: hydrochloric acid
+  matrix: gas
+  standard_units: nmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: HCl
+  chemical_formula_charge: HCl
+  extreme_lower_limit: -0.5
+  extreme_upper_limit: 20.0
+  minimum_resolution: 0.1
+sconchf:
+  long_parameter_name: hydrofluoric acid
+  matrix: gas
+  standard_units: nmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: HF
+  chemical_formula_charge: HF
+  extreme_lower_limit: -0.5
+  extreme_upper_limit: 50.0
+  minimum_resolution: 1.0
+sconchg:
+  long_parameter_name: total particulate mercury
+  matrix: pm
+  standard_units: pg m-3
+  units_quantity: mass_concentration
+  chemical_formula: Hg
+  chemical_formula_charge: Hg
+  extreme_lower_limit: -50.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: 10.0
+sconchggem:
+  long_parameter_name: gaseous elemental mercury
+  matrix: gas
+  standard_units: pmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: Hg
+  chemical_formula_charge: Hg
+  extreme_lower_limit: -0.05
+  extreme_upper_limit: 6.0
+  minimum_resolution: 0.01
+sconchggom:
+  long_parameter_name: gaseous oxidised mercury
+  matrix: gas
+  standard_units: fmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: Hg
+  chemical_formula_charge: Hg
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 100.0
+  minimum_resolution: 0.01
+sconchgtgm:
+  long_parameter_name: total gaseous mercury
+  matrix: gas
+  standard_units: pmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: Hg
+  chemical_formula_charge: Hg
+  extreme_lower_limit: -0.05
+  extreme_upper_limit: 6.0
+  minimum_resolution: 0.01
+sconchno3:
+  long_parameter_name: nitric acid
+  matrix: gas
+  standard_units: nmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: HNO3
+  chemical_formula_charge: HNO3
+  extreme_lower_limit: -0.5
+  extreme_upper_limit: 50.0
+  minimum_resolution: 0.1
+sconcisop:
+  long_parameter_name: isoprene
+  matrix: gas
+  standard_units: pmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: C5H8
+  chemical_formula_charge: C5H8
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 20000.0
+  minimum_resolution: 100.0
+sconck:
+  long_parameter_name: total particulate potassium
+  matrix: pm
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: K
+  chemical_formula_charge: K+
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 50.0
+  minimum_resolution: 0.2
+sconcmg:
+  long_parameter_name: total particulate magnesium
+  matrix: pm
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: Mg
+  chemical_formula_charge: Mg++
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 50.0
+  minimum_resolution: 0.2
+sconcmn:
+  long_parameter_name: total particulate manganese
+  matrix: pm
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Mn
+  chemical_formula_charge: Mn
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: 2.0
+sconcmpxyl:
+  long_parameter_name: m-p-xylene
+  matrix: gas
+  standard_units: pmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: C8H10
+  chemical_formula_charge: C8H10
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 100000.0
+  minimum_resolution: 100.0
+sconcmsa:
+  long_parameter_name: total particulate methanesulfonic acid
+  matrix: pm
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: CH4O3S
+  chemical_formula_charge: CH4O3S
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 5.0
+  minimum_resolution: 0.2
+sconcmxyl:
+  long_parameter_name: m-xylene
+  matrix: gas
+  standard_units: pmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: C8H10
+  chemical_formula_charge: C8H10
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 100000.0
+  minimum_resolution: 100.0
+sconcna:
+  long_parameter_name: total particulate sodium
+  matrix: pm
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: Na
+  chemical_formula_charge: Na+
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+sconcnh3:
+  long_parameter_name: ammonia
+  matrix: gas
+  standard_units: nmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: NH3
+  chemical_formula_charge: HC
+  extreme_lower_limit: -0.2
+  extreme_upper_limit: 1000.0
+  minimum_resolution: 1.0
+sconcnh4:
+  long_parameter_name: total particulate ammonium
+  matrix: pm
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: NH4
+  chemical_formula_charge: NH4+
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+sconcnh4no3:
+  long_parameter_name: total particulate ammonium nitrate
+  matrix: pm
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: NH4NO3
+  chemical_formula_charge: NH4NO3
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+sconcni:
+  long_parameter_name: total particulate nickel
+  matrix: pm
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Ni
+  chemical_formula_charge: Ni
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 2000.0
+  minimum_resolution: 2.0
+sconcnmvoc:
+  long_parameter_name: total non-methane volatile organic compounds
+  matrix: gas
+  standard_units: nmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: HC
+  chemical_formula_charge: HC
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10000.0
+  minimum_resolution: 20.0
+sconcno:
+  long_parameter_name: nitrogen monoxide
+  matrix: gas
+  standard_units: nmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: 'NO'
+  chemical_formula_charge: 'NO'
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1200.0
+  minimum_resolution: 1.0
+sconcno2:
+  long_parameter_name: nitrogen dioxide
+  matrix: gas
+  standard_units: nmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: NO2
+  chemical_formula_charge: NO2
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 600.0
+  minimum_resolution: 1.0
+sconcno3:
+  long_parameter_name: total particulate nitrate
+  matrix: pm
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: NO3
+  chemical_formula_charge: NO3-
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 250.0
+  minimum_resolution: 0.2
+sconco3:
+  long_parameter_name: ozone
+  matrix: gas
+  standard_units: nmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: O3
+  chemical_formula_charge: O3
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 400.0
+  minimum_resolution: 1.0
+sconcoc:
+  long_parameter_name: total particulate organic carbon
+  matrix: pm
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: C
+  chemical_formula_charge: C
+  extreme_lower_limit: -0.5
+  extreme_upper_limit: 500.0
+  minimum_resolution: 1.0
+sconcoxyl:
+  long_parameter_name: o-xylene
+  matrix: gas
+  standard_units: pmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: C8H10
+  chemical_formula_charge: C8H10
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 100000.0
+  minimum_resolution: 100.0
+sconcpan:
+  long_parameter_name: peroxyacetyl nitrate
+  matrix: gas
+  standard_units: nmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: C2H3NO5
+  chemical_formula_charge: C2H3NO5
+  extreme_lower_limit: -0.5
+  extreme_upper_limit: 90.0
+  minimum_resolution: 0.1
+sconcpb:
+  long_parameter_name: total particulate lead
+  matrix: pm
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Pb
+  chemical_formula_charge: Pb
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 10000.0
+  minimum_resolution: 10.0
+sconcpxyl:
+  long_parameter_name: p-xylene
+  matrix: gas
+  standard_units: pmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: C8H10
+  chemical_formula_charge: C8H10
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 100000.0
+  minimum_resolution: 100.0
+sconcse:
+  long_parameter_name: total particulate selenium
+  matrix: pm
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Se
+  chemical_formula_charge: Se
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+sconcso2:
+  long_parameter_name: sulphur dioxide
+  matrix: gas
+  standard_units: nmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: SO2
+  chemical_formula_charge: SO2
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 3000.0
+  minimum_resolution: 2.0
+sconcso4:
+  long_parameter_name: total particulate sulphate
+  matrix: pm
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: SO4
+  chemical_formula_charge: SO4--
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+sconcso4nss:
+  long_parameter_name: 'total particulate sulphate: non-sea salt'
+  matrix: pm
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: SO4
+  chemical_formula_charge: SO4--
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+sconcso4ss:
+  long_parameter_name: 'total particulate sulphate: sea salt'
+  matrix: pm
+  standard_units: ug m-3
+  units_quantity: mass_concentration
+  chemical_formula: SO4
+  chemical_formula_charge: SO4--
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 150.0
+  minimum_resolution: 0.2
+sconcv:
+  long_parameter_name: total particulate vanadium
+  matrix: pm
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: V
+  chemical_formula_charge: V
+  extreme_lower_limit: -1.0
+  extreme_upper_limit: 100.0
+  minimum_resolution: 0.2
+sconcvoc:
+  long_parameter_name: total volatile organic compounds
+  matrix: gas
+  standard_units: nmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: HC
+  chemical_formula_charge: HC
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 12000.0
+  minimum_resolution: 50.0
+sconcxyl:
+  long_parameter_name: xylene
+  matrix: gas
+  standard_units: pmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: C8H10
+  chemical_formula_charge: C8H10
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 100000.0
+  minimum_resolution: 100.0
+sconczn:
+  long_parameter_name: total particulate zinc
+  matrix: pm
+  standard_units: ng m-3
+  units_quantity: mass_concentration
+  chemical_formula: Zn
+  chemical_formula_charge: Zn
+  extreme_lower_limit: -5.0
+  extreme_upper_limit: 30000.0
+  minimum_resolution: 20.0
+sconnmhc:
+  long_parameter_name: total non-methane hydrocarbons
+  matrix: gas
+  standard_units: nmol mol-1
+  units_quantity: mole_fraction
+  chemical_formula: HC
+  chemical_formula_charge: HC
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10000.0
+  minimum_resolution: 20.0
+si:
+  long_parameter_name: snow depth
+  matrix: meteo
+  standard_units: cm
+  units_quantity: length
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1200.0
+  minimum_resolution: 1.0
+slp:
+  long_parameter_name: sea level pressure
+  matrix: meteo
+  standard_units: hPa
+  units_quantity: pressure
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 860.0
+  extreme_upper_limit: 1090.0
+  minimum_resolution: 1.0
+spd10:
+  long_parameter_name: 10m wind speed
+  matrix: meteo
+  standard_units: m s-1
+  units_quantity: velocity
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 90.0
+  minimum_resolution: 1.0
+sphaero:
+  long_parameter_name: sphericity factor
+  matrix: size
+  standard_units: unitless
+  units_quantity: unitless
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 100.0
+  minimum_resolution: .nan
+sst:
+  long_parameter_name: sea surface temperature
+  matrix: meteo
+  standard_units: K
+  units_quantity: temperature
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 268.15
+  extreme_upper_limit: 318.15
+  minimum_resolution: 1.0
+t2:
+  long_parameter_name: 2m air temperature
+  matrix: meteo
+  standard_units: K
+  units_quantity: temperature
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 179.95
+  extreme_upper_limit: 334.95
+  minimum_resolution: 1.0
+td2:
+  long_parameter_name: 2m dew point
+  matrix: meteo
+  standard_units: K
+  units_quantity: temperature
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 174.95
+  extreme_upper_limit: 309.95
+  minimum_resolution: 1.0
+tphclp:
+  long_parameter_name: cold-point tropopause height
+  matrix: meteo
+  standard_units: m
+  units_quantity: length
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 4000.0
+  extreme_upper_limit: 20000.0
+  minimum_resolution: .nan
+tphdyn:
+  long_parameter_name: dynamical tropopause height
+  matrix: meteo
+  standard_units: m
+  units_quantity: length
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 4000.0
+  extreme_upper_limit: 20000.0
+  minimum_resolution: .nan
+tphwmo1:
+  long_parameter_name: WMO 1st thermal lapse rate tropopause height
+  matrix: meteo
+  standard_units: m
+  units_quantity: length
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 4000.0
+  extreme_upper_limit: 20000.0
+  minimum_resolution: .nan
+tphwmo2:
+  long_parameter_name: WMO 2nd thermal lapse rate tropopause height
+  matrix: meteo
+  standard_units: m
+  units_quantity: length
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 4000.0
+  extreme_upper_limit: 20000.0
+  minimum_resolution: .nan
+u10:
+  long_parameter_name: 10m u-component of wind
+  matrix: meteo
+  standard_units: m s-1
+  units_quantity: velocity
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -90.0
+  extreme_upper_limit: 90.0
+  minimum_resolution: 1.0
+v10:
+  long_parameter_name: 10m v-component of wind
+  matrix: meteo
+  standard_units: m s-1
+  units_quantity: velocity
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: -90.0
+  extreme_upper_limit: 90.0
+  minimum_resolution: 1.0
+vconcaero:
+  long_parameter_name: normalised total volume concentration (dV(r)/dln(r))
+  matrix: vconc
+  standard_units: um3 um-2
+  units_quantity: volume_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 20.0
+  minimum_resolution: .nan
+vconcaerobin1:
+  long_parameter_name: normalised volume concentration at 0.05um (dV(r)/dln(r))
+  matrix: size
+  standard_units: um3 um-2
+  units_quantity: volume_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 2.0
+  minimum_resolution: .nan
+vconcaerobin10:
+  long_parameter_name: normalised volume concentration at 0.576227um (dV(r)/dln(r))
+  matrix: size
+  standard_units: um3 um-2
+  units_quantity: volume_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 2.0
+  minimum_resolution: .nan
+vconcaerobin11:
+  long_parameter_name: normalised volume concentration at 0.756052um (dV(r)/dln(r))
+  matrix: size
+  standard_units: um3 um-2
+  units_quantity: volume_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 2.0
+  minimum_resolution: .nan
+vconcaerobin12:
+  long_parameter_name: normalised volume concentration at 0.991996um (dV(r)/dln(r))
+  matrix: size
+  standard_units: um3 um-2
+  units_quantity: volume_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 2.0
+  minimum_resolution: .nan
+vconcaerobin13:
+  long_parameter_name: normalised volume concentration at 1.301571um (dV(r)/dln(r))
+  matrix: size
+  standard_units: um3 um-2
+  units_quantity: volume_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 2.0
+  minimum_resolution: .nan
+vconcaerobin14:
+  long_parameter_name: normalised volume concentration at 1.707757um (dV(r)/dln(r))
+  matrix: size
+  standard_units: um3 um-2
+  units_quantity: volume_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 2.0
+  minimum_resolution: .nan
+vconcaerobin15:
+  long_parameter_name: normalised volume concentration at 2.240702um (dV(r)/dln(r))
+  matrix: size
+  standard_units: um3 um-2
+  units_quantity: volume_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 2.0
+  minimum_resolution: .nan
+vconcaerobin16:
+  long_parameter_name: normalised volume concentration at 2.939966um (dV(r)/dln(r))
+  matrix: size
+  standard_units: um3 um-2
+  units_quantity: volume_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 2.0
+  minimum_resolution: .nan
+vconcaerobin17:
+  long_parameter_name: normalised volume concentration at 3.857452um (dV(r)/dln(r))
+  matrix: size
+  standard_units: um3 um-2
+  units_quantity: volume_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 2.0
+  minimum_resolution: .nan
+vconcaerobin18:
+  long_parameter_name: normalised volume concentration at 5.061260um (dV(r)/dln(r))
+  matrix: size
+  standard_units: um3 um-2
+  units_quantity: volume_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 2.0
+  minimum_resolution: .nan
+vconcaerobin19:
+  long_parameter_name: normalised volume concentration at 6.640745um (dV(r)/dln(r))
+  matrix: size
+  standard_units: um3 um-2
+  units_quantity: volume_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 2.0
+  minimum_resolution: .nan
+vconcaerobin2:
+  long_parameter_name: normalised volume concentration at 0.065604um (dV(r)/dln(r))
+  matrix: size
+  standard_units: um3 um-2
+  units_quantity: volume_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 2.0
+  minimum_resolution: .nan
+vconcaerobin20:
+  long_parameter_name: normalised volume concentration at 8.713145um (dV(r)/dln(r))
+  matrix: size
+  standard_units: um3 um-2
+  units_quantity: volume_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 2.0
+  minimum_resolution: .nan
+vconcaerobin21:
+  long_parameter_name: normalised volume concentration at 11.432287um (dV(r)/dln(r))
+  matrix: size
+  standard_units: um3 um-2
+  units_quantity: volume_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 2.0
+  minimum_resolution: .nan
+vconcaerobin22:
+  long_parameter_name: normalised volume concentration at 15.00um (dV(r)/dln(r))
+  matrix: size
+  standard_units: um3 um-2
+  units_quantity: volume_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 2.0
+  minimum_resolution: .nan
+vconcaerobin3:
+  long_parameter_name: normalised volume concentration at 0.086077um (dV(r)/dln(r))
+  matrix: size
+  standard_units: um3 um-2
+  units_quantity: volume_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 2.0
+  minimum_resolution: .nan
+vconcaerobin4:
+  long_parameter_name: normalised volume concentration at 0.112939um (dV(r)/dln(r))
+  matrix: size
+  standard_units: um3 um-2
+  units_quantity: volume_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 2.0
+  minimum_resolution: .nan
+vconcaerobin5:
+  long_parameter_name: normalised volume concentration at 0.148184um (dV(r)/dln(r))
+  matrix: size
+  standard_units: um3 um-2
+  units_quantity: volume_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 2.0
+  minimum_resolution: .nan
+vconcaerobin6:
+  long_parameter_name: normalised volume concentration at 0.194429um (dV(r)/dln(r))
+  matrix: size
+  standard_units: um3 um-2
+  units_quantity: volume_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 2.0
+  minimum_resolution: .nan
+vconcaerobin7:
+  long_parameter_name: normalised volume concentration at 0.255105um (dV(r)/dln(r))
+  matrix: size
+  standard_units: um3 um-2
+  units_quantity: volume_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 2.0
+  minimum_resolution: .nan
+vconcaerobin8:
+  long_parameter_name: normalised volume concentration at 0.334716um (dV(r)/dln(r))
+  matrix: size
+  standard_units: um3 um-2
+  units_quantity: volume_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 2.0
+  minimum_resolution: .nan
+vconcaerobin9:
+  long_parameter_name: normalised volume concentration at 0.439173um (dV(r)/dln(r))
+  matrix: size
+  standard_units: um3 um-2
+  units_quantity: volume_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 2.0
+  minimum_resolution: .nan
+vconcaerocoarse:
+  long_parameter_name: normalised total coarse mode volume concentration (dV(r)/dln(r))
+  matrix: vconc
+  standard_units: um3 um-2
+  units_quantity: volume_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 20.0
+  minimum_resolution: .nan
+vconcaerofine:
+  long_parameter_name: normalised total fine mode volume concentration (dV(r)/dln(r))
+  matrix: vconc
+  standard_units: um3 um-2
+  units_quantity: volume_concentration
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 20.0
+  minimum_resolution: .nan
+vdist:
+  long_parameter_name: visibility distance
+  matrix: meteo
+  standard_units: m
+  units_quantity: length
+  chemical_formula: ''
+  chemical_formula_charge: ''
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 100000.0
+  minimum_resolution: .nan
+wetal:
+  long_parameter_name: aluminium wet deposition flux
+  matrix: wetdep
+  standard_units: ng m-2 min-1
+  units_quantity: mass_flux
+  chemical_formula: Al
+  chemical_formula_charge: Al
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10000.0
+  minimum_resolution: 2.0
+wetas:
+  long_parameter_name: arsenic wet deposition flux
+  matrix: wetdep
+  standard_units: ng m-2 min-1
+  units_quantity: mass_flux
+  chemical_formula: As
+  chemical_formula_charge: As
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: 1.0
+wetbap:
+  long_parameter_name: benzo[a]pyrene wet deposition flux
+  matrix: wetdep
+  standard_units: ng m-2 min-1
+  units_quantity: mass_flux
+  chemical_formula: C20H12
+  chemical_formula_charge: C20H12
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1.0
+  minimum_resolution: 0.001
+wetca:
+  long_parameter_name: calcium wet deposition flux
+  matrix: wetdep
+  standard_units: ug m-2 min-1
+  units_quantity: mass_flux
+  chemical_formula: Ca
+  chemical_formula_charge: Ca++
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: 1.0
+wetcd:
+  long_parameter_name: cadmium wet deposition flux
+  matrix: wetdep
+  standard_units: ng m-2 min-1
+  units_quantity: mass_flux
+  chemical_formula: Cd
+  chemical_formula_charge: Cd
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 300.0
+  minimum_resolution: 1.0
+wetcl:
+  long_parameter_name: chloride wet deposition flux
+  matrix: wetdep
+  standard_units: ug m-2 min-1
+  units_quantity: mass_flux
+  chemical_formula: Cl
+  chemical_formula_charge: Cl-
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: 1.0
+wetcobalt:
+  long_parameter_name: cobalt wet deposition flux
+  matrix: wetdep
+  standard_units: ng m-2 min-1
+  units_quantity: mass_flux
+  chemical_formula: Co
+  chemical_formula_charge: Co
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 100.0
+  minimum_resolution: 1.0
+wetcr:
+  long_parameter_name: chromium wet deposition flux
+  matrix: wetdep
+  standard_units: ng m-2 min-1
+  units_quantity: mass_flux
+  chemical_formula: Cr
+  chemical_formula_charge: Cr
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: 1.0
+wetcu:
+  long_parameter_name: copper wet deposition flux
+  matrix: wetdep
+  standard_units: ng m-2 min-1
+  units_quantity: mass_flux
+  chemical_formula: Cu
+  chemical_formula_charge: Cu
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: 1.0
+wetf:
+  long_parameter_name: flouride wet deposition flux
+  matrix: wetdep
+  standard_units: ng m-2 min-1
+  units_quantity: mass_flux
+  chemical_formula: F
+  chemical_formula_charge: F-
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10000.0
+  minimum_resolution: 1.0
+wetfe:
+  long_parameter_name: iron wet deposition flux
+  matrix: wetdep
+  standard_units: ng m-2 min-1
+  units_quantity: mass_flux
+  chemical_formula: Fe
+  chemical_formula_charge: Fe
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10000.0
+  minimum_resolution: 1.0
+wethg:
+  long_parameter_name: mercury wet deposition flux
+  matrix: wetdep
+  standard_units: pg m-2 min-1
+  units_quantity: mass_flux
+  chemical_formula: Hg
+  chemical_formula_charge: Hg
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 300.0
+  minimum_resolution: 1.0
+wetk:
+  long_parameter_name: potassium wet deposition flux
+  matrix: wetdep
+  standard_units: ug m-2 min-1
+  units_quantity: mass_flux
+  chemical_formula: K
+  chemical_formula_charge: K+
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: 1.0
+wetmg:
+  long_parameter_name: magnesium wet deposition flux
+  matrix: wetdep
+  standard_units: ug m-2 min-1
+  units_quantity: mass_flux
+  chemical_formula: Mg
+  chemical_formula_charge: Mg++
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: 1.0
+wetmn:
+  long_parameter_name: manganese wet deposition flux
+  matrix: wetdep
+  standard_units: ng m-2 min-1
+  units_quantity: mass_flux
+  chemical_formula: Mn
+  chemical_formula_charge: Mn
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10000.0
+  minimum_resolution: 1.0
+wetmsa:
+  long_parameter_name: methanesulfonic acid wet deposition flux
+  matrix: wetdep
+  standard_units: ug m-2 min-1
+  units_quantity: mass_flux
+  chemical_formula: CH4O3S
+  chemical_formula_charge: CH4O3S
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 2000.0
+  minimum_resolution: 1.0
+wetna:
+  long_parameter_name: sodium wet deposition flux
+  matrix: wetdep
+  standard_units: ug m-2 min-1
+  units_quantity: mass_flux
+  chemical_formula: Na
+  chemical_formula_charge: Na+
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10000.0
+  minimum_resolution: 1.0
+wetnh4:
+  long_parameter_name: ammonium wet deposition flux
+  matrix: wetdep
+  standard_units: ug m-2 min-1
+  units_quantity: mass_flux
+  chemical_formula: NH4
+  chemical_formula_charge: NH4+
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 1000.0
+  minimum_resolution: 1.0
+wetnh4no3:
+  long_parameter_name: ammonium nitrate wet deposition flux
+  matrix: wetdep
+  standard_units: ug m-2 min-1
+  units_quantity: mass_flux
+  chemical_formula: NH4NO3
+  chemical_formula_charge: NH4NO3
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 2000.0
+  minimum_resolution: 1.0
+wetni:
+  long_parameter_name: nickel wet deposition flux
+  matrix: wetdep
+  standard_units: ng m-2 min-1
+  units_quantity: mass_flux
+  chemical_formula: Ni
+  chemical_formula_charge: Ni
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: 1.0
+wetno3:
+  long_parameter_name: nitrate wet deposition flux
+  matrix: wetdep
+  standard_units: ug m-2 min-1
+  units_quantity: mass_flux
+  chemical_formula: NO3
+  chemical_formula_charge: NO3-
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10000.0
+  minimum_resolution: 1.0
+wetpb:
+  long_parameter_name: lead wet deposition flux
+  matrix: wetdep
+  standard_units: ng m-2 min-1
+  units_quantity: mass_flux
+  chemical_formula: Pb
+  chemical_formula_charge: Pb
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10000.0
+  minimum_resolution: 1.0
+wetpo4:
+  long_parameter_name: phosphate wet deposition flux
+  matrix: wetdep
+  standard_units: ug m-2 min-1
+  units_quantity: mass_flux
+  chemical_formula: PO4
+  chemical_formula_charge: PO4---
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 500.0
+  minimum_resolution: 1.0
+wetse:
+  long_parameter_name: selenium wet deposition flux
+  matrix: wetdep
+  standard_units: ng m-2 min-1
+  units_quantity: mass_flux
+  chemical_formula: Se
+  chemical_formula_charge: Se
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10.0
+  minimum_resolution: 1.0
+wetso4:
+  long_parameter_name: sulphate wet deposition flux
+  matrix: wetdep
+  standard_units: ug m-2 min-1
+  units_quantity: mass_flux
+  chemical_formula: SO4
+  chemical_formula_charge: SO4--
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: 1.0
+wetso4nss:
+  long_parameter_name: 'sulphate: non-sea salt wet deposition flux'
+  matrix: wetdep
+  standard_units: ug m-2 min-1
+  units_quantity: mass_flux
+  chemical_formula: SO4
+  chemical_formula_charge: SO4--
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: 1.0
+wetso4ss:
+  long_parameter_name: 'sulphate: sea salt wet deposition flux'
+  matrix: wetdep
+  standard_units: ug m-2 min-1
+  units_quantity: mass_flux
+  chemical_formula: SO4
+  chemical_formula_charge: SO4--
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: 1.0
+wetv:
+  long_parameter_name: vanadium wet deposition flux
+  matrix: wetdep
+  standard_units: ng m-2 min-1
+  units_quantity: mass_flux
+  chemical_formula: V
+  chemical_formula_charge: V
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 5000.0
+  minimum_resolution: 1.0
+wetzn:
+  long_parameter_name: zinc wet deposition flux
+  matrix: wetdep
+  standard_units: ng m-2 min-1
+  units_quantity: mass_flux
+  chemical_formula: Zn
+  chemical_formula_charge: Zn
+  extreme_lower_limit: 0.0
+  extreme_upper_limit: 10000.0
+  minimum_resolution: 1.0

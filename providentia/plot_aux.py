@@ -24,7 +24,6 @@ from providentia.auxiliar import (
     CURRENT_PATH,
     join,
     get_conversion_factor,
-    get_standard_parameters_by_speci,
 )
 from .dashboard_elements import CheckDialog, MessageBox
 from .read_aux import remove_forecast_suffix
@@ -1366,9 +1365,7 @@ def get_fairmode_RV_exceendance(read_instance, speci, RV, exc_threshold, units):
     """
 
     # get input and output units
-    standard_parameter_speci = get_standard_parameters_by_speci(
-        speci, read_instance.ghost_version
-    )
+    standard_parameter_speci = read_instance.parameter_dictionary[speci]
     initial_units = units
     final_units = read_instance.measurement_units[speci]
 
@@ -1407,9 +1404,7 @@ def get_multispecies_conversion_factor(read_instance, speci):
     """
 
     # get input and output units
-    standard_parameter_speci = get_standard_parameters_by_speci(
-        speci, read_instance.ghost_version
-    )
+    standard_parameter_speci = read_instance.parameter_dictionary[speci]
     initial_units = read_instance.measurement_units[speci]
     final_units = read_instance.multispecies_units
 

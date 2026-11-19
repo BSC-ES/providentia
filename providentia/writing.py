@@ -274,15 +274,10 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
 
     # set up some structural variables
     from GHOST_standards import (
-        standard_parameters,
         get_standard_data,
         standard_QA_name_to_QA_code,
         standard_data_flag_name_to_data_flag_code,
     )
-
-    parameter_dictionary = {}
-    for _, param_dict in standard_parameters.items():
-        parameter_dictionary[param_dict["bsc_parameter_name"]] = param_dict
 
     # dictionary to map python types to netcdf types
     type_map = {
@@ -315,7 +310,8 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
             var_prefix = networkspeci.replace("/", "_")
 
         # get some key variables for speci
-        parameter_details = parameter_dictionary[speci]
+        # from the species reference of Providentia, whatever the GHOST version
+        parameter_details = prv.parameter_dictionary[speci]
         metadata_format_dict = prv.standard_metadata
         data_format_dict = get_standard_data(parameter_details)
 

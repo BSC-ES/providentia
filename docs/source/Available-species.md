@@ -1,6 +1,10 @@
 # Available Species
 
-The species Providentia accepts are listed under `available_species_per_matrix` in `settings/available_inputs.yaml`, grouped by matrix. This list is taken from the GHOST (**G**lobally **H**armonised **O**bservations in **S**pace & **T**ime) 1.6 standards and is the same whatever `ghost_version` is set. Whether a species has data still depends on the network, the GHOST version and the dates.
+The species Providentia can read are those of its species reference, `settings/species.yaml`, whatever `ghost_version` is set, so that data that is not from GHOST (**G**lobally **H**armonised **O**bservations in **S**pace & **T**ime), such as gridded model data, does not depend on a GHOST version. For each species it gives the matrix, the units (with what is needed to convert them), the extreme lower and upper limits (default bounds, and the check of negative values), and the minimum resolution of the instruments.
+
+The reference is generated from the GHOST 1.6 standards, and `tests/test_species.py` checks that its GHOST species keep the values of GHOST 1.6. A species that is not in GHOST can be added to it with the same fields.
+
+The GHOST version is only used for GHOST observations and for the folder of interpolated models. When GHOST observations are read, the units, chemical formula, extreme limits, minimum resolution and long name of each species are those of the selected GHOST version, if it has the species, so that they describe its data as stored and the results of a version do not change; the matrix is always the reference's. Interpolation against GHOST observations uses the same fields. Whether a species has data depends on the network, the GHOST version and the dates.
 
 For a full description of GHOST and its standards, see the [GHOST reference paper](https://essd.copernicus.org/articles/16/4417/2024/).
 
@@ -21,7 +25,7 @@ Depending on the version specified in `ghost_version` in the [configuration file
 
 ## Check Available Species
 
-For each GHOST version, the species of its standards are listed below on this page. A link to the corresponding `GHOST_standards.py` file used by Providentia is also provided for additional context on the GHOST standards used. A species of `available_inputs.yaml` that is not in the standards of the selected version is kept in the configuration, but it has no data.
+For each GHOST version, the species of its standards are listed below on this page. A link to the corresponding `GHOST_standards.py` file used by Providentia is also provided for additional context on the GHOST standards used. A species of the reference that is not in the standards of the selected version has no GHOST data, but can be read from other data.
 
 (ghost-1-2)=
 ### GHOST 1.2

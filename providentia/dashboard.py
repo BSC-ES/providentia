@@ -1395,10 +1395,12 @@ class Dashboard(QtWidgets.QWidget):
             # set initial selected config variables as set .conf files or defaults
             self.selected_network = copy.deepcopy(self.network)
             self.selected_resolution = copy.deepcopy(self.resolution)
-            self.selected_matrix = [
-                matrix for matrix, species in self.available_species_per_matrix.items()
-                if self.species[0] in species
-            ]
+            # matrix of the first species in the species reference, none if it is not there
+            self.selected_matrix = (
+                [self.parameter_dictionary[self.species[0]]["matrix"]]
+                if self.species[0] in self.parameter_dictionary
+                else []
+            )
             self.selected_species = copy.deepcopy(self.species)
             self.selected_statistic_mode = copy.deepcopy(self.statistic_mode)
             self.selected_statistic_aggregation = copy.deepcopy(
@@ -1530,8 +1532,10 @@ class Dashboard(QtWidgets.QWidget):
         self.mpl_canvas.timeseries_stat.clear()
 
 
-        # get matrices from settings/available_inputs.yaml
-        available_matrices = list(self.available_species_per_matrix)
+        # get matrices of the species reference (settings/species.yaml)
+        available_matrices = sorted(
+            {param_dict["matrix"] for param_dict in self.parameter_dictionary.values()}
+        )
 
         # update matrix field
         if not self.set_checkable_combobox_options(available_options=available_matrices,
@@ -1543,9 +1547,8 @@ class Dashboard(QtWidgets.QWidget):
         # get species of the selected matrices (all species if none is selected)
         available_species = sorted(
             speci
-            for matrix, species in self.available_species_per_matrix.items()
-            if (not self.selected_matrix) or (matrix in self.selected_matrix)
-            for speci in species
+            for speci, param_dict in self.parameter_dictionary.items()
+            if (not self.selected_matrix) or (param_dict["matrix"] in self.selected_matrix)
         )
 
         # update species field

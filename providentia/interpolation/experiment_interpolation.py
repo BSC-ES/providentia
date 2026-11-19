@@ -45,7 +45,8 @@ from providentia.auxiliar import (
     join,
     get_machine,
     get_conversion_factor,
-    get_standard_parameters_by_speci,
+    load_ghost_species,
+    load_species_reference,
     TIMESTEPS_PER_DAY,
 )
 
@@ -172,10 +173,21 @@ class ModelInterpolation(object):
             else:
                 setattr(self, variable_key, variable_val)
 
-        # import GHOST standards
-        self.standard_parameter_speci = get_standard_parameters_by_speci(
-            self.original_mod_speci_to_process, self.ghost_version
-        )
+        # define if network is in GHOST format
+        self.reading_ghost = check_for_ghost(self.network_to_interpolate_against)
+
+        # fields of the species: those of the GHOST version when interpolating against GHOST
+        # observations and the version has the species (so outputs are as they were), those of
+        # the species reference otherwise; the matrix is always the reference's
+        self.standard_parameter_speci = load_species_reference()[self.original_mod_speci_to_process]
+        if self.reading_ghost:
+            ghost_species = load_ghost_species(self.ghost_version)
+            if self.original_mod_speci_to_process in ghost_species:
+                for field in self.standard_parameter_speci:
+                    if field != "matrix":
+                        self.standard_parameter_speci[field] = ghost_species[
+                            self.original_mod_speci_to_process
+                        ][field]
 
         # get GHOST lower/upper limits for variable
         self.GHOST_speci_lower_limit = self.standard_parameter_speci[
@@ -206,9 +218,6 @@ class ModelInterpolation(object):
             )
             if os.path.exists(mod_to_interp_path):
                 mod_dir = mod_to_interp_path
-
-        # define if network is in GHOST format
-        self.reading_ghost = check_for_ghost(self.network_to_interpolate_against)
 
         # get relevant observational file
         # GHOST

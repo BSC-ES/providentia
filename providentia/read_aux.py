@@ -1091,6 +1091,30 @@ def get_networks_with_data(available_observation_data, resolution, matrices, spe
     )
 
 
+def apply_ghost_version_fields(instance):
+    """
+    Set the fields of each species (units, formula, limits, minimum resolution, long name):
+    those of the GHOST version when reading GHOST observations and the version has the species,
+    so that they describe its data as stored, and those of the species reference otherwise
+    (e.g. gridded or non-GHOST data). The matrix is always the reference's, as the menus and
+    the observation data tree use it.
+
+    Parameters
+    ----------
+    instance : object
+        Instance with the parameter dictionary, the species reference, the standard parameters
+        of the GHOST version and whether GHOST observations are read.
+    """
+
+    for speci, fields in instance.parameter_dictionary.items():
+        source = instance.species_reference[speci]
+        if instance.reading_ghost and (speci in instance.ghost_parameter_dictionary):
+            source = instance.ghost_parameter_dictionary[speci]
+        for field in fields:
+            if field != "matrix":
+                fields[field] = source[field]
+
+
 def get_resolutions_with_data(available_observation_data, matrices, species):
     """
     Get the temporal resolutions with data for at least one of the species, in one of the

@@ -12,7 +12,6 @@ from providentia.auxiliar import (
     CURRENT_PATH,
     join,
     get_conversion_factor,
-    get_standard_parameters_by_speci,
 )
 from .calculate import Stats, ModBias
 from .configuration import split_options
@@ -392,9 +391,7 @@ class DataFilter:
                 return
 
             # convert units of bounds from standard to actual before filtering
-            standard_parameter_speci = get_standard_parameters_by_speci(
-                speci, self.read_instance.ghost_version
-            )
+            standard_parameter_speci = self.read_instance.parameter_dictionary[speci]
             initial_units = standard_parameter_speci["standard_units"]
             final_units = self.read_instance.measurement_units[speci]
             conversion_factor = get_conversion_factor(
