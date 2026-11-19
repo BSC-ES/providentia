@@ -2224,6 +2224,10 @@ class Dashboard(QtWidgets.QWidget):
                 if len({check_for_ghost(network) for network in new_selected_network}) > 1:
                     msg = 'Networks must be all GHOST or non-GHOST. Keeping previous selection.'
                     show_message(self, msg)
+                # actris/actris cannot be read with other networks, otherwise keep previous selection
+                elif ("actris/actris" in new_selected_network) and (len(new_selected_network) > 1):
+                    msg = 'actris/actris cannot be read with other networks. Keeping previous selection.'
+                    show_message(self, msg)
                 else:
                     self.selected_network = new_selected_network
                     # ensure that QA defaults have been updated if network has changed (i.e. to or from ACTRIS)
