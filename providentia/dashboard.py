@@ -57,6 +57,7 @@ from .read_aux import (
     get_default_qa,
     generate_file_trees,
     get_model_id,
+    get_networks_with_data,
     get_valid_models,
     get_valid_obs_files_in_date_range,
     get_temporal_resolution_order,
@@ -1561,16 +1562,11 @@ class Dashboard(QtWidgets.QWidget):
 
         # get networks that have data for at least one of the selected species,
         # for the current resolution and matrix
-        available_networks = sorted(
-            network for network in self.available_observation_data.keys()
-            if self.selected_matrix
-            and self.selected_resolution in self.available_observation_data[network]
-            and any(
-                matrix in self.available_observation_data[network][self.selected_resolution]
-                and set(self.selected_species)
-                    & set(self.available_observation_data[network][self.selected_resolution][matrix])
-                for matrix in self.selected_matrix
-            )
+        available_networks = get_networks_with_data(
+            self.available_observation_data,
+            self.selected_resolution,
+            self.selected_matrix,
+            self.selected_species,
         )
 
         # after a date change, no network is selected if the previous one has no data in the new range

@@ -1056,6 +1056,41 @@ def get_nonghost_observational_tree(instance):
     return nonghost_observation_data
 
 
+def get_networks_with_data(available_observation_data, resolution, matrices, species):
+    """
+    Get the networks with data for a resolution and at least one of the species, in one of
+    the matrices, as the network menu of the dashboard shows them.
+
+    Parameters
+    ----------
+    available_observation_data : dict
+        Observational data in the date range, per network, resolution, matrix and species
+        (see get_valid_obs_files_in_date_range).
+    resolution : str
+        Temporal resolution (e.g. hourly).
+    matrices : list
+        Matrices of the species (e.g. ["gas"]). No network has data without matrices.
+    species : list
+        Species (e.g. ["sconco3"]).
+
+    Returns
+    -------
+    list
+        Sorted names of the networks with data.
+    """
+
+    return sorted(
+        network for network in available_observation_data.keys()
+        if matrices
+        and resolution in available_observation_data[network]
+        and any(
+            matrix in available_observation_data[network][resolution]
+            and set(species) & set(available_observation_data[network][resolution][matrix])
+            for matrix in matrices
+        )
+    )
+
+
 def get_valid_obs_files_in_date_range(instance, start_date, end_date):
     """
     Filters the full observational data tree to identify files available within a specific date range.
