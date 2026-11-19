@@ -157,10 +157,10 @@ class ProvConfiguration:
             setattr(self.read_instance, k, self.parse_parameter(k, val))
 
         # set default values of the current mode
-        # (dashboard and website can be launched without configuration file)
+        # (dashboard and library can be launched without configuration file)
         self.read_instance.default_values = (
-            defaults["dashboard_empty"]
-            if self.read_instance.mode in ["dashboard", "website"]
+            defaults["no_conf"]
+            if self.read_instance.mode in ["dashboard", "library"]
             and self.read_instance.config == ""
             else defaults[self.read_instance.mode]
         )
