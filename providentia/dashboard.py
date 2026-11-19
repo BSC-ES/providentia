@@ -1332,67 +1332,6 @@ class Dashboard(QtWidgets.QWidget):
 
         return True
 
-    def get_species_per_ghost_version(self, matrices=None, version="1.5"):
-        """
-        Get the list of GHOST standard species (bsc_parameter_name),
-        optionally filtered to those belonging to the given matrices.
-
-        Parameters
-        ----------
-        matrices : list, optional
-            If given, only species whose GHOST standard matrix is in this list
-            are returned. Selecting more than one matrix widens the list of
-            available species to the union across all of them.
-        version : str
-            GHOST version
-
-        Returns
-        -------
-        list
-            Sorted list of species.
-        """
-
-        sys.path = [
-            path for path in sys.path if "dependencies/GHOST_standards/" not in path
-        ]
-        sys.path.insert(1, join(CURRENT_PATH, f"dependencies/GHOST_standards/{version}"))
-        if "GHOST_standards" in sys.modules:
-            del sys.modules["GHOST_standards"]
-        from GHOST_standards import standard_parameters
-
-        return sorted(
-            param_dict["bsc_parameter_name"]
-            for param_dict in standard_parameters.values()
-            if (not matrices) or (param_dict["matrix"] in matrices)
-        )
-
-    def get_matrices_per_ghost_version(self, version="1.5"):
-        """
-        Get the list of GHOST standard matrices (bsc_parameter_name's
-        matrix field), independent of any network's available data.
-
-        Parameters
-        ----------
-        version : str
-            GHOST version
-
-        Returns
-        -------
-        list
-            Sorted list of unique matrices.
-        """
-
-        sys.path = [
-            path for path in sys.path if "dependencies/GHOST_standards/" not in path
-        ]
-        sys.path.insert(1, join(CURRENT_PATH, f"dependencies/GHOST_standards/{version}"))
-        if "GHOST_standards" in sys.modules:
-            del sys.modules["GHOST_standards"]
-        from GHOST_standards import standard_parameters
-
-        return sorted({param_dict["matrix"] for param_dict in standard_parameters.values()})
-
-
     def update_configuration_bar_fields(self):
         """Initialise or synchronise all configuration bar widgets and their available options."""
 
@@ -1445,7 +1384,10 @@ class Dashboard(QtWidgets.QWidget):
             # set initial selected config variables as set .conf files or defaults
             self.selected_network = copy.deepcopy(self.network)
             self.selected_resolution = copy.deepcopy(self.resolution)
-            self.selected_matrix = [self.parameter_dictionary[self.species[0]]["matrix"]]
+            self.selected_matrix = [
+                matrix for matrix, species in self.available_species_per_matrix.items()
+                if self.species[0] in species
+            ]
             self.selected_species = copy.deepcopy(self.species)
             self.selected_statistic_mode = copy.deepcopy(self.statistic_mode)
             self.selected_statistic_aggregation = copy.deepcopy(
@@ -1577,8 +1519,8 @@ class Dashboard(QtWidgets.QWidget):
         self.mpl_canvas.timeseries_stat.clear()
 
 
-        # get matrices for GHOST version 1.5
-        available_matrices = self.get_matrices_per_ghost_version()
+        # get matrices from settings/available_inputs.yaml
+        available_matrices = list(self.available_species_per_matrix)
 
         # update matrix field
         if not self.set_checkable_combobox_options(available_options=available_matrices,
@@ -1586,8 +1528,13 @@ class Dashboard(QtWidgets.QWidget):
                                                    recovery_hint='Please select a different matrix or change the date range to include available data.'):
             return
         
-        # get species for GHOST version 1.5
-        available_species = self.get_species_per_ghost_version(self.selected_matrix)
+        # get species of the selected matrices (all species if none is selected)
+        available_species = sorted(
+            speci
+            for matrix, species in self.available_species_per_matrix.items()
+            if (not self.selected_matrix) or (matrix in self.selected_matrix)
+            for speci in species
+        )
 
         # update species field
         self.set_checkable_combobox_options(available_options=available_species,
