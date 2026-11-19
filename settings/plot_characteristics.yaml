@@ -229,6 +229,10 @@
             "hspace": 0.25
           }
         },
+      "website":
+        {
+          "handles": { "markersize": 18 },
+        },
     },
   "metadata":
     {
