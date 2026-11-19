@@ -1091,6 +1091,43 @@ def get_networks_with_data(available_observation_data, resolution, matrices, spe
     )
 
 
+def get_resolutions_with_data(available_observation_data, matrices, species):
+    """
+    Get the temporal resolutions with data for at least one of the species, in one of the
+    matrices, in any network, as the resolution menu of the dashboard shows them.
+
+    Parameters
+    ----------
+    available_observation_data : dict
+        Observational data in the date range, per network, resolution, matrix and species
+        (see get_valid_obs_files_in_date_range).
+    matrices : list
+        Matrices of the species (e.g. ["gas"]). There is no data without matrices.
+    species : list
+        Species (e.g. ["sconco3"]).
+
+    Returns
+    -------
+    list
+        Resolutions with data, from the finest to the coarsest (see get_temporal_resolution_order).
+    """
+
+    return sorted(
+        {
+            resolution
+            for network in available_observation_data
+            for resolution in available_observation_data[network]
+            if matrices
+            and any(
+                matrix in available_observation_data[network][resolution]
+                and set(species) & set(available_observation_data[network][resolution][matrix])
+                for matrix in matrices
+            )
+        },
+        key=get_temporal_resolution_order().__getitem__,
+    )
+
+
 def get_valid_obs_files_in_date_range(instance, start_date, end_date):
     """
     Filters the full observational data tree to identify files available within a specific date range.

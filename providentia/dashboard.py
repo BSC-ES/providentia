@@ -58,9 +58,9 @@ from .read_aux import (
     generate_file_trees,
     get_model_id,
     get_networks_with_data,
+    get_resolutions_with_data,
     get_valid_models,
     get_valid_obs_files_in_date_range,
-    get_temporal_resolution_order,
 )
 from .toolbar import NavigationToolbar
 from .warnings_prv import show_message
@@ -1289,6 +1289,9 @@ class Dashboard(QtWidgets.QWidget):
             ]
             setattr(self, f"selected_{combobox_type}", selected_values)
 
+        # message about the selection, shown once the menu shows the new selection
+        msg_to_show = None
+
         # get options that are not available in data directories
         missing_values = [
             value
@@ -1316,7 +1319,7 @@ class Dashboard(QtWidgets.QWidget):
                 else:
                     msg += f" Please select a {combobox_type.lower()}."
                     selected_values = []
-                show_message(self, msg)
+                msg_to_show = msg
                 setattr(
                     self,
                     f"selected_{combobox_type}",
@@ -1330,6 +1333,13 @@ class Dashboard(QtWidgets.QWidget):
                 if species in selected_values
                 else QtCore.Qt.Unchecked
             )
+
+        # the text only follows a change of a check state, and none changes when nothing is selected
+        selected_cb.updateText()
+
+        # after the menu shows the new selection, as the message waits for the user to close it
+        if msg_to_show is not None:
+            show_message(self, msg_to_show)
 
         return True
 
@@ -1526,7 +1536,8 @@ class Dashboard(QtWidgets.QWidget):
         # update matrix field
         if not self.set_checkable_combobox_options(available_options=available_matrices,
                                                    combobox_type='matrix',
-                                                   recovery_hint='Please select a different matrix or change the date range to include available data.'):
+                                                   recovery_hint='Please select a different matrix or change the date range to include available data.',
+                                                   select_first_option=False):
             return
         
         # get species of the selected matrices (all species if none is selected)
@@ -1540,22 +1551,31 @@ class Dashboard(QtWidgets.QWidget):
         # update species field
         self.set_checkable_combobox_options(available_options=available_species,
                                             combobox_type='species',
-                                            recovery_hint='Please select a different species or change the date range to include available data.')
+                                            recovery_hint='Please select a different species or change the date range to include available data.',
+                                            select_first_option=False)
 
-        # get resolutions that have data in the date range, for any network
-        available_resolutions = sorted(
-            {
-                resolution
-                for network in self.available_observation_data
-                for resolution in self.available_observation_data[network]
-            },
-            key=get_temporal_resolution_order().__getitem__
+        # nothing to read without a matrix or species: READ says which, the other menus stay as they are
+        for menu in ["matrix", "species"]:
+            if not getattr(self, f"selected_{menu}"):
+                self.no_data_to_read = True
+                self.bu_read.setToolTip(f"Select a {menu} to read data")
+                self.disable_element(self.bu_read, "button")
+                self.block_config_bar_handling_updates = False
+                self.block_MPL_canvas_updates = False
+                return
+
+        # get resolutions that have data in the date range for at least one of the selected species,
+        # in any network
+        available_resolutions = get_resolutions_with_data(
+            self.available_observation_data,
+            self.selected_matrix,
+            self.selected_species,
         )
 
         # update resolution field
         if not self.set_combobox_options(available_options=available_resolutions,
                                          combobox_type='resolution',
-                                         recovery_hint='Please select a different resolution or change the date range to include available data.'):
+                                         recovery_hint='Please select a different species or change the date range to include available data.'):
             self.block_config_bar_handling_updates = False
             self.block_MPL_canvas_updates = False
             return
@@ -1569,11 +1589,11 @@ class Dashboard(QtWidgets.QWidget):
             self.selected_species,
         )
 
-        # after a date change, no network is selected if the previous one has no data in the new range
+        # no network is selected if the previous ones have no data for the new selection
         if not self.set_checkable_combobox_options(available_options=available_networks,
                                                    combobox_type='network',
-                                                   recovery_hint='Please select a different network or change the date range to include available data.',
-                                                   select_first_option=not self.date_range_has_changed):
+                                                   recovery_hint='Please select a different resolution or species, or change the date range to include available data.',
+                                                   select_first_option=False):
             self.block_config_bar_handling_updates = False
             self.block_MPL_canvas_updates = False
             return
@@ -2201,6 +2221,8 @@ class Dashboard(QtWidgets.QWidget):
                 self.cb_species: "species",
             }
             if self.sender() in empty_menus:
+                # the selection is empty too, so that the next refresh of the menus keeps it empty
+                setattr(self, f"selected_{empty_menus[self.sender()]}", [])
                 self.no_data_to_read = True
                 self.bu_read.setToolTip(f"Select a {empty_menus[self.sender()]} to read data")
                 self.disable_element(self.bu_read, "button")
