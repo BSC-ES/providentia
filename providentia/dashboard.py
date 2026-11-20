@@ -957,8 +957,8 @@ class Dashboard(QtWidgets.QWidget):
 
         # observations
         config_bar.addWidget(self.lb_obs_selection, 0, 6, 1, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_network, 1, 6, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_ghost_version, 1, 7, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_ghost_version, 1, 6, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_network, 1, 7, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.cb_ghost_features, 1, 8, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.bu_QA, 2, 6, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.bu_flags, 2, 7, QtCore.Qt.AlignLeft)
@@ -2857,6 +2857,38 @@ class Dashboard(QtWidgets.QWidget):
         if self.no_data_to_read:
             return
 
+        # import the GHOST standards of the version selected in the menu (they are only imported
+        # at start, so the species, their fields, QA codes and GHOST networks follow the menu)
+        if self.selected_ghost_version != self.ghost_version:
+            self.provconf.parse_parameter("ghost_version", self.selected_ghost_version)
+
+        # GHOST observations can only be read for the species of the selected GHOST version:
+        # if none is in it, nothing is read, otherwise the others are not read
+        if self.selected_network and all(check_for_ghost(network) for network in self.selected_network):
+            missing_species = [
+                speci for speci in self.selected_species if speci not in self.ghost_parameter_dictionary
+            ]
+            if missing_species:
+                is_are = 'is' if len(missing_species) == 1 else 'are'
+                if len(missing_species) == len(self.selected_species):
+                    msg = (f"Species {', '.join(missing_species)} {is_are} not in GHOST version "
+                           f"{self.selected_ghost_version}. Please select a different GHOST version.")
+                    show_message(self, msg)
+                    return
+                msg = (f"Species {', '.join(missing_species)} {is_are} not in GHOST version "
+                       f"{self.selected_ghost_version}, it will not be read.")
+                show_message(self, msg)
+                # untick them in the species menu, without refreshing the menus
+                self.block_config_bar_handling_updates = True
+                for row in range(self.cb_species.model().rowCount()):
+                    item = self.cb_species.model().item(row)
+                    if item.text() in missing_species:
+                        item.setCheckState(QtCore.Qt.Unchecked)
+                self.block_config_bar_handling_updates = False
+                self.selected_species = [
+                    speci for speci in self.selected_species if speci not in missing_species
+                ]
+
         # forecast options are applied to all models, so do not read if models with
         # forecast data have different forecast options or days selected
         if not self.from_conf:
@@ -3486,7 +3518,6 @@ class Dashboard(QtWidgets.QWidget):
         qa_active = False
         flags_active = False
         period_active = False
-        ghost_version_active = False
         ghost_features_active = False
 
         # see if MODEL is selected
@@ -3508,11 +3539,11 @@ class Dashboard(QtWidgets.QWidget):
                 flags_active = obs_active
                 break
 
-        # GHOST version and features are only active if all selected networks are from GHOST
+        # GHOST features are only active if all selected networks are from GHOST (the GHOST
+        # version is always active, as the GHOST networks offered depend on it)
         all_ghost = bool(self.selected_network) and all(
             check_for_ghost(network) for network in self.selected_network
         )
-        ghost_version_active = all_ghost
         ghost_features_active = all_ghost and obs_active
 
         # update buttons
@@ -3525,10 +3556,7 @@ class Dashboard(QtWidgets.QWidget):
                 self.bu_flags = self.enable_element(self.bu_flags, "button")
             else:
                 self.bu_flags = self.disable_element(self.bu_flags, "button")
-            if ghost_version_active:
-                self.cb_ghost_version = self.enable_element(self.cb_ghost_version, "combobox")
-            else:
-                self.cb_ghost_version = self.disable_element(self.cb_ghost_version, "combobox")
+            self.cb_ghost_version = self.enable_element(self.cb_ghost_version, "combobox")
             if ghost_features_active:
                 self.cb_ghost_features = self.enable_element(self.cb_ghost_features, "combobox")
             else:

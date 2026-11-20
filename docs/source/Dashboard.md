@@ -48,7 +48,11 @@ Once the time period had been updated the drop-down menus will update to show th
 
 If the network that was selected has no data in the new time period, a message is shown, no network is selected and the **READ** button is disabled until one is chosen from the network menu. The temporal resolutions menu always lists every resolution that has data in the time period, and the network menu only lists the networks that have data for the selected resolution, matrix and species. If the start date is not before the end date, or there is no data at all in the time period, the network and resolution menus are emptied and the **READ** button is disabled until the dates are corrected. The same happens if every option of the network, matrix or species menu is unticked. Hover over the disabled **READ** button to see the reason.
 
+The GHOST version menu, first in the Observations section, is always enabled: the GHOST networks in the network menu are those with data for the selected GHOST version.
+
 The matrix and species menus do not depend on the data: they list the matrices and species of the species reference of Providentia (see [Available species](Available-species.md)), whatever the GHOST version, and the species menu only shows the species of the ticked matrices.
+
+When **READ** is clicked with GHOST networks, the GHOST standards of the version selected in the GHOST version menu are used (species, units and limits). If a selected species is not in that version, a message says so, it is unticked and the other species are read. If none of the selected species is in that version, nothing is read until a different GHOST version (or species) is selected.
 
 Next, there are four pop-up menus:
 * **QA** contains the GHOST quality assurance flags to filter observations by, as explained in [QA](QA-filtering.md).
