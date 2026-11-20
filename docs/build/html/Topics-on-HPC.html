@@ -156,9 +156,9 @@
 <section id="bashrc-for-bsc-hpc-machines">
 <h4>.bashrc for BSC HPC machines<a class="headerlink" href="#bashrc-for-bsc-hpc-machines" title="Link to this heading"></a></h4>
 <p>For BSC users, you should also have these lines in your <code class="docutils literal notranslate"><span class="pre">.bashrc</span></code> file in the <code class="docutils literal notranslate"><span class="pre">$HOME</span></code> directory of the remote HPC machine:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>if [ &quot;$BSC_MACHINE&quot; == &quot;mn5&quot; ]; then
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>if [ "$BSC_MACHINE" == "mn5" ]; then
     module use /gpfs/projects/bsc32/software/rhel/9.2/modules/all
-elif [ $BSC_MACHINE == &quot;nord4&quot; ]; then
+elif [ $BSC_MACHINE == "nord4" ]; then
    module load nord3-singu
    module load bsc/current
    module use /gpfs/projects/bsc32/software/suselinux/11/modules/all

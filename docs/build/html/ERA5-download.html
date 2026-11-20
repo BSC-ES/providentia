@@ -65,12 +65,13 @@
 <li class="toctree-l4"><a class="reference internal" href="#era5-hourly-data-on-single-levels-from-1940-to-present">1. ERA5 hourly data on single levels from 1940 to present</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#example-configuration-file">Example configuration file</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#reanalysis-tropopause-data-repository">2. Reanalysis Tropopause Data Repository</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id6">Example configuration file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">Example configuration file</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#cds-era5-ghost-species-mapping">CDS ERA5-GHOST species mapping</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#sdl-era5-ghost-species-mapping">SDL ERA5-GHOST species mapping</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="ICAP-download.html">ICAP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="BDRC-download.html">BDRC</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Library-mode.html">Library</a></li>
@@ -135,7 +136,7 @@
 </ol>
 </section>
 <section id="how-to-enable-era5-download">
-<span id="id1"></span><h2>How to enable ERA5 download<a class="headerlink" href="#how-to-enable-era5-download" title="Link to this heading"></a></h2>
+<h2>How to enable ERA5 download<a class="headerlink" href="#how-to-enable-era5-download" title="Link to this heading"></a></h2>
 <p>To download ERA5 data, include one of the following model names along with the domain:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">era5_reanalysis-global</span></code> - <a class="reference internal" href="#era5-hourly-data-on-single-levels-from-1940-to-present"><strong>ERA5 hourly data on single levels from 1940 to present</strong></a></p></li>
@@ -160,7 +161,7 @@
 <p>The equivalent area for the request would be the following:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="o">...</span>
-    <span class="s2">&quot;area&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">72</span><span class="p">,</span> <span class="o">-</span><span class="mi">28</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">53</span><span class="p">],</span>
+    <span class="s2">"area"</span><span class="p">:</span> <span class="p">[</span><span class="mi">72</span><span class="p">,</span> <span class="o">-</span><span class="mi">28</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">53</span><span class="p">],</span>
     <span class="o">...</span>
 <span class="p">}</span>
 </pre></div>
@@ -335,16 +336,16 @@
 <p>Using this dataset you can download <strong>Global Tropopause Reanalysis data</strong>.</p>
 <p>This dataset contains single-level data.</p>
 <p>Only hourly global data is available in this dataset. You must set <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">hourly</span></code> and <code class="docutils literal notranslate"><span class="pre">domain</span> <span class="pre">=</span> <span class="pre">global</span></code> in your configuration file; otherwise, the download will not work.</p>
-<section id="id2">
-<h3>Mandatory fields<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<section id="id1">
+<h3>Mandatory fields<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">era5_tropopause</span>
 <span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">global</span>
 <span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
 </pre></div>
 </div>
 </section>
-<section id="id3">
-<h3>Available variables (Species)<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<section id="id2">
+<h3>Available variables (Species)<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
 <p>These are the available species:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">tphclp</span></code></p></li>
@@ -356,17 +357,17 @@
 <div><p>Providentia can only read species in GHOST format. If you want to know the mapping from SDL ERA5 variables to GHOST species, please refer to the <a class="reference internal" href="#sdl-era5-ghost-species-mapping">SDL ERA5-GHOST species mapping</a> section.</p>
 </div></blockquote>
 </section>
-<section id="id4">
-<h3>Dataset temporal coverage<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<section id="id3">
+<h3>Dataset temporal coverage<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
 <p>The dataset covers the period from January 2000 to the present.</p>
 </section>
-<section id="id5">
-<h3>Fixed Download Settings<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<section id="id4">
+<h3>Fixed Download Settings<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
 <p>Providentia downloads tropopause data from the <code class="docutils literal notranslate"><span class="pre">v2/era5</span></code> directory.</p>
 </section>
 </section>
-<section id="id6">
-<h2>Example configuration file<a class="headerlink" href="#id6" title="Link to this heading"></a></h2>
+<section id="id5">
+<h2>Example configuration file<a class="headerlink" href="#id5" title="Link to this heading"></a></h2>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[ERA5-SDL]</span><span class="w"> </span>
 <span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20220101</span>
 <span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20220201</span>

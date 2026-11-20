@@ -79,7 +79,7 @@ You may also specify related species in the [mapping_species.yaml](interpolation
 
 ## Example configuration files
 
-#### Example 1: ZAMG WRF CHEM MODEL
+### Example 1: ZAMG WRF CHEM MODEL
 ```ini
 [BDRC-zamg_wrf_chem] 
 model = bdrc_zamg_wrf_chem
@@ -91,7 +91,7 @@ domain = regional
 dl_interpolated = False
 ```
 
-#### Example 2: WRF NEMO MODEL
+### Example 2: WRF NEMO MODEL
 ```ini
 [BDRC-wrf_nemo] 
 model = bdrc_wrf_nemo

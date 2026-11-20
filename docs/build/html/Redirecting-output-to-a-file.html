@@ -133,7 +133,7 @@
 </pre></div>
 </div>
 <p>In the notebook mode, the command looks like this:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">Providentia</span><span class="p">(</span><span class="s1">&#39;debug.conf&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">Providentia</span><span class="p">(</span><span class="s1">'debug.conf'</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This command will create a log file inside the <code class="docutils literal notranslate"><span class="pre">logs</span></code> folder within the directory corresponding to the active mode. For example, logs generated in dashboard mode will be saved in <code class="docutils literal notranslate"><span class="pre">logs/dashboard</span></code>. The log files are named with a timestamp in the format <code class="docutils literal notranslate"><span class="pre">%Y%m%d%H%M%S.log</span></code>, such as <code class="docutils literal notranslate"><span class="pre">20250313123045.log</span></code>.</p>
@@ -145,7 +145,7 @@
 </pre></div>
 </div>
 <p>In the notebook mode, it is like this:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">Providentia</span><span class="p">(</span><span class="s1">&#39;debug.conf&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="s1">&#39;custom_filename&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">Providentia</span><span class="p">(</span><span class="s1">'debug.conf'</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="s1">'custom_filename'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This will save the log file with the name <code class="docutils literal notranslate"><span class="pre">custom_filename</span></code> inside the default <code class="docutils literal notranslate"><span class="pre">logs</span></code> folder.</p>
@@ -157,7 +157,7 @@
 </pre></div>
 </div>
 <p>In the notebook mode, it is like this:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">Providentia</span><span class="p">(</span><span class="s1">&#39;debug.conf&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="s1">&#39;/custom/path/custom_filename&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">Providentia</span><span class="p">(</span><span class="s1">'debug.conf'</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="s1">'/custom/path/custom_filename'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This will save the log file in <code class="docutils literal notranslate"><span class="pre">/custom/path/</span></code> with the name <code class="docutils literal notranslate"><span class="pre">custom_filename</span></code>. Ensure that the specified path exists, Providentia will not create non-existent directories.</p>

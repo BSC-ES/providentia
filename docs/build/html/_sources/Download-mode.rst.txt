@@ -14,3 +14,4 @@ Download
    CAMS-download.md
    ERA5-download.md
    ICAP-download.md
+   BDRC-download.md

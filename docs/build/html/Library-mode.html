@@ -21,7 +21,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Notebooks" href="Notebooks.html" />
-    <link rel="prev" title="ICAP" href="ICAP-download.html" /> 
+    <link rel="prev" title="BDRC" href="BDRC-download.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -142,24 +142,24 @@
 <h4>Accessing the Providentia modes<a class="headerlink" href="#accessing-the-providentia-modes" title="Link to this heading"></a></h4>
 <p>Each of the different Providentia modes can be used through the Providentia object, as well as would normally execute them via the command line.</p>
 <p>After importing Providentia, you need to create the object using a configuration file:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">Providentia</span><span class="p">(</span><span class="s1">&#39;interactive_template.conf&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">Providentia</span><span class="p">(</span><span class="s1">'interactive_template.conf'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Providentia looks for configuration files in the <code class="docutils literal notranslate"><span class="pre">configurations</span></code> folder by default, if your configuration file is saved elsewhere, pass the complete path.</p>
 <p>The configuration file is optional. Instead, the configuration fields can be passed as arguments:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">Providentia</span><span class="p">(</span><span class="n">network</span><span class="o">=</span><span class="s1">&#39;EBAS&#39;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s1">&#39;sconco3&#39;</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="s1">&#39;20180101&#39;</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="s1">&#39;20180201&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">Providentia</span><span class="p">(</span><span class="n">network</span><span class="o">=</span><span class="s1">'EBAS'</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s1">'sconco3'</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="s1">'20180101'</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="s1">'20180201'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Fields that are not passed take the same defaults as the dashboard when it is launched without a configuration file (network <code class="docutils literal notranslate"><span class="pre">GHOST</span></code>, species <code class="docutils literal notranslate"><span class="pre">sconco3</span></code>, resolution <code class="docutils literal notranslate"><span class="pre">hourly</span></code>, from <code class="docutils literal notranslate"><span class="pre">20180101</span></code> to <code class="docutils literal notranslate"><span class="pre">20190101</span></code>). Without a configuration file there are no sections or subsections.</p>
 <p>By default the plots are drawn with matplotlib. To get plotly figures instead, pass <code class="docutils literal notranslate"><span class="pre">backend='plotly'</span></code> when creating the object, which then applies to every plot it makes:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">Providentia</span><span class="p">(</span><span class="s1">&#39;interactive_template.conf&#39;</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;plotly&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">Providentia</span><span class="p">(</span><span class="s1">'interactive_template.conf'</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s1">'plotly'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>At the moment only the timeseries, the map, the table and the statsummary can be drawn with plotly. In the plotly table, a networkspecies or subsection repeated in the rows below is left blank instead of merged.</p>
 <p>The configuration will become part of the object, therefere you can call the modes as explained below. You can pass any arguments you wish when calling each function to override what is set in the loaded configuration file.</p>
 <p>When using Providentia inside a Python script, instead of through the terminal or in a Jupyter notebook, we need to call its functions with the main guard:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">Providentia</span><span class="p">(</span><span class="s1">&#39;interactive_template.conf&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">Providentia</span><span class="p">(</span><span class="s1">'interactive_template.conf'</span><span class="p">)</span>
     <span class="c1"># Other functions (load, plot, etc.)</span>
 </pre></div>
 </div>
@@ -193,14 +193,14 @@
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">provi</span></code> is the object instance previously defined, which can access all of the class variables and methods.</p>
 <p>Only one section-subsection pair in the configuration file can be read and filtered by the library at one time, with the exception in the creation of plots with the <code class="docutils literal notranslate"><span class="pre">multispecies</span></code> option (see plotting section). Where there is more than one pair defined in the file, the specific pair wished to be read can be set by passing the section and/or subsection arguments, e.g.:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">Providentia</span><span class="p">(</span><span class="s1">&#39;interactive_template.conf&#39;</span><span class="p">,</span> <span class="n">section</span><span class="o">=</span><span class="s1">&#39;OTHERSECTION&#39;</span><span class="p">,</span> <span class="n">subsection</span><span class="o">=</span><span class="s1">&#39;OTHERSUBSECTION&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">Providentia</span><span class="p">(</span><span class="s1">'interactive_template.conf'</span><span class="p">,</span> <span class="n">section</span><span class="o">=</span><span class="s1">'OTHERSECTION'</span><span class="p">,</span> <span class="n">subsection</span><span class="o">=</span><span class="s1">'OTHERSUBSECTION'</span><span class="p">)</span>
 <span class="n">provi</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>If there are multiple section and subsection pairs in the configuration file, and a specific pair is not explicitly set to be read, then simply the first pair is taken to be read.</p>
 <p>When wanting to change any data or filters applied to the data, simply update the configuration file and reinitiate the class instance.</p>
 <p>If wanting to overwrite any arguments in the configuration file, directly in the script, each argument can be simply passed when initiating the class instance, e.g.:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">Providentia</span><span class="p">(</span><span class="s1">&#39;interactive_template.conf&#39;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s1">&#39;EANET&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">Providentia</span><span class="p">(</span><span class="s1">'interactive_template.conf'</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s1">'EANET'</span><span class="p">)</span>
 <span class="n">provi</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -229,12 +229,12 @@
 </div>
 <p>NOTE: It is not mandatory to pass <code class="docutils literal notranslate"><span class="pre">lower</span></code> and <code class="docutils literal notranslate"><span class="pre">upper</span></code> arguments together.</p>
 <p>If the field is textual, values to keep and remove associated data with can be set as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="s1">&#39;Spain&#39;</span><span class="p">,</span> <span class="n">remove</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="s1">'Spain'</span><span class="p">,</span> <span class="n">remove</span><span class="o">=</span><span class="s1">''</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>NOTE: It is not mandatory to pass <code class="docutils literal notranslate"><span class="pre">keep</span></code> and <code class="docutils literal notranslate"><span class="pre">remove</span></code> arguments together.</p>
 <p>If multiple values are wanted to be removed concurrently, the arguments passed should be lists.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">remove</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Spain&#39;</span><span class="p">,</span><span class="s1">&#39;France&#39;</span><span class="p">])</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">remove</span><span class="o">=</span><span class="p">[</span><span class="s1">'Spain'</span><span class="p">,</span><span class="s1">'France'</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>For the specific case of coverage fields, the argument passed should be <code class="docutils literal notranslate"><span class="pre">limit</span></code>:</p>
@@ -257,19 +257,19 @@
 </pre></div>
 </div>
 <p>If wanting to visually print any other existing configuration, this can be done by passing the <code class="docutils literal notranslate"><span class="pre">conf</span></code> or <code class="docutils literal notranslate"><span class="pre">config</span></code> argument:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">print_config</span><span class="p">(</span><span class="n">conf</span><span class="o">=</span><span class="s1">&#39;another-configuration.conf&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">print_config</span><span class="p">(</span><span class="n">conf</span><span class="o">=</span><span class="s1">'another-configuration.conf'</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
 <section id="library-calculate-statistics">
 <h4>Library: Calculate statistics<a class="headerlink" href="#library-calculate-statistics" title="Link to this heading"></a></h4>
 <p>In order to calculate statistics for a dataset, this can done via the following method:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">stat_calc</span> <span class="o">=</span> <span class="n">provi</span><span class="o">.</span><span class="n">statistic</span><span class="p">(</span><span class="n">stat</span><span class="p">,</span> <span class="n">labela</span><span class="o">=</span><span class="s1">&#39;OBS&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">stat_calc</span> <span class="o">=</span> <span class="n">provi</span><span class="o">.</span><span class="n">statistic</span><span class="p">(</span><span class="n">stat</span><span class="p">,</span> <span class="n">labela</span><span class="o">=</span><span class="s1">'OBS'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">stat</span></code> is the statistic wished to be calculated, and <code class="docutils literal notranslate"><span class="pre">labela</span></code> is the name of the observations/model data (this can be an alias set in the configuration file or the original dataset name). The statistic returned will be one summary value, which can be formulated in differing ways, e.g. taking a median time series across all stations and then calculating the statistic or calculating the statistic across all stations and then taking the median. This formulation can be set by changing the statistical mode in the configuration file, for which more information can be found <a class="reference internal" href="Statistics.html"><span class="doc std std-doc">here</span></a>.</p>
 <p>If wanting to calculate a bias statistic, then an additional dataset is needed to be compared against, which can be set via the following argument:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">labelb</span><span class="o">=</span><span class="s1">&#39;EMEP&#39;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">labelb</span><span class="o">=</span><span class="s1">'EMEP'</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">EMEP</span></code> in this case is the name of the dataset that is wished to be compared against.</p>
@@ -282,12 +282,12 @@
 <section id="library-saving-data">
 <h4>Library: Saving data<a class="headerlink" href="#library-saving-data" title="Link to this heading"></a></h4>
 <p>The data which has been read and filtered can be saved out using the following method:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s1">&#39;nc&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s1">'nc'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">format</span></code> is the format of the saved data, and can be <code class="docutils literal notranslate"><span class="pre">nc</span></code> (netCDF), <code class="docutils literal notranslate"><span class="pre">np</span></code> (numpy) or <code class="docutils literal notranslate"><span class="pre">conf</span></code> (Providentia configuration file). In the case of <code class="docutils literal notranslate"><span class="pre">conf</span></code>, rather than the data being saved, a Providentia configuration file is generated, which when loaded would return the exact same data in memory.</p>
 <p>The filename of the saved data can be set by passing the following argument:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fname</span><span class="o">=</span><span class="s1">&#39;/mypath/myfilename&#39;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fname</span><span class="o">=</span><span class="s1">'/mypath/myfilename'</span>
 </pre></div>
 </div>
 <p>If <code class="docutils literal notranslate"><span class="pre">fname</span></code> is not provided then one is generated automatically, and saved in the directory <code class="docutils literal notranslate"><span class="pre">saved_data</span></code>.</p>
@@ -296,7 +296,7 @@
 <section id="library-accessing-data-in-memory">
 <h4>Library: Accessing data in memory<a class="headerlink" href="#library-accessing-data-in-memory" title="Link to this heading"></a></h4>
 <p>As well as being able to save data out, data can be returned directly in memory in specific formats, via the following method:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">provi</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s1">&#39;xr&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">provi</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s1">'xr'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">format</span></code> is the format of the returned data, and can be <code class="docutils literal notranslate"><span class="pre">nc</span></code> (netCDF), <code class="docutils literal notranslate"><span class="pre">np</span></code> (numpy) or <code class="docutils literal notranslate"><span class="pre">xr</span></code> (xarray).</p>
@@ -305,7 +305,7 @@
 <section id="library-accessing-specific-variable-in-memory">
 <h4>Library: Accessing specific variable in memory<a class="headerlink" href="#library-accessing-specific-variable-in-memory" title="Link to this heading"></a></h4>
 <p>If wanting to extract a specific variable in memory, rather than the entire read dataset, this can be done using the following method:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">var_data</span> <span class="o">=</span> <span class="n">provi</span><span class="o">.</span><span class="n">variable</span><span class="p">(</span><span class="n">var</span><span class="o">=</span><span class="s1">&#39;myvar&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">var_data</span> <span class="o">=</span> <span class="n">provi</span><span class="o">.</span><span class="n">variable</span><span class="p">(</span><span class="n">var</span><span class="o">=</span><span class="s1">'myvar'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">var</span></code> is the name of the variable wished to be read.</p>
@@ -324,7 +324,7 @@
 <section id="species">
 <h6>Species<a class="headerlink" href="#species" title="Link to this heading"></a></h6>
 <p>In non-multispecies plots you can choose the species that you want to plot using the <code class="docutils literal notranslate"><span class="pre">networkspeci</span></code> argument, e.g.:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">networkspeci</span><span class="o">=</span><span class="s1">&#39;EEA|sconco3&#39;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">networkspeci</span><span class="o">=</span><span class="s1">'EEA|sconco3'</span>
 </pre></div>
 </div>
 </section>
@@ -349,7 +349,7 @@
 <section id="limiting-plotted-data">
 <h6>Limiting plotted data<a class="headerlink" href="#limiting-plotted-data" title="Link to this heading"></a></h6>
 <p>By default, all read data will be plotted. If wanting to limit which data is plotted, this can be done by passing a list of the relevant data labels to be plotted, e.g.:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">data_labels</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;EMEP&#39;</span><span class="p">,</span> <span class="s1">&#39;MONARCH&#39;</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">data_labels</span><span class="o">=</span><span class="p">[</span><span class="s1">'EMEP'</span><span class="p">,</span> <span class="s1">'MONARCH'</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>NOTE: These labels should be the dataset aliases, if set.</p>
@@ -357,23 +357,23 @@
 <section id="setting-title-x-or-y-labels">
 <h6>Setting title, x or y labels<a class="headerlink" href="#setting-title-x-or-y-labels" title="Link to this heading"></a></h6>
 <p>The title, xlabel and ylabel will be set automatically (if required) for all plot types, however if wanting to overwrite them this can be done by passing the following arguments:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;My custom title&#39;</span>
-<span class="n">xlabel</span><span class="o">=</span><span class="s1">&#39;My custom xlabel&#39;</span>
-<span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;My custom ylabel&#39;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">title</span><span class="o">=</span><span class="s1">'My custom title'</span>
+<span class="n">xlabel</span><span class="o">=</span><span class="s1">'My custom xlabel'</span>
+<span class="n">ylabel</span><span class="o">=</span><span class="s1">'My custom ylabel'</span>
 </pre></div>
 </div>
 </section>
 <section id="custom-formatting">
 <h6>Custom formatting<a class="headerlink" href="#custom-formatting" title="Link to this heading"></a></h6>
 <p>To have more granular control of the plot formatting, and overwrite specific variables set in <code class="docutils literal notranslate"><span class="pre">settings/plot_characteristics.yaml</span></code>, the <code class="docutils literal notranslate"><span class="pre">format</span></code> argument can be used to pass a dictionary which sets specific plot type format variables to overwrite, e.g.:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">format</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;figsize&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">14</span><span class="p">,</span><span class="mi">7</span><span class="p">],</span> <span class="s2">&quot;xtick_params&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;labelsize&quot;</span><span class="p">:</span> <span class="mi">22</span><span class="p">}}</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">format</span><span class="o">=</span><span class="p">{</span><span class="s2">"figsize"</span><span class="p">:</span> <span class="p">[</span><span class="mi">14</span><span class="p">,</span><span class="mi">7</span><span class="p">],</span> <span class="s2">"xtick_params"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"labelsize"</span><span class="p">:</span> <span class="mi">22</span><span class="p">}}</span>
 </pre></div>
 </div>
 </section>
 <section id="plot-options">
 <h6>Plot options<a class="headerlink" href="#plot-options" title="Link to this heading"></a></h6>
 <p>As in reports, plot options can be set for each plot type. There are 2 ways to set the plot options. One way is passing them all through a list, e.g.:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plot_options</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;annotate&#39;</span><span class="p">,</span> <span class="s1">&#39;bias&#39;</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plot_options</span><span class="o">=</span><span class="p">[</span><span class="s1">'annotate'</span><span class="p">,</span> <span class="s1">'bias'</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>The other way is to pass each individual plot option as an argument e.g.:</p>
@@ -392,7 +392,7 @@
 <p>where <code class="docutils literal notranslate"><span class="pre">plot_obj</span></code> is the object of the plot returned.</p>
 <p>If no valid data is left for the plot (for example, when temporal colocation removes all of it because the models do not have data at the same times and stations), a warning is shown, no plot is made and <code class="docutils literal notranslate"><span class="pre">plot_obj</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
 <p>To save the plot, the following argument can be passed:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">save</span><span class="o">=</span><span class="s1">&#39;fname&#39;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">save</span><span class="o">=</span><span class="s1">'fname'</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">save</span></code> is the name of the file to save to. If save is set as: <code class="docutils literal notranslate"><span class="pre">save=True</span></code>, then the filename will be automatically generated and saved in the <code class="docutils literal notranslate"><span class="pre">plots</span></code> directory.</p>
@@ -405,7 +405,7 @@
 </pre></div>
 </div>
 <p>By default, the files will be saved in the <code class="docutils literal notranslate"><span class="pre">saved_data</span></code> folder, users can change the path by passing <code class="docutils literal notranslate"><span class="pre">save_data_path</span></code>.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plot_obj</span> <span class="o">=</span> <span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_type</span><span class="p">,</span> <span class="n">save_data</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save_data_path</span><span class="o">=</span><span class="s1">&#39;path&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plot_obj</span> <span class="o">=</span> <span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_type</span><span class="p">,</span> <span class="n">save_data</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save_data_path</span><span class="o">=</span><span class="s1">'path'</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -415,7 +415,7 @@
 <section id="id1">
 <h6>legend<a class="headerlink" href="#id1" title="Link to this heading"></a></h6>
 <p>The legend plot can be made as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;legend&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">'legend'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>It has no available plot options.</p>
@@ -423,7 +423,7 @@
 <section id="metadata">
 <h6>metadata<a class="headerlink" href="#metadata" title="Link to this heading"></a></h6>
 <p>The metadata plot can be made as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;metadata&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">'metadata'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>It has no available plot options.</p>
@@ -431,12 +431,12 @@
 <section id="map">
 <h6>map<a class="headerlink" href="#map" title="Link to this heading"></a></h6>
 <p>The map plot can be made as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;map-stat&#39;</span><span class="p">,</span> <span class="n">labela</span><span class="o">=</span><span class="s1">&#39;OBS&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">'map-stat'</span><span class="p">,</span> <span class="n">labela</span><span class="o">=</span><span class="s1">'OBS'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>where stat is the statistic to be plotted per station on the map, and <code class="docutils literal notranslate"><span class="pre">labela</span></code> is the data label of the dataset to calculate the statistics with.</p>
 <p>By adding <code class="docutils literal notranslate"><span class="pre">labelb</span></code> to the plot arguments, you can turn the plot type into a bias plot:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;map-stat&#39;</span><span class="p">,</span> <span class="n">labela</span><span class="o">=</span><span class="s1">&#39;OBS&#39;</span><span class="p">,</span> <span class="n">labelb</span><span class="o">=</span><span class="s1">&#39;MONARCH&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">'map-stat'</span><span class="p">,</span> <span class="n">labela</span><span class="o">=</span><span class="s1">'OBS'</span><span class="p">,</span> <span class="n">labelb</span><span class="o">=</span><span class="s1">'MONARCH'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>For bias statistics for which a subtraction is involved, it is always done as <code class="docutils literal notranslate"><span class="pre">datasetb</span> <span class="pre">-</span> <span class="pre">dataseta</span></code>.</p>
@@ -446,7 +446,7 @@
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">lonmin</span></code>, <code class="docutils literal notranslate"><span class="pre">lonmax</span></code>, <code class="docutils literal notranslate"><span class="pre">latmin</span></code>, and <code class="docutils literal notranslate"><span class="pre">latmax</span></code> are the rectangular bounds of the map extent, e.g.: <code class="docutils literal notranslate"><span class="pre">map_extent</span> <span class="pre">=</span> <span class="pre">[-180,</span> <span class="pre">180,</span> <span class="pre">-90,</span> <span class="pre">90]</span></code></p>
 <p>The projection of the map is the one set in <code class="docutils literal notranslate"><span class="pre">settings/plot_characteristics.yaml</span></code> (see <a class="reference internal" href="Plot-customisation.html"><span class="std std-doc">Plot customisation</span></a>). It can be changed by passing the argument:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">projection</span> <span class="o">=</span> <span class="s1">&#39;Mollweide&#39;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">projection</span> <span class="o">=</span> <span class="s1">'Mollweide'</span>
 </pre></div>
 </div>
 <p>with the name of any of the projections listed there. The projection is kept for the maps made afterwards, until another one is passed.</p>
@@ -455,11 +455,11 @@
 <section id="timeseries">
 <h6>timeseries<a class="headerlink" href="#timeseries" title="Link to this heading"></a></h6>
 <p>The timeseries plot can be made as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;timeseries&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">'timeseries'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>By adding a statistic and resolution, we can get statistical timeseries to see the variation of a statistic with time:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;timeseries-stat-resolution&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">'timeseries-stat-resolution'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The available plot options are: <code class="docutils literal notranslate"><span class="pre">annotate</span></code>, <code class="docutils literal notranslate"><span class="pre">bias</span></code>, <code class="docutils literal notranslate"><span class="pre">hidedata</span></code>, <code class="docutils literal notranslate"><span class="pre">logy</span></code>, <code class="docutils literal notranslate"><span class="pre">smooth</span></code> and <code class="docutils literal notranslate"><span class="pre">threshold</span></code>.</p>
@@ -467,7 +467,7 @@
 <section id="periodic">
 <h6>periodic<a class="headerlink" href="#periodic" title="Link to this heading"></a></h6>
 <p>The periodic plot can be made as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;periodic-stat&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">'periodic-stat'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">stat</span></code> is the statistic that is wanted to be plotted.</p>
@@ -476,7 +476,7 @@
 <section id="periodic-violin">
 <h6>periodic-violin<a class="headerlink" href="#periodic-violin" title="Link to this heading"></a></h6>
 <p>The periodic-violin plot can be made as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;periodic-violin&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">'periodic-violin'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The available plot options are: <code class="docutils literal notranslate"><span class="pre">annotate</span></code>, <code class="docutils literal notranslate"><span class="pre">logy</span></code> and <code class="docutils literal notranslate"><span class="pre">threshold</span></code>.</p>
@@ -484,7 +484,7 @@
 <section id="distribution">
 <h6>distribution<a class="headerlink" href="#distribution" title="Link to this heading"></a></h6>
 <p>The distribution plot can be made as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;distribution&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">'distribution'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>By adding a statistic (<code class="docutils literal notranslate"><span class="pre">provi.plot('distribution-stat')</span></code>), the distribution of that statistic across the selected stations is plotted instead of the raw concentration values. This needs at least 2 stations, otherwise the plot is not made.</p>
@@ -493,7 +493,7 @@
 <section id="histogram">
 <h6>histogram<a class="headerlink" href="#histogram" title="Link to this heading"></a></h6>
 <p>The histogram can be made as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;histogram&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">'histogram'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>As with the distribution, a statistic can be added (<code class="docutils literal notranslate"><span class="pre">provi.plot('histogram-stat')</span></code>) to plot a histogram of selected station statistics.</p>
@@ -502,7 +502,7 @@
 <section id="scatter">
 <h6>scatter<a class="headerlink" href="#scatter" title="Link to this heading"></a></h6>
 <p>The scatter plot can be made as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;scatter&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">'scatter'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The available plot options are: <code class="docutils literal notranslate"><span class="pre">annotate</span></code>, <code class="docutils literal notranslate"><span class="pre">hidedata</span></code>, <code class="docutils literal notranslate"><span class="pre">logx</span></code>, <code class="docutils literal notranslate"><span class="pre">logy</span></code>, <code class="docutils literal notranslate"><span class="pre">regression</span></code> and <code class="docutils literal notranslate"><span class="pre">threshold</span></code>.</p>
@@ -510,7 +510,7 @@
 <section id="boxplot">
 <h6>boxplot<a class="headerlink" href="#boxplot" title="Link to this heading"></a></h6>
 <p>The boxplot can be made as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;boxplot&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">'boxplot'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The available plot options are: <code class="docutils literal notranslate"><span class="pre">annotate</span></code>, <code class="docutils literal notranslate"><span class="pre">logy</span></code>, <code class="docutils literal notranslate"><span class="pre">multispecies</span></code>, <code class="docutils literal notranslate"><span class="pre">normalise</span></code> and <code class="docutils literal notranslate"><span class="pre">threshold</span></code>.</p>
@@ -518,7 +518,7 @@
 <section id="heatmap">
 <h6>heatmap<a class="headerlink" href="#heatmap" title="Link to this heading"></a></h6>
 <p>The heatmap plot can be made as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;heatmap-stat&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">'heatmap-stat'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">stat</span></code> is the statistic that is wanted to be plotted.</p>
@@ -527,7 +527,7 @@
 <section id="table">
 <h6>table<a class="headerlink" href="#table" title="Link to this heading"></a></h6>
 <p>The table plot can be made as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;table&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">'table'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The available plot options are: <code class="docutils literal notranslate"><span class="pre">bias</span></code> and <code class="docutils literal notranslate"><span class="pre">multispecies</span></code>.</p>
@@ -535,7 +535,7 @@
 <section id="statsummary">
 <h6>statsummary<a class="headerlink" href="#statsummary" title="Link to this heading"></a></h6>
 <p>The statsummary plot can be made as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;statsummary&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">'statsummary'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The available plot options are: <code class="docutils literal notranslate"><span class="pre">bias</span></code> and <code class="docutils literal notranslate"><span class="pre">multispecies</span></code>.</p>
@@ -543,7 +543,7 @@
 <section id="taylor">
 <h6>taylor<a class="headerlink" href="#taylor" title="Link to this heading"></a></h6>
 <p>The Taylor diagram can be made as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;taylor-stat&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">'taylor-stat'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">stat</span></code> is the statistic that is wanted to be plotted, from <code class="docutils literal notranslate"><span class="pre">r</span></code> or <code class="docutils literal notranslate"><span class="pre">r2</span></code>. If <code class="docutils literal notranslate"><span class="pre">stat</span></code> is not set (<code class="docutils literal notranslate"><span class="pre">provi.plot('taylor')</span></code>) it defaults to <code class="docutils literal notranslate"><span class="pre">r</span></code>.</p>
@@ -553,7 +553,7 @@
 <section id="fairmode-target">
 <h6>fairmode-target<a class="headerlink" href="#fairmode-target" title="Link to this heading"></a></h6>
 <p>The FAIRMODE target plot can be made as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;fairmode-target&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">'fairmode-target'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The available plot option is: <code class="docutils literal notranslate"><span class="pre">annotate</span></code>.</p>
@@ -561,7 +561,7 @@
 <section id="fairmode-statsummary">
 <h6>fairmode-statsummary<a class="headerlink" href="#fairmode-statsummary" title="Link to this heading"></a></h6>
 <p>The FAIRMODE statistic summary plot can be made as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;fairmode-statsummary&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">'fairmode-statsummary'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>It has no available plot options.</p>
@@ -592,7 +592,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="ICAP-download.html" class="btn btn-neutral float-left" title="ICAP" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="BDRC-download.html" class="btn btn-neutral float-left" title="BDRC" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="Notebooks.html" class="btn btn-neutral float-right" title="Notebooks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

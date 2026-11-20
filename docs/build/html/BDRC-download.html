@@ -1,0 +1,259 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BDRC &mdash; Providentia 4.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=3304f9e4"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Library" href="Library-mode.html" />
+    <link rel="prev" title="ICAP" href="ICAP-download.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Providentia
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Home.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Getting-started.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="Modes.html">Modes</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Interpolation.html">Interpolation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dashboard.html">Dashboard</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Report.html">Report</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="Download-mode.html">Download</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="Download-mode.html#overview">Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="BSC-download.html">BSC HPC machines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ACTRIS-download.html">ACTRIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Zenodo-download.html">Zenodo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CAMS-download.html">CAMS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ERA5-download.html">ERA5</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ICAP-download.html">ICAP</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">BDRC</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#available-bdrc-datasets">Available BDRC datasets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#how-to-enable-bdrc-download">How to enable BDRC download</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bdrc-thredds-public-data">BDRC THREDDS Public Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#example-configuration-files">Example configuration files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#env-file">.env file</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Library-mode.html">Library</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Colocation.html">Colocation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Filtering.html">Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Forecast.html">Forecast</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Gridded-data.html">Gridded data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Statistics.html">Statistics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Skills.html">Skills</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the team</a></li>
+<li class="toctree-l1"><a class="reference internal" href="History.html">History of Providentia</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tips-and-tricks-for-developers.html">Tips and tricks for developers</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Providentia</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="Modes.html">Modes</a></li>
+          <li class="breadcrumb-item"><a href="Download-mode.html">Download</a></li>
+      <li class="breadcrumb-item active">BDRC</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/BDRC-download.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="bdrc">
+<h1>BDRC<a class="headerlink" href="#bdrc" title="Link to this heading"></a></h1>
+<p>Providentia’s download mode supports downloading model output data from the <strong>Barcelona Dust Regional Center</strong> (BDRC) through its THREDDS Data Server.</p>
+<p><a class="reference external" href="https://dust.aemet.es/thredds/catalog/dataRoot/catalog.html">https://dust.aemet.es/thredds/catalog/dataRoot/catalog.html</a></p>
+<p>BDRC credentials are required to download the files. To request credentials for data download please fill in the <a class="reference external" href="https://dust.aemet.es/contact-info">Contact form</a> with a short bio and briefly explain your motivation.</p>
+<section id="available-bdrc-datasets">
+<h2>Available BDRC datasets<a class="headerlink" href="#available-bdrc-datasets" title="Link to this heading"></a></h2>
+<p>Currently, only one BDRC dataset is available for download:</p>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="#bdrc-thredds-public-data"><strong>BDRC THREDDS Public Data</strong></a></p></li>
+</ol>
+</section>
+<section id="how-to-enable-bdrc-download">
+<h2>How to enable BDRC download<a class="headerlink" href="#how-to-enable-bdrc-download" title="Link to this heading"></a></h2>
+<p>To download data from the Barcelona Dust Regional Center, include the following model name along with the domain. For details about available models,  see the section below:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">bdrc_&lt;model&gt;-regional</span></code> - <a class="reference internal" href="#bdrc-thredds-public-data"><strong>BDRC THREDDS Public Data</strong></a></p></li>
+</ul>
+<p>Once you have specified the model and domain, make sure to set:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">dl_interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
+</pre></div>
+</div>
+<p>or</p>
+<p>Answer <code class="docutils literal notranslate"><span class="pre">n</span></code> to the prompt:</p>
+<p><em>“Model data was detected in the configuration file. Do you want to download the interpolated version? (Otherwise, the non-interpolated model data will be downloaded)”</em></p>
+</section>
+<section id="bdrc-thredds-public-data">
+<h2>BDRC THREDDS Public Data<a class="headerlink" href="#bdrc-thredds-public-data" title="Link to this heading"></a></h2>
+<p><a class="reference external" href="https://dust.aemet.es/thredds/catalog/dataRoot/catalog.html">Dataset Link</a></p>
+<p>Using this dataset you can download <strong>Regional data</strong>.</p>
+<p>Only 3hourly regional data is available in this dataset. You must set <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">3hourly</span></code> and <code class="docutils literal notranslate"><span class="pre">domain</span> <span class="pre">=</span> <span class="pre">regional</span></code> in your configuration file; otherwise, the download will not work.</p>
+<section id="mandatory-fields">
+<h3>Mandatory fields<a class="headerlink" href="#mandatory-fields" title="Link to this heading"></a></h3>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">bdrc_&lt;model&gt;</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">regional</span>
+<span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">3hourly</span>
+</pre></div>
+</div>
+</section>
+<section id="available-models">
+<h3>Available models<a class="headerlink" href="#available-models" title="Link to this heading"></a></h3>
+<p>Use the following model names:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">aladin</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bsc_dream8b</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cams_ifs</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dream8_cams</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ema_regcm4</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">icon_art</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lotos_euros</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">metoffice_um</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mocage</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">monarch</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">multi_model</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nasa_geos</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ncep_gefs</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">noa</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">silam</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">wrf_nemo</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">zamg_wrf_chem</span></code></p></li>
+</ul>
+</section>
+<section id="available-variables-species">
+<h3>Available variables (Species)<a class="headerlink" href="#available-variables-species" title="Link to this heading"></a></h3>
+<p>The only available species is:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">od550du</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcdu</span></code></p></li>
+</ul>
+<p>You may also specify related species in the <a class="reference internal" href="Interpolation.html#interpolation-mapping-species"><span class="std std-ref">mapping_species.yaml</span></a> file (e.g. <code class="docutils literal notranslate"><span class="pre">od550aero</span></code>, <code class="docutils literal notranslate"><span class="pre">od500aerocoarse</span></code> or other mapped aliases). Regardless of the requested alias, the downloaded data will always correspond to <code class="docutils literal notranslate"><span class="pre">od550du</span></code>.</p>
+</section>
+</section>
+<section id="example-configuration-files">
+<h2>Example configuration files<a class="headerlink" href="#example-configuration-files" title="Link to this heading"></a></h2>
+<section id="example-1-zamg-wrf-chem-model">
+<h3>Example 1: ZAMG WRF CHEM MODEL<a class="headerlink" href="#example-1-zamg-wrf-chem-model" title="Link to this heading"></a></h3>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[BDRC-zamg_wrf_chem]</span><span class="w"> </span>
+<span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">bdrc_zamg_wrf_chem</span>
+<span class="na">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">od550aero</span>
+<span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">3hourly</span>
+<span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20230201</span>
+<span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20230202</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">regional</span>
+<span class="na">dl_interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
+</pre></div>
+</div>
+</section>
+<section id="example-2-wrf-nemo-model">
+<h3>Example 2: WRF NEMO MODEL<a class="headerlink" href="#example-2-wrf-nemo-model" title="Link to this heading"></a></h3>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[BDRC-wrf_nemo]</span><span class="w"> </span>
+<span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">bdrc_wrf_nemo</span>
+<span class="na">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">od550aero</span>
+<span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">3hourly</span>
+<span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20230211</span>
+<span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20230212</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">regional</span>
+<span class="na">dl_interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="env-file">
+<h2>.env file<a class="headerlink" href="#env-file" title="Link to this heading"></a></h2>
+<p>An <code class="docutils literal notranslate"><span class="pre">.env</span></code> file will appear in the Providentia root directory when using the download mode. It is designed to store specific user preferences.</p>
+<ul class="simple">
+<li><p><strong>BDRC_USER:</strong> This setting specifies the username used to connect to the BDRC. It can be any valid username.</p></li>
+<li><p><strong>BDRC_PWD:</strong> This setting allows you to save the password needed for connecting to BDRC</p></li>
+</ul>
+<p>These values can be changed directly on the <code class="docutils literal notranslate"><span class="pre">.env</span></code> file and also be updated by Providentia during the next run.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ICAP-download.html" class="btn btn-neutral float-left" title="ICAP" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Library-mode.html" class="btn btn-neutral float-right" title="Library" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2026, Dene Bowdalo, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa, Amalia Vradi.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

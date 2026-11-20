@@ -66,6 +66,7 @@
 <li class="toctree-l3"><a class="reference internal" href="CAMS-download.html">CAMS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ERA5-download.html">ERA5</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ICAP-download.html">ICAP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="BDRC-download.html">BDRC</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Library-mode.html">Library</a></li>
@@ -175,11 +176,18 @@ or set <code class="docutils literal notranslate"><span class="pre">dl_ghost_sou
 <li><p>To see more information, check the <a class="reference internal" href="ERA5-download.html"><span class="doc std std-doc">ERA5 download page</span></a>.</p></li>
 </ul>
 </li>
-<li><p><strong>Download of ICAP non-interpolated model data from the  U.S. Navy / Naval Research Laboratory (NRL)</strong></p>
+<li><p><strong>Download of ICAP non-interpolated model data from the U.S. Navy / Naval Research Laboratory (NRL)</strong></p>
 <ul class="simple">
 <li><p>Downloads ICAP model output from the <a class="reference external" href="https://nrlgodae1.nrlmry.navy.mil/cgi-bin/datalist.pl?generate=summary">U.S. Navy / Naval Research Laboratory</a>.</p></li>
 <li><p>How to get this type of download: specify the model as <code class="docutils literal notranslate"><span class="pre">icap_ensemble</span></code> or <code class="docutils literal notranslate"><span class="pre">icap_ensemble_C4</span></code> in your configuration, and set <code class="docutils literal notranslate"><span class="pre">dl_interpolated</span></code> to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
 <li><p>To see more information, check the <a class="reference internal" href="ICAP-download.html"><span class="doc std std-doc">ICAP download page</span></a>.</p></li>
+</ul>
+</li>
+<li><p><strong>Download of BDRC non-interpolated model data from its THREDDS Data Server</strong></p>
+<ul class="simple">
+<li><p>Downloads ICAP model output from its <a class="reference external" href="https://dust.aemet.es/thredds/catalog/dataRoot/catalog.html">THREDDS Data Server</a>.</p></li>
+<li><p>How to get this type of download: specify the model as <code class="docutils literal notranslate"><span class="pre">bdrc_&lt;model&gt;</span></code> in your configuration, and set <code class="docutils literal notranslate"><span class="pre">dl_interpolated</span></code> to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+<li><p>To see more information, check the <a class="reference internal" href="BDRC-download.html"><span class="doc std std-doc">BDRC download page</span></a>.</p></li>
 </ul>
 </li>
 </ol>
@@ -314,16 +322,24 @@ or set <code class="docutils literal notranslate"><span class="pre">dl_ghost_sou
 <li class="toctree-l2"><a class="reference internal" href="ERA5-download.html#era5-hourly-data-on-single-levels-from-1940-to-present">1. ERA5 hourly data on single levels from 1940 to present</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ERA5-download.html#example-configuration-file">Example configuration file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ERA5-download.html#reanalysis-tropopause-data-repository">2. Reanalysis Tropopause Data Repository</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ERA5-download.html#id6">Example configuration file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ERA5-download.html#id5">Example configuration file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ERA5-download.html#cds-era5-ghost-species-mapping">CDS ERA5-GHOST species mapping</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ERA5-download.html#sdl-era5-ghost-species-mapping">SDL ERA5-GHOST species mapping</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="ICAP-download.html">ICAP</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="ICAP-download.html#available-cams-datasets">Available CAMS datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ICAP-download.html#available-icap-datasets">Available ICAP datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ICAP-download.html#how-to-enable-icap-download">How to enable ICAP download</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ICAP-download.html#icap-mme-the-international-cooperative-for-aerosol-prediction-icap-multi-model-ensemble-mme">ICAP MME - The International Cooperative for Aerosol Prediction (ICAP) Multi-Model Ensemble (MME)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ICAP-download.html#example-configuration-files">Example configuration files</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="BDRC-download.html">BDRC</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="BDRC-download.html#available-bdrc-datasets">Available BDRC datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BDRC-download.html#how-to-enable-bdrc-download">How to enable BDRC download</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BDRC-download.html#bdrc-thredds-public-data">BDRC THREDDS Public Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BDRC-download.html#example-configuration-files">Example configuration files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BDRC-download.html#env-file">.env file</a></li>
 </ul>
 </li>
 </ul>

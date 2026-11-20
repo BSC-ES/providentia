@@ -153,21 +153,21 @@ git<span class="w"> </span>push<span class="w"> </span>--no-verify<span class="w
 <ul class="simple">
 <li><p>Edit the settings.ts within the repository that you’ve just cloned: Leave projectId as 0 the first time you run <code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">run</span> <span class="pre">start</span></code>, that way it will throw an error showing you all the available project ids and their corresponding project names. Then update <code class="docutils literal notranslate"><span class="pre">settings.ts</span></code> with your id and run again. Our <code class="docutils literal notranslate"><span class="pre">settings.ts</span></code> was:</p></li>
 </ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">Settings</span> <span class="kn">from</span><span class="w"> </span><span class="s1">&#39;./src/settings&#39;</span><span class="p">;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">Settings</span> <span class="kn">from</span><span class="w"> </span><span class="s1">'./src/settings'</span><span class="p">;</span>
 <span class="n">export</span> <span class="n">default</span> <span class="p">{</span>
   <span class="n">gitlab</span><span class="p">:</span> <span class="p">{</span>
-    <span class="n">url</span><span class="p">:</span> <span class="s1">&#39;https://earth.bsc.es/gitlab&#39;</span><span class="p">,</span>
-    <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;YOUR-GITLAB-ACCOUNT-TOKEN&#39;</span><span class="p">,</span>
+    <span class="n">url</span><span class="p">:</span> <span class="s1">'https://earth.bsc.es/gitlab'</span><span class="p">,</span>
+    <span class="n">token</span><span class="p">:</span> <span class="s1">'YOUR-GITLAB-ACCOUNT-TOKEN'</span><span class="p">,</span>
     <span class="n">projectId</span><span class="p">:</span> <span class="mi">574</span><span class="p">,</span>
     <span class="n">listArchivedProjects</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
-    <span class="n">sessionCookie</span><span class="p">:</span> <span class="s2">&quot;***&quot;</span><span class="p">,</span>
+    <span class="n">sessionCookie</span><span class="p">:</span> <span class="s2">"***"</span><span class="p">,</span>
   <span class="p">},</span>
   <span class="n">github</span><span class="p">:</span> <span class="p">{</span>
-    <span class="n">owner</span><span class="p">:</span> <span class="s1">&#39;BSC-ES&#39;</span><span class="p">,</span>
+    <span class="n">owner</span><span class="p">:</span> <span class="s1">'BSC-ES'</span><span class="p">,</span>
     <span class="n">ownerIsOrg</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
-    <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;YOUR-GITHUB-ACCOUNT-TOKEN&#39;</span><span class="p">,</span>
-    <span class="n">token_owner</span><span class="p">:</span> <span class="s1">&#39;albavilanova&#39;</span><span class="p">,</span>
-    <span class="n">repo</span><span class="p">:</span> <span class="s1">&#39;providentia&#39;</span><span class="p">,</span>
+    <span class="n">token</span><span class="p">:</span> <span class="s1">'YOUR-GITHUB-ACCOUNT-TOKEN'</span><span class="p">,</span>
+    <span class="n">token_owner</span><span class="p">:</span> <span class="s1">'albavilanova'</span><span class="p">,</span>
+    <span class="n">repo</span><span class="p">:</span> <span class="s1">'providentia'</span><span class="p">,</span>
     <span class="n">recreateRepo</span><span class="p">:</span> <span class="n">false</span><span class="p">,</span>
   <span class="p">},</span>
   <span class="n">s3</span><span class="p">:</span> <span class="p">{</span>
@@ -177,36 +177,36 @@ git<span class="w"> </span>push<span class="w"> </span>--no-verify<span class="w
     <span class="n">region</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span>
   <span class="p">},</span>
   <span class="n">usermap</span><span class="p">:</span> <span class="p">{</span>
-    <span class="s1">&#39;dbowdalo&#39;</span><span class="p">:</span> <span class="s1">&#39;denebowdalo&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;avilanov&#39;</span><span class="p">:</span> <span class="s1">&#39;albavilanova&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;pserrano&#39;</span><span class="p">:</span> <span class="s1">&#39;PaulaSerranoSierra&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;avilamir&#39;</span><span class="p">:</span> <span class="s1">&#39;albertvilabsc&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;avradi&#39;</span><span class="p">:</span> <span class="s1">&#39;amaliavr&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;cmeikle&#39;</span><span class="p">:</span> <span class="s1">&#39;cmeikle&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;ctena&#39;</span><span class="p">:</span> <span class="s1">&#39;charlio86&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;cgile&#39;</span><span class="p">:</span> <span class="s1">&#39;carlottagile&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;cferruz&#39;</span><span class="p">:</span> <span class="s1">&#39;cferruz&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;eemili&#39;</span><span class="p">:</span> <span class="s1">&#39;emanueleemili&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;fmacchia&#39;</span><span class="p">:</span> <span class="s1">&#39;f-macchia&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;fbeninca&#39;</span><span class="p">:</span> <span class="s1">&#39;fbeninca&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;hpetetin&#39;</span><span class="p">:</span> <span class="s1">&#39;hervepetetin&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;jescriba&#39;</span><span class="p">:</span> <span class="s1">&#39;jeronimoescribano&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;jmassagu&#39;</span><span class="p">:</span> <span class="s1">&#39;jomassa&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;jyun&#39;</span><span class="p">:</span> <span class="s1">&#39;JayoungYun&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;kdeoliv&#39;</span><span class="p">:</span> <span class="s1">&#39;kdeoliv&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;kserrade&#39;</span><span class="p">:</span> <span class="s1">&#39;kserradell&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;lilic&#39;</span><span class="p">:</span> <span class="s1">&#39;atmosphericdust&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;mguevara&#39;</span><span class="p">:</span> <span class="s1">&#39;mguevarabsc&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;molid&#39;</span><span class="p">:</span> <span class="s1">&#39;molidg&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;ojorba&#39;</span><span class="p">:</span> <span class="s1">&#39;orioljorba&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;pcamps&#39;</span><span class="p">:</span> <span class="s1">&#39;paulacamps&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;rcruzalv&#39;</span><span class="p">:</span> <span class="s1">&#39;Rafaelaalves15&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;rgrodofz&#39;</span><span class="p">:</span> <span class="s1">&#39;raphaelgrzg&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;rgaratac&#39;</span><span class="p">:</span> <span class="s1">&#39;rgaratac1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;rsousse&#39;</span><span class="p">:</span> <span class="s1">&#39;rsousse&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;tvintimi&#39;</span><span class="p">:</span> <span class="s1">&#39;tito-vintimilla&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;yyousef&#39;</span><span class="p">:</span> <span class="s1">&#39;yarayo&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;hnavarro&#39;</span><span class="p">:</span> <span class="s1">&#39;hectornav&#39;</span><span class="p">,</span>
+    <span class="s1">'dbowdalo'</span><span class="p">:</span> <span class="s1">'denebowdalo'</span><span class="p">,</span>
+    <span class="s1">'avilanov'</span><span class="p">:</span> <span class="s1">'albavilanova'</span><span class="p">,</span>
+    <span class="s1">'pserrano'</span><span class="p">:</span> <span class="s1">'PaulaSerranoSierra'</span><span class="p">,</span>
+    <span class="s1">'avilamir'</span><span class="p">:</span> <span class="s1">'albertvilabsc'</span><span class="p">,</span>
+    <span class="s1">'avradi'</span><span class="p">:</span> <span class="s1">'amaliavr'</span><span class="p">,</span>
+    <span class="s1">'cmeikle'</span><span class="p">:</span> <span class="s1">'cmeikle'</span><span class="p">,</span>
+    <span class="s1">'ctena'</span><span class="p">:</span> <span class="s1">'charlio86'</span><span class="p">,</span>
+    <span class="s1">'cgile'</span><span class="p">:</span> <span class="s1">'carlottagile'</span><span class="p">,</span>
+    <span class="s1">'cferruz'</span><span class="p">:</span> <span class="s1">'cferruz'</span><span class="p">,</span>
+    <span class="s1">'eemili'</span><span class="p">:</span> <span class="s1">'emanueleemili'</span><span class="p">,</span>
+    <span class="s1">'fmacchia'</span><span class="p">:</span> <span class="s1">'f-macchia'</span><span class="p">,</span>
+    <span class="s1">'fbeninca'</span><span class="p">:</span> <span class="s1">'fbeninca'</span><span class="p">,</span>
+    <span class="s1">'hpetetin'</span><span class="p">:</span> <span class="s1">'hervepetetin'</span><span class="p">,</span>
+    <span class="s1">'jescriba'</span><span class="p">:</span> <span class="s1">'jeronimoescribano'</span><span class="p">,</span>
+    <span class="s1">'jmassagu'</span><span class="p">:</span> <span class="s1">'jomassa'</span><span class="p">,</span>
+    <span class="s1">'jyun'</span><span class="p">:</span> <span class="s1">'JayoungYun'</span><span class="p">,</span>
+    <span class="s1">'kdeoliv'</span><span class="p">:</span> <span class="s1">'kdeoliv'</span><span class="p">,</span>
+    <span class="s1">'kserrade'</span><span class="p">:</span> <span class="s1">'kserradell'</span><span class="p">,</span>
+    <span class="s1">'lilic'</span><span class="p">:</span> <span class="s1">'atmosphericdust'</span><span class="p">,</span>
+    <span class="s1">'mguevara'</span><span class="p">:</span> <span class="s1">'mguevarabsc'</span><span class="p">,</span>
+    <span class="s1">'molid'</span><span class="p">:</span> <span class="s1">'molidg'</span><span class="p">,</span>
+    <span class="s1">'ojorba'</span><span class="p">:</span> <span class="s1">'orioljorba'</span><span class="p">,</span>
+    <span class="s1">'pcamps'</span><span class="p">:</span> <span class="s1">'paulacamps'</span><span class="p">,</span>
+    <span class="s1">'rcruzalv'</span><span class="p">:</span> <span class="s1">'Rafaelaalves15'</span><span class="p">,</span>
+    <span class="s1">'rgrodofz'</span><span class="p">:</span> <span class="s1">'raphaelgrzg'</span><span class="p">,</span>
+    <span class="s1">'rgaratac'</span><span class="p">:</span> <span class="s1">'rgaratac1'</span><span class="p">,</span>
+    <span class="s1">'rsousse'</span><span class="p">:</span> <span class="s1">'rsousse'</span><span class="p">,</span>
+    <span class="s1">'tvintimi'</span><span class="p">:</span> <span class="s1">'tito-vintimilla'</span><span class="p">,</span>
+    <span class="s1">'yyousef'</span><span class="p">:</span> <span class="s1">'yarayo'</span><span class="p">,</span>
+    <span class="s1">'hnavarro'</span><span class="p">:</span> <span class="s1">'hectornav'</span><span class="p">,</span>
   <span class="p">},</span>
   <span class="n">projectmap</span><span class="p">:</span> <span class="p">{},</span>
   <span class="n">conversion</span><span class="p">:</span> <span class="p">{</span>
@@ -233,7 +233,7 @@ git<span class="w"> </span>push<span class="w"> </span>--no-verify<span class="w
   <span class="n">skipMergeRequestStates</span><span class="p">:</span> <span class="p">[],</span>
   <span class="n">skipMatchingComments</span><span class="p">:</span> <span class="p">[],</span>
   <span class="n">mergeRequests</span><span class="p">:</span> <span class="p">{</span>
-    <span class="n">logFile</span><span class="p">:</span> <span class="s1">&#39;./merge-requests.json&#39;</span><span class="p">,</span>
+    <span class="n">logFile</span><span class="p">:</span> <span class="s1">'./merge-requests.json'</span><span class="p">,</span>
     <span class="n">log</span><span class="p">:</span> <span class="n">false</span><span class="p">,</span>
   <span class="p">},</span>
   <span class="n">commitMap</span><span class="p">:</span> <span class="p">{</span>
@@ -259,7 +259,7 @@ Transferring<span class="w"> </span>Issues
 </ul>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># FORMAT: &lt;replace-with--name&gt;  &lt;replace-with-email&gt;  &lt;commit-name&gt;  &lt;commit-email&gt;</span>
 <span class="c1"># Omit commit-name or commit-email if same as replace-with.</span>
-<span class="c1"># git log --pretty=&quot;%aN &lt;%aE&gt;%n%cN &lt;%cE&gt;&quot; | sort | uniq</span>
+<span class="c1"># git log --pretty="%aN &lt;%aE&gt;%n%cN &lt;%cE&gt;" | sort | uniq</span>
 
 <span class="n">Alba</span> <span class="n">Vilanova</span>               <span class="o">&lt;</span><span class="n">alba</span><span class="o">.</span><span class="n">vilanova</span><span class="nd">@outlook</span><span class="o">.</span><span class="n">com</span><span class="o">&gt;</span>          <span class="n">Alba</span> <span class="n">Vilanova</span>             <span class="o">&lt;</span><span class="n">alba</span><span class="o">.</span><span class="n">vilanova</span><span class="nd">@bsc</span><span class="o">.</span><span class="n">es</span><span class="o">&gt;</span>
 <span class="n">Dene</span> <span class="n">Bowdalo</span>                <span class="o">&lt;</span><span class="n">denebowdalo</span><span class="nd">@googlemail</span><span class="o">.</span><span class="n">com</span><span class="o">&gt;</span>         <span class="n">Dene</span> <span class="n">Bowdalo</span>              <span class="o">&lt;</span><span class="n">dene</span><span class="o">.</span><span class="n">bowdalo</span><span class="nd">@bsc</span><span class="o">.</span><span class="n">es</span><span class="o">&gt;</span>
@@ -330,22 +330,22 @@ pytest<span class="w"> </span>tests
 <h2>Check that all reports are created<a class="headerlink" href="#check-that-all-reports-are-created" title="Link to this heading"></a></h2>
 <p>To generate reports for all configuration files under <code class="docutils literal notranslate"><span class="pre">configurations</span></code> folder:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
-<span class="nv">folder_path</span><span class="o">=</span><span class="s2">&quot;configurations&quot;</span>
-<span class="nv">error_log</span><span class="o">=</span><span class="s2">&quot;error_log2.txt&quot;</span>
-&gt;<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$error_log</span><span class="s2">&quot;</span>
-<span class="k">for</span><span class="w"> </span>file<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$folder_path</span><span class="s2">&quot;</span>/*<span class="p">;</span><span class="w"> </span><span class="k">do</span>
-<span class="w">        </span><span class="nv">command</span><span class="o">=</span><span class="s2">&quot;./bin/providentia --report --config=&quot;</span><span class="nv">$file</span>
+<span class="nv">folder_path</span><span class="o">=</span><span class="s2">"configurations"</span>
+<span class="nv">error_log</span><span class="o">=</span><span class="s2">"error_log2.txt"</span>
+&gt;<span class="w"> </span><span class="s2">"</span><span class="nv">$error_log</span><span class="s2">"</span>
+<span class="k">for</span><span class="w"> </span>file<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s2">"</span><span class="nv">$folder_path</span><span class="s2">"</span>/*<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">        </span><span class="nv">command</span><span class="o">=</span><span class="s2">"./bin/providentia --report --config="</span><span class="nv">$file</span>
 <span class="w">  </span><span class="nb">echo</span>
 <span class="w">  </span><span class="nb">echo</span>
 <span class="w">  </span><span class="nb">echo</span>
-<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;ejecutando: </span><span class="nv">$command</span><span class="s2">&quot;</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"ejecutando: </span><span class="nv">$command</span><span class="s2">"</span>
 <span class="w">  </span><span class="nv">output</span><span class="o">=</span><span class="k">$(</span><span class="nb">eval</span><span class="w"> </span><span class="nv">$command</span><span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="k">)</span>
 <span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="nv">$?</span><span class="w"> </span>-ne<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
-<span class="w">  	</span><span class="nv">error_type</span><span class="o">=</span><span class="k">$(</span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$output</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-o<span class="w"> </span>-E<span class="w"> </span><span class="s1">&#39;[a-zA-Z]*Error&#39;</span><span class="k">)</span>
-<span class="w">  	</span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Command failed with exit code </span><span class="nv">$?</span><span class="s2">.&quot;</span>
-<span class="w">  	</span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;File: </span><span class="nv">$file</span><span class="s2"> Error: </span><span class="nv">$error_type</span><span class="s2">&quot;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$error_log</span><span class="s2">&quot;</span>
+<span class="w">  	</span><span class="nv">error_type</span><span class="o">=</span><span class="k">$(</span><span class="nb">echo</span><span class="w"> </span><span class="s2">"</span><span class="nv">$output</span><span class="s2">"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-o<span class="w"> </span>-E<span class="w"> </span><span class="s1">'[a-zA-Z]*Error'</span><span class="k">)</span>
+<span class="w">  	</span><span class="nb">echo</span><span class="w"> </span><span class="s2">"Command failed with exit code </span><span class="nv">$?</span><span class="s2">."</span>
+<span class="w">  	</span><span class="nb">echo</span><span class="w"> </span><span class="s2">"File: </span><span class="nv">$file</span><span class="s2"> Error: </span><span class="nv">$error_type</span><span class="s2">"</span><span class="w"> </span>&gt;&gt;<span class="w"> </span><span class="s2">"</span><span class="nv">$error_log</span><span class="s2">"</span>
 <span class="w">  </span><span class="k">else</span>
-<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Command executed successfully.&quot;</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"Command executed successfully."</span>
 <span class="w">  </span><span class="k">fi</span>
 <span class="k">done</span>
 </pre></div>
@@ -354,7 +354,7 @@ pytest<span class="w"> </span>tests
 <section id="run-providentia-inside-docker-container">
 <h2>Run Providentia inside Docker container<a class="headerlink" href="#run-providentia-inside-docker-container" title="Link to this heading"></a></h2>
 <p>We need to first build our image:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span><span class="s2">&quot;providentia-image&quot;</span><span class="w"> </span>.
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span><span class="s2">"providentia-image"</span><span class="w"> </span>.
 </pre></div>
 </div>
 <p>To be able to display the dashboard we will also run these commands:</p>
@@ -385,18 +385,18 @@ sphinx-quickstart
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># -- General configuration ---------------------------------------------------</span>
 <span class="c1"># https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration</span>
 
-<span class="n">extensions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;myst_parser&quot;</span><span class="p">,</span> <span class="s2">&quot;sphinx.ext.todo&quot;</span><span class="p">,</span> <span class="s2">&quot;sphinx.ext.viewcode&quot;</span><span class="p">,</span> <span class="s2">&quot;sphinx.ext.autodoc&quot;</span><span class="p">,</span> <span class="s2">&quot;sphinx_rtd_theme&quot;</span><span class="p">]</span>
-<span class="n">templates_path</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;_templates&#39;</span><span class="p">]</span>
+<span class="n">extensions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"myst_parser"</span><span class="p">,</span> <span class="s2">"sphinx.ext.todo"</span><span class="p">,</span> <span class="s2">"sphinx.ext.viewcode"</span><span class="p">,</span> <span class="s2">"sphinx.ext.autodoc"</span><span class="p">,</span> <span class="s2">"sphinx_rtd_theme"</span><span class="p">]</span>
+<span class="n">templates_path</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'_templates'</span><span class="p">]</span>
 <span class="n">exclude_patterns</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="n">myst_heading_anchors</span> <span class="o">=</span> <span class="mi">2</span>
 
 <span class="c1"># -- Options for HTML output -------------------------------------------------</span>
 <span class="c1"># https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output</span>
 
-<span class="n">html_theme</span> <span class="o">=</span> <span class="s1">&#39;sphinx_rtd_theme&#39;</span>
-<span class="n">html_static_path</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;_static&#39;</span><span class="p">]</span>
+<span class="n">html_theme</span> <span class="o">=</span> <span class="s1">'sphinx_rtd_theme'</span>
+<span class="n">html_static_path</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'_static'</span><span class="p">]</span>
 <span class="n">html_css_files</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;css/custom.css&#39;</span><span class="p">,</span>
+    <span class="s1">'css/custom.css'</span><span class="p">,</span>
 <span class="p">]</span>
 </pre></div>
 </div>
@@ -417,9 +417,9 @@ make<span class="w"> </span>html
 <span class="n">build</span><span class="p">:</span>
   <span class="n">os</span><span class="p">:</span> <span class="n">ubuntu</span><span class="o">-</span><span class="mf">24.04</span>
   <span class="n">tools</span><span class="p">:</span>
-    <span class="n">python</span><span class="p">:</span> <span class="s2">&quot;mambaforge-latest&quot;</span>
+    <span class="n">python</span><span class="p">:</span> <span class="s2">"mambaforge-latest"</span>
 
-<span class="c1"># Build documentation in the &quot;docs/&quot; directory with Sphinx</span>
+<span class="c1"># Build documentation in the "docs/" directory with Sphinx</span>
 <span class="n">sphinx</span><span class="p">:</span>
    <span class="n">configuration</span><span class="p">:</span> <span class="n">docs</span><span class="o">/</span><span class="n">source</span><span class="o">/</span><span class="n">conf</span><span class="o">.</span><span class="n">py</span>
 
@@ -501,7 +501,7 @@ conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> <
 <span class="k">def</span><span class="w"> </span><span class="nf">function_to_profile1</span><span class="p">():</span>
     <span class="k">pass</span>
 
-<span class="k">with</span> <span class="n">memray</span><span class="o">.</span><span class="n">Tracker</span><span class="p">(</span><span class="s2">&quot;output_file&quot;</span><span class="p">):</span>
+<span class="k">with</span> <span class="n">memray</span><span class="o">.</span><span class="n">Tracker</span><span class="p">(</span><span class="s2">"output_file"</span><span class="p">):</span>
     <span class="n">function_to_profile1</span><span class="p">()</span>
 
 </pre></div>
@@ -555,7 +555,7 @@ conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> <
 <span class="n">artifact_network</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">artifact_mapping</span><span class="p">[</span><span class="n">network</span><span class="p">]</span>    
 
 <span class="c1"># create temporal dir to store the zip file and its tar components</span>
-<span class="bp">self</span><span class="o">.</span><span class="n">temp_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">download_instance</span><span class="o">.</span><span class="n">ghost_root</span><span class="p">,</span> <span class="s2">&quot;.temp&quot;</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">temp_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">download_instance</span><span class="o">.</span><span class="n">ghost_root</span><span class="p">,</span> <span class="s2">".temp"</span><span class="p">)</span>
 <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">temp_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="c1"># download zip on the temporal directory</span>
@@ -571,20 +571,20 @@ conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> <
 <p>Before that modify the <code class="docutils literal notranslate"><span class="pre">extract_zip</span></code> and <code class="docutils literal notranslate"><span class="pre">extract_tar</span></code> functions from the <code class="docutils literal notranslate"><span class="pre">zenodo.py</span></code> module.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">extract_zip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">zip_path</span><span class="p">):</span>        
   <span class="c1"># open the ZIP file</span>
-  <span class="k">with</span> <span class="n">ZipFile</span><span class="p">(</span><span class="n">zip_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">zipf</span><span class="p">:</span>            
+  <span class="k">with</span> <span class="n">ZipFile</span><span class="p">(</span><span class="n">zip_path</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">)</span> <span class="k">as</span> <span class="n">zipf</span><span class="p">:</span>            
       <span class="n">zipf</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">temp_dir</span><span class="p">)</span>
 
       <span class="c1"># list all files inside the ZIP</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">file_paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">temp_dir</span><span class="p">,</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">zipf</span><span class="o">.</span><span class="n">namelist</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)]</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">file_paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">temp_dir</span><span class="p">,</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">zipf</span><span class="o">.</span><span class="n">namelist</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)]</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">extract_tar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">):</span>
   <span class="kn">import</span><span class="w"> </span><span class="nn">tarfile</span>
   <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 
   <span class="n">json_dict</span> <span class="o">=</span> <span class="p">{}</span>
-  <span class="k">for</span> <span class="n">tar_path</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_paths</span><span class="p">,</span><span class="n">desc</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;    Checking </span><span class="si">{</span><span class="n">network</span><span class="si">}</span><span class="s2"> tars&quot;</span><span class="p">,):</span>
-      <span class="k">with</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">tar_path</span><span class="p">,</span> <span class="s2">&quot;r:*&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tar</span><span class="p">:</span>
-          <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">species_tar</span> <span class="o">=</span> <span class="n">tar_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+  <span class="k">for</span> <span class="n">tar_path</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_paths</span><span class="p">,</span><span class="n">desc</span><span class="o">=</span><span class="sa">f</span><span class="s2">"    Checking </span><span class="si">{</span><span class="n">network</span><span class="si">}</span><span class="s2"> tars"</span><span class="p">,):</span>
+      <span class="k">with</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">tar_path</span><span class="p">,</span> <span class="s2">"r:*"</span><span class="p">)</span> <span class="k">as</span> <span class="n">tar</span><span class="p">:</span>
+          <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">species_tar</span> <span class="o">=</span> <span class="n">tar_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'/'</span><span class="p">)</span>
           <span class="n">species</span> <span class="o">=</span> <span class="n">species_tar</span><span class="p">[:</span><span class="o">-</span><span class="mi">7</span><span class="p">]</span>
 
           <span class="k">if</span> <span class="n">network</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">json_dict</span><span class="p">:</span>
@@ -597,17 +597,17 @@ conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> <
               <span class="n">json_dict</span><span class="p">[</span><span class="n">network</span><span class="p">][</span><span class="n">resolution</span><span class="p">][</span><span class="n">species</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
           <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">tar</span><span class="o">.</span><span class="n">getmembers</span><span class="p">():</span>
-              <span class="n">file_name</span> <span class="o">=</span> <span class="n">member</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-              <span class="k">if</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.nc&#39;</span><span class="p">):</span>
+              <span class="n">file_name</span> <span class="o">=</span> <span class="n">member</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'/'</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+              <span class="k">if</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">'.nc'</span><span class="p">):</span>
                   <span class="n">json_dict</span><span class="p">[</span><span class="n">network</span><span class="p">][</span><span class="n">resolution</span><span class="p">][</span><span class="n">species</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
 
           <span class="n">json_dict</span><span class="p">[</span><span class="n">network</span><span class="p">][</span><span class="n">resolution</span><span class="p">][</span><span class="n">species</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">json_dict</span><span class="p">[</span><span class="n">network</span><span class="p">][</span><span class="n">resolution</span><span class="p">][</span><span class="n">species</span><span class="p">]))</span>
       
-  <span class="n">final_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;/home/pserrano/providentia/settings/internal/zenodo/zenodo_networks/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">download_instance</span><span class="o">.</span><span class="n">ghost_version</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">network</span><span class="si">}</span><span class="s2">.json&quot;</span>
-  <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">final_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+  <span class="n">final_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"/home/pserrano/providentia/settings/internal/zenodo/zenodo_networks/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">download_instance</span><span class="o">.</span><span class="n">ghost_version</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">network</span><span class="si">}</span><span class="s2">.json"</span>
+  <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">final_path</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
       <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">json_dict</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
-  <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">final_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+  <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">final_path</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
       <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -617,12 +617,12 @@ conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> <
 <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 
-<span class="n">ghost_version</span> <span class="o">=</span> <span class="s1">&#39;1.5.1&#39;</span>
+<span class="n">ghost_version</span> <span class="o">=</span> <span class="s1">'1.5.1'</span>
 
-<span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;/home/pserrano/providentia/settings/internal/zenodo/zenodo_networks/</span><span class="si">{</span><span class="n">ghost_version</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"/home/pserrano/providentia/settings/internal/zenodo/zenodo_networks/</span><span class="si">{</span><span class="n">ghost_version</span><span class="si">}</span><span class="s2">"</span>
 <span class="n">ld</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 
-<span class="n">yaml_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;/home/pserrano/providentia/settings/internal/zenodo/zenodo_</span><span class="si">{</span><span class="n">ghost_version</span><span class="si">}</span><span class="s2">.yaml&quot;</span>
+<span class="n">yaml_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"/home/pserrano/providentia/settings/internal/zenodo/zenodo_</span><span class="si">{</span><span class="n">ghost_version</span><span class="si">}</span><span class="s2">.yaml"</span>
 <span class="n">yaml_obj</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">yaml_path</span><span class="p">))</span>
 
 <span class="n">valid_networks</span> <span class="o">=</span> <span class="n">yaml_obj</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
@@ -643,8 +643,8 @@ conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> <
     <span class="n">n</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
 
-<span class="n">final_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path</span><span class="p">)),</span> <span class="sa">f</span><span class="s1">&#39;zenodo_ghost_filetree_</span><span class="si">{</span><span class="n">ghost_version</span><span class="si">}</span><span class="s1">.json&#39;</span><span class="p">)</span>
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">final_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<span class="n">final_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path</span><span class="p">)),</span> <span class="sa">f</span><span class="s1">'zenodo_ghost_filetree_</span><span class="si">{</span><span class="n">ghost_version</span><span class="si">}</span><span class="s1">.json'</span><span class="p">)</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">final_path</span><span class="p">,</span> <span class="s1">'w'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span><span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 </pre></div>
 </div>

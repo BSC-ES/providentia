@@ -19,7 +19,6 @@ Currently, two ERA5 datasets are available for download:
 1. [**ERA5 hourly data on single levels from 1940 to present**](#1-era5-hourly-data-on-single-levels-from-1940-to-present) (CDS)
 2. [**Reanalysis Tropopause Data Repository**](#2-reanalysis-tropopause-data-repository) (SDL)
 
-(how-to-enable-era5-download)=
 ## How to enable ERA5 download 
 
 To download ERA5 data, include one of the following model names along with the domain:

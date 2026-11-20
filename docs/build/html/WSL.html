@@ -170,14 +170,14 @@
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wsl:<span class="w"> </span>Using<span class="w"> </span>legacy<span class="w"> </span>distribution<span class="w"> </span>registration.<span class="w"> </span>Consider<span class="w"> </span>using<span class="w"> </span>a<span class="w"> </span>tar<span class="w"> </span>based<span class="w"> </span>distribution<span class="w"> </span>instead.
 Downloading:<span class="w"> </span>Ubuntu<span class="w"> </span><span class="m">22</span>.04<span class="w"> </span>LTS
 Ubuntu<span class="w"> </span><span class="m">22</span>.04<span class="w"> </span>LTS<span class="w"> </span>has<span class="w"> </span>been<span class="w"> </span>downloaded.
-Distribution<span class="w"> </span>successfully<span class="w"> </span>installed.<span class="w"> </span>It<span class="w"> </span>can<span class="w"> </span>be<span class="w"> </span>launched<span class="w"> </span>via<span class="w"> </span><span class="s1">&#39;wsl.exe -d Ubuntu 22.04 LTS&#39;</span>
+Distribution<span class="w"> </span>successfully<span class="w"> </span>installed.<span class="w"> </span>It<span class="w"> </span>can<span class="w"> </span>be<span class="w"> </span>launched<span class="w"> </span>via<span class="w"> </span><span class="s1">'wsl.exe -d Ubuntu 22.04 LTS'</span>
 Launching<span class="w"> </span>Ubuntu<span class="w"> </span><span class="m">22</span>.04<span class="w"> </span>LTS...
 Installing,<span class="w"> </span>this<span class="w"> </span>may<span class="w"> </span>take<span class="w"> </span>a<span class="w"> </span>few<span class="w"> </span>minutes...
 WslRegisterDistribution<span class="w"> </span>failed<span class="w"> </span>with<span class="w"> </span>error:<span class="w"> </span>0x80370102
 Please<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>the<span class="w"> </span>Virtual<span class="w"> </span>Machine<span class="w"> </span>Platform<span class="w"> </span>Windows<span class="w"> </span>feature<span class="w"> </span>and<span class="w"> </span>ensure<span class="w"> </span>virtualization<span class="w"> </span>is<span class="w"> </span>enabled<span class="w"> </span><span class="k">in</span><span class="w"> </span>the<span class="w"> </span>BIOS.
 For<span class="w"> </span>information<span class="w"> </span>please<span class="w"> </span>visit<span class="w"> </span>https://aka.ms/enablevirtualization
 Press<span class="w"> </span>any<span class="w"> </span>key<span class="w"> </span>to<span class="w"> </span><span class="k">continue</span>...
-The<span class="w"> </span>installation<span class="w"> </span>process<span class="w"> </span><span class="k">for</span><span class="w"> </span>distribution<span class="w"> </span><span class="s1">&#39;Ubuntu-22.04&#39;</span><span class="w"> </span>failed<span class="w"> </span>with<span class="w"> </span><span class="nb">exit</span><span class="w"> </span>code:<span class="w"> </span><span class="m">1</span>.
+The<span class="w"> </span>installation<span class="w"> </span>process<span class="w"> </span><span class="k">for</span><span class="w"> </span>distribution<span class="w"> </span><span class="s1">'Ubuntu-22.04'</span><span class="w"> </span>failed<span class="w"> </span>with<span class="w"> </span><span class="nb">exit</span><span class="w"> </span>code:<span class="w"> </span><span class="m">1</span>.
 </pre></div>
 </div>
 <p>It means that your virtualisation is not activated. This is probably due to your Windows not being the Pro version and therefore not having access to the Hyper-V feature that had to be checked in the prerequisites instructions.</p>
@@ -193,7 +193,7 @@ bash<span class="w"> </span>Miniconda3-latest-Linux-x86_64.sh
 </pre></div>
 </div>
 <p>If conda is not detected after the installation finishes, run:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;export PATH=&quot;/home/{user}/miniconda3/bin:$PATH&quot;&#39;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.bashrc
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="s1">'export PATH="/home/{user}/miniconda3/bin:$PATH"'</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.bashrc
 <span class="nb">source</span><span class="w"> </span>~/.bashrc
 conda<span class="w"> </span>init
 </pre></div>
