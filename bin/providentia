@@ -341,6 +341,12 @@ if $download; then
     fi
 fi
 
+# website mode is not available yet, except for its developers (PROVIDENTIA_WEBSITE=1)
+if $website && [[ "${PROVIDENTIA_WEBSITE}" != "1" ]]; then
+    echo "WARNING: Website mode is not available yet. Exiting..."
+    exit 1
+fi
+
 # website mode runs only on local machines, as it opens the browser of the machine
 if $website; then
     if [[ "${BSC_MACHINE}" == "mn5" || "${BSC_MACHINE}" == "nord4" || "${BSC_MACHINE}" == "stg" || "${ip}" == "84.88.185.205" ]]; then

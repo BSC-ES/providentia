@@ -4,10 +4,10 @@ The website mode runs Providentia's website on your machine, together with the b
 
 ## Getting started
 
-To start the website, run the following command in the command line:
+The website mode is not available to users yet; without `PROVIDENTIA_WEBSITE=1`, `--website` only says so. To start the website, run the following command in the command line:
 
 ```
-./bin/providentia --website
+PROVIDENTIA_WEBSITE=1 ./bin/providentia --website
 ```
 
 It starts the backend, which loads Providentia and can take a few minutes, and then opens the dashboard of the website in your browser (`http://127.0.0.1:7782/...`). The configuration file and section are not used in this mode.
@@ -18,4 +18,4 @@ To stop the website and the backend, press `Ctrl+C` in the command line. If the 
 
 - The website mode is only available on local machines, not on MN5, Nord4 or the operational machine.
 - Port 7782 must be free on your machine.
-- The website package (`ines-providentia`) is installed with the `providentia-env_v4.0.0` environment from BSC's GitLab (https://gitlab.earth.bsc.es).
+- The website package (`ines-providentia`) is installed with the `providentia-env_v4.0.0` environment from BSC's GitLab (public, https://gitlab.earth.bsc.es).

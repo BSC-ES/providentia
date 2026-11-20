@@ -412,7 +412,7 @@ conda install -c conda-forge cartopy==0.25.0 jupyterlab==4.5.3 ghostscript==10.0
 pip install --no-user -r requirements.txt
 ```
 
-`requirements.txt` installs ines-providentia from BSC's GitLab (https://gitlab.earth.bsc.es).
+`requirements.txt` installs ines-providentia from BSC's GitLab (public, https://gitlab.earth.bsc.es). The website mode is not available to users yet: `./bin/providentia --website` only says so, and developers run it with `PROVIDENTIA_WEBSITE=1 ./bin/providentia --website`.
 
 ### Create providentia-env_v4.0.0 in MN5
 
