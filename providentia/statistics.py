@@ -17,7 +17,6 @@ from providentia.auxiliar import (
     join,
     get_conversion_factor,
     get_role_colourmap,
-    get_standard_parameters_by_speci,
 )
 from .calculate import Stats, ModBias
 from .read_aux import (
@@ -2959,9 +2958,7 @@ def exceedance_lim(read_instance, networkspeci):
 
     if limit is not np.nan:
         # get output units
-        standard_parameter_speci = get_standard_parameters_by_speci(
-            speci, read_instance.ghost_version
-        )
+        standard_parameter_speci = read_instance.parameter_dictionary[speci]
         final_units = read_instance.measurement_units[speci]
 
         # convert units using conversion factor

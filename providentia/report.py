@@ -36,7 +36,7 @@ from .fields_menus import (
     metadata_conf,
 )
 from .filter import DataFilter
-from .plotting import Plotting
+from .plotting_pyqt import PlottingPyQt
 from .plot_aux import (
     get_taylor_diagram_ghelper,
     histogram_bin_target,
@@ -223,7 +223,7 @@ class Report:
             self.plot_characteristics = {}
 
             # initialise Plotting class
-            self.plotting = Plotting(read_instance=self, canvas_instance=self)
+            self.plotting = PlottingPyQt(read_instance=self, canvas_instance=self)
 
             # add general plot characteristics to self (if not passed via command line)
             for k, val in self.plot_characteristics_templates["general"].items():

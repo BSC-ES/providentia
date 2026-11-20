@@ -209,7 +209,7 @@ def expand_plot_characteristics(plot_characteristics, mode):
         Plot characteristics dictionary
     """
 
-    keys_to_remove = ["dashboard", "report", "library", "tests"]
+    keys_to_remove = ["dashboard", "report", "library", "website", "tests"]
     for plot_type in plot_characteristics:
         # get all keys
         plot_type_characteristics = plot_characteristics[plot_type]
@@ -409,34 +409,56 @@ class Tee:
             s.flush()
 
 
-def get_standard_parameters_by_speci(speci, ghost_version):
+def load_species_reference():
     """
-    Get GHOST standard parameters dictionary
-
-    Parameters
-    ----------
-    speci : str
-        Speci to plot
-    ghost_version : str
-        GHOST version
+    Load the species reference of Providentia (settings/species.yaml), which gives each species
+    its matrix, units and limits whatever the GHOST version (generated from GHOST 1.6, see
+    tests/test_species.py)
 
     Returns
     -------
     dict
-        GHOST standard parameters dictionary
+        Fields of each species, as in the GHOST standards, with its name also as
+        bsc_parameter_name
     """
 
-    sys.path.insert(
-        1, join(CURRENT_PATH, "dependencies/GHOST_standards/{}".format(ghost_version))
-    )
+    with open(join(PROVIDENTIA_ROOT, "settings", "species.yaml")) as f:
+        # the C loader when there is one, as the file is long
+        reference = yaml.load(f, Loader=getattr(yaml, "CSafeLoader", yaml.SafeLoader))
+
+    return {
+        speci: {"bsc_parameter_name": speci, **fields}
+        for speci, fields in reference.items()
+    }
+
+
+def load_ghost_species(ghost_version):
+    """
+    Load the species of the GHOST standards of a version, as configuration.py imports them,
+    replacing any version imported earlier as GHOST_standards
+
+    Parameters
+    ----------
+    ghost_version : str
+        GHOST version (e.g. 1.5)
+
+    Returns
+    -------
+    dict
+        Standard parameters of the version, with the BSC parameter names as keys
+    """
+
+    # import GHOST standards
+    sys.path = [path for path in sys.path if "dependencies/GHOST_standards/" not in path]
+    sys.path.insert(1, join(CURRENT_PATH, "dependencies/GHOST_standards/{}".format(ghost_version)))
+    if "GHOST_standards" in sys.modules:
+        del sys.modules["GHOST_standards"]
     from GHOST_standards import standard_parameters
 
-    standard_parameters = standard_parameters
-
-    # get cut of standard parameters for original speci to process
-    for standard_parameter in standard_parameters.keys():
-        if standard_parameters[standard_parameter]["bsc_parameter_name"] == speci:
-            return standard_parameters[standard_parameter]
+    return {
+        param_dict["bsc_parameter_name"]: param_dict
+        for param_dict in standard_parameters.values()
+    }
 
 
 def unit_conversion(initial_units, final_units, standard_parameter_speci):

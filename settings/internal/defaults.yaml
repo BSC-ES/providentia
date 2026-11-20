@@ -46,7 +46,8 @@ dashboard: &dashboard
     - -90
     - 90
 
-dashboard_empty:
+# defaults when there is no configuration file (dashboard, library and the ines-providentia website)
+no_conf:
   <<: *dashboard
   network:
     - GHOST

@@ -18,7 +18,6 @@ from providentia.auxiliar import (
     join,
     get_conversion_factor,
     get_standard_units,
-    get_standard_parameters_by_speci,
 )
 from .fields_menus import (
     init_coverage,
@@ -34,6 +33,7 @@ from .fields_menus import (
 from .plot_aux import update_plotting_parameters
 from .read_aux import (
     add_forecast_suffix,
+    apply_ghost_version_fields,
     check_for_ghost,
     get_default_qa,
     get_forecast_run_mask,
@@ -105,6 +105,8 @@ class DataReader:
             self.read_instance.reading_ghost = check_for_ghost(
                 self.read_instance.network[0]
             )
+            # fields of the GHOST version for GHOST observations, of the species reference otherwise
+            apply_ghost_version_fields(self.read_instance)
 
             # re-initialise and update fields for active resolution
             init_coverage(self.read_instance)
@@ -578,9 +580,7 @@ class DataReader:
                 nonghost_standard_units = {}
                 for speci in self.read_instance.nonghost_units.keys():
                     input_units = self.read_instance.nonghost_units[speci]
-                    standard_parameter_speci = get_standard_parameters_by_speci(
-                        speci, self.read_instance.ghost_version
-                    )
+                    standard_parameter_speci = self.read_instance.parameter_dictionary[speci]
                     standard_input_units = get_standard_units(
                         input_units, standard_parameter_speci
                     )
@@ -3615,9 +3615,7 @@ class DataReader:
             return None
 
         obs_units = self.read_instance.measurement_units[speci]
-        standard_parameter_speci = get_standard_parameters_by_speci(
-            speci, self.read_instance.ghost_version
-        )
+        standard_parameter_speci = self.read_instance.parameter_dictionary[speci]
 
         # get start of first day of the period, to get the day of each timestep
         first_day = start.floor("D")
@@ -3775,9 +3773,7 @@ class DataReader:
             return None, None
 
         obs_units = self.read_instance.measurement_units[speci]
-        standard_parameter_speci = get_standard_parameters_by_speci(
-            speci, self.read_instance.ghost_version
-        )
+        standard_parameter_speci = self.read_instance.parameter_dictionary[speci]
 
         grid_sum, grid_count = None, None
         for filepath, time_indices, timestamps, file_lead_days in gridded_data["files"]:

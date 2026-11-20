@@ -60,7 +60,7 @@ def init_qa(instance):
         instance.qa_menu["select_buttons"] = ["all", "clear", "default"]
 
     # reset fields
-    if instance.network == ["actris/actris"]:
+    if "actris/actris" in instance.network:
         qa_labels = {
             "Invalid Data Provider Flags - GHOST Decreed": 6,
             "Invalid Data Provider Flags - Network Decreed": 7,
@@ -375,7 +375,7 @@ def update_qa(instance):
     """
 
     # reset fields
-    if instance.selected_network == "actris/actris":
+    if "actris/actris" in instance.selected_network:
         qa_labels = {
             "Invalid Data Provider Flags - GHOST Decreed": 6,
             "Invalid Data Provider Flags - Network Decreed": 7,
@@ -389,6 +389,24 @@ def update_qa(instance):
     instance.qa_menu["checkboxes"]["remove_default"] = np.array([], dtype=np.uint8)
     instance.qa_menu["checkboxes"]["remove_selected"] = np.array([], dtype=np.uint8)
     instance.qa_menu["checkboxes"]["map_vars"] = np.sort(list(qa_map_vars))
+
+
+def update_flags(instance):
+    """
+    Update the flag menu labels and mappings (e.g. with the codes of another GHOST version).
+
+    Parameters
+    ----------
+    instance : object
+        An object instance to be updated with flag menu configurations.
+    """
+
+    # reset fields
+    flag_codes = instance.standard_data_flag_name_to_data_flag_code
+    instance.flag_menu["checkboxes"]["labels"] = np.array(sorted(flag_codes, key=flag_codes.get))
+    instance.flag_menu["checkboxes"]["remove_default"] = np.array([], dtype=np.uint8)
+    instance.flag_menu["checkboxes"]["remove_selected"] = np.array([], dtype=np.uint8)
+    instance.flag_menu["checkboxes"]["map_vars"] = np.sort(list(flag_codes.values()))
 
 
 def update_coverage_fields(instance):

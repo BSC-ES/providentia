@@ -12,6 +12,7 @@ from netCDF4 import Dataset, num2date, chartostring
 import numpy as np
 import pandas as pd
 import re
+import socket
 import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join, TIMESTEPS_PER_DAY
@@ -38,6 +39,25 @@ PROVIDENTIA_ROOT = "/".join(CURRENT_PATH.split("/")[:-1])
 interp_models = yaml.safe_load(
     open(join(PROVIDENTIA_ROOT, "settings", "interp_models.yaml"))
 )
+
+def write_json_file(path, data):
+    """
+    Writes data to a JSON file all at once, so that other processes reading it
+    at the same time always get a complete file.
+
+    Parameters
+    ----------
+    path : str
+        Path of the JSON file.
+    data : dict
+        Data to write.
+    """
+
+    # the temporary file name is unique to this process, also across nodes of a machine
+    temporary_path = f"{path}.{socket.gethostname()}.{os.getpid()}.tmp"
+    with open(temporary_path, "w") as json_file:
+        json.dump(data, json_file, indent=4)
+    os.replace(temporary_path, path)
 
 def drop_nans(data):
     """
@@ -941,14 +961,13 @@ def get_ghost_observational_tree(instance, ghost_version):
                     ] = file_yearmonths
 
     # save file tree out to yaml
-    with open(
+    write_json_file(
         join(
             PROVIDENTIA_ROOT,
             "settings/internal/ghost_filetree_{}.json".format(ghost_version),
         ),
-        "w",
-    ) as json_file:
-        json.dump(ghost_observation_data, json_file, indent=4)
+        ghost_observation_data,
+    )
 
     return ghost_observation_data
 
@@ -1029,12 +1048,108 @@ def get_nonghost_observational_tree(instance):
                     ] = file_yearmonths
 
     # save file tree out to yaml
-    with open(
-        join(PROVIDENTIA_ROOT, "settings/internal/nonghost_filetree.json"), "w"
-    ) as json_file:
-        json.dump(nonghost_observation_data, json_file, indent=4)
+    write_json_file(
+        join(PROVIDENTIA_ROOT, "settings/internal/nonghost_filetree.json"),
+        nonghost_observation_data,
+    )
 
     return nonghost_observation_data
+
+
+def get_networks_with_data(available_observation_data, resolution, matrices, species):
+    """
+    Get the networks with data for a resolution and at least one of the species, in one of
+    the matrices, as the network menu of the dashboard shows them.
+
+    Parameters
+    ----------
+    available_observation_data : dict
+        Observational data in the date range, per network, resolution, matrix and species
+        (see get_valid_obs_files_in_date_range).
+    resolution : str
+        Temporal resolution (e.g. hourly).
+    matrices : list
+        Matrices of the species (e.g. ["gas"]). No network has data without matrices.
+    species : list
+        Species (e.g. ["sconco3"]).
+
+    Returns
+    -------
+    list
+        Sorted names of the networks with data.
+    """
+
+    return sorted(
+        network for network in available_observation_data.keys()
+        if matrices
+        and resolution in available_observation_data[network]
+        and any(
+            matrix in available_observation_data[network][resolution]
+            and set(species) & set(available_observation_data[network][resolution][matrix])
+            for matrix in matrices
+        )
+    )
+
+
+def apply_ghost_version_fields(instance):
+    """
+    Set the fields of each species (units, formula, limits, minimum resolution, long name):
+    those of the GHOST version when reading GHOST observations and the version has the species,
+    so that they describe its data as stored, and those of the species reference otherwise
+    (e.g. gridded or non-GHOST data). The matrix is always the reference's, as the menus and
+    the observation data tree use it.
+
+    Parameters
+    ----------
+    instance : object
+        Instance with the parameter dictionary, the species reference, the standard parameters
+        of the GHOST version and whether GHOST observations are read.
+    """
+
+    for speci, fields in instance.parameter_dictionary.items():
+        source = instance.species_reference[speci]
+        if instance.reading_ghost and (speci in instance.ghost_parameter_dictionary):
+            source = instance.ghost_parameter_dictionary[speci]
+        for field in fields:
+            if field != "matrix":
+                fields[field] = source[field]
+
+
+def get_resolutions_with_data(available_observation_data, matrices, species):
+    """
+    Get the temporal resolutions with data for at least one of the species, in one of the
+    matrices, in any network, as the resolution menu of the dashboard shows them.
+
+    Parameters
+    ----------
+    available_observation_data : dict
+        Observational data in the date range, per network, resolution, matrix and species
+        (see get_valid_obs_files_in_date_range).
+    matrices : list
+        Matrices of the species (e.g. ["gas"]). There is no data without matrices.
+    species : list
+        Species (e.g. ["sconco3"]).
+
+    Returns
+    -------
+    list
+        Resolutions with data, from the finest to the coarsest (see get_temporal_resolution_order).
+    """
+
+    return sorted(
+        {
+            resolution
+            for network in available_observation_data
+            for resolution in available_observation_data[network]
+            if matrices
+            and any(
+                matrix in available_observation_data[network][resolution]
+                and set(species) & set(available_observation_data[network][resolution][matrix])
+                for matrix in matrices
+            )
+        },
+        key=get_temporal_resolution_order().__getitem__,
+    )
 
 
 def get_valid_obs_files_in_date_range(instance, start_date, end_date):

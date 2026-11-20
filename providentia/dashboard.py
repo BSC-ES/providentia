@@ -39,6 +39,7 @@ from .fields_menus import (
     init_flags,
     init_qa,
     update_qa,
+    update_flags,
     init_metadata,
     init_multispecies,
     init_period,
@@ -57,9 +58,10 @@ from .read_aux import (
     get_default_qa,
     generate_file_trees,
     get_model_id,
+    get_networks_with_data,
+    get_resolutions_with_data,
     get_valid_models,
     get_valid_obs_files_in_date_range,
-    get_temporal_resolution_order,
 )
 from .toolbar import NavigationToolbar
 from .warnings_prv import show_message
@@ -956,8 +958,8 @@ class Dashboard(QtWidgets.QWidget):
 
         # observations
         config_bar.addWidget(self.lb_obs_selection, 0, 6, 1, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_network, 1, 6, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_ghost_version, 1, 7, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_ghost_version, 1, 6, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_network, 1, 7, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.cb_ghost_features, 1, 8, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.bu_QA, 2, 6, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.bu_flags, 2, 7, QtCore.Qt.AlignLeft)
@@ -1288,6 +1290,9 @@ class Dashboard(QtWidgets.QWidget):
             ]
             setattr(self, f"selected_{combobox_type}", selected_values)
 
+        # message about the selection, shown once the menu shows the new selection
+        msg_to_show = None
+
         # get options that are not available in data directories
         missing_values = [
             value
@@ -1315,7 +1320,7 @@ class Dashboard(QtWidgets.QWidget):
                 else:
                     msg += f" Please select a {combobox_type.lower()}."
                     selected_values = []
-                show_message(self, msg)
+                msg_to_show = msg
                 setattr(
                     self,
                     f"selected_{combobox_type}",
@@ -1330,68 +1335,14 @@ class Dashboard(QtWidgets.QWidget):
                 else QtCore.Qt.Unchecked
             )
 
+        # the text only follows a change of a check state, and none changes when nothing is selected
+        selected_cb.updateText()
+
+        # after the menu shows the new selection, as the message waits for the user to close it
+        if msg_to_show is not None:
+            show_message(self, msg_to_show)
+
         return True
-
-    def get_species_per_ghost_version(self, matrices=None, version="1.5"):
-        """
-        Get the list of GHOST standard species (bsc_parameter_name),
-        optionally filtered to those belonging to the given matrices.
-
-        Parameters
-        ----------
-        matrices : list, optional
-            If given, only species whose GHOST standard matrix is in this list
-            are returned. Selecting more than one matrix widens the list of
-            available species to the union across all of them.
-        version : str
-            GHOST version
-
-        Returns
-        -------
-        list
-            Sorted list of species.
-        """
-
-        sys.path = [
-            path for path in sys.path if "dependencies/GHOST_standards/" not in path
-        ]
-        sys.path.insert(1, join(CURRENT_PATH, f"dependencies/GHOST_standards/{version}"))
-        if "GHOST_standards" in sys.modules:
-            del sys.modules["GHOST_standards"]
-        from GHOST_standards import standard_parameters
-
-        return sorted(
-            param_dict["bsc_parameter_name"]
-            for param_dict in standard_parameters.values()
-            if (not matrices) or (param_dict["matrix"] in matrices)
-        )
-
-    def get_matrices_per_ghost_version(self, version="1.5"):
-        """
-        Get the list of GHOST standard matrices (bsc_parameter_name's
-        matrix field), independent of any network's available data.
-
-        Parameters
-        ----------
-        version : str
-            GHOST version
-
-        Returns
-        -------
-        list
-            Sorted list of unique matrices.
-        """
-
-        sys.path = [
-            path for path in sys.path if "dependencies/GHOST_standards/" not in path
-        ]
-        sys.path.insert(1, join(CURRENT_PATH, f"dependencies/GHOST_standards/{version}"))
-        if "GHOST_standards" in sys.modules:
-            del sys.modules["GHOST_standards"]
-        from GHOST_standards import standard_parameters
-
-        return sorted({param_dict["matrix"] for param_dict in standard_parameters.values()})
-
 
     def update_configuration_bar_fields(self):
         """Initialise or synchronise all configuration bar widgets and their available options."""
@@ -1445,7 +1396,12 @@ class Dashboard(QtWidgets.QWidget):
             # set initial selected config variables as set .conf files or defaults
             self.selected_network = copy.deepcopy(self.network)
             self.selected_resolution = copy.deepcopy(self.resolution)
-            self.selected_matrix = [self.parameter_dictionary[self.species[0]]["matrix"]]
+            # matrix of the first species in the species reference, none if it is not there
+            self.selected_matrix = (
+                [self.parameter_dictionary[self.species[0]]["matrix"]]
+                if self.species[0] in self.parameter_dictionary
+                else []
+            )
             self.selected_species = copy.deepcopy(self.species)
             self.selected_statistic_mode = copy.deepcopy(self.statistic_mode)
             self.selected_statistic_aggregation = copy.deepcopy(
@@ -1577,60 +1533,71 @@ class Dashboard(QtWidgets.QWidget):
         self.mpl_canvas.timeseries_stat.clear()
 
 
-        # get matrices for GHOST version 1.5
-        available_matrices = self.get_matrices_per_ghost_version()
+        # get matrices of the species reference (settings/species.yaml)
+        available_matrices = sorted(
+            {param_dict["matrix"] for param_dict in self.parameter_dictionary.values()}
+        )
 
         # update matrix field
         if not self.set_checkable_combobox_options(available_options=available_matrices,
                                                    combobox_type='matrix',
-                                                   recovery_hint='Please select a different matrix or change the date range to include available data.'):
+                                                   recovery_hint='Please select a different matrix or change the date range to include available data.',
+                                                   select_first_option=False):
             return
         
-        # get species for GHOST version 1.5
-        available_species = self.get_species_per_ghost_version(self.selected_matrix)
+        # get species of the selected matrices (all species if none is selected)
+        available_species = sorted(
+            speci
+            for speci, param_dict in self.parameter_dictionary.items()
+            if (not self.selected_matrix) or (param_dict["matrix"] in self.selected_matrix)
+        )
 
         # update species field
         self.set_checkable_combobox_options(available_options=available_species,
                                             combobox_type='species',
-                                            recovery_hint='Please select a different species or change the date range to include available data.')
+                                            recovery_hint='Please select a different species or change the date range to include available data.',
+                                            select_first_option=False)
 
-        # get resolutions that have data in the date range, for any network
-        available_resolutions = sorted(
-            {
-                resolution
-                for network in self.available_observation_data
-                for resolution in self.available_observation_data[network]
-            },
-            key=get_temporal_resolution_order().__getitem__
+        # nothing to read without a matrix or species: READ says which, the other menus stay as they are
+        for menu in ["matrix", "species"]:
+            if not getattr(self, f"selected_{menu}"):
+                self.no_data_to_read = True
+                self.bu_read.setToolTip(f"Select a {menu} to read data")
+                self.disable_element(self.bu_read, "button")
+                self.block_config_bar_handling_updates = False
+                self.block_MPL_canvas_updates = False
+                return
+
+        # get resolutions that have data in the date range for at least one of the selected species,
+        # in any network
+        available_resolutions = get_resolutions_with_data(
+            self.available_observation_data,
+            self.selected_matrix,
+            self.selected_species,
         )
 
         # update resolution field
         if not self.set_combobox_options(available_options=available_resolutions,
                                          combobox_type='resolution',
-                                         recovery_hint='Please select a different resolution or change the date range to include available data.'):
+                                         recovery_hint='Please select a different species or change the date range to include available data.'):
             self.block_config_bar_handling_updates = False
             self.block_MPL_canvas_updates = False
             return
 
         # get networks that have data for at least one of the selected species,
         # for the current resolution and matrix
-        available_networks = sorted(
-            network for network in self.available_observation_data.keys()
-            if self.selected_matrix
-            and self.selected_resolution in self.available_observation_data[network]
-            and any(
-                matrix in self.available_observation_data[network][self.selected_resolution]
-                and set(self.selected_species)
-                    & set(self.available_observation_data[network][self.selected_resolution][matrix])
-                for matrix in self.selected_matrix
-            )
+        available_networks = get_networks_with_data(
+            self.available_observation_data,
+            self.selected_resolution,
+            self.selected_matrix,
+            self.selected_species,
         )
 
-        # after a date change, no network is selected if the previous one has no data in the new range
+        # no network is selected if the previous ones have no data for the new selection
         if not self.set_checkable_combobox_options(available_options=available_networks,
                                                    combobox_type='network',
-                                                   recovery_hint='Please select a different network or change the date range to include available data.',
-                                                   select_first_option=not self.date_range_has_changed):
+                                                   recovery_hint='Please select a different resolution or species, or change the date range to include available data.',
+                                                   select_first_option=False):
             self.block_config_bar_handling_updates = False
             self.block_MPL_canvas_updates = False
             return
@@ -2258,6 +2225,8 @@ class Dashboard(QtWidgets.QWidget):
                 self.cb_species: "species",
             }
             if self.sender() in empty_menus:
+                # the selection is empty too, so that the next refresh of the menus keeps it empty
+                setattr(self, f"selected_{empty_menus[self.sender()]}", [])
                 self.no_data_to_read = True
                 self.bu_read.setToolTip(f"Select a {empty_menus[self.sender()]} to read data")
                 self.disable_element(self.bu_read, "button")
@@ -2277,10 +2246,20 @@ class Dashboard(QtWidgets.QWidget):
                 if len({check_for_ghost(network) for network in new_selected_network}) > 1:
                     msg = 'Networks must be all GHOST or non-GHOST. Keeping previous selection.'
                     show_message(self, msg)
+                # actris/actris cannot be read with other networks, otherwise keep previous selection
+                elif ("actris/actris" in new_selected_network) and (len(new_selected_network) > 1):
+                    msg = 'actris/actris cannot be read with other networks. Keeping previous selection.'
+                    show_message(self, msg)
                 else:
                     self.selected_network = new_selected_network
                     # ensure that QA defaults have been updated if network has changed (i.e. to or from ACTRIS)
                     update_qa(self)
+                    # default QA of the ticked networks, set here as the refresh of the menus
+                    # below can stop early
+                    self.provconf.parse_parameter("qa", None)
+                    if self.selected_species:
+                        self.qa_menu["checkboxes"]["remove_default"] = get_default_qa(self, self.selected_species[0])
+                        self.qa_menu["checkboxes"]["remove_selected"] = self.qa_menu["checkboxes"]["remove_default"]
 
             elif event_source == self.cb_resolution:
                 self.selected_resolution = changed_param
@@ -2296,7 +2275,21 @@ class Dashboard(QtWidgets.QWidget):
 
             elif event_source == self.cb_ghost_version:
                 self.selected_ghost_version = changed_param
-                
+
+                # the GHOST standards of the new version (species, their fields, QA and flag
+                # codes, GHOST networks), so that everything follows the menu
+                self.ghost_version = self.selected_ghost_version
+                self.provconf.parse_parameter("ghost_version", self.ghost_version)
+                # its default QA (default_qa_standard, default_qa_non_negative), and the QA and
+                # flag menus with its codes, starting again from its defaults (set here, as the
+                # refresh of the menus below stops early when the version has no data)
+                self.provconf.parse_parameter("qa", None)
+                update_qa(self)
+                update_flags(self)
+                if self.selected_species:
+                    self.qa_menu["checkboxes"]["remove_default"] = get_default_qa(self, self.selected_species[0])
+                    self.qa_menu["checkboxes"]["remove_selected"] = self.qa_menu["checkboxes"]["remove_default"]
+
                 generate_file_trees(self, ghost_version=self.selected_ghost_version, only_ghost=True)
 
                 self.ghost_version_has_changed = True
@@ -2884,6 +2877,33 @@ class Dashboard(QtWidgets.QWidget):
         # if have no data to read, then do not read any data
         if self.no_data_to_read:
             return
+
+        # GHOST observations can only be read for the species of the selected GHOST version:
+        # if none is in it, nothing is read, otherwise the others are not read
+        if self.selected_network and all(check_for_ghost(network) for network in self.selected_network):
+            missing_species = [
+                speci for speci in self.selected_species if speci not in self.ghost_parameter_dictionary
+            ]
+            if missing_species:
+                is_are = 'is' if len(missing_species) == 1 else 'are'
+                if len(missing_species) == len(self.selected_species):
+                    msg = (f"Species {', '.join(missing_species)} {is_are} not in GHOST version "
+                           f"{self.selected_ghost_version}. Please select a different GHOST version.")
+                    show_message(self, msg)
+                    return
+                msg = (f"Species {', '.join(missing_species)} {is_are} not in GHOST version "
+                       f"{self.selected_ghost_version}, it will not be read.")
+                show_message(self, msg)
+                # untick them in the species menu, without refreshing the menus
+                self.block_config_bar_handling_updates = True
+                for row in range(self.cb_species.model().rowCount()):
+                    item = self.cb_species.model().item(row)
+                    if item.text() in missing_species:
+                        item.setCheckState(QtCore.Qt.Unchecked)
+                self.block_config_bar_handling_updates = False
+                self.selected_species = [
+                    speci for speci in self.selected_species if speci not in missing_species
+                ]
 
         # forecast options are applied to all models, so do not read if models with
         # forecast data have different forecast options or days selected
@@ -3514,7 +3534,6 @@ class Dashboard(QtWidgets.QWidget):
         qa_active = False
         flags_active = False
         period_active = False
-        ghost_version_active = False
         ghost_features_active = False
 
         # see if MODEL is selected
@@ -3536,11 +3555,11 @@ class Dashboard(QtWidgets.QWidget):
                 flags_active = obs_active
                 break
 
-        # GHOST version and features are only active if all selected networks are from GHOST
+        # GHOST features are only active if all selected networks are from GHOST (the GHOST
+        # version is always active, as the GHOST networks offered depend on it)
         all_ghost = bool(self.selected_network) and all(
             check_for_ghost(network) for network in self.selected_network
         )
-        ghost_version_active = all_ghost
         ghost_features_active = all_ghost and obs_active
 
         # update buttons
@@ -3553,10 +3572,7 @@ class Dashboard(QtWidgets.QWidget):
                 self.bu_flags = self.enable_element(self.bu_flags, "button")
             else:
                 self.bu_flags = self.disable_element(self.bu_flags, "button")
-            if ghost_version_active:
-                self.cb_ghost_version = self.enable_element(self.cb_ghost_version, "combobox")
-            else:
-                self.cb_ghost_version = self.disable_element(self.cb_ghost_version, "combobox")
+            self.cb_ghost_version = self.enable_element(self.cb_ghost_version, "combobox")
             if ghost_features_active:
                 self.cb_ghost_features = self.enable_element(self.cb_ghost_features, "combobox")
             else:

@@ -1255,6 +1255,19 @@ class CheckableComboBox(QtWidgets.QComboBox):
         ]
         self.lineEdit().setText(", ".join(texts))
 
+        # a menu without options shows nothing, one with options and none checked asks to select
+        self.lineEdit().setPlaceholderText(
+            "Select option/s:" if self.model().rowCount() else ""
+        )
+
+    def clear(self):
+        """
+        Remove all items, and update the text and placeholder that showed them
+        """
+
+        super().clear()
+        self.updateText()
+
     def addItem(self, text, data=None, enabled=True):
         """
         Add a single checkable item to the model

@@ -17,10 +17,11 @@ import yaml
 from providentia.auxiliar import (
     CURRENT_PATH,
     join,
+    load_species_reference,
     get_machine,
     resolve_plots_or_preset,
 )
-from providentia.read_aux import check_for_ghost, get_default_qa
+from providentia.read_aux import apply_ghost_version_fields, check_for_ghost, get_default_qa
 from providentia.warnings_prv import show_message
 
 # get current path and providentia root path
@@ -68,6 +69,30 @@ actris_standard_metadata = yaml.safe_load(
 
 # set current MACHINE
 MACHINE = get_machine()
+
+
+def get_data_path(machine, path_key):
+    """
+    Get a root data path for a machine from settings/data_paths.yaml.
+
+    Parameters
+    ----------
+    machine : str
+        Machine name as defined in data_paths.yaml (e.g. "local", "mn5")
+    path_key : str
+        One of "ghost_root", "nonghost_root", "mod_root", "mod_to_interp_root"
+
+    Returns
+    -------
+    str
+        Path with "~" expanded, or "" if the path is undefined for that machine
+    """
+
+    path = data_paths[machine][path_key]
+    if path == "":
+        return path
+
+    return os.path.expanduser(path[0]) + path[1:]
 
 
 def parse_path(dir, f):
@@ -133,9 +158,10 @@ class ProvConfiguration:
             setattr(self.read_instance, k, self.parse_parameter(k, val))
 
         # set default values of the current mode
+        # (dashboard and library can be launched without configuration file)
         self.read_instance.default_values = (
-            defaults["dashboard_empty"]
-            if self.read_instance.mode == "dashboard"
+            defaults["no_conf"]
+            if self.read_instance.mode in ["dashboard", "library"]
             and self.read_instance.config == ""
             else defaults[self.read_instance.mode]
         )
@@ -275,8 +301,7 @@ class ProvConfiguration:
 
             # set default if left undefined
             if value == "":
-                ghost_root = data_paths[MACHINE]["ghost_root"]
-                return os.path.expanduser(ghost_root[0]) + ghost_root[1:]
+                return get_data_path(MACHINE, "ghost_root")
 
         elif key == "nonghost_root":
             # define non-GHOST observational root data directory (if undefined it is
@@ -284,26 +309,19 @@ class ProvConfiguration:
 
             # set default if left undefined
             if value == "":
-                nonghost_root = data_paths[MACHINE]["nonghost_root"]
-                return os.path.expanduser(nonghost_root[0]) + nonghost_root[1:]
+                return get_data_path(MACHINE, "nonghost_root")
 
         elif key == "mod_root":
             # define model root data directory
             # set model root data directory if left undefined
             if value == "":
-                mod_root = data_paths[MACHINE]["mod_root"]
-                return os.path.expanduser(mod_root[0]) + mod_root[1:]
+                return get_data_path(MACHINE, "mod_root")
 
         elif key == "mod_to_interp_root":
             # define model root data directory
             # set model root data directory if left undefined
             if value == "":
-                mod_to_interp_root = data_paths[MACHINE]["mod_to_interp_root"]
-                if mod_to_interp_root != "":
-                    return (
-                        os.path.expanduser(mod_to_interp_root[0])
-                        + mod_to_interp_root[1:]
-                    )
+                return get_data_path(MACHINE, "mod_to_interp_root")
 
         elif key == "ghost_version":
             # parse GHOST version
@@ -350,12 +368,21 @@ class ProvConfiguration:
                 for resolution_dict in standard_temporal_resolutions.values()
             ]
 
-            # modify standard parameter dictionary to have BSC standard parameter names as keys (rather than GHOST)
-            self.read_instance.parameter_dictionary = dict()
-            for _, param_dict in standard_parameters.items():
-                self.read_instance.parameter_dictionary[
-                    param_dict["bsc_parameter_name"]
-                ] = param_dict
+            # standard parameters of this GHOST version, with BSC standard parameter names as keys
+            # (rather than GHOST), only for the fields of its own observations (see
+            # apply_ghost_version_fields in read_aux.py)
+            self.read_instance.ghost_parameter_dictionary = {
+                param_dict["bsc_parameter_name"]: param_dict
+                for param_dict in standard_parameters.values()
+            }
+
+            # species, with their matrix, units and limits, from the species reference of
+            # Providentia, whatever the GHOST version (a copy, as its fields are replaced by those
+            # of the GHOST version for GHOST observations, and its limits can be changed)
+            self.read_instance.species_reference = load_species_reference()
+            self.read_instance.parameter_dictionary = copy.deepcopy(
+                self.read_instance.species_reference
+            )
 
             # get available species
             self.read_instance.available_species = list(
@@ -429,7 +456,10 @@ class ProvConfiguration:
             if self.read_instance.ghost_version not in ['1.2', '1.3', '1.3.1', '1.3.2']:
                 from GHOST_standards import providentia_defaults
 
-                if self.read_instance.network == ["actris/actris"]:
+                # in the dashboard, the defaults are those of the networks ticked in its menu,
+                # which are only read (network) when READ is clicked
+                networks = getattr(self.read_instance, "selected_network", self.read_instance.network)
+                if "actris/actris" in networks:
                     defaults = {
                         "flag": [],
                         "qa_standard": ["Invalid Data Provider Flags - GHOST Decreed"],
@@ -467,7 +497,7 @@ class ProvConfiguration:
                     else:
                         value = sorted(list(value))
                     # if we have an ACTRIS network, keep only qa that can be applied
-                    if self.read_instance.network == ["actris/actris"]:
+                    if "actris/actris" in self.read_instance.network:
                         value = [val for val in value if val in [6, 7]]
                     return value
                 # otherwise, set default QA per species (set later)
@@ -481,7 +511,10 @@ class ProvConfiguration:
 
                 from GHOST_standards import providentia_defaults
 
-                if self.read_instance.network == ["actris/actris"]:
+                # in the dashboard, the defaults are those of the networks ticked in its menu,
+                # which are only read (network) when READ is clicked
+                networks = getattr(self.read_instance, "selected_network", self.read_instance.network)
+                if "actris/actris" in networks:
                     defaults = {
                         "flag": [],
                         "qa_standard": ["Invalid Data Provider Flags - GHOST Decreed"],
@@ -661,6 +694,7 @@ class ProvConfiguration:
             if isinstance(value, str):
                 # empty string
                 if value == "":
+                    self.read_instance.alias = []
                     return []
                 # split models
                 else:
@@ -683,6 +717,9 @@ class ProvConfiguration:
                         self.read_instance.alias = []
 
                     return mods
+            # lists have no legend names in brackets (e.g. passed as argument from the library)
+            else:
+                self.read_instance.alias = []
 
         elif key == "map_extent":
             # parse map extent
@@ -1912,6 +1949,10 @@ class ProvConfiguration:
                     sys.exit(1)
                 self.read_instance.reading_ghost = is_ghost
 
+        # fields of the GHOST version for GHOST observations, of the species reference otherwise
+        if self.read_instance.network:
+            apply_ghost_version_fields(self.read_instance)
+
         # if only one network or species, save in list
         if len(self.read_instance.network) == 1:
             self.read_instance.network = [self.read_instance.network[0]]
@@ -2324,6 +2365,9 @@ class ProvConfiguration:
 
             # create a variable to set qa per species (including filter species), setting defaults in the process
             if isinstance(self.read_instance.qa, dict):
+                # default qa for the final network (qa is parsed before the network of the
+                # configuration file, so its default would not be the one of ACTRIS)
+                self.parse_parameter("qa", None)
                 self.read_instance.qa_per_species = {
                     speci: get_default_qa(self.read_instance, speci)
                     for speci in species_plus_filter_species
