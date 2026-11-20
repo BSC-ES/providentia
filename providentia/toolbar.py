@@ -658,6 +658,10 @@ class NavigationToolbar(NavigationToolbar2QT):
                 vars(self.read_instance).pop(k)
             except:
                 pass
+        # and the networks ticked in the menu, which are set again from the configuration file
+        # when the menus are refreshed below, so that the defaults (e.g. QA) are those of its
+        # networks
+        vars(self.read_instance).pop("selected_network", None)
 
         # reinitialise default configuration variables
         # no commandline arguments considered as reloading config
@@ -683,12 +687,13 @@ class NavigationToolbar(NavigationToolbar2QT):
         )
         self.read_instance.dashboard_plots = previous_dashboard_plots
 
-        # generate file trees and the QA and flag menus (with the codes of its standards) if
-        # GHOST version has changed
+        # generate file trees if GHOST version has changed
         if current_ghost_version != self.read_instance.ghost_version:
             generate_file_trees(self.read_instance)
-            init_flags(self.read_instance)
-            init_qa(self.read_instance)
+
+        # QA and flag menus with the codes of its GHOST version and its networks (e.g. ACTRIS)
+        init_flags(self.read_instance)
+        init_qa(self.read_instance)
 
         # update species, models, qa & flags
         self.read_instance.config_bar_initialisation = True

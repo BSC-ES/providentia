@@ -456,7 +456,10 @@ class ProvConfiguration:
             if self.read_instance.ghost_version not in ['1.2', '1.3', '1.3.1', '1.3.2']:
                 from GHOST_standards import providentia_defaults
 
-                if self.read_instance.network == ["actris/actris"]:
+                # in the dashboard, the defaults are those of the networks ticked in its menu,
+                # which are only read (network) when READ is clicked
+                networks = getattr(self.read_instance, "selected_network", self.read_instance.network)
+                if "actris/actris" in networks:
                     defaults = {
                         "flag": [],
                         "qa_standard": ["Invalid Data Provider Flags - GHOST Decreed"],
@@ -494,7 +497,7 @@ class ProvConfiguration:
                     else:
                         value = sorted(list(value))
                     # if we have an ACTRIS network, keep only qa that can be applied
-                    if self.read_instance.network == ["actris/actris"]:
+                    if "actris/actris" in self.read_instance.network:
                         value = [val for val in value if val in [6, 7]]
                     return value
                 # otherwise, set default QA per species (set later)
@@ -508,7 +511,10 @@ class ProvConfiguration:
 
                 from GHOST_standards import providentia_defaults
 
-                if self.read_instance.network == ["actris/actris"]:
+                # in the dashboard, the defaults are those of the networks ticked in its menu,
+                # which are only read (network) when READ is clicked
+                networks = getattr(self.read_instance, "selected_network", self.read_instance.network)
+                if "actris/actris" in networks:
                     defaults = {
                         "flag": [],
                         "qa_standard": ["Invalid Data Provider Flags - GHOST Decreed"],
@@ -2359,6 +2365,9 @@ class ProvConfiguration:
 
             # create a variable to set qa per species (including filter species), setting defaults in the process
             if isinstance(self.read_instance.qa, dict):
+                # default qa for the final network (qa is parsed before the network of the
+                # configuration file, so its default would not be the one of ACTRIS)
+                self.parse_parameter("qa", None)
                 self.read_instance.qa_per_species = {
                     speci: get_default_qa(self.read_instance, speci)
                     for speci in species_plus_filter_species

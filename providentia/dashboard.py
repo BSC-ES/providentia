@@ -2254,6 +2254,12 @@ class Dashboard(QtWidgets.QWidget):
                     self.selected_network = new_selected_network
                     # ensure that QA defaults have been updated if network has changed (i.e. to or from ACTRIS)
                     update_qa(self)
+                    # default QA of the ticked networks, set here as the refresh of the menus
+                    # below can stop early
+                    self.provconf.parse_parameter("qa", None)
+                    if self.selected_species:
+                        self.qa_menu["checkboxes"]["remove_default"] = get_default_qa(self, self.selected_species[0])
+                        self.qa_menu["checkboxes"]["remove_selected"] = self.qa_menu["checkboxes"]["remove_default"]
 
             elif event_source == self.cb_resolution:
                 self.selected_resolution = changed_param
