@@ -19,7 +19,7 @@ You will also need to load the necessary modules for it to function, for this yo
 conda activate providentia-env_v[version]
 ```
 
-where `version` is the relevant version of Providentia, e.g. `3.1.0`.
+where `version` is the relevant version of Providentia, e.g. `4.0.0`.
 
 Then the Providentia library can be used in any script, through simply importing it as a module:
 
@@ -51,6 +51,20 @@ provi = prv.Providentia('interactive_template.conf')
 ```
 
 Providentia looks for configuration files in the `configurations` folder by default, if your configuration file is saved elsewhere, pass the complete path.
+
+The configuration file is optional. Instead, the configuration fields can be passed as arguments:
+```
+provi = prv.Providentia(network='EBAS', species='sconco3', start_date='20180101', end_date='20180201')
+```
+
+Fields that are not passed take the same defaults as the dashboard when it is launched without a configuration file (network `GHOST`, species `sconco3`, resolution `hourly`, from `20180101` to `20190101`). Without a configuration file there are no sections or subsections.
+
+By default the plots are drawn with matplotlib. To get plotly figures instead, pass `backend='plotly'` when creating the object, which then applies to every plot it makes:
+```
+provi = prv.Providentia('interactive_template.conf', backend='plotly')
+```
+
+At the moment only the timeseries, the map, the table and the statsummary can be drawn with plotly. In the plotly table, a networkspecies or subsection repeated in the rows below is left blank instead of merged.
 
 The configuration will become part of the object, therefere you can call the modes as explained below. You can pass any arguments you wish when calling each function to override what is set in the loaded configuration file. 
 
@@ -368,6 +382,8 @@ plot_obj = provi.plot(plot_type, return_plot=True)
 
 where `plot_obj` is the object of the plot returned.
 
+If no valid data is left for the plot (for example, when temporal colocation removes all of it because the models do not have data at the same times and stations), a warning is shown, no plot is made and `plot_obj` is `None`.
+
 To save the plot, the following argument can be passed:
 
 ```
@@ -440,6 +456,14 @@ map_extent = [lonmin, lonmax, latmin, latmax]
 
 where `lonmin`, `lonmax`, `latmin`, and `latmax` are the rectangular bounds of the map extent, e.g.: `map_extent = [-180, 180, -90, 90]`
 
+The projection of the map is the one set in `settings/plot_characteristics.yaml` (see [Plot customisation](Plot-customisation.md)). It can be changed by passing the argument:
+
+```
+projection = 'Mollweide'
+```
+
+with the name of any of the projections listed there. The projection is kept for the maps made afterwards, until another one is passed.
+
 The available plot options are: `annotate` and `domain`.
  
 ##### timeseries
@@ -456,7 +480,7 @@ By adding a statistic and resolution, we can get statistical timeseries to see t
 provi.plot('timeseries-stat-resolution')
 ```
 
-The available plot options are: `annotate`, `bias`, `hidedata`, `logy` and `smooth`.
+The available plot options are: `annotate`, `bias`, `hidedata`, `logy`, `smooth` and `threshold`.
 
 ##### periodic
 
@@ -468,7 +492,7 @@ provi.plot('periodic-stat')
 
 where `stat` is the statistic that is wanted to be plotted. 
 
-The available plot options are: `annotate`, `bias` and `logy`.
+The available plot options are: `annotate`, `bias`, `logy` and `threshold`.
 
 ##### periodic-violin
 
@@ -478,7 +502,7 @@ The periodic-violin plot can be made as follows:
 provi.plot('periodic-violin')
 ```
 
-The available plot options are: `annotate`and `logy`.
+The available plot options are: `annotate`, `logy` and `threshold`.
 
 ##### distribution
 
@@ -488,7 +512,21 @@ The distribution plot can be made as follows:
 provi.plot('distribution')
 ```
 
-The available plot options are: `annotate`, `bias`, `logx` and `logy`.
+By adding a statistic (`provi.plot('distribution-stat')`), the distribution of that statistic across the selected stations is plotted instead of the raw concentration values. This needs at least 2 stations, otherwise the plot is not made.
+
+The available plot options are: `annotate`, `bias`, `logx`, `logy` and `threshold`.
+
+##### histogram
+
+The histogram can be made as follows: 
+
+```
+provi.plot('histogram')
+```
+
+As with the distribution, a statistic can be added (`provi.plot('histogram-stat')`) to plot a histogram of selected station statistics.
+
+The available plot options are: `annotate`, `bias`, `logx`, `logy` and `threshold`.
 
 ##### scatter
 
@@ -498,7 +536,7 @@ The scatter plot can be made as follows:
 provi.plot('scatter')
 ```
 
-The available plot options are: `annotate`, `hidedata`, `logx`, `logy` and `regression`.
+The available plot options are: `annotate`, `hidedata`, `logx`, `logy`, `regression` and `threshold`.
 
 ##### boxplot
 
@@ -508,7 +546,7 @@ The boxplot can be made as follows:
 provi.plot('boxplot')
 ```
 
-The available plot options are: `annotate`, `logy` and `multispecies`.
+The available plot options are: `annotate`, `logy`, `multispecies`, `normalise` and `threshold`.
 
 ##### heatmap
 
@@ -550,9 +588,11 @@ The Taylor diagram can be made as follows:
 provi.plot('taylor-stat')
 ```
 
-where `stat` is the statistic that is wanted to be plotted, from `r` or `r2`. 
+where `stat` is the statistic that is wanted to be plotted, from `r` or `r2`. If `stat` is not set (`provi.plot('taylor')`) it defaults to `r`.
 
-The available plot option is: `annotate`.
+The available plot options are: `annotate` and `perstation`.
+
+Setting `_perstation` draws one point per selected station for each model, instead of a single aggregated point per model, showing how model performance varies between stations.
 
 ##### fairmode-target
 
@@ -562,7 +602,7 @@ The FAIRMODE target plot can be made as follows:
 provi.plot('fairmode-target')
 ```
 
-The available plot option is: `annotate`.
+The available plot option is: `annotate`. 
 
 ##### fairmode-statsummary
 

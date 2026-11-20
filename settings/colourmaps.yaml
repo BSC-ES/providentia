@@ -1,0 +1,89 @@
+# Colourmaps used by the map (and any other plot drawing a colourbar).
+#
+# A statistic is drawn with the colourmap suited to what it measures, rather
+# than one fixed colourmap for everything. Which of the four roles a statistic
+# needs is set per statistic, with "cmap_type_bias" in basic_stats.yaml and
+# model_bias_stats.yaml (the absolute view of a statistic is always sequential):
+#
+#   sequential             absolute magnitude, no sign to convey      e.g. Mean
+#   diverging             signed, the ideal value sits in the middle  e.g. MB, r
+#   sequential_low_best    an error, never negative, 0 is perfect      e.g. RMSE
+#   sequential_high_best   a skill score, the maximum is perfect       e.g. r2
+#
+# Colourmaps are resolved in this order:
+#   1. the colourmap chosen in the dashboard's map settings menu
+#   2. cmap_absolute / cmap_bias for the statistic, if set in the stats yamls
+#   3. the role mapping of the active preset below
+#
+# Any matplotlib colourmap name can be used. Appending "_r" reverses it.
+
+# colour presets - a basemap paired with colourmaps that stay legible against
+# it. The diverging maps here are the ones with a dark middle (berlin,
+# vanimo): a conventional diverging map fades to white in the middle, which
+# disappears against a light basemap and takes the near-zero stations with it.
+# Dark and Night keep a light-middled map, which their basemaps show up
+# perfectly well. Selectable in the dashboard's map settings menu, and settable
+# for every mode with "colour_preset" in plot_characteristics.yaml. A plot with
+# no basemap uses only the colourmaps; one naming no preset gets the first
+presets:
+
+  # near-white basemap, giving the colourmap the most room of any light option
+  Light:
+    land: "#E8E8E8"
+    ocean: "#FAFAFA"
+    sequential: "viridis"
+    diverging: "RdYlBu_r"
+    sequential_low_best: "viridis"
+    sequential_high_best: "viridis_r"
+
+  # dark basemaps invert the usual convention that the best value is the
+  # darkest: against dark land a dark point disappears, so these two presets
+  # trade that convention for ramps that stay visible end to end
+  Dark:
+    land: "#2F3640"
+    ocean: "#22303C"
+    sequential: "autumn"
+    diverging: "RdYlBu_r"
+    sequential_low_best: "autumn"
+    sequential_high_best: "autumn_r"
+
+  # near-black, where the dark end of any ramp is lost, so this uses one that
+  # stays bright across its whole range
+  Night:
+    land: "#1E1E1E"
+    ocean: "#0D0D0D"
+    sequential: "spring"
+    diverging: "coolwarm"
+    sequential_low_best: "spring"
+    sequential_high_best: "spring_r"
+
+  # the greys Providentia has historically opened with
+  Classic:
+    land: "#D9D9D9"
+    ocean: "#DCE6ED"
+    sequential: "magma"
+    diverging: "berlin"
+    sequential_low_best: "magma"
+    sequential_high_best: "magma_r"
+
+  # sandy land and a blue sea. The ramp runs green to yellow rather than
+  # through blue, which the sea would swallow, and the land is kept off green
+  # so the greener end of it still reads against the land
+  Terrain:
+    land: "#EDE0C8"
+    ocean: "#AED6F1"
+    sequential: "summer"
+    diverging: "vanimo"
+    sequential_low_best: "summer"
+    sequential_high_best: "summer_r"
+
+  # cividis and berlin both hold their ordering and their two sides apart
+  # under the common forms of colour blindness - berlin's blue against red is
+  # readable where a green against red would not be
+  Colourblind:
+    land: "#E8DCC8"
+    ocean: "#DCE6ED"
+    sequential: "cividis"
+    diverging: "berlin"
+    sequential_low_best: "cividis"
+    sequential_high_best: "cividis_r"

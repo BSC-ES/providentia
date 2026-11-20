@@ -44,7 +44,7 @@
 
     "all_plots": ["metadata",
                   "map-Median", "map-Median_bias", "map-Median_domain", "map-Median_annotate", 
-                  "map-Median_obs",
+                  "map-Median_obs", "histogram",
                   "timeseries", "timeseries_bias", "timeseries_smooth", "timeseries_individual", 
                   "timeseries_smooth_hidedata",
                   "timeseries_annotate","timeseries_logy", "timeseries_threshold",
@@ -73,7 +73,7 @@
     "cams2_82_bis": ["metadata", "statsummary", "statsummary_multispecies_bias", "map-r", "map-MFB", "map-MFE", "timeseries_smooth", "timeseries_bias_smooth", "distribution", 
                      "scatter_annotate"],
 
-    "debug": ['statsummary','statsummary_multispecies','statsummary_multispecies_bias','boxplot_multispecies'],
+    "debug": ['timeseries','statsummary','statsummary_multispecies','statsummary_multispecies_bias','boxplot_multispecies'],
 
     "training": ['map-Mean', 'distribution'],
 
@@ -81,6 +81,8 @@
 
     "training3": ['map-MB','timeseries','periodic-r','distribution','statsummary'],
 
-    "kuwait": ["map-Median", "map-r", "timeseries_annotate", "periodic-Mean_threshold", "statsummary", "taylor-r2", "scatter_annotate"]
+    "kuwait": ["map-Median", "map-r", "timeseries_annotate", "periodic-Mean_threshold", "statsummary", "taylor-r2", "scatter_annotate"],
+
+    "forecast_gridded": ["map-Mean", "timeseries", "heatmap-Mean"]
 
 }

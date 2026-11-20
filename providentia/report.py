@@ -16,7 +16,12 @@ from pypdf import PdfReader, PdfWriter
 import yaml
 import re
 
-from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
+from providentia.auxiliar import (
+    CURRENT_PATH,
+    join,
+    expand_plot_characteristics,
+    resolve_plots_or_preset,
+)
 from .configuration import load_conf
 from .configuration import ProvConfiguration
 from .fields_menus import (
@@ -31,8 +36,12 @@ from .fields_menus import (
     metadata_conf,
 )
 from .filter import DataFilter
-from .plotting import Plotting
-from .plot_aux import get_taylor_diagram_ghelper, set_map_extent
+from .plotting_pyqt import PlottingPyQt
+from .plot_aux import (
+    get_taylor_diagram_ghelper,
+    histogram_bin_target,
+    set_map_extent,
+)
 from .plot_formatting import (
     format_plot_options,
     format_axis,
@@ -46,13 +55,19 @@ from .read_aux import (
     get_possible_resampling_resolutions,
     get_periodic_nonrelevant_temporal_resolutions,
     get_periodic_relevant_temporal_resolutions,
+    get_data_label_lead_day,
+    get_grid_title,
+    get_map_grid_forecast_lead_days,
     get_valid_models,
     get_valid_obs_files_in_date_range,
 )
 from .statistics import (
+    boxplot_inner_fences,
     calculate_statistic,
     get_fairmode_data,
     generate_colourbar,
+    get_gridded_statistic,
+    get_selected_station_count,
     get_selected_station_data,
     get_z_statistic_info,
 )
@@ -124,9 +139,9 @@ class Report:
             self.logger.error(error)
             sys.exit(1)
 
-        # load report plot presets
+        # named presets a "report_plots" entry can refer to (e.g. "standard")
         try:
-            self.report_plots = yaml.safe_load(
+            self.report_plots_presets = yaml.safe_load(
                 open(join(PROVIDENTIA_ROOT, "settings/report_plots.yaml"))
             )
         except:
@@ -181,8 +196,10 @@ class Report:
             for k, val in self.section_opts.items():
                 # n_cpus is always passed via command line, either as default or explicit,
                 # only read n_cpus from conf if it was not explicitly defined in command line
-                if ((k not in self.commandline_arguments) 
-                    or (k == "n_cpus" and self.commandline_arguments['n_cpus_explicit'] == 'false')):
+                if (k not in self.commandline_arguments) or (
+                    k == "n_cpus"
+                    and self.commandline_arguments["n_cpus_explicit"] == "false"
+                ):
                     setattr(self, k, provconf.parse_parameter(k, val))
 
             # if first section or GHOST version has changed
@@ -206,7 +223,7 @@ class Report:
             self.plot_characteristics = {}
 
             # initialise Plotting class
-            self.plotting = Plotting(read_instance=self, canvas_instance=self)
+            self.plotting = PlottingPyQt(read_instance=self, canvas_instance=self)
 
             # add general plot characteristics to self (if not passed via command line)
             for k, val in self.plot_characteristics_templates["general"].items():
@@ -236,12 +253,17 @@ class Report:
             self.periodic_nonrelevant_temporal_resolutions = (
                 get_periodic_nonrelevant_temporal_resolutions(self.resolution)
             )
-            self.data_labels = [self.observations_data_label] + list(
-                self.experiments.values()
-            )
-            self.data_labels_raw = [self.observations_data_label] + list(
-                self.experiments.keys()
-            )
+            # if no obs are loaded (when MODEL is active), remove observations from labels
+            if not self.obs_active:
+                self.data_labels = list(self.experiments.values())
+                self.data_labels_raw = list(self.experiments.keys())
+            else:
+                self.data_labels = [self.observations_data_label] + list(
+                    self.experiments.values()
+                )
+                self.data_labels_raw = [self.observations_data_label] + list(
+                    self.experiments.keys()
+                )
             self.networkspecies = [
                 "{}|{}".format(network, speci)
                 for network, speci in zip(self.network, self.species)
@@ -256,40 +278,37 @@ class Report:
                 self.start_date,
                 self.end_date,
                 self.resolution,
-                self.network,
-                self.species,
+                self.networkspecies
             )
 
             # read data
             self.datareader.read_setup(["reset"])
 
-            # initialise previous QA, flags, filter species and calibration factor as section values
+            # initialise previous QA, flags, filter species, ghost features and calibration factor as section values
             self.previous_qa = copy.deepcopy(self.qa)
             self.previous_flags = copy.deepcopy(self.flags)
             self.previous_filter_species = copy.deepcopy(self.filter_species)
             self.previous_calibration_factor = copy.deepcopy(self.calibration_factor)
+            self.previous_ghost_features = copy.deepcopy(self.ghost_features)
 
             # if no valid data has been found be to be read, then skip to next section
             if self.invalid_read:
                 self.logger.info("No valid data for {} section".format(section))
                 continue
 
-            # check if report type is valid
-            if self.report_type not in self.report_plots.keys():
-                error = "Error: The report type {0} cannot be found in settings/report_plots.yaml. ".format(
-                    self.report_type
-                )
-                error += "The available report types are {0}. Select one or create your own.".format(
-                    list(self.report_plots.keys())
-                )
-                self.logger.error(error)
-                sys.exit(1)
+            # a single entry is a preset name (e.g. "standard") unless it is
+            # itself a real plot type, which wins as itself
+            report_plots = resolve_plots_or_preset(
+                self.report_plots,
+                self.report_plots_presets,
+                set(self.plot_characteristics_templates.keys()),
+            )
 
             # set plots that need to be made (summary and station specific)
             self.summary_plots_to_make = []
             self.station_plots_to_make = []
-            if isinstance(self.report_plots[self.report_type], list):
-                for plot_type in self.report_plots[self.report_type]:
+            if isinstance(report_plots, list):
+                for plot_type in report_plots:
                     # there can be no station specific plots for map plot type
                     if plot_type[:4] != "map-":
                         self.station_plots_to_make.append(plot_type)
@@ -299,27 +318,27 @@ class Report:
                     else:
                         if "gerrity" in plot_type.split("_")[1:]:
                             self.summary_plots_to_make.append(plot_type)
-            elif isinstance(self.report_plots[self.report_type], dict):
+            elif isinstance(report_plots, dict):
                 # get summary plots
-                if "summary" in self.report_plots[self.report_type].keys():
+                if "summary" in report_plots.keys():
                     if not self.report_summary:
                         msg = "report_summary is False, summary plots will not be created."
                         show_message(self, msg)
                     else:
                         # there can be no summary specific contingency tables (if gerrity, then allow)
-                        for plot_type in self.report_plots[self.report_type]["summary"]:
+                        for plot_type in report_plots["summary"]:
                             if plot_type[:16] != "contingencytable":
                                 self.summary_plots_to_make.append(plot_type)
                             else:
                                 if "gerrity" in plot_type.split("_")[1:]:
                                     self.summary_plots_to_make.append(plot_type)
                 # get station plots
-                if "station" in self.report_plots[self.report_type].keys():
+                if "station" in report_plots.keys():
                     if not self.report_stations:
                         msg = "report_stations is False, station plots will not be created."
                         show_message(self, msg)
                     else:
-                        for plot_type in self.report_plots[self.report_type]["station"]:
+                        for plot_type in report_plots["station"]:
                             # there can be no station specific plots for map plot type
                             if plot_type[:4] != "map-":
                                 self.station_plots_to_make.append(plot_type)
@@ -446,6 +465,34 @@ class Report:
             self.plotting.set_plot_characteristics(["header"])
             self.plotting.make_header(self.pdf, self.plot_characteristics["header"])
 
+            # histogram bins are worked out once per data range and shared by
+            # every page drawn over it, so they start afresh with each section
+            self.histogram_bin_edges = {}
+
+            # widest bins any subsection wants, and how far up the axis their
+            # values reach, gathered across subsections the same way the data
+            # ranges below are - so that every page can be given one set of
+            # bins wide enough not to leave the sparsest subsection as noise
+            self.histogram_width_summary = {
+                networkspeci: 0 for networkspeci in self.networkspecies
+            }
+            self.histogram_width_station = {
+                networkspeci: 0 for networkspeci in self.networkspecies
+            }
+            self.histogram_fence_summary = {
+                networkspeci: 0 for networkspeci in self.networkspecies
+            }
+            self.histogram_fence_station = {
+                networkspeci: 0 for networkspeci in self.networkspecies
+            }
+
+            # a "distribution-<stat>"/"histogram-<stat>" page is drawn over a
+            # statistic's own per-station values, on a different scale to the
+            # concentrations the ranges below are gathered in, so those pages
+            # need a range of their own - see update_station_statistic_range()
+            self.station_statistic_stats = self.get_station_statistic_stats()
+            self.station_statistic_range_summary = {}
+
             # create variables to keep track of minimum and maximum data ranges across subsections
             self.data_range_min_summary = {
                 networkspeci: np.inf for networkspeci in self.networkspecies
@@ -466,16 +513,20 @@ class Report:
                 networkspeci: 0 for networkspeci in self.networkspecies
             }
 
-            # make all plots per subsection (for all plot types except distribution/taylor plots)
+            # make all plots per subsection (for all plot types except distribution/histogram/taylor plots)
             summary_plots_to_make = [
                 plot_type
                 for plot_type in self.summary_plots_to_make
-                if ("distribution" not in plot_type) and ("taylor" not in plot_type)
+                if ("distribution" not in plot_type)
+                and ("histogram" not in plot_type)
+                and ("taylor" not in plot_type)
             ]
             station_plots_to_make = [
                 plot_type
                 for plot_type in self.station_plots_to_make
-                if ("distribution" not in plot_type) and ("taylor" not in plot_type)
+                if ("distribution" not in plot_type)
+                and ("histogram" not in plot_type)
+                and ("taylor" not in plot_type)
             ]
             self.make_plots_per_subsection(
                 summary_plots_to_make,
@@ -484,17 +535,21 @@ class Report:
             )
 
             # make all plots per subsection
-            # for distribution/taylor plot types --> done so to calculate data ranges
+            # for distribution/histogram/taylor plot types --> done so to calculate data ranges
             # across subsections first
             summary_plots_to_make = [
                 plot_type
                 for plot_type in self.summary_plots_to_make
-                if ("distribution" in plot_type) or ("taylor" in plot_type)
+                if ("distribution" in plot_type)
+                or ("histogram" in plot_type)
+                or ("taylor" in plot_type)
             ]
             station_plots_to_make = [
                 plot_type
                 for plot_type in self.station_plots_to_make
-                if ("distribution" in plot_type) or ("taylor" in plot_type)
+                if ("distribution" in plot_type)
+                or ("histogram" in plot_type)
+                or ("taylor" in plot_type)
             ]
             if (len(summary_plots_to_make) > 0) or (len(station_plots_to_make) > 0):
                 self.make_plots_per_subsection(
@@ -740,7 +795,7 @@ class Report:
                     reports_path, reports_path_temp
                 )
             )
-            os.system("rm {}".format(reports_path_temp))
+            os.remove(reports_path_temp)
         else:
             os.system("mv {} {}".format(reports_path_temp, reports_path))
 
@@ -1152,8 +1207,19 @@ class Report:
                         set_obs = False
                     else:
                         set_obs = True
+                    # gridded models are left out, as the legend is only shown on
+                    # plots of station data (maps describe their grid in the title)
+                    legend_data_labels = [
+                        data_label
+                        for data_label, data_label_raw in zip(
+                            self.data_labels, self.data_labels_raw
+                        )
+                        if not data_label_raw.endswith("::gridded")
+                    ]
                     plot_characteristics["legend"] = self.plotting.make_legend_handles(
-                        plot_characteristics["legend"], set_obs=set_obs
+                        plot_characteristics["legend"],
+                        data_labels=legend_data_labels,
+                        set_obs=set_obs,
                     )
                     fig.legend(**plot_characteristics["legend"]["plot"])
 
@@ -1252,8 +1318,10 @@ class Report:
                 for k, val in self.subsection_opts.items():
                     # n_cpus is always passed via command line, either as default or explicit,
                     # only read n_cpus from conf if it was not explicitly defined in command line
-                    if ((k not in self.commandline_arguments) 
-                        or (k == "n_cpus" and self.commandline_arguments['n_cpus_explicit'] == 'false')):
+                    if (k not in self.commandline_arguments) or (
+                        k == "n_cpus"
+                        and self.commandline_arguments["n_cpus_explicit"] == "false"
+                    ):
                         value = provconf.parse_parameter(
                             k, val, deactivate_warning=True
                         )
@@ -1266,9 +1334,10 @@ class Report:
                 self.species = read_species
                 self.networkspecies = read_networkspecies
 
-            # determine if need to re-read data (qa, flags, filter_species or calibration factor have changed)
+            # determine if need to re-read data (qa, flags, filter_species, ghost features or calibration factor have changed)
             if (
-                (not np.array_equal(self.qa, self.previous_qa))
+                (self.ghost_features != self.previous_ghost_features)
+                or (not np.array_equal(self.qa, self.previous_qa))
                 or (not np.array_equal(self.flags, self.previous_flags))
                 or (
                     str(dict(sorted(self.filter_species.items())))
@@ -1309,11 +1378,12 @@ class Report:
                 update_metadata_fields(self)
                 metadata_conf(self)
 
-            # set previous QA, flags, filter species and calibration factor as subsection
+            # set previous QA, flags, filter species, ghost features and calibration factor as subsection
             self.previous_qa = copy.deepcopy(self.qa)
             self.previous_flags = copy.deepcopy(self.flags)
             self.previous_filter_species = copy.deepcopy(self.filter_species)
             self.previous_calibration_factor = copy.deepcopy(self.calibration_factor)
+            self.previous_ghost_features = copy.deepcopy(self.ghost_features)
 
             # filter dataset for current subsection
             self.logger.info(
@@ -1325,7 +1395,10 @@ class Report:
             # 0 valid measurements, to do this we need to have valid_station_inds, which is obtained
             # after filtering
             if not self.reading_ghost:
-                update_metadata_fields(self)
+                if self.station_cap:
+                    update_metadata_fields(self, cap=True)
+                else:
+                    update_metadata_fields(self)
 
             # iterate through networks and species, creating plots
             self.n_total_pages = len(self.plot_dictionary)
@@ -1454,7 +1527,7 @@ class Report:
             input_doi_pdf = PdfReader(open(reports_doi_path_temp, "rb"))
             for page_number in range(len(input_doi_pdf.pages)):
                 output_pdf_file.add_page(input_doi_pdf.pages[page_number])
-            os.system("rm {}".format(reports_doi_path_temp))
+            os.remove(reports_doi_path_temp)
 
         # Write the rearranged pages to a new PDF file
         self.logger.info(f"Writing {output_pdf}")
@@ -1565,6 +1638,10 @@ class Report:
                     self.stddev_max_summary[ns] = copy.deepcopy(
                         self.selected_station_stddev_max[ns]
                     )
+                self.update_histogram_bin_target(
+                    ns, self.histogram_width_summary, self.histogram_fence_summary
+                )
+                self.update_station_statistic_range(ns)
 
         # if have no valid data across data labels (no observations or models), then set flag
         if not self.selected_station_data[networkspeci]:
@@ -1607,6 +1684,16 @@ class Report:
 
             # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
             plot_options = plot_type.split("_")[1:]
+
+            # a stat-less taylor plot defaults to "r", as the dashboard does
+            if (base_plot_type == "taylor") and (zstat is None):
+                (
+                    zstat,
+                    base_zstat,
+                    z_statistic_type,
+                    z_statistic_sign,
+                    z_statistic_period,
+                ) = get_z_statistic_info(plot_type="taylor-r")
 
             # make sure periodic, map, heatmap, taylor and table plots have a -[stat]
             if (
@@ -1839,6 +1926,11 @@ class Report:
                 self.data_range_max_station[networkspeci] = copy.deepcopy(
                     self.selected_station_data_max[networkspeci]
                 )
+            self.update_histogram_bin_target(
+                networkspeci,
+                self.histogram_width_station,
+                self.histogram_fence_station,
+            )
             if (
                 self.selected_station_stddev_max[networkspeci]
                 > self.stddev_max_station[networkspeci]
@@ -1878,6 +1970,16 @@ class Report:
 
                 # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
                 plot_options = plot_type.split("_")[1:]
+
+                # a stat-less taylor plot defaults to "r", as the dashboard does
+                if (base_plot_type == "taylor") and (zstat is None):
+                    (
+                        zstat,
+                        base_zstat,
+                        z_statistic_type,
+                        z_statistic_sign,
+                        z_statistic_period,
+                    ) = get_z_statistic_info(plot_type="taylor-r")
 
                 # make sure periodic, map, heatmap, taylor and table plots have a -[stat]
                 if (
@@ -2212,6 +2314,180 @@ class Report:
 
         return None
 
+    def update_histogram_bin_target(self, networkspeci, widths, fences):
+        """
+        Keep track of the widest bins any subsection of this section wants for
+        a networkspeci, and of how far up the axis its values reach.
+
+        Every page of a report is drawn with one set of bins, so that the
+        counts on them can be read against one another. The widest bins asked
+        for are taken rather than the narrowest, as bins fine enough for the
+        richest subsection would leave the sparsest as noise.
+
+        Parameters
+        ----------
+        networkspeci : str
+            Current networkspeci (e.g. EBAS|sconco3)
+        widths : dict
+            Widest bin wanted so far, per networkspeci
+        fences : dict
+            Highest upper inner Tukey fence so far, per networkspeci
+        """
+
+        if not self.selected_station_data.get(networkspeci):
+            return None
+
+        width, fence = histogram_bin_target(
+            self.selected_station_data[networkspeci]["flat"].flatten()
+        )
+        if np.isfinite(width) and (width > widths[networkspeci]):
+            widths[networkspeci] = width
+        if np.isfinite(fence) and (fence > fences[networkspeci]):
+            fences[networkspeci] = fence
+
+        return None
+
+    def get_station_statistic_stats(self):
+        """
+        Get the statistics that "distribution-<stat>"/"histogram-<stat>" pages
+        of this section will be drawn over, e.g. "r" for "histogram-r_bias".
+
+        Returns
+        -------
+        list of str
+            Statistic names, without duplicates
+        """
+
+        stats = []
+        for plot_type in self.summary_plots_to_make:
+            base_plot_type = plot_type.split("_")[0]
+            if "-" not in base_plot_type:
+                continue
+            base, stat = base_plot_type.split("-", 1)
+            if (base in ["distribution", "histogram"]) and (stat not in stats):
+                stats.append(stat)
+
+        return stats
+
+    def update_station_statistic_range(self, networkspeci):
+        """
+        Keep track of the range each statistic's own per-station values cover
+        across the subsections of this section, how far up and down the axis
+        they reach, and the widest bins any subsection wants for them.
+
+        Gathered for the same reason the data ranges and bins of the raw pages
+        are (see update_histogram_bin_target()): a "distribution-<stat>"/
+        "histogram-<stat>" page following only its own subsection's values
+        would be drawn on its own axis, and the pages are meant to be read
+        against one another. The widest bins are taken rather than the
+        narrowest for that same reason - bins fine enough for a subsection
+        holding every station would leave one holding a handful as noise.
+
+        Parameters
+        ----------
+        networkspeci : str
+            Current networkspeci (e.g. EBAS|sconco3)
+        """
+
+        if not self.selected_station_data.get(networkspeci):
+            return None
+
+        for stat in self.station_statistic_stats:
+            # a modbias stat (e.g. r, MB) compares a model against the
+            # observations, so it needs both to be loaded and paired - the
+            # page itself is not made without them either
+            if (stat in self.modbias_stats) and (
+                (not self.temporal_colocation) or (len(self.data_labels) == 1)
+            ):
+                continue
+
+            label_data = self.plotting._station_statistic_label_data(
+                networkspeci, self.data_labels, stat
+            )
+            values = np.concatenate(
+                [data for data in label_data.values() if data.size > 0]
+                or [np.array([], dtype=np.float32)]
+            )
+            if values.size == 0:
+                continue
+
+            width, fence = histogram_bin_target(values)
+            lower_fence, _ = boxplot_inner_fences(values)
+            (
+                current_min,
+                current_max,
+                current_lower_fence,
+                current_fence,
+                current_width,
+            ) = self.station_statistic_range_summary.get(
+                (networkspeci, stat), (np.inf, -np.inf, np.inf, -np.inf, 0)
+            )
+            if np.isfinite(lower_fence) and (lower_fence < current_lower_fence):
+                current_lower_fence = lower_fence
+            if np.isfinite(fence) and (fence > current_fence):
+                current_fence = fence
+            if np.isfinite(width) and (width > current_width):
+                current_width = width
+            self.station_statistic_range_summary[(networkspeci, stat)] = (
+                min(float(np.nanmin(values)), current_min),
+                max(float(np.nanmax(values)), current_max),
+                current_lower_fence,
+                current_fence,
+                current_width,
+            )
+
+        return None
+
+    def get_station_statistic_range(
+        self, plotting_paradigm, networkspeci, stat, trim=False
+    ):
+        """
+        Get the range gathered across subsections for a
+        "distribution-<stat>"/"histogram-<stat>" page, if there is one.
+
+        Parameters
+        ----------
+        plotting_paradigm : str
+            'summary' or 'station'
+        networkspeci : str
+            Current networkspeci (e.g. EBAS|sconco3)
+        stat : str or None
+            Statistic the page is drawn over, None for a raw-value page
+        trim : bool, default False
+            Hold both ends of the range back to the inner Tukey fences, as
+            the histogram does - the distribution covers the values as they
+            are, in every mode
+
+        Returns
+        -------
+        tuple of float or None
+            Minimum and maximum of the statistic's per-station values, and the
+            widest bins any subsection wanted for them. None where the page is
+            drawn over the raw values, or is a station page (drawn over a
+            single station, which has no spread across stations to show)
+        """
+
+        if (stat is None) or (plotting_paradigm != "summary"):
+            return None
+
+        stat_range = self.station_statistic_range_summary.get((networkspeci, stat))
+        if stat_range is None:
+            return None
+
+        range_min, range_max, lower_fence, fence, width = stat_range
+
+        # both ends of the axis are held back to where the values actually
+        # are - the concentration pages hold back only the top, as a species
+        # has its long tail there, where a statistic can have one at either
+        # end (see make_histogram())
+        if trim:
+            if range_min < fence < range_max:
+                range_max = fence
+            if range_min < lower_fence < range_max:
+                range_min = lower_fence
+
+        return range_min, range_max, width
+
     def make_plot(self, plotting_paradigm, plot_type, plot_options, networkspeci):
         """
         Directs the generation of specific plot types by coordinating data labels, axes, and plotting functions.
@@ -2254,27 +2530,47 @@ class Report:
         else:
             base_plot_type = plot_type.split("_")[0]
 
+        # a stat-less taylor plot defaults to "r", as the dashboard does
+        if (base_plot_type == "taylor") and (zstat is None):
+            (
+                zstat,
+                base_zstat,
+                z_statistic_type,
+                z_statistic_sign,
+                z_statistic_period,
+            ) = get_z_statistic_info(plot_type="taylor-r")
+
         # set variable to know if we need to create plot for dataframes in last subsection
         plot_type_df = self.get_plot_type_df(base_plot_type)
 
         # get all data_labels for selected_station_data
         # if multispecies plot then ensure have data_labels from across all networkspecies
         if plot_type_df:
+            # gridded models have no station data, so they would only add empty columns/rows
+            # (filtered on the raw label, as an alias has no ' (gridded)' suffix)
+            experiment_labels = [
+                label
+                for label_raw, label in self.experiments.items()
+                if not label_raw.endswith("::gridded")
+            ]
             if base_plot_type in ["heatmap", "table"]:
                 if z_statistic_sign == "bias":
-                    data_labels = list(self.experiments.values())
+                    data_labels = experiment_labels
                 else:
-                    data_labels = [self.observations_data_label] + list(
-                        self.experiments.values()
-                    )
+                    if not self.obs_active:
+                        data_labels = experiment_labels
+                    else:
+                        data_labels = [self.observations_data_label] + experiment_labels
 
             elif base_plot_type == "statsummary":
                 if "bias" in plot_options:
-                    data_labels = list(self.experiments.values())
+                    data_labels = experiment_labels
                 else:
-                    data_labels = [self.observations_data_label] + list(
-                        self.experiments.values()
-                    )
+                    # if no obs are loaded (when MODEL is active), remove observations from labels
+                    if not self.obs_active:
+                        data_labels = experiment_labels
+                    else:
+                        data_labels = [self.observations_data_label] + experiment_labels
 
         elif "multispecies" in plot_options:
             data_labels = []
@@ -2342,6 +2638,18 @@ class Report:
             show_message(self, msg)
             return plot_indices
 
+        # a "distribution-<stat>"/"histogram-<stat>" shows the spread of a
+        # statistic across stations, which a station page, drawn for a single
+        # station, has nothing of (see _resolve_station_statistic())
+        if (
+            (base_plot_type in ["distribution", "histogram"])
+            and (base_zstat is not None)
+            and (get_selected_station_count(self, self, networkspeci) < 2)
+        ):
+            msg = f"Cannot make {plot_type} because a station statistic needs at least 2 stations. Not making plot."
+            show_message(self, msg)
+            return plot_indices
+
         # do not make statsummary plot if stat is MDA8, and are making periodic statistic
         if (
             (base_plot_type == "statsummary")
@@ -2405,10 +2713,14 @@ class Report:
             data_range_min = self.data_range_min_summary[networkspeci]
             data_range_max = self.data_range_max_summary[networkspeci]
             stddev_max = self.stddev_max_summary[networkspeci]
+            histogram_width = self.histogram_width_summary[networkspeci]
+            histogram_fence = self.histogram_fence_summary[networkspeci]
         elif plotting_paradigm == "station":
             data_range_min = self.data_range_min_station[networkspeci]
             data_range_max = self.data_range_max_station[networkspeci]
             stddev_max = self.stddev_max_station[networkspeci]
+            histogram_width = self.histogram_width_station[networkspeci]
+            histogram_fence = self.histogram_fence_station[networkspeci]
 
         # map plots (1 plot per data array/s (1 array if absolute plot,
         # 2 arrays if making bias plot), per subsection)
@@ -2425,10 +2737,19 @@ class Report:
                 z2 = [""] * len(data_labels)
 
             # iterate through relevant data labels making plots
+            raw_per_data_label = dict(zip(self.data_labels, self.data_labels_raw))
             for z1_label, z2_label in zip(z1, z2):
+                # forecast days of a gridded model loaded without its interpolated version
+                # have no station data, but get a map of the observations over their lead day grid
+                gridded_lead_day_map = (
+                    (z2_label == "")
+                    and raw_per_data_label.get(z1_label, "").endswith("::gridded")
+                    and (get_data_label_lead_day(self, z1_label) is not None)
+                )
+
                 # skip map if we have no data for a specific label
                 skip_map = False
-                if (z2_label == "") and (
+                if (z2_label == "") and (not gridded_lead_day_map) and (
                     z1_label not in self.selected_station_data_labels[networkspeci]
                 ):
                     skip_map = True
@@ -2443,9 +2764,10 @@ class Report:
                         unavailable_label = "{}".format(z1_label)
                     else:
                         unavailable_label = "{} - {}".format(z2_label, z1_label)
-                    msg = f"{plot_type} cannot be created because there is no available data of {unavailable_label}."
-                    show_message(self, msg)
-                    return plot_indices
+                    if 'gridded' not in z1_label and 'gridded' not in z2_label:
+                        msg = f"{plot_type} cannot be created because there is no available data of {unavailable_label}."
+                        show_message(self, msg)
+                    continue
 
                 # get relevant page/axis to plot on
                 axis_ind = (
@@ -2455,12 +2777,28 @@ class Report:
                     plotting_paradigm, networkspeci, plot_type, axis_ind
                 )
 
+                # get gridded statistic for all loaded period (if there is grid data),
+                # not in bias maps, as the grid is an absolute field
+                speci = networkspeci.split('|')[1]
+                grid_data, grid_lat, grid_lon = None, None, None
+                grid_lead_days = None
+                if z2_label == "":
+                    grid_lead_days = get_map_grid_forecast_lead_days(self, z1_label)
+                    grid_data, grid_lat, grid_lon = get_gridded_statistic(
+                        self, speci, zstat, data_label=z1_label, lead_days=grid_lead_days
+                    )
+
                 # set axis title
                 if relevant_axis.get_title() == "":
                     if z2_label != "":
                         label = copy.deepcopy(z2_label)
                     else:
                         label = copy.deepcopy(z1_label)
+
+                    # describe the grid drawn under the stations, on its own line
+                    # as it does not fit next to the label in the report layout
+                    if grid_data is not None:
+                        label += "\n" + get_grid_title(self, z1_label, lead_days=grid_lead_days)
 
                     axis_title_label = "{}\n{} ".format(label, self.subsection)
                     if self.n_stations == 1:
@@ -2487,6 +2825,10 @@ class Report:
                     zstat=zstat,
                     labela=z1_label,
                     labelb=z2_label,
+                    var=grid_data,
+                    lat=grid_lat,
+                    lon=grid_lon,
+                    map_extent=self.map_extent,
                 )
 
                 # save plot information for later formatting
@@ -2674,7 +3016,22 @@ class Report:
 
                 # axis xlabel is empty?
                 if (axis_xlabel == "") or ("[measurement_units]" in axis_xlabel):
-                    if "xlabel" in self.plot_characteristics[plot_type]:
+                    # "distribution-<stat>"/"histogram-<stat>" x-axis is the stat's own label/units
+                    if (
+                        (base_plot_type in ["distribution", "histogram"])
+                        and (base_zstat is not None)
+                    ):
+                        stats_dict = {**self.basic_stats, **self.modbias_stats}
+                        stat_settings = stats_dict[base_zstat]
+                        xlabel = stat_settings["label"]
+                        stat_units = stat_settings["units"]
+                        if stat_units == "[measurement_units]":
+                            stat_units = self.measurement_units[
+                                networkspeci.split("|")[-1]
+                            ]
+                        if stat_units:
+                            xlabel += " [{}]".format(stat_units)
+                    elif "xlabel" in self.plot_characteristics[plot_type]:
                         xlabel = self.plot_characteristics[plot_type]["xlabel"][
                             "xlabel"
                         ]
@@ -2760,7 +3117,62 @@ class Report:
                         plot_options,
                         zstat=zstat,
                     )
+                elif base_plot_type == "histogram":
+                    # a "histogram-<stat>" page is drawn over the statistic's
+                    # own values, which have a range and bins of their own
+                    # gathered across subsections - the concentration range
+                    # and count stay as they are for where such a page falls
+                    # back to the raw values (a station page, drawn for a
+                    # single station)
+                    stat_range = self.get_station_statistic_range(
+                        plotting_paradigm,
+                        networkspeci,
+                        base_zstat if zstat else None,
+                        trim=True,
+                    )
+
+                    # every subsection shares one bin count, worked out from
+                    # the widest bins any of them wanted
+                    histogram_range_max = data_range_max
+                    if data_range_min < histogram_fence < data_range_max:
+                        histogram_range_max = histogram_fence
+                    n_bins = None
+                    if histogram_width > 0:
+                        n_bins = int(
+                            np.ceil(
+                                (histogram_range_max - data_range_min) / histogram_width
+                            )
+                        )
+
+                    station_statistic_range = None
+                    if stat_range is not None:
+                        stat_min, stat_max, stat_width = stat_range
+                        station_statistic_range = (stat_min, stat_max)
+                        n_bins = (
+                            int(np.ceil((stat_max - stat_min) / stat_width))
+                            if stat_width > 0
+                            else None
+                        )
+                    func(
+                        relevant_axis,
+                        networkspeci,
+                        data_labels,
+                        self.plot_characteristics[plot_type],
+                        plot_options,
+                        data_range_min=data_range_min,
+                        data_range_max=histogram_range_max,
+                        n_bins=n_bins,
+                        # e.g. "histogram-r" - the statistic's own per-station value
+                        zstat=base_zstat if zstat else None,
+                        station_statistic_range=station_statistic_range,
+                    )
                 elif base_plot_type == "distribution":
+                    # see the equivalent histogram comment above - a
+                    # distribution has no bins, so only the range is taken
+                    stat_range = self.get_station_statistic_range(
+                        plotting_paradigm, networkspeci, base_zstat if zstat else None
+                    )
+
                     func(
                         relevant_axis,
                         networkspeci,
@@ -2769,6 +3181,10 @@ class Report:
                         plot_options,
                         data_range_min=data_range_min,
                         data_range_max=data_range_max,
+                        zstat=base_zstat if zstat else None,
+                        station_statistic_range=(
+                            stat_range[:2] if stat_range is not None else None
+                        ),
                     )
                 elif base_plot_type == "taylor":
                     func(

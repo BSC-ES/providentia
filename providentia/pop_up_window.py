@@ -1,22 +1,31 @@
 """ Class for dashboard pop-up window """
 
 import copy
+from functools import partial
 import platform
 import time
+import random
+import os
+import sys
+import subprocess
+import re
 
 import numpy as np
-from PyQt5 import QtCore, QtWidgets, QtGui
+import pandas as pd
+from PyQt5 import QtCore, QtWidgets
 import yaml
 
-from providentia.auxiliar import CURRENT_PATH, join
-from .read_aux import get_default_qa
+from providentia.auxiliar import CURRENT_PATH, join, Tee
+from .read_aux import get_default_qa, get_valid_models
 from .dashboard_elements import (
     set_formatting,
     wrap_tooltip_text,
+    search_field_labels,
     ComboBox,
     CheckableComboBox,
 )
 from .warnings_prv import show_message
+from .writing import export_basic_configuration
 
 
 PROVIDENTIA_ROOT = "/".join(CURRENT_PATH.split("/")[:-1])
@@ -35,6 +44,17 @@ elif operating_system in ["Windows", "MINGW32_NT", "MINGW64_NT"]:
         open(join(PROVIDENTIA_ROOT, "settings/internal/stylesheet_windows.yaml"))
     )
 
+# Status code definitions from https://www.bsc.es/supportkc/docs/MareNostrum5/slurm
+slurm_states = {
+    "CD": "Completed",
+    "CG": "Completing",
+    "F": "Failed",
+    "PD": "Pending",
+    "PR": "Preempted",
+    "R": "Running",
+    "S": "Suspended",
+    "ST": "Stopped",
+}
 
 class PopUpWindow(QtWidgets.QWidget):
     """Class that generates generalised pop-up window."""
@@ -176,7 +196,47 @@ class PopUpWindow(QtWidgets.QWidget):
             )
             button_row.addWidget(add_row_button)
 
-            add_row_button.clicked.connect(lambda: self.add_multispecies_widgets())
+            add_row_button.clicked.connect(
+                lambda: self.add_multispecies_widgets())
+
+        # check if page has fields a search could narrow down
+        self.searchable_menu_types = [
+            menu_type
+            for menu_type in ["checkboxes", "rangeboxes", "navigation_buttons", "models"]
+            if menu_type in menu_current_keys
+            and len(self.menu_current[menu_type].get("labels", [])) > 0
+        ]
+
+        # a search on the root page of a menu whose buttons lead to further
+        # fields (i.e. metadata) reaches into those pages rather than only
+        # matching the button labels, as the fields being looked for are a
+        # level below - see build_search_results()
+        self.search_results = {}
+        self.grids = {}
+        self.search_descends = (len(self.menu_levels) == 0) and any(
+            self.submenu_fields()
+        )
+
+        # create search box, sat with the buttons so the two read as one row
+        if self.searchable_menu_types:
+            self.have_buttons = True
+            self.search_box = set_formatting(
+                QtWidgets.QLineEdit(),
+                formatting_dict["popup_lineedit_search"],
+            )
+            self.search_box.setPlaceholderText("Search fields")
+            self.search_box.setClearButtonEnabled(True)
+            self.search_box.setToolTip(
+                "Show only the fields matching the search. Case, spaces, "
+                "underscores and dashes are ignored"
+            )
+            # debounced so rapid typing only searches once it pauses
+            self._search_debounce_timer = QtCore.QTimer(self)
+            self._search_debounce_timer.setSingleShot(True)
+            self._search_debounce_timer.timeout.connect(
+                self._run_debounced_search)
+            self.search_box.textChanged.connect(self._schedule_search)
+            button_row.addWidget(self.search_box)
 
         # add button row to parent layout (if have some buttons)
         if self.have_buttons:
@@ -234,6 +294,14 @@ class PopUpWindow(QtWidgets.QWidget):
             Layout containing the horizontally concatenated grids.
         """
 
+        # kept so a search results column can be sat alongside them
+        self.menu_type_scroll_areas = []
+
+        # keep hold of each menu type's grid, its rows and the measurements
+        # used to lay it out, so that a search can place the rows it keeps
+        # exactly as they were placed here - see apply_search_filter()
+        self.grids = {}
+
         # create horizontal layout to place all menu types within
         horizontal_parent = QtWidgets.QHBoxLayout()
 
@@ -241,7 +309,27 @@ class PopUpWindow(QtWidgets.QWidget):
         horizontal_parent.setSpacing(25)
 
         # align grids to centre and top
-        horizontal_parent.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignTop)
+        horizontal_parent.setAlignment(
+            QtCore.Qt.AlignCenter | QtCore.Qt.AlignTop)
+
+        # layout the menu's own columns are placed in
+        column_parent = horizontal_parent
+
+        # on a page whose search lists its matches in a column of their own
+        # (see build_search_results()), the menu's own columns sit centred in
+        # a half of their own. It spans the whole window until something is
+        # searched for, then the left half, with the results in the right
+        if self.search_descends:
+            horizontal_parent.setAlignment(QtCore.Qt.AlignTop)
+            menu_half = QtWidgets.QWidget()
+            menu_half.setSizePolicy(
+                QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Preferred
+            )
+            column_parent = QtWidgets.QHBoxLayout(menu_half)
+            column_parent.setContentsMargins(0, 0, 0, 0)
+            column_parent.setSpacing(horizontal_parent.spacing())
+            column_parent.addStretch(1)
+            horizontal_parent.addWidget(menu_half, 1)
 
         # order appearance of menu types grids in menu (from left to right)
         menu_type_order_dict = {
@@ -406,18 +494,40 @@ class PopUpWindow(QtWidgets.QWidget):
                 }
 
             elif menu_type == "models":
-                format_type = ["popup_checkbox", "popup_combobox", "popup_combobox"]
+                format_type = [
+                    "popup_checkbox",
+                    "popup_checkbox",
+                    "popup_button_run",
+                    "popup_combobox",
+                    "popup_combobox",
+                ]
                 obj_height = formatting_dict["popup_checkbox"]["QCheckBox"]["height"]
                 grid_vertical_spacing = 3
+                # data label whose forecast options are shown on each model row
+                # (interpolated or gridded version of the model), to save them under it
+                self.forecast_data_labels = {}
+                # models listed when the window was opened, as its rows are tied to them
+                # (see models_list_changed)
+                self.opened_models = list(self.menu_current["models"]["map_vars"])
                 self.page_memory["models"] = {
-                    "keep_selected": [],
+                    "interpolated": [],
+                    "gridded": [],
+                    "run": [],
                     "forecast": [],
                     "forecast_days": [],
-                    "n_column_consumed": 3,
-                    "ordered_elements": ["keep_selected", "forecast", "forecast_days"],
+                    "n_column_consumed": 4,
+                    "ordered_elements": [
+                        "interpolated",
+                        "gridded",
+                        "run",
+                        "forecast",
+                        "forecast_days",
+                    ],
                     "widget": [
                         QtWidgets.QCheckBox,
-                        CheckableComboBox,
+                        QtWidgets.QCheckBox,
+                        QtWidgets.QPushButton,
+                        ComboBox,
                         CheckableComboBox,
                     ],
                 }
@@ -445,7 +555,8 @@ class PopUpWindow(QtWidgets.QWidget):
             )
             if self.have_buttons:
                 occupied_vertical_space_before_grid += (
-                    int(formatting_dict["popup_button"]["QPushButton"]["height"])
+                    int(formatting_dict["popup_button"]
+                        ["QPushButton"]["height"])
                     + self.layout_spacing
                 )
             if have_column_headers:
@@ -458,14 +569,17 @@ class PopUpWindow(QtWidgets.QWidget):
 
             # set horizontal scroll properties
             scroll_area = QtWidgets.QScrollArea()
-            scroll_area.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-            scroll_area.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+            scroll_area.setVerticalScrollBarPolicy(
+                QtCore.Qt.ScrollBarAlwaysOff)
+            scroll_area.setHorizontalScrollBarPolicy(
+                QtCore.Qt.ScrollBarAsNeeded)
             scroll_area.setWidgetResizable(True)
             scroll_area.setFrameShape(0)
 
             # add horizontal scroll
             scroll_area.setWidget(scroll_area_content)
-            horizontal_parent.addWidget(scroll_area)
+            column_parent.addWidget(scroll_area)
+            self.menu_type_scroll_areas.append(scroll_area)
 
             # add horizontal scrollbar spacing to occupied vertical space
             occupied_vertical_space_before_grid += (
@@ -477,8 +591,26 @@ class PopUpWindow(QtWidgets.QWidget):
                 occupied_vertical_space_before_grid
             )
 
+            # store what a re-layout needs to reproduce this placement
+            self.grids[menu_type] = {
+                "grid": self.grid,
+                "scroll_area": scroll_area,
+                "rows": [],
+                "column_headers": [],
+                "obj_height": obj_height,
+                "vertical_spacing": grid_vertical_spacing,
+                "start_row_n": start_row_n,
+                "space_before_grid": occupied_vertical_space_before_grid,
+                "have_column_headers": have_column_headers,
+                "hidden_by_search": set(),
+                "visible_labels": None,
+            }
+
             # iterate through all grid labels
             for label_ii, label in enumerate(menu_current_type["labels"]):
+                # widgets making up this row, gathered as they are created
+                row_widgets = {"subtitle": None, "label": None, "elements": []}
+                self.grids[menu_type]["rows"].append(row_widgets)
                 # evaluate if all available vertical space has been consumed
                 row_available_space = (
                     self.full_window_geometry.height()
@@ -515,6 +647,7 @@ class PopUpWindow(QtWidgets.QWidget):
                                 column_n,
                                 QtCore.Qt.AlignLeft,
                             )
+                            row_widgets["subtitle"] = subtitle_label
 
                             # update occupied vertical space
                             currently_occupied_vertical_space += (
@@ -550,6 +683,7 @@ class PopUpWindow(QtWidgets.QWidget):
                         column_n,
                         QtCore.Qt.AlignLeft,
                     )
+                    row_widgets["label"] = rangebox_label
 
                 # create all elements in column, per row
                 for (element_ii, element), widget in zip(
@@ -563,8 +697,16 @@ class PopUpWindow(QtWidgets.QWidget):
                         element_format = formatting_dict[format_type]
 
                     # if menu type ==  'rangeboxes' then add 1 to element ii, because placed a label in first column
+                    element_label = ""
                     if menu_type in ["checkboxes", "rangeboxes", "models"]:
-                        element_label = ""
+                        if element == "run":
+                            element_label = "Run"
+                            # When we close the MODELS menu during an interpolation and reopen it again
+                            # The buttons take the label Run unless we explicitly set it to Interpolating...
+                            if hasattr(self.read_instance, "active_interpolations"):
+                                model_id = self.menu_current[menu_type]["map_vars"][label_ii]
+                                if model_id in self.read_instance.active_interpolations.keys():
+                                    element_label = self.read_instance.active_interpolations[model_id]
                         element_ii += 1
                     elif menu_type in ["multispecies"]:
                         element_ii -= 1
@@ -572,13 +714,14 @@ class PopUpWindow(QtWidgets.QWidget):
                         element_label = label
 
                     # append widget to page memory dictionary
-                    if menu_type in ["multispecies", "models"]:
+                    if element_label == "":
                         self.page_memory[menu_type][element].append(
                             set_formatting(widget(), element_format)
                         )
                     else:
                         self.page_memory[menu_type][element].append(
-                            set_formatting(widget(element_label), element_format)
+                            set_formatting(
+                                widget(element_label), element_format)
                         )
 
                     # set checkboxes / rangeboxes to previous values
@@ -598,9 +741,13 @@ class PopUpWindow(QtWidgets.QWidget):
                         # set rangeboxes to previous set value (if any)
                         elif menu_type == "rangeboxes":
                             if element != "apply_selected":
-                                self.page_memory[menu_type][element][label_ii].setText(
-                                    menu_current_type[element][label_ii]
-                                )
+                                rangebox = self.page_memory[menu_type][element][
+                                    label_ii
+                                ]
+                                rangebox.setText(
+                                    menu_current_type[element][label_ii])
+                                # show the value from its start, not its end
+                                rangebox.setCursorPosition(0)
                             else:
                                 if "map_vars" in current_menu_keys:
                                     var_to_check = menu_current_type["map_vars"][
@@ -665,174 +812,73 @@ class PopUpWindow(QtWidgets.QWidget):
 
                     # if menu type == models
                     elif menu_type == "models":
-                        # check if model checkbox is currently selected, if so select it again
-                        if element == "keep_selected":
-                            self.page_memory[menu_type][element][
+                        if element in ['interpolated', 'gridded', 'run']:
+                            model_checkbox = self.page_memory[menu_type][element][
                                 label_ii
-                            ].setObjectName("expcheckboxes_" + str(label_ii))
-                            var_to_check = menu_current_type["map_vars"][label_ii]
-                            if var_to_check in menu_current_type[element]:
-                                self.page_memory[menu_type][element][
-                                    label_ii
-                                ].setCheckState(QtCore.Qt.Checked)
+                            ]
+                            model_id = menu_current_type["map_vars"][label_ii]
+
+                            model_checkbox.setObjectName(
+                                "expcheckboxes_" + element +
+                                "_" + str(label_ii)
+                            )       
+
+                            # When we close the MODELS menu during an interpolation and reopen it again
+                            # We need to keep button disabled
+                            is_interpolating = model_id in getattr(
+                                self.read_instance, "active_interpolations", []
+                            )
+
+                            if element == "run":
+                                has_gridded_data = menu_current_type["enabled"]["gridded"].get(
+                                    model_id, False
+                                )
+                                model_checkbox.setEnabled(has_gridded_data and not is_interpolating)
+                            else:
+                                model_checkbox.setEnabled(
+                                    menu_current_type["enabled"][element].get(model_id, False)
+                                )
+                            
+                            if not model_checkbox.isEnabled() and not is_interpolating:
+                                # fade the box so it is obvious it cannot be clicked
+                                fade = QtWidgets.QGraphicsOpacityEffect(
+                                    model_checkbox)
+                                fade.setOpacity(0.5)
+                                model_checkbox.setGraphicsEffect(fade)
+                                model_checkbox.setToolTip(
+                                    wrap_tooltip_text(
+                                        "Unavailable",
+                                        self.full_window_geometry.width(),
+                                        "popup_label",
+                                    )
+                                )
+                            elif model_id in menu_current_type["keep_selected"][element] and element != "run":
+                                model_checkbox.setCheckState(QtCore.Qt.Checked)
+
                             # connect checkbox to handle model being checked
-                            self.page_memory[menu_type][element][
-                                label_ii
-                            ].stateChanged.connect(self.handle_model_checked)
+                            if element in ['interpolated', 'gridded']:
+                                model_checkbox.stateChanged.connect(
+                                    self.handle_model_checked
+                                )
+                            else:
+                                # fix width so button does not resize when text changes to "Interpolating..."
+                                model_checkbox.clicked.connect(
+                                    self.handle_model_interp_clicked
+                                )
 
-                        # update forecast options combobox back to previously available and selected values
+                        # connect forecast options combobox to handle forecast option being selected
                         elif element == "forecast":
-                            # gather all forecast options, selected options and disabled options
-                            var_to_check_raw = menu_current_type["map_vars"][label_ii]
-                            if var_to_check_raw in self.read_instance.init_models:
-                                var_to_check = self.read_instance.init_models[
-                                    var_to_check_raw
-                                ]
-                            else:
-                                var_to_check = None
+                            self.page_memory["models"]["forecast"][
+                                label_ii
+                            ].setObjectName("forecastcombobox_" + str(label_ii))
+                            self.page_memory["models"]["forecast"][
+                                label_ii
+                            ].currentTextChanged.connect(self.forecast_option_changed)
 
-                            if var_to_check_raw in menu_current_type["forecast"]:
-                                matched_var = var_to_check_raw
-                            elif var_to_check in menu_current_type["forecast"]:
-                                matched_var = var_to_check
-                            else:
-                                matched_var = None
-
-                            # only proceed if have previously intialised
-                            if matched_var:
-                                all_forecast_vars = menu_current_type["forecast"][
-                                    matched_var
-                                ][0]
-                                selected_forecast_vars = menu_current_type["forecast"][
-                                    matched_var
-                                ][1]
-                                disabled_forecast_vars = menu_current_type["forecast"][
-                                    matched_var
-                                ][2]
-                                # add available forecast options to combobox
-                                self.page_memory[menu_type]["forecast"][
-                                    label_ii
-                                ].addItems(all_forecast_vars)
-                                # if model is checked and have available forecast options, then show combobox
-                                if (
-                                    self.page_memory[menu_type]["keep_selected"][
-                                        label_ii
-                                    ].isChecked()
-                                ) & (len(all_forecast_vars) > 0):
-                                    self.page_memory[menu_type]["forecast"][
-                                        label_ii
-                                    ].show()
-                                # otherwise hide combobox
-                                else:
-                                    self.page_memory[menu_type]["forecast"][
-                                        label_ii
-                                    ].hide()
-                                # iterate through forecast options and select or disable options if they were previously so
-                                for forecast_var in all_forecast_vars:
-                                    item_index = all_forecast_vars.index(forecast_var)
-                                    item = (
-                                        self.page_memory[menu_type]["forecast"][
-                                            label_ii
-                                        ]
-                                        .model()
-                                        .item(item_index, 0)
-                                    )
-                                    # select option
-                                    if forecast_var in selected_forecast_vars:
-                                        item.setCheckState(QtCore.Qt.Checked)
-                                    # disable option
-                                    if forecast_var in disabled_forecast_vars:
-                                        item.setFlags(
-                                            item.flags() & ~QtCore.Qt.ItemIsEnabled
-                                        )
-                                        item.setData(
-                                            QtGui.QBrush(QtGui.QColor(150, 150, 150)),
-                                            QtCore.Qt.ForegroundRole,
-                                        )
-
-                                # setup connectivity for combobox upon selecting option
-                                self.page_memory["models"]["forecast"][
-                                    label_ii
-                                ].model().setObjectName(
-                                    "forecastcheckboxes_" + str(label_ii)
-                                )
-                                self.page_memory["models"]["forecast"][
-                                    label_ii
-                                ].model().dataChanged.connect(
-                                    self.forecast_option_checked
-                                )
-
-                            # if not yet initialised hide combobox
-                            else:
-                                self.page_memory[menu_type]["forecast"][label_ii].hide()
-
-                        # update forecast days combobox back to previously available and selected values
+                        # fill forecast option and day comboboxes back with previously selected values
+                        # (done with forecast days, as both comboboxes of the row exist by then)
                         elif element == "forecast_days":
-                            # gather all forecast options, selected forecast options, forecast days, and selected forecast days
-                            var_to_check_raw = menu_current_type["map_vars"][label_ii]
-                            if var_to_check_raw in self.read_instance.init_models:
-                                var_to_check = self.read_instance.init_models[
-                                    var_to_check_raw
-                                ]
-                            else:
-                                var_to_check = None
-
-                            if var_to_check_raw in menu_current_type["forecast"]:
-                                matched_var = var_to_check_raw
-                            elif var_to_check in menu_current_type["forecast"]:
-                                matched_var = var_to_check
-                            else:
-                                matched_var = None
-
-                            # only proceed if have previously intialised
-                            if matched_var:
-                                selected_forecast_vars = menu_current_type["forecast"][
-                                    matched_var
-                                ][1]
-                                all_forecast_day_vars = menu_current_type[
-                                    "forecast_days"
-                                ][matched_var][0]
-                                selected_forecast_day_vars = menu_current_type[
-                                    "forecast_days"
-                                ][matched_var][1]
-                                # add available forecast days to combobox
-                                self.page_memory[menu_type]["forecast_days"][
-                                    label_ii
-                                ].addItems(all_forecast_day_vars)
-                                # if model is checked and have selected forecast options, then show combobox
-                                if (
-                                    self.page_memory[menu_type]["keep_selected"][
-                                        label_ii
-                                    ].isChecked()
-                                ) & (len(selected_forecast_vars) > 0):
-                                    self.page_memory[menu_type]["forecast_days"][
-                                        label_ii
-                                    ].show()
-                                # otherwise hide combobox
-                                else:
-                                    self.page_memory[menu_type]["forecast_days"][
-                                        label_ii
-                                    ].hide()
-                                # iterate through forecast days and select days if they were previously so
-                                for forecast_day_var in all_forecast_day_vars:
-                                    item_index = all_forecast_day_vars.index(
-                                        forecast_day_var
-                                    )
-                                    item = (
-                                        self.page_memory[menu_type]["forecast_days"][
-                                            label_ii
-                                        ]
-                                        .model()
-                                        .item(item_index, 0)
-                                    )
-                                    if forecast_day_var in selected_forecast_day_vars:
-                                        item.setCheckState(QtCore.Qt.Checked)
-
-                            # if not yet initialised hide combobox
-                            else:
-                                self.page_memory[menu_type]["forecast_days"][
-                                    label_ii
-                                ].hide()
+                            self.update_forecast_comboboxes(label_ii)
 
                     # add element to grid
                     if menu_type == "multispecies":
@@ -849,6 +895,9 @@ class PopUpWindow(QtWidgets.QWidget):
                             column_n + element_ii,
                             QtCore.Qt.AlignLeft,
                         )
+                    row_widgets["elements"].append(
+                        self.page_memory[menu_type][element][label_ii]
+                    )
 
                 # update multispecies filtering fields for each row
                 if menu_type == "multispecies":
@@ -869,8 +918,14 @@ class PopUpWindow(QtWidgets.QWidget):
 
             # add column headers to menu type grid if needed
             if have_column_headers:
+                # checkbox and rangebox headers are placed by the same method
+                # a search uses, so that they are known to it and can be put
+                # back over whichever columns the search leaves in use
+                self.place_column_headers(menu_type, column_n)
+
                 for column_number in np.arange(
-                    0, column_n + 1, self.page_memory[menu_type]["n_column_consumed"]
+                    0, column_n +
+                        1, self.page_memory[menu_type]["n_column_consumed"]
                 ):
                     if menu_type == "checkboxes":
                         texts = ["K", "R"]
@@ -887,6 +942,19 @@ class PopUpWindow(QtWidgets.QWidget):
                             )
                     elif menu_type == "rangeboxes":
                         texts = ["Min", "Max", "A"]
+                        for i, text in enumerate(texts):
+                            column_label = set_formatting(
+                                QtWidgets.QLabel(self, text=text),
+                                formatting_dict["popup_label_column_header"],
+                            )
+                            self.grid.addWidget(
+                                column_label,
+                                0,
+                                column_number + i + 1,
+                                QtCore.Qt.AlignCenter,
+                            )
+                    elif menu_type == "models":
+                        texts = ["Interpolated", "Gridded", "Interpolation"]
                         for i, text in enumerate(texts):
                             column_label = set_formatting(
                                 QtWidgets.QLabel(self, text=text),
@@ -918,8 +986,613 @@ class PopUpWindow(QtWidgets.QWidget):
                                     column_label, 1, i, QtCore.Qt.AlignCenter
                                 )
 
+        # kept so that a search can add its results column beside the grids
+        self.horizontal_parent = horizontal_parent
+
+        # close the menu's own columns in from the right too, centring them in
+        # their half, and add the half search results are listed in - hidden
+        # until something is searched for
+        if self.search_descends:
+            column_parent.addStretch(1)
+            self.create_search_results_column()
+            self.hold_menu_columns()
+            # again once the window has been shown, as a widget only settles
+            # on the width it needs once it has been through the event loop
+            QtCore.QTimer.singleShot(0, self.hold_menu_columns)
+
         # return horizontally concatenated menu type grids
         return horizontal_parent
+
+    def submenu_fields(self):
+        """
+        Function which gathers the fields sitting one level below the current
+        page, as (menu level, menu type, index, label) for each.
+
+        Used by the metadata menu, whose root page holds nothing but buttons
+        into the five metadata types: the fields a search is after are inside
+        those pages, so the search reaches into them rather than only matching
+        the button labels.
+
+        Returns
+        -------
+        list
+            One entry per field found below this page
+        """
+
+        fields = []
+        if "navigation_buttons" not in self.menu_current:
+            return fields
+
+        for menu_level in self.menu_current["navigation_buttons"].get("labels", []):
+            submenu = self.menu_current.get(menu_level)
+            if not isinstance(submenu, dict):
+                continue
+            for menu_type in ["rangeboxes", "navigation_buttons"]:
+                labels = submenu.get(menu_type, {}).get("labels", [])
+                for label_ii, label in enumerate(labels):
+                    fields.append((menu_level, menu_type, label_ii, label))
+
+        return fields
+
+    def _schedule_search(self, query):
+        """
+        Function which (re)starts the search debounce timer on every change
+        to the search box.
+
+        Parameters
+        ----------
+        query : str
+            Text currently in the search box (unused - the timer rereads it)
+        """
+
+        self._search_debounce_timer.start(150)
+
+        return None
+
+    def _run_debounced_search(self):
+        """Function which runs the search once the debounce timer fires."""
+
+        self.handle_search(self.search_box.text())
+
+        return None
+
+    def handle_search(self, query):
+        """
+        Function which narrows the page down to the fields matching what has
+        been typed into the search box, upon every change to it.
+
+        Parameters
+        ----------
+        query : str
+            Text currently in the search box
+        """
+
+        # the metadata root page keeps its own column of buttons whole, as the
+        # fields being searched for are a level below it and are shown in a
+        # results column of their own instead
+        if self.search_descends:
+            self.build_search_results(query)
+            return None
+
+        for menu_type in self.grids:
+            # a multispecies row is a filter being built up rather than a
+            # named field, so there is nothing to search through
+            if menu_type == "multispecies":
+                continue
+            labels = list(self.menu_current[menu_type].get("labels", []))
+            matched = search_field_labels(query, labels)
+            self.filter_grid(menu_type, set(matched))
+
+        return None
+
+    def filter_grid(self, menu_type, visible_labels):
+        """
+        Function which lays a menu type's grid out again with only the wanted
+        rows in it, closing up the space left by the rest.
+
+        The rows are the ones built by create_grid(), moved rather than
+        rebuilt, so that anything selected or typed into them survives a
+        search - and stays where the window's closure expects to find it, as
+        it reads the rows back by position.
+
+        Parameters
+        ----------
+        menu_type : str
+            Menu type whose grid is being laid out again
+        visible_labels : set
+            Indices of the labels to keep
+        """
+
+        grid_info = self.grids[menu_type]
+        grid = grid_info["grid"]
+        grid_info["visible_labels"] = visible_labels
+
+        # detaching from the scroll area avoids live geometry updates while
+        # relaying out - ~20-30x faster for a large field (e.g. station name)
+        scroll_area = grid_info["scroll_area"]
+        container = scroll_area.takeWidget()
+        container.setUpdatesEnabled(False)
+        try:
+            self._filter_grid_relayout(
+                menu_type, grid_info, grid, visible_labels)
+        finally:
+            container.setUpdatesEnabled(True)
+            scroll_area.setWidget(container)
+
+        return None
+
+    def _filter_grid_relayout(self, menu_type, grid_info, grid, visible_labels):
+        """
+        Does the actual work of filter_grid() - split out so the repaint
+        hold in filter_grid() wraps it in a try/finally without an extra
+        indent level over the whole method.
+        """
+
+        # take every row out of the grid, hiding what it holds - a widget left
+        # out of the layout is still drawn where it last sat until it is
+        for row in grid_info["rows"]:
+            for widget in [row["subtitle"], row["label"]] + row["elements"]:
+                if widget is None:
+                    continue
+                grid.removeWidget(widget)
+                # only hide what is showing, so that a widget the page itself
+                # hid (an unchecked model's forecast options, say) is not
+                # brought back by a search
+                if not widget.isHidden():
+                    grid_info["hidden_by_search"].add(widget)
+                    widget.hide()
+
+        # the column headers follow the number of columns, so they are made
+        # again rather than moved
+        for header in grid_info["column_headers"]:
+            header.setParent(None)
+        grid_info["column_headers"] = []
+
+        n_column_consumed = self.page_memory[menu_type]["n_column_consumed"]
+        row_n = 0
+        column_n = 0
+        occupied_vertical_space = copy.deepcopy(grid_info["space_before_grid"])
+        pending_subtitle = None
+
+        def show_row_widget(widget, column, alignment):
+            """Place one widget back in the grid, showing it if the search hid it."""
+
+            grid.addWidget(
+                widget, grid_info["start_row_n"] + row_n, column, alignment)
+            if widget in grid_info["hidden_by_search"]:
+                grid_info["hidden_by_search"].discard(widget)
+                widget.show()
+
+        for label_ii, row in enumerate(grid_info["rows"]):
+            # a subtitle heads the rows beneath it, so it is only worth showing
+            # once one of them has survived the search
+            if row["subtitle"] is not None:
+                pending_subtitle = row["subtitle"]
+
+            if label_ii not in visible_labels:
+                continue
+
+            # start a new column once this one has no room left, exactly as
+            # create_grid() does when first filling the grid
+            if (
+                self.full_window_geometry.height() - occupied_vertical_space
+            ) <= int(grid_info["obj_height"]):
+                column_n += n_column_consumed
+                row_n = 0
+                occupied_vertical_space = copy.deepcopy(
+                    grid_info["space_before_grid"])
+
+            if pending_subtitle is not None:
+                show_row_widget(pending_subtitle, column_n,
+                                QtCore.Qt.AlignLeft)
+                pending_subtitle = None
+                occupied_vertical_space += (
+                    int(formatting_dict["popup_subtitle"]["QLabel"]["height"])
+                    + grid_info["vertical_spacing"]
+                )
+                row_n += 1
+
+            if row["label"] is not None:
+                show_row_widget(row["label"], column_n, QtCore.Qt.AlignLeft)
+
+            for element_ii, widget in enumerate(row["elements"]):
+                # the label of a row takes the first column of the group, so
+                # its elements start one along - as they were first placed
+                column_offset = element_ii + \
+                    1 if row["label"] is not None else element_ii
+                show_row_widget(widget, column_n +
+                                column_offset, QtCore.Qt.AlignLeft)
+
+            row_n += 1
+            occupied_vertical_space += (
+                int(grid_info["obj_height"]) + grid_info["vertical_spacing"]
+            )
+
+        # put the column headers back over whatever columns are now in use
+        if grid_info["have_column_headers"]:
+            self.place_column_headers(menu_type, column_n)
+
+        return None
+
+    def place_column_headers(self, menu_type, max_column):
+        """
+        Function which puts a header over each column of a menu type's grid.
+
+        Parameters
+        ----------
+        menu_type : str
+            Menu type the headers belong to
+        max_column : int
+            Index of the last column in use
+        """
+
+        header_texts = {"checkboxes": ["K", "R"],
+                        "rangeboxes": ["Min", "Max", "A"]}
+        if menu_type not in header_texts:
+            return None
+
+        grid_info = self.grids[menu_type]
+        for column_number in np.arange(
+            0, max_column + 1, self.page_memory[menu_type]["n_column_consumed"]
+        ):
+            for header_ii, text in enumerate(header_texts[menu_type]):
+                column_label = set_formatting(
+                    QtWidgets.QLabel(self, text=text),
+                    formatting_dict["popup_label_column_header"],
+                )
+                grid_info["grid"].addWidget(
+                    column_label, 0, column_number + header_ii + 1, QtCore.Qt.AlignCenter
+                )
+                column_label.show()
+                grid_info["column_headers"].append(column_label)
+
+        return None
+
+    def build_search_results(self, query):
+        """
+        Function which fills the right half of the page with the fields below
+        it matching what has been typed into the search box.
+
+        Used by the metadata menu's root page, which holds only the buttons
+        into the five metadata types. Those move into the left half whole, so
+        nothing is lost from sight, and the matches are listed alongside
+        them: a numeric field with its min, max and apply controls, so
+        it can be set without leaving the page, and a text field as the button
+        onto its own page of values.
+
+        Parameters
+        ----------
+        query : str
+            Text currently in the search box
+        """
+
+        fields = self.submenu_fields()
+        matched = (
+            search_field_labels(query, [field[3] for field in fields])
+            if query.strip()
+            else []
+        )
+
+        results_grid = self.search_results["grid"]
+
+        # empty the column of the last search's results
+        while results_grid.count():
+            item = results_grid.takeAt(0)
+            if item.widget() is not None:
+                item.widget().setParent(None)
+
+        # with nothing searched for the results half is taken away, and the
+        # menu's own column goes back to the middle of the whole window
+        if not query.strip():
+            self.search_results["container"].hide()
+            self.fit_search_results_column()
+            return None
+
+        # otherwise the page stays split even when nothing matches, rather
+        # than the menu's column jumping back to the middle and out again as
+        # a search is typed, and says so in place of the results
+        self.search_results["container"].show()
+        if not matched:
+            results_grid.addWidget(
+                set_formatting(
+                    QtWidgets.QLabel(self, text="No fields match"),
+                    formatting_dict["popup_label"],
+                ),
+                0,
+                0,
+                QtCore.Qt.AlignLeft,
+            )
+            QtCore.QTimer.singleShot(0, self.fit_search_results_column)
+            return None
+
+        # results run into further columns once one is full, as the menu's own
+        # grids do, rather than off the bottom of the window
+        row_height = int(
+            formatting_dict["popup_button"]["QPushButton"]["height"]) + 3
+        occupied_vertical_space = (
+            (self.page_margin * 2)
+            + int(formatting_dict["popup_title"]["QLabel"]["height"])
+            + (self.layout_spacing * 2)
+            + int(formatting_dict["popup_button"]["QPushButton"]["height"])
+            + int(formatting_dict["popup_subtitle"]["QLabel"]["height"])
+            + 3
+            + int(formatting_dict["popup_label_column_header"]
+                  ["QLabel"]["height"])
+            + 3
+            + (self.search_results["scroll_area"].horizontalScrollBar().height() * 2.0)
+        )
+        rows_per_column = max(
+            1,
+            int(
+                (self.full_window_geometry.height() - occupied_vertical_space)
+                // row_height
+            ),
+        )
+
+        # column headers, only worth showing once a numeric field is among the
+        # results, as they head its min/max/apply controls
+        if any(fields[field_ii][1] == "rangeboxes" for field_ii in matched):
+            for column_start in range(
+                0, len(matched), rows_per_column
+            ):
+                column_n = (column_start // rows_per_column) * 4
+                for header_ii, text in enumerate(["Min", "Max", "A"]):
+                    results_grid.addWidget(
+                        set_formatting(
+                            QtWidgets.QLabel(self, text=text),
+                            formatting_dict["popup_label_column_header"],
+                        ),
+                        0,
+                        column_n + header_ii + 1,
+                        QtCore.Qt.AlignCenter,
+                    )
+
+        for result_ii, field_ii in enumerate(matched):
+            row_n = (result_ii % rows_per_column) + 1
+            column_n = (result_ii // rows_per_column) * 4
+            menu_level, menu_type, label_ii, label = fields[field_ii]
+            submenu = self.menu_current[menu_level][menu_type]
+            tooltip = ""
+            if len(submenu.get("tooltips", [])) > label_ii:
+                tooltip = wrap_tooltip_text(
+                    "{} ({})".format(
+                        submenu["tooltips"][label_ii], menu_level),
+                    self.full_window_geometry.width(),
+                    "popup_label",
+                )
+
+            # a text field is filtered by picking from its values, so the
+            # result is the button onto that page
+            if menu_type == "navigation_buttons":
+                result_button = set_formatting(
+                    QtWidgets.QPushButton(
+                        str(label)), formatting_dict["popup_button"]
+                )
+                result_button.setToolTip(tooltip)
+                result_button.clicked.connect(
+                    partial(self.open_search_result_page, [menu_level, label])
+                )
+                results_grid.addWidget(
+                    result_button, row_n, column_n, QtCore.Qt.AlignLeft
+                )
+                continue
+
+            # a numeric field is set by its bounds, so those are shown here
+            # and written straight back to the page they belong to
+            result_label = set_formatting(
+                QtWidgets.QLabel(self, text=str(
+                    label)), formatting_dict["popup_label"]
+            )
+            result_label.setToolTip(tooltip)
+            results_grid.addWidget(
+                result_label, row_n, column_n, QtCore.Qt.AlignLeft
+            )
+
+            for element_ii, element in enumerate(["current_lower", "current_upper"]):
+                rangebox = set_formatting(
+                    QtWidgets.QLineEdit(
+                    ), formatting_dict["popup_lineedit_rangebox"]
+                )
+                rangebox.setText(str(submenu[element][label_ii]))
+                # show the value from its start, not its end
+                rangebox.setCursorPosition(0)
+                rangebox.textChanged.connect(
+                    partial(self.handle_search_result_range,
+                            submenu, element, label_ii)
+                )
+                results_grid.addWidget(
+                    rangebox, row_n, column_n + element_ii + 1, QtCore.Qt.AlignLeft
+                )
+
+            apply_box = set_formatting(
+                QtWidgets.QCheckBox(""), formatting_dict["popup_checkbox"]
+            )
+            if label in list(submenu["apply_selected"]):
+                apply_box.setCheckState(QtCore.Qt.Checked)
+            apply_box.stateChanged.connect(
+                partial(self.handle_search_result_apply, submenu, label)
+            )
+            results_grid.addWidget(
+                apply_box, row_n, column_n + 3, QtCore.Qt.AlignLeft)
+
+        # left to the next turn of the event loop, as a widget only settles on
+        # the size it needs once it has been through one
+        QtCore.QTimer.singleShot(0, self.fit_search_results_column)
+
+        return None
+
+    def create_search_results_column(self):
+        """
+        Function which adds the half of the page search results are listed
+        in, to the right of the half holding the menu's own columns (see
+        create_grid()).
+
+        The two halves are the same width whatever either holds, so that
+        filling this one never moves the menu's columns. Results too wide for
+        it are scrolled through sideways. Hidden until something is searched
+        for, leaving the menu's half the whole window.
+        """
+
+        scroll_area_content = QtWidgets.QWidget()
+        results_grid = QtWidgets.QGridLayout(scroll_area_content)
+        results_grid.setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignHCenter)
+        results_grid.setHorizontalSpacing(15)
+        results_grid.setVerticalSpacing(3)
+        scroll_area = QtWidgets.QScrollArea()
+        scroll_area.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        scroll_area.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setFrameShape(0)
+        scroll_area.setWidget(scroll_area_content)
+        scroll_area.setSizePolicy(
+            QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Preferred
+        )
+
+        # kept outside results_grid so clearing it each search doesn't touch it
+        title_label = set_formatting(
+            QtWidgets.QLabel(self, text="Search results"),
+            formatting_dict["popup_subtitle"],
+        )
+        title_label.setAlignment(QtCore.Qt.AlignCenter)
+        container = QtWidgets.QWidget()
+        container_layout = QtWidgets.QVBoxLayout(container)
+        container_layout.setContentsMargins(0, 0, 0, 0)
+        container_layout.setSpacing(3)
+        container_layout.addWidget(title_label, 0, QtCore.Qt.AlignHCenter)
+        container_layout.addWidget(scroll_area, 1)
+
+        self.horizontal_parent.addWidget(container, 1)
+        container.hide()
+        self.search_results = {
+            "scroll_area": scroll_area,
+            "grid": results_grid,
+            "container": container,
+        }
+
+        return None
+
+    def hold_menu_columns(self):
+        """
+        Function which fixes the menu's own columns at the width their
+        contents need, on a page whose search results sit beside them, so
+        that they stay the same width - and so centred in their half -
+        whatever is searched for.
+        """
+
+        available_width = self.full_window_geometry.width() - (self.page_margin * 2)
+        for scroll_area in self.menu_type_scroll_areas:
+            # taken from the layout rather than the widget, whose own hint is
+            # capped short of what a wide grid needs
+            content_layout = scroll_area.widget().layout()
+            content_layout.invalidate()
+            content_layout.activate()
+            scroll_area.setFixedWidth(
+                min(content_layout.sizeHint().width(), available_width)
+            )
+
+        return None
+
+    def fit_search_results_column(self):
+        """
+        Function which gives the search results column the height its
+        contents need - a column filled after the window was laid out is
+        otherwise left at the height it was given when empty.
+        """
+
+        scroll_area = self.search_results["scroll_area"]
+        content_layout = self.search_results["grid"]
+        content_layout.invalidate()
+        content_layout.activate()
+        content_hint = content_layout.sizeHint()
+
+        wanted_height = 0
+        if content_layout.count() > 0:
+            wanted_height = content_hint.height()
+            # results too wide for the column are scrolled through sideways,
+            # and the scrollbar takes a strip of the height with it
+            if content_hint.width() > scroll_area.viewport().width():
+                wanted_height += scroll_area.horizontalScrollBar().sizeHint().height()
+        scroll_area.setMinimumHeight(
+            min(wanted_height, self.full_window_geometry.height())
+        )
+        scroll_area.updateGeometry()
+
+        return None
+
+    def handle_search_result_range(self, rangeboxes, element, label_ii, text):
+        """
+        Function which writes a bound set in the search results column back to
+        the menu page the field belongs to, upon it being typed.
+
+        Written as it is typed rather than when the window closes, as the
+        results are rebuilt on every change to the search box and so are gone
+        by then.
+
+        Parameters
+        ----------
+        rangeboxes : dict
+            Rangeboxes of the menu level the field belongs to
+        element : str
+            Bound being set, "current_lower" or "current_upper"
+        label_ii : int
+            Position of the field within that menu level
+        text : str
+            Value that has been typed
+        """
+
+        rangeboxes[element][label_ii] = text
+
+        return None
+
+    def handle_search_result_apply(self, rangeboxes, label, state):
+        """
+        Function which adds or removes a field from those to filter by, upon
+        its apply box being checked in the search results column.
+
+        Parameters
+        ----------
+        rangeboxes : dict
+            Rangeboxes of the menu level the field belongs to
+        label : str
+            Field the apply box belongs to
+        state : int
+            Check state of the box
+        """
+
+        apply_selected = [
+            selected for selected in list(rangeboxes["apply_selected"]) if selected != label
+        ]
+        if state == QtCore.Qt.Checked:
+            apply_selected.append(label)
+        rangeboxes["apply_selected"] = apply_selected
+
+        return None
+
+    def open_search_result_page(self, menu_levels):
+        """
+        Function which opens the page a search result sits on, upon clicking
+        it in the results column.
+
+        Parameters
+        ----------
+        menu_levels : list
+            Sequence of keys leading to the page holding the field
+        """
+
+        self.new_window = PopUpWindow(
+            self.read_instance,
+            self.menu_root,
+            list(menu_levels),
+            self.full_window_geometry,
+        )
+
+        # sleep briefly to allow new page to be generated
+        time.sleep(0.1)
+
+        # close current pop-up page
+        self.close()
+
+        return None
 
     def open_new_page(self):
         """
@@ -981,6 +1654,29 @@ class PopUpWindow(QtWidgets.QWidget):
         # close current pop-up page
         self.close()
 
+    def label_is_showing(self, menu_type, label_ii):
+        """
+        Function which reports whether a field is currently showing, so that
+        the select buttons only reach the fields a search has left on the
+        page rather than the whole menu behind it.
+
+        Parameters
+        ----------
+        menu_type : str
+            Menu type the field belongs to
+        label_ii : int
+            Position of the field within the menu type
+
+        Returns
+        -------
+        bool
+            Whether the field is showing
+        """
+
+        visible_labels = self.grids.get(menu_type, {}).get("visible_labels")
+
+        return (visible_labels is None) or (label_ii in visible_labels)
+
     def select_all(self):
         """
         Sets the state of all applicable checkboxes within the current menu to checked.
@@ -994,13 +1690,20 @@ class PopUpWindow(QtWidgets.QWidget):
             return
 
         for element in self.page_memory[menu_type]["ordered_elements"]:
-            if element in ["keep_selected", "remove_selected"]:
+            if element in ["keep_selected", "remove_selected", "interpolated", "gridded"]:
                 for checkbox_ii, checkbox in enumerate(
                     self.page_memory[menu_type][element]
                 ):
-                    self.page_memory[menu_type][element][checkbox_ii].setCheckState(
-                        QtCore.Qt.Checked
-                    )
+                    if not self.label_is_showing(menu_type, checkbox_ii):
+                        continue
+                    # skip models without data available
+                    if not checkbox.isEnabled():
+                        continue
+                    checkbox.setCheckState(QtCore.Qt.Checked)
+
+                    # only one gridded model can be loaded, so select the first available one
+                    if element == "gridded":
+                        break
 
     def clear_all(self):
         """
@@ -1015,10 +1718,12 @@ class PopUpWindow(QtWidgets.QWidget):
             return
 
         for element in self.page_memory[menu_type]["ordered_elements"]:
-            if element in ["keep_selected", "remove_selected"]:
+            if element in ["keep_selected", "remove_selected", "interpolated", "gridded"]:
                 for checkbox_ii, checkbox in enumerate(
                     self.page_memory[menu_type][element]
                 ):
+                    if not self.label_is_showing(menu_type, checkbox_ii):
+                        continue
                     self.page_memory[menu_type][element][checkbox_ii].setCheckState(
                         QtCore.Qt.Unchecked
                     )
@@ -1033,6 +1738,8 @@ class PopUpWindow(QtWidgets.QWidget):
             for checkbox_ii, checkbox in enumerate(
                 self.page_memory["checkboxes"][element]
             ):
+                if not self.label_is_showing("checkboxes", checkbox_ii):
+                    continue
                 self.page_memory["checkboxes"][element][checkbox_ii].setCheckState(
                     QtCore.Qt.Unchecked
                 )
@@ -1047,13 +1754,16 @@ class PopUpWindow(QtWidgets.QWidget):
             ]
         else:
             default_inds = [
-                np.where(self.menu_current["checkboxes"]["labels"] == default_var)[0][0]
+                np.where(self.menu_current["checkboxes"]
+                         ["labels"] == default_var)[0][0]
                 for default_var in self.menu_current["checkboxes"]["remove_default"]
             ]
 
         # now select only desired default checkboxes
         for element in self.page_memory["checkboxes"]["ordered_elements"]:
             for default_ind in default_inds:
+                if not self.label_is_showing("checkboxes", default_ind):
+                    continue
                 self.page_memory["checkboxes"][element][default_ind].setCheckState(
                     QtCore.Qt.Checked
                 )
@@ -1068,7 +1778,8 @@ class PopUpWindow(QtWidgets.QWidget):
 
         # initalise labels
         if len(self.menu_current["multispecies"]["labels"]) == 0:
-            texts = ["Network", "Matrix", "Species", "Min", "Max", "Fill value", "A"]
+            texts = ["Network", "Matrix", "Species",
+                     "Min", "Max", "Fill value", "A"]
             for i, text in enumerate(texts):
                 column_label = set_formatting(
                     QtWidgets.QLabel(self, text=text),
@@ -1131,7 +1842,8 @@ class PopUpWindow(QtWidgets.QWidget):
                 # add element to memory
                 self.page_memory["multispecies"][element].append(
                     set_formatting(
-                        widget(), formatting_dict["popup_lineedit_multispecies"]
+                        widget(
+                        ), formatting_dict["popup_lineedit_multispecies"]
                     )
                 )
 
@@ -1212,8 +1924,10 @@ class PopUpWindow(QtWidgets.QWidget):
             self.page_memory["multispecies"]["network"][label_ii].clear()
             self.page_memory["multispecies"]["matrix"][label_ii].clear()
             self.page_memory["multispecies"]["species"][label_ii].clear()
-            self.page_memory["multispecies"]["current_lower"][label_ii].setText(":")
-            self.page_memory["multispecies"]["current_upper"][label_ii].setText(":")
+            self.page_memory["multispecies"]["current_lower"][label_ii].setText(
+                ":")
+            self.page_memory["multispecies"]["current_upper"][label_ii].setText(
+                ":")
             self.page_memory["multispecies"]["current_filter_species_fill_value"][
                 label_ii
             ].setText(str(np.nan))
@@ -1576,7 +2290,8 @@ class PopUpWindow(QtWidgets.QWidget):
                 msg = "filter_species lower bound ({}) for {} cannot contain < or <=. ".format(
                     current_lower, networkspeci
                 )
-                current_lower = ">=" + current_lower.replace("<", "").replace("=", "")
+                current_lower = ">=" + \
+                    current_lower.replace("<", "").replace("=", "")
                 msg += "Setting it to be {}.".format(current_lower)
                 self.page_memory["multispecies"]["current_lower"][
                     label_ii
@@ -1609,7 +2324,8 @@ class PopUpWindow(QtWidgets.QWidget):
                 msg = "filter_species upper bound ({}) for {} cannot contain > or >=. ".format(
                     current_upper, networkspeci
                 )
-                current_upper = "<=" + current_upper.replace(">", "").replace("=", "")
+                current_upper = "<=" + \
+                    current_upper.replace(">", "").replace("=", "")
                 msg += "Setting it to be {}.".format(current_upper)
                 self.page_memory["multispecies"]["current_upper"][
                     label_ii
@@ -1717,7 +2433,8 @@ class PopUpWindow(QtWidgets.QWidget):
                 filter_species = [
                     val.split("|")[1]
                     for val in list(
-                        copy.deepcopy(self.read_instance.selected_filter_species).keys()
+                        copy.deepcopy(
+                            self.read_instance.selected_filter_species).keys()
                     )
                 ]
 
@@ -1762,6 +2479,331 @@ class PopUpWindow(QtWidgets.QWidget):
             ):
                 del self.read_instance.qa_per_species[speci]
 
+    def get_open_models_widget(self, element, model_id):
+        """
+        Get the widget of a model row in the models popup currently open.
+
+        Parameters
+        ----------
+        element : str
+            Type of widget in the model row ("run", "interpolated", "gridded", ...).
+        model_id : str
+            Name of the model of the row.
+
+        Returns
+        -------
+        QtWidget or None
+            Widget of the model row, or None if the popup currently open is not the
+            models menu or does not show that model.
+        """
+
+        open_window = self.read_instance.pop_up_window
+        if "models" not in open_window.page_memory:
+            return None
+        map_vars = open_window.menu_current["models"]["map_vars"]
+        if model_id not in map_vars:
+            return None
+        return open_window.page_memory["models"][element][list(map_vars).index(model_id)]
+
+    def check_interpolation(self, timer, job_id, log_path, model_id, start_date, end_date,
+                            resolution, networkspecies, configuration_name, process=None):
+        """
+        Checks if an interpolation launched from the dashboard has finished, and if so, updates the
+        dashboard accordingly.
+
+        It is called periodically by the timer created in handle_model_interp_clicked. Locally, the
+        interpolation is finished when its process has exited; in the rest of machines, when the
+        Slurm job is no longer listed by squeue. While it is still running, nothing is done.
+
+        Once finished, the timer is stopped, the model is removed from the active interpolations,
+        the temporary configuration file is deleted, the RUN button is restored and the available
+        models and menus are updated. If interpolated files were found for the model, its checkbox
+        is enabled and a message reports what is available per networkspeci, as the interpolation
+        can be partial. Otherwise, a message reports that the interpolation failed.
+
+        Parameters
+        ----------
+        timer : QtCore.QTimer
+            Timer calling this function, stopped once the interpolation has finished.
+        job_id : int or str
+            Process ID in local runs, or Slurm job ID in the rest of machines.
+        log_path : str
+            Path to the interpolation log, shown in the messages to the user.
+        model_id : str
+            Name of the model being interpolated.
+        start_date : str
+            Start date of the interpolation (YYYYMMDD).
+        end_date : str
+            End date of the interpolation (YYYYMMDD), exclusive.
+        resolution : str
+            Temporal resolution of the interpolation.
+        networkspecies : list of str
+            Network and species combinations requested, as network|species.
+        configuration_name : str
+            Configuration file name (created only for the interpolation)
+        process : subprocess.Popen
+            Process running the interpolation (only used in local runs).
+
+        Returns
+        -------
+        bool
+            True if the interpolation has finished.
+        """
+
+        # the models menu may have been closed, or replaced by another popup, while the
+        # interpolation runs: its widgets are only updated if it is the popup currently open
+        # (if not, they are rebuilt from active_interpolations when it is opened again)
+        run_button = self.get_open_models_widget("run", model_id)
+
+        if self.read_instance.machine == "local":
+            finished = process.poll() is not None
+            if not finished:
+                self.read_instance.active_interpolations[model_id] = f"Running ({job_id})"
+                if run_button is not None:
+                    run_button.setText(f"Running ({job_id})")
+        else:
+            result = subprocess.run(["squeue", "-h", "-j", job_id],
+                                    capture_output=True, text=True)
+            fields = result.stdout.split()
+            status = fields[4] if len(fields) > 4 else None
+            finished = False
+            if not status:
+                finished = True
+            else:
+                status_long_name = slurm_states[status]
+                self.read_instance.active_interpolations[model_id] = f"{status_long_name} ({job_id})"
+                if run_button is not None:
+                    run_button.setText(f"{status_long_name} ({job_id})")
+
+        # If no longer running
+        if finished:
+
+            timer.stop()
+            
+            # free the timer (and the popup it keeps alive) now that it is no longer needed
+            timer.deleteLater()
+
+            # Remove from active interpolations
+            self.read_instance.active_interpolations.pop(model_id, None)
+
+            # Remove configuration
+            os.remove(configuration_name)
+
+            # Update available models, now that the interpolated files exist
+            get_valid_models(
+                self.read_instance,
+                start_date,
+                end_date,
+                resolution,
+                networkspecies,
+            )
+            # Update forecast menus
+            self.read_instance.update_models_menu()
+
+            if model_id in self.menu_current["models"]["enabled"]["interpolated"]:
+                # Report what is available per networkspeci, as interpolation can be partial
+                # (e.g. no observations or no gridded files for some species / months)
+                available = self.read_instance.available_model_data["interpolated"]
+                done = []
+                missing = []
+
+                # Months requested (end date is exclusive, same rule as in get_valid_interpolated_models)
+                requested_yearmonths = [
+                    ym for ym in pd.date_range(start_date[:6] + "01", end_date, freq="MS").strftime("%Y%m")
+                    if int(ym + "01") < int(end_date)
+                ]
+                for networkspeci in networkspecies:
+                    net, speci = networkspeci.split("|")
+                    yearmonths = available.get(net, {}).get(
+                        resolution, {}).get(speci, {}).get(model_id, [])
+                    missing_yearmonths = [
+                        ym for ym in requested_yearmonths if ym not in yearmonths]
+                    if not yearmonths:
+                        missing.append(networkspeci)
+                    elif missing_yearmonths:
+                        done.append(f"{networkspeci} ({len(yearmonths)} of {len(requested_yearmonths)} months, "
+                                    f"missing: {', '.join(missing_yearmonths)})")
+                    else:
+                        done.append(
+                            f"{networkspeci} (all {len(requested_yearmonths)} months)")
+
+                msg = f"Interpolation job {job_id} finished. "
+                msg += f"Available: {', '.join(done)}."
+                if missing:
+                    msg += f" Nothing interpolated for: {', '.join(missing)}. Check the log in {log_path}."
+                else:
+                    # Enable interpolated model checkbox if anything was interpolated
+                    model_checkbox = self.get_open_models_widget("interpolated", model_id)
+                    if model_checkbox is not None:
+                        model_checkbox.setEnabled(True)
+                        model_checkbox.setGraphicsEffect(None)
+                        model_checkbox.setToolTip("")
+                show_message(self.read_instance, msg)
+            else:
+                # Interpolation did not produce files, allow retrying
+                msg = f"Interpolation of {model_id} failed. Check the terminal and log in {log_path}."
+                show_message(self.read_instance, msg)
+
+            # Enable interpolation button and update its text
+            if run_button is not None:
+                self.read_instance.enable_element(run_button, "button_run", prefix="popup")
+                run_button.setText("Run")
+
+        return finished
+
+    def handle_model_interp_clicked(self, event):
+        """
+        Manages the interpolation of a gridded model when its RUN button is clicked.
+
+        The current dashboard selection (network, species, resolution and dates) is written to a
+        temporary configuration file, which is used to run the interpolation from the dashboard.
+        The call is blocking, and its output is written both to the terminal and to a log in
+        logs/interpolation/management_logs. Once finished, the configuration file is removed,
+        the available models are updated and a message reports what was interpolated per
+        networkspeci, as the interpolation can be partial.
+
+        Parameters
+        ----------
+        event : bool
+            Checked state emitted by the clicked signal of the button (not used).
+        """
+
+        # Get the source widget that triggered the event (the checkbox)
+        event_source = self.sender()
+
+        # Disable interpolation button and update its text
+        self.read_instance.disable_element(event_source, "button_run", prefix="popup")
+
+        # Force repaint before the blocking interpolation call
+        QtWidgets.QApplication.processEvents()
+
+        # Extract the numeric index from the checkbox object (e.g. expcheckboxes_run_2) to get the model
+        object_name = event_source.objectName().split("_")
+        label_ii = int(object_name[-1])
+        model_id = self.menu_current["models"]["map_vars"][label_ii]
+
+        # Assign unique ID to experiment
+        unique_id = f"{random.randint(0, 999999):06d}"
+
+        # Get currently selected parameters (not read into memory)
+        start_date = self.read_instance.le_start_date.text()
+        end_date = self.read_instance.le_end_date.text()
+        resolution = self.read_instance.selected_resolution
+        networkspecies = self.read_instance.selected_networkspecies
+        species = self.read_instance.selected_species
+        network = self.read_instance.selected_network
+
+        # Store configuration
+        configuration_name = join(
+            self.read_instance.config_dir, f"dashboard/run_{unique_id}.conf")
+        export_basic_configuration(self.read_instance, configuration_name,
+                                   network=network,
+                                   species=species,
+                                   resolution=resolution,
+                                   start_date=start_date,
+                                   end_date=end_date,
+                                   experiment=model_id,
+                                   ghost_version=self.read_instance.selected_ghost_version)
+
+        # Submit the interpolation as done from the command line
+        arguments = ["./bin/providentia", "--interpolation",
+                     f"--config={configuration_name}"]
+        if self.read_instance.machine == "local":
+            process = subprocess.Popen(arguments,
+                                       cwd=PROVIDENTIA_ROOT,
+                                       start_new_session=True,
+                                       stdout=subprocess.DEVNULL,
+                                       stderr=subprocess.DEVNULL)
+            job_id = process.pid
+        else:
+            process = None
+            submission_result = subprocess.run(arguments,
+                                               cwd=PROVIDENTIA_ROOT,
+                                               capture_output=True,
+                                               text=True)
+
+            # Extract the Slurm job ID from the log path
+            match = re.search(r"management_logs/(\d+)\.out",
+                              submission_result.stdout)
+            if not match:
+                # Remove configuration
+                os.remove(configuration_name)
+
+                raise RuntimeError(
+                    "Could not find Slurm job ID in launcher output\n"
+                    f"Return code: {submission_result.returncode}\n"
+                    f"STDOUT:\n{submission_result.stdout}\n"
+                    f"STDERR:\n{submission_result.stderr}")
+            
+            job_id = match.group(1)
+
+        msg = f"Submitted interpolation job {job_id} with the following configuration: "
+        msg += f"\n- Network: {network}\n- GHOST version: {self.read_instance.selected_ghost_version}"
+        msg += f"\n- Species: {species}\n- Resolution: {resolution}"
+        msg += f"\n- Start date: {start_date}\n- End date: {end_date}\n- Experiment: {model_id}"
+        show_message(self.read_instance, msg)
+
+        # Store active interpolations into list
+        self.read_instance.active_interpolations = getattr(
+            self.read_instance, "active_interpolations", {}
+        )
+
+        # Check interpolation status
+        log_path = join(
+            PROVIDENTIA_ROOT,
+            "logs",
+            "interpolation",
+            "management_logs",
+            f"{job_id}.out",
+        )
+        # the timer belongs to the dashboard, not to this popup: once another popup is
+        # opened, this one is no longer referenced and is garbage collected, which would
+        # delete its timer and silently stop checking the interpolation
+        timer = QtCore.QTimer(self.read_instance)
+        timer.timeout.connect(
+            lambda: self.check_interpolation(
+                timer, job_id, log_path, model_id, start_date, end_date,
+                resolution, networkspecies, configuration_name, process
+            )
+        )
+
+        # Check immediately at 0 seconds, and repeat every 10 seconds if still running
+        # (an interpolation can finish before the first check, e.g. if there is nothing to interpolate)
+        finished = self.check_interpolation(
+            timer, job_id, log_path, model_id, start_date, end_date,
+            resolution, networkspecies, configuration_name, process
+        )
+        if not finished:
+            timer.start(10000)
+
+        return None
+
+    def get_forecast_data_label(self, model_id, model_type):
+        """
+        Get the data label the forecast options of a model row are stored under.
+
+        Parameters
+        ----------
+        model_id : str
+            Model on the row (e.g. 'a59g-regional-000').
+        model_type : str
+            Interpolation mode, 'interpolated' or 'gridded'.
+
+        Returns
+        -------
+        str
+            Data label (the alias set in the .conf file when there is one).
+        """
+
+        model = "{}::{}".format(model_id, model_type)
+        if model in self.menu_current["models"]["forecast"]:
+            return model
+        if model in self.read_instance.init_models:
+            return self.read_instance.init_models[model]
+        if model_type == "gridded":
+            return "{} (gridded)".format(model_id)
+        return model_id
+
     def handle_model_checked(self, event):
         """
         Manages the visibility and population of forecast-related widgets when a model checkbox is toggled.
@@ -1769,164 +2811,323 @@ class PopUpWindow(QtWidgets.QWidget):
         Parameters
         ----------
         event : int
-            The check state of the checkbox (standard PyQt5 signal argument).
+            The check state of the checkbox.
         """
 
         # Get the source widget that triggered the event (the checkbox)
         event_source = self.sender()
 
-        # Extract the numeric index from the checkbox object name (e.g., 'model_2' → 2)
-        label_ii = int(event_source.objectName().split("_")[1])
-        model = self.menu_current["models"]["map_vars"][label_ii]
-        if model not in self.menu_current["models"]["forecast"]:
-            if model in self.read_instance.init_models:
-                model = self.read_instance.init_models[model]
+        # Extract the model type and the numeric index from the checkbox object
+        # name (e.g., 'expcheckboxes_interpolated_2' -> 'interpolated', 2)
+        object_name = event_source.objectName().split("_")
+        model_type = object_name[1]
+        label_ii = int(object_name[-1])
 
-        # --- CASE 1: Model is checked ---
-        if event_source.isChecked():
-            # Check if this model has forecast options defined
-            if model in self.menu_current["models"]["forecast"]:
-                # Get all available forecast variable options and forecast day options
-                all_forecast_vars = self.menu_current["models"]["forecast"][model][0]
-                all_forecast_day_vars = self.menu_current["models"]["forecast_days"][
-                    model
-                ][0]
+        # the rows no longer match the models listed, so the model of the row is unknown
+        if self.models_list_changed():
+            return
 
-                # Retrieve the QStandardItemModel for the forecast combobox (checkbox list)
-                forecast_model = self.page_memory["models"]["forecast"][
-                    label_ii
-                ].model()
+        # only one gridded model can be loaded, so refuse a second one on click
+        # (signals blocked so unchecking does not run this handler again)
+        if (model_type == "gridded") and (event == QtCore.Qt.Checked):
+            checked_gridded = [
+                self.menu_current["models"]["map_vars"][checkbox_ii]
+                for checkbox_ii, checkbox in enumerate(self.page_memory["models"]["gridded"])
+                if (checkbox_ii != label_ii) and checkbox.isChecked()
+            ]
+            if checked_gridded:
+                event_source.blockSignals(True)
+                event_source.setCheckState(QtCore.Qt.Unchecked)
+                event_source.blockSignals(False)
+                msg = ("Only one gridded model can be loaded. "
+                       f"Uncheck {checked_gridded[0]} first.")
+                show_message(self.read_instance, msg)
+                return
 
-                # Extract the current items from the combobox model
-                forecast_vars = [
-                    forecast_model.data(forecast_model.index(i, 0))
-                    for i in range(forecast_model.rowCount())
-                ]
+        # save the forecast options selected for the version of the model shown before the change
+        previous_model = self.forecast_data_labels.get(label_ii)
+        self.save_forecast_comboboxes(label_ii)
 
-                # If the combobox doesn’t already contain the correct items, populate it
-                if all_forecast_vars != forecast_vars:
-                    self.page_memory["models"]["forecast"][label_ii].addItems(
-                        all_forecast_vars
-                    )
+        # if the comboboxes now show the other version of the model, keep the forecast options
+        # and days selected, as far as they are available for it (both versions have the same
+        # lead days, but only lead day 1 is shown for an interpolated version without them)
+        model, all_forecast_vars, _ = self.get_forecast_options(label_ii)
+        forecast_menu = self.menu_current["models"]["forecast"]
+        forecast_days_menu = self.menu_current["models"]["forecast_days"]
+        if (
+            (previous_model is not None)
+            and (model is not None)
+            and (model != previous_model)
+            and (previous_model in forecast_menu)
+            and (previous_model in forecast_days_menu)
+        ):
+            forecast_menu[model][1] = [
+                forecast_var
+                for forecast_var in forecast_menu[previous_model][1]
+                if forecast_var in all_forecast_vars
+            ]
+            forecast_menu[model][2] = [
+                forecast_var
+                for forecast_var in forecast_menu[previous_model][2]
+                if forecast_var in all_forecast_vars
+            ]
+            forecast_days_menu[model][1] = [
+                forecast_day_var
+                for forecast_day_var in forecast_days_menu[previous_model][1]
+                if forecast_day_var in forecast_days_menu[model][0]
+            ]
 
-                    # Set an identifiable name for the model (useful for debugging or tracking)
-                    forecast_model.setObjectName("forecastcheckboxes_" + str(label_ii))
+        # show the options of the version shown now
+        self.update_forecast_comboboxes(label_ii)
 
-                    # Connect dataChanged signal to the handler for checking/unchecking forecast options
-                    forecast_model.dataChanged.connect(self.forecast_option_checked)
-
-                # --- Add available forecast days (secondary combobox) ---
-                forecast_day_model = self.page_memory["models"]["forecast_days"][
-                    label_ii
-                ].model()
-
-                # Extract the current forecast day items
-                forecast_day_vars = [
-                    forecast_day_model.data(forecast_day_model.index(i, 0))
-                    for i in range(forecast_day_model.rowCount())
-                ]
-
-                # If the forecast days differ from the expected ones, populate them
-                if all_forecast_day_vars != forecast_day_vars:
-                    self.page_memory["models"]["forecast_days"][label_ii].addItems(
-                        all_forecast_day_vars
-                    )
-
-                # --- Display the forecast option widgets ---
-                if len(all_forecast_vars) > 0:
-                    # Show the forecast options combobox
-                    self.page_memory["models"]["forecast"][label_ii].show()
-
-                    # Iterate through forecast variables and check their state
-                    for forecast_ii, forecast_var in enumerate(all_forecast_vars):
-                        item = (
-                            self.page_memory["models"]["forecast"][label_ii]
-                            .model()
-                            .item(forecast_ii, 0)
-                        )
-
-                        # If any forecast option is already checked, show forecast days as well
-                        if item.checkState() == QtCore.Qt.Checked:
-                            self.page_memory["models"]["forecast_days"][label_ii].show()
-                            break
-
-        # --- CASE 2: Model is unchecked ---
-        else:
-            # Hide both forecast options and forecast day widgets
-            self.page_memory["models"]["forecast"][label_ii].hide()
-            self.page_memory["models"]["forecast_days"][label_ii].hide()
-
-    def forecast_option_checked(self, event):
+    def models_list_changed(self):
         """
-        Manages the selection logic for forecast types, enforcing mutual exclusivity and toggling lead-time visibility.
+        Check if the list of models changed while the models window was open (e.g. by
+        changing the period in the dashboard), as its rows are tied to the models listed
+        when it was opened. If so, warn that its selections cannot be used.
+
+        Returns
+        -------
+        bool
+            True if the list of models changed.
+        """
+
+        if list(self.menu_current["models"]["map_vars"]) == self.opened_models:
+            return False
+
+        msg = (
+            "The list of models changed while the MODELS window was open, so the "
+            "selections made in it are not saved. Open it again to select models."
+        )
+        show_message(self.read_instance, msg)
+        return True
+
+    def get_forecast_options(self, label_ii):
+        """
+        Get the forecast options shown on a model row. Both versions of a model have the same
+        lead days, but the interpolated version only has them when it was interpolated with the
+        forecast option, so its options are shown when it is checked (only lead day 1 when it was
+        not interpolated with the forecast option, as it cannot load other lead days), otherwise
+        the options of the gridded version. When the model is not checked, no options are shown.
 
         Parameters
         ----------
-        event : QModelIndex
-            The index of the data item that was changed.
+        label_ii : int
+            Row of the model.
+
+        Returns
+        -------
+        str or None
+            Data label the forecast options are saved under, None if there are none to show.
+        list
+            Forecast options (e.g. ['combined', 'daily', 'day']).
+        list
+            Forecast days (e.g. ['day 1', 'day 2']).
         """
 
-        # get widget line
-        event_source = self.sender()
-        label_ii = int(event_source.objectName().split("_")[1])
-        model = self.menu_current["models"]["map_vars"][label_ii]
-        if model not in self.menu_current["models"]["forecast"]:
-            if model in self.read_instance.init_models:
-                model = self.read_instance.init_models[model]
+        model_id = self.menu_current["models"]["map_vars"][label_ii]
 
-        # disconnect the combobox event while inside event so it is not infinitely called
-        self.page_memory["models"]["forecast"][label_ii].model().dataChanged.disconnect(
-            self.forecast_option_checked
+        # get data label and available forecast days of each version of the model
+        checked, data_labels, forecast_days = {}, {}, {}
+        for model_type in ["interpolated", "gridded"]:
+            checked[model_type] = self.page_memory["models"][model_type][label_ii].isChecked()
+            data_labels[model_type] = self.get_forecast_data_label(model_id, model_type)
+            forecast_days[model_type] = self.menu_current["models"]["forecast_days"].get(
+                data_labels[model_type], [[]]
+            )[0]
+
+        if checked["interpolated"] and forecast_days["interpolated"]:
+            model_type, days = "interpolated", forecast_days["interpolated"]
+        # interpolated version without forecast days can only load lead day 1
+        elif checked["interpolated"] and checked["gridded"] and forecast_days["gridded"]:
+            model_type, days = "gridded", forecast_days["gridded"][:1]
+        elif checked["gridded"] and forecast_days["gridded"]:
+            model_type, days = "gridded", forecast_days["gridded"]
+        else:
+            return None, [], []
+
+        model = data_labels[model_type]
+        return model, self.menu_current["models"]["forecast"][model][0], days
+
+    def update_forecast_comboboxes(self, label_ii):
+        """
+        Fill the forecast option and forecast day comboboxes of a model row with the options
+        of the version of the model shown (see get_forecast_options), checking the ones saved
+        for it, and show them if there are options to show.
+
+        Parameters
+        ----------
+        label_ii : int
+            Row of the model.
+        """
+
+        model, all_forecast_vars, all_forecast_day_vars = self.get_forecast_options(label_ii)
+        forecast_combobox = self.page_memory["models"]["forecast"][label_ii]
+        forecast_days_combobox = self.page_memory["models"]["forecast_days"][label_ii]
+
+        # remember which data label the comboboxes show, to save the selection under it
+        self.forecast_data_labels[label_ii] = model
+
+        # block the dropdown signal while filling it, so it is not handled per item
+        forecast_combobox.blockSignals(True)
+
+        # add available forecast options (after None, to load no forecast option)
+        forecast_combobox.clear()
+        forecast_combobox.addItems(["None"] + all_forecast_vars)
+
+        # select forecast option and days previously selected
+        selected_forecast_vars, selected_forecast_day_vars = [], []
+        if model is not None:
+            selected_forecast_vars = self.menu_current["models"]["forecast"][model][1]
+            selected_forecast_day_vars = self.menu_current["models"]["forecast_days"][model][1]
+        forecast_var = selected_forecast_vars[0] if selected_forecast_vars else "None"
+        forecast_combobox.setCurrentText(forecast_var)
+        self.fill_forecast_days_combobox(
+            label_ii, forecast_var, all_forecast_day_vars, selected_forecast_day_vars
         )
 
-        # get all forecast options
-        all_forecast_vars = self.menu_current["models"]["forecast"][model][0]
+        forecast_combobox.blockSignals(False)
 
-        # work out which forecast option is selected currently
-        checked_var = "None"
-        for forecast_ii, forecast_var in enumerate(all_forecast_vars):
-            item = (
-                self.page_memory["models"]["forecast"][label_ii]
-                .model()
-                .item(forecast_ii, 0)
-            )
-            if item.checkState() == QtCore.Qt.Checked:
-                checked_var = forecast_var
-                break
+        # show forecast options and days if there are any
+        forecast_combobox.setVisible(len(all_forecast_vars) > 0)
+        forecast_days_combobox.setVisible(len(all_forecast_vars) > 0)
 
-        # deactivate other forecast options when one is selected
-        for forecast_ii, forecast_var in enumerate(all_forecast_vars):
-            deactivate = False
-            if (checked_var == "daily") & (forecast_var != "daily"):
-                deactivate = True
-            elif (checked_var == "combined") & (forecast_var != "combined"):
-                deactivate = True
-            elif (checked_var == "day") & (forecast_var != "day"):
-                deactivate = True
+    def fill_forecast_days_combobox(
+        self, label_ii, forecast_var, all_forecast_day_vars, selected_forecast_day_vars
+    ):
+        """
+        Fill the forecast days combobox of a model row. With no forecast option (None), only
+        lead day 1 is shown, checked and disabled, as it is the lead day read. Otherwise all
+        the forecast days are shown, checking the ones selected.
 
-            item = (
-                self.page_memory["models"]["forecast"][label_ii]
-                .model()
-                .item(forecast_ii, 0)
-            )
-            if deactivate:
-                item.setFlags(item.flags() & ~QtCore.Qt.ItemIsEnabled)
-                item.setData(
-                    QtGui.QBrush(QtGui.QColor(150, 150, 150)), QtCore.Qt.ForegroundRole
-                )
-            else:
-                item.setFlags(item.flags() | QtCore.Qt.ItemIsEnabled)
-                item.setData(None, QtCore.Qt.ForegroundRole)
+        Parameters
+        ----------
+        label_ii : int
+            Row of the model.
+        forecast_var : str
+            Forecast option selected (e.g. 'day', or 'None').
+        all_forecast_day_vars : list
+            Forecast days of the model (e.g. ['day 1', 'day 2']).
+        selected_forecast_day_vars : list
+            Forecast days selected (e.g. ['day 2']).
+        """
 
-        # hide or show the forecast days depending if have forecast option selected or not
-        if checked_var == "None":
-            self.page_memory["models"]["forecast_days"][label_ii].hide()
+        forecast_days_combobox = self.page_memory["models"]["forecast_days"][label_ii]
+        forecast_days_combobox.clear()
+        if forecast_var == "None":
+            forecast_days_combobox.addItems(all_forecast_day_vars[:1])
+            checked_forecast_day_vars = all_forecast_day_vars[:1]
         else:
-            self.page_memory["models"]["forecast_days"][label_ii].show()
+            forecast_days_combobox.addItems(all_forecast_day_vars)
+            checked_forecast_day_vars = selected_forecast_day_vars
+        for forecast_day_ii in range(forecast_days_combobox.model().rowCount()):
+            item = forecast_days_combobox.model().item(forecast_day_ii, 0)
+            if item.text() in checked_forecast_day_vars:
+                item.setCheckState(QtCore.Qt.Checked)
+        forecast_days_combobox.updateText()
 
-        # reconnect the combobox event
-        self.page_memory["models"]["forecast"][label_ii].model().dataChanged.connect(
-            self.forecast_option_checked
+        # with None the forecast days cannot be changed, so the dropdown is disabled
+        if forecast_var == "None":
+            self.read_instance.disable_element(forecast_days_combobox, "combobox", prefix="popup")
+        else:
+            self.read_instance.enable_element(forecast_days_combobox, "combobox", prefix="popup")
+
+    def save_forecast_comboboxes(self, label_ii):
+        """
+        Save the forecast options and days checked on a model row under the data label
+        whose options the comboboxes show. Items are read by their text, as the comboboxes
+        can show fewer forecast days than the data label has (only lead day 1).
+
+        Parameters
+        ----------
+        label_ii : int
+            Row of the model.
+        """
+
+        # nothing to save if the row shows no forecast options, or if its data label is no
+        # longer in the menu (the models menu can be updated while this window is open,
+        # e.g. when an interpolation finishes)
+        model = self.forecast_data_labels.get(label_ii)
+        if (
+            (model is None)
+            or (model not in self.menu_current["models"]["forecast"])
+            or (model not in self.menu_current["models"]["forecast_days"])
+        ):
+            return
+
+        forecast_day_items = [
+            self.page_memory["models"]["forecast_days"][label_ii].model().item(item_ii, 0)
+            for item_ii in range(
+                self.page_memory["models"]["forecast_days"][label_ii].model().rowCount()
+            )
+        ]
+
+        # selected forecast option (None selects none), the others are disabled
+        # as they cannot be combined
+        forecast_combobox = self.page_memory["models"]["forecast"][label_ii]
+        selected_forecast_vars = []
+        if forecast_combobox.currentText() != "None":
+            selected_forecast_vars = [forecast_combobox.currentText()]
+        disabled_forecast_vars = [
+            forecast_var
+            for forecast_var in self.menu_current["models"]["forecast"][model][0]
+            if selected_forecast_vars and (forecast_var not in selected_forecast_vars)
+        ]
+        # forecast days are only kept when a forecast option is selected. Days saved before
+        # that are not shown now (only lead day 1 is shown while the interpolated version
+        # without forecast days is checked) are kept, so they are back when all days are shown
+        selected_forecast_day_vars = []
+        if selected_forecast_vars:
+            shown_forecast_day_vars = [item.text() for item in forecast_day_items]
+            checked_forecast_day_vars = [
+                item.text()
+                for item in forecast_day_items
+                if item.checkState() == QtCore.Qt.Checked
+            ]
+            saved_forecast_day_vars = self.menu_current["models"]["forecast_days"][model][1]
+            selected_forecast_day_vars = [
+                forecast_day_var
+                for forecast_day_var in self.menu_current["models"]["forecast_days"][model][0]
+                if (forecast_day_var in checked_forecast_day_vars)
+                or (
+                    (forecast_day_var not in shown_forecast_day_vars)
+                    and (forecast_day_var in saved_forecast_day_vars)
+                )
+            ]
+
+        self.menu_current["models"]["forecast"][model][1] = selected_forecast_vars
+        self.menu_current["models"]["forecast"][model][2] = disabled_forecast_vars
+        self.menu_current["models"]["forecast_days"][model][1] = selected_forecast_day_vars
+
+    def forecast_option_changed(self, forecast_var):
+        """
+        Update the forecast days of a model row when its forecast option changes: only lead
+        day 1 (checked and disabled) when None is selected, or all the forecast days when
+        changing from None to a forecast option. The days checked are kept when changing
+        between forecast options.
+
+        Parameters
+        ----------
+        forecast_var : str
+            Forecast option selected (e.g. 'day', or 'None').
+        """
+
+        label_ii = int(self.sender().objectName().split("_")[1])
+        forecast_days_combobox = self.page_memory["models"]["forecast_days"][label_ii]
+
+        # the forecast days dropdown is disabled while None is selected
+        showing_none_days = not forecast_days_combobox.isEnabled()
+        if (forecast_var != "None") and (not showing_none_days):
+            return
+
+        # refill the forecast days, checking the ones saved for the model
+        _, _, all_forecast_day_vars = self.get_forecast_options(label_ii)
+        model = self.forecast_data_labels.get(label_ii)
+        selected_forecast_day_vars = []
+        if (model is not None) and (model in self.menu_current["models"]["forecast_days"]):
+            selected_forecast_day_vars = self.menu_current["models"]["forecast_days"][model][1]
+        self.fill_forecast_days_combobox(
+            label_ii, forecast_var, all_forecast_day_vars, selected_forecast_day_vars
         )
 
     def closeEvent(self, event):
@@ -2065,87 +3266,33 @@ class PopUpWindow(QtWidgets.QWidget):
                                 )
 
                 elif menu_type == "models":
-                    if element == "keep_selected":
+                    # do not save the models page if its rows no longer match the models listed
+                    if self.models_list_changed():
+                        break
+                    # save the models checked for each model type
+                    if element in ["interpolated", "gridded"]:
                         selected_vars = []
+
                         # iterate through models
                         for checkbox_ii, checkbox in enumerate(
                             self.page_memory[menu_type][element]
                         ):
-                            # get model name
-                            model_raw = self.menu_current[menu_type]["map_vars"][
+                            # model is not checked in this mode, nothing to save
+                            if checkbox.checkState() != QtCore.Qt.Checked:
+                                continue
+
+                            # get model name on the row
+                            model_id = self.menu_current[menu_type]["map_vars"][
                                 checkbox_ii
                             ]
-                            model = copy.deepcopy(model_raw)
-                            if model not in self.menu_current[menu_type]["forecast"]:
-                                if model in self.read_instance.init_models:
-                                    model = self.read_instance.init_models[model]
+                            selected_vars.append(model_id)
 
-                            # check if model is checked
-                            if checkbox.checkState() == QtCore.Qt.Checked:
-                                # append checked model
-                                selected_vars.append(model_raw)
-                                # get current selected and disabled forecast variables for model
-                                if model in self.menu_current[menu_type]["forecast"]:
-                                    all_forecast_vars = self.menu_current[menu_type][
-                                        "forecast"
-                                    ][model][0]
-                                    all_forecast_day_vars = self.menu_current[
-                                        menu_type
-                                    ]["forecast_days"][model][0]
-                                    selected_forecast_vars = []
-                                    disabled_forecast_vars = []
-                                    selected_forecast_day_vars = []
-                                    # iterate through forecast options
-                                    for forecast_ii, forecast_var in enumerate(
-                                        all_forecast_vars
-                                    ):
-                                        item = (
-                                            self.page_memory[menu_type]["forecast"][
-                                                checkbox_ii
-                                            ]
-                                            .model()
-                                            .item(forecast_ii, 0)
-                                        )
-                                        # check if forecast option is checked
-                                        if item.checkState() == QtCore.Qt.Checked:
-                                            # append forecast option
-                                            selected_forecast_vars.append(forecast_var)
-                                            # iterate through forecast days
-                                            for (
-                                                forecast_day_ii,
-                                                forecast_day_var,
-                                            ) in enumerate(all_forecast_day_vars):
-                                                item_day = (
-                                                    self.page_memory[menu_type][
-                                                        "forecast_days"
-                                                    ][checkbox_ii]
-                                                    .model()
-                                                    .item(forecast_day_ii, 0)
-                                                )
-                                                # check if forecast day is checked
-                                                if (
-                                                    item_day.checkState()
-                                                    == QtCore.Qt.Checked
-                                                ):
-                                                    # append forecast day
-                                                    selected_forecast_day_vars.append(
-                                                        forecast_day_var
-                                                    )
+                        # save selected models for this mode
+                        self.menu_current[menu_type]["keep_selected"][
+                            element
+                        ] = selected_vars
 
-                                        if not (item.flags() & QtCore.Qt.ItemIsEnabled):
-                                            disabled_forecast_vars.append(forecast_var)
-                                    # save selected forecast variables
-                                    self.menu_current[menu_type]["forecast"][model][
-                                        1
-                                    ] = selected_forecast_vars
-                                    # save disabled forecast variables
-                                    self.menu_current[menu_type]["forecast"][model][
-                                        2
-                                    ] = disabled_forecast_vars
-                                    # save selected forecast day variables
-                                    self.menu_current[menu_type]["forecast_days"][
-                                        model
-                                    ][1] = selected_forecast_day_vars
-
-                        # save selected models
-                        self.menu_current[menu_type][element] = selected_vars
+                    # save the forecast options and days checked on each model row
+                    elif element == "forecast":
+                        for label_ii in range(len(self.page_memory[menu_type]["forecast"])):
+                            self.save_forecast_comboboxes(label_ii)

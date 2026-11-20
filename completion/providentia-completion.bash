@@ -24,9 +24,15 @@ _providentia_complete() {
         local prefix="${cur%%=*}="
         local value="${cur#*=}"
         local matches=()
+        # Two separate -name tests (ANDed by find) rather than one
+        # "${value}*.conf" pattern: once $value has already reached into the
+        # ".conf" extension (e.g. typed/completed up to "station.c"), a single
+        # concatenated pattern would require a *second* ".conf" after that,
+        # which no real filename can satisfy - completion would silently stop
+        # matching right as the user gets close to finishing the name.
         while IFS= read -r -d '' f; do
             matches+=("${prefix}$(basename "$f")")
-        done < <(find "$confdir" -maxdepth 1 -name "${value}*.conf" -print0 2>/dev/null)
+        done < <(find "$confdir" -maxdepth 1 -name "${value}*" -name "*.conf" -print0 2>/dev/null)
         COMPREPLY=("${matches[@]}")
         return
     fi
@@ -34,14 +40,18 @@ _providentia_complete() {
     COMPREPLY=()
 }
 
-# Strip '=' from word-breaks locally so --conf=<TAB> / --config=<TAB>
-# are seen as one token instead of being split on '='.
-_providentia_wrapper() {
-    local old_wordbreaks="$COMP_WORDBREAKS"
-    COMP_WORDBREAKS="${COMP_WORDBREAKS//=/}"
-    _providentia_complete
-    COMP_WORDBREAKS="$old_wordbreaks"
-}
+# Strip '=' from word-breaks globally (once) so --conf=<TAB> / --config=<TAB>
+# are seen as one token instead of being split on '='. This must NOT be
+# toggled per-call from inside the completion function: bash inserts the
+# completed match into the line *after* the function returns, using
+# whatever COMP_WORDBREAKS holds at that point. Restoring the old value
+# before returning (as a previous version of this script did) makes that
+# insertion split on '=' again, which replaces only the fragment after the
+# last '=' and duplicates the "--conf=" prefix in the result. Default
+# COMP_WORDBREAKS on Linux includes '=', so this bit silently mangled every
+# completion there; it happened to be masked on Mac because the reporter's
+# terminal runs zsh, which never executes this file at all.
+COMP_WORDBREAKS="${COMP_WORDBREAKS//=/}"
 
-complete -F _providentia_wrapper -o nospace ./bin/providentia
-complete -F _providentia_wrapper -o nospace providentia
+complete -F _providentia_complete -o nospace ./bin/providentia
+complete -F _providentia_complete -o nospace providentia

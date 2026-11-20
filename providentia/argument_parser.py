@@ -57,6 +57,13 @@ class ProvArgumentParser(object):
                 help="run Providentia dashboard",
             )
             self.parser.add_argument(
+                "--website",
+                dest="website",
+                default=False,
+                action="store_true",
+                help="run Providentia website and its backend on this machine",
+            )
+            self.parser.add_argument(
                 "-V",
                 "--version",
                 action="version",
@@ -293,6 +300,11 @@ class ProvArgumentParser(object):
                 help="map extent for plots involving any maps",
             )
             self.parser.add_argument(
+                "--map_grid_forecast_lead_days",
+                dest="map_grid_forecast_lead_days",
+                help="lead days averaged on the map grid, from the ones loaded (e.g. '2, 4' or 'day2, day4')",
+            )
+            self.parser.add_argument(
                 "--filter_species",
                 dest="filter_species",
                 help="filter read species by other species within a given data range",
@@ -318,7 +330,22 @@ class ProvArgumentParser(object):
                 help="remove extreme stations using defined statistic limits",
             )
             self.parser.add_argument(
-                "--report_type", dest="report_type", help="define plot options"
+                "--report_plots",
+                dest="report_plots",
+                help="plots to make in the report - a single named preset "
+                "(e.g. standard, looked up in report_plots.yaml) or a list "
+                "of plots given directly (e.g. timeseries,distribution-r)",
+            )
+            self.parser.add_argument(
+                "--report_type",
+                dest="report_type",
+                help="deprecated alias for report_plots",
+            )
+            self.parser.add_argument(
+                "--plots",
+                dest="plots",
+                help="plots to make - for dashboard_plots (first 4 used) "
+                "or report_plots, whichever is not otherwise set",
             )
             self.parser.add_argument(
                 "--report_summary",
@@ -347,9 +374,14 @@ class ProvArgumentParser(object):
                 help="harmonise axes limits across stations for stations report",
             )
             self.parser.add_argument(
+                "--dashboard_plots",
+                dest="dashboard_plots",
+                help="plots on dashboard upon launch",
+            )
+            self.parser.add_argument(
                 "--active_dashboard_plots",
                 dest="active_dashboard_plots",
-                help="active plots on dashboard upon launch",
+                help="deprecated alias for dashboard_plots",
             )
             self.parser.add_argument(
                 "--resampling_resolution",

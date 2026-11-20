@@ -46,6 +46,14 @@ Under this section, to the furthest left there are four drop-down menus and two 
 
 Once the time period had been updated the drop-down menus will update to show the available observational data providers (network), temporal resolutions, matrix (type of observations), and species. Select the desired fields from each menu.
 
+If the network that was selected has no data in the new time period, a message is shown, no network is selected and the **READ** button is disabled until one is chosen from the network menu. The temporal resolutions menu always lists every resolution that has data in the time period, and the network menu only lists the networks that have data for the selected resolution, matrix and species. If the start date is not before the end date, or there is no data at all in the time period, the network and resolution menus are emptied and the **READ** button is disabled until the dates are corrected. The same happens if every option of the network, matrix or species menu is unticked. Hover over the disabled **READ** button to see the reason.
+
+The GHOST version menu, first in the Observations section, is always enabled: the GHOST networks in the network menu are those with data for the selected GHOST version.
+
+The matrix and species menus do not depend on the data: they list the matrices and species of the species reference of Providentia (see [Available species](Available-species.md)), whatever the GHOST version, and the species menu only shows the species of the ticked matrices.
+
+When the GHOST version changes in its menu, its GHOST standards are used from then on (species, units and limits, QA and flags). The **QA** and **FLAGS** windows list the items of that version, starting again from its default selection. When **READ** is clicked with GHOST networks, if a selected species is not in that version, a message says so, it is unticked and the other species are read. If none of the selected species is in that version, nothing is read until a different GHOST version (or species) is selected.
+
 Next, there are four pop-up menus:
 * **QA** contains the GHOST quality assurance flags to filter observations by, as explained in [QA](QA-filtering.md).
 * **FLAGS** contain standardised data reporter provided flags to filter observations by, as explained in [Flags](QA-filtering.md).
@@ -89,6 +97,14 @@ See here for more detailed information: [Period filtering](periods)
 ![meta](uploads/meta.png)
 
 The **METADATA** button opens a pop-up menu allows the user to filter stations on the map by a variety of metadata variables. See here for more detailed information: [Metadata filtering](filtering_metadata)
+
+#### Searching for a field
+
+The pop-up menus opened by **QA**, **FLAGS**, **MODELS**, **COVERAGE**, **PERIOD** and **METADATA** each have a search box beside their buttons. Typing in it leaves only the fields matching what has been typed, and emptying it brings the rest back. Case, spaces, underscores and dashes are ignored, so `station name`, `Station_Name` and `stationname` all find the same field, and a small typo will still find what was meant when nothing matches exactly.
+
+Anything already selected or typed into a field stays as it is while searching, whether or not the field is on screen. The **Select All**, **Clear All** and **Select Default** buttons apply to the fields the search has left showing, so they can be used to select a group of fields at once.
+
+The **METADATA** menu searches the fields inside all of its metadata types rather than the type buttons themselves, listing what it finds in a second column beside them. A numeric field is shown there with its min, max and apply controls, so it can be set without opening the page it belongs to, and a text field is shown as the button onto its own page of values.
 
 ### Statistics
 
@@ -187,9 +203,25 @@ At the bottom of the settings window is a drop-down menu for plot options, where
 
 One major plot option to note is **bias**. By selecting **bias** what is plotted is the result of the model - observations (i.e. bias). On the map, rather than selecting **bias** as a plot option, it can be obtained by selecting a secondary dataset. The bias will be calculated by the two active datasets.
 
-On some plots, the plotted statistic can also be altered though the settings menu, e.g. **periodic**.
+On some plots, the plotted statistic can also be altered though the settings menu, e.g. **periodic**. On the **distribution** and **histogram**, the "Station statistic" control switches from the raw concentration distribution to the distribution of a statistic across the selected stations (e.g. each station's correlation), which needs at least 2 stations selected.
 
 See here for more information about all available [plot options](Plot-types-and-options).
+
+#### Map settings
+
+The map's settings menu has an additional three sub-menus, with the following customisation options:
+
+- **Map**: the projection, the colour preset, the land and ocean colours, the map resolution, and whether country borders and gridlines are drawn
+- **Points**: automatic point sizing, and the size and opacity of selected and unselected stations when it is turned off
+- **Colourbar**: the colourbar limits, the colourmap, whether it is drawn continuously or in sections, and the number of labels and sections
+
+Each of the three has a reset control beside its title, which returns just that panel to the settings Providentia started with.
+
+The colourmap shown is the one the statistic currently being mapped resolves to, and it changes with the statistic. Choosing one here keeps it until the statistic changes, or until the panel is reset.
+
+If gridded data is loaded, the **Forecast grid lead days** drop-down in the settings menu chooses which of the lead days read for the gridded model are averaged in the grid drawn on the map, and the legend shows the gridded square only next to them. When the gridded model is not read with a forecast option, only `1` is offered. When it is not a forecast experiment (its files are not forecast runs), the drop-down is empty and disabled, and the grid is always drawn. After reading, all lead days are checked if the models have changed, otherwise the previous selection is kept. If no lead day is checked, no grid is drawn. The drop-down is empty and disabled when no gridded data is loaded. See [Gridded data](Gridded-data.md).
+
+Changes made here apply for the session only. To change what the dashboard opens with, edit `settings/plot_characteristics.yaml` (see [Plot customisation](Plot-customisation.md)).
 
 ### Legend
 

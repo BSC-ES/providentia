@@ -1,4 +1,4 @@
-name: providentia-env_v3.1.0
+name: providentia-env_v4.0.0
 channels:
   - conda-forge
   - nodefaults
@@ -10,7 +10,10 @@ dependencies:
   - dask==2026.1.2
   - nco==5.3.6
   - pyproj==3.7.2 
-  - proj==9.7.1
+  - proj==9.7.1 
+  - openssh==10.5p1
+  - numpy==2.3.5
+  - scipy==1.17.1
   - pip
   - pip:
     - -r requirements.txt

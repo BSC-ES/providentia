@@ -43,3 +43,14 @@ available_domains:
   - regional_i01
   - regional_i02
   - regional_i03
+available_ghost_versions:
+  - '1.3'
+  - '1.4'
+  - '1.5'
+  - '1.5.1'
+  - '1.5.2'
+  - '1.6'
+available_ghost_features:
+  - min
+  - med
+  - max

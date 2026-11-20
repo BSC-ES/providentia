@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Interpolation &mdash; Providentia 3.1.0 documentation</title>
+  <title>Interpolation &mdash; Providentia 4.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=dd1205ac"></script>
+      <script src="_static/documentation_options.js?v=3304f9e4"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -76,8 +76,10 @@
 <li class="toctree-l1"><a class="reference internal" href="Colocation.html">Colocation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Filtering.html">Filtering</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Forecast.html">Forecast</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Gridded-data.html">Gridded data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Statistics.html">Statistics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Skills.html">Skills</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
@@ -114,7 +116,7 @@
   <section class="tex2jax_ignore mathjax_ignore" id="interpolation">
 <h1>Interpolation<a class="headerlink" href="#interpolation" title="Link to this heading"></a></h1>
 <p>This mode allows users to spatially interpolate model output against available observational stations, allowing it to be subsequently evaluated in <strong>Providentia</strong>.</p>
-<p>Interpolation consists of spatially interpolating gridded model outputs to observational station locations using a nearest-neighbour approach.</p>
+<p>Interpolation consists of spatially interpolating gridded model outputs to observational station locations using a nearest-neighbour approach. Stations without a valid longitude or latitude in the observational file are skipped, and listed in the interpolation log.</p>
 <p>The Interpolation mode allows to interpolate models against <strong>GHOST</strong> and <strong>non-GHOST</strong> observations.</p>
 <section id="getting-started">
 <h2>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h2>
@@ -155,6 +157,15 @@ Be aware that this can be demanding on the computer, so ensure your machine has 
 <p>When checking if an model is stored in a location with the corresponding domain, resolution, and species, consider that the species might not always be listed under the same name.</p>
 <p>The file <code class="docutils literal notranslate"><span class="pre">settings/mapping_species.yaml</span></code> contains a dictionary mapping original species names to their alternative names.</p>
 <p>Note that the mapping species file is only used when the species name from the configuration file is not found in the expected location, meaning Povidentia first looks for the species written in the configuration file. If it is not found, it then searches for the corresponding mapped species in <code class="docutils literal notranslate"><span class="pre">mapping_species.yaml</span></code>.</p>
+</section>
+<section id="interpolating-between-species">
+<span id="interpolation-between-species"></span><h4>Interpolating between species<a class="headerlink" href="#interpolating-between-species" title="Link to this heading"></a></h4>
+<p>A model species can be interpolated to the stations of a different observational species, by joining the two with <code class="docutils literal notranslate"><span class="pre">&#64;</span></code> in <code class="docutils literal notranslate"><span class="pre">species</span></code>, as <code class="docutils literal notranslate"><span class="pre">model_species&#64;observational_species</span></code>. For example, to interpolate modelled 2m temperature to the stations measuring ozone:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">species</span> <span class="o">=</span> <span class="n">t2</span><span class="nd">@sconco3</span>
+</pre></div>
+</div>
+<p>Both species in a pair must be valid - if either is not, the whole pair is removed with a warning.</p>
+<p>In the <a class="reference internal" href="Download.html"><span class="doc std std-doc">Download mode</span></a>, a defined pair downloads the observations of the observational species and the model data of the model species automatically.</p>
 </section>
 <section id="different-temporal-resolutions-between-observations-and-model">
 <h4>Different temporal resolutions between observations and model<a class="headerlink" href="#different-temporal-resolutions-between-observations-and-model" title="Link to this heading"></a></h4>

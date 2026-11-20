@@ -6,6 +6,7 @@ import yaml
 from netCDF4 import Dataset
 import numpy as np
 import pandas as pd
+import shutil
 
 from .warnings_prv import show_message
 
@@ -168,20 +169,38 @@ class ICAP(object):
             else self.download_instance.resolution
         )
         
-        # get the domain from the yaml file
+        # get the resolution from the yaml file
         correct_resolution = self.icap_fixed_values["resolution"]
 
         final_resolution_list = []
+
+        resolution_not_found = False
 
         # check if the resolution is the correct one for the dataset
         for resolution in resolution_list:
             if correct_resolution == resolution:
                 final_resolution_list.append(resolution)
             else:
-                msg = f"The current resolution '{resolution}' is not valid. It must be '{correct_resolution}'."
-                show_message(
-                    self.download_instance, msg
-                )
+                if not resolution_not_found:
+                    while True:
+                        user_resolution = input(
+                        f"\nNo non-interpolated model data is available for {resolution} resolution. "
+                        f"Available temporal resolution for this model: {correct_resolution}. "
+                        f"Please specify the desired resolution or press Enter to automatically select "
+                        f"'{correct_resolution}'. "
+                        f"Otherwise enter 'n' if you do not want to download this model at another resolution. "
+                        ).lower()
+
+                        if (user_resolution == correct_resolution or user_resolution in ["", "n"]):
+                            if user_resolution == "":
+                                final_resolution_list.append(correct_resolution)
+                            elif user_resolution != "n":
+                                final_resolution_list.append(user_resolution)
+
+                            # block input from the user happening again
+                            resolution_not_found = True
+
+                            break  
 
         return final_resolution_list
 
@@ -213,6 +232,7 @@ class ICAP(object):
         # make sure that species is either od550du or related
         for species in self.download_instance.species:
             if species == correct_species or species in mapping_species_keys:
+                # add the correct one because it will always be od550du even if it is aero
                 final_species_list.append(correct_species)
             else:
                 msg = f"The species '{species}' is not available in ICAP-MME."
@@ -597,6 +617,10 @@ class ICAP(object):
                         temp_path = self.download(mod_id, files_to_download_dict["temp_dir"], date)
                 
                         self.format_data(temp_path, local_dir, nc_file, species)
+
+                # remove the temp directory tail
+                if os.path.exists(files_to_download_dict["temp_dir"]):
+                    shutil.rmtree(files_to_download_dict["temp_dir"])
 
         else:
             # tell the user if not valid resolution specie date combinations

@@ -3,20 +3,20 @@
 #SBATCH --job-name=PRVI                                         
 #SBATCH --ntasks=1                                                
 #SBATCH --output=logs/interpolation/submission_logs/%J.out
-#SBATCH --error=/dev/null
+#SBATCH --error=logs/interpolation/submission_logs/%J.err
 #SBATCH --account=bsc32
 #SBATCH --qos=gp_bsces
 
 # load modules from conda environment
-module load Miniconda3/24.7.1-0
+module load Miniconda3/26.1.1-1
 eval "$(conda shell.bash hook)"
 conda config --set env_prompt '($(basename {default_env})) '
 if ! { conda config --show-sources | grep '/gpfs/projects/bsc32/repository/apps/conda_envs/'; } >/dev/null 2>&1; then
     conda config --append envs_dirs /gpfs/projects/bsc32/repository/apps/conda_envs/
 fi
-if { conda env list | grep 'providentia-env_v3.1.0'; } >/dev/null 2>&1; then 
-    echo "INFO: Activating conda environment in /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.1.0..."
-    conda activate providentia-env_v3.1.0
+if { conda env list | grep 'providentia-env_v4.0.0'; } >/dev/null 2>&1; then 
+    echo "INFO: Activating conda environment in /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v4.0.0..."
+    conda activate providentia-env_v4.0.0
 else 
     echo "ERROR: Environment not found in /gpfs/projects/bsc32/repository/apps/conda_envs/, contact the developers."
 fi

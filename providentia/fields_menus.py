@@ -5,7 +5,6 @@ import copy
 import numpy as np
 import pandas as pd
 
-
 def init_flags(instance):
     """
     Initialise the internal dictionary structure and default values for network quality assurance flags.
@@ -61,7 +60,7 @@ def init_qa(instance):
         instance.qa_menu["select_buttons"] = ["all", "clear", "default"]
 
     # reset fields
-    if instance.network == ["actris/actris"]:
+    if "actris/actris" in instance.network:
         qa_labels = {
             "Invalid Data Provider Flags - GHOST Decreed": 6,
             "Invalid Data Provider Flags - Network Decreed": 7,
@@ -99,7 +98,16 @@ def init_models(instance):
 
     # reset fields
     instance.models_menu["models"]["labels"] = []
-    instance.models_menu["models"]["keep_selected"] = []
+    instance.models_menu["models"]["keep_selected"] = {
+        "interpolated": [],
+        "gridded": [],
+        "run": []
+    }
+    instance.models_menu["models"]["enabled"] = {
+        "interpolated": {},
+        "gridded": {},
+        "run": []
+    }
     instance.models_menu["models"]["forecast"] = {}
     instance.models_menu["models"]["forecast_days"] = {}
     instance.models_menu["models"]["map_vars"] = []
@@ -367,7 +375,7 @@ def update_qa(instance):
     """
 
     # reset fields
-    if instance.selected_network == "actris/actris":
+    if "actris/actris" in instance.selected_network:
         qa_labels = {
             "Invalid Data Provider Flags - GHOST Decreed": 6,
             "Invalid Data Provider Flags - Network Decreed": 7,
@@ -381,6 +389,24 @@ def update_qa(instance):
     instance.qa_menu["checkboxes"]["remove_default"] = np.array([], dtype=np.uint8)
     instance.qa_menu["checkboxes"]["remove_selected"] = np.array([], dtype=np.uint8)
     instance.qa_menu["checkboxes"]["map_vars"] = np.sort(list(qa_map_vars))
+
+
+def update_flags(instance):
+    """
+    Update the flag menu labels and mappings (e.g. with the codes of another GHOST version).
+
+    Parameters
+    ----------
+    instance : object
+        An object instance to be updated with flag menu configurations.
+    """
+
+    # reset fields
+    flag_codes = instance.standard_data_flag_name_to_data_flag_code
+    instance.flag_menu["checkboxes"]["labels"] = np.array(sorted(flag_codes, key=flag_codes.get))
+    instance.flag_menu["checkboxes"]["remove_default"] = np.array([], dtype=np.uint8)
+    instance.flag_menu["checkboxes"]["remove_selected"] = np.array([], dtype=np.uint8)
+    instance.flag_menu["checkboxes"]["map_vars"] = np.sort(list(flag_codes.values()))
 
 
 def update_coverage_fields(instance):
@@ -540,7 +566,7 @@ def update_period_fields(instance):
                 instance.period_menu["checkboxes"]["remove_selected"].remove(label)
 
 
-def update_metadata_fields(instance):
+def update_metadata_fields(instance, cap=False):
     """
     Update metadata menu fields using metadata values currently loaded in memory.
 
@@ -562,6 +588,8 @@ def update_metadata_fields(instance):
         active network/species configuration, station-validity information, and
         standard metadata definitions. The function updates
         ``instance.metadata_menu`` in place.
+    cap: boolean, optional
+        optional boolean indicating that have capped stations. 
 
     Returns
     -------
@@ -573,8 +601,11 @@ def update_metadata_fields(instance):
     metadata_menu = instance.metadata_menu
     metadata_vars = instance.metadata_vars_to_read
     standard_metadata = instance.standard_metadata
-    metadata_in_memory = instance.metadata_in_memory
     networkspecies = instance.networkspecies
+    if cap:
+        metadata_in_memory = instance.metadata_in_memory_filtered
+    else:
+        metadata_in_memory = instance.metadata_in_memory
 
     # ------------------------------------------------------------------
     # Local helper: clean object metadata values.
@@ -677,7 +708,7 @@ def update_metadata_fields(instance):
 
     valid_indices_by_netspec = {}
 
-    if use_valid_station_inds:
+    if (use_valid_station_inds) or (cap):
         obs_label = instance.observations_data_label
 
         if instance.temporal_colocation:
@@ -722,7 +753,10 @@ def update_metadata_fields(instance):
             unique_chunks = []
 
             for netspec in networkspecies:
-                arr = metadata_in_memory[netspec][meta_var]
+                if cap:
+                    arr = metadata_in_memory[netspec][valid_indices_by_netspec[netspec], :][meta_var]
+                else:
+                    arr = metadata_in_memory[netspec][meta_var]
 
                 if use_valid_station_inds:
                     vals = _get_metadata_values(arr, valid_indices_by_netspec[netspec])
@@ -786,8 +820,11 @@ def update_metadata_fields(instance):
         current_max = None
 
         for netspec in networkspecies:
-            arr = metadata_in_memory[netspec][meta_var]
-
+            if cap:
+                arr = metadata_in_memory[netspec][valid_indices_by_netspec[netspec], :][meta_var]
+            else:
+                arr = metadata_in_memory[netspec][meta_var]
+            
             if use_valid_station_inds:
                 vals = _get_metadata_values(arr, valid_indices_by_netspec[netspec])
             else:

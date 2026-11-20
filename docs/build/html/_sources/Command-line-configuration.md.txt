@@ -17,7 +17,7 @@ However, there are some parameters that can only be set through the command line
 | `conf`, `config` | Configuration file path or configuration file name if the file is stored in `providentia/configurations`. | — |
 | `section` | Section within configuration file. | — |
 | `logfile` | Redirects output to a file. More info in the [Redirecting output to a file](Redirecting-output-to-a-file)  page. | — |
-| `n_cpus` | Number of CPUs. | `24` for interpolation, `12` for download, `1` for dashboard, library and report |
+| `n_cpus` | Number of CPUs. | `24` for interpolation, `12` for download, `2` for dashboard, library and report |
 | `time` | Requested time. | `02:00:00` |
 | `jobname` | Job name. | `PRV` |
 | `queue` | Job queue. | `debug` |
@@ -42,7 +42,7 @@ The final value used would be `EBAS`.
 To provide a parameter with multiple values, do not include spaces between them. For example:
 
 ```
-./bin/providentia --active_dashboard_plots=timeseries,metadata,periodic-violin,boxplot
+./bin/providentia --plots=timeseries,metadata,periodic-violin,boxplot
 ```
 
 To specify a subsection, add the name of the parent section followed by an interpunct (·) before the subsection name, like in:

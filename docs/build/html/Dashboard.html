@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard &mdash; Providentia 3.1.0 documentation</title>
+  <title>Dashboard &mdash; Providentia 4.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=dd1205ac"></script>
+      <script src="_static/documentation_options.js?v=3304f9e4"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -79,8 +79,10 @@
 <li class="toctree-l1"><a class="reference internal" href="Colocation.html">Colocation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Filtering.html">Filtering</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Forecast.html">Forecast</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Gridded-data.html">Gridded data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Statistics.html">Statistics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Skills.html">Skills</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
@@ -151,6 +153,10 @@ If more than one section is defined, a pop-up will appear asking you to select t
 <p><img alt="providentia" src="_images/dashboard_dataselection.png" /></p>
 <p>Under this section, to the furthest left there are four drop-down menus and two rangeboxes. The rangeboxes will contain a default start date and end date (in the format YYYYMMDD). Change these if you wish to analyse a different time period.</p>
 <p>Once the time period had been updated the drop-down menus will update to show the available observational data providers (network), temporal resolutions, matrix (type of observations), and species. Select the desired fields from each menu.</p>
+<p>If the network that was selected has no data in the new time period, a message is shown, no network is selected and the <strong>READ</strong> button is disabled until one is chosen from the network menu. The temporal resolutions menu always lists every resolution that has data in the time period, and the network menu only lists the networks that have data for the selected resolution, matrix and species. If the start date is not before the end date, or there is no data at all in the time period, the network and resolution menus are emptied and the <strong>READ</strong> button is disabled until the dates are corrected. The same happens if every option of the network, matrix or species menu is unticked. Hover over the disabled <strong>READ</strong> button to see the reason.</p>
+<p>The GHOST version menu, first in the Observations section, is always enabled: the GHOST networks in the network menu are those with data for the selected GHOST version.</p>
+<p>The matrix and species menus do not depend on the data: they list the matrices and species of the species reference of Providentia (see <a class="reference internal" href="Available-species.html"><span class="std std-doc">Available species</span></a>), whatever the GHOST version, and the species menu only shows the species of the ticked matrices.</p>
+<p>When the GHOST version changes in its menu, its GHOST standards are used from then on (species, units and limits, QA and flags). The <strong>QA</strong> and <strong>FLAGS</strong> windows list the items of that version, starting again from its default selection. When <strong>READ</strong> is clicked with GHOST networks, if a selected species is not in that version, a message says so, it is unticked and the other species are read. If none of the selected species is in that version, nothing is read until a different GHOST version (or species) is selected.</p>
 <p>Next, there are four pop-up menus:</p>
 <ul class="simple">
 <li><p><strong>QA</strong> contains the GHOST quality assurance flags to filter observations by, as explained in <a class="reference internal" href="QA-filtering.html"><span class="std std-doc">QA</span></a>.</p></li>
@@ -186,6 +192,12 @@ If more than one section is defined, a pop-up will appear asking you to select t
 <p><img alt="meta" src="_images/meta.png" /></p>
 <p>The <strong>METADATA</strong> button opens a pop-up menu allows the user to filter stations on the map by a variety of metadata variables. See here for more detailed information: <a class="reference internal" href="Filtering.html#filtering-metadata"><span class="std std-ref">Metadata filtering</span></a></p>
 </section>
+</section>
+<section id="searching-for-a-field">
+<h4>Searching for a field<a class="headerlink" href="#searching-for-a-field" title="Link to this heading"></a></h4>
+<p>The pop-up menus opened by <strong>QA</strong>, <strong>FLAGS</strong>, <strong>MODELS</strong>, <strong>COVERAGE</strong>, <strong>PERIOD</strong> and <strong>METADATA</strong> each have a search box beside their buttons. Typing in it leaves only the fields matching what has been typed, and emptying it brings the rest back. Case, spaces, underscores and dashes are ignored, so <code class="docutils literal notranslate"><span class="pre">station</span> <span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">Station_Name</span></code> and <code class="docutils literal notranslate"><span class="pre">stationname</span></code> all find the same field, and a small typo will still find what was meant when nothing matches exactly.</p>
+<p>Anything already selected or typed into a field stays as it is while searching, whether or not the field is on screen. The <strong>Select All</strong>, <strong>Clear All</strong> and <strong>Select Default</strong> buttons apply to the fields the search has left showing, so they can be used to select a group of fields at once.</p>
+<p>The <strong>METADATA</strong> menu searches the fields inside all of its metadata types rather than the type buttons themselves, listing what it finds in a second column beside them. A numeric field is shown there with its min, max and apply controls, so it can be set without opening the page it belongs to, and a text field is shown as the button onto its own page of values.</p>
 </section>
 </section>
 <section id="statistics">
@@ -263,8 +275,21 @@ If more than one section is defined, a pop-up will appear asking you to select t
 <p><img alt="providentia" src="_images/dashboard_plotoptions.png" /></p>
 <p>At the bottom of the settings window is a drop-down menu for plot options, where by selecting one or more of these options you can dramatically alter the plot in some way.</p>
 <p>One major plot option to note is <strong>bias</strong>. By selecting <strong>bias</strong> what is plotted is the result of the model - observations (i.e. bias). On the map, rather than selecting <strong>bias</strong> as a plot option, it can be obtained by selecting a secondary dataset. The bias will be calculated by the two active datasets.</p>
-<p>On some plots, the plotted statistic can also be altered though the settings menu, e.g. <strong>periodic</strong>.</p>
+<p>On some plots, the plotted statistic can also be altered though the settings menu, e.g. <strong>periodic</strong>. On the <strong>distribution</strong> and <strong>histogram</strong>, the “Station statistic” control switches from the raw concentration distribution to the distribution of a statistic across the selected stations (e.g. each station’s correlation), which needs at least 2 stations selected.</p>
 <p>See here for more information about all available <a class="reference internal" href="Plot-types-and-options.html"><span class="doc std std-doc">plot options</span></a>.</p>
+<section id="map-settings">
+<h4>Map settings<a class="headerlink" href="#map-settings" title="Link to this heading"></a></h4>
+<p>The map’s settings menu has an additional three sub-menus, with the following customisation options:</p>
+<ul class="simple">
+<li><p><strong>Map</strong>: the projection, the colour preset, the land and ocean colours, the map resolution, and whether country borders and gridlines are drawn</p></li>
+<li><p><strong>Points</strong>: automatic point sizing, and the size and opacity of selected and unselected stations when it is turned off</p></li>
+<li><p><strong>Colourbar</strong>: the colourbar limits, the colourmap, whether it is drawn continuously or in sections, and the number of labels and sections</p></li>
+</ul>
+<p>Each of the three has a reset control beside its title, which returns just that panel to the settings Providentia started with.</p>
+<p>The colourmap shown is the one the statistic currently being mapped resolves to, and it changes with the statistic. Choosing one here keeps it until the statistic changes, or until the panel is reset.</p>
+<p>If gridded data is loaded, the <strong>Forecast grid lead days</strong> drop-down in the settings menu chooses which of the lead days read for the gridded model are averaged in the grid drawn on the map, and the legend shows the gridded square only next to them. When the gridded model is not read with a forecast option, only <code class="docutils literal notranslate"><span class="pre">1</span></code> is offered. When it is not a forecast experiment (its files are not forecast runs), the drop-down is empty and disabled, and the grid is always drawn. After reading, all lead days are checked if the models have changed, otherwise the previous selection is kept. If no lead day is checked, no grid is drawn. The drop-down is empty and disabled when no gridded data is loaded. See <a class="reference internal" href="Gridded-data.html"><span class="std std-doc">Gridded data</span></a>.</p>
+<p>Changes made here apply for the session only. To change what the dashboard opens with, edit <code class="docutils literal notranslate"><span class="pre">settings/plot_characteristics.yaml</span></code> (see <a class="reference internal" href="Plot-customisation.html"><span class="std std-doc">Plot customisation</span></a>).</p>
+</section>
 </section>
 <section id="legend">
 <h3>Legend<a class="headerlink" href="#legend" title="Link to this heading"></a></h3>

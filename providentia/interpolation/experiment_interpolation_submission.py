@@ -2,7 +2,6 @@
 
 import copy
 import glob
-import math
 import multiprocessing
 import os
 import random
@@ -13,10 +12,10 @@ import time
 from netCDF4 import Dataset
 import numpy as np
 import psutil
-from pprint import pprint
+from pprint import pformat
 import yaml
 
-from providentia.auxiliar import CURRENT_PATH, join
+from providentia.auxiliar import CURRENT_PATH, file_in_date_range, join
 
 # get current path and providentia root path
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
@@ -28,6 +27,7 @@ from interpolation.aux_interp import (
     get_aeronet_bin_radius_from_bin_variable,
     get_model_bin_radii,
     check_for_ghost,
+    get_read_chunk_timesteps,
 )
 from configuration import ProvConfiguration, load_conf
 
@@ -92,11 +92,13 @@ class SubmitInterpolation(object):
                 load_conf(self, self.config)
                 self.from_conf = True
             else:
-                error = "Error: The path to the configuration file specified in the command line does not exist."
-                sys.exit(error)
+                msg = "Error: The path to the configuration file specified in the command line does not exist."
+                self.logger.error(msg)
+                sys.exit(1)
         else:
-            error = "Error: No configuration file found. The path to the config file must be added as an argument."
-            sys.exit(error)
+            msg = "Error: No configuration file found. The path to the config file must be added as an argument."
+            self.logger.error(msg)
+            sys.exit(1)
 
         # update variables from config file
         if self.config != "":
@@ -159,14 +161,20 @@ class SubmitInterpolation(object):
             for k, val in self.section_opts.items():
                 # n_cpus is always passed via command line, either as default or explicit,
                 # only read n_cpus from conf if it was not explicitly defined in command line
-                if ((k not in self.commandline_arguments) 
-                    or (k == "n_cpus" and self.commandline_arguments['n_cpus_explicit'] == 'false')):
+                if (k not in self.commandline_arguments) or (
+                    k == "n_cpus"
+                    and self.commandline_arguments["n_cpus_explicit"] == "false"
+                ):
                     setattr(self, k, self.provconf.parse_parameter(k, val))
-            
+
             # if n_cpus are defined in configuration file, consider as explicit
             if "n_cpus" in self.section_opts.keys():
-                setattr(self, "n_cpus_explicit", self.provconf.parse_parameter("n_cpus_explicit", True))
-            
+                setattr(
+                    self,
+                    "n_cpus_explicit",
+                    self.provconf.parse_parameter("n_cpus_explicit", True),
+                )
+
             # now all variables have been parsed, check validity of those, throwing errors where necessary
             self.provconf.check_validity()
 
@@ -271,6 +279,10 @@ class SubmitInterpolation(object):
 
         # iterate through desired model IDs and its types
         for mod_dom_ens, alias in models.items():
+            # skip gridded models
+            if "gridded" in mod_dom_ens:
+                continue
+            
             model_to_process, grid_type, ensemble = mod_dom_ens.split("-")
 
             print("\nMODEL: {0}\n".format(alias))
@@ -372,6 +384,10 @@ class SubmitInterpolation(object):
 
                         # before proceeding check if have already processed jobs for the model-grid_type/species/temporal_resolution_to_output pairing before
                         # if so, continue to next species
+                        # the model species (arg_list[2]) is not compared: it is stored after mapping
+                        # (e.g. od550aero -> od550du), while mod_speci_to_process is not mapped yet here,
+                        # so they would never match and jobs would also be added for coarser model resolutions;
+                        # the species from the configuration (arg_list[6]) is enough to know it was processed
                         processed_species = False
                         for arg in self.arguments:
                             arg_list = arg.split(" ")
@@ -380,7 +396,6 @@ class SubmitInterpolation(object):
                                     "-".join(arg_list[0].split("-")[:2])
                                     == "{}-{}".format(model_to_process, grid_type)
                                 )
-                                & (arg_list[2] == mod_speci_to_process)
                                 & (arg_list[4] == temporal_resolution_to_output)
                                 & (arg_list[6] == speci_to_process)
                             ):
@@ -467,6 +482,7 @@ class SubmitInterpolation(object):
                                                     mod_speci_to_process,
                                                 )
                                                 have_valid_resolution = True
+                                                break
                                         else:
                                             mod_speci_to_process = copy.deepcopy(
                                                 speci_to_map
@@ -476,6 +492,7 @@ class SubmitInterpolation(object):
                                                 mod_speci_to_process,
                                             )
                                             have_valid_resolution = True
+                                            break
 
                         # for some variables it is possible to extract the variable information by mapping to a different variable name, with a higher dimensionality
                         # this currently is implemented for 2 cases:
@@ -528,6 +545,7 @@ class SubmitInterpolation(object):
                                                     mod_speci_to_process,
                                                 )
                                                 have_valid_resolution = True
+                                                break
                                         else:
                                             mod_speci_to_process = copy.deepcopy(
                                                 speci_to_map
@@ -537,6 +555,7 @@ class SubmitInterpolation(object):
                                                 mod_speci_to_process,
                                             )
                                             have_valid_resolution = True
+                                            break
 
                         # only proceed if have valid resolution
                         if have_valid_resolution:
@@ -695,7 +714,7 @@ class SubmitInterpolation(object):
                                                 ]
                                             )
 
-                                    # get all observational file start dates (year and month)
+                                    # get all observational file start dates (as in file name)
                                     obs_files_dates = []
                                     for obs_file in obs_files:
                                         obs_file_date = (
@@ -706,10 +725,10 @@ class SubmitInterpolation(object):
                                             .split(".nc")[0]
                                         )
                                         obs_files_dates = np.append(
-                                            obs_files_dates, obs_file_date[:6]
+                                            obs_files_dates, obs_file_date
                                         )
 
-                                    # get all model file start dates (year and month)
+                                    # get all model file start dates (as in file name)
                                     mod_files_dates = []
                                     for mod_file in mod_files:
                                         mod_file_date = (
@@ -720,27 +739,18 @@ class SubmitInterpolation(object):
                                             .split(".nc")[0]
                                         )
                                         mod_files_dates = np.append(
-                                            mod_files_dates, mod_file_date[:6]
+                                            mod_files_dates, mod_file_date
                                         )
 
-                                    # remove observational files outside date ranges
+                                    # remove observational files whose period does not overlap date range
                                     obs_files_ii = np.array(
                                         [
                                             obs_files_ii
                                             for obs_files_ii, obs_files_date in enumerate(
                                                 obs_files_dates
                                             )
-                                            if (
-                                                (
-                                                    self.start_date == "*"
-                                                    or int(obs_files_date)
-                                                    >= int(self.start_date)
-                                                )
-                                                and (
-                                                    self.end_date == "*"
-                                                    or int(obs_files_date)
-                                                    < int(self.end_date)
-                                                )
+                                            if file_in_date_range(
+                                                obs_files_date, self.start_date, self.end_date
                                             )
                                         ]
                                     )
@@ -749,26 +759,20 @@ class SubmitInterpolation(object):
                                         obs_files_dates = []
                                         continue
                                     obs_files = obs_files[obs_files_ii]
-                                    obs_files_dates = obs_files_dates[obs_files_ii]
+                                    # keep year and month only, to intersect with model
+                                    obs_files_dates = np.array(
+                                        [d[:6] for d in obs_files_dates[obs_files_ii]]
+                                    )
 
-                                    # remove model files outside date ranges
+                                    # remove model files whose period does not overlap date range
                                     mod_files_ii = np.array(
                                         [
                                             mod_files_ii
                                             for mod_files_ii, mod_files_date in enumerate(
                                                 mod_files_dates
                                             )
-                                            if (
-                                                (
-                                                    self.start_date == "*"
-                                                    or int(mod_files_date)
-                                                    >= int(self.start_date)
-                                                )
-                                                and (
-                                                    self.end_date == "*"
-                                                    or int(mod_files_date)
-                                                    < int(self.end_date)
-                                                )
+                                            if file_in_date_range(
+                                                mod_files_date, self.start_date, self.end_date
                                             )
                                         ]
                                     )
@@ -777,7 +781,10 @@ class SubmitInterpolation(object):
                                         mod_files_dates = []
                                         continue
                                     mod_files = mod_files[mod_files_ii]
-                                    mod_files_dates = mod_files_dates[mod_files_ii]
+                                    # keep year and month only, to intersect with observations
+                                    mod_files_dates = np.array(
+                                        [d[:6] for d in mod_files_dates[mod_files_ii]]
+                                    )
 
                                     # get intersection of file yearmonths between observations and model
                                     intersect_yearmonths = np.intersect1d(
@@ -865,7 +872,7 @@ class SubmitInterpolation(object):
                 msg = "\nNO INTERSECTING OBSERVATIONAL AND EXPERIMENT DATA FOR INTERPOLATION. \n"
                 if not have_valid_resolution:
                     # show paths where we have searched for data
-                    msg += f"\nSearched paths for model data: {pprint(searched_paths, width=120)}"
+                    msg += f"\nSearched paths for model data:\n{pformat(searched_paths, width=120)}"
             else:
                 msg = "\n***INTERSECTING OBSERVATIONAL AND EXPERIMENTAL DATA IS AVAILABLE FOR INTERPOLATION.***"
 
@@ -966,8 +973,6 @@ class SubmitInterpolation(object):
                    sys.executable, self.working_directory, str_to_write
                 )
             )
-            if self.machine == "nord4":
-                command = "nord3_singu_es {}".format(command)
             arguments_file.write(command)
 
             # iterate n lines written
@@ -1306,7 +1311,16 @@ class SubmitInterpolation(object):
                 )
 
     def guess_peak_RSS_per_worker(self):
-        """Get conservative estimate of peak RSS per worker in GB."""
+        """
+        Get conservative estimate of peak RSS per worker in GB.
+
+        experiment_interpolation.py reads/holds at most one memory-bounded chunk of one model
+        file's (y, x) grid at a time (see get_read_chunk_timesteps() in aux_interp.py), rather
+        than every model file for the whole job at once. So a job's payload is estimated as the
+        largest single chunk read across its model files, not their sum, and that chunk is
+        itself capped independent of file size (except for upsampling, which is read unchunked -
+        see get_read_chunk_timesteps()).
+        """
 
         # define conservative factors for estimation for peak RSS in GB
         array_overhead_factor = 1.5
@@ -1328,6 +1342,7 @@ class SubmitInterpolation(object):
             prov_mod_code = argument[0]
             model_temporal_resolution = argument[1]
             mod_speci_to_process = argument[2]
+            temporal_resolution_to_output = argument[4]
             yearmonth = argument[5]
             model_to_process, grid_type, ensemble = prov_mod_code.split("-")
             ensemble_member = ensemble.isdigit()
@@ -1358,9 +1373,29 @@ class SubmitInterpolation(object):
                 with Dataset(model_file, "r") as nc:
                     var = nc.variables[mod_speci_to_process]
                     dims = [nc.dimensions[d].size for d in var.dimensions]
-                    n_elements = math.prod(dims)
                     dtype_size = np.dtype(var.dtype).itemsize
-                    worker_payload_gb += (n_elements * dtype_size) / (1024**3)
+                    # by convention (see experiment_interpolation.py's get_model_information())
+                    # the raw variable's first dimension is time, and the last two are (y, x) -
+                    # any bin/vertical dimension in between is dropped down to a single index
+                    # before a chunk's grid slab is ever held in memory
+                    n_raw_timesteps, y_N, x_N = dims[0], dims[-2], dims[-1]
+
+                    read_chunk_timesteps = get_read_chunk_timesteps(
+                        y_N, x_N, model_temporal_resolution, temporal_resolution_to_output,
+                        dtype_size,
+                    )
+                    # None means unbounded/unchunked (upsampling): the whole file's raw
+                    # timesteps are read in one go
+                    if read_chunk_timesteps is None:
+                        chunk_timesteps = n_raw_timesteps
+                    else:
+                        chunk_timesteps = min(read_chunk_timesteps, n_raw_timesteps)
+
+                    chunk_payload_gb = (chunk_timesteps * y_N * x_N * dtype_size) / (1024**3)
+
+                    # only one file's chunk is ever resident at a time, so the job's payload is
+                    # the largest single chunk across its model files, not their sum
+                    worker_payload_gb = max(worker_payload_gb, chunk_payload_gb)
 
             # Inflate to peak RSS
             peak_worker_gb = (
@@ -1528,8 +1563,10 @@ class SubmitInterpolation(object):
 
         arguments_list = commands.strip().split()
         print(
-            "Submitting job with arguments: [{} {} {} {} {}]".format(
+            "Submitting job with arguments: [{} {} {} {} {} {} {}]".format(
                 arguments_list[3],
+                arguments_list[4],
+                arguments_list[5],
                 arguments_list[9],
                 arguments_list[6],
                 arguments_list[7],
@@ -1537,8 +1574,6 @@ class SubmitInterpolation(object):
             ),
             flush=True,
         )
-        if self.machine == "nord4":
-            arguments_list.insert(0, "nord3_singu_es")
         result = subprocess.run(arguments_list, capture_output=True, text=True)
 
         if result.returncode != 0:

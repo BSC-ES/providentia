@@ -11,6 +11,7 @@ import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join
 from .configuration import write_conf
+from .auxiliar import join_unique
 from .read_aux import get_default_qa
 from .statistics import do_resampling, merge_forecast_days
 
@@ -83,14 +84,19 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
                 networkspeci
             ][prv.observations_data_label]
 
-            # get filtered data array
-            data_array = copy.deepcopy(prv.data_in_memory_filtered[networkspeci])
+            # get filtered data array, cut immediately for valid station inds
+            # (subsetting first avoids allocating a full-size copy of the whole
+            # networkspeci array: np.take() already returns an independent
+            # array, and the temporal colocation NaN mask below only needs to
+            # be computed over the selected stations, not the whole array)
+            data_array = np.take(
+                prv.data_in_memory_filtered[networkspeci], valid_station_inds, axis=1
+            )
 
             # apply NaNs for temporal colocation
-            data_array[:, prv.temporal_colocation_nans[networkspeci]] = np.nan
-
-            # cut data array for valid station inds
-            data_array = np.take(data_array, valid_station_inds, axis=1)
+            data_array[
+                :, prv.temporal_colocation_nans[networkspeci][valid_station_inds]
+            ] = np.nan
 
             # do resampling (if set)
             if prv.resampling_resolution != "None":
@@ -109,7 +115,9 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
             )
 
             # get unfiltered data array
-            data_array = copy.deepcopy(prv.data_in_memory[networkspeci])
+            # (.copy() suffices: pure float32 data; kept independent from prv.data_in_memory
+            # since this array is handed back to the caller / written out)
+            data_array = prv.data_in_memory[networkspeci].copy()
 
             # if daily or combined forecast need to merge forecast days separated as different models in 1 tiled dimension
             if (prv.daily_forecast) or (prv.combined_forecast):
@@ -266,15 +274,10 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
 
     # set up some structural variables
     from GHOST_standards import (
-        standard_parameters,
         get_standard_data,
         standard_QA_name_to_QA_code,
         standard_data_flag_name_to_data_flag_code,
     )
-
-    parameter_dictionary = {}
-    for _, param_dict in standard_parameters.items():
-        parameter_dictionary[param_dict["bsc_parameter_name"]] = param_dict
 
     # dictionary to map python types to netcdf types
     type_map = {
@@ -307,7 +310,8 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
             var_prefix = networkspeci.replace("/", "_")
 
         # get some key variables for speci
-        parameter_details = parameter_dictionary[speci]
+        # from the species reference of Providentia, whatever the GHOST version
+        parameter_details = prv.parameter_dictionary[speci]
         metadata_format_dict = prv.standard_metadata
         data_format_dict = get_standard_data(parameter_details)
 
@@ -320,14 +324,19 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
                 networkspeci
             ][prv.observations_data_label]
 
-            # get filtered data array
-            data_array = copy.deepcopy(prv.data_in_memory_filtered[networkspeci])
+            # get filtered data array, cut immediately for valid station inds
+            # (subsetting first avoids allocating a full-size copy of the whole
+            # networkspeci array: np.take() already returns an independent
+            # array, and the temporal colocation NaN mask below only needs to
+            # be computed over the selected stations, not the whole array)
+            data_array = np.take(
+                prv.data_in_memory_filtered[networkspeci], valid_station_inds, axis=1
+            )
 
             # apply NaNs for temporal colocation
-            data_array[:, prv.temporal_colocation_nans[networkspeci]] = np.nan
-
-            # cut data array for valid station inds
-            data_array = np.take(data_array, valid_station_inds, axis=1)
+            data_array[
+                :, prv.temporal_colocation_nans[networkspeci][valid_station_inds]
+            ] = np.nan
 
             # do resampling (if set)
             if prv.resampling_resolution != "None":
@@ -346,7 +355,9 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
             )
 
             # get unfiltered data array
-            data_array = copy.deepcopy(prv.data_in_memory[networkspeci])
+            # (.copy() suffices: pure float32 data; kept independent from prv.data_in_memory
+            # since this array is handed back to the caller / written out)
+            data_array = prv.data_in_memory[networkspeci].copy()
 
             # if daily or combined forecast need to merge forecast days separated as different models in 1 tiled dimension
             if (prv.daily_forecast) or (prv.combined_forecast):
@@ -652,6 +663,84 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
 
     return True
 
+def export_basic_configuration(prv, cname, network=None, species=None, resolution=None,
+                               start_date=None, end_date=None, experiment=None,
+                               ghost_version=None):
+    """
+    Generates and writes a minimal configuration file (section DASHBOARD) containing only
+    the fields network, species, resolution, start_date, end_date and experiments.
+
+    Any field that is not passed is taken from the current state of prv.
+
+    Parameters
+    ----------
+    prv : object
+        Instance of the application (Dashboard or Library) providing current state and settings.
+    cname : str
+        The filename or path for the configuration file to be created.
+    network : list of str, optional
+        Networks to write, paired by position with species. If None, prv.network is used.
+    species : list of str, optional
+        Species to write, paired by position with network. If None, prv.species is used.
+    resolution : str, optional
+        Temporal resolution (e.g. 'hourly', 'daily'). If None, prv.resolution is used.
+    start_date : str, optional
+        Start date in 'YYYYMMDD' format. If None, prv.start_date is used.
+    end_date : str, optional
+        End date in 'YYYYMMDD' format (exclusive). If None, prv.end_date is used.
+    experiment : str, optional
+        Experiment name, coming from model to interpolate on dashboard. If None, it is built
+        from prv.experiments as a comma-separated list, followed by the aliases in brackets
+        if there are any.
+    ghost_version : str, optional
+        GHOST version of the observations. If None, prv.ghost_version is used.
+
+    Returns
+    -------
+    None
+        Writes the configuration file to `cname`.
+    """
+
+    section = "DASHBOARD"
+    subsection = None
+
+    options = {}
+    options["section"] = {}
+    options["subsection"] = {}
+
+    network = join_unique(prv.network if network is None else network)
+    species = join_unique(prv.species if species is None else species)
+    resolution = prv.resolution if resolution is None else resolution
+    start_date = prv.start_date if start_date is None else start_date
+    end_date = prv.end_date if end_date is None else end_date
+    ghost_version = prv.ghost_version if ghost_version is None else ghost_version
+
+    if experiment is None and prv.experiments:
+        mods = []
+        aliases = []
+        for mod_raw, mod in prv.experiments.items():
+            mods.append(mod_raw)
+            if mod_raw != mod:
+                aliases.append(mod)
+        experiment = ",".join(str(i) for i in mods)
+        if len(aliases) > 0:
+            alias_str = ",".join(str(i) for i in aliases)
+            experiment = "{} ({})".format(experiment, alias_str)
+
+    options["section"] = {
+        "network": network,
+        "species": species,
+        "resolution": resolution,
+        "start_date": start_date,
+        "end_date": end_date,
+        "experiments": experiment,
+        "ghost_version": ghost_version,
+    }
+
+    # write .conf file
+    write_conf(section, subsection, cname, options)
+
+    return None
 
 def export_configuration(prv, cname, separator="||"):
     """
@@ -693,7 +782,7 @@ def export_configuration(prv, cname, separator="||"):
     )
 
     # merge defaults
-    merged_defaults = init["required_init"].copy() 
+    merged_defaults = init["required_init"].copy()
     merged_defaults.update(init["empty_init"].copy())
     merged_defaults.update(defaults[prv.mode])
     merged_defaults.update(available_inputs)
@@ -719,18 +808,8 @@ def export_configuration(prv, cname, separator="||"):
     options["subsection"] = {}
 
     # default variables
-    if prv.mode in ["report", "library"]:
-        if len(np.unique(prv.network)) > 1:
-            network = ",".join(str(i) for i in prv.network)
-        else:
-            network = prv.network[0]
-        if len(np.unique(prv.species)) > 1:
-            species = ",".join(str(i) for i in prv.species)
-        else:
-            species = prv.species[0]
-    else:
-        network = prv.network[0]
-        species = prv.species[0]
+    network = join_unique(prv.network)
+    species = join_unique(prv.species)
 
     options["section"] = {
         "network": network,
@@ -914,10 +993,22 @@ def export_configuration(prv, cname, separator="||"):
             options["section"]["map_extent"] = ",".join(str(i) for i in prv.map_extent)
 
     # active dashboard plots
-    if prv.active_dashboard_plots != merged_defaults["active_dashboard_plots"]:
-        options["section"]["active_dashboard_plots"] = ",".join(
-            str(i) for i in prv.active_dashboard_plots
+    if prv.dashboard_plots != merged_defaults["dashboard_plots"]:
+        options["section"]["dashboard_plots"] = ",".join(
+            str(i) for i in prv.dashboard_plots
         )
+
+    # report plots (a single named preset, e.g. "standard", or a list of
+    # plots given directly - either way always a list by this point, see
+    # ProvConfiguration.parse_parameter())
+    if prv.report_plots and (prv.report_plots != merged_defaults["report_plots"]):
+        options["section"]["report_plots"] = ",".join(
+            str(i) for i in prv.report_plots
+        )
+
+    # generic plots (same shape as report_plots/dashboard_plots above)
+    if prv.plots and (prv.plots != merged_defaults["plots"]):
+        options["section"]["plots"] = ",".join(str(i) for i in prv.plots)
 
     # plot_characteristics_filename
     if (

@@ -179,23 +179,9 @@ It is also possible that the default branch is not set to be the master, you can
 
 ## Run tests
 
-To run all the pipeline tests in your local machine and read the data from the folder `tests/data`, first, you will need to change your `get_machine()` function in `auxiliar.py` to this:
+The tests read the data from the folder `tests/data`, which is the path used by the `github` machine. `tests/conftest.py` sets the environment variable `GITHUB_ACTIONS=true` whenever pytest runs, so `get_machine()` returns `github` on any machine. Normal Providentia runs are not affected, since this file is only loaded by pytest.
 
-```python
-def get_machine():
-    """
-    Get machine where code is running
-
-    Returns
-    -------
-    str
-        Machine
-    """
-
-    return "github"
-```
-
-Next, you will need to run:
+To run all the pipeline tests in your local machine, run:
 
 ```bash
 conda activate providentia-env_v[version]
@@ -211,6 +197,8 @@ pytest tests/test_read_data.py
 To run a specific test, you will need to edit these files and comment the functions you are not interested in testing.
 
 If you want to recreate the expected data in the tests, set the variable `GENERATE_OUTPUT` in `tests/aux_functions.py` to True temporarily and run the tests once before reverting it back to False.
+
+If you use Claude Code, `.claude/settings.json` stops its file-editing tools from changing `tests/data` and `tests/reference`, so any changes to these folders need to be made by you. This does not cover shell commands that Claude Code runs, such as a test run with `GENERATE_OUTPUT` set to True.
 
 If you want to see the coverage report use:
 
@@ -364,7 +352,7 @@ version: 2
 build:
   os: ubuntu-24.04
   tools:
-    python: "mambaforge-22.9"
+    python: "mambaforge-latest"
 
 # Build documentation in the "docs/" directory with Sphinx
 sphinx:
@@ -382,7 +370,7 @@ Trigger a build from your latest commit containing this file and you should be r
 Edit the files under `docs/source`, then navigate to docs and simply run:
 
 ```bash
-conda activate providentia-env_v3.1.0
+conda activate providentia-env_v4.0.0
 cd docs
 make clean
 make html
@@ -415,34 +403,42 @@ conda install -n base conda=24.4.0 conda-build=24.3.0
 
 Check what the latest versions of [conda](https://github.com/conda/conda/releases) and [conda-build](https://github.com/conda/conda-build/releases) are.
 
-What the first command does is creating an environment called `providentia-env_v3.1.0` with the Python version 3.11.5, and installing `cartopy`, `jupyterlab`, `ghostscript`, `dask`, `nco`, `pyproj` and `proj` with conda, and the Python packages from `requirements.txt` using pip. The equivalent would be:
+What the first command does is creating an environment called `providentia-env_v4.0.0` with the Python version 3.11.5, and installing `cartopy`, `jupyterlab`, `ghostscript`, `dask`, `nco`, `pyproj`, `proj`, `numpy` and `scipy` with conda, and the Python packages from `requirements.txt` using pip. The equivalent would be:
 
 ```bash
-conda create -n providentia-env_v3.1.0 python=3.11.5 -c conda-forge --override-channels
-conda activate providentia-env_v3.1.0
-conda install -c conda-forge cartopy==0.25.0 jupyterlab==4.5.3 ghostscript==10.06.0 dask==2026.1.2 nco==5.3.6 pyproj==3.7.2 proj==9.7.1 --override-channels
+conda create -n providentia-env_v4.0.0 python=3.11.5 -c conda-forge --override-channels
+conda activate providentia-env_v4.0.0
+conda install -c conda-forge cartopy==0.25.0 jupyterlab==4.5.3 ghostscript==10.06.0 dask==2026.1.2 nco==5.3.6 pyproj==3.7.2 proj==9.7.1 openssh==10.5p1 numpy==2.3.5 scipy==1.17.1 --override-channels
 pip install --no-user -r requirements.txt
 ```
 
-### Create providentia-env_v3.1.0-nord4 in Nord4
+`requirements.txt` has the packages of the website (ines-providentia, on BSC's GitLab, public, https://gitlab.earth.bsc.es), which runs in this environment from its checkout; ines-providentia lists no dependencies of its own. The website mode is not available to users yet: `./bin/providentia --website` only says so, and developers run it with `WEBSITE_PATH=<path to ines-providentia> ./bin/providentia --website`, which runs their checkout from its folder, without installing it.
+
+### Create providentia-env_v4.0.0 in MN5
+
+```bash
+ENV=/gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v4.0.0
+conda create -p $ENV -y python=3.11.5 -c conda-forge --override-channels
+conda activate $ENV
+conda install -c conda-forge cartopy==0.25.0 jupyterlab==4.5.3 ghostscript==10.06.0 dask==2026.1.2 nco==5.3.6 pyproj==3.7.2 proj==9.7.1 openssh==10.5p1 numpy==2.3.5 scipy==1.17.1 --override-channels
+$ENV/bin/python -m pip install --no-user -r requirements.txt
+```
+
+pip is run with the environment's Python by its full path. If a module with its own Python is loaded, such as `anaconda`, its folder can come before the environment's in `PATH` even after `conda activate`, and a plain `pip` then installs into the module and fails with `Permission denied: '/apps/GPP/ANACONDA/...'`. Using `--user` is not the fix. `which python` shows which Python the shell uses.
+
+### Create providentia-env_v4.0.0-nord4 in Nord4
 
 ```bash
 module unload intel
 module load GCC/10.2.0
-conda create -p /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.1.0-nord4 -y python=3.11.5 -c conda-forge --override-channels
-conda activate /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.1.0-nord4
-conda install -c conda-forge cartopy==0.25.0 jupyterlab==4.5.3 ghostscript==10.06.0 dask==2026.1.2 nco==5.3.6 pyproj==3.7.2 proj==9.7.1 --override-channels
-pip install --no-user -r requirements.txt
+ENV=/gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v4.0.0-nord4
+conda create -p $ENV -y python=3.11.5 -c conda-forge --override-channels
+conda activate $ENV
+conda install -c conda-forge cartopy==0.25.0 jupyterlab==4.5.3 ghostscript==10.06.0 dask==2026.1.2 nco==5.3.6 pyproj==3.7.2 proj==9.7.1 openssh==10.5p1 numpy==2.3.5 scipy==1.17.1 --override-channels
+$ENV/bin/python -m pip install --no-user -r requirements.txt
 ```
 
-### Create providentia-env_v3.1.0 in MN5
-
-```bash
-conda create -p /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.1.0 -y python=3.11.5 -c conda-forge --override-channels
-conda activate /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.1.0
-conda install -c conda-forge cartopy==0.25.0 jupyterlab==4.5.3 ghostscript==10.06.0 dask==2026.1.2 nco==5.3.6 pyproj==3.7.2 proj==9.7.1 --override-channels
-pip install --no-user -r requirements.txt
-```
+pip is run with the environment's Python by its full path, as in MN5 above.
 
 ## Memory Profiling Code
 

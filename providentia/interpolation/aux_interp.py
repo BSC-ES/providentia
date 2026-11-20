@@ -255,3 +255,130 @@ def findMiddle(input_len):
         return int(middle - 0.5)
     else:
         return [int(middle - 1), int(middle)]
+
+
+def get_temporal_resolution_hours(resolution):
+    """
+    Get the approximate number of hours represented by a given temporal resolution string.
+
+    Parameters
+    ----------
+    resolution : str
+        One of the recognised temporal resolution strings (e.g. 'hourly', 'daily').
+
+    Returns
+    -------
+    int
+        Approximate number of hours spanned by one timestep of that resolution.
+    """
+
+    freq_map = {
+        "hourly": 1,
+        "hourly_instantaneous": 1,
+        "3hourly": 3,
+        "3hourly_instantaneous": 3,
+        "6hourly": 6,
+        "6hourly_instantaneous": 6,
+        "daily": 24,
+        "monthly": 24 * 30,
+    }
+
+    return freq_map[resolution]
+
+
+def get_resampling_direction(model_temporal_resolution, temporal_resolution_to_output):
+    """
+    Determine the resampling direction between a model's input and output temporal resolutions.
+
+    Parameters
+    ----------
+    model_temporal_resolution : str
+        Temporal resolution of the raw model data (e.g. 'hourly').
+    temporal_resolution_to_output : str
+        Temporal resolution the interpolated output is to be written at (e.g. 'daily').
+
+    Returns
+    -------
+    str or None
+        'downsampling' if input is finer than output,
+        'upsampling' if input is coarser than output,
+        None if input and output resolutions are equal.
+    """
+
+    in_freq = get_temporal_resolution_hours(model_temporal_resolution)
+    out_freq = get_temporal_resolution_hours(temporal_resolution_to_output)
+
+    # input resolution finer than output resolution (downsampling)
+    if in_freq < out_freq:
+        return "downsampling"
+    # input resolution coarser than output resolution (upsampling)
+    elif in_freq > out_freq:
+        return "upsampling"
+    # no resampling
+    else:
+        return
+
+
+def get_read_chunk_timesteps(
+    y_N,
+    x_N,
+    model_temporal_resolution,
+    temporal_resolution_to_output,
+    dtype_size=4,
+    target_chunk_bytes=256 * 1024 * 1024,
+):
+    """
+    Work out how many raw model file timesteps should be read from a model file at a time, to
+    bound the size of the (y, x) grid slab held in memory while reading, independent of how
+    large the model grid or the file's full time dimension are.
+
+    For downsampling, the returned chunk size is rounded up to a whole multiple of the number of
+    raw timesteps making up one output resampling period (e.g. 24 raw hourly timesteps per output
+    daily period), so that a chunk never splits a resample() aggregation window across two reads.
+
+    Upsampling is intentionally left unbounded (None): the input there is coarser than the
+    output, so a raw read is already small relative to downsampling/no-resampling cases, and the
+    logic for extending the last raw timestep to cover the end of the file is simplest to reason
+    about over one contiguous block, rather than being split into further chunks.
+
+    Parameters
+    ----------
+    y_N : int
+        Size of the model grid's y (latitude) dimension.
+    x_N : int
+        Size of the model grid's x (longitude) dimension.
+    model_temporal_resolution : str
+        Temporal resolution of the raw model data (e.g. 'hourly').
+    temporal_resolution_to_output : str
+        Temporal resolution the interpolated output is to be written at (e.g. 'daily').
+    dtype_size : int, optional
+        Size in bytes of one raw model grid value (default 4, for float32).
+    target_chunk_bytes : int, optional
+        Target memory budget in bytes for one chunk's raw (y, x) grid slab, before accounting
+        for a chunk possibly spanning multiple timesteps (default 256 MiB).
+
+    Returns
+    -------
+    int or None
+        Maximum number of raw file timesteps to read in one chunk, or None if the read should
+        not be chunked (upsampling case - see above).
+    """
+
+    resampling_direction = get_resampling_direction(
+        model_temporal_resolution, temporal_resolution_to_output
+    )
+
+    if resampling_direction == "upsampling":
+        return None
+
+    bytes_per_raw_timestep = max(1, y_N * x_N * dtype_size)
+    read_chunk_timesteps = max(1, target_chunk_bytes // bytes_per_raw_timestep)
+
+    if resampling_direction == "downsampling":
+        in_freq_hours = get_temporal_resolution_hours(model_temporal_resolution)
+        out_freq_hours = get_temporal_resolution_hours(temporal_resolution_to_output)
+        period_ratio = max(1, round(out_freq_hours / in_freq_hours))
+        n_periods_per_chunk = max(1, read_chunk_timesteps // period_ratio)
+        read_chunk_timesteps = n_periods_per_chunk * period_ratio
+
+    return read_chunk_timesteps

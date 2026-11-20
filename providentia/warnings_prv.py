@@ -29,7 +29,7 @@ def show_message(read_instance, msg, from_conf=None, deactivate=False, print=Fal
         read_instance.mode in ["report", "library", "interpolation", "download"]
         or print
     ):
-        read_instance.logger.warning("Warning: " + msg)
+        read_instance.logger.warning("\nWarning: " + msg)
 
     else:
         # there are some warnings that will only be shown if we launch the dashboard
