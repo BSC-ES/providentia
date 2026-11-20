@@ -1173,11 +1173,21 @@ class Providentia:
             # fill dataframe
             is_initial = copy.deepcopy(self.initialised)
             kwargs = copy.deepcopy(self.kwargs)
+            
             # save current subsection
             orig_ss = copy.deepcopy(self.subsection)
+            
+            # the website (ines-providentia) switches temporal colocation after reading by setting
+            # temporal_colocation, as the Temporal checkbox of the dashboard (filtering keeps the
+            # stations with and without colocation); library users reinitiate the class with it
+            # instead (see Library.md). set_config below would set it back to its value when the
+            # class was initialised, so the current value is kept (it cannot change per
+            # subsection, see fixed_section_vars in init.yaml)
+            orig_temporal_colocation = copy.deepcopy(self.temporal_colocation)
             for ss in self.subsections:
                 kwargs["subsection"] = ss
                 self.set_config(**kwargs)
+                self.temporal_colocation = orig_temporal_colocation
                 # filter data
                 self.reset(initialise=True)
                 for ns in networkspecies:
@@ -1263,6 +1273,7 @@ class Providentia:
             # re-filter for original subsection
             kwargs["subsection"] = orig_ss
             self.set_config(**kwargs)
+            self.temporal_colocation = orig_temporal_colocation
             if is_initial:
                 self.reset(initialise=True)
             else:
@@ -1284,9 +1295,18 @@ class Providentia:
             kwargs = copy.deepcopy(self.kwargs)
             # save current subsection
             orig_ss = copy.deepcopy(self.subsection)
+            
+            # the website (ines-providentia) switches temporal colocation after reading by setting
+            # temporal_colocation, as the Temporal checkbox of the dashboard (filtering keeps the
+            # stations with and without colocation); library users reinitiate the class with it
+            # instead (see Library.md). set_config below would set it back to its value when the
+            # class was initialised, so the current value is kept (it cannot change per
+            # subsection, see fixed_section_vars in init.yaml)
+            orig_temporal_colocation = copy.deepcopy(self.temporal_colocation)
             for ss in self.subsections:
                 kwargs["subsection"] = ss
                 self.set_config(**kwargs)
+                self.temporal_colocation = orig_temporal_colocation
                 # filter data
                 self.reset(initialise=True)
                 for ns in networkspecies:
@@ -1348,6 +1368,7 @@ class Providentia:
             # re-filter for original subsection
             kwargs["subsection"] = orig_ss
             self.set_config(**kwargs)
+            self.temporal_colocation = orig_temporal_colocation
             if is_initial:
                 self.reset(initialise=True)
             else:
