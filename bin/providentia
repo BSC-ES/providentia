@@ -341,10 +341,18 @@ if $download; then
     fi
 fi
 
-# website mode is not available yet, except for its developers (WEB=1)
-if $website && [[ "${WEB}" != "1" ]]; then
-    echo "WARNING: Website mode is not available yet. Exiting..."
-    exit 1
+# website mode is not available yet, except for its developers, who give the path to their
+# checkout of ines-providentia (WEBSITE_PATH=<path to ines-providentia>)
+if $website; then
+    WEBSITE_PATH="${WEBSITE_PATH%/}"
+    if [[ -z "${WEBSITE_PATH}" ]]; then
+        echo "WARNING: Website mode is not available yet. Exiting..."
+        exit 1
+    fi
+    if [[ "$(basename "${WEBSITE_PATH}")" != "ines-providentia" || ! -d "${WEBSITE_PATH}/src/ines_providentia" ]]; then
+        echo "ERROR: WEBSITE_PATH (${WEBSITE_PATH}) is not a checkout of ines-providentia. Exiting..."
+        exit 1
+    fi
 fi
 
 # website mode runs only on local machines, as it opens the browser of the machine
@@ -354,9 +362,6 @@ if $website; then
         exit 1
     fi
 fi
-
-# checkout of ines-providentia run by the website mode (WEB=1), until the website is public
-WEBSITE_PATH="${HOME}/software/ines-providentia"
 
 # activate or create the conda environment for local and operational machines
 ENV_NAME="providentia-env_v4.0.0"
@@ -667,10 +672,6 @@ else
     # installing it, never the one installed in the environment (the backend it starts inherits
     # PYTHONPATH)
     if $website; then
-        if [[ ! -d "${WEBSITE_PATH}/src/ines_providentia" ]]; then
-            echo "ERROR: ${WEBSITE_PATH} is not a checkout of ines-providentia. Set WEBSITE_PATH in bin/providentia."
-            exit 1
-        fi
         echo "INFO: Using the website of ${WEBSITE_PATH}..."
         # the website runs in two python processes, which both need the checkout:
         # - this one (python_command), which imports ines_providentia.website: it runs with -E,
