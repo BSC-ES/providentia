@@ -341,8 +341,8 @@ if $download; then
     fi
 fi
 
-# website mode is not available yet, except for its developers (PROVIDENTIA_WEBSITE=1)
-if $website && [[ "${PROVIDENTIA_WEBSITE}" != "1" ]]; then
+# website mode is not available yet, except for its developers (WEB=1)
+if $website && [[ "${WEB}" != "1" ]]; then
     echo "WARNING: Website mode is not available yet. Exiting..."
     exit 1
 fi
@@ -354,6 +354,9 @@ if $website; then
         exit 1
     fi
 fi
+
+# checkout of ines-providentia run by the website mode (WEB=1), until the website is public
+WEBSITE_PATH="${HOME}/software/ines-providentia"
 
 # activate or create the conda environment for local and operational machines
 ENV_NAME="providentia-env_v4.0.0"
@@ -659,6 +662,26 @@ else
 
     # load modules from conda environment
     setup_providentia_env_locally
+
+    # the website (ines-providentia) is the checkout at WEBSITE_PATH, used from its folder without
+    # installing it, never the one installed in the environment (the backend it starts inherits
+    # PYTHONPATH)
+    if $website; then
+        if [[ ! -d "${WEBSITE_PATH}/src/ines_providentia" ]]; then
+            echo "ERROR: ${WEBSITE_PATH} is not a checkout of ines-providentia. Set WEBSITE_PATH in bin/providentia."
+            exit 1
+        fi
+        echo "INFO: Using the website of ${WEBSITE_PATH}..."
+        # the website runs in two python processes, which both need the checkout:
+        # - this one (python_command), which imports ines_providentia.website: it runs with -E,
+        #   which ignores PYTHONPATH, so the checkout is added to sys.path in its command
+        python_command="${python_command/from providentia import main/import sys; sys.path.insert(0, \"${WEBSITE_PATH}/src\"); from providentia import main}"
+        # - the backend that the website starts (python -m ines_providentia.backend.server, in
+        #   local_launcher.py of ines-providentia): a new process does not get the sys.path of
+        #   this one, only its environment variables, and it runs without -E, so it takes the
+        #   checkout from PYTHONPATH (and providentia from this folder, where it runs)
+        export PYTHONPATH="${WEBSITE_PATH}/src:${PYTHONPATH}"
+    fi
 
     # merge exp and exp_to_interp directories to mod and mod_to_interp       
     if [[ $PARSED =~ "--dir_merge" ]]; then

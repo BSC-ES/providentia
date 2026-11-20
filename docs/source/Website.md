@@ -4,11 +4,13 @@ The website mode runs Providentia's website on your machine, together with the b
 
 ## Getting started
 
-The website mode is not available to users yet; without `PROVIDENTIA_WEBSITE=1`, `--website` only says so. To start the website, run the following command in the command line:
+The website mode is not available to users yet; without `WEB=1`, `--website` only says so. To start the website, run the following command in the command line:
 
 ```
-PROVIDENTIA_WEBSITE=1 ./bin/providentia --website
+WEB=1 ./bin/providentia --website
 ```
+
+It runs the checkout of ines-providentia at `WEBSITE_PATH`, at the top of `bin/providentia` (`${HOME}/software/ines-providentia` by default; change it if yours is elsewhere), from its folder: its `src` is put on `PYTHONPATH`, also for the backend it starts, and the ines-providentia installed in the environment is not used. Its dependencies must be in the environment, as they are when it was created with `requirements.txt`.
 
 It starts the backend, which loads Providentia and can take a few minutes, and then opens the dashboard of the website in your browser (`http://127.0.0.1:7782/...`). The configuration file and section are not used in this mode.
 
