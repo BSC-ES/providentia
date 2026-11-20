@@ -680,8 +680,16 @@ class PlottingDash(Plotting):
         # room that the title needs is kept, so that the table takes more of the figure
         fig.update_layout(margin=plot_characteristics["margin"])
 
+        # plotly gives every column the same width: each one takes the share of the longest
+        # text in it, header included, so that the labels of the first column fit
+        column_widths = [
+            max(len(str(text)) for text in [label, *column])
+            for label, column in zip(col_labels, columns)
+        ]
+
         fig.add_trace(
             go.Table(
+                columnwidth=column_widths,
                 header=dict(
                     values=col_labels,
                     fill_color=header_fill,
