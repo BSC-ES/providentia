@@ -1,0 +1,69 @@
+bdrc_zamg_wrf_chem:
+  url: ZAMG-WRF-CHEM
+  format: 3H_ZAMG-WRF-CHEM.nc
+  ending: "00"
+bdrc_wrf_nemo:
+  url: WRF-NEMO
+  format: 1H_WRF-NEMO-CAMx.nc
+  ending: "00"
+bdrc_silam:
+  url: SILAM
+  format: SILAM.nc
+  ending: "00"
+bdrc_noa:
+  url: NOA
+  format: NOA-WRF-CHEM.nc
+  ending: 12
+bdrc_ncep_gefs:
+  url: NCEP-GEFS
+  format: NCEP-NGAC.nc
+  ending: ""
+bdrc_nasa_geos:
+  url: NASA-GEOS
+  format: NASA-GEOS.nc
+  ending: ""
+bdrc_metoffice_um:
+  url: MetOffice-UM
+  format: 3H_UKMET.nc
+  ending: "00"
+bdrc_multi_model:
+  url: MULTI-MODEL
+  format: 3H_MEDIAN.nc
+  ending: ""
+bdrc_monarch:
+  url: MONARCH
+  format: null # generate file for Tito
+  ending: ""
+bdrc_mocage:
+  url: MOCAGE
+  format: 3H_MOCAGE.nc
+  ending: "00"
+bdrc_lotos_euros:
+  url: LOTOS-EUROS
+  format: 3H_LOTOSEUROS.nc
+  ending: "00"
+bdrc_icon_art:
+  url: ICON-ART
+  format: ICON-ART.nc
+  ending: "00"
+bdrc_ema_regcm4:
+  url: EMA-RegCM4
+  format: EMA-RegCM4.nc
+  ending: ""
+bdrc_dream8_cams:
+  url: DREAM8-CAMS
+  format: 3H_DREAM8-MACC.nc
+  ending: "00"
+bdrc_cams_ifs:
+  url: CAMS-IFS
+  format: 3H_MACC-ECMWF.nc
+  ending: "00"
+bdrc_bsc_dream8b:
+  url: BSC-DREAM8b
+  format: BSC_DREAM8b_V2.nc
+  ending: ""
+bdrc_aladin:
+  url: ALADIN
+  format: 3H_ALADIN_DUST.nc
+  ending: "00"
+

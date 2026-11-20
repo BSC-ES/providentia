@@ -1,0 +1,479 @@
+ZAMG-WRF-CHEM:
+  '2022':
+  - 3H_ZAMG-WRF-CHEM.nc
+  '2023':
+  - 3H_ZAMG-WRF-CHEM.nc
+  '2024':
+  - 3H_ZAMG-WRF-CHEM.nc
+  '2025':
+  - 3H_ZAMG-WRF-CHEM.nc
+  '2026':
+  - 3H_ZAMG-WRF-CHEM.nc
+WRF-NEMO:
+  '2020':
+  - 1H_WRF-NEMO-CAMx.nc
+  '2021':
+  - 1H_WRF-NEMO-CAMx.nc
+  '2022':
+  - 1H_WRF-NEMO-CAMx.nc
+  '2023':
+  - 1H_WRF-NEMO-CAMx.nc
+  '2024':
+  - 1H_WRF-NEMO-CAMx.nc
+  '2025':
+  - 1H_WRF-NEMO-CAMx.nc
+  '2026':
+  - 1H_WRF-NEMO-CAMx.nc
+SILAM:
+  '2016':
+  - SILAM.nc
+  '2017':
+  - SILAM.nc
+  '2018':
+  - SILAM.nc
+  '2019':
+  - SILAM.nc
+  '2020':
+  - SILAM_old.nc
+  - SILAM.nc
+  '2021':
+  - SILAM.nc
+  '2022':
+  - SILAM.nc
+  '2023':
+  - SILAM.nc
+  '2024':
+  - SILAM.nc
+  '2025':
+  - SILAM.nc
+  '2026':
+  - SILAM.nc
+NOA:
+  '2015':
+  - NOA-WRF-CHEM.nc
+  '2016':
+  - NOA-WRF-CHEM.nc
+  '2017':
+  - NOA-WRF-CHEM.nc
+  '2018':
+  - NOA-WRF-CHEM.nc
+  '2019':
+  - NOA-WRF-CHEM.nc
+  '2020':
+  - NOA-WRF-CHEM.nc
+  '2021':
+  - NOA-WRF-CHEM.nc
+  '2022':
+  - NOA-WRF-CHEM.nc
+  '2023':
+  - NOA-WRF-CHEM.nc
+  '2024':
+  - NOA-WRF-CHEM.nc
+  '2025':
+  - NOA-WRF-CHEM.nc
+  '2026':
+  - NOA-WRF-CHEM.nc
+NCEP-GEFS:
+  '2012':
+  - NCEP-NGAC.nc
+  '2013':
+  - NCEP-NGAC.nc
+  '2014':
+  - NCEP-NGAC.nc
+  '2015':
+  - NCEP-NGAC.nc
+  '2016':
+  - NCEP-NGAC.nc
+  '2017':
+  - NCEP-NGAC.nc
+  - NCEP-NGAC_OLD.nc
+  '2018':
+  - NCEP-NGAC.nc
+  '2019':
+  - NCEP-NGAC.nc
+  '2020':
+  - NCEP-NGAC.nc
+  '2021':
+  - NCEP-NGAC.nc
+  '2022':
+  - NCEP-NGAC.nc
+  '2023':
+  - NCEP-NGAC.nc
+  '2024':
+  - NCEP-NGAC.nc
+  '2025':
+  - NCEP-NGAC.nc
+  '2026':
+  - NCEP-NGAC.nc
+NASA-GEOS:
+  '2012':
+  - NASA-GEOS.nc
+  '2013':
+  - NASA-GEOS.nc
+  '2014':
+  - NASA-GEOS.nc
+  '2015':
+  - NASA-GEOS.nc
+  '2016':
+  - NASA-GEOS_BAK.nc
+  - NASA-GEOS.nc
+  '2017':
+  - NASA-GEOS.nc
+  '2018':
+  - NASA-GEOS.nc
+  '2019':
+  - NASA-GEOS.nc
+  '2020':
+  - NASA-GEOS.nc
+  '2021':
+  - NASA-GEOS.nc
+  - NASA-GEOS_old.nc
+  '2022':
+  - NASA-GEOS.nc
+  '2023':
+  - NASA-GEOS.nc
+  '2024':
+  - NASA-GEOS.nc
+  '2025':
+  - NASA-GEOS.nc
+  '2026':
+  - NASA-GEOS.nc
+MetOffice-UM:
+  '2012':
+  - 3H_UKMET.nc
+  '2013':
+  - 3H_UKMET.nc
+  '2014':
+  - 3H_UKMET.nc
+  '2015':
+  - 3H_UKMET.nc
+  '2016':
+  - 3H_UKMET.nc
+  '2017':
+  - 3H_UKMET.nc
+  '2018':
+  - 3H_UKMET.nc
+  '2019':
+  - 3H_UKMET.nc
+  '2020':
+  - 3H_UKMET.nc
+  '2021':
+  - 3H_UKMET.nc
+  '2022':
+  - 3H_UKMET.nc
+  '2023':
+  - 3H_UKMET.nc
+  '2024':
+  - 3H_UKMET.nc
+  '2025':
+  - 3H_UKMET.nc
+  '2026':
+  - 3H_UKMET.nc
+MULTI-MODEL:
+  '2011':
+  - 3H_MEDIAN.nc
+  '2012':
+  - 3H_STDEV.nc
+  - 3H_MEAN.nc
+  - 3H_MEDIAN.nc
+  - 3H_RANGE.nc
+  '2013':
+  - 3H_STDEV.nc
+  - 3H_MEAN.nc
+  - 3H_MEDIAN.nc
+  - 3H_RANGE.nc
+  '2014':
+  - 3H_STDEV.nc
+  - 3H_MEAN.nc
+  - 3H_MEDIAN.nc
+  - 3H_RANGE.nc
+  '2015':
+  - 3H_STDEV.nc
+  - 3H_MEAN.nc
+  - 3H_MEDIAN.nc
+  - 3H_RANGE.nc
+  '2016':
+  - 3H_STDEV.nc
+  - 3H_MEAN.nc
+  - 3H_MEDIAN.nc
+  - 3H_RANGE.nc
+  '2017':
+  - 3H_STDEV.nc
+  - 3H_MEAN.nc
+  - 3H_MEDIAN.nc
+  - 3H_RANGE.nc
+  '2018':
+  - 3H_STDEV.nc
+  - 3H_MEAN.nc
+  - 3H_MEDIAN.nc
+  - 3H_RANGE.nc
+  '2019':
+  - 3H_STDEV.nc
+  - 3H_MEAN.nc
+  - 3H_MEDIAN.nc
+  - 3H_RANGE.nc
+  '2020':
+  - 3H_STDEV.nc
+  - 3H_MEAN.nc
+  - 3H_MEDIAN.nc
+  - 3H_RANGE.nc
+  '2021':
+  - 3H_STDEV.nc
+  - 3H_MEAN.nc
+  - 3H_MEDIAN.nc
+  - 3H_RANGE.nc
+  '2022':
+  - 3H_MEDIAN.nc
+  '2023':
+  - 3H_MEDIAN.nc
+  '2024':
+  - 3H_MEDIAN.nc
+  '2025':
+  - 3H_MEDIAN.nc
+  '2026':
+  - 3H_MEDIAN.nc
+MONARCH:
+  '2013':
+  - 3H_NMMB-BSC_OPER.nc
+  '2016':
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER.nc
+  '2017':
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER.nc
+  '2018':
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_KMZ.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_MAUR.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_KUWAIT.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_BFASO.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_HOME.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER.nc
+  - full-NMMB-BSC.nc
+  - 3H_NMMB-BSC_OPER.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_QATAR.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_SPAIN.nc
+  '2019':
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_SPAIN.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_KMZ.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_MAUR.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_BFASO.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_HOME.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER.nc
+  - full-NMMB-BSC.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_QATAR.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_KUWAIT.nc
+  '2020':
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_SPAIN.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_KMZ.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_MAUR.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_old.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_BFASO.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_HOME.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER.nc
+  - full-NMMB-BSC.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_QATAR.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_KUWAIT.nc
+  '2021':
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_SPAIN.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_KMZ.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_MAUR.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_BFASO.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_OLD.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_HOME.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER.nc
+  - full-NMMB-BSC.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_QATAR.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER_KUWAIT.nc
+  '2022':
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER.nc
+  '2023':
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER.nc
+  '2024':
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER.nc
+  '2025':
+  - 3H_SDSWAS_MONARCH-fct.nc
+  - 3H_SDSWAS_NMMB-BSC-v2_OPER.nc
+  '2026':
+  - 3H_SDSWAS_MONARCH-fct.nc
+MOCAGE:
+  '2022':
+  - 3H_MOCAGE.nc
+  '2023':
+  - 3H_MOCAGE.nc
+  '2024':
+  - 3H_MOCAGE.nc
+  '2025':
+  - 3H_MOCAGE.nc
+  '2026':
+  - 3H_MOCAGE.nc
+LOTOS-EUROS:
+  '2016':
+  - 3H_LOTOSEUROS.nc
+  '2017':
+  - 3H_LOTOSEUROS.nc
+  '2018':
+  - 3H_LOTOSEUROS.nc
+  '2019':
+  - 3H_LOTOSEUROS.nc
+  '2020':
+  - 3H_LOTOSEUROS.nc
+  '2021':
+  - 3H_LOTOSEUROS.nc
+  '2022':
+  - 3H_LOTOSEUROS.nc
+  '2023':
+  - 3H_LOTOSEUROS.nc
+  '2024':
+  - 3H_LOTOSEUROS.nc
+  '2025':
+  - 3H_LOTOSEUROS.nc
+  '2026':
+  - 3H_LOTOSEUROS.nc
+ICON-ART:
+  '2019':
+  - ICON-ART.nc
+  '2020':
+  - ICON-ART.nc
+  '2021':
+  - ICON-ART.nc
+  '2022':
+  - ICON-ART.nc
+  '2023':
+  - ICON-ART.nc
+  '2024':
+  - ICON-ART.nc
+  '2025':
+  - ICON-ART.nc
+  '2026':
+  - ICON-ART.nc
+EMA-RegCM4:
+  '2014':
+  - EMA-RegCM4.nc
+  '2015':
+  - EMA-RegCM4.nc
+  '2016':
+  - EMA-RegCM4.nc
+  '2017':
+  - EMA-RegCM4.nc
+  '2018':
+  - EMA-RegCM4.nc
+  '2019':
+  - EMA-RegCM4.nc
+  '2020':
+  - EMA-RegCM4.nc
+  '2021':
+  - EMA-RegCM4.nc
+  '2022':
+  - EMA-RegCM4.nc
+  '2023':
+  - EMA-RegCM4.nc
+  '2024':
+  - EMA-RegCM4.nc
+  '2025':
+  - EMA-RegCM4.nc
+  '2026':
+  - EMA-RegCM4.nc
+DREAM8-CAMS:
+  '2011':
+  - 3H_DREAM8-MACC.nc
+  '2012':
+  - 3H_DREAM8-MACC.nc
+  '2013':
+  - 3H_DREAM8-MACC.nc
+  '2014':
+  - 3H_DREAM8-MACC.nc
+  '2015':
+  - 3H_DREAM8-MACC.nc
+  '2016':
+  - 3H_DREAM8-MACC.nc
+  '2017':
+  - 3H_DREAM8-MACC.nc
+  '2018':
+  - 3H_DREAM8-MACC.nc
+  '2019':
+  - 3H_DREAM8-MACC.nc
+  '2020':
+  - 3H_DREAM8-MACC.nc
+  '2021':
+  - 3H_DREAM8-MACC.nc
+  '2022':
+  - 3H_DREAM8-MACC.nc
+  '2023':
+  - 3H_DREAM8-MACC.nc
+  '2024':
+  - 3H_DREAM8-MACC.nc
+  '2025':
+  - 3H_DREAM8-MACC.nc
+  '2026':
+  - 3H_DREAM8-MACC.nc
+CAMS-IFS:
+  '2010':
+  - 3H_MACC-ECMWF.nc
+  '2011':
+  - 3H_MACC-ECMWF_old.nc
+  - 3H_MACC-ECMWF.nc
+  '2012':
+  - 3H_MACC-ECMWF.nc
+  '2013':
+  - 3H_MACC-ECMWF.nc
+  '2014':
+  - 3H_MACC-ECMWF.nc
+  '2015':
+  - 3H_MACC-ECMWF.nc
+  '2016':
+  - 3H_MACC-ECMWF.nc
+  '2017':
+  - 3H_MACC-ECMWF.nc
+  '2018':
+  - 3H_MACC-ECMWF.nc
+  '2019':
+  - 3H_MACC-ECMWF.nc
+  '2020':
+  - 3H_MACC-ECMWF.nc
+  '2021':
+  - 3H_MACC-ECMWF.nc
+  '2022':
+  - 3H_MACC-ECMWF.nc
+  '2023':
+  - 3H_MACC-ECMWF.nc
+  '2024':
+  - 3H_MACC-ECMWF.nc
+  '2025':
+  - 3H_MACC-ECMWF.nc
+  '2026':
+  - 3H_MACC-ECMWF.nc
+BSC-DREAM8b:
+  '2010':
+  - BSC_DREAM8b.nc
+  '2011':
+  - BSC_DREAM8b.nc
+  '2012':
+  - BSC_DREAM8b_V2.nc
+  - BSC_DREAM8b.nc
+  '2013':
+  - BSC_DREAM8b_V2.nc
+  '2014':
+  - BSC_DREAM8b_V2.nc
+  '2015':
+  - BSC_DREAM8b_V2.nc
+  '2016':
+  - BSC_DREAM8b_V2.nc
+  '2017':
+  - BSC_DREAM8b_V2.nc
+  '2018':
+  - BSC_DREAM8b_V2.nc
+  '2019':
+  - BSC_DREAM8b_V2.nc
+  '2020':
+  - BSC_DREAM8b_V2.nc
+  '2021':
+  - BSC_DREAM8b_V2.nc
+  '2022':
+  - BSC_DREAM8b_V2.nc
+ALADIN:
+  '2020':
+  - 3H_ALADIN_DUST.nc
+  '2021':
+  - 3H_ALADIN_DUST.nc
+  '2022':
+  - 3H_ALADIN_DUST.nc
+  '2023':
+  - 3H_ALADIN_DUST.nc
