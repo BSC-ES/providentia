@@ -1862,6 +1862,10 @@ class Providentia:
 
         # update variables to set from config file
         self.from_conf = False
+        # subsection variables, none without a configuration file or a subsection (they are
+        # removed after each plot of statistics, see plot)
+        self.subsection_opts = {}
+
         if self.config != "":
             read_conf = False
             if os.path.exists(self.config):
