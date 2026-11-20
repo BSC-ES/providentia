@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Library &mdash; Providentia 3.1.0 documentation</title>
+  <title>Library &mdash; Providentia 4.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=dd1205ac"></script>
+      <script src="_static/documentation_options.js?v=3304f9e4"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -122,7 +122,7 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">providentia</span><span class="o">-</span><span class="n">env_v</span><span class="p">[</span><span class="n">version</span><span class="p">]</span>
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">version</span></code> is the relevant version of Providentia, e.g. <code class="docutils literal notranslate"><span class="pre">3.1.0</span></code>.</p>
+<p>where <code class="docutils literal notranslate"><span class="pre">version</span></code> is the relevant version of Providentia, e.g. <code class="docutils literal notranslate"><span class="pre">4.0.0</span></code>.</p>
 <p>Then the Providentia library can be used in any script, through simply importing it as a module:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">providentia</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">prv</span>
 </pre></div>
@@ -146,6 +146,16 @@
 </pre></div>
 </div>
 <p>Providentia looks for configuration files in the <code class="docutils literal notranslate"><span class="pre">configurations</span></code> folder by default, if your configuration file is saved elsewhere, pass the complete path.</p>
+<p>The configuration file is optional. Instead, the configuration fields can be passed as arguments:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">Providentia</span><span class="p">(</span><span class="n">network</span><span class="o">=</span><span class="s1">&#39;EBAS&#39;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s1">&#39;sconco3&#39;</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="s1">&#39;20180101&#39;</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="s1">&#39;20180201&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Fields that are not passed take the same defaults as the dashboard when it is launched without a configuration file (network <code class="docutils literal notranslate"><span class="pre">GHOST</span></code>, species <code class="docutils literal notranslate"><span class="pre">sconco3</span></code>, resolution <code class="docutils literal notranslate"><span class="pre">hourly</span></code>, from <code class="docutils literal notranslate"><span class="pre">20180101</span></code> to <code class="docutils literal notranslate"><span class="pre">20190101</span></code>). Without a configuration file there are no sections or subsections.</p>
+<p>By default the plots are drawn with matplotlib. To get plotly figures instead, pass <code class="docutils literal notranslate"><span class="pre">backend='plotly'</span></code> when creating the object, which then applies to every plot it makes:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">Providentia</span><span class="p">(</span><span class="s1">&#39;interactive_template.conf&#39;</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;plotly&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>At the moment only the timeseries, the map, the table and the statsummary can be drawn with plotly. In the plotly table, a networkspecies or subsection repeated in the rows below is left blank instead of merged.</p>
 <p>The configuration will become part of the object, therefere you can call the modes as explained below. You can pass any arguments you wish when calling each function to override what is set in the loaded configuration file.</p>
 <p>When using Providentia inside a Python script, instead of through the terminal or in a Jupyter notebook, we need to call its functions with the main guard:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
@@ -380,6 +390,7 @@
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">plot_obj</span></code> is the object of the plot returned.</p>
+<p>If no valid data is left for the plot (for example, when temporal colocation removes all of it because the models do not have data at the same times and stations), a warning is shown, no plot is made and <code class="docutils literal notranslate"><span class="pre">plot_obj</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
 <p>To save the plot, the following argument can be passed:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">save</span><span class="o">=</span><span class="s1">&#39;fname&#39;</span>
 </pre></div>
@@ -434,6 +445,11 @@
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">lonmin</span></code>, <code class="docutils literal notranslate"><span class="pre">lonmax</span></code>, <code class="docutils literal notranslate"><span class="pre">latmin</span></code>, and <code class="docutils literal notranslate"><span class="pre">latmax</span></code> are the rectangular bounds of the map extent, e.g.: <code class="docutils literal notranslate"><span class="pre">map_extent</span> <span class="pre">=</span> <span class="pre">[-180,</span> <span class="pre">180,</span> <span class="pre">-90,</span> <span class="pre">90]</span></code></p>
+<p>The projection of the map is the one set in <code class="docutils literal notranslate"><span class="pre">settings/plot_characteristics.yaml</span></code> (see <a class="reference internal" href="Plot-customisation.html"><span class="std std-doc">Plot customisation</span></a>). It can be changed by passing the argument:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">projection</span> <span class="o">=</span> <span class="s1">&#39;Mollweide&#39;</span>
+</pre></div>
+</div>
+<p>with the name of any of the projections listed there. The projection is kept for the maps made afterwards, until another one is passed.</p>
 <p>The available plot options are: <code class="docutils literal notranslate"><span class="pre">annotate</span></code> and <code class="docutils literal notranslate"><span class="pre">domain</span></code>.</p>
 </section>
 <section id="timeseries">

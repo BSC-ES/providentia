@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Redirecting output to a file &mdash; Providentia 3.1.0 documentation</title>
+  <title>Redirecting output to a file &mdash; Providentia 4.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=dd1205ac"></script>
+      <script src="_static/documentation_options.js?v=3304f9e4"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -126,14 +126,14 @@
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Link to this heading"></a></h2>
 <p>To enable logging, use the <code class="docutils literal notranslate"><span class="pre">--logfile</span></code> argument when running Providentia from the command line in <strong>Dashboard</strong>, <strong>Report</strong>, and <strong>Download</strong> modes.</p>
-<p>To enable logging in a notebook, set the <code class="docutils literal notranslate"><span class="pre">logfile</span></code> argument when calling <code class="docutils literal notranslate"><span class="pre">Interactive</span></code>, as explained below. In this case, each Providentia object will be linked to a single log file.</p>
+<p>To enable logging in a notebook, set the <code class="docutils literal notranslate"><span class="pre">logfile</span></code> argument when creating a <code class="docutils literal notranslate"><span class="pre">Providentia</span></code> object (see <a class="reference internal" href="Library.html"><span class="std std-doc">Library mode</span></a>), as explained below. In this case, each Providentia object will be linked to a single log file.</p>
 <section id="default-logging">
 <h3>Default logging<a class="headerlink" href="#default-logging" title="Link to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./bin/providentia<span class="w"> </span>--logfile
 </pre></div>
 </div>
 <p>In the notebook mode, the command looks like this:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Interactive</span><span class="p">(</span><span class="n">conf</span><span class="o">=</span><span class="s1">&#39;debug.conf&#39;</span><span class="p">,</span><span class="n">logfile</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">Providentia</span><span class="p">(</span><span class="s1">&#39;debug.conf&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This command will create a log file inside the <code class="docutils literal notranslate"><span class="pre">logs</span></code> folder within the directory corresponding to the active mode. For example, logs generated in dashboard mode will be saved in <code class="docutils literal notranslate"><span class="pre">logs/dashboard</span></code>. The log files are named with a timestamp in the format <code class="docutils literal notranslate"><span class="pre">%Y%m%d%H%M%S.log</span></code>, such as <code class="docutils literal notranslate"><span class="pre">20250313123045.log</span></code>.</p>
@@ -145,7 +145,7 @@
 </pre></div>
 </div>
 <p>In the notebook mode, it is like this:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Interactive</span><span class="p">(</span><span class="n">conf</span><span class="o">=</span><span class="s1">&#39;debug.conf&#39;</span><span class="p">,</span><span class="n">logfile</span><span class="o">=</span><span class="s1">&#39;custom_filename&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">Providentia</span><span class="p">(</span><span class="s1">&#39;debug.conf&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="s1">&#39;custom_filename&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This will save the log file with the name <code class="docutils literal notranslate"><span class="pre">custom_filename</span></code> inside the default <code class="docutils literal notranslate"><span class="pre">logs</span></code> folder.</p>
@@ -157,7 +157,7 @@
 </pre></div>
 </div>
 <p>In the notebook mode, it is like this:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Interactive</span><span class="p">(</span><span class="n">conf</span><span class="o">=</span><span class="s1">&#39;debug.conf&#39;</span><span class="p">,</span><span class="n">logfile</span><span class="o">=</span><span class="s1">&#39;/custom/path/custom_filename&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">Providentia</span><span class="p">(</span><span class="s1">&#39;debug.conf&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="s1">&#39;/custom/path/custom_filename&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This will save the log file in <code class="docutils literal notranslate"><span class="pre">/custom/path/</span></code> with the name <code class="docutils literal notranslate"><span class="pre">custom_filename</span></code>. Ensure that the specified path exists, Providentia will not create non-existent directories.</p>

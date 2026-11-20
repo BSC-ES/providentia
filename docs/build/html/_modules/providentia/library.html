@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>providentia.library &mdash; Providentia 3.1.0 documentation</title>
+  <title>providentia.library &mdash; Providentia 4.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=7ae09063" />
@@ -13,7 +13,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=dd1205ac"></script>
+      <script src="../../_static/documentation_options.js?v=3304f9e4"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -94,10 +94,9 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.gridspec</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gridspec</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">mpl_toolkits.axisartist.floating_axes</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fa</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">cartopy.crs</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ccrs</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
@@ -116,15 +115,9 @@
     <span class="n">coverage_conf</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.filter</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFilter</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.plotting</span><span class="w"> </span><span class="kn">import</span> <span class="n">Plotting</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.plot_aux</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_taylor_diagram_ghelper</span><span class="p">,</span> <span class="n">download_plot_data_to_csv</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.plot_formatting</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">format_plot_options</span><span class="p">,</span>
-    <span class="n">format_axis</span><span class="p">,</span>
-    <span class="n">set_axis_label</span><span class="p">,</span>
-    <span class="n">set_axis_title</span><span class="p">,</span>
-    <span class="n">harmonise_xy_lims_paradigm</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.plotting_dash</span><span class="w"> </span><span class="kn">import</span> <span class="n">PlottingDash</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.plotting_pyqt</span><span class="w"> </span><span class="kn">import</span> <span class="n">PlottingPyQt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.plot_aux</span><span class="w"> </span><span class="kn">import</span> <span class="n">download_plot_data_to_csv</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.read</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataReader</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.read_aux</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">generate_file_trees</span><span class="p">,</span>
@@ -171,14 +164,17 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">Providentia</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for Providentia Library mode&quot;&quot;&quot;</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;matplotlib&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the library mode environment</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        config : str</span>
-<span class="sd">            Path to the configuration file.</span>
+<span class="sd">        config : str, optional</span>
+<span class="sd">            Path to the configuration file. If not given, the configuration is</span>
+<span class="sd">            taken from the passed arguments and the defaults.</span>
+<span class="sd">        backend : str, optional</span>
+<span class="sd">            Library that draws the plots, &#39;matplotlib&#39; (default) or &#39;plotly&#39;.</span>
 <span class="sd">        **kwargs : dict</span>
 <span class="sd">            Optional command-line arguments that override default configuration values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -219,7 +215,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">datareader</span> <span class="o">=</span> <span class="n">DataReader</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="c1"># check for self defined plot characteristics file</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tests</span><span class="p">:</span>
+        <span class="c1"># the plot characteristics of plotly figures are those of the website</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;plotly&quot;</span><span class="p">:</span>
+            <span class="n">mode</span> <span class="o">=</span> <span class="s2">&quot;website&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">tests</span><span class="p">:</span>
             <span class="n">mode</span> <span class="o">=</span> <span class="s2">&quot;tests&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">mode</span> <span class="o">=</span> <span class="s2">&quot;library&quot;</span>
@@ -232,8 +231,17 @@
             <span class="n">plot_characteristics</span><span class="p">,</span> <span class="n">mode</span>
         <span class="p">)</span>
 
-        <span class="c1"># initialise Plotting class</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">plotting</span> <span class="o">=</span> <span class="n">Plotting</span><span class="p">(</span><span class="n">read_instance</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">canvas_instance</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="c1"># initialise Plotting class of the backend (PlottingPyQt draws with matplotlib,</span>
+        <span class="c1"># PlottingDash with plotly)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backend</span> <span class="o">=</span> <span class="n">backend</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;matplotlib&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plotting</span> <span class="o">=</span> <span class="n">PlottingPyQt</span><span class="p">(</span><span class="n">read_instance</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">canvas_instance</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;plotly&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plotting</span> <span class="o">=</span> <span class="n">PlottingDash</span><span class="p">(</span><span class="n">read_instance</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">canvas_instance</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Backend </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">backend</span><span class="si">}</span><span class="s2"> is not available&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">valid_config</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">return</span>
 
         <span class="c1"># add general plot characteristics to self</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics_templates</span><span class="p">[</span><span class="s2">&quot;general&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -617,6 +625,7 @@
         <span class="n">save_data</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">save_data_path</span><span class="o">=</span><span class="s2">&quot;saved_data&quot;</span><span class="p">,</span>
         <span class="n">tests_generate_output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">projection</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Wrapper method to make a Providentia plot.</span>
@@ -691,6 +700,9 @@
 <span class="sd">            Path to save data, defaults to folder saved_data</span>
 <span class="sd">        tests_generate_output : bool, optional</span>
 <span class="sd">            Indicates if tests need to regenerate CSV files with plot data</span>
+<span class="sd">        projection : str, optional</span>
+<span class="sd">            Projection of the map (name of a cartopy.crs projection, e.g. Mollweide), defaults</span>
+<span class="sd">            to None, which keeps the current one. It is kept for the maps made afterwards.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -805,6 +817,20 @@
             <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
             <span class="k">return</span>
         <span class="n">speci</span> <span class="o">=</span> <span class="n">networkspeci</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># do not make plot if no valid data is left, unless it does not need the data of</span>
+        <span class="c1"># this networkspeci (as in report mode)</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">base_plot_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;table&quot;</span><span class="p">,</span> <span class="s2">&quot;heatmap&quot;</span><span class="p">,</span> <span class="s2">&quot;statsummary&quot;</span><span class="p">,</span> <span class="s2">&quot;legend&quot;</span><span class="p">,</span> <span class="s2">&quot;metadata&quot;</span><span class="p">]</span>
+            <span class="ow">and</span> <span class="s2">&quot;multispecies&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">plot_options</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_station_data</span><span class="p">[</span><span class="n">networkspeci</span><span class="p">]</span>
+        <span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;There is no valid data for </span><span class="si">{</span><span class="n">networkspeci</span><span class="si">}</span><span class="s2">, not making </span><span class="si">{</span><span class="n">plot_type</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">temporal_colocation</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot; With temporal colocation, all data needs to be valid at the same&quot;</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot; times and stations, try deactivating it.&quot;</span>
+            <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+            <span class="k">return</span>
 
         <span class="k">if</span> <span class="p">(</span><span class="n">multispecies</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
             <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">measurement_units</span><span class="o">.</span><span class="n">values</span><span class="p">())))</span> <span class="o">&gt;</span> <span class="mi">1</span>
@@ -1096,86 +1122,44 @@
         <span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">][</span><span class="s2">&quot;smooth&quot;</span><span class="p">][</span><span class="s2">&quot;window&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">smooth_window</span>
 
+        <span class="c1"># set the projection of maps if passed, which is kept for the maps made afterwards</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">projection</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">base_plot_type</span> <span class="o">==</span> <span class="s2">&quot;map&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ccrs</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">projection</span><span class="p">)):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s2">&quot;Projection </span><span class="si">{}</span><span class="s2"> is not available in cartopy.crs&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">projection</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">return</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics_templates</span><span class="p">[</span><span class="s2">&quot;map&quot;</span><span class="p">][</span><span class="s2">&quot;projection&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">projection</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plotcrs</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ccrs</span><span class="p">,</span> <span class="n">projection</span><span class="p">)()</span>
+
         <span class="c1"># if map extent passed not passed as argument, set it as value from .conf in memory</span>
         <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">map_extent</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map_extent</span><span class="p">):</span>
             <span class="n">map_extent</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map_extent</span><span class="p">)</span>
 
-        <span class="c1"># create figure</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">width</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">height</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
-            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Width and/or height have not been passed. The default values will be set.&quot;</span>
-            <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
-            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">][</span><span class="s2">&quot;figsize&quot;</span><span class="p">])</span>
-
-        <span class="c1"># create axes</span>
-        <span class="n">main_gs</span> <span class="o">=</span> <span class="n">gridspec</span><span class="o">.</span><span class="n">GridSpec</span><span class="p">(</span>
-            <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">][</span><span class="s2">&quot;main_gs&quot;</span><span class="p">]</span>
-        <span class="p">)</span>
-        <span class="k">if</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s2">&quot;map&quot;</span><span class="p">:</span>
-            <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">main_gs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">plotcrs</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s2">&quot;taylor&quot;</span><span class="p">:</span>
-            <span class="n">reference_stddev</span> <span class="o">=</span> <span class="mf">7.5</span>
-            <span class="n">ghelper</span> <span class="o">=</span> <span class="n">get_taylor_diagram_ghelper</span><span class="p">(</span>
-                <span class="n">reference_stddev</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">]</span>
-            <span class="p">)</span>
-            <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span>
-                <span class="n">main_gs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">axes_class</span><span class="o">=</span><span class="n">fa</span><span class="o">.</span><span class="n">FloatingAxes</span><span class="p">,</span> <span class="n">grid_helper</span><span class="o">=</span><span class="n">ghelper</span>
-            <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s2">&quot;fairmode-statsummary&quot;</span><span class="p">:</span>
-            <span class="c1"># get current species</span>
-            <span class="n">speci</span> <span class="o">=</span> <span class="n">networkspeci</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-
-            <span class="c1"># get number of rows and columns</span>
-            <span class="n">ncols</span> <span class="o">=</span> <span class="mi">4</span>
-            <span class="n">nrows</span> <span class="o">=</span> <span class="mi">8</span> <span class="k">if</span> <span class="n">speci</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;sconco3&quot;</span><span class="p">,</span> <span class="s2">&quot;sconcno2&quot;</span><span class="p">,</span> <span class="s2">&quot;pm10&quot;</span><span class="p">]</span> <span class="k">else</span> <span class="mi">7</span>
-
-            <span class="c1"># create gridspec and add it to a list</span>
-            <span class="n">gs</span> <span class="o">=</span> <span class="n">gridspec</span><span class="o">.</span><span class="n">GridSpecFromSubplotSpec</span><span class="p">(</span>
-                <span class="n">nrows</span><span class="p">,</span>
-                <span class="n">ncols</span><span class="p">,</span>
-                <span class="n">subplot_spec</span><span class="o">=</span><span class="n">main_gs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="s2">&quot;fairmode-statsummary&quot;</span><span class="p">][</span><span class="s2">&quot;gridspec_kw&quot;</span><span class="p">],</span>
-            <span class="p">)</span>
-            <span class="n">ax</span> <span class="o">=</span> <span class="p">[</span><span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nrows</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ncols</span><span class="p">)]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">main_gs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-
-        <span class="k">if</span> <span class="n">base_plot_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;periodic&quot;</span><span class="p">,</span> <span class="s2">&quot;periodic-violin&quot;</span><span class="p">]:</span>
-            <span class="n">gs</span> <span class="o">=</span> <span class="n">gridspec</span><span class="o">.</span><span class="n">GridSpecFromSubplotSpec</span><span class="p">(</span>
-                <span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="n">subplot_spec</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">get_subplotspec</span><span class="p">()</span>
-            <span class="p">)</span>
-            <span class="n">grid_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-            <span class="n">grid_dict</span><span class="p">[</span><span class="s2">&quot;hour&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[:</span><span class="mi">46</span><span class="p">,</span> <span class="p">:])</span>
-            <span class="n">grid_dict</span><span class="p">[</span><span class="s2">&quot;dayofweek&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">54</span><span class="p">:,</span> <span class="mi">64</span><span class="p">:])</span>
-            <span class="n">grid_dict</span><span class="p">[</span><span class="s2">&quot;month&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">54</span><span class="p">:,</span> <span class="p">:</span><span class="mi">62</span><span class="p">])</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">&quot;top&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s2">&quot;none&quot;</span><span class="p">)</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">&quot;bottom&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s2">&quot;none&quot;</span><span class="p">)</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">&quot;left&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s2">&quot;none&quot;</span><span class="p">)</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">&quot;right&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s2">&quot;none&quot;</span><span class="p">)</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span>
-                <span class="n">labelcolor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="kc">False</span>
-            <span class="p">)</span>
-            <span class="n">relevant_ax</span> <span class="o">=</span> <span class="n">grid_dict</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">relevant_ax</span> <span class="o">=</span> <span class="n">ax</span>
-
-        <span class="c1"># adjust margings and subplot spacing if defined</span>
-        <span class="k">if</span> <span class="s2">&quot;subplots_adjust&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">]:</span>
-            <span class="n">fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span>
-                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">][</span><span class="s2">&quot;subplots_adjust&quot;</span><span class="p">]</span>
-            <span class="p">)</span>
-        <span class="c1"># get plotting function</span>
+        <span class="c1"># get plotting function, stopping if the backend cannot draw this plot</span>
         <span class="k">if</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s2">&quot;statsummary&quot;</span><span class="p">:</span>
-            <span class="n">func</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotting</span><span class="p">,</span> <span class="s2">&quot;make_table&quot;</span><span class="p">)</span>
+            <span class="n">func_name</span> <span class="o">=</span> <span class="s2">&quot;make_table&quot;</span>
         <span class="k">elif</span> <span class="n">base_plot_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;fairmode-target&quot;</span><span class="p">,</span> <span class="s2">&quot;fairmode-statsummary&quot;</span><span class="p">]:</span>
-            <span class="n">func</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">plotting</span><span class="p">,</span> <span class="s2">&quot;make_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">base_plot_type</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">))</span>
-            <span class="p">)</span>
+            <span class="n">func_name</span> <span class="o">=</span> <span class="s2">&quot;make_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">base_plot_type</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">))</span>
         <span class="k">elif</span> <span class="n">base_plot_type</span> <span class="o">!=</span> <span class="s2">&quot;legend&quot;</span><span class="p">:</span>
-            <span class="n">func</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">plotting</span><span class="p">,</span> <span class="s2">&quot;make_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">base_plot_type</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="p">)</span>
+            <span class="n">func_name</span> <span class="o">=</span> <span class="s2">&quot;make_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">base_plot_type</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        
+        <span class="c1"># check if function exists for selected backend</span>
+        <span class="k">if</span> <span class="n">base_plot_type</span> <span class="o">!=</span> <span class="s2">&quot;legend&quot;</span><span class="p">:</span>
+            <span class="n">func</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotting</span><span class="p">,</span> <span class="n">func_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s2">&quot;Plot type </span><span class="si">{}</span><span class="s2"> is not available with the </span><span class="si">{}</span><span class="s2"> backend&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">plot_type</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">backend</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">return</span>
+
+        <span class="c1"># create figure, and axes if the backend has them (main_gs is the matplotlib grid</span>
+        <span class="c1"># that has the plot in its first row and room for the legend in the second)</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">relevant_ax</span><span class="p">,</span> <span class="n">main_gs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotting</span><span class="o">.</span><span class="n">create_figure</span><span class="p">(</span>
+            <span class="n">plot_type</span><span class="p">,</span> <span class="n">base_plot_type</span><span class="p">,</span> <span class="n">networkspeci</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">legend</span>
+        <span class="p">)</span>
 
         <span class="c1"># set boolean on whether to plot obs in legend or not, and relevant data labels (data labels plotted)</span>
         <span class="k">if</span> <span class="p">(</span>
@@ -1245,7 +1229,8 @@
                 <span class="p">)</span>
 
             <span class="n">func</span><span class="p">(</span>
-                <span class="n">relevant_ax</span><span class="p">,</span>
+                <span class="c1"># PlottingDash draws on the plotly figure, PlottingPyQt on the matplotlib axis</span>
+                <span class="n">fig</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;plotly&quot;</span> <span class="k">else</span> <span class="n">relevant_ax</span><span class="p">,</span>
                 <span class="n">networkspeci</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span>
                 <span class="n">plot_options</span><span class="p">,</span>
@@ -1261,7 +1246,7 @@
         <span class="c1"># periodic plot</span>
         <span class="k">elif</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s2">&quot;periodic&quot;</span><span class="p">:</span>
             <span class="n">func</span><span class="p">(</span>
-                <span class="n">grid_dict</span><span class="p">,</span>
+                <span class="n">relevant_ax</span><span class="p">,</span>
                 <span class="n">networkspeci</span><span class="p">,</span>
                 <span class="n">data_labels</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span>
@@ -1288,11 +1273,21 @@
             <span class="c1"># fill dataframe</span>
             <span class="n">is_initial</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initialised</span><span class="p">)</span>
             <span class="n">kwargs</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
+            
             <span class="c1"># save current subsection</span>
             <span class="n">orig_ss</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subsection</span><span class="p">)</span>
+            
+            <span class="c1"># the website (ines-providentia) switches temporal colocation after reading by setting</span>
+            <span class="c1"># temporal_colocation, as the Temporal checkbox of the dashboard (filtering keeps the</span>
+            <span class="c1"># stations with and without colocation); library users reinitiate the class with it</span>
+            <span class="c1"># instead (see Library.md). set_config below would set it back to its value when the</span>
+            <span class="c1"># class was initialised, so the current value is kept (it cannot change per</span>
+            <span class="c1"># subsection, see fixed_section_vars in init.yaml)</span>
+            <span class="n">orig_temporal_colocation</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">temporal_colocation</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsections</span><span class="p">:</span>
                 <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;subsection&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ss</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">set_config</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">temporal_colocation</span> <span class="o">=</span> <span class="n">orig_temporal_colocation</span>
                 <span class="c1"># filter data</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">initialise</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">ns</span> <span class="ow">in</span> <span class="n">networkspecies</span><span class="p">:</span>
@@ -1363,7 +1358,8 @@
 
             <span class="c1"># make plot</span>
             <span class="n">func</span><span class="p">(</span>
-                <span class="n">relevant_ax</span><span class="p">,</span>
+                <span class="c1"># PlottingDash draws on the plotly figure, PlottingPyQt on the matplotlib axis</span>
+                <span class="n">fig</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;plotly&quot;</span> <span class="k">else</span> <span class="n">relevant_ax</span><span class="p">,</span>
                 <span class="n">networkspeci</span><span class="p">,</span>
                 <span class="n">relevant_data_labels</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span>
@@ -1377,6 +1373,7 @@
             <span class="c1"># re-filter for original subsection</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;subsection&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">orig_ss</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_config</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">temporal_colocation</span> <span class="o">=</span> <span class="n">orig_temporal_colocation</span>
             <span class="k">if</span> <span class="n">is_initial</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">initialise</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -1398,9 +1395,18 @@
             <span class="n">kwargs</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="c1"># save current subsection</span>
             <span class="n">orig_ss</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subsection</span><span class="p">)</span>
+            
+            <span class="c1"># the website (ines-providentia) switches temporal colocation after reading by setting</span>
+            <span class="c1"># temporal_colocation, as the Temporal checkbox of the dashboard (filtering keeps the</span>
+            <span class="c1"># stations with and without colocation); library users reinitiate the class with it</span>
+            <span class="c1"># instead (see Library.md). set_config below would set it back to its value when the</span>
+            <span class="c1"># class was initialised, so the current value is kept (it cannot change per</span>
+            <span class="c1"># subsection, see fixed_section_vars in init.yaml)</span>
+            <span class="n">orig_temporal_colocation</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">temporal_colocation</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsections</span><span class="p">:</span>
                 <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;subsection&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ss</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">set_config</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">temporal_colocation</span> <span class="o">=</span> <span class="n">orig_temporal_colocation</span>
                 <span class="c1"># filter data</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">initialise</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">ns</span> <span class="ow">in</span> <span class="n">networkspecies</span><span class="p">:</span>
@@ -1448,7 +1454,8 @@
 
             <span class="c1"># make plot</span>
             <span class="n">func</span><span class="p">(</span>
-                <span class="n">relevant_ax</span><span class="p">,</span>
+                <span class="c1"># PlottingDash draws on the plotly figure, PlottingPyQt on the matplotlib axis</span>
+                <span class="n">fig</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;plotly&quot;</span> <span class="k">else</span> <span class="n">relevant_ax</span><span class="p">,</span>
                 <span class="n">networkspeci</span><span class="p">,</span>
                 <span class="n">relevant_data_labels</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span>
@@ -1461,6 +1468,7 @@
             <span class="c1"># re-filter for original subsection</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;subsection&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">orig_ss</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_config</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">temporal_colocation</span> <span class="o">=</span> <span class="n">orig_temporal_colocation</span>
             <span class="k">if</span> <span class="n">is_initial</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">initialise</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -1469,7 +1477,8 @@
         <span class="c1"># make timeseries plot</span>
         <span class="k">elif</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s2">&quot;timeseries&quot;</span><span class="p">:</span>
             <span class="n">func</span><span class="p">(</span>
-                <span class="n">relevant_ax</span><span class="p">,</span>
+                <span class="c1"># PlottingDash draws on the plotly figure, PlottingPyQt on the matplotlib axis</span>
+                <span class="n">fig</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;plotly&quot;</span> <span class="k">else</span> <span class="n">relevant_ax</span><span class="p">,</span>
                 <span class="n">networkspeci</span><span class="p">,</span>
                 <span class="n">data_labels</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span>
@@ -1696,104 +1705,34 @@
                         <span class="n">speci</span> <span class="o">=</span> <span class="n">networkspeci</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
                         <span class="n">title</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fairmode_settings</span><span class="p">[</span><span class="n">speci</span><span class="p">][</span><span class="s2">&quot;title&quot;</span><span class="p">])</span>
 
-        <span class="c1"># overwrite passed xlabels and ylabels</span>
-        <span class="k">if</span> <span class="n">title</span><span class="p">:</span>
-            <span class="n">set_axis_title</span><span class="p">(</span>
-                <span class="bp">self</span><span class="p">,</span> <span class="n">relevant_ax</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">]</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="n">xlabel</span><span class="p">:</span>
-            <span class="n">set_axis_label</span><span class="p">(</span>
-                <span class="n">relevant_ax</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">]</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="n">ylabel</span><span class="p">:</span>
-            <span class="n">set_axis_label</span><span class="p">(</span>
-                <span class="n">relevant_ax</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">]</span>
-            <span class="p">)</span>
+        <span class="c1"># keep gridded models in the legend only on a map drawn over their grid</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">base_plot_type</span> <span class="o">==</span> <span class="s2">&quot;map&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">grid_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="n">legend_data_labels</span> <span class="o">=</span> <span class="n">data_labels</span>
 
-        <span class="c1"># format plot axis/axes</span>
-        <span class="n">format_axis</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="bp">self</span><span class="p">,</span>
+        <span class="c1"># set title and, where the backend has axes, format them and add legend and colourbar</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotting</span><span class="o">.</span><span class="n">format_figure</span><span class="p">(</span>
+            <span class="n">fig</span><span class="p">,</span>
             <span class="n">relevant_ax</span><span class="p">,</span>
-            <span class="n">base_plot_type</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span>
-            <span class="n">map_extent</span><span class="o">=</span><span class="n">map_extent</span><span class="p">,</span>
-        <span class="p">)</span>
-
-        <span class="c1"># format plot options</span>
-        <span class="n">format_plot_options</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">relevant_ax</span><span class="p">,</span>
-            <span class="p">[</span><span class="n">relevant_data_labels</span><span class="p">],</span>
-            <span class="n">networkspeci</span><span class="p">,</span>
-            <span class="n">base_plot_type</span><span class="p">,</span>
+            <span class="n">main_gs</span><span class="p">,</span>
             <span class="n">plot_type</span><span class="p">,</span>
+            <span class="n">base_plot_type</span><span class="p">,</span>
+            <span class="n">networkspeci</span><span class="p">,</span>
             <span class="n">plot_options</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+            <span class="n">xlabel</span><span class="o">=</span><span class="n">xlabel</span><span class="p">,</span>
+            <span class="n">ylabel</span><span class="o">=</span><span class="n">ylabel</span><span class="p">,</span>
+            <span class="n">relevant_data_labels</span><span class="o">=</span><span class="n">relevant_data_labels</span><span class="p">,</span>
+            <span class="n">legend_data_labels</span><span class="o">=</span><span class="n">legend_data_labels</span><span class="p">,</span>
+            <span class="n">legend</span><span class="o">=</span><span class="n">legend</span><span class="p">,</span>
+            <span class="n">set_obs_legend</span><span class="o">=</span><span class="n">set_obs_legend</span><span class="p">,</span>
+            <span class="n">cb</span><span class="o">=</span><span class="n">cb</span><span class="p">,</span>
+            <span class="n">zstat</span><span class="o">=</span><span class="n">zstat</span><span class="p">,</span>
+            <span class="n">speci</span><span class="o">=</span><span class="n">speci</span><span class="p">,</span>
+            <span class="n">labela</span><span class="o">=</span><span class="n">labela</span><span class="p">,</span>
             <span class="n">map_extent</span><span class="o">=</span><span class="n">map_extent</span><span class="p">,</span>
             <span class="n">chunk_stat</span><span class="o">=</span><span class="n">chunk_stat</span><span class="p">,</span>
             <span class="n">chunk_resolution</span><span class="o">=</span><span class="n">chunk_resolution</span><span class="p">,</span>
         <span class="p">)</span>
-
-        <span class="c1"># handle harmonisation of axes</span>
-        <span class="k">if</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s2">&quot;scatter&quot;</span><span class="p">:</span>
-            <span class="n">harmonise_xy_lims_paradigm</span><span class="p">(</span>
-                <span class="bp">self</span><span class="p">,</span>
-                <span class="bp">self</span><span class="p">,</span>
-                <span class="n">relevant_ax</span><span class="p">,</span>
-                <span class="n">base_plot_type</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span>
-                <span class="n">plot_options</span><span class="p">,</span>
-                <span class="n">relim</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">base_plot_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span>
-            <span class="s2">&quot;legend&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;metadata&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;map&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;taylor&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;fairmode-statsummary&quot;</span><span class="p">,</span>
-        <span class="p">]:</span>
-            <span class="n">harmonise_xy_lims_paradigm</span><span class="p">(</span>
-                <span class="bp">self</span><span class="p">,</span>
-                <span class="bp">self</span><span class="p">,</span>
-                <span class="n">relevant_ax</span><span class="p">,</span>
-                <span class="n">base_plot_type</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span>
-                <span class="n">plot_options</span><span class="p">,</span>
-                <span class="n">relim</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">autoscale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="p">)</span>
-
-        <span class="c1"># make legend (embedded on plot axis)</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">legend</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">base_plot_type</span> <span class="o">!=</span> <span class="s2">&quot;legend&quot;</span><span class="p">):</span>
-            <span class="k">if</span> <span class="s2">&quot;legend&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">]:</span>
-                <span class="c1"># only make map legend in &#39;domain&#39; plot option is a active</span>
-                <span class="c1"># also remove observations from legend</span>
-                <span class="n">valid_legend</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="k">if</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s2">&quot;map&quot;</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="s2">&quot;domain&quot;</span> <span class="ow">in</span> <span class="n">plot_options</span><span class="p">:</span>
-                        <span class="n">set_obs_legend</span> <span class="o">=</span> <span class="kc">False</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">valid_legend</span> <span class="o">=</span> <span class="kc">False</span>
-
-                <span class="k">if</span> <span class="n">valid_legend</span><span class="p">:</span>
-                    <span class="c1"># keep gridded models only on a map drawn over their grid</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="n">base_plot_type</span> <span class="o">==</span> <span class="s2">&quot;map&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">grid_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
-                        <span class="n">legend_data_labels</span> <span class="o">=</span> <span class="n">data_labels</span>
-                    <span class="n">legend_handles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span>
-                        <span class="n">plot_type</span><span class="p">,</span> <span class="n">data_labels</span><span class="o">=</span><span class="n">legend_data_labels</span><span class="p">,</span> <span class="n">set_obs</span><span class="o">=</span><span class="n">set_obs_legend</span><span class="p">,</span>
-                        <span class="n">map_grid_data_label</span><span class="o">=</span><span class="n">labela</span> <span class="k">if</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s2">&quot;map&quot;</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-                    <span class="p">)</span>
-                    <span class="n">legend_ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">main_gs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-                    <span class="n">legend_ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
-                    <span class="n">legend_ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="o">**</span><span class="n">legend_handles</span><span class="p">)</span>
-
-        <span class="c1"># make colourbar (embedded on plot axis)</span>
-        <span class="k">if</span> <span class="s2">&quot;cb&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">]:</span>
-            <span class="n">cb_ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">colourbar</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">relevant_ax</span><span class="p">,</span> <span class="n">zstat</span><span class="p">,</span> <span class="n">speci</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">)</span>
-            <span class="c1"># hide colourbar if requested, we still need to create it to get the correct cmap / bounds in the maps</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">cb</span><span class="p">:</span>
-                <span class="n">cb_ax</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="c1"># download data to CSV file</span>
         <span class="k">if</span> <span class="n">save_data</span><span class="p">:</span>
@@ -2045,11 +1984,19 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">provconf</span> <span class="o">=</span> <span class="n">ProvConfiguration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># for any passed arguments not in default Providentia variables, now set them to self</span>
+        <span class="c1"># (aliases, e.g. model for experiments, are kept as parsed by ProvConfiguration, as</span>
+        <span class="c1"># check_validity moves their parsed value to the destination field)</span>
+        <span class="n">alias_options</span> <span class="o">=</span> <span class="p">[</span><span class="n">option</span> <span class="k">for</span> <span class="n">options</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">aliases</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">kwarg</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">kwarg</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">provconf</span><span class="o">.</span><span class="n">init</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">kwarg</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">provconf</span><span class="o">.</span><span class="n">init</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">kwarg</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">alias_options</span><span class="p">):</span>
                 <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kwarg</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">kwarg</span><span class="p">])</span>
 
         <span class="c1"># update variables to set from config file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">from_conf</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># subsection variables, none without a configuration file or a subsection (they are</span>
+        <span class="c1"># removed after each plot of statistics, see plot)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subsection_opts</span> <span class="o">=</span> <span class="p">{}</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
             <span class="n">read_conf</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">):</span>
@@ -2066,9 +2013,24 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
                 <span class="k">return</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">error</span> <span class="o">=</span> <span class="s2">&quot;Error: The configuration file must be given as an argument: e.g. &#39;config=...&#39;&quot;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
-            <span class="k">return</span>
+            <span class="c1"># without configuration file, fields are taken from the passed arguments</span>
+            <span class="c1"># or the defaults (as in the dashboard without configuration file)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">provconf</span><span class="o">.</span><span class="n">check_validity</span><span class="p">()</span>
+
+            <span class="c1"># there are no sections or subsections, so a placeholder is set</span>
+            <span class="c1"># for the loops over subsections (e.g. in statsummary, heatmap and table plots)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">section</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">|</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">speci</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">network</span><span class="p">,</span> <span class="n">speci</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">subsection</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">section</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">subsections</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">section</span><span class="p">]</span>
+
+            <span class="c1"># overwrite models variable if forecast active</span>
+            <span class="k">if</span> <span class="n">forecast_models</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">experiments</span> <span class="o">=</span> <span class="n">forecast_models</span>
+
+            <span class="k">return</span> <span class="kc">True</span>
 
         <span class="c1"># parse section</span>
         <span class="c1"># if section name provided, try and use that</span>
@@ -2214,6 +2176,11 @@
                 <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;No valid configuration was passed&quot;</span>
                 <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
                 <span class="k">return</span>
+            <span class="c1"># nothing to print if the configuration was only set from arguments</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;No configuration file was passed, the configuration was set from arguments.&quot;</span>
+                <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+                <span class="k">return</span>
             <span class="n">conf</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
 
         <span class="c1"># check if file exists</span>
@@ -2229,6 +2196,48 @@
         <span class="c1"># open and read if it exists</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="Providentia.available_models">
+<a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.available_models">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">available_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get models with data for the networks, species, resolution and dates of the</span>
+<span class="sd">        configuration, as listed in the models window of the dashboard.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            Models and whether they have interpolated and gridded data, sorted by model</span>
+<span class="sd">            (e.g. {&quot;cams61_monarch_ph2-eu-000&quot;: {&quot;interpolated&quot;: True, &quot;gridded&quot;: False}}).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># check have valid conf</span>
+        <span class="n">valid_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">have_valid_config</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_config</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{}</span>
+
+        <span class="c1"># update available models for selected fields</span>
+        <span class="n">get_valid_models</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start_date</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">end_date</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">networkspecies</span>
+        <span class="p">)</span>
+
+        <span class="c1"># models are nested per network (interpolated) or domain (gridded), resolution and species</span>
+        <span class="c1"># (e.g. {&quot;EBAS&quot;: {&quot;hourly&quot;: {&quot;sconco3&quot;: {&quot;cams61-eu-000&quot;: [&quot;201801&quot;, ...]}}}})</span>
+        <span class="n">models</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">model_type</span><span class="p">,</span> <span class="n">model_data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_model_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">resolutions</span> <span class="ow">in</span> <span class="n">model_data</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">species</span> <span class="ow">in</span> <span class="n">resolutions</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                    <span class="k">for</span> <span class="n">speci_models</span> <span class="ow">in</span> <span class="n">species</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">speci_models</span><span class="p">:</span>
+                            <span class="n">models</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;interpolated&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;gridded&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">})</span>
+                            <span class="n">models</span><span class="p">[</span><span class="n">model</span><span class="p">][</span><span class="n">model_type</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
