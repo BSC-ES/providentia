@@ -66,7 +66,7 @@ class Providentia(object):
             args = self.parser.parse_args()
 
             # disable dashboard if other mode is active
-            if args.download or args.interpolation or args.report:
+            if args.download or args.interpolation or args.report or args.website:
                 args.dashboard = False
 
             LOG.info(args)
@@ -85,6 +85,8 @@ class Providentia(object):
                 from .interpolation.experiment_interpolation_submission import main
             elif args.download:
                 from .download import main
+            elif args.website:
+                from ines_providentia.website import main
             else:
                 from .dashboard import main
 

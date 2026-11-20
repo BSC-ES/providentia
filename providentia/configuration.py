@@ -14,8 +14,14 @@ import sys
 import numpy as np
 import yaml
 
-from providentia.auxiliar import CURRENT_PATH, join, get_machine
-from providentia.read_aux import check_for_ghost, get_default_qa
+from providentia.auxiliar import (
+    CURRENT_PATH,
+    join,
+    load_species_reference,
+    get_machine,
+    resolve_plots_or_preset,
+)
+from providentia.read_aux import apply_ghost_version_fields, check_for_ghost, get_default_qa
 from providentia.warnings_prv import show_message
 
 # get current path and providentia root path
@@ -39,8 +45,19 @@ wildcard = yaml.safe_load(
 available_inputs = yaml.safe_load(
     open(join(PROVIDENTIA_ROOT, "settings", "available_inputs.yaml"))
 )
-init = yaml.safe_load(
-    open(join(PROVIDENTIA_ROOT, "settings", "internal", "init.yaml"))
+init = yaml.safe_load(open(join(PROVIDENTIA_ROOT, "settings", "internal", "init.yaml")))
+# named presets a single "report_plots" or "dashboard_plots" entry can refer
+# to (see Report.run() and check_validity()'s "dashboard_plots" handling)
+report_plots_presets = yaml.safe_load(
+    open(join(PROVIDENTIA_ROOT, "settings", "report_plots.yaml"))
+)
+# valid base plot types, checked against a single "dashboard_plots" entry
+# before treating it as a preset name above - a real plot type wins as
+# itself even if a preset happens to share its name (see resolve_plots_or_preset())
+known_plot_types = set(
+    yaml.safe_load(
+        open(join(PROVIDENTIA_ROOT, "settings", "plot_characteristics.yaml"))
+    ).keys()
 )
 actris_standard_metadata = yaml.safe_load(
     open(
@@ -52,6 +69,30 @@ actris_standard_metadata = yaml.safe_load(
 
 # set current MACHINE
 MACHINE = get_machine()
+
+
+def get_data_path(machine, path_key):
+    """
+    Get a root data path for a machine from settings/data_paths.yaml.
+
+    Parameters
+    ----------
+    machine : str
+        Machine name as defined in data_paths.yaml (e.g. "local", "mn5")
+    path_key : str
+        One of "ghost_root", "nonghost_root", "mod_root", "mod_to_interp_root"
+
+    Returns
+    -------
+    str
+        Path with "~" expanded, or "" if the path is undefined for that machine
+    """
+
+    path = data_paths[machine][path_key]
+    if path == "":
+        return path
+
+    return os.path.expanduser(path[0]) + path[1:]
 
 
 def parse_path(dir, f):
@@ -100,22 +141,27 @@ class ProvConfiguration:
             non_library = [m for m in active_modes if m not in "library"]
             self.read_instance.mode = non_library[0]
 
-        # initialise command line values or empty values in empty_init, otherwise 
+        # initialise command line values or empty values in empty_init, otherwise
         self.init = init["empty_init"]
         self.init.update(self.required_init)
         self.init.update(available_inputs)
+
+        # direct output to filescreen before parsing the rest of values, so errors
+        # found while parsing command line values can be logged (only needs mode and logfile)
+        self.read_instance.logfile = self.parse_parameter(
+            "logfile", kwargs.get("logfile", self.init["logfile"])
+        )
+        self.switch_logging()
 
         for k, val in self.init.items():
             val = kwargs.get(k, val)
             setattr(self.read_instance, k, self.parse_parameter(k, val))
 
-        # direct output to filescreen
-        self.switch_logging()
-
         # set default values of the current mode
+        # (dashboard and library can be launched without configuration file)
         self.read_instance.default_values = (
-            defaults["dashboard_empty"]
-            if self.read_instance.mode == "dashboard"
+            defaults["no_conf"]
+            if self.read_instance.mode in ["dashboard", "library"]
             and self.read_instance.config == ""
             else defaults[self.read_instance.mode]
         )
@@ -255,8 +301,7 @@ class ProvConfiguration:
 
             # set default if left undefined
             if value == "":
-                ghost_root = data_paths[MACHINE]["ghost_root"]
-                return os.path.expanduser(ghost_root[0]) + ghost_root[1:]
+                return get_data_path(MACHINE, "ghost_root")
 
         elif key == "nonghost_root":
             # define non-GHOST observational root data directory (if undefined it is
@@ -264,26 +309,19 @@ class ProvConfiguration:
 
             # set default if left undefined
             if value == "":
-                nonghost_root = data_paths[MACHINE]["nonghost_root"]
-                return os.path.expanduser(nonghost_root[0]) + nonghost_root[1:]
+                return get_data_path(MACHINE, "nonghost_root")
 
         elif key == "mod_root":
             # define model root data directory
             # set model root data directory if left undefined
             if value == "":
-                mod_root = data_paths[MACHINE]["mod_root"]
-                return os.path.expanduser(mod_root[0]) + mod_root[1:]
+                return get_data_path(MACHINE, "mod_root")
 
         elif key == "mod_to_interp_root":
             # define model root data directory
             # set model root data directory if left undefined
             if value == "":
-                mod_to_interp_root = data_paths[MACHINE]["mod_to_interp_root"]
-                if mod_to_interp_root != "":
-                    return (
-                        os.path.expanduser(mod_to_interp_root[0])
-                        + mod_to_interp_root[1:]
-                    )
+                return get_data_path(MACHINE, "mod_to_interp_root")
 
         elif key == "ghost_version":
             # parse GHOST version
@@ -330,12 +368,21 @@ class ProvConfiguration:
                 for resolution_dict in standard_temporal_resolutions.values()
             ]
 
-            # modify standard parameter dictionary to have BSC standard parameter names as keys (rather than GHOST)
-            self.read_instance.parameter_dictionary = dict()
-            for _, param_dict in standard_parameters.items():
-                self.read_instance.parameter_dictionary[
-                    param_dict["bsc_parameter_name"]
-                ] = param_dict
+            # standard parameters of this GHOST version, with BSC standard parameter names as keys
+            # (rather than GHOST), only for the fields of its own observations (see
+            # apply_ghost_version_fields in read_aux.py)
+            self.read_instance.ghost_parameter_dictionary = {
+                param_dict["bsc_parameter_name"]: param_dict
+                for param_dict in standard_parameters.values()
+            }
+
+            # species, with their matrix, units and limits, from the species reference of
+            # Providentia, whatever the GHOST version (a copy, as its fields are replaced by those
+            # of the GHOST version for GHOST observations, and its limits can be changed)
+            self.read_instance.species_reference = load_species_reference()
+            self.read_instance.parameter_dictionary = copy.deepcopy(
+                self.read_instance.species_reference
+            )
 
             # get available species
             self.read_instance.available_species = list(
@@ -409,7 +456,10 @@ class ProvConfiguration:
             if self.read_instance.ghost_version not in ['1.2', '1.3', '1.3.1', '1.3.2']:
                 from GHOST_standards import providentia_defaults
 
-                if self.read_instance.network == ["actris/actris"]:
+                # in the dashboard, the defaults are those of the networks ticked in its menu,
+                # which are only read (network) when READ is clicked
+                networks = getattr(self.read_instance, "selected_network", self.read_instance.network)
+                if "actris/actris" in networks:
                     defaults = {
                         "flag": [],
                         "qa_standard": ["Invalid Data Provider Flags - GHOST Decreed"],
@@ -447,7 +497,7 @@ class ProvConfiguration:
                     else:
                         value = sorted(list(value))
                     # if we have an ACTRIS network, keep only qa that can be applied
-                    if self.read_instance.network == ["actris/actris"]:
+                    if "actris/actris" in self.read_instance.network:
                         value = [val for val in value if val in [6, 7]]
                     return value
                 # otherwise, set default QA per species (set later)
@@ -461,7 +511,10 @@ class ProvConfiguration:
 
                 from GHOST_standards import providentia_defaults
 
-                if self.read_instance.network == ["actris/actris"]:
+                # in the dashboard, the defaults are those of the networks ticked in its menu,
+                # which are only read (network) when READ is clicked
+                networks = getattr(self.read_instance, "selected_network", self.read_instance.network)
+                if "actris/actris" in networks:
                     defaults = {
                         "flag": [],
                         "qa_standard": ["Invalid Data Provider Flags - GHOST Decreed"],
@@ -608,12 +661,40 @@ class ProvConfiguration:
                 else:
                     return [value.strip().lower()]
 
+        elif key == "map_grid_forecast_lead_days":
+            # parse lead days averaged on the map grid, given as numbers or
+            # forecast days (e.g. '2, 4' or 'day2, day4'). Numbers arrive as int or tuple,
+            # as .conf values are evaluated when read, or as a list in library mode
+            if isinstance(value, (list, tuple)):
+                value = ",".join(str(lead_day) for lead_day in value)
+            value = str(value).strip()
+
+            # treat leaving the field blank as default (all loaded lead days)
+            if value == "":
+                return []
+
+            lead_days = []
+            for lead_day in value.split(","):
+                lead_day = lead_day.strip().lower().removeprefix("day")
+                if (not lead_day.isdigit()) or (int(lead_day) == 0):
+                    error = (
+                        f"Error: '{value}' is not valid for 'map_grid_forecast_lead_days'. "
+                        "Give lead days as numbers or forecast days, e.g. '2, 4' or 'day2, day4'. "
+                        "Lead days start at 1, so 0 is not accepted."
+                    )
+                    self.read_instance.logger.error(error)
+                    sys.exit(1)
+                lead_days.append(int(lead_day))
+
+            return sorted(set(lead_days))
+
         elif key in ["experiments", "experiment", "model", "models"]:
             # parse models
 
             if isinstance(value, str):
                 # empty string
                 if value == "":
+                    self.read_instance.alias = []
                     return []
                 # split models
                 else:
@@ -636,6 +717,9 @@ class ProvConfiguration:
                         self.read_instance.alias = []
 
                     return mods
+            # lists have no legend names in brackets (e.g. passed as argument from the library)
+            else:
+                self.read_instance.alias = []
 
         elif key == "map_extent":
             # parse map extent
@@ -740,11 +824,19 @@ class ProvConfiguration:
             else:
                 return {}
 
-        elif key == "active_dashboard_plots":
-            # parse active_dashboard_plots
+        # "active_dashboard_plots"/"report_type" are deprecated aliases
+        # (settings/internal/init.yaml) - parsed the same as what they alias
+        elif key in (
+            "dashboard_plots",
+            "active_dashboard_plots",
+            "report_plots",
+            "report_type",
+            "plots",
+        ):
+            # parse plot type list
 
             if isinstance(value, str):
-                # parse multiple active_dashboard_plots
+                # parse multiple plot types
                 if "," in value:
                     return [plot.strip() for plot in value.split(",")]
                 else:
@@ -840,8 +932,24 @@ class ProvConfiguration:
             If True, suppresses user-facing warnings.
         """
 
+        # the conf can carry the interpolation mode in a '::' tag (e.g. 'mod-eu-000::gridded'),
+        # it is taken off before splitting and re-attached once the final model str is built
+        model_types = []
+        untagged_models = []
+        for mod in self.read_instance.experiments:
+            mod_untagged, _, mod_type = mod.rpartition("::")
+            if not mod_untagged:
+                mod_untagged, mod_type = mod, ""
+            elif mod_type not in ["interpolated", "gridded"]:
+                error = (f"Invalid interpolation mode '{mod_type}' for model {mod}. "
+                         "Valid modes are 'interpolated' and 'gridded'.")
+                self.read_instance.logger.error(error)
+                sys.exit(1)
+            untagged_models.append(mod_untagged)
+            model_types.append(mod_type)
+
         # get separated model parts list
-        split_models = [mod.split("-") for mod in self.read_instance.experiments]
+        split_models = [mod.split("-") for mod in untagged_models]
 
         # get default ensemble
         default_ensemble = self.read_instance.default_values["ensemble"]
@@ -910,6 +1018,20 @@ class ProvConfiguration:
         domains = []
         ensembles = []
         forecasts = []
+        # forecast options set in the model field per model, for interpolated and gridded versions
+        model_forecasts = {}
+
+        # throw error if an alias contains the words used in data labels to find forecast options
+        # and gridded models (e.g. 'fc-daily', 'fc-day3', 'fc (gridded)'), as they would be taken as such
+        for alias in self.read_instance.alias:
+            forbidden_words = [
+                word for word in ["-daily", "-combined", "-day", "gridded"] if word in alias
+            ]
+            if forbidden_words:
+                error = f"Error: Model alias '{alias}' cannot contain {' or '.join(forbidden_words)}, "
+                error += "as these words mark forecast options and gridded models in data labels."
+                self.read_instance.logger.error(error)
+                sys.exit(1)
 
         # iterate through each model string
         for mod_ii, split_model in enumerate(split_models):
@@ -1048,6 +1170,17 @@ class ProvConfiguration:
                                         mod_id_alt, d_alt, e_alt
                                     )
 
+                                # save forecast option set in model field for this model and type
+                                model_forecasts.setdefault(
+                                    final_model, {"interpolated": set(), "gridded": set()}
+                                )[model_types[mod_ii] or "interpolated"].add(mod_fct)
+
+                                # re-attach the interpolation mode tag taken off above
+                                if model_types[mod_ii]:
+                                    final_model = "{}::{}".format(
+                                        final_model, model_types[mod_ii]
+                                    )
+
                                 # append domain, ensemble, and forecast to arrays if not None, and not already set
                                 if (d_alt is not None) & (d_alt not in domains):
                                     domains.append(d_alt)
@@ -1062,14 +1195,88 @@ class ProvConfiguration:
                                     if alias is not None:
                                         aliases.append(alias)
 
+        # throw error if a gridded model does not have the same forecast option as its
+        # interpolated versions, as gridded models loaded interpolated are read for their
+        # forecast days (a gridded model loaded alone has its own forecast option)
+        for model, model_forecast in model_forecasts.items():
+            if (not model_forecast["gridded"]) or (not model_forecast["interpolated"]):
+                continue
+            all_forecasts = model_forecast["gridded"] | model_forecast["interpolated"]
+            if len(all_forecasts) > 1:
+                options = ", ".join(sorted(fct if fct else "none" for fct in all_forecasts))
+                error = f"Error: Model {model} is loaded gridded with different forecast options ({options}). "
+                error += "Its gridded and interpolated versions must have the same forecast option, or none."
+                self.read_instance.logger.error(error)
+                sys.exit(1)
+
+        # save forecast options set in the model field per model (of its interpolated versions,
+        # or of its gridded version when it is loaded alone), to check when reading that models
+        # with forecast data do not have different ones, as they are applied to all models
+        # (it is only known when reading which models have forecast data)
+        self.read_instance.forecast_per_model = {
+            model: model_forecast["interpolated"] or model_forecast["gridded"]
+            for model, model_forecast in model_forecasts.items()
+        }
+
         # set models dictionary mapping models to aliases
         # it is mandatory to have the same number of models and alises, otherwise alises are dropped
         if (len(models) == len(aliases)) & (len(models) > 0):
             self.read_instance.alias_flag = True
+
+            # the gridded and non-gridded versions of an experiment are the same model, so
+            # they cannot be given different names, get the first alias given for each of them
+            alias_per_base_model = {}
+            model_inds_per_base_model = {}
+            overwritten_aliases = []
+            for mod_ii, (mod, alias) in enumerate(zip(models, aliases)):
+                base_model = mod.replace("::gridded", "").replace("::interpolated", "")
+                model_inds_per_base_model.setdefault(base_model, []).append(mod_ii)
+                if base_model not in alias_per_base_model:
+                    alias_per_base_model[base_model] = alias
+                elif alias != alias_per_base_model[base_model]:
+                    overwritten_aliases.append(
+                        "{} ({} --> {})".format(
+                            mod, alias, alias_per_base_model[base_model]
+                        )
+                    )
+
+            # set the shared alias for the models loaded in both interpolation modes, marking
+            # the gridded version, as the data labels have to stay unique to index the data
+            for base_model, mod_inds in model_inds_per_base_model.items():
+                if len(mod_inds) == 1:
+                    continue
+                for mod_ii in mod_inds:
+                    alias = alias_per_base_model[base_model]
+                    if models[mod_ii].endswith("::gridded"):
+                        alias = "{} (gridded)".format(alias)
+                    aliases[mod_ii] = alias
+
+            # inform that some of the aliases given have been overwritten
+            if overwritten_aliases:
+                msg = (
+                    "The gridded and non-gridded versions of a model cannot be given "
+                    "different aliases, keeping the first one given: {}.".format(
+                        ", ".join(overwritten_aliases)
+                    )
+                )
+                show_message(
+                    self.read_instance,
+                    msg,
+                    from_conf=self.read_instance.from_conf,
+                    deactivate=deactivate_warning,
+                )
+
             models = {mod: alias for mod, alias in zip(models, aliases)}
         else:
             self.read_instance.alias_flag = False
-            models = {mod: mod for mod in models}
+            models = {
+                mod: (
+                    "{} (gridded)".format(mod.rpartition("::")[0])
+                    if mod.endswith("::gridded")
+                    else (mod.rpartition("::")[0] or mod)
+                )
+                for mod in models
+            }
 
         # show warning if alias not possible to be set
         if (not self.read_instance.alias_flag) & (len(aliases) > 0):
@@ -1506,6 +1713,56 @@ class ProvConfiguration:
                         default[self.read_instance.statistic_mode],
                     )
 
+            # falls back to "plots", then the hardcoded default. Either way,
+            # a single entry can be a report_plots.yaml preset name (a real
+            # plot type wins first) - only the first 4 are kept, and if there are
+            # fewer, the empty positions are filled with "None"
+            elif field == "dashboard_plots":
+                if current_value in [[], "", None]:
+                    dashboard_plots = (
+                        self.read_instance.plots
+                        if self.read_instance.plots
+                        else default
+                    )
+                else:
+                    dashboard_plots = current_value
+
+                dashboard_plots = resolve_plots_or_preset(
+                    dashboard_plots, report_plots_presets, known_plot_types
+                )
+                if isinstance(dashboard_plots, dict):
+                    dashboard_plots = list(
+                        dict.fromkeys(
+                            dashboard_plots.get("summary", [])
+                            + dashboard_plots.get("station", [])
+                        )
+                    )
+                # the map is always in the first position of the dashboard, so drop it
+                map_plots = [plot for plot in dashboard_plots if plot.split("-")[0] == "map"]
+                if map_plots:
+                    msg = (
+                        f"{', '.join(map_plots)} ignored in the dashboard, as the map is always "
+                        "shown in its first position and its statistic is chosen in the map settings menu."
+                    )
+                    show_message(
+                        self.read_instance,
+                        msg,
+                        from_conf=self.read_instance.from_conf,
+                        deactivate=deactivate_warning,
+                    )
+                dashboard_plots = [
+                    plot for plot in dashboard_plots if plot.split("-")[0] != "map"
+                ][:4]
+                dashboard_plots += ["None"] * (4 - len(dashboard_plots))
+                setattr(self.read_instance, field, dashboard_plots)
+
+            # same as above, for report mode
+            elif (field == "report_plots") and (current_value in [[], "", None]):
+                if self.read_instance.plots:
+                    setattr(self.read_instance, field, self.read_instance.plots)
+                else:
+                    setattr(self.read_instance, field, default)
+
             # set the defined defaults
             elif current_value in [[], "", None]:
                 if default is not None:
@@ -1692,21 +1949,14 @@ class ProvConfiguration:
                     sys.exit(1)
                 self.read_instance.reading_ghost = is_ghost
 
-        # if are using dashboard then just take first network/species pair, as multivar not supported yet
-        if (
-            (len(self.read_instance.network) > 1)
-            and (len(self.read_instance.species) > 1)
-            and (self.read_instance.mode == "dashboard")
-        ):
-            msg = "Multiple networks/species are not supported in the dashboard. First ones will be taken."
-            show_message(
-                self.read_instance,
-                msg,
-                from_conf=self.read_instance.from_conf,
-                deactivate=deactivate_warning,
-            )
+        # fields of the GHOST version for GHOST observations, of the species reference otherwise
+        if self.read_instance.network:
+            apply_ghost_version_fields(self.read_instance)
 
+        # if only one network or species, save in list
+        if len(self.read_instance.network) == 1:
             self.read_instance.network = [self.read_instance.network[0]]
+        if len(self.read_instance.species) == 1:
             self.read_instance.species = [self.read_instance.species[0]]
 
         # initialise networkspeci as first network and species pair
@@ -1758,6 +2008,12 @@ class ProvConfiguration:
             # YYYYMMDD
             elif len(date) == 8:
                 if self.read_instance.mode == "interpolation":
+                    # interpolation works per month, so round end date up to the next month
+                    # when it is not the first day (end date is exclusive)
+                    if date_var_name == "end_date" and date[6:8] != "01":
+                        date = (
+                            datetime.strptime(date[:6], "%Y%m") + relativedelta(months=1)
+                        ).strftime("%Y%m%d")
                     setattr(self.read_instance, date_var_name, date[:-2])
             # YYYYMM
             elif len(date) == 6:
@@ -1864,11 +2120,7 @@ class ProvConfiguration:
                 deactivate=deactivate_warning,
             )
             self.read_instance.interp_multiprocessing = True
-            if (
-                1
-                <= self.read_instance.n_cpus
-                <= self.read_instance.available_cpus
-            ):
+            if 1 <= self.read_instance.n_cpus <= self.read_instance.available_cpus:
                 default = self.read_instance.n_cpus
             else:
                 default = self.read_instance.available_cpus
@@ -1886,16 +2138,6 @@ class ProvConfiguration:
 
         # visualisation only validity checks
         if self.read_instance.mode not in ["download", "interpolation"]:
-            # check have 4 active dashboard plots
-            if (
-                len(self.read_instance.active_dashboard_plots) != 4
-                and "active_dashboard_plots" in self.read_instance.default_values
-                and self.read_instance.mode == "dashboard"
-            ):
-                error = 'Error: There must be 4 "active_dashboard_plots"'
-                self.read_instance.logger.error(error)
-                sys.exit(1)
-
             # do checks on filter_species
             filter_species_copy = copy.deepcopy(self.read_instance.filter_species)
             invalid_filter_species = []
@@ -2123,6 +2365,9 @@ class ProvConfiguration:
 
             # create a variable to set qa per species (including filter species), setting defaults in the process
             if isinstance(self.read_instance.qa, dict):
+                # default qa for the final network (qa is parsed before the network of the
+                # configuration file, so its default would not be the one of ACTRIS)
+                self.parse_parameter("qa", None)
                 self.read_instance.qa_per_species = {
                     speci: get_default_qa(self.read_instance, speci)
                     for speci in species_plus_filter_species
@@ -2552,6 +2797,9 @@ def write_conf(section, subsection, fpath, opts):
 
     config = configparser.RawConfigParser()
 
+    # keep option names case-sensitive (e.g. GSFC_coastline_proximity)
+    config.optionxform = str
+    
     # update configuration
     for section, section_name in zip(["section", "subsection"], [section, subsection]):
         if opts[section]:

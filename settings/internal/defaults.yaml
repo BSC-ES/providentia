@@ -30,11 +30,12 @@ visualization_defaults: &visualization_defaults
   spatial_colocation_measurement_altitude: True
   spatial_colocation_validation: True
   spatial_colocation_validation_tolerance: 10000.0
+  obs_active: True
 
 dashboard: &dashboard
   <<: *visualization_defaults
   network:
-  active_dashboard_plots:
+  dashboard_plots:
     - timeseries
     - statsummary
     - distribution
@@ -45,7 +46,8 @@ dashboard: &dashboard
     - -90
     - 90
 
-dashboard_empty:
+# defaults when there is no configuration file (dashboard, library and the ines-providentia website)
+no_conf:
   <<: *dashboard
   network:
     - GHOST
@@ -58,7 +60,8 @@ dashboard_empty:
 report:
   <<: *visualization_defaults
   network:
-  report_type: standard
+  report_plots:
+    - standard
   report_summary: True
   report_stations: False
   report_title: Providentia Report
@@ -91,4 +94,4 @@ download:
   <<: *base_defaults
   ensemble:
     - "000"
-  dl_timeout: 180
+  dl_timeout: 10000

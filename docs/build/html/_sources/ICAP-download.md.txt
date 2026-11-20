@@ -90,7 +90,7 @@ When `model = icap_ensemble_C4` is specified, Providentia downloads the **C4** d
 
 ## Example configuration files
 
-#### Example 1: ICAP Multi-Model Ensemble/Consensus (MME/MMC)
+### Example 1: ICAP Multi-Model Ensemble/Consensus (MME/MMC)
 ```ini
 [ICAP-MME_MMC] 
 start_date = 20220701
@@ -101,7 +101,7 @@ model = icap_ensemble-global
 dl_interpolated = False
 ```
 
-#### Example 2: ICAP 4-model consensus (C4)
+### Example 2: ICAP 4-model consensus (C4)
 ```ini
 [ICAP-C4] 
 start_date = 20220901

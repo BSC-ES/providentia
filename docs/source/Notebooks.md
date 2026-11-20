@@ -39,7 +39,7 @@ You will also need to load the necessary modules for it to function, for this yo
 conda activate providentia-env_v[version]
 ```
 
-where `version` is the relevant version of Providentia, e.g. `3.1.0`.
+where `version` is the relevant version of Providentia, e.g. `4.0.0`.
 
 Then the Providentia library can be safely imported as a module:
 
@@ -60,4 +60,8 @@ This is a magic function that allows for the rendering of figures directly in th
 
 ## Tutorials
 
-We have a number of tutorial notebooks that can be used to learn about Providentia's features, these can all be found in the [tutorials](https://github.com/BSC-ES/providentia/tree/master/tutorials) subdirectory. 
+We have a number of tutorial notebooks that can be used to learn about Providentia's features, these can all be found in the [tutorials](https://github.com/BSC-ES/providentia/tree/master/tutorials) subdirectory.
+
+## Creating a notebook with a skill
+
+Instead of writing a notebook by hand, you can ask an AI coding assistant to create one for you with the `/create-notebook` skill. See [Skills](Skills.md).

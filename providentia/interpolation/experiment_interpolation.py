@@ -45,7 +45,9 @@ from providentia.auxiliar import (
     join,
     get_machine,
     get_conversion_factor,
-    get_standard_parameters_by_speci,
+    load_ghost_species,
+    load_species_reference,
+    TIMESTEPS_PER_DAY,
 )
 
 # set current MACHINE
@@ -171,10 +173,21 @@ class ModelInterpolation(object):
             else:
                 setattr(self, variable_key, variable_val)
 
-        # import GHOST standards
-        self.standard_parameter_speci = get_standard_parameters_by_speci(
-            self.original_mod_speci_to_process, self.ghost_version
-        )
+        # define if network is in GHOST format
+        self.reading_ghost = check_for_ghost(self.network_to_interpolate_against)
+
+        # fields of the species: those of the GHOST version when interpolating against GHOST
+        # observations and the version has the species (so outputs are as they were), those of
+        # the species reference otherwise; the matrix is always the reference's
+        self.standard_parameter_speci = load_species_reference()[self.original_mod_speci_to_process]
+        if self.reading_ghost:
+            ghost_species = load_ghost_species(self.ghost_version)
+            if self.original_mod_speci_to_process in ghost_species:
+                for field in self.standard_parameter_speci:
+                    if field != "matrix":
+                        self.standard_parameter_speci[field] = ghost_species[
+                            self.original_mod_speci_to_process
+                        ][field]
 
         # get GHOST lower/upper limits for variable
         self.GHOST_speci_lower_limit = self.standard_parameter_speci[
@@ -205,9 +218,6 @@ class ModelInterpolation(object):
             )
             if os.path.exists(mod_to_interp_path):
                 mod_dir = mod_to_interp_path
-
-        # define if network is in GHOST format
-        self.reading_ghost = check_for_ghost(self.network_to_interpolate_against)
 
         # get relevant observational file
         # GHOST
@@ -356,20 +366,7 @@ class ModelInterpolation(object):
                 n_timesteps = mod_nc_root.dimensions["time"].size
 
                 # get number of complete forecast days
-                if self.model_temporal_resolution in ["hourly", "hourly_instantaneous"]:
-                    forecast_days = int(n_timesteps / 24.0)
-                elif self.model_temporal_resolution in [
-                    "3hourly",
-                    "3hourly_instantaneous",
-                ]:
-                    forecast_days = int(n_timesteps / (24.0 / 3.0))
-                elif self.model_temporal_resolution in [
-                    "6hourly",
-                    "6hourly_instantaneous",
-                ]:
-                    forecast_days = int(n_timesteps / (24.0 / 6.0))
-                elif self.model_temporal_resolution == "daily":
-                    forecast_days = int(n_timesteps)
+                forecast_days = n_timesteps // TIMESTEPS_PER_DAY[self.model_temporal_resolution]
 
                 # determine if current file has more complete forecast days than the previous maximum
                 if forecast_days > max_forecast_days:
@@ -566,13 +563,7 @@ class ModelInterpolation(object):
                     # misnamed (or attribute-less) Z dimension gives this clean error instead of an
                     # uncaught exception being raised when accessing it
                     # Z dimension is valid if == 'z' or 'lev' or 'alt' or 'height' or 'level'
-                    if (
-                        (self.z_varname != "lev")
-                        and (self.z_varname != "z")
-                        and (self.z_varname != "alt")
-                        and (self.z_varname != "height")
-                        and (self.z_varname != "level")
-                    ):
+                    if self.z_varname not in ["lev", "z", "alt", "height", "level"]:
                         self.log_file_str += (
                             "Z dimension incorrectly named. Terminating process."
                         )
@@ -1101,9 +1092,21 @@ class ModelInterpolation(object):
         )
         self.station_references = self.station_references[non_nan_station_indices]
 
-        # get valid longitude and latitudes
-        self.obs_lons = obs_lon_obj[non_nan_station_indices]
-        self.obs_lats = obs_lat_obj[non_nan_station_indices]
+        # get longitude and latitudes, with masked values as NaN
+        obs_lons = np.ma.filled(obs_lon_obj[non_nan_station_indices], np.nan)
+        obs_lats = np.ma.filled(obs_lat_obj[non_nan_station_indices], np.nan)
+
+        # drop stations without valid coordinates (some non-GHOST files have named stations with NaN longitude/latitude)
+        # non_nan_station_indices only drops stations whose reference is "nan" (padding), not named stations
+        # with NaN coordinates, so these are still in obs_lons/obs_lats and must be checked here
+        valid_coords = np.isfinite(obs_lons) & np.isfinite(obs_lats)
+        if not np.all(valid_coords):
+            self.log_file_str += "{} stations dropped as they have no valid longitude/latitude: {}\n".format(
+                np.sum(~valid_coords), ", ".join(self.station_references[~valid_coords])
+            )
+        self.station_references = self.station_references[valid_coords]
+        self.obs_lons = obs_lons[valid_coords]
+        self.obs_lats = obs_lats[valid_coords]
 
         # close the nc file
         obs_nc_root.close()
@@ -1925,19 +1928,27 @@ class ModelInterpolation(object):
             )
             create_output_logfile(1, self.log_file_str)
 
-        # compress netCDF file
+        # compress netCDF file (wait for it, as ncks replaces the file and
+        # the permissions set below would otherwise be lost)
         try:
-            subprocess.Popen(
+            ncks_result = subprocess.run(
                 ["ncks", "-O", "--dfl_lvl", "1", netCDF_fname, netCDF_fname],
                 stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
             )
-        except:
+        except FileNotFoundError:
             self.log_file_str += (
                 "NCO could not be found, please install it in your system "
             )
             self.log_file_str += (
                 "with conda install -c conda-forge nco --override-channels.\n"
             )
+        else:
+            if ncks_result.returncode != 0:
+                self.log_file_str += "File {} could not be compressed with ncks (return code {}). Error: {}\n".format(
+                    netCDF_fname, ncks_result.returncode, ncks_result.stderr.strip()
+                )
 
         # give 770 permissions for file and make owner bsc32 if machine isn't local
         if MACHINE != "local":

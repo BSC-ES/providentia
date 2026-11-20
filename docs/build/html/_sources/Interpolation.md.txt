@@ -2,7 +2,7 @@
 
 This mode allows users to spatially interpolate model output against available observational stations, allowing it to be subsequently evaluated in **Providentia**. 
 
-Interpolation consists of spatially interpolating gridded model outputs to observational station locations using a nearest-neighbour approach.
+Interpolation consists of spatially interpolating gridded model outputs to observational station locations using a nearest-neighbour approach. Stations without a valid longitude or latitude in the observational file are skipped, and listed in the interpolation log.
 
 The Interpolation mode allows to interpolate models against **GHOST** and **non-GHOST** observations.
 
@@ -55,6 +55,19 @@ When checking if an model is stored in a location with the corresponding domain,
 The file `settings/mapping_species.yaml` contains a dictionary mapping original species names to their alternative names. 
 
 Note that the mapping species file is only used when the species name from the configuration file is not found in the expected location, meaning Povidentia first looks for the species written in the configuration file. If it is not found, it then searches for the corresponding mapped species in `mapping_species.yaml`.
+
+(interpolation-between-species)=
+#### Interpolating between species
+
+A model species can be interpolated to the stations of a different observational species, by joining the two with `@` in `species`, as `model_species@observational_species`. For example, to interpolate modelled 2m temperature to the stations measuring ozone:
+
+```
+species = t2@sconco3
+```
+
+Both species in a pair must be valid - if either is not, the whole pair is removed with a warning.
+
+In the [Download mode](Download), a defined pair downloads the observations of the observational species and the model data of the model species automatically.
 
 #### Different temporal resolutions between observations and model
 

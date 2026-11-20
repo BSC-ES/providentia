@@ -24,11 +24,13 @@ from providentia.auxiliar import (
     CURRENT_PATH,
     join,
     get_conversion_factor,
-    get_standard_parameters_by_speci,
 )
 from .dashboard_elements import CheckDialog, MessageBox
+from .read_aux import remove_forecast_suffix
 from .statistics import (
+    boxplot_inner_fences,
     calculate_statistic,
+    get_z_statistic_info,
     get_z_statistic_sign,
     get_z_statistic_type,
 )
@@ -256,6 +258,27 @@ def get_land_polygon_resolution(selection):
 
     return resolution
 
+def get_base_label(data_label_raw):
+    """
+    Get the label a model shares across its interpolated and gridded versions,
+    i.e. the raw data label without the interpolation mode tag.
+
+    The display label cannot be used for this, as it can be an alias set in the
+    .conf file, which carries no information about the interpolation mode.
+    The forecast suffix (e.g. '-day1') is kept, so each forecast day is kept apart.
+
+    Parameters
+    ----------
+    data_label_raw : str
+        Raw data label (e.g. 'cams61_monarch_ph2-eu-000::gridded').
+
+    Returns
+    -------
+    str
+        Base label (e.g. 'cams61_monarch_ph2-eu-000').
+    """
+
+    return data_label_raw.replace("::gridded", "").replace("::interpolated", "")
 
 def update_plotting_parameters(
     instance, data_labels_to_remove=None, data_labels_to_add=None, daily_forecast=False
@@ -286,7 +309,7 @@ def update_plotting_parameters(
         # Extract unique base labels, stripping '-day', '-daily', '-combined' suffixes
         unique_base_data_labels = np.unique(
             [
-                data_label.split("-day")[0].split("-daily")[0].split("-combined")[0]
+                remove_forecast_suffix(data_label)
                 for data_label in data_labels_to_add
             ]
         )
@@ -322,11 +345,7 @@ def update_plotting_parameters(
 
                     # iterate through data labels to add
                     for data_label in data_labels_to_add:
-                        base_data_label = (
-                            data_label.split("-day")[0]
-                            .split("-daily")[0]
-                            .split("-combined")[0]
-                        )
+                        base_data_label = remove_forecast_suffix(data_label)
 
                         if (base_data_label == unique_base_data_label) & (
                             data_label not in processed_data_labels
@@ -341,22 +360,20 @@ def update_plotting_parameters(
                                     for ii, data_label_to_remove in enumerate(
                                         data_labels_to_remove
                                     )
-                                    if data_label in data_label_to_remove
+                                    if remove_forecast_suffix(data_label_to_remove)
+                                    == remove_forecast_suffix(data_label)
                                 ]
-                                instance.plotting_params[data_label][
-                                    "grid_edge_longitude"
-                                ] = instance.plotting_params[
+                                removed_plotting_params = instance.plotting_params[
                                     data_labels_to_remove[relevant_inds[0]]
-                                ][
-                                    "grid_edge_longitude"
                                 ]
-                                instance.plotting_params[data_label][
-                                    "grid_edge_latitude"
-                                ] = instance.plotting_params[
-                                    data_labels_to_remove[relevant_inds[0]]
-                                ][
-                                    "grid_edge_latitude"
-                                ]
+                                # gridded labels have no grid edges, as they are not read at stations
+                                if "grid_edge_longitude" in removed_plotting_params:
+                                    instance.plotting_params[data_label][
+                                        "grid_edge_longitude"
+                                    ] = removed_plotting_params["grid_edge_longitude"]
+                                    instance.plotting_params[data_label][
+                                        "grid_edge_latitude"
+                                    ] = removed_plotting_params["grid_edge_latitude"]
                                 processed_data_labels.append(data_label)
 
                             # otherwise open netCDF file to extract grid edges
@@ -377,14 +394,24 @@ def update_plotting_parameters(
         for data_label in data_labels_to_remove:
             del instance.plotting_params[data_label]
 
-    # Add colour and zorder for observations
-    instance.plotting_params[instance.observations_data_label][
-        "colour"
-    ] = instance.plot_characteristics_templates["general"]["obs_markerfacecolor"]
-    instance.plotting_params[instance.observations_data_label][
-        "zorder"
-    ] = instance.plot_characteristics_templates["general"]["obs_zorder"]
+    # Add colour and zorder for observations if loaded
+    if instance.observations_data_label in instance.plotting_params.keys():
+        instance.plotting_params[instance.observations_data_label][
+            "colour"
+        ] = instance.plot_characteristics_templates["general"]["obs_markerfacecolor"]
+        instance.plotting_params[instance.observations_data_label][
+            "zorder"
+        ] = instance.plot_characteristics_templates["general"]["obs_zorder"]
 
+    # get the base label per data label, so that the gridded and non-gridded
+    # versions of a model are assigned the same colour
+    base_label_per_data_label = {
+        data_label: get_base_label(data_label_raw)
+        for data_label, data_label_raw in zip(
+            instance.data_labels, instance.data_labels_raw
+        )
+    }
+    
     # Generate a list of RGB tuples for the number of models
     sns.reset_orig()  # Reset seaborn to default
     color_palette = instance.plot_characteristics_templates["general"][
@@ -408,25 +435,186 @@ def update_plotting_parameters(
             clrs = sns.color_palette(color_palettes[color_palette])
     else:
         # If palette not in YAML, generate colors automatically
-        clrs = sns.color_palette(color_palette, n_colors=len(instance.data_labels) - 1)
+        # count base labels (the gridded and non-gridded versions of a model share a colour),
+        # so loading a model in both modes does not shift every other colour
+        n_colors = len(
+            {
+                base_label_per_data_label[data_label]
+                for data_label in instance.data_labels
+                if data_label != instance.observations_data_label
+            }
+        )
+        clrs = sns.color_palette(color_palette, n_colors=n_colors)
+
+    # assign a colour per base label (raw data label without the interpolation mode tag), so
+    # that the gridded and non-gridded versions of a model share a colour
+    # the display label cannot be used as it can be an alias set in the .conf file, which
+    # carries no information about the interpolation mode
+    # the forecast suffix is kept, so each forecast day keeps its own colour
+    # keep data label order, so a model keeps its colour whichever mode it is loaded in
+    # (the non-gridded label always precedes its gridded counterpart, so the pair takes
+    # the colour of the non-gridded one)
+    colour_per_base_label = {}
+    colour_ind = 1
+    for data_label in instance.data_labels:
+        if data_label == instance.observations_data_label:
+            continue
+        base_label = base_label_per_data_label[data_label]
+        if base_label not in colour_per_base_label:
+            colour_per_base_label[base_label] = clrs[colour_ind - 1]
+            colour_ind += 1
 
     # Add colours and zorder for each model (non-observations)
-    model_ind = 1
+    if not instance.obs_active:
+        model_ind = 0
+    else:
+        model_ind = 1
     for data_label in instance.data_labels:
         if data_label != instance.observations_data_label:
             # Define colour for model
-            instance.plotting_params[data_label]["colour"] = clrs[model_ind - 1]
+            instance.plotting_params[data_label]["colour"] = colour_per_base_label[
+                base_label_per_data_label[data_label]
+            ]
             # Define zorder for model relative to observations
-            instance.plotting_params[data_label]["zorder"] = (
-                instance.plotting_params[instance.observations_data_label]["zorder"]
-                + model_ind
-            )
+            if instance.observations_data_label in instance.plotting_params.keys():
+                instance.plotting_params[data_label]["zorder"] = (
+                    instance.plotting_params[instance.observations_data_label]["zorder"]
+                    + model_ind
+                )
+            else:
+                instance.plotting_params[data_label]["zorder"] = (
+                    model_ind
+                )
             # Update count of models
             model_ind += 1
 
 
+def get_display_label(read_instance, data_label):
+    """
+    Get the text to actually show for a data label (legend, statsummary),
+    applying any per-session rename set via double-clicking a legend entry
+    (see legend_picker_func()/rename_legend_label() in
+    dashboard_interactivity.py).
+
+    data_label itself - the real identifier used for data selection,
+    colour/style lookups, and everywhere else a data label is matched by
+    value - is never touched by this; only what gets drawn as text. That's
+    also why this doesn't affect the model pop-up menu, which shows
+    data_label directly rather than going through this function.
+
+    Parameters
+    ----------
+    read_instance : object
+        Instance of class Dashboard (or Report/Library, where this is
+        always a no-op - legend_label_overrides is dashboard-only, reset on
+        every data load, and never set outside the live dashboard session).
+    data_label : str
+        The data label's real identifier.
+
+    Returns
+    -------
+    str
+        data_label, or its override if one is set.
+    """
+
+    return getattr(read_instance, "legend_label_overrides", {}).get(
+        data_label, data_label
+    )
+
+
+# fixed seed for get_deterministic_subsample() - not a secret or a tunable,
+# just a constant so every call is reproducible
+_DETERMINISTIC_SUBSAMPLE_SEED = 0
+
+
+def get_deterministic_subsample(n, max_points):
+    """
+    Pick a fixed-size, reproducible random subset of indices into an array
+    of length `n`, for plots that cap how many points they draw (a scatter
+    cloud, a per-station Taylor diagram) once a selection is too large to
+    render or read legibly in full.
+
+    Seeded locally rather than drawn from the shared, global numpy random
+    state: without a fixed seed, the exact same plot redrawn for a reason
+    that has nothing to do with its own data (the window resizing, a
+    sibling panel updating) silently swaps in a different random sample -
+    a station a reader had spotted and was tracking moves or disappears for
+    no reason connected to their own selection. A fixed seed instead
+    reproduces the same subset every time the pool is the same size, and
+    only ever changes because the underlying selection itself did. Using a
+    local generator rather than reseeding the global one also means this
+    can never be perturbed by unrelated code drawing random numbers
+    elsewhere, nor perturb it in turn.
+
+    Parameters
+    ----------
+    n : int
+        Size of the full index range to sample from.
+    max_points : int
+        Number of indices to draw. If `n` is already this size or smaller,
+        every index is returned and nothing is actually subsampled.
+
+    Returns
+    -------
+    numpy.ndarray
+        Sorted array of indices into an array of length `n`, `max_points`
+        long (or `n` long, if there was nothing to cut down).
+    """
+
+    if n <= max_points:
+        return np.arange(n)
+
+    rng = np.random.default_rng(_DETERMINISTIC_SUBSAMPLE_SEED)
+    return np.sort(rng.choice(n, size=max_points, replace=False))
+
+
+def histogram_bin_target(data):
+    """
+    Work out what one set of data would want from a histogram's bins, as the
+    widest bin it can carry and how far up the axis its values reach.
+
+    Gathered across a report's subsections (the same way their data ranges
+    are) so that every page can be drawn with one set of bins: bins following
+    each subsection's own data would put every page on its own axis, and the
+    counts on those pages are meant to be read against one another.
+
+    Parameters
+    ----------
+    data : np.ndarray
+        Values of one subsection, across all data labels
+
+    Returns
+    -------
+    tuple of float
+        Bin width the data would choose, and its upper inner Tukey fence.
+        Both nan if the data cannot be binned
+    """
+
+    data = data[np.isfinite(data)]
+    if (data.size == 0) or (np.nanmin(data) == np.nanmax(data)):
+        return np.nan, np.nan
+
+    _, upper_inner_fence = boxplot_inner_fences(data)
+
+    # the bins this data would be given on its own (numpy's "auto" - the
+    # larger of the Freedman-Diaconis and Sturges counts), as a width, which
+    # unlike a count can be carried over to the range shared by every page
+    edges = np.histogram_bin_edges(data, bins="auto")
+    if len(edges) < 2:
+        return np.nan, upper_inner_fence
+
+    return float(edges[1] - edges[0]), float(upper_inner_fence)
+
+
 def kde_fft(
-    xin, gridsize=1024, extents=None, weights=None, adjust=1.0, bw="scott", xgrid=None
+    xin,
+    gridsize=1024,
+    extents=None,
+    weights=None,
+    adjust=1.0,
+    bw="scott",
+    xgrid=None,
+    min_bandwidth=None,
 ):
     """
     A fft-based Gaussian kernel density estimate (KDE)
@@ -452,6 +640,12 @@ def kde_fft(
         Method used to calculate bandwidth (default is 'scott').
     xgrid : ndarray, shape (n,), optional
         If provided, this grid will be used for KDE evaluation. Overrides `gridsize` and `extents`.
+    min_bandwidth : float, optional
+        Floor for the kernel's standard deviation, in the same units as xin
+        (e.g. a species' instrument reporting resolution). Below it, the KDE
+        reproduces the comb of rounded observations rather than smoothing
+        over it, seen as ringing on the curve. None leaves the automatic
+        bandwidth unmodified
 
     Returns
     -------
@@ -523,9 +717,18 @@ def kde_fft(
     elif bw == "silverman":
         bw_factor = ((n * 3 / 4.0) ** (-1.0 / 5)) * adjust
 
+    # kernel standard deviation, in grid cells
+    kernel_std = bw_factor * std_x
+
+    # floor the kernel width at min_bandwidth, converted from data units to
+    # grid cells - a large enough sample count otherwise shrinks the automatic
+    # bandwidth below the data's own reporting resolution
+    if min_bandwidth is not None and min_bandwidth > 0:
+        kernel_std = max(kernel_std, min_bandwidth / dx)
+
     # make the gaussian kernel
     # first, determine the bandwidth using defined bandwidth estimator rule
-    kern_nx = int(np.round(bw_factor * 2 * np.pi * std_x))
+    kern_nx = int(np.round(kernel_std * 2 * np.pi))
 
     # If bandwidth is 0, skip plot for current data label
     if kern_nx == 0:
@@ -535,7 +738,7 @@ def kde_fft(
         return error
 
     # Then evaluate the gaussian function on the kernel grid
-    kernel = np.reshape(gaussian(kern_nx, bw_factor * std_x), (kern_nx, 1))
+    kernel = np.reshape(gaussian(kern_nx, kernel_std), (kern_nx, 1))
 
     # convolve the histogram with the gaussian kernel
     # use symmetric padding to correct for data boundaries in the kde
@@ -544,8 +747,11 @@ def kde_fft(
     grid = convolve(grid, kernel, mode="same")[npad : npad + nx]
 
     # normalization factor to divide result by so that units are in the same
-    # units as scipy.stats.kde.gaussian_kde's output.
-    norm_factor = 2 * np.pi * std_x * std_x * bw_factor**2
+    # units as scipy.stats.kde.gaussian_kde's output. Uses kernel_std (the
+    # actual, possibly min_bandwidth-floored kernel width) rather than
+    # bw_factor * std_x directly, so normalization stays consistent with
+    # whichever kernel was actually used above.
+    norm_factor = 2 * np.pi * kernel_std**2
     norm_factor = n * dx * np.sqrt(norm_factor)
 
     # normalize the result
@@ -736,6 +942,156 @@ def get_taylor_diagram_ghelper(reference_stddev, plot_characteristics, extend=Fa
     )
 
     return ghelper
+
+
+# bounds on the automatic map marker size (see get_map_marker_size()).
+#
+# The floor is absolute: below it a point stops being visible at all, and that
+# is just as true on a large figure as a small one. It is the one bound kept
+# fixed across modes, so a dense map reads the same everywhere.
+#
+# The ceiling scales with the panel instead. Held fixed it bound far earlier on
+# the library's large figure than on a report's small panel, so the same map
+# came out relatively sparser in the library - the ceiling, not the sizing,
+# was what made the modes disagree. It is only ever scaled up, never below
+# MAP_MARKER_MAX_SIZE, so a small panel keeps a readable size, and never past
+# MAP_MARKER_ABSOLUTE_MAX_SIZE, so a near-empty map cannot produce blobs
+MAP_MARKER_MIN_SIZE = 6
+MAP_MARKER_MAX_SIZE = 60
+MAP_MARKER_ABSOLUTE_MAX_SIZE = 250
+# panel area, in pixels squared, MAP_MARKER_MAX_SIZE is the ceiling for - a
+# report map panel, the smallest of the three modes
+MAP_MARKER_REFERENCE_AREA = 175000.0
+# how much of the space each station has to itself its marker fills. The
+# marker area is set to this share of the area per station, so points keep the
+# same look however large the panel is and however many stations there are -
+# raise it to make every map's points bigger
+MAP_MARKER_AREA_FRACTION = 0.18
+
+
+def get_map_marker_size(ax, datacrs, longitudes, latitudes, map_extent=None):
+    """
+    Get the marker size for a map, from how densely the stations being shown
+    are packed into the axis. Shared by every mode, so the same map reads the
+    same way in the dashboard, a report and the library.
+
+    Counting only the stations on show is what makes this respond to zoom:
+    zooming in leaves fewer of them on the same axis, so the markers grow,
+    without needing a separate zoom term. Panel size is carried by the axis
+    area, so the report's small 2x2 panels and the library's full-width figure
+    each get a size suited to them.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        Map axis the stations are plotted on
+    datacrs : cartopy.crs.CRS
+        CRS the station coordinates are given in
+    longitudes : numpy array
+        Station longitudes
+    latitudes : numpy array
+        Station latitudes
+    map_extent : array-like, shape (4,), optional
+        Extent the map will be shown at, as [lon_min, lon_max, lat_min,
+        lat_max]. Given by report and library, which size the markers before
+        the extent has been applied to the axis, so the axis cannot be asked.
+        The dashboard leaves this as None and is counted against the axis's
+        own current view, which is always live there.
+
+    Returns
+    -------
+    float
+        Marker size, in points squared
+    """
+
+    longitudes = np.asarray(longitudes)
+    latitudes = np.asarray(latitudes)
+
+    panel_area = ax.bbox.width * ax.bbox.height
+    max_size = float(
+        np.clip(
+            MAP_MARKER_MAX_SIZE * panel_area / MAP_MARKER_REFERENCE_AREA,
+            MAP_MARKER_MAX_SIZE,
+            MAP_MARKER_ABSOLUTE_MAX_SIZE,
+        )
+    )
+
+    if longitudes.size == 0 or panel_area <= 0:
+        return max_size
+
+    if map_extent is not None and len(map_extent) == 4:
+        # count against the extent the map will be shown at, in lon/lat, which
+        # is how map_extent is given
+        lon_min, lon_max, lat_min, lat_max = map_extent
+        coords_x, coords_y = longitudes, latitudes
+        view_x = (min(lon_min, lon_max), max(lon_min, lon_max))
+        view_y = (min(lat_min, lat_max), max(lat_min, lat_max))
+    else:
+        # count against the axis's current view, in the axis's own projected
+        # coordinates rather than lon/lat, so this holds for every projection
+        projected = ax.projection.transform_points(datacrs, longitudes, latitudes)
+        coords_x, coords_y = projected[:, 0], projected[:, 1]
+        xlim, ylim = ax.get_xlim(), ax.get_ylim()
+        view_x = (min(xlim), max(xlim))
+        view_y = (min(ylim), max(ylim))
+
+    shown = (
+        (coords_x >= view_x[0])
+        & (coords_x <= view_x[1])
+        & (coords_y >= view_y[0])
+        & (coords_y <= view_y[1])
+    )
+    n_points = int(np.count_nonzero(shown))
+
+    # a lone station should always be plainly visible
+    if n_points == 1:
+        return max_size
+
+    if n_points == 0:
+        # nothing on show either means the map genuinely holds no stations, or
+        # the axis has not been given its limits yet - a fresh axis reports
+        # (0, 1) on both, which no station falls inside. Fall back to counting
+        # them all across the whole panel, rather than defaulting to the
+        # sparsest possible size
+        n_points = int(longitudes.size)
+        area = panel_area
+    else:
+        # measure the density over the part of the panel the stations actually
+        # occupy, not the whole of it - a network gathered in one region is
+        # crowded there however much empty map surrounds it, and dividing by
+        # the full panel made those points come out as large as a sparse
+        # global network's. Spans are taken between the 2nd and 98th
+        # percentile so a single distant station cannot stretch the area and
+        # hide the crowding in the rest
+        span_x = float(np.ptp(np.percentile(coords_x[shown], [2, 98])))
+        span_y = float(np.ptp(np.percentile(coords_y[shown], [2, 98])))
+        fraction_x = np.clip(span_x / (view_x[1] - view_x[0]), 0.0, 1.0)
+        fraction_y = np.clip(span_y / (view_y[1] - view_y[0]), 0.0, 1.0)
+
+        # keep a floor on the occupied area, so a very tight cluster still
+        # divides by something rather than by (near) zero
+        area = max(panel_area * fraction_x * fraction_y, 16.0)
+
+    # give each marker a fixed share of the area its own station has to
+    # itself, so the spacing between points reads the same whatever the panel
+    # size or station count. Replaces the exponential of density this used to
+    # apply (https://github.com/BSC-ES/providentia/issues/199), which fell
+    # away far too steeply once a map held a few hundred stations - a Spanish
+    # or European report map bottomed out at the floor while its points were
+    # still visibly well separated
+    area_per_station = area / n_points
+
+    # matplotlib marker sizes are in points squared, the axis area in pixels
+    dpi = ax.figure.dpi if ax.figure.dpi else 100.0
+    area_per_station *= (72.0 / dpi) ** 2
+
+    return float(
+        np.clip(
+            MAP_MARKER_AREA_FRACTION * area_per_station,
+            MAP_MARKER_MIN_SIZE,
+            max_size,
+        )
+    )
 
 
 def set_map_extent(canvas_instance, ax, map_extent):
@@ -1009,9 +1365,7 @@ def get_fairmode_RV_exceendance(read_instance, speci, RV, exc_threshold, units):
     """
 
     # get input and output units
-    standard_parameter_speci = get_standard_parameters_by_speci(
-        speci, read_instance.ghost_version
-    )
+    standard_parameter_speci = read_instance.parameter_dictionary[speci]
     initial_units = units
     final_units = read_instance.measurement_units[speci]
 
@@ -1050,9 +1404,7 @@ def get_multispecies_conversion_factor(read_instance, speci):
     """
 
     # get input and output units
-    standard_parameter_speci = get_standard_parameters_by_speci(
-        speci, read_instance.ghost_version
-    )
+    standard_parameter_speci = read_instance.parameter_dictionary[speci]
     initial_units = read_instance.measurement_units[speci]
     final_units = read_instance.multispecies_units
 
@@ -1190,10 +1542,21 @@ def handle_test_or_save_df(
         if "time" in generated_output.columns:
             parse_dates.append("time")
         expected_output = pd.read_csv(f"{path}/{filename}.csv", parse_dates=parse_dates)
+
+        # when we read the expected output file, Unnamed: appears in columns that do not have values, keep emtpy for comparison
+        expected_output.columns = [
+            "" if col.startswith("Unnamed:") else col
+            for col in expected_output.columns
+        ]
         read_instance.logger.info(f'Expected_output ({f"{path}/{filename}.csv"})')
         read_instance.logger.info(expected_output)
+
+        read_instance.logger.info(f'Expected_dtypes {expected_output.dtypes}')
+        read_instance.logger.info(f'Generated_dtypes {generated_output.dtypes}')
+
         if "metadata" in filename:
             expected_output["value"] = expected_output["value"].astype(str)
+
         assert assert_frame_equal(generated_output, expected_output, atol=1e-5) is None
 
     else:
@@ -1348,13 +1711,42 @@ def download_plot_data_to_csv(
     if len(element_types_to_save) == 0:
         return
 
+    # active statistic, from plot_characteristics (dashboard) or plot_type
+    # (report/library, e.g. "distribution-r") - for a meaningful column name
+    (parsed_zstat, parsed_base_zstat, _, _, _) = get_z_statistic_info(
+        plot_type=plot_type
+    )
+
+    station_statistic = None
+    if base_plot_type in ["distribution", "histogram"]:
+        station_statistic = parsed_zstat or canvas_instance.plot_characteristics[
+            plot_type
+        ].get("station_statistic")
+        if station_statistic in (None, "", "None"):
+            station_statistic = None
+
+    taylor_corr_stat = None
+    if base_plot_type == "taylor":
+        taylor_corr_stat = (
+            canvas_instance.plot_characteristics[plot_type].get("corr_stat")
+            or parsed_base_zstat
+            or "r"
+        )
+
+    stats_dict = {**read_instance.basic_stats, **read_instance.modbias_stats}
+
     x_column = (
         "time"
         if base_plot_type == "timeseries"
         else read_instance.observations_data_label
         if base_plot_type == "scatter"
+        else stats_dict[station_statistic]["label"]
+        if (base_plot_type in ["distribution", "histogram"])
+        and (station_statistic in stats_dict)
         else "concentration"
-        if base_plot_type == "distribution"
+        if base_plot_type in ["distribution", "histogram"]
+        else taylor_corr_stat
+        if base_plot_type == "taylor"
         else canvas_instance.plot_characteristics[plot_type]["xlabel"]["xlabel"]
         if base_plot_type == "fairmode-target"
         else "x"
@@ -1419,13 +1811,30 @@ def download_plot_data_to_csv(
                                 else value,
                             }
                         )
-
+                    
                     df = (
                         pd.DataFrame(data, columns=["x", "y", "z"])
                         .pivot(index="x", columns="y", values="z")
                         .sort_index()
                         .rename_axis(index=None, columns=None)
                     )
+
+                    # in heatmap set data labels as columns
+                    if base_plot_type == 'heatmap':
+                        df.columns = canvas_instance.selected_station_data_labels[
+                            networkspeci
+                        ]
+                    # in statsummary
+                    elif base_plot_type == 'statsummary':
+                        # remove first row (column names made of numbers like 0, 1, 2, etc.) 
+                        # and set stats in second row as column names
+                        df.columns = df.iloc[0].to_list()
+                        df = df.iloc[1:].reset_index(drop=True)
+                        
+                        # make columns numeric
+                        n_empty = sum(col == "" for col in df.columns)
+                        numeric_cols = df.columns[n_empty:]
+                        df[numeric_cols] = df[numeric_cols].apply(pd.to_numeric)
 
                     df.columns = df.columns.astype(str)
 
@@ -1448,6 +1857,7 @@ def download_plot_data_to_csv(
                 elif base_plot_type in [
                     "timeseries",
                     "distribution",
+                    "histogram",
                     "scatter",
                     "fairmode-target",
                     "fairmode-statsummary",
@@ -1508,6 +1918,16 @@ def download_plot_data_to_csv(
                         else:
                             data = []
                             xy = plot_element.get_xydata()
+
+                            # collapse the n+1 bin edges into centres, one
+                            # per real bin, dropping the repeated closing edge
+                            if base_plot_type == "histogram":
+                                edges = xy[:, 0]
+                                densities = xy[:-1, 1]
+                                xy = np.column_stack(
+                                    ((edges[:-1] + edges[1:]) / 2.0, densities)
+                                )
+
                             for x, y in xy:
                                 # no y axis on FAIRMODE statsummary
                                 if base_plot_type == "fairmode-statsummary":
@@ -1519,11 +1939,13 @@ def download_plot_data_to_csv(
                                 else:
                                     data.append(
                                         {
-                                            # convert time from unix to actual for timeseries
+                                            # taylor's x is arccos(correlation) - undo it
                                             x_column: pd.to_datetime(
                                                 x, unit="D", utc=True
                                             ).round("s")
                                             if base_plot_type == "timeseries"
+                                            else math.cos(x)
+                                            if base_plot_type == "taylor"
                                             else x,
                                             canvas_instance.plot_characteristics[
                                                 plot_type
@@ -1539,6 +1961,7 @@ def download_plot_data_to_csv(
                                 "timeseries",
                                 "scatter",
                                 "distribution",
+                                "histogram",
                                 "periodic",
                                 "periodic-violin",
                                 "taylor",
@@ -1562,18 +1985,16 @@ def download_plot_data_to_csv(
                             # for other plot types save data per data label
                             else:
                                 if base_plot_type == "fairmode-statsummary":
-                                    plot_element_str = canvas_instance.plotting.fairmode_statsummary_row_titles[
-                                        data_label
-                                    ][
-                                        plot_element_i
-                                    ]
+                                    plot_element_str =(
+                                        f"_{canvas_instance.plotting.fairmode_statsummary_row_titles[data_label][plot_element_i]}"
+                                    )
                                 else:
                                     plot_element_str = (
-                                        f"{plot_element_i}"
+                                        f"_{plot_element_i}"
                                         if len(plot_elements) > 1
                                         else ""
                                     )
-                                filename = f"{plot_type}_{data_label}_{element_type}_{plot_element_str}"
+                                filename = f"{plot_type}_{data_label}_{element_type}{plot_element_str}"
                                 msgs = handle_test_or_save_df(
                                     read_instance,
                                     df,
@@ -1700,6 +2121,7 @@ def download_plot_data_to_csv(
         "timeseries",
         "scatter",
         "distribution",
+        "histogram",
         "periodic",
         "periodic-violin",
         "taylor",

@@ -16,15 +16,18 @@ from providentia.auxiliar import (
     CURRENT_PATH,
     join,
     get_conversion_factor,
-    get_standard_parameters_by_speci,
+    get_role_colourmap,
 )
 from .calculate import Stats, ModBias
 from .read_aux import (
+    get_data_label_lead_day,
     get_frequency_code,
     get_chunk_size,
     get_periodic_nonrelevant_temporal_resolutions,
     get_periodic_relevant_temporal_resolutions,
+    remove_forecast_suffix,
 )
+from .warnings_prv import show_message
 
 
 PROVIDENTIA_ROOT = "/".join(CURRENT_PATH.split("/")[:-1])
@@ -104,20 +107,29 @@ def get_selected_station_data(
         else:
             canvas_instance.selected_station_stddev_max[networkspeci] = 0.0
 
-        # get data array for networkspeci
-        data_array = copy.deepcopy(read_instance.data_in_memory_filtered[networkspeci])
-
-        # temporally colocate data array
-        if read_instance.temporal_colocation:
-            data_array[:, read_instance.temporal_colocation_nans[networkspeci]] = np.nan
-
         # get selected station indices
         canvas_instance.station_inds[networkspeci] = get_station_inds(
             read_instance, canvas_instance, networkspeci, station_index
         )
 
-        # get data cut for relevant stations
-        data_array = data_array[:, canvas_instance.station_inds[networkspeci], :]
+        # get data array for networkspeci, cut immediately for relevant stations
+        # (slicing to the selected stations first avoids allocating a full-size
+        # copy of the whole networkspeci array: fancy indexing on the station
+        # axis already returns an independent array, so no separate .copy() is
+        # needed, and the temporal colocation NaN mask below only needs to be
+        # computed over the selected stations, not the whole array)
+        data_array = read_instance.data_in_memory_filtered[networkspeci][
+            :, canvas_instance.station_inds[networkspeci], :
+        ]
+
+        # temporally colocate data array
+        if read_instance.temporal_colocation:
+            data_array[
+                :,
+                read_instance.temporal_colocation_nans[networkspeci][
+                    canvas_instance.station_inds[networkspeci]
+                ],
+            ] = np.nan
 
         # get NaNs in data array
         nan_data_array = np.isnan(data_array)
@@ -141,7 +153,6 @@ def get_selected_station_data(
             canvas_instance.selected_station_data_labels[networkspeci] = list(
                 np.array(read_instance.data_labels)[valid_data_labels_mask]
             )
-
             # cut data array for valid data labels
             data_array = data_array[valid_data_labels_mask]
 
@@ -316,6 +327,21 @@ def get_selected_station_data(
                 canvas_instance.selected_station_data[networkspeci][
                     "per_station"
                 ] = data_array
+
+            # the stations before any spatial aggregation, on the same time
+            # axis as per_station, for the unique station count to be taken
+            # from - so it says how many stations are behind the numbers in
+            # every mode. Under Spatial|Temporal per_station holds the one
+            # series the stations were aggregated into, which counts as a
+            # single station; in the other modes the two are the same array
+            if read_instance.statistic_mode == "Spatial|Temporal":
+                canvas_instance.selected_station_data[networkspeci]["stations"] = (
+                    data_array if read_instance.daily_forecast else data_array_ts
+                )
+            else:
+                canvas_instance.selected_station_data[networkspeci][
+                    "stations"
+                ] = canvas_instance.selected_station_data[networkspeci]["per_station"]
 
             # transform timeseries to pandas dataframe
             canvas_instance.selected_station_data[networkspeci][
@@ -492,6 +518,176 @@ def do_resampling(read_instance, data_array, update=True):
             return data_array, read_instance.time_index_after_filter
 
 
+def get_date_range_mask(read_instance, time_index, date_range):
+    """
+    Get mask of time steps inside a date range.
+    Time steps are labelled by their start, so they are kept if their interval overlaps
+    the date range (e.g. when resampling to daily, a day is kept if any of its hours is inside).
+
+    Parameters
+    ----------
+    read_instance : object
+        The instance containing the data and resampling resolutions.
+    time_index : pandas.DatetimeIndex
+        Time steps of the data array (after resampling).
+    date_range : tuple
+        Start (inclusive) and end (exclusive) of date range, as datetimes.
+
+    Returns
+    -------
+    numpy.ndarray
+        Boolean mask, True for time steps inside the date range.
+    """
+
+    start, end = pd.Timestamp(date_range[0]), pd.Timestamp(date_range[1])
+    time_index = pd.DatetimeIndex(time_index)
+
+    # get length of each time step, from the active (resampled or original) resolution
+    resolution = read_instance.resampling_resolution
+    if resolution == "None":
+        resolution = read_instance.resolution
+    offset = pd.tseries.frequencies.to_offset(get_frequency_code(resolution))
+
+    return np.asarray((time_index < end) & ((time_index + offset) > start))
+
+
+def get_gridded_statistic(
+    read_instance, speci, zstat, date_range=None, date=None, hour=None, data_label=None,
+    lead_days=None
+):
+    """
+    Get gridded model data to plot on map from gridded data read in read_setup,
+    either for a specific timestep (date and hour) or a statistic over a period
+
+    Parameters
+    ----------
+    read_instance : object
+        Instance with gridded_var_data (dashboard, report or library)
+    speci : str
+        Current speci (e.g. sconco3)
+    zstat : str
+        Statistic (only Mean accepted)
+    date_range : tuple, optional
+        Start (inclusive) and end (exclusive) datetimes of period used to calculate statistic,
+        by default None (all loaded period)
+    date : str, optional
+        Date, by default None
+    hour : int, optional
+        Hour, by default None
+    data_label : str, optional
+        Data label selected for the map, by default None. If lead_days is not given,
+        in day forecast mode (e.g. 'fc-day3') only its lead day is used,
+        otherwise all loaded lead days
+    lead_days : list of int, optional
+        Lead days to average (e.g. chosen in the dashboard), by default None
+        (taken from data_label)
+
+    Returns
+    -------
+    grid_stat : np.ndarray or None
+        Gridded data for the timestep or statistic over the period
+    grid_lat : np.ndarray or None
+        Gridded latitudes
+    grid_lon : np.ndarray or None
+        Gridded longitudes
+    """
+
+    grid_stat, grid_lat, grid_lon = None, None, None
+
+    # Get read gridded data for this species
+    gridded_data = read_instance.gridded_var_data.get(speci)
+    if gridded_data is None:
+        return grid_stat, grid_lat, grid_lon
+
+    grid_sum, grid_count, grid_day, grid_lead, grid_lat, grid_lon = (
+        gridded_data[key] for key in ("sum", "count", "day", "lead", "lat", "lon")
+    )
+
+    # use the lead days given, or in day forecast mode only the lead day of the
+    # selected data label (all loaded lead days otherwise)
+    if lead_days is None:
+        lead_day = get_data_label_lead_day(read_instance, data_label)
+        if lead_day is not None:
+            lead_days = [lead_day]
+    if lead_days is not None:
+        # keep the lead days and files that are not forecast runs (lead 0)
+        lead_indices = np.flatnonzero(np.isin(grid_lead, lead_days) | (grid_lead == 0))
+        if len(lead_indices) == 0:
+            return grid_stat, grid_lat, grid_lon
+    else:
+        lead_indices = np.arange(len(grid_lead))
+
+    # get start (inclusive) and end (exclusive) of period, all loaded period by default
+    if date_range is not None:
+        start, end = pd.Timestamp(date_range[0]), pd.Timestamp(date_range[1])
+    else:
+        start = read_instance.time_array[0]
+        end = read_instance.time_array[-1] + pd.tseries.frequencies.to_offset(
+            read_instance.active_frequency_code
+        )
+
+    # sum and count of valid values at each grid cell, to calculate the mean
+    total_sum, total_count = None, None
+
+    # read specific timestep on the fly, as only daily sums are kept in memory.
+    # All lead days covering the timestamp are averaged (only one in day forecast mode)
+    if date and hour is not None:
+        target_timestamp = pd.Timestamp(date) + pd.Timedelta(hours=int(hour))
+        total_sum, total_count = read_instance.datareader.read_gridded_timesteps(
+            speci, target_timestamp, target_timestamp + pd.Timedelta(hours=1), lead_days
+        )
+
+    # calculate statistic
+    elif zstat:
+        if zstat not in ['Mean']:
+            msg = f"Statistic '{zstat}' is not supported for gridded data. Only 'Mean' is supported."
+            show_message(read_instance, msg)
+        else:
+            # full days inside the period are taken from the daily sums, and partial days
+            # at its edges (e.g. starting at 10:00) are read on the fly, so the mean is exact
+            first_full_day, end_full_day = start.ceil("D"), end.floor("D")
+            if first_full_day < end_full_day:
+                day_start, day_end = np.searchsorted(
+                    grid_day, [first_full_day.to_datetime64(), end_full_day.to_datetime64()]
+                )
+
+                # sum one lead day at a time, as slices are views and the daily sums are
+                # not copied (indexing with lead_indices would copy them). Counts are summed
+                # as int64, as their uint8 would overflow over more than 10 days
+                total_sum = np.zeros(grid_sum.shape[2:], dtype=np.float64)
+                total_count = np.zeros(grid_count.shape[2:], dtype=np.int64)
+                for lead_index in lead_indices:
+                    total_sum += grid_sum[day_start:day_end, lead_index].sum(axis=0, dtype=np.float64)
+                    total_count += grid_count[day_start:day_end, lead_index].sum(axis=0, dtype=np.int64)
+
+                partial_periods = [(start, first_full_day), (end_full_day, end)]
+
+            # no full day inside the period (e.g. from 10:00 to 14:00), read all on the fly
+            else:
+                partial_periods = [(start, end)]
+
+            for partial_start, partial_end in partial_periods:
+                if partial_start >= partial_end:
+                    continue
+                partial_sum, partial_count = read_instance.datareader.read_gridded_timesteps(
+                    speci, partial_start, partial_end, lead_days
+                )
+                if partial_sum is None:
+                    continue
+                if total_sum is None:
+                    total_sum, total_count = partial_sum, partial_count
+                else:
+                    total_sum += partial_sum
+                    total_count += partial_count
+
+    # calculate the mean at each grid cell, NaN where there are no valid values
+    if (total_count is not None) and (total_count > 0).any():
+        grid_stat = np.full(total_sum.shape, np.nan)
+        np.divide(total_sum, total_count, out=grid_stat, where=total_count > 0)
+
+    return grid_stat, grid_lat, grid_lon
+
+
 def merge_forecast_days(
     read_instance, networkspeci, data_labels, unique_base_data_labels, data_array
 ):
@@ -539,7 +735,12 @@ def merge_forecast_days(
     for base_label_ii, base_label in enumerate(unique_base_data_labels):
         # Find indices of all data_labels that match this base label
         relevant_inds = np.array(
-            [i for i, lbl in enumerate(data_labels) if lbl.startswith(base_label)],
+            [
+                i
+                for i, lbl in enumerate(data_labels)
+                if remove_forecast_suffix(lbl) == base_label
+                and not read_instance.data_labels_raw[i].endswith("::gridded")
+            ],
             dtype=np.int32,
         )
 
@@ -618,6 +819,39 @@ def boxplot_inner_fences(data):
         upper_inner_fence = p75 + 1.5 * iqr
 
         return lower_inner_fence, upper_inner_fence
+
+
+def get_selected_station_count(read_instance, canvas_instance, networkspeci):
+    """
+    Counts the stations actually behind the data currently being plotted.
+
+    Taken from the selected data itself rather than from the stations the
+    selection was made with (see get_station_inds()), so that it also holds
+    where a single station's data has been cut out of a wider selection, as
+    a report's per-station pages do.
+
+    Parameters
+    ----------
+    read_instance : object
+        The source instance containing filtered data and valid station indices.
+    canvas_instance : object
+        The target instance holding the selected data.
+    networkspeci : str
+        The combined network and species identifier.
+
+    Returns
+    -------
+    int
+        Number of stations behind the selected data.
+    """
+
+    selected_data = getattr(canvas_instance, "selected_station_data", {}).get(
+        networkspeci, {}
+    )
+    if "stations" in selected_data:
+        return selected_data["stations"].shape[1]
+
+    return len(get_station_inds(read_instance, canvas_instance, networkspeci, None))
 
 
 def get_station_inds(read_instance, canvas_instance, networkspeci, station_index):
@@ -1042,6 +1276,7 @@ def calculate_statistic(
     periodic_statistic_mode=None,
     periodic_statistic_aggregation=None,
     forecast_type=None,
+    date_range=None,
 ):
     """
     Calculates statistical metrics for absolute values or model biases across various aggregation modes.
@@ -1082,6 +1317,9 @@ def calculate_statistic(
         Aggregation method for periodic groups.
     forecast_type : str, optional
         Identifier for forecast-specific handling (e.g., 'daily').
+    date_range : tuple, optional
+        Start (inclusive) and end (exclusive) of date range, as datetimes.
+        Data outside the period is ignored. By default None (all loaded period).
 
     Returns
     -------
@@ -1193,7 +1431,14 @@ def calculate_statistic(
 
         # do resampling
         if map:
-            data_array_a, _ = do_resampling(read_instance, data_array_a, update=False)
+            data_array_a, map_time_index = do_resampling(read_instance, data_array_a, update=False)
+
+            # ignore data outside date range selected for map
+            if date_range is not None:
+                outside_date_range = ~get_date_range_mask(
+                    read_instance, map_time_index, date_range
+                )
+                data_array_a[:, :, outside_date_range] = np.nan
 
         # if have second data array, read it
         if len(data_labels_b) != 0:
@@ -1220,6 +1465,9 @@ def calculate_statistic(
                 data_array_b, _ = do_resampling(
                     read_instance, data_array_b, update=False
                 )
+                # ignore data outside date range selected for map
+                if date_range is not None:
+                    data_array_b[:, :, outside_date_range] = np.nan
 
     # for other cases, get cut of selected station data for data_labels_a
     else:
@@ -1295,6 +1543,20 @@ def calculate_statistic(
                         networkspeci
                     ]["active_mode"][data_label_b_indices]
 
+        # the unique station count is taken before any spatial aggregation
+        # - see get_selected_station_data()
+        if any(
+            get_z_statistic_info(zstat=zstat)[1] == "NUniqueStations"
+            for zstat in zstats
+        ):
+            data_array_a_st = canvas_instance.selected_station_data[networkspeci][
+                "stations"
+            ][data_label_a_indices]
+            if len(data_labels_b) != 0:
+                data_array_b_st = canvas_instance.selected_station_data[
+                    networkspeci
+                ]["stations"][data_label_b_indices]
+
     # iterate through zstats and calculate statistics
     stats_calc = {}
     for zstat in zstats:
@@ -1336,6 +1598,13 @@ def calculate_statistic(
                 data_array_a = data_array_a_am
                 if len(data_labels_b) != 0:
                     data_array_b = data_array_b_am
+
+            # counted from the stations themselves rather than from what they
+            # were aggregated into, which under Spatial|Temporal is one series
+            if base_zstat == "NUniqueStations":
+                data_array_a = data_array_a_st
+                if len(data_labels_b) != 0:
+                    data_array_b = data_array_b_st
 
         # if need to mask data, then do so
         if mask is not None:
@@ -1425,6 +1694,15 @@ def calculate_statistic(
                 data_array_a,
                 return_nan_padding_counts=True,
             )
+
+        # for Data% on map, do not count time steps outside selected date range as missing data
+        if (
+            (map)
+            and (date_range is not None)
+            and (base_zstat == "Data%")
+            and (nan_padding_counts_a is None)
+        ):
+            nan_padding_counts_a = np.count_nonzero(outside_date_range)
 
         # if have no data_labels_b, calculate 'absolute' basic statistic
         if len(data_labels_b) == 0:
@@ -1867,6 +2145,100 @@ def get_axes_vminmax(axs):
         return np.nan, np.nan
 
 
+def get_colourmap_role(zstat):
+    """
+    Get the kind of colourmap a statistic needs - see settings/colourmaps.yaml.
+
+    Parameters
+    ----------
+    zstat : str
+        Statistic being plotted
+
+    Returns
+    -------
+    str
+        Colourmap role
+    """
+
+    (
+        _,
+        base_zstat,
+        z_statistic_type,
+        z_statistic_sign,
+        _,
+    ) = get_z_statistic_info(zstat=zstat)
+
+    if z_statistic_sign == "absolute":
+        return "sequential"
+
+    if z_statistic_type == "basic":
+        stats_dict = basic_stats.get(base_zstat, {})
+    else:
+        stats_dict = modbias_stats.get(base_zstat, {})
+
+    return stats_dict.get("cmap_type_bias") or "diverging"
+
+
+def resolve_colourmap(read_instance, zstat, plot_characteristics, speci):
+    """
+    Get the colourmap for a statistic, in this order: the colourmap named for
+    the statistic itself, then the one for the kind of scale the statistic
+    needs (its role) taken from the active colour preset. See
+    settings/colourmaps.yaml.
+
+    Parameters
+    ----------
+    read_instance : object
+        Instance of class Dashboard, Report or Library
+    zstat : str
+        Statistic being plotted
+    plot_characteristics : dict
+        Plot characteristics for the plot type being made
+    speci : str
+        Current species
+
+    Returns
+    -------
+    str or None
+        Colourmap name, or None if none is defined anywhere
+    """
+
+    (
+        _,
+        base_zstat,
+        z_statistic_type,
+        z_statistic_sign,
+        _,
+    ) = get_z_statistic_info(zstat=zstat)
+
+    if z_statistic_type == "basic":
+        stats_dict = basic_stats.get(base_zstat, {})
+    else:
+        stats_dict = modbias_stats.get(base_zstat, {})
+
+    role = get_colourmap_role(zstat)
+    cmap_var_name = (
+        "cmap_absolute" if z_statistic_sign == "absolute" else "cmap_bias"
+    )
+
+    # colourmap named for this statistic, as a string for every species or as
+    # a dict per species
+    named = stats_dict.get(cmap_var_name)
+    if isinstance(named, dict):
+        if speci in named.keys():
+            named = named[speci]
+        else:
+            error = f"Error: colourmap ({cmap_var_name}) is not defined for {speci}. "
+            error += f"{cmap_var_name} can be set as a string per statistic (for all species), or as a dict (per species)."
+            read_instance.logger.error(error)
+            sys.exit(1)
+
+    if named:
+        return named
+
+    return get_role_colourmap(role, plot_characteristics.get("colour_preset"))
+
+
 def generate_colourbar_detail(
     read_instance,
     zstat,
@@ -1875,6 +2247,13 @@ def generate_colourbar_detail(
     plot_characteristics,
     speci,
     only_label=False,
+    label_units=None,
+    cmap_override=None,
+    vmin_override=None,
+    vmax_override=None,
+    discrete_override=None,
+    n_discrete_override=None,
+    n_ticks_override=None,
 ):
     """
     Determines colourbar parameters including limits, labels, and colourmaps for a specific statistic.
@@ -1895,6 +2274,27 @@ def generate_colourbar_detail(
         The species name, used for species-specific overrides.
     only_label : bool, optional
         If True, only the generated label string is returned (default is False).
+    cmap_override : str, optional
+        If given, used as the colourmap name instead of the one resolved from
+        the per-statistic/species/configuration-file precedence chain below
+        (default is None, i.e. no override).
+    vmin_override : float, optional
+        If given, used as the colourbar's lower limit instead of the resolved
+        value (default is None, i.e. no override) - see the map settings
+        menu's colourbar limit fields.
+    vmax_override : float, optional
+        As vmin_override, for the upper limit.
+    discrete_override : bool, optional
+        If given, forces the colourbar to be discrete (True) or continuous
+        (False) instead of the resolved value (default is None, i.e. no
+        override) - see the map settings menu's colourmap scale selector.
+    n_discrete_override : int, optional
+        If given together with discrete_override=True, used as the number of
+        discrete colour levels instead of the resolved value.
+    n_ticks_override : int, optional
+        If given, used as the number of tick labels on the colourbar
+        instead of the resolved value (default is None, i.e. no override)
+        - see the map settings menu's "Labels" field.
 
     Returns
     -------
@@ -1913,22 +2313,26 @@ def generate_colourbar_detail(
     """
 
     # get zstat information
-    (
-        zstat,
-        base_zstat,
-        z_statistic_type,
-        z_statistic_sign,
-        z_statistic_period,
-    ) = get_z_statistic_info(zstat=zstat)
+    if zstat is not None:
+        (
+            zstat,
+            base_zstat,
+            z_statistic_type,
+            z_statistic_sign,
+            z_statistic_period,
+        ) = get_z_statistic_info(zstat=zstat)
 
-    # get dictionary containing necessary information for calculation of selected statistic
-    if z_statistic_type == "basic":
-        stats_dict = basic_stats[base_zstat]
+        # get dictionary containing necessary information for calculation of selected statistic
+        if z_statistic_type == "basic":
+            stats_dict = basic_stats[base_zstat]
+        else:
+            stats_dict = modbias_stats[base_zstat]
+        label_units = stats_dict["units"]
+        if label_units == "[measurement_units]":
+            label_units = read_instance.measurement_units[speci]
     else:
-        stats_dict = modbias_stats[base_zstat]
-    label_units = stats_dict["units"]
-    if label_units == "[measurement_units]":
-        label_units = read_instance.measurement_units[speci]
+        stats_dict = {"label": speci}
+        z_statistic_sign = "absolute"
 
     # generate z colourbar label
     # first check if have defined label (in this order: 1. specific for z statistic 2. specific for species 3. configuration file)
@@ -1973,42 +2377,19 @@ def generate_colourbar_detail(
     if only_label:
         return z_label
 
-    # set cmap for z statistic
-    # first check if have defined cmap (in this order: 1. specific for z statistic 2. specific for species 3. configuration file)
-    set_cmap = False
-    if z_statistic_sign == "absolute":
-        cmap_var_name = "cmap_absolute"
-    else:
-        cmap_var_name = "cmap_bias"
-    # 1. get cmap specific for z statistic
-    if cmap_var_name in stats_dict:
-        if (stats_dict[cmap_var_name] != "") and (stats_dict[cmap_var_name] != {}):
-            set_cmap = True
-            if isinstance(stats_dict[cmap_var_name], dict):
-                if speci in stats_dict[cmap_var_name].keys():
-                    z_colourmap = stats_dict[cmap_var_name][speci]
-
-                else:
-                    error = f"Error: colourmap ({cmap_var_name}) is not defined for {speci}. "
-                    error += f"{cmap_var_name} can be set as a string per statistic (for all species), or as a dict (per species)."
-                    read_instance.logger.error(error)
-                    sys.exit(1)
-            else:
-                z_colourmap = stats_dict[cmap_var_name]
-    # 3. check configuration file
-    if not set_cmap:
-        if cmap_var_name in plot_characteristics["cb"]:
-            if (plot_characteristics["cb"][cmap_var_name] != "") and (
-                plot_characteristics["cb"][cmap_var_name]
-            ):
-                z_colourmap = plot_characteristics["cb"][cmap_var_name]
-                set_cmap = True
-    # if have no defined cmap, raise error
-    if not set_cmap:
-        error = f"Error: colourmap ({cmap_var_name}) for the colourbar needs to be defined, either in the "
-        error += "configuration files for the map, or per statistic in 'basic_stats.yaml' or 'model_bias_stats.yaml'."
+    # colourmap for this statistic - see resolve_colourmap()
+    z_colourmap = resolve_colourmap(read_instance, zstat, plot_characteristics, speci)
+    if not z_colourmap:
+        error = "Error: colourmap for the colourbar needs to be defined, either per "
+        error += "statistic in 'basic_stats.yaml' or 'model_bias_stats.yaml', or per "
+        error += "role in 'colourmaps.yaml'."
         read_instance.logger.error(error)
         sys.exit(1)
+
+    # explicit override (e.g. from the map settings menu's colourmap selector)
+    # takes precedence over everything resolved above
+    if cmap_override:
+        z_colourmap = cmap_override
 
     # check if have defined vmin (in this order: 1. specific for z statistic 2. specific for species 3. configuration file)
     # if have no defined vmin, then take vmin as minimum range value of calculated statistic
@@ -2079,6 +2460,20 @@ def generate_colourbar_detail(
         z_vmin = -limit_stat
         z_vmax = limit_stat
 
+    # explicit overrides (e.g. from the map settings menu's colourbar limit
+    # fields) take precedence over everything resolved above
+    if vmin_override is not None:
+        z_vmin = vmin_override
+    if vmax_override is not None:
+        z_vmax = vmax_override
+
+    # overriding only one of the two can invert the pair (e.g. a minimum set
+    # above the data's own maximum), which matplotlib refuses outright, part
+    # way through redrawing the map. Ordering them keeps both numbers asked
+    # for and lets the redraw finish
+    if z_vmin > z_vmax:
+        z_vmin, z_vmax = z_vmax, z_vmin
+
     # check if have defined n_discrete (in this order: 1. specific for z statistic 2. specific for species 3. configuration file)
     # if have no defined n_discrete, then take None
     set_n_discrete = False
@@ -2105,6 +2500,14 @@ def generate_colourbar_detail(
     # if have no defined n_discrete, take None
     if not set_n_discrete:
         n_discrete = None
+
+    # explicit override (e.g. from the map settings menu's colourmap scale
+    # selector) takes precedence over everything resolved above
+    if discrete_override is not None:
+        if discrete_override:
+            n_discrete = n_discrete_override if n_discrete_override else (n_discrete or 10)
+        else:
+            n_discrete = None
 
     # check if have defined n_ticks (in this order: 1. specific for z statistic 2. specific for species 3. configuration file)
     # if have no defined n_ticks, then raise error
@@ -2136,10 +2539,29 @@ def generate_colourbar_detail(
         read_instance.logger.error(error)
         sys.exit(1)
 
+    # explicit override (e.g. from the map settings menu's "Labels" field)
+    # takes precedence over everything resolved above
+    if n_ticks_override is not None:
+        n_ticks = n_ticks_override
+
     return z_vmin, z_vmax, z_label, z_colourmap, n_discrete, n_ticks
 
 
-def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, speci):
+def generate_colourbar(
+    read_instance,
+    axs,
+    cb_axs,
+    zstat,
+    plot_characteristics,
+    speci, 
+    label_units=None,
+    cmap_override=None,
+    vmin_override=None,
+    vmax_override=None,
+    discrete_override=None,
+    n_discrete_override=None,
+    n_ticks_override=None,
+):
     """
     Renders the colourbar on the specified axes and updates plot collection limits.
 
@@ -2157,6 +2579,33 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
         Configuration dictionary defining orientation, labels, and tick parameters.
     speci : str
         The species identifier for species-specific scaling.
+    cmap_override : str, optional
+        If given, used as the colourmap name instead of the default resolved
+        for the statistic/species/configuration (default is None).
+    vmin_override : float, optional
+        If given, used as the colourbar's lower limit instead of the resolved
+        value (default is None).
+    vmax_override : float, optional
+        As vmin_override, for the upper limit.
+    discrete_override : bool, optional
+        If given, forces the colourbar to be discrete (True) or continuous
+        (False) instead of the resolved value (default is None).
+    n_discrete_override : int, optional
+        If given together with discrete_override=True, used as the number of
+        discrete colour levels instead of the resolved value.
+    n_ticks_override : int, optional
+        If given, used as the number of tick labels on the colourbar
+        instead of the resolved value (default is None, i.e. no override)
+        - see the map settings menu's "Labels" field.
+
+    Returns
+    -------
+    z_vmin : np.float32 or None
+        The colourbar's resolved lower limit (whatever was actually applied -
+        auto-resolved or overridden), or None if there was no valid data to
+        plot a colourbar for.
+    z_vmax : np.float32 or None
+        As z_vmin, for the upper limit.
     """
 
     # get plotted vmin and vmax over relevant axes
@@ -2165,7 +2614,7 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
         for cb_ax in cb_axs:
             cb_ax.axis("off")
             cb_ax.set_visible(False)
-        return
+        return None, None
 
     # get colourbar limits/label
     (
@@ -2176,7 +2625,19 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
         n_discrete,
         n_ticks,
     ) = generate_colourbar_detail(
-        read_instance, zstat, plotted_min, plotted_max, plot_characteristics, speci
+        read_instance,
+        zstat,
+        plotted_min,
+        plotted_max,
+        plot_characteristics,
+        speci, 
+        label_units=label_units,
+        cmap_override=cmap_override,
+        vmin_override=vmin_override,
+        vmax_override=vmax_override,
+        discrete_override=discrete_override,
+        n_discrete_override=n_discrete_override,
+        n_ticks_override=n_ticks_override,
     )
 
     # generate colourbar tick array
@@ -2229,7 +2690,10 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
             # remove ticks for discrete colourbars
             # we do this because different screen resolutions slightly offset the tick position
             # https://github.com/BSC-ES/providentia/issues/159
-            if plot_characteristics["cb"]["discrete"]:
+            # n_discrete (not the static "discrete" config flag) is the
+            # source of truth here, since the map settings menu's colourmap
+            # scale selector can override it dynamically per statistic
+            if n_discrete:
                 plot_characteristics["cb_tick_params"]["size"] = 0
             cb.ax.tick_params(**plot_characteristics["cb_tick_params"])
 
@@ -2241,6 +2705,8 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
             ):
                 collection.set_clim(vmin=z_vmin, vmax=z_vmax)
                 collection.set_cmap(cmap=cmap)
+
+    return z_vmin, z_vmax
 
 
 def get_z_statistic_comboboxes(base_zstat, bias=False):
@@ -2492,9 +2958,7 @@ def exceedance_lim(read_instance, networkspeci):
 
     if limit is not np.nan:
         # get output units
-        standard_parameter_speci = get_standard_parameters_by_speci(
-            speci, read_instance.ghost_version
-        )
+        standard_parameter_speci = read_instance.parameter_dictionary[speci]
         final_units = read_instance.measurement_units[speci]
 
         # convert units using conversion factor
@@ -2536,15 +3000,24 @@ def get_fairmode_data(read_instance, canvas_instance, networkspeci, data_labels)
     speci = networkspeci.split("|")[1]
     coverage = fairmode_settings[speci]["coverage"]
 
-    # get data per station
-    data_array = copy.deepcopy(read_instance.data_in_memory_filtered[networkspeci])
+    # get data per station, cut immediately for relevant stations
+    # (slicing to the selected stations first avoids allocating a full-size
+    # copy of the whole networkspeci array: fancy indexing on the station axis
+    # already returns an independent array, so no separate .copy() is needed,
+    # and the temporal colocation NaN mask below only needs to be computed
+    # over the selected stations, not the whole array)
+    data_array = read_instance.data_in_memory_filtered[networkspeci][
+        :, canvas_instance.station_inds[networkspeci], :
+    ]
 
     # temporally colocate data (if active)
     if read_instance.temporal_colocation:
-        data_array[:, read_instance.temporal_colocation_nans[networkspeci]] = np.nan
-
-    # get data cut for relevant stations
-    data_array = data_array[:, canvas_instance.station_inds[networkspeci], :]
+        data_array[
+            :,
+            read_instance.temporal_colocation_nans[networkspeci][
+                canvas_instance.station_inds[networkspeci]
+            ],
+        ] = np.nan
 
     # if hourly data then make sure days with less than 75% coverage are nan
     if read_instance.active_resolution == "hourly":

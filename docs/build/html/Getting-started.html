@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Getting started &mdash; Providentia 3.1.0 documentation</title>
+  <title>Getting started &mdash; Providentia 4.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=dd1205ac"></script>
+      <script src="_static/documentation_options.js?v=3304f9e4"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -71,8 +71,10 @@
 <li class="toctree-l1"><a class="reference internal" href="Colocation.html">Colocation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Filtering.html">Filtering</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Forecast.html">Forecast</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Gridded-data.html">Gridded data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Statistics.html">Statistics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Skills.html">Skills</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
@@ -148,7 +150,7 @@ bash<span class="w"> </span>Miniconda3-latest-Linux-x86_64.sh
 <span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span>
 </pre></div>
 </div>
-<p>The first time the software runs in a local machine it will create a conda environment called <code class="docutils literal notranslate"><span class="pre">providentia-env_v[version]</span></code> with all the modules needed. If you encountered any other problem, feel free to <a class="reference internal" href="Meet-the-team.html"><span class="doc std std-doc">contact us</span></a>.</p>
+<p>The first time the software runs in a local machine it will create a conda environment called <code class="docutils literal notranslate"><span class="pre">providentia-env_v[version]</span></code> with all the modules needed. Some of them come from BSC’s GitLab (https://gitlab.earth.bsc.es). If you encountered any other problem, feel free to <a class="reference internal" href="Meet-the-team.html"><span class="doc std std-doc">contact us</span></a>.</p>
 <p>In HPC, the environment is not created by the user as it is stored in a shared folder. Every time we run Providentia on HPC, a wall time of 2 hours is requested, with 12 CPUs and 30Gb of total memory. This can be modified as desired using the bash options. You can check the available options with:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">usage</span>
 </pre></div>
@@ -259,9 +261,9 @@ bash<span class="w"> </span>Miniconda3-latest-Linux-x86_64.sh
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>├── basic_stats.yaml                 Defines the stats properties
 ├── color_palettes.yaml              Defines the possible color palettes
 ├── data_paths.yaml                  Defines dataset paths categorized by machine.              	
-├── experiment_bias_stats.yaml       Defines the experiment stats properties
+├── model_bias_stats.yaml            Defines the model stats properties
 ├── init_prov.yaml                   Stores initialization settings, including non-ghost available networks and resolutions.             
-├── interp_experiments.yaml          Specifies locations for non-interpolated experiments. 
+├── interp_models.yaml               Model names and the paths to their non-interpolated versions searched for them on HPC machines.
 ├── remove_extreme_stations.yaml     Defines criteria for filtering stations if you want to automatically remove them. 
 ├── exceedances.yaml                 Stores threshold values for exceedance statistics             	 
 ├── fairmode.yaml                    Stores configurations for the Fairmode plots.                

@@ -42,6 +42,6 @@ oper:
 
 github:
   ghost_root: tests/data/obs/ghost
-  mod_root: tests/data/exp
+  mod_root: tests/data/mod
   mod_to_interp_root: ""
   nonghost_root: tests/data/obs/nonghost

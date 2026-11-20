@@ -2,13 +2,11 @@
 # init
 jobname="PRV"
 time="02:00:00"
-mem="20Gb"
 constraint="medmem"
 
 function usage () {
 echo "Usage: providentia [-u|--usage] [-c|--n_cpus)]"
 echo "    [-J|--jobname JOB_NAME (default=PRV)] [-q|--queue QUEUE_NAME (default=debug)]"
-echo "    [-m|--mem MEMORY (only valid on P9, default=20Gb)]"
 echo "    [--constraint CONSTRAINT (default=medmem)]"
 }
 
@@ -98,7 +96,38 @@ install_completion
 # An option followed by double colons '::' means that its argument is optional.
 # See `man getopt'.
 SHORT=uc:t:J:q:m:V
-LONG=usage,n_cpus:,time:,jobname:,queue:,mem:,constraint:,help,version,debug,clean,section:,ghost_version:,ghost_features:,conf:,config:,config_dir:,cartopy_data_dir:,ghost_root:,nonghost_root:,exp_root:,exp_to_interp_root:,generate_file_tree,gft,disable_file_tree,dft,report,reports,offline,download,dl,interpolation,interp,interpolate,notebook,nb,jupyter,dir_merge,slurm_job_id:,network:,framework:,observation:,species:,resolution:,model_resolution:,start_date:,end_date:,observations_data_label:,experiments:,experiment:,model:,models:,domain:,ensemble:,forecast:,qa:,flags:,add_qa:,subtract_qa:,add_flags:,subtract_flags:,temporal_colocation:,spatial_colocation:,spatial_colocation_tolerance:,spatial_colocation_station_reference:,spatial_colocation_station_name:,spatial_colocation_longitude_latitude:,spatial_colocation_measurement_altitude:,spatial_colocation_validation:,spatial_colocation_validation_tolerance:,map_extent:,filter_species:,calibration_factor:,lower_bound:,upper_bound:,remove_extreme_stations:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,harmonise_summary:,harmonise_stations:,active_dashboard_plots:,resampling_resolution:,statistic_mode:,statistic_aggregation:,periodic_statistic_mode:,periodic_statistic_aggregation:,timeseries_statistic_aggregation:,plot_characteristics_filename:,dl_overwrite:,dl_ghost_source:,dl_interpolated:,dl_mode:,dl_timeout:,dl_thredds_update:,interp_multiprocessing:,interp_n_neighbours:,interp_reverse_vertical_orientation:,interp_chunk_size:,interp_job_array_limit:,interp_cleanup:,interp_spinup_timesteps:,z:,interp_model_downsampling:,interp_model_upsampling:,logfile::,multispecies_units:,station_order:,station_cap:
+# Allowed options
+# launcher and general
+LONG="usage,n_cpus:,time:,jobname:,queue:,mem:,constraint:,help,version,debug,clean,section:,"
+# paths and file trees
+LONG+="ghost_version:,ghost_features:,conf:,config:,config_dir:,cartopy_data_dir:,ghost_root:,nonghost_root:,"
+LONG+="exp_root:,exp_to_interp_root:,generate_file_tree,gft,disable_file_tree,dft,"
+# modes
+LONG+="report,reports,offline,download,dl,interpolation,interp,interpolate,notebook,nb,jupyter,dir_merge,slurm_job_id:,website,"
+# data selection
+LONG+="network:,framework:,observation:,species:,resolution:,model_resolution:,start_date:,end_date:,"
+LONG+="observations_data_label:,experiments:,experiment:,model:,models:,domain:,ensemble:,forecast:,"
+# QA and flags
+LONG+="qa:,flags:,add_qa:,subtract_qa:,add_flags:,subtract_flags:,"
+# colocation
+LONG+="temporal_colocation:,spatial_colocation:,spatial_colocation_tolerance:,"
+LONG+="spatial_colocation_station_reference:,spatial_colocation_station_name:,"
+LONG+="spatial_colocation_longitude_latitude:,spatial_colocation_measurement_altitude:,"
+LONG+="spatial_colocation_validation:,spatial_colocation_validation_tolerance:,"
+# maps and filters
+LONG+="map_extent:,map_grid_forecast_lead_days:,filter_species:,calibration_factor:,lower_bound:,upper_bound:,remove_extreme_stations:,"
+# report
+LONG+="report_type:,report_summary:,report_stations:,report_title:,report_filename:,harmonise_summary:,harmonise_stations:,"
+# dashboard and statistics
+LONG+="active_dashboard_plots:,resampling_resolution:,statistic_mode:,statistic_aggregation:,"
+LONG+="periodic_statistic_mode:,periodic_statistic_aggregation:,timeseries_statistic_aggregation:,plot_characteristics_filename:,"
+# download
+LONG+="dl_overwrite:,dl_ghost_source:,dl_interpolated:,dl_mode:,dl_timeout:,dl_thredds_update:,"
+# interpolation
+LONG+="interp_multiprocessing:,interp_n_neighbours:,interp_reverse_vertical_orientation:,interp_chunk_size:,"
+LONG+="interp_job_array_limit:,interp_cleanup:,interp_spinup_timesteps:,z:,interp_model_downsampling:,interp_model_upsampling:,"
+# logging and others
+LONG+="logfile::,multispecies_units:,station_order:,station_cap:"
 
 # parse arguments
 PARSED=$(getopt --options ${SHORT} \
@@ -117,9 +146,9 @@ if [[ $PARSED =~ "--interp" || $PARSED =~ "--interpolation" || $PARSED =~ "--int
 # 12 for download mode
 elif [[ $PARSED =~ "--download" || $PARSED =~ "--dl" ]]; then
     n_cpus=12
-# 1 for dashboard and report modes
+# 2 for dashboard and report modes
 else
-    n_cpus=1
+    n_cpus=2
 fi
 n_cpus_explicit=false
 
@@ -128,8 +157,6 @@ if [[ $PARSED =~ "--interp" || $PARSED =~ "--interpolation" || $PARSED =~ "--int
     # define qos in interpolation
     if [ "${BSC_MACHINE}" == "mn5" ]; then
         queue="gp_bsces"
-    elif [ "${BSC_MACHINE}" == "grace" ]; then
-        queue="ngp_bsces"
     else
         queue="bsc_es"
     fi
@@ -137,8 +164,6 @@ else
     # define qos in every mode but interpolation
     if [ "${BSC_MACHINE}" == "mn5" ]; then
         queue="gp_debug"
-    elif [ "${BSC_MACHINE}" == "grace" ]; then
-        queue="ngp_debug"
     else
         queue="debug"
     fi 
@@ -191,7 +216,6 @@ done
 
 account_option="--account=bsc32"
 queue_option="--qos=$queue"
-memory_option="--mem=$mem"
 n_cpus_option="--cpus-per-task=$n_cpus"
 n_cpus_explicit_option="--n_cpus_explicit=$n_cpus_explicit"
 constraint_option="--constraint=$constraint"
@@ -267,8 +291,15 @@ else
     report=false
 fi
 
+# if using website mode then
+if [[ $PARSED =~ "--website" ]]; then
+    website=true
+else
+    website=false
+fi
+
 # check for incompatible modes
-mode_bools=("$debug" "$notebook" "$interpolation" "$download" "$report")
+mode_bools=("$debug" "$notebook" "$interpolation" "$download" "$report" "$website")
 mode_count=0
 
 for i in "${!mode_bools[@]}"; do
@@ -310,8 +341,30 @@ if $download; then
     fi
 fi
 
+# website mode is not available yet, except for its developers, who give the path to their
+# checkout of ines-providentia (WEBSITE_PATH=<path to ines-providentia>)
+if $website; then
+    WEBSITE_PATH="${WEBSITE_PATH%/}"
+    if [[ -z "${WEBSITE_PATH}" ]]; then
+        echo "WARNING: Website mode is not available yet. Exiting..."
+        exit 1
+    fi
+    if [[ "$(basename "${WEBSITE_PATH}")" != "ines-providentia" || ! -d "${WEBSITE_PATH}/src/ines_providentia" ]]; then
+        echo "ERROR: WEBSITE_PATH (${WEBSITE_PATH}) is not a checkout of ines-providentia. Exiting..."
+        exit 1
+    fi
+fi
+
+# website mode runs only on local machines, as it opens the browser of the machine
+if $website; then
+    if [[ "${BSC_MACHINE}" == "mn5" || "${BSC_MACHINE}" == "nord4" || "${BSC_MACHINE}" == "stg" || "${ip}" == "84.88.185.205" ]]; then
+        echo "ERROR: Website mode is only available on local machines. Exiting..."
+        exit 1
+    fi
+fi
+
 # activate or create the conda environment for local and operational machines
-ENV_NAME="providentia-env_v3.1.0"
+ENV_NAME="providentia-env_v4.0.0"
 setup_providentia_env_locally() {
     active_env=false
     eval "$(conda shell.bash hook)"
@@ -337,9 +390,16 @@ setup_providentia_env_locally() {
         conda create -n "$ENV_NAME" python=3.11.5 -c conda-forge --override-channels -y
         conda activate "$ENV_NAME"
         export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
-        conda install -c conda-forge cartopy==0.25.0 jupyterlab==4.5.3 ghostscript==10.06.0 dask==2026.1.2 nco==5.3.6 pyproj==3.7.2 proj==9.7.1 openssh==10.5p1 --override-channels -y
+        conda install -c conda-forge cartopy==0.25.0 jupyterlab==4.5.3 ghostscript==10.06.0 dask==2026.1.2 nco==5.3.6 pyproj==3.7.2 proj==9.7.1 openssh==10.5p1 numpy==2.3.5 scipy==1.17.1 --override-channels -y
         if [ -f requirements.txt ]; then
-            pip install --no-user -r requirements.txt
+            # remove the environment if it cannot be completed, so that it is created again
+            # on the next run
+            if ! pip install --no-user -r requirements.txt; then
+                echo "ERROR: Could not install the Python packages of $ENV_NAME, see the pip error above."
+                conda deactivate
+                conda env remove -n "$ENV_NAME" -y
+                exit 1
+            fi
         fi
         active_env=true
     fi
@@ -377,6 +437,31 @@ initialise_conda() {
     fi
 }
 
+# run a command that executes Providentia in a SLURM job, and if the job is killed for
+# running out of memory, suggest to request more CPUs (memory is assigned per CPU)
+run_with_oom_hint() {
+    local command="$1"
+    local stderr_log=$(mktemp)
+    local status=0
+
+    # keep showing stderr in the terminal while saving a copy to look for the OOM message
+    eval "${command}" 2> >(tee "$stderr_log" >&2) || status=$?
+    # wait for tee to finish writing before reading the copy
+    wait $! 2>/dev/null || true
+
+    # only suggest more CPUs in dashboard and report modes
+    if ! $download && grep -qE "oom_kill|Out Of Memory" "$stderr_log"; then
+        suggested_cpus=$(( n_cpus < 4 ? 4 : n_cpus * 2 ))
+        echo ""
+        echo "ERROR: Providentia was killed because it ran out of memory (job had ${n_cpus} CPUs)."
+        echo "On HPC machines memory is assigned per CPU, so request more CPUs, e.g. --n_cpus=${suggested_cpus},"
+        echo "or use a high memory node with --constraint=highmem."
+    fi
+
+    rm -f "$stderr_log"
+    return $status
+}
+
 # execution
 # Marenostrum5
 if [ "${BSC_MACHINE}" == "mn5" ]; then
@@ -388,7 +473,7 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
     initialise_conda
 
     if $interpolation; then
-        echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
+        echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, time ${time}"
         echo "INFO: Loading dependencies..."
         eval "${load_command}"
         sanitise_python_environment
@@ -415,7 +500,7 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
 
         if $active_env; then
             if $notebook; then
-                echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+                echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}, time ${time}"
                 echo "INFO: Starting Jupyter session."
                 echo "INFO: Check 'notebook.out' for information on how to connect to session."
                 
@@ -426,7 +511,7 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
                 fi
 
             elif $debug; then
-                echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+                echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}, time ${time}"
                 echo "INFO: Entering debug mode"
                 if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
                     eval "${salloc_command} ${account_option} ${queue_option}"
@@ -436,13 +521,13 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
             
             else
                 if $debugexec; then
-                    eval "srun ${account_option} ${python_command}"
+                    run_with_oom_hint "srun ${account_option} ${python_command}"
                 else
-                    echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+                    echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}, time ${time}"
                     if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
-                        eval "${salloc_command} ${account_option} ${queue_option} srun ${python_command}"
+                        run_with_oom_hint "${salloc_command} ${account_option} ${queue_option} srun ${python_command}"
                     else
-                        eval "${salloc_command} ${account_option} ${constraint_option} ${queue_option} srun ${python_command}"
+                        run_with_oom_hint "${salloc_command} ${account_option} ${constraint_option} ${queue_option} srun ${python_command}"
                     fi
                 fi
             fi
@@ -485,7 +570,7 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
     initialise_conda
 
     if $interpolation; then
-        echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
+        echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, time ${time}"
         echo "INFO: Loading dependencies..."
         eval "${load_command}"
         sanitise_python_environment
@@ -512,7 +597,7 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
 
         if $active_env; then
             if $notebook; then
-                echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+                echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}, time ${time}"
                 echo "INFO: Starting Jupyter session."
                 echo "INFO: Check 'notebook.out' for information on how to connect to session."
                 
@@ -523,7 +608,7 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
                 fi
 
             elif $debug; then
-                echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+                echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}, time ${time}"
                 echo "INFO: Entering debug mode"
                 if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
                     eval "${salloc_command} ${account_option} ${queue_option}"
@@ -533,13 +618,13 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
             
             else
                 if $debugexec; then
-                    eval "srun ${account_option} ${python_command}"
+                    run_with_oom_hint "srun ${account_option} ${python_command}"
                 else
-                    echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+                    echo "OPTIONS: n_cpus: ${n_cpus}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}, time ${time}"
                     if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
-                        eval "${salloc_command} ${account_option} ${queue_option} srun nord3_singu_es ${python_command}"
+                        run_with_oom_hint "${salloc_command} ${account_option} ${queue_option} srun ${python_command}"
                     else
-                        eval "${salloc_command} ${account_option} ${constraint_option} ${queue_option} srun nord3_singu_es ${python_command}"
+                        run_with_oom_hint "${salloc_command} ${account_option} ${constraint_option} ${queue_option} srun ${python_command}"
                     fi
                 fi
             fi
@@ -583,6 +668,22 @@ else
     # load modules from conda environment
     setup_providentia_env_locally
 
+    # the website (ines-providentia) is the checkout at WEBSITE_PATH, used from its folder without
+    # installing it, never the one installed in the environment (the backend it starts inherits
+    # PYTHONPATH)
+    if $website; then
+        echo "INFO: Using the website of ${WEBSITE_PATH}..."
+        # the website runs in two python processes, which both need the checkout:
+        # - this one (python_command), which imports ines_providentia.website: it runs with -E,
+        #   which ignores PYTHONPATH, so the checkout is added to sys.path in its command
+        python_command="${python_command/from providentia import main/import sys; sys.path.insert(0, \"${WEBSITE_PATH}/src\"); from providentia import main}"
+        # - the backend that the website starts (python -m ines_providentia.backend.server, in
+        #   local_launcher.py of ines-providentia): a new process does not get the sys.path of
+        #   this one, only its environment variables, and it runs without -E, so it takes the
+        #   checkout from PYTHONPATH (and providentia from this folder, where it runs)
+        export PYTHONPATH="${WEBSITE_PATH}/src:${PYTHONPATH}"
+    fi
+
     # merge exp and exp_to_interp directories to mod and mod_to_interp       
     if [[ $PARSED =~ "--dir_merge" ]]; then
         python providentia/dir_merge.py
@@ -609,7 +710,12 @@ else
     if $notebook; then
         echo "INFO: Starting Jupyter session."
         export PYTHONPATH="$(pwd)"
-        jupyter-lab --port 8888 --ip 0.0.0.0 --allow-root
+        # bind to localhost and open the URL directly. Jupyter hands the browser
+        # its connection_url, which comes straight from --ip: with 0.0.0.0 that is
+        # an unroutable wildcard the browser cannot open, and without the flag it
+        # is handed a file:// redirect page instead, which Safari will not follow
+        jupyter-lab --port 8888 --ip localhost --allow-root \
+            --ServerApp.use_redirect_file=False
     elif $interpolation; then
         unique_id=$(printf "%06d\n" $((RANDOM % 1000000)))
         eval "${python_command} ${n_cpus_option} ${n_cpus_explicit_option} --slurm_job_id=$unique_id" 2>&1 | tee logs/interpolation/management_logs/$unique_id.out

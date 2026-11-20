@@ -17,7 +17,7 @@ import yaml
 
 from .actris import Actris
 from .cams import Cams, cams_options
-from providentia.auxiliar import CURRENT_PATH, join
+from providentia.auxiliar import CURRENT_PATH, file_in_date_range, join
 from .configuration import ProvConfiguration, load_conf
 from .icap import ICAP
 from .read_aux import check_for_ghost
@@ -155,8 +155,10 @@ class Download(object):
             for k, val in self.section_opts.items():
                 # n_cpus is always passed via command line, either as default or explicit,
                 # only read n_cpus from conf if it was not explicitly defined in command line
-                if ((k not in self.commandline_arguments) 
-                    or (k == "n_cpus" and self.commandline_arguments['n_cpus_explicit'] == 'false')):
+                if (k not in self.commandline_arguments) or (
+                    k == "n_cpus"
+                    and self.commandline_arguments["n_cpus_explicit"] == "false"
+                ):
                     setattr(self, k, self.provconf.parse_parameter(k, val))
 
             # now all variables have been parsed, check validity of those, throwing errors where necessary
@@ -452,7 +454,7 @@ class Download(object):
                 "OpenSSL version mismatch detected while running ssh-keyscan.\n\n"
                 "Please activate the conda environment and install "
                 "OpenSSH from conda-forge using:\n\n"
-                "conda activate providentia-env_v3.1.0\n"
+                "conda activate providentia-env_v4.0.0\n"
                 "conda install -c conda-forge openssh --override-channels\n\n"
                 "Then restart the download."
             )
@@ -531,7 +533,11 @@ class Download(object):
                     username=self.prv_user,
                     password=self.prv_password,
                 )
-                self.sftp = self.ssh.open_sftp()
+                transport = self.ssh.get_transport()
+                self.sftp = paramiko.SFTPClient.from_transport(
+                    transport,
+                    window_size=64 * 1024 * 1024,
+                )
 
                 # exit the loop when the connection was succesful
                 break
@@ -1963,17 +1969,10 @@ class Download(object):
 
         for nc_file in sorted(nc_files):
             if nc_file.endswith(".nc"):
-                ym = nc_file[:-3].split("_")[1]
+                file_date = nc_file[:-3].split("_")[1]
 
-                # from yyyymm to yyyymmdd
-                if len(ym) == 6:
-                    ym = "{}01".format(ym)
-                # from yyyymmddhh to yyyymmdd
-                elif len(ym) == 10:
-                    ym = ym[:-2]
-
-                # filter files out of the data range
-                if int(ym) >= int(self.start_date) and int(ym) < int(self.end_date):
+                # filter files whose period does not overlap the date range
+                if file_in_date_range(file_date, self.start_date, self.end_date):
                     valid_nc_files.append(nc_file)
 
         return valid_nc_files

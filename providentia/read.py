@@ -16,8 +16,8 @@ import yaml
 from providentia.auxiliar import (
     CURRENT_PATH,
     join,
+    get_conversion_factor,
     get_standard_units,
-    get_standard_parameters_by_speci,
 )
 from .fields_menus import (
     init_coverage,
@@ -32,13 +32,24 @@ from .fields_menus import (
 )
 from .plot_aux import update_plotting_parameters
 from .read_aux import (
+    add_forecast_suffix,
+    apply_ghost_version_fields,
     check_for_ghost,
     get_default_qa,
+    get_forecast_run_mask,
     get_frequency_code,
+    get_gridded_model_base_data_labels,
+    get_map_lead_days,
+    get_data_label_lead_day,
+    get_model_id,
     get_yearmonths_to_read,
+    is_gridded_model_forecast,
     init_shared_vars_read_netcdf_data,
+    model_file_overlaps_period,
     read_netcdf_data,
     read_netcdf_metadata,
+    remove_forecast_suffix,
+    replace_forecast_suffix,
     check_forecast_dimension,
     time_var_to_asi8,
 )
@@ -94,6 +105,8 @@ class DataReader:
             self.read_instance.reading_ghost = check_for_ghost(
                 self.read_instance.network[0]
             )
+            # fields of the GHOST version for GHOST observations, of the species reference otherwise
+            apply_ghost_version_fields(self.read_instance)
 
             # re-initialise and update fields for active resolution
             init_coverage(self.read_instance)
@@ -185,7 +198,9 @@ class DataReader:
                 )
 
                 # get time array as integer timestamps
-                self.read_instance.timestamp_array = self.read_instance.time_array.asi8
+                # make sure time array is always in nanoseconds
+                # pandas >= 3.0.0 considers the time units to be microseconds (us) instead of nanoseconds (ns)
+                self.read_instance.timestamp_array = self.read_instance.time_array.as_unit("ns").asi8
 
                 # get N indices per yearmonth
                 self.read_instance.N_inds_per_yearmonth = np.array(
@@ -315,7 +330,7 @@ class DataReader:
                     self.read_instance.data_labels,
                     self.read_instance.data_labels_raw,
                     self.read_instance.experiments,
-                ) = self.update_forecast_indices(init=True)
+                ) = self.update_forecast_indices(init=True, show_warnings=True)
 
             # create data in memory array
             self.read_instance.data_in_memory = {
@@ -565,9 +580,7 @@ class DataReader:
                 nonghost_standard_units = {}
                 for speci in self.read_instance.nonghost_units.keys():
                     input_units = self.read_instance.nonghost_units[speci]
-                    standard_parameter_speci = get_standard_parameters_by_speci(
-                        speci, self.read_instance.ghost_version
-                    )
+                    standard_parameter_speci = self.read_instance.parameter_dictionary[speci]
                     standard_input_units = get_standard_units(
                         input_units, standard_parameter_speci
                     )
@@ -1143,43 +1156,38 @@ class DataReader:
                 for model in models_to_remove
             ]
 
-            # remove model data
-            self.read_instance.data_in_memory[
-                self.read_instance.networkspecies[0]
-            ] = np.delete(
-                self.read_instance.data_in_memory[self.read_instance.networkspecies[0]],
-                models_to_remove_inds,
-                axis=0,
-            )
+            # remove model data (for every network / species in memory)
+            for networkspeci in self.read_instance.networkspecies:
+                self.read_instance.data_in_memory[networkspeci] = np.delete(
+                    self.read_instance.data_in_memory[networkspeci],
+                    models_to_remove_inds,
+                    axis=0,
+                )
 
         # need to read model/s ?
         if "read_mod" in operations:
-            # insert space for new models in data array
+            # insert space for new models in data array (for every network / species in memory)
             for model_to_read in models_to_read:
                 models_to_read_ind = self.read_instance.data_labels.index(model_to_read)
 
-                self.read_instance.data_in_memory[
-                    self.read_instance.networkspecies[0]
-                ] = np.insert(
-                    self.read_instance.data_in_memory[
-                        self.read_instance.networkspecies[0]
-                    ],
-                    models_to_read_ind,
-                    np.full(
-                        (
-                            1,
-                            len(
-                                self.read_instance.station_references[
-                                    self.read_instance.networkspecies[0]
-                                ]
+                for networkspeci in self.read_instance.networkspecies:
+                    self.read_instance.data_in_memory[networkspeci] = np.insert(
+                        self.read_instance.data_in_memory[networkspeci],
+                        models_to_read_ind,
+                        np.full(
+                            (
+                                1,
+                                len(
+                                    self.read_instance.station_references[networkspeci]
+                                ),
+                                len(self.read_instance.time_array),
                             ),
-                            len(self.read_instance.time_array),
+                            np.nan,
+                            dtype=np.float32,
                         ),
-                        np.nan,
-                        dtype=np.float32,
-                    ),
-                    axis=0,
-                )
+                        axis=0,
+                    )
+
 
             # get list of yearmonths to read
             yearmonths_to_read = get_yearmonths_to_read(
@@ -1278,17 +1286,158 @@ class DataReader:
             mods_printed = []
             for model, alias in self.read_instance.experiments.items():
                 if "-daily" in model:
-                    model = "{}-daily".format(model.split("-daily")[0])
-                    alias = "{}-daily".format(alias.split("-daily")[0])
+                    model = replace_forecast_suffix(model, "daily")
+                    alias = replace_forecast_suffix(alias, "daily")
                 if "-combined" in model:
-                    model = "{}-combined".format(model.split("-combined")[0])
-                    alias = "{}-combined".format(alias.split("-combined")[0])
+                    model = replace_forecast_suffix(model, "combined")
+                    alias = replace_forecast_suffix(alias, "combined")
+                # gridded models split into forecast labels are printed once, with their lead days
+                if model.endswith("::gridded"):
+                    model = remove_forecast_suffix(model)
                 if model not in mods_printed:
                     str_model = f" - {model}"
-                    if self.read_instance.alias_flag:
+                    # gridded models are read for the forecast days of their interpolated
+                    # versions, or of their own forecast labels when not loaded interpolated.
+                    # Gridded models that are not forecast experiments have no lead days
+                    if model.endswith("::gridded") and is_gridded_model_forecast(self.read_instance):
+                        lead_days = get_map_lead_days(self.read_instance)
+                        base_data_labels = get_gridded_model_base_data_labels(self.read_instance)
+                        # versions without data in the period have no forecast days,
+                        # so the grid falls back to lead day 1
+                        if base_data_labels and not any(
+                            base_data_label in forecast_days
+                            for forecast_days in self.read_instance.forecast_days_per_data_label.values()
+                            for base_data_label in base_data_labels
+                        ):
+                            # base labels are the interpolated versions of the gridded model,
+                            # or the gridded model itself when it is not loaded interpolated
+                            loaded_interpolated = any(
+                                (not data_label_raw.endswith("::gridded"))
+                                and (get_model_id(data_label_raw) == get_model_id(model))
+                                for data_label_raw in self.read_instance.data_labels_raw
+                            )
+                            if loaded_interpolated:
+                                msg = (
+                                    f"{', '.join(sorted(base_data_labels))} has no interpolated data "
+                                    f"in the selected period, so the grid of {model} is drawn with lead day 1."
+                                )
+                            else:
+                                msg = (
+                                    f"{model} has no forecast data in the selected period, "
+                                    "so its grid is drawn with lead day 1."
+                                )
+                            show_message(
+                                self.read_instance, msg, from_conf=self.read_instance.from_conf
+                            )
+                        lead_days = [str(day) for day in lead_days]
+                        if len(lead_days) > 1:
+                            str_lead_days = "s {} and {}".format(", ".join(lead_days[:-1]), lead_days[-1])
+                        else:
+                            str_lead_days = f" {lead_days[0]}"
+                        # name the forecast option the lead days come from, only if it was applied to the
+                        # gridded model (it has forecast indices), otherwise lead day 1 is used by default.
+                        # The option type is taken from the first forecast entry, as in update_forecast_indices
+                        str_forecast = ""
+                        if any(
+                            indices
+                            for forecast_indices in self.read_instance.forecast_indices_per_data_label.values()
+                            for base_data_label, indices in forecast_indices.items()
+                            if base_data_label in base_data_labels
+                        ):
+                            forecast_type = next(
+                                fct for fct in ["day", "combined", "daily"]
+                                if fct in self.read_instance.forecast[0]
+                            )
+                            str_forecast = f"{forecast_type} option "
+                        str_model += f" ({str_forecast}with data from lead day{str_lead_days})"
+                    elif self.read_instance.alias_flag:
                         str_model += f" ({alias})"
                     self.read_instance.logger.info(str_model)
                     mods_printed.append(model)
+
+        # get data arrays for gridded model if any
+        species = np.unique([networkspeci.split('|')[1]
+                            for networkspeci in self.read_instance.networkspecies])
+        self.read_instance.gridded_var_data = {}
+        for speci in species:      
+            result = self.read_gridded_data(speci)
+
+            if result is None:
+                continue
+
+            grid_sum, grid_count, days, leads, lat, lon, files = result
+
+            self.read_instance.gridded_var_data[speci] = {
+                "sum": grid_sum,
+                "count": grid_count,
+                "day": days,
+                "lead": leads,
+                "lat": lat,
+                "lon": lon,
+                "files": files,
+            }
+
+        # warn if map_grid_forecast_lead_days is not used: no gridded data loaded,
+        # gridded model not a forecast experiment, or some of its lead days were not loaded
+        if self.read_instance.map_grid_forecast_lead_days:
+            if not self.read_instance.gridded_var_data:
+                msg = "'map_grid_forecast_lead_days' is set, but no gridded data is loaded, so it is not used."
+                show_message(self.read_instance, msg)
+            elif not is_gridded_model_forecast(self.read_instance):
+                # first gridded model is the one read
+                model_id = next(
+                    get_model_id(data_label_raw)
+                    for data_label_raw in self.read_instance.data_labels_raw
+                    if data_label_raw.endswith("::gridded")
+                )
+                msg = (
+                    f"'map_grid_forecast_lead_days' is not used because {model_id} "
+                    "is not a forecast experiment."
+                )
+                show_message(self.read_instance, msg)
+            else:
+                loaded_lead_days = get_map_lead_days(self.read_instance)
+                not_loaded = [
+                    lead_day for lead_day in self.read_instance.map_grid_forecast_lead_days
+                    if lead_day not in loaded_lead_days
+                ]
+                if not_loaded:
+                    str_not_loaded = ", ".join(str(lead_day) for lead_day in not_loaded)
+                    str_loaded = ", ".join(str(lead_day) for lead_day in loaded_lead_days)
+                    if len(not_loaded) == len(self.read_instance.map_grid_forecast_lead_days):
+                        consequence = "so the grid uses all loaded lead days"
+                    elif len(not_loaded) == 1:
+                        consequence = "so it is not used on the grid"
+                    else:
+                        consequence = "so they are not used on the grid"
+                    if len(not_loaded) == 1:
+                        str_not_loaded = f"Lead day {str_not_loaded} of 'map_grid_forecast_lead_days' was"
+                    else:
+                        str_not_loaded = f"Lead days {str_not_loaded} of 'map_grid_forecast_lead_days' were"
+                    msg = f"{str_not_loaded} not loaded (loaded: {str_loaded}), {consequence}."
+                    show_message(self.read_instance, msg)
+
+                # in report and library modes, maps of a single forecast day (day mode) keep
+                # their own lead day, so warn that the field is only used on the other maps
+                # (not in the dashboard, where the grid lead days do not depend on the map).
+                # The forecast type is taken from the first forecast entry, as in update_forecast_indices,
+                # as daily and combined labels are still split per lead day until they are merged
+                day_mode = bool(self.read_instance.forecast) and ("day" in self.read_instance.forecast[0])
+                single_day_labels = [
+                    data_label for data_label in self.read_instance.data_labels
+                    if day_mode and (get_data_label_lead_day(self.read_instance, data_label) is not None)
+                ]
+                if (
+                    (self.read_instance.mode in ["report", "library"])
+                    and single_day_labels
+                    and (len(not_loaded) < len(self.read_instance.map_grid_forecast_lead_days))
+                ):
+                    msg = (
+                        "'map_grid_forecast_lead_days' is not used on maps of a single forecast day "
+                        f"(e.g. {single_day_labels[0]}), which keep their own lead day. "
+                        "It is only used on the other maps."
+                    )
+                    show_message(self.read_instance, msg)
 
     def read_basic_metadata(self):
         """
@@ -1681,55 +1830,124 @@ class DataReader:
             for data_label, data_label_raw in zip(data_labels, data_labels_raw):
                 # only check model data labels
                 if data_label != self.read_instance.observations_data_label:
-                    if "/" in network:
-                        file_root = "%s/%s/%s/%s/%s/%s/%s_" % (
-                            self.read_instance.mod_root,
-                            ghost_version,
-                            data_label_raw,
-                            resolution,
-                            speci,
-                            network.replace("/", "-"),
-                            speci,
-                        )
+                    # split raw data label into model id and type
+                    if "::" in data_label_raw:
+                        # e.g. 'cams61_emep_ph2-eu-000::interpolated
+                        model_id, _, model_type = data_label_raw.rpartition("::")
+
+                        # gridded files have no forecast_day dimension, so their lead days
+                        # are counted from the time axis of the first file in the period
+                        if model_type == "gridded":
+                            domain = model_id.rsplit("-", 2)[1]
+                            file_root_key = (model_type, model_id, speci)
+                            if (
+                                file_root_key
+                                not in self.read_instance.available_model_data_file_roots
+                            ):
+                                continue
+                            try:
+                                available_timesteps = self.read_instance.available_model_data[
+                                    model_type
+                                ][domain][resolution][speci][model_id]
+                            except KeyError:
+                                continue
+
+                            # get files inside the months to read
+                            yearmonths_to_read_str = {str(yyyymm) for yyyymm in yearmonths_to_read}
+                            timesteps_to_read_intersect = sorted(
+                                ts for ts in available_timesteps
+                                if ts[:6] in yearmonths_to_read_str
+                            )
+
+                            # take the first file that exists, as missing files are only
+                            # reported when reading (in read_gridded_data)
+                            file_root = self.read_instance.available_model_data_file_roots[
+                                file_root_key
+                            ]
+                            first_timestep = next(
+                                (
+                                    ts for ts in timesteps_to_read_intersect
+                                    if os.path.exists(file_root.format(date=ts))
+                                ),
+                                None,
+                            )
+                            if first_timestep is None:
+                                continue
+
+                            files_to_read[data_label] = (
+                                file_root.format(date=first_timestep),
+                                first_timestep,
+                            )
+                            continue
+                    # if nothing is saved next to ::, assume it is interpolated
                     else:
-                        file_root = "%s/%s/%s/%s/%s/%s/%s_" % (
-                            self.read_instance.mod_root,
-                            ghost_version,
-                            data_label_raw,
-                            resolution,
-                            speci,
-                            network,
-                            speci,
-                        )
+                        model_id, model_type = data_label_raw, "interpolated"
+
+                    data_key = network
+                    file_root_key = (model_type, model_id, network, speci)
+
+                    # get file path
+                    if (
+                        file_root_key
+                        not in self.read_instance.available_model_data_file_roots
+                    ):
+                        continue
+                    file_root = self.read_instance.available_model_data_file_roots[
+                        file_root_key
+                    ]
 
                     try:
                         available_yearmonths = self.read_instance.available_model_data[
-                            network
-                        ][resolution][speci][data_label_raw]
+                            model_type
+                        ][data_key][resolution][speci][model_id]
                     except KeyError:
-                        print(
-                            file_root, self.read_instance.available_model_data[network]
-                        )
                         continue
 
                     # get intersection of yearmonths_to_read and available_yearmonths
                     yearmonths_to_read_intersect = list(
                         set(yearmonths_to_read) & set(available_yearmonths)
                     )
-                    files_to_read[data_label] = sorted(
-                        [
-                            file_root + str(yyyymm) + ".nc"
-                            for yyyymm in yearmonths_to_read_intersect
-                        ]
-                    )[0]
+
+                    # no files inside the date range, nothing to check
+                    if len(yearmonths_to_read_intersect) == 0:
+                        continue
+
+                    # interpolated files have no timestep, their lead days are in the forecast dimension.
+                    # Take the first file that exists
+                    first_file = next(
+                        (
+                            relevant_file
+                            for relevant_file in sorted(
+                                file_root + str(yyyymm) + ".nc"
+                                for yyyymm in yearmonths_to_read_intersect
+                            )
+                            if os.path.exists(relevant_file)
+                        ),
+                        None,
+                    )
+                    if first_file is None:
+                        continue
+                    files_to_read[data_label] = (first_file, None)
 
             # read forecast dimension for each model
             if len(files_to_read) == 0:
                 continue
             else:
-                returned_data = [
-                    check_forecast_dimension(files) for files in files_to_read.values()
-                ]
+                returned_data = []
+                for files in files_to_read.values():
+                    # files that cannot be opened (e.g. corrupted) are taken as having no
+                    # forecast data, so that they do not stop the mode
+                    try:
+                        returned_data.append(check_forecast_dimension((*files, resolution)))
+                    except OSError as error:
+                        # in the dashboard this only fills the models menu, nothing is being read yet
+                        msg = f"Cannot check forecast days, the file cannot be opened: {error}"
+                        show_message(
+                            self.read_instance,
+                            msg,
+                            deactivate=self.read_instance.mode == "dashboard",
+                        )
+                        returned_data.append(0)
 
             # unzip returned data
             n_forecast_days = np.array(returned_data, dtype=np.int32)
@@ -1751,6 +1969,7 @@ class DataReader:
         selected_data_labels_raw=None,
         networkspecies=None,
         init=False,
+        show_warnings=False,
     ):
         """
         Updates forecast-related indices, labels, and model configurations based on current settings and selections.
@@ -1769,6 +1988,9 @@ class DataReader:
             List of networkspecies pairs; defaults to instance networkspecies.
         init : bool, optional
             Flag indicating if this is an initialisation call to reset menu structures.
+        show_warnings : bool, optional
+            Warn about the selected forecast days a selected model does not have, only
+            when reading (not when updating the models menu), by default False.
 
         Returns
         -------
@@ -1843,6 +2065,68 @@ class DataReader:
         unique_data_labels_to_remove = []
         unique_data_labels_raw_to_remove = []
 
+        # reset models pop-up menu options if in dashboard mode, and are initialising
+        # (done once for all networkspecies, otherwise models only available for some
+        # networkspecies lose their entry when a later networkspeci resets the menu)
+        if (self.read_instance.mode not in ["report", "library"]) & (init):
+            self.read_instance.models_menu["models"]["forecast"] = {}
+            self.read_instance.models_menu["models"]["forecast_days"] = {}
+        # otherwise reset selected and disabled forecast variable and day options 
+        # (to ensure data labels that are no longer selected are cleaned)
+        elif (self.read_instance.mode not in ["report", "library"]) & (not init):
+            for data_label in self.read_instance.models_menu["models"]["forecast"]:
+                self.read_instance.models_menu["models"]["forecast"][data_label][
+                    1
+                ] = []
+                self.read_instance.models_menu["models"]["forecast"][data_label][
+                    2
+                ] = []
+                self.read_instance.models_menu["models"]["forecast_days"][
+                    data_label
+                ][1] = []
+
+        # models loaded interpolated, as their gridded versions are read for the forecast
+        # days of the interpolated versions, so are not split into forecast labels
+        interpolated_model_ids = {
+            get_model_id(data_label_raw)
+            for data_label_raw in selected_data_labels_raw
+            if (data_label_raw != self.read_instance.observations_data_label)
+            and (not data_label_raw.endswith("::gridded"))
+        }
+
+        # forecast options set in the model field are applied to all models, so throw error if
+        # models with forecast data have different ones (models without forecast data are skipped),
+        # only when reading from a configuration file, as dashboard selections are checked when reading
+        forecast_per_model = getattr(self.read_instance, "forecast_per_model", {})
+        if (self.read_instance.mode in ["report", "library"] or self.read_instance.from_conf) and any(
+            fct is not None for fcts in forecast_per_model.values() for fct in fcts
+        ):
+            forecasts_per_forecast_model = {}
+            for networkspeci in networkspecies:
+                for data_label, data_label_raw in zip(data_labels, data_labels_raw):
+                    if data_label == self.read_instance.observations_data_label:
+                        continue
+                    # gridded models loaded interpolated follow their interpolated versions
+                    if data_label_raw.endswith("::gridded") and (
+                        get_model_id(data_label_raw) in interpolated_model_ids
+                    ):
+                        continue
+                    if self.read_instance.forecast_days_per_data_label[networkspeci].get(data_label, 0) == 0:
+                        continue
+                    forecasts_per_forecast_model[get_model_id(data_label_raw)] = frozenset(
+                        forecast_per_model.get(get_model_id(data_label_raw), {None})
+                    )
+            if len(set(forecasts_per_forecast_model.values())) > 1:
+                options = ", ".join(
+                    "{}: {}".format(model, ", ".join(sorted(fct if fct else "none" for fct in fcts)))
+                    for model, fcts in forecasts_per_forecast_model.items()
+                )
+                error = f"Error: Models with forecast data have different forecast options in the model name ({options}). "
+                error += "Forecast options are applied to all models, so they must be the same for all models with "
+                error += "forecast data, or be set in the 'forecast' field."
+                self.read_instance.logger.error(error)
+                sys.exit(1)
+
         # iterate over each network species
         for networkspeci in networkspecies:
             # temporary lists for each species
@@ -1850,23 +2134,6 @@ class DataReader:
             data_labels_raw_to_remove = []
             data_labels_to_add = []
             data_labels_raw_to_add = []
-
-            # reset models pop-up menu options if in dashboard mode, and are initialising
-            if (self.read_instance.mode not in ["report", "library"]) & (init):
-                self.read_instance.models_menu["models"]["forecast"] = {}
-                self.read_instance.models_menu["models"]["forecast_days"] = {}
-            # otherwise reset selected and disabled forecast variable and day options (to ensure data labels that are no longer selected are cleaned)
-            elif (self.read_instance.mode not in ["report", "library"]) & (not init):
-                for data_label in self.read_instance.models_menu["models"]["forecast"]:
-                    self.read_instance.models_menu["models"]["forecast"][data_label][
-                        1
-                    ] = []
-                    self.read_instance.models_menu["models"]["forecast"][data_label][
-                        2
-                    ] = []
-                    self.read_instance.models_menu["models"]["forecast_days"][
-                        data_label
-                    ][1] = []
 
             # initialise dictionary for this network species
             self.read_instance.forecast_indices_per_data_label[networkspeci] = {}
@@ -1883,6 +2150,10 @@ class DataReader:
                     not in self.read_instance.forecast_days_per_data_label[networkspeci]
                 ):
                     continue
+                # gridded models loaded interpolated follow the forecast days of their interpolated versions
+                gridded_follows_interpolated = data_label_raw.endswith("::gridded") and (
+                    get_model_id(data_label_raw) in interpolated_model_ids
+                )
                 # get number of forecast days for this label
                 n_forecast_days = self.read_instance.forecast_days_per_data_label[
                     networkspeci
@@ -1907,14 +2178,25 @@ class DataReader:
                         networkspeci, data_label, "", n_forecast_days, ""
                     )
                 else:
-                    # if no specific forecast requested, still update empty menu entry
-                    if len(wanted_forecast_days) == 0:
+                    # if no specific forecast requested, or gridded model follows its
+                    # interpolated versions, still update empty menu entry
+                    if (len(wanted_forecast_days) == 0) or gridded_follows_interpolated:
                         self.update_forecast_menu(
                             networkspeci, data_label, "", n_forecast_days, ""
                         )
                     else:
+                        # a gridded model loaded alone has no station data to merge per lead day,
+                        # so with daily and combined it is not split into forecast labels: its
+                        # forecast labels are only mapped to their indices below, which is where
+                        # its lead days are read from (get_map_lead_days). With day, each lead day
+                        # gets its own label, to be selected for the map
+                        split_data_label = not (
+                            data_label_raw.endswith("::gridded")
+                            and (forecast_type in ["daily", "combined"])
+                        )
+
                         # mark the data label for removal if it was selected (will be replaced by forecast versions)
-                        if data_label in selected_data_labels:
+                        if (data_label in selected_data_labels) and split_data_label:
                             data_labels_to_remove.append(data_label)
                             data_labels_raw_to_remove.append(data_label_raw)
 
@@ -1922,13 +2204,13 @@ class DataReader:
                         if wanted_forecast_days[0] in ["combined", "daily", "day"]:
                             for wanted_forecast_index in range(n_forecast_days):
                                 # create new label names with forecast day index
-                                new_data_label = "{}-{}{}".format(
-                                    data_label, forecast_type, wanted_forecast_index + 1
+                                new_data_label = add_forecast_suffix(
+                                    data_label,
+                                    "{}{}".format(forecast_type, wanted_forecast_index + 1),
                                 )
-                                new_data_label_raw = "{}-{}{}".format(
+                                new_data_label_raw = add_forecast_suffix(
                                     data_label_raw,
-                                    forecast_type,
-                                    wanted_forecast_index + 1,
+                                    "{}{}".format(forecast_type, wanted_forecast_index + 1),
                                 )
                                 # map new labels to forecast indices
                                 self.read_instance.forecast_indices_per_data_label[
@@ -1943,22 +2225,45 @@ class DataReader:
                                     wanted_forecast_days[0],
                                 )
                                 # if label was selected, add the new one to be displayed
-                                if data_label in selected_data_labels:
+                                if (data_label in selected_data_labels) and split_data_label:
                                     data_labels_to_add.append(new_data_label)
                                     data_labels_raw_to_add.append(new_data_label_raw)
 
                         else:
+                            # warn about the wanted forecast days the model does not have
+                            missing_forecast_days = [
+                                str(wanted_forecast_day)
+                                for wanted_forecast_day in wanted_forecast_days
+                                if wanted_forecast_day > n_forecast_days
+                            ]
+                            if show_warnings and missing_forecast_days and (
+                                data_label in selected_data_labels
+                            ):
+                                if len(missing_forecast_days) == len(wanted_forecast_days):
+                                    msg = (
+                                        f"{data_label} has {n_forecast_days} lead day(s) for "
+                                        f"{networkspeci}, none of the selected forecast days "
+                                        f"({', '.join(missing_forecast_days)})."
+                                    )
+                                else:
+                                    msg = (
+                                        f"{data_label} has {n_forecast_days} lead day(s) for "
+                                        f"{networkspeci}, so forecast day(s) "
+                                        f"{', '.join(missing_forecast_days)} cannot be loaded for it."
+                                    )
+                                show_message(self.read_instance, msg)
+
                             # otherwise, handle explicit list of wanted forecast days
                             for wanted_forecast_day in wanted_forecast_days:
                                 if wanted_forecast_day <= n_forecast_days:
                                     # create new forecast label for that specific day
-                                    new_data_label = "{}-{}{}".format(
-                                        data_label, forecast_type, wanted_forecast_day
+                                    new_data_label = add_forecast_suffix(
+                                        data_label,
+                                        "{}{}".format(forecast_type, wanted_forecast_day),
                                     )
-                                    new_data_label_raw = "{}-{}{}".format(
+                                    new_data_label_raw = add_forecast_suffix(
                                         data_label_raw,
-                                        forecast_type,
-                                        wanted_forecast_day,
+                                        "{}{}".format(forecast_type, wanted_forecast_day),
                                     )
                                     # store forecast index (zero-based)
                                     self.read_instance.forecast_indices_per_data_label[
@@ -1975,7 +2280,7 @@ class DataReader:
                                         wanted_forecast_day,
                                     )
                                     # if label was selected, add new label to lists
-                                    if data_label in selected_data_labels:
+                                    if (data_label in selected_data_labels) and split_data_label:
                                         data_labels_to_add.append(new_data_label)
                                         data_labels_raw_to_add.append(
                                             new_data_label_raw
@@ -2019,11 +2324,7 @@ class DataReader:
                         unique_data_labels_to_add, unique_data_labels_raw_to_add
                     ):
                         # find base label before forecast suffix
-                        base_data_label_to_add = (
-                            data_label_to_add.split("-day")[0]
-                            .split("-daily")[0]
-                            .split("-combined")[0]
-                        )
+                        base_data_label_to_add = remove_forecast_suffix(data_label_to_add)
                         if base_data_label_to_add == data_label:
                             new_data_labels.append(data_label_to_add)
                             new_data_labels_raw.append(data_label_raw_to_add)
@@ -2202,14 +2503,8 @@ class DataReader:
                 ]
 
                 # get base data label and data label raw (i.e. without -dayN or -daily or -combined suffix for forecast data)
-                base_data_label = (
-                    data_label.split("-day")[0].split("-daily")[0].split("-combined")[0]
-                )
-                base_data_label_raw = (
-                    data_label_raw.split("-day")[0]
-                    .split("-daily")[0]
-                    .split("-combined")[0]
-                )
+                base_data_label = remove_forecast_suffix(data_label)
+                base_data_label_raw = remove_forecast_suffix(data_label_raw)
 
                 # if already have base data label in files_to_read, then continue
                 if base_data_label in self.read_instance.files_to_read[networkspeci]:
@@ -2264,32 +2559,41 @@ class DataReader:
                     if filter_read:
                         continue
 
-                    elif "/" in network:
-                        file_root = "%s/%s/%s/%s/%s/%s/%s_" % (
-                            self.read_instance.mod_root,
-                            self.read_instance.ghost_version,
-                            base_data_label_raw,
-                            self.read_instance.resolution,
-                            speci,
-                            network.replace("/", "-"),
-                            speci,
-                        )
                     else:
-                        file_root = "%s/%s/%s/%s/%s/%s/%s_" % (
-                            self.read_instance.mod_root,
-                            self.read_instance.ghost_version,
-                            base_data_label_raw,
-                            self.read_instance.resolution,
-                            speci,
-                            network,
-                            speci,
-                        )
-                    try:
-                        available_yearmonths = self.read_instance.available_model_data[
-                            network
-                        ][self.read_instance.resolution][speci][base_data_label_raw]
-                    except KeyError:
-                        continue
+                        # split raw data label into model id and type
+                        if "::" in base_data_label_raw:
+                            # e.g. 'cams61_emep_ph2-eu-000::interpolated
+                            model_id, _, model_type = base_data_label_raw.rpartition("::")
+
+                            # gridded data has no stations, so it is not
+                            # read here, it is read per date when the gridded map is drawn
+                            if model_type == "gridded":
+                                continue
+                        # if nothing is saved next to ::, assume it is interpolated
+                        else:
+                            model_id, model_type = base_data_label_raw, "interpolated"
+
+                        data_key = network
+                        file_root_key = (model_type, model_id, network, speci)
+
+                        # get file path
+                        if (
+                            file_root_key
+                            not in self.read_instance.available_model_data_file_roots
+                        ):
+                            continue
+                        file_root = self.read_instance.available_model_data_file_roots[
+                            file_root_key
+                        ]
+
+                        try:
+                            available_yearmonths = (
+                                self.read_instance.available_model_data[model_type][data_key][
+                                    self.read_instance.resolution
+                                ][speci][model_id]
+                            )
+                        except KeyError:
+                            continue
 
                 # get intersection of yearmonths_to_read and available_yearmonths
                 yearmonths_to_read_intersect = list(
@@ -3082,18 +3386,18 @@ class DataReader:
                 if have_forecast:
                     # daily forecast
                     if daily_forecast:
-                        data_label_forecast = "{}-daily{}".format(
-                            data_label, forecast_index + 1
+                        data_label_forecast = add_forecast_suffix(
+                            data_label, "daily{}".format(forecast_index + 1)
                         )
                     # combined forecast
                     elif combined_forecast:
-                        data_label_forecast = "{}-combined{}".format(
-                            data_label, forecast_index + 1
+                        data_label_forecast = add_forecast_suffix(
+                            data_label, "combined{}".format(forecast_index + 1)
                         )
                     # N day forecast
                     elif day_forecast:
-                        data_label_forecast = "{}-day{}".format(
-                            data_label, forecast_index + 1
+                        data_label_forecast = add_forecast_suffix(
+                            data_label, "day{}".format(forecast_index + 1)
                         )
                     else:
                         data_label_forecast = data_label
@@ -3122,3 +3426,385 @@ class DataReader:
         ncdf_root.close()
 
         return True
+
+    def read_model_dataset(self, ds, speci, obs_units, standard_parameter_speci, time_indices, 
+                           first_file=True):
+        """
+        Read model dataset
+
+        Parameters
+        ----------
+        ds : netCDF4.Dataset
+            Opened model gridded dataset
+        speci : str
+            Speci
+        obs_units : str
+            Measurement units of observations (and interpolated model)
+        standard_parameter_speci : dict
+            GHOST standard parameters dictionary
+        time_indices : np.ndarray
+            Sorted indices of the timesteps to read from the file
+        first_file : bool, optional
+            Indicates if dataset to read comes from first file in files_to_read list, by default True
+
+        Returns
+        -------
+        np.array
+            Gridded model variable data of the selected timesteps
+        np.array
+            Gridded model latitude for first file
+        np.array
+            Gridded model longitude for first file
+        """
+
+        speci_object = ds[speci]
+
+        # drop level
+        if len(speci_object.shape) == 4:
+            z_varname = speci_object.dimensions[1]
+
+            # check if species Z dimension is named correctly, and in correct BSC standard order
+            # if not, model grid won't be plotted
+            # Z dimension is valid if == 'z' or 'lev' or 'alt' or 'height' or 'level'
+            if z_varname not in ["lev", "z", "alt", "height", "level"]:
+                msg = f"Z dimension incorrectly named in {ds.filepath()}. Z={z_varname}. Model grid won't be plotted."
+                show_message(self.read_instance, msg)
+                return None, None, None
+
+            # check if vertical dimension goes up or down to get correct index for surface
+            mod_vert_obj = ds[z_varname]
+            direction = mod_vert_obj.positive
+
+            # if direction == 'up', surface index is location of mininum value in z var
+            if direction == "up":
+                z_index = np.argmin(mod_vert_obj[:])
+            # if direction == 'down', surface index is location of maximum value in z var
+            elif direction == "down":
+                z_index = np.argmax(mod_vert_obj[:])
+            # if cannot determine a surface index, model grid won't be plotted
+            else:
+                msg = f"Cannot determine surface index in vertical dimension in {ds.filepath()}. Z={z_varname}. Model grid won't be plotted."
+                show_message(self.read_instance, msg)
+                return None, None, None
+
+            read_data = speci_object[time_indices, z_index, :, :]
+        else:
+            read_data = speci_object[time_indices]
+
+        # convert model units to observational units
+        mod_speci_units = speci_object.units
+        conversion_factor = get_conversion_factor(
+            mod_speci_units, obs_units, standard_parameter_speci
+        )
+        read_data = read_data * conversion_factor
+
+        # replace masked values (fill values) by NaN, as the mask is lost when writing
+        # into the preallocated (non-masked) array in read_gridded_data
+        read_data = np.ma.filled(read_data, np.nan)
+
+        lat, lon = None, None
+        if first_file:
+            # get lat, lon and units from first readable file
+            for name in ("lat", "latitude"):
+                if name in ds.variables:
+                    lat = ds.variables[name][:]
+                    break
+            else:
+                msg = "Latitudes cannot be read, model grid won't be plotted."
+                show_message(self.read_instance, msg)
+                return None, None, None
+            for name in ("lon", "longitude"):
+                if name in ds.variables:
+                    lon = ds.variables[name][:]
+                    break
+            else:
+                msg = "Longitudes cannot be read, model grid won't be plotted."
+                show_message(self.read_instance, msg)
+                return None, None, None
+        
+        return read_data, lat, lon
+
+    def read_gridded_data(self, speci):
+        """
+        Read model gridded data
+
+        Parameters
+        ----------
+        speci : str
+            Current speci (e.g. sconco3)
+
+        Returns
+        -------
+        np.array
+            Sum of gridded model variable data per day and lead day, with shape
+            (day, lead, lat, lon)
+        np.array
+            Number of valid (non-NaN) values added to each sum, with the same shape
+        np.array
+            datetime64 start of each day of the day dimension
+        np.array
+            Lead day of the lead dimension (1 = first 24 hours after the model
+            initialisation), 0 for files that are not forecast runs
+        np.array
+            Gridded model latitude
+        np.array
+            Gridded model longitude
+        list
+            (filepath, time indices, timestamps, lead days) of the timesteps read from
+            each file, to read them again on the fly in read_gridded_timesteps
+        """
+
+        # get lead days
+        lead_days = get_map_lead_days(self.read_instance)
+
+        # get gridded model loaded
+        # model id without forecast suffix, as gridded models loaded alone are split into forecast labels
+        selected_gridded_models = [
+            get_model_id(data_label_raw)
+            for data_label_raw in self.read_instance.data_labels_raw
+            if data_label_raw.endswith("::gridded")
+        ]
+
+        # nothing to draw if no gridded model is selected
+        if len(selected_gridded_models) == 0:
+            return None
+        
+        # use first lead day by default
+        if lead_days is None:
+            lead_days = [1]
+
+        # take the first selected gridded model
+        model_id = selected_gridded_models[0]
+        domain = model_id.rsplit("-", 2)[1]
+        resolution = self.read_instance.resolution
+
+        file_root_key = ("gridded", model_id, speci)
+
+        # get file path
+        if (
+            file_root_key
+            not in self.read_instance.available_model_data_file_roots
+        ):
+            return None
+        file_root = self.read_instance.available_model_data_file_roots[
+            file_root_key
+        ]
+
+        try:
+            available_timesteps = self.read_instance.available_model_data[
+                "gridded"
+            ][domain][resolution][speci][model_id]
+        except KeyError:
+            return None
+
+        # get start (inclusive) and end (exclusive) of all loaded period at first
+        start = self.read_instance.time_array[0]
+        end = self.read_instance.time_array[-1] + pd.tseries.frequencies.to_offset(
+            self.read_instance.active_frequency_code
+        )
+        
+        # keep only files that can have data inside the period
+        timesteps_to_read_intersect = [
+            ts
+            for ts in available_timesteps
+            if model_file_overlaps_period(ts, start, end, lead_days)
+        ]
+
+        # no files inside the date range, nothing to check
+        if len(timesteps_to_read_intersect) == 0:
+            return None
+
+        obs_units = self.read_instance.measurement_units[speci]
+        standard_parameter_speci = self.read_instance.parameter_dictionary[speci]
+
+        # get start of first day of the period, to get the day of each timestep
+        first_day = start.floor("D")
+        day_length = pd.Timedelta(days=1).value
+
+        # first pass: read only times of each file, to know the day and lead day of
+        # all timesteps before reading any data, so the sums and counts per day and
+        # lead day can be allocated once and filled while reading
+        file_blocks, day_blocks, lead_blocks, files = [], [], [], []
+        for timestep in sorted(timesteps_to_read_intersect):
+            # skip files not found, the days they cover are reported as days without data
+            filepath = file_root.format(date=timestep)
+            if not os.path.exists(filepath):
+                continue
+
+            with Dataset(filepath) as ds:
+                # get timesteps of file inside period
+                file_timestamps = time_var_to_asi8(ds["time"])
+                in_period = (file_timestamps >= start.value) & (file_timestamps < end.value)
+                
+                # forecast runs: keep only timesteps of wanted lead days
+                is_forecast_run = len(timestep) == 10
+                if is_forecast_run:
+                    run_start = pd.to_datetime(timestep, format="%Y%m%d%H")
+                    in_period &= get_forecast_run_mask(
+                        file_timestamps,
+                        run_start,
+                        lead_days,
+                    )
+
+                # skip file if there are no timesteps to use
+                if not in_period.any():
+                    continue
+
+                # get indices of timesteps to read (inside period and, for forecast runs, of wanted lead days)
+                time_indices = np.flatnonzero(in_period)
+
+                # get lead day of each timestep read, or 0 if file is not a forecast run.
+                # As in get_forecast_run_mask, lead day N covers [run start + (N-1) days, run start + N days)
+                selected_timestamps = file_timestamps[time_indices]
+                if is_forecast_run:
+                    file_lead_days = (
+                        (selected_timestamps - run_start.value) // pd.Timedelta(days=1).value + 1
+                    )
+                else:
+                    file_lead_days = np.zeros(selected_timestamps.shape, dtype=np.int64)
+
+                file_blocks.append((filepath, time_indices))
+                day_blocks.append((selected_timestamps - first_day.value) // day_length)
+                lead_blocks.append(file_lead_days)
+                files.append((filepath, time_indices, selected_timestamps, file_lead_days))
+
+        if not file_blocks:
+            return None
+
+        # get start of each day covered by the period (end is exclusive)
+        n_days = int(np.ceil((end - first_day) / pd.Timedelta(days=1)))
+        days = first_day.to_datetime64() + np.arange(n_days) * np.timedelta64(1, "D")
+
+        # get lead days read (0 for files that are not forecast runs)
+        leads = np.unique(np.concatenate(lead_blocks))
+
+        # second pass: read data of each file, adding it to the sums and counts
+        # of the day and lead day of each timestep
+        grid_sum, grid_count = None, None
+        lat, lon = None, None
+        for (filepath, time_indices), day_indices, file_lead_days in zip(
+            file_blocks, day_blocks, lead_blocks
+        ):
+            with Dataset(filepath) as ds:
+                timestep_data, file_lat, file_lon = self.read_model_dataset(
+                    ds,
+                    speci,
+                    obs_units,
+                    standard_parameter_speci,
+                    time_indices,
+                    first_file=False if lat is not None else True
+                )
+
+            # stop reading if data could not be read, as files of the same model share structure
+            if timestep_data is None:
+                return None
+
+            if lat is None:
+                lat, lon = file_lat, file_lon
+
+            # create sum and count arrays for all days and lead days, taking grid shape
+            # and dtype from first file read. A day has at most 24 hourly values per
+            # lead day, so the count fits in uint8
+            if grid_sum is None:
+                shape = (n_days, len(leads)) + timestep_data.shape[1:]
+                grid_sum = np.zeros(shape, dtype=timestep_data.dtype)
+                grid_count = np.zeros(shape, dtype=np.uint8)
+
+            # get position of lead day of each timestep in leads
+            lead_indices = np.searchsorted(leads, file_lead_days)
+
+            # add the timesteps of each (day, lead day) cell to its sum and count.
+            # NaN values (fill values) add nothing to the sum or to the count
+            for day_index, lead_index in set(zip(day_indices, lead_indices)):
+                in_cell = (day_indices == day_index) & (lead_indices == lead_index)
+                cell_data = timestep_data[in_cell]
+                grid_sum[day_index, lead_index] += np.nansum(cell_data, axis=0)
+                grid_count[day_index, lead_index] += np.sum(~np.isnan(cell_data), axis=0, dtype=np.uint8)
+
+            # free data of this file before reading the next one, so the data of
+            # two files is never in memory at the same time
+            del timestep_data, cell_data
+
+        # warn if some days of the period have no valid gridded data (e.g. forecast runs
+        # not found), as they are not drawn on the grid. Forecast runs are checked per
+        # lead day read, and files that are not forecast runs (lead 0) as a whole
+        has_data = grid_count.reshape(n_days, len(leads), -1).any(axis=2)
+        checked_lead_days = [0] if leads.tolist() == [0] else lead_days
+        some_data_missing = any(
+            (lead_day not in leads) or (not has_data[:, np.searchsorted(leads, lead_day)].all())
+            for lead_day in checked_lead_days
+        )
+        if some_data_missing:
+            msg = (
+                f"Some gridded data of {model_id} ({speci}) is missing in the selected period, "
+                "so it is not drawn on the grid for those days."
+            )
+            show_message(self.read_instance, msg)
+
+        return grid_sum, grid_count, days, leads, lat, lon, files
+
+    def read_gridded_timesteps(self, speci, start, end, lead_days=None):
+        """
+        Read on the fly the gridded model timesteps inside a period, from the files
+        found in read_gridded_data, without keeping them in memory
+
+        Parameters
+        ----------
+        speci : str
+            Current speci (e.g. sconco3)
+        start : pd.Timestamp
+            Start of period (inclusive)
+        end : pd.Timestamp
+            End of period (exclusive)
+        lead_days : list of int, optional
+            Lead days to read (plus files that are not forecast runs), by default None
+            (all loaded lead days)
+
+        Returns
+        -------
+        np.array or None
+            Sum of gridded model variable data of the timesteps, with shape (lat, lon)
+        np.array or None
+            Number of valid (non-NaN) values added to the sum, with the same shape
+        """
+
+        gridded_data = self.read_instance.gridded_var_data.get(speci)
+        if gridded_data is None:
+            return None, None
+
+        obs_units = self.read_instance.measurement_units[speci]
+        standard_parameter_speci = self.read_instance.parameter_dictionary[speci]
+
+        grid_sum, grid_count = None, None
+        for filepath, time_indices, timestamps, file_lead_days in gridded_data["files"]:
+            # get timesteps of file inside period and of wanted lead day
+            wanted = (timestamps >= start.value) & (timestamps < end.value)
+            if lead_days is not None:
+                wanted &= np.isin(file_lead_days, lead_days) | (file_lead_days == 0)
+            if not wanted.any():
+                continue
+
+            with Dataset(filepath) as ds:
+                timestep_data, _, _ = self.read_model_dataset(
+                    ds,
+                    speci,
+                    obs_units,
+                    standard_parameter_speci,
+                    time_indices[wanted],
+                    first_file=False
+                )
+
+            # stop reading if data could not be read, as files of the same model share structure
+            if timestep_data is None:
+                return None, None
+
+            # NaN values (fill values) add nothing to the sum or to the count
+            file_sum = np.nansum(timestep_data, axis=0, dtype=np.float64)
+            file_count = np.sum(~np.isnan(timestep_data), axis=0, dtype=np.int64)
+            if grid_sum is None:
+                grid_sum, grid_count = file_sum, file_count
+            else:
+                grid_sum += file_sum
+                grid_count += file_count
+
+        return grid_sum, grid_count

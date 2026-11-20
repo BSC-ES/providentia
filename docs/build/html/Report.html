@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Report &mdash; Providentia 3.1.0 documentation</title>
+  <title>Report &mdash; Providentia 4.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=dd1205ac"></script>
+      <script src="_static/documentation_options.js?v=3304f9e4"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -67,8 +67,10 @@
 <li class="toctree-l1"><a class="reference internal" href="Colocation.html">Colocation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Filtering.html">Filtering</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Forecast.html">Forecast</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Gridded-data.html">Gridded data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Statistics.html">Statistics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Skills.html">Skills</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
@@ -126,15 +128,10 @@
 </section>
 <section id="plot-selection">
 <h2>Plot selection<a class="headerlink" href="#plot-selection" title="Link to this heading"></a></h2>
-<p>You should edit the file <code class="docutils literal notranslate"><span class="pre">settings/report_plots.yaml</span></code> and add a new dictionary key with the names of the plots you want to have. For instance, if you want to include timeseries and scatter plots with and without annotations in your report, you should add:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;new_plots&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;timeseries&quot;</span><span class="p">,</span> <span class="s2">&quot;timeseries_annotate&quot;</span><span class="p">,</span> 
-              <span class="s2">&quot;scatter&quot;</span><span class="p">,</span> <span class="s2">&quot;scatter_annotate&quot;</span><span class="p">]</span>
-</pre></div>
-</div>
-<p>The plots will appear in the report in the given order, with the exception of <code class="docutils literal notranslate"><span class="pre">multispecies</span></code> plots, which will appear first. The key name <code class="docutils literal notranslate"><span class="pre">new_plots</span></code> will be used if called from the <code class="docutils literal notranslate"><span class="pre">report_type</span></code> parameter in the <a class="reference internal" href="Configuration-files.html"><span class="doc std std-doc">configuration file</span></a>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">report_type</span> <span class="o">=</span> <span class="n">new_plots</span>
-</pre></div>
-</div>
+<p>The plots that are defined to be visualised in the report can be set via the <code class="docutils literal notranslate"><span class="pre">plots</span></code> variable in 2 ways.</p>
+<p>They can be set in the form of a list, (e.g. <code class="docutils literal notranslate"><span class="pre">plots</span> <span class="pre">=</span> <span class="pre">timeseries,</span> <span class="pre">distribution,</span> <span class="pre">statsummary</span></code>), or the name of a preset group of plots from <code class="docutils literal notranslate"><span class="pre">settings/report_plots.yaml</span></code> (e.g. <code class="docutils literal notranslate"><span class="pre">standard</span></code>). Preset names cannot take the name of a plot type (e.g. <code class="docutils literal notranslate"><span class="pre">timeseries</span></code>).</p>
+<p>Each plot can be defined with valid plot options via the <code class="docutils literal notranslate"><span class="pre">_option</span></code> suffix (e.g. <code class="docutils literal notranslate"><span class="pre">taylor_perstation</span></code>), and/or a <code class="docutils literal notranslate"><span class="pre">-stat</span></code> suffix to select a statistic where the plot supports one (e.g. <code class="docutils literal notranslate"><span class="pre">periodic-r</span></code>).</p>
+<p>The plots will appear in the report in the defined plot order, with the exception of <code class="docutils literal notranslate"><span class="pre">multispecies</span></code> plots, which will appear first.</p>
 </section>
 <section id="summary-and-station-plots">
 <h2>Summary and station plots<a class="headerlink" href="#summary-and-station-plots" title="Link to this heading"></a></h2>

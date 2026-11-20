@@ -3,6 +3,7 @@
 from collections import OrderedDict
 import copy
 from functools import partial
+import logging
 import os
 import sys
 import time
@@ -16,17 +17,29 @@ from packaging.version import Version
 from PyQt5 import QtCore, QtWidgets, QtGui
 import yaml
 
-from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
+from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics, correct_plot_type_name
 from .canvas import Canvas
 from .configuration import load_conf
 from .configuration import ProvConfiguration
-from .dashboard_elements import ComboBox, QVLine, InputDialog, set_cursor, unset_cursor
+from .dashboard_elements import (
+    CheckableComboBox,
+    ComboBox,
+    DateLineEdit,
+    DateTimePicker,
+    QVLine,
+    InputDialog,
+    MenuEditCommitFilter,
+    MultiSwitch,
+    set_cursor,
+    unset_cursor,
+)
 from .dashboard_elements import set_formatting
 from .fields_menus import (
     init_models,
     init_flags,
     init_qa,
     update_qa,
+    update_flags,
     init_metadata,
     init_multispecies,
     init_period,
@@ -44,9 +57,11 @@ from .read_aux import (
     check_for_ghost,
     get_default_qa,
     generate_file_trees,
+    get_model_id,
+    get_networks_with_data,
+    get_resolutions_with_data,
     get_valid_models,
     get_valid_obs_files_in_date_range,
-    get_temporal_resolution_order,
 )
 from .toolbar import NavigationToolbar
 from .warnings_prv import show_message
@@ -57,6 +72,40 @@ os.environ["QT_FONT_DPI"] = "96"
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
 PROVIDENTIA_ROOT = "/".join(CURRENT_PATH.split("/")[:-1])
+
+
+# plots showing a table or a written summary rather than a range of data.
+# There is nothing in them to zoom into, and the toolbar's rubber band only
+# left them redrawn at a scale that made them unreadable
+NON_NAVIGABLE_PLOTS = [
+    "contingencytable",
+    "fairmode-statsummary",
+    "metadata",
+    "statsummary",
+]
+
+
+def disable_axis_navigation(axes):
+    """
+    Stop the navigation toolbar zooming or panning the given axes, through
+    the hooks its rubber band checks before acting.
+
+    Parameters
+    ----------
+    axes : object
+        An axis, a list of axes, or a dict of them
+    """
+
+    if isinstance(axes, dict):
+        axes = list(axes.values())
+    elif not isinstance(axes, (list, tuple)):
+        axes = [axes]
+
+    for ax in axes:
+        ax.can_zoom = lambda: False
+        ax.can_pan = lambda: False
+
+    return None
 
 
 class Dashboard(QtWidgets.QWidget):
@@ -191,8 +240,10 @@ class Dashboard(QtWidgets.QWidget):
             for k, val in self.current_config.items():
                 # n_cpus is always passed via command line, either as default or explicit,
                 # only read n_cpus from conf if it was not explicitly defined in command line
-                if ((k not in self.commandline_arguments) 
-                    or (k == "n_cpus" and self.commandline_arguments['n_cpus_explicit'] == 'false')):
+                if (k not in self.commandline_arguments) or (
+                    k == "n_cpus"
+                    and self.commandline_arguments["n_cpus_explicit"] == "false"
+                ):
                     setattr(self, k, self.provconf.parse_parameter(k, val))
 
         # now all variables have been parsed, check validity of those, throwing errors where necessary
@@ -255,7 +306,7 @@ class Dashboard(QtWidgets.QWidget):
                     ).keys()
                 ),
             )
-
+        
         # initialise UI
         self.init_ui()
 
@@ -321,6 +372,36 @@ class Dashboard(QtWidgets.QWidget):
 
         return super(Dashboard, self).moveEvent(event)
 
+    def closeEvent(self, event):
+        """
+        Show warning on close if interpolation jobs are in queue or running.
+
+        This method overrides the default PyQt5 `closeEvent` function to
+        trigger custom logic.
+
+        Parameters
+        ----------
+        event : QCloseEvent
+            The close event object.
+        """
+
+        if hasattr(self, "active_interpolations") and self.active_interpolations:
+            reply = QtWidgets.QMessageBox.warning(
+                self,
+                "Interpolations in progress",
+                "There are still interpolation jobs queued or running.\n"
+                "Closing the dashboard will not cancel those jobs.\n"
+                "Click OK to close the dashboard or Cancel to keep it open.",
+                QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel,
+                QtWidgets.QMessageBox.Cancel,
+            )
+
+            if reply == QtWidgets.QMessageBox.Cancel:
+                event.ignore()
+                return
+
+        event.accept()
+
     def get_geometry(self):
         """
         Update the current geometry of the main Providentia window and buttons.
@@ -331,6 +412,58 @@ class Dashboard(QtWidgets.QWidget):
 
         # update geometry of qt elements
         self.update_qt_elements_geometry(resize=True)
+
+    def show_date_picker(self, line_edit):
+        """
+        Show date picker under a start/end date field.
+
+        Parameters
+        ----------
+        line_edit : QtWidgets.QLineEdit
+            Start or end date field (YYYYMMDD)
+        """
+
+        self.date_picker_line_edit = line_edit
+
+        # get date in edit line field
+        date = QtCore.QDate.fromString(line_edit.text(), "yyyyMMdd")
+
+        # if date on edit line field is not valid, show last read date in calendar
+        if not date.isValid():
+            last_read_date = self.start_date if line_edit == self.le_start_date else self.end_date
+            date = QtCore.QDate.fromString(str(last_read_date), "yyyyMMdd")
+
+        # end date must be after start date (end date is not included in the period read)
+        start_date = QtCore.QDate.fromString(self.le_start_date.text(), "yyyyMMdd")
+        end_date = QtCore.QDate.fromString(self.le_end_date.text(), "yyyyMMdd")
+        minimum_date_time, maximum_date_time = None, None
+
+        # minimum end date is one day after start date
+        if (line_edit == self.le_end_date) and start_date.isValid():
+            minimum_date_time = QtCore.QDateTime(start_date.addDays(1), QtCore.QTime(0, 0), QtCore.Qt.UTC)
+        # maximum start date is one day before end date
+        elif (line_edit == self.le_start_date) and end_date.isValid():
+            maximum_date_time = QtCore.QDateTime(end_date.addDays(-1), QtCore.QTime(0, 0), QtCore.Qt.UTC)
+
+        # show date picker in dropdown position
+        self.date_picker.show_at(
+            line_edit.mapToGlobal(QtCore.QPoint(0, line_edit.height())),
+            QtCore.QDateTime(date, QtCore.QTime(0, 0), QtCore.Qt.UTC),
+            minimum_date_time,
+            maximum_date_time,
+        )
+
+    def handle_date_picker_selection(self, date_time):
+        """
+        Write date selected in date picker into start/end date field.
+
+        Parameters
+        ----------
+        date_time : QtCore.QDateTime
+            Selected date
+        """
+
+        self.date_picker_line_edit.setText(date_time.toString("yyyyMMdd"))
 
     def update_qt_elements_geometry(
         self, plot_types="ALL", positions=[1, 2, 3, 4, 5], resize=False
@@ -379,12 +512,8 @@ class Dashboard(QtWidgets.QWidget):
                 self.mpl_canvas.elements,
             ):
                 menu_plot_type = menu_button.objectName().split("_menu")[0]
-                if plot_type in [
-                    "periodic-violin",
-                    "fairmode-target",
-                    "fairmode-statsummary",
-                ]:
-                    plot_type = plot_type.replace("-", "_")
+                menu_plot_type = correct_plot_type_name(menu_plot_type)
+                plot_type = correct_plot_type_name(plot_type)
 
                 # proceed once have objects for plot type
                 # if plot type is None the axes and are initalising the qt element geometry
@@ -468,6 +597,22 @@ class Dashboard(QtWidgets.QWidget):
                             self.mpl_canvas.canvas_cover.setGeometry(
                                 0, 0, canvas_width, canvas_height
                             )
+                            
+                            # place map controls under the colourbar
+                            cb_bbox = self.mpl_canvas.plot_axes["cb"].get_position()
+                            gap = int((45 * canvas_height) / 1016)
+
+                            date_range_x = int(cb_bbox.x0 * canvas_width)
+                            date_range_y = int((1 - cb_bbox.y0) * canvas_height) + gap
+                            date_range_width = int(cb_bbox.width * canvas_width)
+                            date_range_height = 24
+
+                            self.mpl_canvas.map_date_range.setGeometry(
+                                date_range_x,
+                                date_range_y,
+                                date_range_width,
+                                date_range_height,
+                            )
 
                         else:
                             # apply new geometry to layout button
@@ -538,42 +683,103 @@ class Dashboard(QtWidgets.QWidget):
         # add one more horizontal layout
         hbox = QtWidgets.QHBoxLayout()
 
-        # define all configuration box objects (labels, comboboxes etc.)
         # data selection section
-        self.lb_data_selection = set_formatting(
-            QtWidgets.QLabel(self, text="Data Selection"),
+        self.lb_general_selection = set_formatting(
+            QtWidgets.QLabel(self, text="General"),
             self.formatting_dict["menu_title"],
         )
-        self.lb_data_selection.setToolTip(
-            "Setup configuration of data to read into memory"
+        self.switch = set_formatting(
+            MultiSwitch(
+                self,
+                ["BOTH", "OBS", "MODEL"],
+                highlight_color=self.plot_characteristics_templates["general"]["highlight_color"],
+                tooltips={
+                    "BOTH": "See observations and models",
+                    "OBS": "See observations only",
+                    "MODEL": "See models only",
+                },
+            ),
+            self.formatting_dict["menu_multiswitch"],
         )
-        self.cb_network = set_formatting(
+        self.switch.setToolTip("See observations, models or both")
+        two_row_height = (20 * 2 + config_bar.spacing())
+        self.switch.setFixedHeight(two_row_height)
+
+        self.le_start_date = set_formatting(
+            DateLineEdit(self), self.formatting_dict["menu_lineedit"]
+        )
+        self.le_start_date.setToolTip("Set data start date: YYYY-MM-DD")
+        self.le_end_date = set_formatting(
+            DateLineEdit(self), self.formatting_dict["menu_lineedit"]
+        )
+        self.le_end_date.setToolTip("Set data end date: YYYY-MM-DD")
+
+        # add calendar icon inside start and end date fields to open date picker
+        self.date_picker = DateTimePicker(
+            self,
+            highlight_color=self.plot_characteristics_templates["general"]["highlight_color"],
+            show_clock=False,
+        )
+        self.date_picker.accepted.connect(self.handle_date_picker_selection)
+        self.date_picker_line_edit = None
+        for line_edit in [self.le_start_date, self.le_end_date]:
+            picker_action = line_edit.addAction(
+                QtGui.QIcon(join(CURRENT_PATH, "resources/calendar_icon.png")),
+                QtWidgets.QLineEdit.TrailingPosition,
+            )
+            picker_action.setToolTip("Select date")
+            picker_action.triggered.connect(
+                lambda _, line_edit=line_edit: self.show_date_picker(line_edit)
+            )
+
+        self.cb_resolution = set_formatting(
             ComboBox(self), self.formatting_dict["menu_combobox"]
+        )
+        self.cb_resolution.setToolTip("Select temporal resolution of data")
+
+        self.cb_matrix = set_formatting(
+            CheckableComboBox(self), self.formatting_dict["menu_combobox"]
+        )
+        self.cb_matrix.setToolTip("Select data matrix/es")
+
+        self.cb_species = set_formatting(
+            CheckableComboBox(self), self.formatting_dict["menu_combobox"]
+        )
+        self.cb_species.setToolTip("Select species")
+
+        # date fields need 110px to show full YYYY-MM-DD, widen whole date columns in GENERAL
+        for element in [self.le_start_date, self.le_end_date, 
+                        self.cb_matrix, self.cb_species, 
+                        self.cb_resolution]:
+            element.setFixedWidth(110)
+
+        self.vertical_splitter_1 = QVLine()
+        self.vertical_splitter_1.setMaximumWidth(20)
+
+        # observations selection section
+        self.lb_obs_selection = set_formatting(
+            QtWidgets.QLabel(self, text="Observations"),
+            self.formatting_dict["menu_title"],
+        )
+
+        self.cb_ghost_version = set_formatting(
+            ComboBox(self), self.formatting_dict["menu_combobox"]
+        )
+        self.cb_ghost_version.setToolTip("Select GHOST version")
+
+        self.cb_ghost_features = set_formatting(
+            ComboBox(self), self.formatting_dict["menu_combobox"]
+        )
+        self.cb_ghost_features.setToolTip("Select GHOST features")
+
+        self.cb_network = set_formatting(
+            CheckableComboBox(self), self.formatting_dict["menu_combobox"]
         )
         self.cb_network.setToolTip(
             "Select providing observational data network. "
             "Names starting with * indicate non-GHOST datasets"
         )
-        self.cb_resolution = set_formatting(
-            ComboBox(self), self.formatting_dict["menu_combobox"]
-        )
-        self.cb_resolution.setToolTip("Select temporal resolution of data")
-        self.cb_matrix = set_formatting(
-            ComboBox(self), self.formatting_dict["menu_combobox"]
-        )
-        self.cb_matrix.setToolTip("Select data matrix")
-        self.cb_species = set_formatting(
-            ComboBox(self), self.formatting_dict["menu_combobox"]
-        )
-        self.cb_species.setToolTip("Select species")
-        self.le_start_date = set_formatting(
-            QtWidgets.QLineEdit(self), self.formatting_dict["menu_lineedit"]
-        )
-        self.le_start_date.setToolTip("Set data start date: YYYYMMDD")
-        self.le_end_date = set_formatting(
-            QtWidgets.QLineEdit(self), self.formatting_dict["menu_lineedit"]
-        )
-        self.le_end_date.setToolTip("Set data end date: YYYYMMDD")
+
         self.bu_QA = set_formatting(
             QtWidgets.QPushButton("QA", self), self.formatting_dict["menu_button"]
         )
@@ -586,22 +792,35 @@ class Dashboard(QtWidgets.QWidget):
         self.bu_flags.setToolTip(
             "Select standardised data reporter provided flags to filter by"
         )
-        self.bu_models = set_formatting(
-            QtWidgets.QPushButton("MODELS", self), self.formatting_dict["menu_button"]
-        )
-        self.bu_models.setToolTip("Select model/s data to read")
+
         self.bu_multispecies = set_formatting(
             QtWidgets.QPushButton("SPECIES", self), self.formatting_dict["menu_button"]
         )
         self.bu_multispecies.setToolTip("Select species data to filter by")
+
+        self.vertical_splitter_2 = QVLine()
+        self.vertical_splitter_2.setMaximumWidth(20)
+
+        # models selection section
+        self.lb_mod_selection = set_formatting(
+            QtWidgets.QLabel(self, text="Models"),
+            self.formatting_dict["menu_title"],
+        )
+
+        self.bu_models = set_formatting(
+            QtWidgets.QPushButton("MODELS", self), self.formatting_dict["menu_button"]
+        )
+        self.bu_models.setToolTip("Select model/s data to read")
+
         self.bu_read = set_formatting(
             QtWidgets.QPushButton("READ", self),
             self.formatting_dict["menu_button"],
             extra_arguments={"color": "green"},
         )
         self.bu_read.setToolTip("Read selected configuration of data into memory")
-        self.vertical_splitter_1 = QVLine()
-        self.vertical_splitter_1.setMaximumWidth(20)
+
+        self.vertical_splitter_3 = QVLine()
+        self.vertical_splitter_3.setMaximumWidth(20)
 
         # filters section
         self.lb_data_filter = set_formatting(
@@ -644,8 +863,8 @@ class Dashboard(QtWidgets.QWidget):
             QtWidgets.QLineEdit(self), self.formatting_dict["menu_lineedit"]
         )
         self.le_maximum_value.setToolTip("Set upper bound of data")
-        self.vertical_splitter_2 = QVLine()
-        self.vertical_splitter_2.setMaximumWidth(20)
+        self.vertical_splitter_4 = QVLine()
+        self.vertical_splitter_4.setMaximumWidth(20)
 
         # statistical calculation section
         self.lb_statistic = set_formatting(
@@ -674,8 +893,8 @@ class Dashboard(QtWidgets.QWidget):
         self.cb_statistic_aggregation.setToolTip(
             "Select statistic for spatial aggregation"
         )
-        self.vertical_splitter_3 = QVLine()
-        self.vertical_splitter_3.setMaximumWidth(20)
+        self.vertical_splitter_5 = QVLine()
+        self.vertical_splitter_5.setMaximumWidth(20)
 
         # colocation section
         self.lb_colocate = set_formatting(
@@ -687,8 +906,8 @@ class Dashboard(QtWidgets.QWidget):
             QtWidgets.QCheckBox("Temporal"), self.formatting_dict["menu_checkbox"]
         )
         self.ch_colocate.setToolTip("Temporally colocate observational/model data")
-        self.vertical_splitter_4 = QVLine()
-        self.vertical_splitter_4.setMaximumWidth(20)
+        self.vertical_splitter_6 = QVLine()
+        self.vertical_splitter_6.setMaximumWidth(20)
 
         # resampling section
         self.lb_resampling = set_formatting(
@@ -702,8 +921,8 @@ class Dashboard(QtWidgets.QWidget):
         self.cb_resampling_resolution.setToolTip(
             "Select temporal resolution to resample the data to"
         )
-        self.vertical_splitter_5 = QVLine()
-        self.vertical_splitter_5.setMaximumWidth(20)
+        self.vertical_splitter_7 = QVLine()
+        self.vertical_splitter_7.setMaximumWidth(20)
 
         # station selection section
         self.lb_station_selection = set_formatting(
@@ -728,70 +947,84 @@ class Dashboard(QtWidgets.QWidget):
 
         # position objects on gridded configuration bar
         # data selection section
-        config_bar.addWidget(self.lb_data_selection, 0, 0, 1, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_network, 1, 0, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_resolution, 2, 0, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_matrix, 1, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_species, 1, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.le_start_date, 2, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.le_end_date, 2, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_QA, 1, 3, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_flags, 2, 3, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_models, 1, 4, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_multispecies, 2, 4, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_read, 3, 4, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_1, 0, 5, 4, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_general_selection, 0, 0, 1, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.switch, 1, 0, 2, 1, QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        config_bar.addWidget(self.le_start_date, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.le_end_date, 1, 2, QtCore.Qt.AlignLeft)        
+        config_bar.addWidget(self.cb_resolution, 1, 3, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_matrix, 2, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_species, 2, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_1, 0, 5, 3, 1, QtCore.Qt.AlignLeft)
+
+        # observations
+        config_bar.addWidget(self.lb_obs_selection, 0, 6, 1, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_ghost_version, 1, 6, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_network, 1, 7, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_ghost_features, 1, 8, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_QA, 2, 6, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_flags, 2, 7, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_multispecies, 2, 8, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_2, 0, 9, 3, 1, QtCore.Qt.AlignLeft)
+
+        # models
+        config_bar.addWidget(self.lb_mod_selection, 0, 10, 1, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_models, 1, 10, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_read, 3, 10, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_3, 0, 11, 4, 1, QtCore.Qt.AlignLeft)
 
         # filters section
-        config_bar.addWidget(self.lb_data_filter, 0, 6, 1, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.lb_data_bounds, 1, 6, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.le_minimum_value, 1, 7, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.le_maximum_value, 1, 8, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_rep, 2, 6, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_period, 2, 7, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_meta, 2, 8, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_reset, 3, 7, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_filter, 3, 8, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_2, 0, 9, 4, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_data_filter, 0, 12, 1, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_data_bounds, 1, 12, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.le_minimum_value, 1, 13, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.le_maximum_value, 1, 14, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_rep, 2, 12, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_period, 2, 13, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_meta, 2, 14, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_reset, 3, 13, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_filter, 3, 14, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_4, 0, 15, 4, 1, QtCore.Qt.AlignLeft)
 
         # station aggregation section
-        config_bar.addWidget(self.lb_statistic, 0, 10, 1, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.lb_statistic_mode, 1, 10, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.lb_statistic_aggregation, 2, 10, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_statistic_mode, 1, 11, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_statistic_aggregation, 2, 11, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_3, 0, 12, 4, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_statistic, 0, 16, 1, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_statistic_mode, 1, 16, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_statistic_aggregation, 2, 16, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_statistic_mode, 1, 17, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_statistic_aggregation, 2, 17, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_5, 0, 18, 4, 1, QtCore.Qt.AlignLeft)
 
         # colocation section
-        config_bar.addWidget(self.lb_colocate, 0, 13, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_colocate, 1, 13, 1, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_4, 0, 14, 4, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_colocate, 0, 19, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_colocate, 1, 19, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_6, 0, 20, 4, 1, QtCore.Qt.AlignLeft)
 
         # resampling section
-        config_bar.addWidget(self.lb_resampling, 0, 15, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_resampling, 0, 21, 1, 1, QtCore.Qt.AlignLeft)
         config_bar.addWidget(
-            self.cb_resampling_resolution, 1, 15, 1, 1, QtCore.Qt.AlignLeft
+            self.cb_resampling_resolution, 1, 21, 1, 1, QtCore.Qt.AlignLeft
         )
-        config_bar.addWidget(self.vertical_splitter_5, 0, 16, 4, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_7, 0, 22, 4, 1, QtCore.Qt.AlignLeft)
 
         # station selection section
-        config_bar.addWidget(self.lb_station_selection, 0, 17, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_select_all, 1, 17, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_intersect, 2, 17, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_extent, 3, 17, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_station_selection, 0, 23, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_select_all, 1, 23, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_intersect, 2, 23, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_extent, 3, 23, QtCore.Qt.AlignLeft)
 
         # enable dynamic updating of specific configuration bar fields
+        self.switch.stateChanged.connect(self.handle_switch_option_change)
         self.cb_network.currentTextChanged.connect(self.handle_config_bar_params_change)
         self.cb_resolution.currentTextChanged.connect(
             self.handle_config_bar_params_change
         )
         self.cb_matrix.currentTextChanged.connect(self.handle_config_bar_params_change)
         self.cb_species.currentTextChanged.connect(self.handle_config_bar_params_change)
-        self.le_start_date.textChanged.connect(self.handle_config_bar_params_change)
-        self.le_end_date.textChanged.connect(self.handle_config_bar_params_change)
+        self.le_start_date.dateTextChanged.connect(self.handle_config_bar_params_change)
+        self.le_end_date.dateTextChanged.connect(self.handle_config_bar_params_change)
         self.cb_statistic_mode.currentTextChanged.connect(
             self.handle_config_bar_params_change
         )
+        self.cb_ghost_version.currentTextChanged.connect(self.handle_config_bar_params_change)
+        self.cb_ghost_features.currentTextChanged.connect(self.handle_config_bar_params_change)
 
         # setup pop-up window menu tree for flags, qa, models,
         # % data coverage, data periods and metadata
@@ -946,6 +1179,171 @@ class Dashboard(QtWidgets.QWidget):
 
         self.pop_up_window = PopUpWindow(self, menu_root, [], self.full_window_geometry)
 
+    def set_combobox_options(self, available_options, combobox_type, recovery_hint=None):
+        """
+        Set the available options in a combobox and synchronise the selected values.
+
+        Parameters
+        ----------
+        available_options : list
+            List of available options (e.g. ['3hourly'] for resolution) in checkable combobox
+        combobox_type : str
+            Combobox type (resolution, matrix, ghost_version, ghost_features)
+        """
+
+        selected_cb = getattr(self, f"cb_{combobox_type}")
+        selected_values = getattr(self, f"selected_{combobox_type}")
+
+        selected_cb.addItems(available_options)
+
+        # no options at all
+        if not available_options and recovery_hint is not None:
+            setattr(self, f"selected_{combobox_type}", "")
+            msg = f"No {combobox_type.lower()} is available for the current selection."
+            msg += f" {recovery_hint}"
+            if self.from_conf:
+                self.logger.error(msg)
+                sys.exit(1)
+            else:
+                show_message(self, msg)
+                self.no_data_to_read = True
+                self.bu_read.setToolTip(msg)
+                self.disable_element(self.bu_read, "button")
+                self.block_config_bar_handling_updates = False
+                self.block_MPL_canvas_updates = False
+                return False
+        
+        if selected_values in available_options:
+            selected_cb.setCurrentText(selected_values)
+        else:
+            if combobox_type == "ghost_version":
+                combobox_str = 'GHOST version'
+            elif combobox_type == "ghost_features":
+                combobox_str = 'GHOST features'
+            else:
+                combobox_str = combobox_type.capitalize()
+            if selected_values:
+                msg = f"{combobox_str} {selected_values} is not available."
+            else:
+                msg = f"{combobox_str} is empty."
+            if self.from_conf:
+                self.logger.error(msg)
+                sys.exit(1)
+            else:
+                if selected_cb.currentText():
+                    msg += f" Choosing {selected_cb.currentText()} as it is the first option in the dropdown."
+                show_message(self, msg)
+                setattr(
+                    self,
+                    f"selected_{combobox_type}",
+                    selected_cb.currentText()
+                )
+        
+        return True
+
+    def set_checkable_combobox_options(self, available_options, combobox_type, recovery_hint, select_first_option=True):
+        """
+        Set the available options in a checkable combobox and synchronise the selected values.
+
+        Parameters
+        ----------
+        available_options : list
+            List of available options (e.g. ['sconco3', 'sconcno2'] for species) in checkable combobox
+        combobox_type : str
+            Combobox type (e.g. species, network)
+        recovery_hint : str
+            Message shown when there are no options
+        select_first_option : bool
+            If none of the selected values is available, select the first option (default),
+            or select nothing and ask the user to select one
+        """
+
+        selected_cb = getattr(self, f"cb_{combobox_type}")
+        selected_values = getattr(self, f"selected_{combobox_type}")
+
+        # update field
+        selected_cb.addItems(available_options)
+
+        # no options at all
+        if not available_options:
+            setattr(self, f"selected_{combobox_type}", "")
+            msg = f"No {combobox_type.lower()} is available for the current selection."
+            msg += f" {recovery_hint}"
+            if self.from_conf:
+                self.logger.error(msg)
+                sys.exit(1)
+            else:
+                show_message(self, msg)
+                self.no_data_to_read = True
+                self.bu_read.setToolTip(msg)
+                self.disable_element(self.bu_read, "button")
+                self.block_config_bar_handling_updates = False
+                self.block_MPL_canvas_updates = False
+                return False
+    
+        # convert string to list if needed
+        # for species: "sconcno2, sconco3" -> ["sconcno2", "sconco3"]
+        if isinstance(selected_values, str):
+            selected_values = [
+                value.strip()
+                for value in selected_values.split(",")
+            ]
+            setattr(self, f"selected_{combobox_type}", selected_values)
+
+        # message about the selection, shown once the menu shows the new selection
+        msg_to_show = None
+
+        # get options that are not available in data directories
+        missing_values = [
+            value
+            for value in selected_values
+            if value not in available_options
+        ]
+        if missing_values:
+            combobox_str = combobox_type.capitalize()
+            if any(missing_values):
+                msg = f"{combobox_str} {', '.join(missing_values)} is not available."
+            else:
+                msg = f"{combobox_str} is empty."
+            if self.from_conf:
+                self.logger.error(msg)
+                sys.exit(1)
+            else:
+                # keep whichever previously selected values are still valid
+                still_valid_values = [v for v in selected_values if v not in missing_values]
+                if still_valid_values:
+                    selected_values = still_valid_values
+                    msg += f" Keeping {', '.join(still_valid_values)}."
+                elif selected_cb.currentText() and select_first_option:
+                    msg += f" Choosing {selected_cb.currentText()} as it is the first option in the dropdown."
+                    selected_values = [selected_cb.currentText()]
+                else:
+                    msg += f" Please select a {combobox_type.lower()}."
+                    selected_values = []
+                msg_to_show = msg
+                setattr(
+                    self,
+                    f"selected_{combobox_type}",
+                    selected_values
+                )
+
+        # check in available values if there is any value that needs to be selected
+        for i, species in enumerate(available_options):
+            selected_cb.model().item(i).setCheckState(
+                QtCore.Qt.Checked
+                if species in selected_values
+                else QtCore.Qt.Unchecked
+            )
+
+        # the text only follows a change of a check state, and none changes when nothing is selected
+        selected_cb.updateText()
+
+        # after the menu shows the new selection, as the message waits for the user to close it
+        if msg_to_show is not None:
+            show_message(self, msg_to_show)
+
+        return True
+
     def update_configuration_bar_fields(self):
         """Initialise or synchronise all configuration bar widgets and their available options."""
 
@@ -955,12 +1353,20 @@ class Dashboard(QtWidgets.QWidget):
         # set variable to avoid updating the canvas while updating config bar parameters
         self.block_MPL_canvas_updates = True
 
+        # reset per-session legend display name overrides (see
+        # get_display_label() in plot_aux.py) - this function runs on every
+        # data load/reload, so a custom legend name doesn't survive one,
+        # by design
+        self.legend_label_overrides = {}
+
         # set some default configuration values when initialising config bar
         if self.config_bar_initialisation:
             # set initial selected start-end date
             self.le_start_date.setText(str(self.start_date))
             self.le_end_date.setText(str(self.end_date))
             self.date_range_has_changed = False
+
+            self.ghost_version_has_changed = False
 
             # initialise resampling resolution combobox
             self.cb_resampling_resolution.addItems([self.resampling_resolution])
@@ -988,10 +1394,15 @@ class Dashboard(QtWidgets.QWidget):
             self.station_references = {}
 
             # set initial selected config variables as set .conf files or defaults
-            self.selected_network = copy.deepcopy(self.network[0])
+            self.selected_network = copy.deepcopy(self.network)
             self.selected_resolution = copy.deepcopy(self.resolution)
-            self.selected_matrix = self.parameter_dictionary[self.species[0]]["matrix"]
-            self.selected_species = copy.deepcopy(self.species[0])
+            # matrix of the first species in the species reference, none if it is not there
+            self.selected_matrix = (
+                [self.parameter_dictionary[self.species[0]]["matrix"]]
+                if self.species[0] in self.parameter_dictionary
+                else []
+            )
+            self.selected_species = copy.deepcopy(self.species)
             self.selected_statistic_mode = copy.deepcopy(self.statistic_mode)
             self.selected_statistic_aggregation = copy.deepcopy(
                 self.statistic_aggregation
@@ -1009,6 +1420,8 @@ class Dashboard(QtWidgets.QWidget):
             self.selected_networkspeci = "{}|{}".format(
                 self.selected_network, self.selected_species
             )
+            self.selected_ghost_version = copy.deepcopy(self.ghost_version)
+            self.selected_ghost_features = copy.deepcopy(self.ghost_features)
 
             # set initial filter species in widgets as empty dictionaries
             self.selected_widget_network = dict()
@@ -1030,15 +1443,80 @@ class Dashboard(QtWidgets.QWidget):
 
             # update qa / flags checkboxes
             self.flag_menu["checkboxes"]["remove_selected"] = copy.deepcopy(self.flags)
+            # TODO: Have different selections of qa per species
             self.qa_menu["checkboxes"]["remove_selected"] = copy.deepcopy(
-                self.qa_per_species[self.selected_species]
+                self.qa_per_species[self.selected_species[0]]
             )
 
-        # if date range has changed then update available observational data dictionary
-        if self.date_range_has_changed:
+
+        # if date range or ghost version has changed then update available observational data dictionary
+        if self.date_range_has_changed or self.ghost_version_has_changed:
             get_valid_obs_files_in_date_range(
                 self, self.le_start_date.text(), self.le_end_date.text()
             )
+        
+        # if have no available observational data, keep previous selection
+        # updating only variable informing that we have no data
+        # if the GHOST version has changed and GHOST networks are selected, only GHOST data counts
+        # (otherwise no GHOST network would be selected and the GHOST version could not be changed back)
+        reading_ghost = self.ghost_version_has_changed and bool(self.selected_network) and all(
+            check_for_ghost(network) for network in self.selected_network
+        )
+        if reading_ghost:
+            has_data = any(check_for_ghost(network) for network in self.available_observation_data)
+        else:
+            has_data = len(self.available_observation_data) > 0
+        if not has_data:
+            self.no_data_to_read = True
+            start_date = self.le_start_date.text()
+            end_date = self.le_end_date.text()
+            # do not show message while dates are being edited (incomplete dates)
+            dates_complete = all(
+                QtCore.QDate.fromString(line_edit.text(), "yyyyMMdd").isValid()
+                for line_edit in [self.le_start_date, self.le_end_date]
+            )
+            reversed_range = (
+                not self.ghost_version_has_changed
+                and dates_complete
+                and int(start_date) >= int(end_date)
+            )
+            if self.ghost_version_has_changed:
+                msg = (f"No observational data available for GHOST version {self.selected_ghost_version} "
+                       f"between {start_date} and {end_date}. Please select a different GHOST version.")
+            elif reversed_range:
+                msg = (f"Start date {start_date} must be before end date {end_date}. "
+                       "Please change the start date or the end date.")
+            elif not dates_complete:
+                invalid_dates = [
+                    f"{date_name} ('{line_edit.text()}')"
+                    for date_name, line_edit in [
+                        ("start date", self.le_start_date),
+                        ("end date", self.le_end_date),
+                    ]
+                    if not QtCore.QDate.fromString(line_edit.text(), "yyyyMMdd").isValid()
+                ]
+                msg = f"Invalid {' and '.join(invalid_dates)}. Dates must be given as YYYY-MM-DD."
+            else:
+                msg = (f"No observational data available between {start_date} and {end_date}. "
+                       "Please change the date range.")
+            # a reversed range is usually a step while editing the dates, so it is only shown when hovering READ
+            show_message(
+                self, msg,
+                deactivate=reversed_range or (self.date_range_has_changed and not dates_complete)
+            )
+            self.bu_read.setToolTip(msg)
+            
+            # after a date change, empty the lists that depend on the data (selected values stay in memory)
+            if not self.ghost_version_has_changed:
+                self.cb_network.clear()
+                self.cb_resolution.clear()
+            
+            self.disable_element(self.bu_read, "button")
+            self.block_config_bar_handling_updates = False
+            self.block_MPL_canvas_updates = False
+            return
+        else:
+            self.no_data_to_read = False
 
         # initialise/update fields - maintain previously selected values wherever possible
         # clear fields
@@ -1048,93 +1526,120 @@ class Dashboard(QtWidgets.QWidget):
         self.cb_species.clear()
         self.cb_statistic_mode.clear()
         self.cb_statistic_aggregation.clear()
+        self.cb_ghost_features.clear()
+        self.cb_ghost_version.clear()
         self.mpl_canvas.statsummary_periodic_aggregation.clear()
         self.mpl_canvas.statsummary_periodic_mode.clear()
         self.mpl_canvas.timeseries_stat.clear()
 
-        # if have no available observational data, return from function, updating variable informing that have no data
-        if len(self.available_observation_data) == 0:
-            self.no_data_to_read = True
-            # unset variable to allow interactive handling from now
-            self.block_config_bar_handling_updates = False
+
+        # get matrices of the species reference (settings/species.yaml)
+        available_matrices = sorted(
+            {param_dict["matrix"] for param_dict in self.parameter_dictionary.values()}
+        )
+
+        # update matrix field
+        if not self.set_checkable_combobox_options(available_options=available_matrices,
+                                                   combobox_type='matrix',
+                                                   recovery_hint='Please select a different matrix or change the date range to include available data.',
+                                                   select_first_option=False):
             return
-        else:
-            self.no_data_to_read = False
+        
+        # get species of the selected matrices (all species if none is selected)
+        available_species = sorted(
+            speci
+            for speci, param_dict in self.parameter_dictionary.items()
+            if (not self.selected_matrix) or (param_dict["matrix"] in self.selected_matrix)
+        )
 
-        # update network field
-        available_networks = list(self.available_observation_data.keys())
-        self.cb_network.addItems(available_networks)
-        if self.selected_network in available_networks:
-            self.cb_network.setCurrentText(self.selected_network)
-        else:
-            if self.from_conf:
-                msg = f"Network {self.selected_network} is not available."
-                self.logger.error(msg)
-                sys.exit(1)
-            else:
-                msg = f"Network {self.selected_network} is not available. Choosing {self.cb_network.currentText()} as it is the first option in the dropdown."
-                show_message(self, msg)
-                self.selected_network = self.cb_network.currentText()
+        # update species field
+        self.set_checkable_combobox_options(available_options=available_species,
+                                            combobox_type='species',
+                                            recovery_hint='Please select a different species or change the date range to include available data.',
+                                            select_first_option=False)
 
+        # nothing to read without a matrix or species: READ says which, the other menus stay as they are
+        for menu in ["matrix", "species"]:
+            if not getattr(self, f"selected_{menu}"):
+                self.no_data_to_read = True
+                self.bu_read.setToolTip(f"Select a {menu} to read data")
+                self.disable_element(self.bu_read, "button")
+                self.block_config_bar_handling_updates = False
+                self.block_MPL_canvas_updates = False
+                return
+
+        # get resolutions that have data in the date range for at least one of the selected species,
+        # in any network
+        available_resolutions = get_resolutions_with_data(
+            self.available_observation_data,
+            self.selected_matrix,
+            self.selected_species,
+        )
+
+        # update resolution field
+        if not self.set_combobox_options(available_options=available_resolutions,
+                                         combobox_type='resolution',
+                                         recovery_hint='Please select a different species or change the date range to include available data.'):
+            self.block_config_bar_handling_updates = False
+            self.block_MPL_canvas_updates = False
+            return
+
+        # get networks that have data for at least one of the selected species,
+        # for the current resolution and matrix
+        available_networks = get_networks_with_data(
+            self.available_observation_data,
+            self.selected_resolution,
+            self.selected_matrix,
+            self.selected_species,
+        )
+
+        # no network is selected if the previous ones have no data for the new selection
+        if not self.set_checkable_combobox_options(available_options=available_networks,
+                                                   combobox_type='network',
+                                                   recovery_hint='Please select a different resolution or species, or change the date range to include available data.',
+                                                   select_first_option=False):
+            self.block_config_bar_handling_updates = False
+            self.block_MPL_canvas_updates = False
+            return
+        
         # update buttons
         self.update_ghost_buttons("update_configuration_bar_fields")
 
-        # update resolution field
-        available_resolutions = list(
-            self.available_observation_data[self.selected_network].keys()
-        )
-        # set order of available resolutions
-        available_resolutions = sorted(
-            available_resolutions, key=get_temporal_resolution_order().__getitem__
-        )
-        self.cb_resolution.addItems(available_resolutions)
-        if self.selected_resolution in available_resolutions:
-            self.cb_resolution.setCurrentText(self.selected_resolution)
-        else:
-            if self.from_conf:
-                msg = f"Resolution {self.selected_resolution} is not available."
-                self.logger.error(msg)
-                sys.exit(1)
-            else:
-                msg = f"Resolution {self.selected_resolution} is not available. Choosing {self.cb_resolution.currentText()} as it is the first option in the dropdown."
-                show_message(self, msg)
-                self.selected_resolution = self.cb_resolution.currentText()
+        # update GHOST version field
+        available_ghost_versions = self.available_ghost_versions
+        if not self.set_combobox_options(available_options=available_ghost_versions, 
+                                         combobox_type='ghost_version',
+                                         recovery_hint='Please select a different GHOST version or change the date range to include available data.'):
+            return
 
-        # update matrix field
-        available_matrices = sorted(
-            self.available_observation_data[self.selected_network][
-                self.selected_resolution
-            ]
-        )
-        self.cb_matrix.addItems(available_matrices)
-        if self.selected_matrix in available_matrices:
-            self.cb_matrix.setCurrentText(self.selected_matrix)
-        else:
-            self.selected_matrix = self.cb_matrix.currentText()
+        # update GHOST features field
+        available_ghost_features = self.available_ghost_features
+        if not self.set_combobox_options(available_options=available_ghost_features, 
+                                         combobox_type='ghost_features',
+                                         recovery_hint='Please select a different GHOST features or change the date range to include available data.'):
+            return
 
-        # update species field
-        available_species = sorted(
-            self.available_observation_data[self.selected_network][
-                self.selected_resolution
-            ][self.selected_matrix]
-        )
-        self.cb_species.addItems(available_species)
-        if self.selected_species in available_species:
-            self.cb_species.setCurrentText(self.selected_species)
-        else:
-            if self.from_conf:
-                msg = f"Species {self.selected_species} is not available."
-                self.logger.error(msg)
-                sys.exit(1)
-            else:
-                msg = f"Species {self.selected_species} is not available. Choosing {self.cb_species.currentText()} as it is the first option in the dropdown."
-                show_message(self, msg)
-                self.selected_species = self.cb_species.currentText()
+        # if no network is selected (after a date change), the user has to select one before reading
+        if not self.selected_network:
+            self.no_data_to_read = True
+            self.bu_read.setToolTip("Select a network to read data")
+            self.disable_element(self.bu_read, "button")
+            self.block_config_bar_handling_updates = False
+            self.block_MPL_canvas_updates = False
+            return
 
-        # update networkspecies field
-        self.selected_networkspeci = "{}|{}".format(
-            self.selected_network, self.selected_species
-        )
+        # update selected networkspecies field
+        self.selected_networkspecies = [
+            f"{network}|{species}"
+            for network in set(self.selected_network)
+            for species in set(self.selected_species)
+            if network and species
+        ]
+
+        # only sync it with the menu selection before the first read has taken place
+        # (afterwards it is updated in handle_data_selection_update)
+        if self.first_read:
+            self.networkspecies = copy.deepcopy(self.selected_networkspecies)
 
         # check if have filter species data
         for filter_networkspeci in copy.deepcopy(self.selected_filter_species).keys():
@@ -1174,18 +1679,9 @@ class Dashboard(QtWidgets.QWidget):
             "Spatial|Temporal",
             "Temporal|Spatial",
         ]
-        self.cb_statistic_mode.addItems(available_statistic_modes)
-        if self.selected_statistic_mode in available_statistic_modes:
-            self.cb_statistic_mode.setCurrentText(self.selected_statistic_mode)
-        else:
-            if self.from_conf:
-                msg = f"Statistic mode {self.selected_statistic_mode} is not available."
-                self.logger.error(msg)
-                sys.exit(1)
-            else:
-                msg = f"Statistic mode {self.selected_statistic_mode} is not available. Choosing {self.cb_statistic_mode.currentText()} as it is the first option in the dropdown."
-                show_message(self, msg)
-                self.selected_statistic_mode = self.cb_statistic_mode.currentText()
+        if not self.set_combobox_options(available_options=available_statistic_modes, 
+                                         combobox_type='statistic_mode'):
+            return
 
         # update statistic aggregation field
         if self.selected_statistic_mode == "Flattened":
@@ -1321,101 +1817,67 @@ class Dashboard(QtWidgets.QWidget):
             self.le_start_date.text(),
             self.le_end_date.text(),
             self.selected_resolution,
-            [self.selected_network],
-            [self.selected_species],
+            self.selected_networkspecies,
         )
 
         # update models -- keeping previously selected models if available
         if self.config_bar_initialisation:
-            self.models_menu["models"]["keep_selected"] = [
-                model
-                for model in self.experiments
-                if model in self.models_menu["models"]["map_vars"]
+            for model_type in ['interpolated', 'gridded']:
+                candidate_models = []
+                for model in self.experiments:
+                    # the conf carries the interpolation mode in the '::' tag,
+                    # the menu rows are keyed by bare model id, so the tag is taken off here
+                    model_id, _, conf_model_type = model.rpartition("::")
+                    if not model_id:
+                        model_id, conf_model_type = model, "interpolated"
+                    if conf_model_type != model_type:
+                        continue
+                    if (model_id in self.models_menu["models"]["map_vars"]) and (
+                        self.models_menu["models"]["enabled"][model_type].get(model_id, False)
+                    ):
+                        candidate_models.append(model_id)
+
+                # only one gridded model can be plotted on the map at a time, keep first one
+                if model_type == 'gridded':
+                    if self.from_conf and len(candidate_models) > 1:
+                        msg = ("It is not possible to load more than one gridded model from a configuration file. "
+                               f"Selecting the first one: {candidate_models[0]}")
+                        show_message(self, msg)
+                    candidate_models = candidate_models[:1]
+                self.models_menu["models"]["keep_selected"][model_type] = candidate_models
+
+        for model_type in ['interpolated', 'gridded']:
+            self.models_menu["models"]["keep_selected"][model_type] = [
+                previous_selected_model
+                for previous_selected_model in self.models_menu["models"]["keep_selected"][model_type]
+                if (previous_selected_model in self.models_menu["models"]["map_vars"])
+                and self.models_menu["models"]["enabled"][model_type].get(previous_selected_model, False)
             ]
-
-        self.models_menu["models"]["keep_selected"] = [
-            previous_selected_model
-            for previous_selected_model in self.models_menu["models"]["keep_selected"]
-            if previous_selected_model in self.models_menu["models"]["map_vars"]
-        ]
-
-        # set all and selected models
-        all_models = {}
-        for mod in self.models_menu["models"]["map_vars"]:
-            if mod in self.experiments:
-                all_models[mod] = self.experiments[mod]
-            elif mod in self.init_models:
-                all_models[mod] = self.init_models[mod]
-            else:
-                all_models[mod] = mod
-
-        selected_models = {}
-        for mod in self.models_menu["models"]["keep_selected"]:
-            if mod in self.experiments:
-                selected_models[mod] = self.experiments[mod]
-            elif mod in self.init_models:
-                selected_models[mod] = self.init_models[mod]
-            else:
-                selected_models[mod] = mod
-
-        # set selected data labels
-        all_data_labels = [self.observations_data_label] + list(all_models.values())
-        all_data_labels_raw = [self.observations_data_label] + list(all_models.keys())
-        selected_data_labels = [self.observations_data_label] + list(
-            selected_models.values()
-        )
-        selected_data_labels_raw = [self.observations_data_label] + list(
-            selected_models.keys()
-        )
-
-        # save intial models if loading from .conf file to keep alias
-        if self.from_conf:
-            self.init_models = copy.deepcopy(selected_models)
-
-        # check N available forecast days for model
-        self.datareader.check_forecast(
-            data_labels=all_data_labels,
-            data_labels_raw=all_data_labels_raw,
-            networkspecies=[self.selected_networkspeci],
-            resolution=self.selected_resolution,
-            ghost_version=self.ghost_version,
-        )
-
-        # update forecast indices and data labels based on selected forecast data
-        (
-            selected_data_labels,
-            selected_data_labels_raw,
-            selected_models,
-        ) = self.datareader.update_forecast_indices(
-            data_labels=all_data_labels,
-            data_labels_raw=all_data_labels_raw,
-            selected_data_labels=selected_data_labels,
-            selected_data_labels_raw=selected_data_labels_raw,
-            networkspecies=[self.selected_networkspeci],
-            init=True,
-        )
-
-        # if are loading from a .conf file then set data labels and models
-        if self.from_conf:
-            self.data_labels = copy.deepcopy(selected_data_labels)
-            self.data_labels_raw = copy.deepcopy(selected_data_labels_raw)
-            self.experiments = copy.deepcopy(selected_models)
+        
+        # update forecast menus
+        self.update_models_menu()
 
         # update default qa
-        default_qa = get_default_qa(self, self.selected_species)
-        previous_default_qa = copy.deepcopy(
-            self.qa_menu["checkboxes"]["remove_default"]
-        )
-        self.qa_menu["checkboxes"]["remove_default"] = default_qa
+        # TODO: Have different selections of qa per species
+        if any(self.selected_species):
+            default_qa = get_default_qa(self, self.selected_species[0])
+            previous_default_qa = copy.deepcopy(
+                self.qa_menu["checkboxes"]["remove_default"]
+            )
+            self.qa_menu["checkboxes"]["remove_default"] = default_qa
 
-        # update selected qa if previous selected qa was default (to new default)
-        if set(self.qa_menu["checkboxes"]["remove_selected"]) == set(
-            previous_default_qa
-        ):
-            self.qa_menu["checkboxes"]["remove_selected"] = default_qa
+            # update selected qa if previous selected qa was default (to new default)
+            if set(self.qa_menu["checkboxes"]["remove_selected"]) == set(
+                previous_default_qa
+            ):
+                self.qa_menu["checkboxes"]["remove_selected"] = default_qa
 
         # update layout fields
         self.update_layout_fields(self.mpl_canvas)
+
+        self.no_data_to_read = False
+        self.bu_read.setToolTip("Read selected configuration of data into memory")
+        self.enable_element(self.bu_read, "button", {"color": "green"})
 
         # unset variable to allow interactive handling from now
         self.block_config_bar_handling_updates = False
@@ -1543,6 +2005,207 @@ class Dashboard(QtWidgets.QWidget):
         # unset variable to allow interactive handling from now
         self.block_config_bar_handling_updates = False
 
+    def update_models_menu(self):
+        """
+        Update internal models menu after checking if models have forecast options
+        """
+
+        # the conf leaves the interpolation mode tag off interpolated models
+        # (e.g. 'mod-eu-000'), so normalise the keys to be able to look up the
+        # aliases by the tagged raw data label used inside the dashboard
+        read_models = {}
+        for model, alias in self.experiments.items():
+            model_id, _, conf_model_type = model.rpartition("::")
+            if not model_id:
+                model_id, conf_model_type = model, "interpolated"
+            read_models["{}::{}".format(model_id, conf_model_type)] = alias
+
+        # set all and selected models
+        all_models = {}
+        selected_models = {}
+
+        for model_type in ['interpolated', 'gridded']:
+            for mod in self.models_menu["models"]["map_vars"]:
+                # skip model types the model has no data available in
+                if not self.models_menu["models"]["enabled"][model_type].get(mod, False):
+                    continue
+
+                 # the raw data label carries the interpolation mode, so the same
+                # experiment can be read interpolated and gridded at the same time
+                data_label_raw = "{}::{}".format(mod, model_type)
+
+                # keep the alias the model was last read under
+                if data_label_raw in read_models:
+                    data_label = read_models[data_label_raw]
+                # keep the alias set in the .conf file
+                elif data_label_raw in self.init_models:
+                    data_label = self.init_models[data_label_raw]
+                # no alias, mark gridded models
+                elif model_type == "gridded":
+                    data_label = "{} (gridded)".format(mod)
+                # no alias, interpolated models keep the model name
+                else:
+                    data_label = mod
+
+                all_models[data_label_raw] = data_label
+
+                # model is checked in this mode?
+                if mod in self.models_menu["models"]["keep_selected"][model_type]:
+                    selected_models[data_label_raw] = data_label
+        
+        # if no obs are loaded (when MODEL is active), remove observations from labels
+        if not self.obs_active:
+            all_data_labels = list(all_models.values())
+            all_data_labels_raw = list(all_models.keys())
+            selected_data_labels = list(selected_models.values())
+            selected_data_labels_raw = list(selected_models.keys())
+        else:
+            all_data_labels = [self.observations_data_label] + list(all_models.values())
+            all_data_labels_raw = [self.observations_data_label] + list(all_models.keys())
+            selected_data_labels = [self.observations_data_label] + list(
+                selected_models.values()
+            )
+            selected_data_labels_raw = [self.observations_data_label] + list(
+                selected_models.keys()
+            )
+
+        # save intial models if loading from .conf file to keep alias
+        if self.from_conf:
+            self.init_models = copy.deepcopy(selected_models)
+
+        # check N available forecast days for model
+        self.datareader.check_forecast(
+            data_labels=all_data_labels,
+            data_labels_raw=all_data_labels_raw,
+            networkspecies=self.selected_networkspecies,
+            resolution=self.selected_resolution,
+            ghost_version=self.ghost_version,
+        )
+
+        # update forecast indices and data labels based on selected forecast data
+        (
+            selected_data_labels,
+            selected_data_labels_raw,
+            selected_models,
+        ) = self.datareader.update_forecast_indices(
+            data_labels=all_data_labels,
+            data_labels_raw=all_data_labels_raw,
+            selected_data_labels=selected_data_labels,
+            selected_data_labels_raw=selected_data_labels_raw,
+            networkspecies=self.selected_networkspecies,
+            init=True,
+            show_warnings=self.from_conf,
+        )
+
+        # if are loading from a .conf file then set data labels and models
+        if self.from_conf:
+            self.data_labels = copy.deepcopy(selected_data_labels)
+            self.data_labels_raw = copy.deepcopy(selected_data_labels_raw)
+            self.experiments = copy.deepcopy(selected_models)
+
+    def enable_element(self, element, element_type, extra_arguments={}, prefix="menu"):
+        """
+        Make element active and update its formatting.
+
+        Parameters
+        ----------
+        element : QtWidget (QtWidgets.QPushButton, QtWidgets.QComboBox)
+            PyQt object
+        element_type : str
+            PyQt object type (button, combobox, etc.)
+        extra_arguments : dict
+            Extra arguments
+        prefix : str
+            Prefix of the format name in the stylesheet (menu, popup)
+        
+        Returns
+        -------
+        QtWidget (QtWidgets.QPushButton, QtWidgets.QComboBox)
+            Updated PyQt object
+        """
+
+        element = set_formatting(element, self.formatting_dict[f"{prefix}_{element_type}"],
+                                 extra_arguments=extra_arguments)
+        element.setEnabled(True)
+
+        return element
+    
+    def disable_element(self, element, element_type, prefix="menu"):
+        """
+        Make element inactive and update its formatting.
+
+        Parameters
+        ----------
+        element : QtWidget (QtWidgets.QPushButton, QtWidgets.QComboBox)
+            PyQt object
+        element_type : str
+            PyQt object type (button, combobox, etc.)
+        prefix : str
+            Prefix of the format name in the stylesheet (menu, popup)
+        
+        Returns
+        -------
+        QtWidget (QtWidgets.QPushButton, QtWidgets.QComboBox)
+            Updated PyQt object
+        """
+
+        element = set_formatting(
+            element,
+            self.formatting_dict[f"{prefix}_{element_type}_disabled"],
+            disabled=True,
+        )
+        element.setEnabled(False)
+
+        return element
+    
+    def handle_switch_option_change(self, option_index):
+        """
+        Handle clicks on BOTH, OBS and MODEL
+
+        Parameters
+        ----------
+        option_index : int
+            Index of selected option in switch
+        """
+
+        option = self.switch.currentOption()
+        
+        if option in ["OBS", "BOTH"]:
+            self.bu_QA = self.enable_element(self.bu_QA, "button")
+            self.bu_flags = self.enable_element(self.bu_flags, "button")
+            self.bu_multispecies = self.enable_element(self.bu_multispecies, "button")
+            self.cb_ghost_features = self.enable_element(self.cb_ghost_features, "combobox")
+            self.bu_rep = self.enable_element(self.bu_rep, "button")
+            self.bu_period = self.enable_element(self.bu_period, "button")
+            self.bu_meta = self.enable_element(self.bu_meta, "button")
+        # option = "MODEL"
+        else:
+            self.bu_QA = self.disable_element(self.bu_QA, "button")
+            self.bu_flags = self.disable_element(self.bu_flags, "button")
+            self.bu_multispecies = self.disable_element(self.bu_multispecies, "button")
+            self.cb_ghost_features = self.disable_element(self.cb_ghost_features, "combobox")
+            self.bu_rep = self.disable_element(self.bu_rep, "button")
+            self.bu_period = self.disable_element(self.bu_period, "button")
+            self.bu_meta = self.disable_element(self.bu_meta, "button")
+
+        if option in ["MODEL", "BOTH"]:
+            # update available models for selected fields
+            get_valid_models(
+                self,
+                self.le_start_date.text(),
+                self.le_end_date.text(),
+                self.selected_resolution,
+                self.selected_networkspecies
+            )
+            # update forecast menus
+            self.update_models_menu()
+            self.bu_models = self.enable_element(self.bu_models, "button")
+        # option = "OBS"
+        else:
+            # remove experiments from selected models if switching to OBS
+            init_models(self)
+            self.bu_models = self.disable_element(self.bu_models, "button")
+
     def handle_config_bar_params_change(self, changed_param):
         """
         Update internal state and synchronise interface fields when configuration parameters are modified.
@@ -1554,35 +2217,85 @@ class Dashboard(QtWidgets.QWidget):
             configuration bar.
         """
 
+        # if all the options of the network, matrix or species menu are unticked, there is nothing to read
+        if (changed_param == "") & (not self.block_config_bar_handling_updates):
+            empty_menus = {
+                self.cb_network: "network",
+                self.cb_matrix: "matrix",
+                self.cb_species: "species",
+            }
+            if self.sender() in empty_menus:
+                # the selection is empty too, so that the next refresh of the menus keeps it empty
+                setattr(self, f"selected_{empty_menus[self.sender()]}", [])
+                self.no_data_to_read = True
+                self.bu_read.setToolTip(f"Select a {empty_menus[self.sender()]} to read data")
+                self.disable_element(self.bu_read, "button")
+
         if (changed_param != "") & (not self.block_config_bar_handling_updates):
             # get event origin source
             event_source = self.sender()
 
+            # the GHOST version has only changed for the event that changes it
+            self.ghost_version_has_changed = False
+
             # if network, resolution, matrix, species, aggregation mode or resampling resolution have changed
             # then alter respective current selection for the changed param
             if event_source == self.cb_network:
-                self.selected_network = changed_param
-                # ensure that QA defaults have been updated if network has changed (i.e. to or from ACTRIS)
-                update_qa(self)
+                new_selected_network = self.cb_network.currentData()
+                # networks must be all GHOST or non-GHOST, otherwise keep previous selection
+                if len({check_for_ghost(network) for network in new_selected_network}) > 1:
+                    msg = 'Networks must be all GHOST or non-GHOST. Keeping previous selection.'
+                    show_message(self, msg)
+                # actris/actris cannot be read with other networks, otherwise keep previous selection
+                elif ("actris/actris" in new_selected_network) and (len(new_selected_network) > 1):
+                    msg = 'actris/actris cannot be read with other networks. Keeping previous selection.'
+                    show_message(self, msg)
+                else:
+                    self.selected_network = new_selected_network
+                    # ensure that QA defaults have been updated if network has changed (i.e. to or from ACTRIS)
+                    update_qa(self)
+                    # default QA of the ticked networks, set here as the refresh of the menus
+                    # below can stop early
+                    self.provconf.parse_parameter("qa", None)
+                    if self.selected_species:
+                        self.qa_menu["checkboxes"]["remove_default"] = get_default_qa(self, self.selected_species[0])
+                        self.qa_menu["checkboxes"]["remove_selected"] = self.qa_menu["checkboxes"]["remove_default"]
 
             elif event_source == self.cb_resolution:
                 self.selected_resolution = changed_param
 
             elif event_source == self.cb_matrix:
-                self.selected_matrix = changed_param
-                self.selected_species = sorted(
-                    list(
-                        self.available_observation_data[self.selected_network][
-                            self.selected_resolution
-                        ][self.selected_matrix].keys()
-                    )
-                )[0]
+                self.selected_matrix = self.cb_matrix.currentData()
 
             elif event_source == self.cb_species:
-                self.selected_species = changed_param
+                self.selected_species = self.cb_species.currentData()
 
             elif event_source == self.cb_statistic_mode:
                 self.selected_statistic_mode = changed_param
+
+            elif event_source == self.cb_ghost_version:
+                self.selected_ghost_version = changed_param
+
+                # the GHOST standards of the new version (species, their fields, QA and flag
+                # codes, GHOST networks), so that everything follows the menu
+                self.ghost_version = self.selected_ghost_version
+                self.provconf.parse_parameter("ghost_version", self.ghost_version)
+                # its default QA (default_qa_standard, default_qa_non_negative), and the QA and
+                # flag menus with its codes, starting again from its defaults (set here, as the
+                # refresh of the menus below stops early when the version has no data)
+                self.provconf.parse_parameter("qa", None)
+                update_qa(self)
+                update_flags(self)
+                if self.selected_species:
+                    self.qa_menu["checkboxes"]["remove_default"] = get_default_qa(self, self.selected_species[0])
+                    self.qa_menu["checkboxes"]["remove_selected"] = self.qa_menu["checkboxes"]["remove_default"]
+
+                generate_file_trees(self, ghost_version=self.selected_ghost_version, only_ghost=True)
+
+                self.ghost_version_has_changed = True
+
+            elif event_source == self.cb_ghost_features:
+                self.selected_ghost_features = changed_param
 
             # set variable to check if date range changes
             self.date_range_has_changed = False
@@ -1599,6 +2312,7 @@ class Dashboard(QtWidgets.QWidget):
                 self.cb_resolution,
                 self.cb_matrix,
                 self.cb_species,
+                self.cb_ghost_version
             ]:
                 init_multispecies(self)
 
@@ -1674,8 +2388,8 @@ class Dashboard(QtWidgets.QWidget):
             ):
                 self.position_5 = "None"
 
-            # remove axis elements for previous plot type, and from active_dashboard_plots
-            if (previous_plot_type in self.active_dashboard_plots) & (
+            # remove axis elements for previous plot type, and from dashboard_plots
+            if (previous_plot_type in self.dashboard_plots) & (
                 previous_plot_type in self.mpl_canvas.plot_axes
             ):
                 ax = self.mpl_canvas.plot_axes[previous_plot_type]
@@ -1697,35 +2411,22 @@ class Dashboard(QtWidgets.QWidget):
                     self.mpl_canvas.elements,
                 ):
                     menu_plot_type = menu_button.objectName().split("_menu")[0]
-                    if menu_plot_type in [
-                        "periodic_violin",
-                        "fairmode_target",
-                        "fairmode_statsummary",
-                    ]:
-                        menu_plot_type = menu_plot_type.replace("_", "-")
+                    menu_plot_type = correct_plot_type_name(menu_plot_type)
 
                     if previous_plot_type == menu_plot_type:
                         menu_button.hide()
                         save_button.hide()
                         save_data_button.hide()
-                        if previous_plot_type in [
-                            "periodic-violin",
-                            "fairmode-target",
-                            "fairmode-statsummary",
-                        ]:
-                            previous_plot_type = previous_plot_type.replace("-", "_")
-                        for element in getattr(
-                            self.mpl_canvas, previous_plot_type + "_elements"
-                        ):
-                            if isinstance(element, dict):
-                                for sub_element in element.values():
-                                    sub_element.hide()
-                            else:
-                                element.hide()
+                        previous_plot_type = correct_plot_type_name(previous_plot_type)
+                        # closed rather than only hidden, so the menu is not
+                        # still taken to be open the next time the plot is
+                        # chosen, when its settings button would need two
+                        # clicks to open it
+                        self.mpl_canvas.close_settings_menus([previous_plot_type])
                         break
 
             # if changed_plot_type already axis on another axis then remove those axis elements
-            if (changed_plot_type in self.active_dashboard_plots) & (
+            if (changed_plot_type in self.dashboard_plots) & (
                 changed_plot_type in self.mpl_canvas.plot_axes
             ):
                 ax = self.mpl_canvas.plot_axes[changed_plot_type]
@@ -1738,13 +2439,13 @@ class Dashboard(QtWidgets.QWidget):
                         sub_ax.remove()
                 else:
                     ax.remove()
-                self.active_dashboard_plots[
-                    self.active_dashboard_plots.index(changed_plot_type)
+                self.dashboard_plots[
+                    self.dashboard_plots.index(changed_plot_type)
                 ] = "None"
 
             # update active dashboard plots
-            del self.active_dashboard_plots[changed_position - 2]
-            self.active_dashboard_plots.insert(changed_position - 2, changed_plot_type)
+            del self.dashboard_plots[changed_position - 2]
+            self.dashboard_plots.insert(changed_position - 2, changed_plot_type)
 
             # update plot axis for new plot type
             self.update_plot_axis(self.mpl_canvas, event_source, changed_plot_type)
@@ -1753,7 +2454,7 @@ class Dashboard(QtWidgets.QWidget):
             if changed_plot_type != "None":
                 # format axis
                 format_axis(
-                    self.mpl_canvas.read_instance,
+                    self,
                     self.mpl_canvas,
                     self.mpl_canvas.plot_axes[changed_plot_type],
                     changed_plot_type,
@@ -1802,7 +2503,7 @@ class Dashboard(QtWidgets.QWidget):
         elif changed_plot_type == "fairmode-statsummary":
             # get number of rows and columns
             ncols = 4
-            nrows = 8 if self.species[0] in ["sconco3", "sconcno2", "pm10"] else 7
+            nrows = 8 if any(species in ["sconco3", "sconcno2", "pm10"] for species in self.species) else 7
 
         # position 2 (top right)
         if changed_position == self.cb_position_2 or changed_position == 2:
@@ -2060,6 +2761,20 @@ class Dashboard(QtWidgets.QWidget):
                 )
             )
 
+            # Taylor diagrams use a curvilinear grid whose tick positions
+            # come from a fixed ExtremeFinder set when the diagram is built
+            # (see make_taylor()), not from xlim/ylim - so the toolbar's
+            # set_xlim()/set_ylim() leaves the grid's cached extent stale and
+            # the ticks vanish. The diagram is a fixed comparison space
+            # anyway, not a literal data range, so zoom/pan is disabled
+            # through the hook matplotlib's toolbar checks
+            disable_axis_navigation(
+                [
+                    canvas_instance.plot_axes[changed_plot_type],
+                    canvas_instance.plotting.taylor_polar_relevant_axis,
+                ]
+            )
+
         elif changed_plot_type == "fairmode-statsummary":
             # create gridspec and add it to a list
             canvas_instance.plot_axes[changed_plot_type] = [
@@ -2068,12 +2783,148 @@ class Dashboard(QtWidgets.QWidget):
                 for j in range(ncols)
             ]
 
+        # save space given to heatmap in this position, the axis is fitted inside it
+        # each time the heatmap is made, as its labels and colourbar change (see make_heatmap())
+        if changed_plot_type == "heatmap":
+            canvas_instance.heatmap_slot = canvas_instance.plot_axes[
+                changed_plot_type
+            ].get_position()
+            if changed_position == self.cb_position_2 or changed_position == 2:
+                canvas_instance.heatmap_scale = 0.8
+            else:
+                canvas_instance.heatmap_scale = 1.0
+                
+        # done once the axes exist, whichever of the branches above made them
+        if changed_plot_type in NON_NAVIGABLE_PLOTS:
+            if changed_plot_type in canvas_instance.plot_axes:
+                disable_axis_navigation(canvas_instance.plot_axes[changed_plot_type])
+
+    def get_forecast_selections(self):
+        """
+        Get the forecast options and days selected in the models menu for each selected
+        model with forecast data (gridded models loaded interpolated follow their interpolated ones).
+
+        Returns
+        -------
+        forecast_selections : dict
+            Selected forecast options and days per model, e.g. {'a59g-regional-000': (('day',), ('2', '4'))},
+            with days set to 'all' when no days or all days are selected
+        """
+
+        forecast_selections = {}
+        selected_models = self.models_menu["models"]["keep_selected"]
+        for model_type in ["interpolated", "gridded"]:
+            for mod in selected_models[model_type]:
+                # gridded models loaded interpolated follow the forecast options of their interpolated versions
+                if (model_type == "gridded") and (mod in selected_models["interpolated"]):
+                    continue
+
+                # get the data label the forecast options of the model are stored under
+                # (the alias set in the .conf file when there is one)
+                model = "{}::{}".format(mod, model_type)
+                if model not in self.models_menu["models"]["forecast"]:
+                    if model in self.init_models:
+                        model = self.init_models[model]
+                    elif model_type == "gridded":
+                        model = "{} (gridded)".format(mod)
+                    else:
+                        model = mod
+                if model not in self.models_menu["models"]["forecast"]:
+                    continue
+
+                # skip models without forecast data, as forecast options do not apply to them
+                available_forecast_days = self.models_menu["models"]["forecast_days"][model][0]
+                if len(available_forecast_days) == 0:
+                    continue
+
+                # get selected forecast options and days, taking all days if none or all are selected
+                selected_forecast_options = tuple(sorted(self.models_menu["models"]["forecast"][model][1]))
+                selected_forecast_days = tuple(sorted(
+                    (day.split("day")[-1].strip()
+                     for day in self.models_menu["models"]["forecast_days"][model][1]),
+                    key=int,
+                ))
+                if len(selected_forecast_days) in [0, len(available_forecast_days)]:
+                    selected_forecast_days = "all"
+
+                forecast_selections[model] = (selected_forecast_options, selected_forecast_days)
+
+        return forecast_selections
+
     def handle_data_selection_update(self):
         """Execute the data reading process and synchronise the interface and canvas based on current selections."""
+
+        # check start and end dates are valid before reading
+        start_date = QtCore.QDate.fromString(self.le_start_date.text(), "yyyyMMdd")
+        end_date = QtCore.QDate.fromString(self.le_end_date.text(), "yyyyMMdd")
+        invalid_dates = [
+            f"{date_name} ('{line_edit.text()}')"
+            for date_name, line_edit, date in [
+                ("start date", self.le_start_date, start_date),
+                ("end date", self.le_end_date, end_date),
+            ]
+            if not date.isValid()
+        ]
+        if invalid_dates:
+            msg = f"Invalid {' and '.join(invalid_dates)}. Dates must be given as YYYY-MM-DD. Data won't be read."
+            show_message(self, msg)
+            return
+        if start_date >= end_date:
+            msg = "End date must be after start date. Data won't be read."
+            show_message(self, msg)
+            return
 
         # if have no data to read, then do not read any data
         if self.no_data_to_read:
             return
+
+        # GHOST observations can only be read for the species of the selected GHOST version:
+        # if none is in it, nothing is read, otherwise the others are not read
+        if self.selected_network and all(check_for_ghost(network) for network in self.selected_network):
+            missing_species = [
+                speci for speci in self.selected_species if speci not in self.ghost_parameter_dictionary
+            ]
+            if missing_species:
+                is_are = 'is' if len(missing_species) == 1 else 'are'
+                if len(missing_species) == len(self.selected_species):
+                    msg = (f"Species {', '.join(missing_species)} {is_are} not in GHOST version "
+                           f"{self.selected_ghost_version}. Please select a different GHOST version.")
+                    show_message(self, msg)
+                    return
+                msg = (f"Species {', '.join(missing_species)} {is_are} not in GHOST version "
+                       f"{self.selected_ghost_version}, it will not be read.")
+                show_message(self, msg)
+                # untick them in the species menu, without refreshing the menus
+                self.block_config_bar_handling_updates = True
+                for row in range(self.cb_species.model().rowCount()):
+                    item = self.cb_species.model().item(row)
+                    if item.text() in missing_species:
+                        item.setCheckState(QtCore.Qt.Unchecked)
+                self.block_config_bar_handling_updates = False
+                self.selected_species = [
+                    speci for speci in self.selected_species if speci not in missing_species
+                ]
+
+        # forecast options are applied to all models, so do not read if models with
+        # forecast data have different forecast options or days selected
+        if not self.from_conf:
+            forecast_selections = self.get_forecast_selections()
+            if len(set(forecast_selections.values())) > 1:
+                selections_str = ", ".join(
+                    "{}: {}".format(
+                        model,
+                        "none" if not options else "{} ({})".format(
+                            "/".join(options), "all days" if days == "all"
+                            else "day{} {}".format("s" if len(days) > 1 else "", ", ".join(days))
+                        ),
+                    )
+                    for model, (options, days) in forecast_selections.items()
+                )
+                msg = ("Models with forecast data must have the same forecast option and days "
+                       f"selected, as they are applied to all models ({selections_str}). "
+                       "Data won't be read.")
+                show_message(self, msg)
+                return
 
         # update mouse cursor to a waiting cursor
         self.cursor_function = set_cursor(
@@ -2103,6 +2954,9 @@ class Dashboard(QtWidgets.QWidget):
         self.mpl_canvas.previous_plot_options = copy.deepcopy(
             self.mpl_canvas.current_plot_options
         )
+        self.previous_ghost_features = self.ghost_features
+        self.previous_obs_active = self.obs_active
+
         # if previous data labels contain daily or combined forecast data, then ensure data labels, models and plotting params
         # refer to the data labels per day, not the summary label
         if (
@@ -2137,7 +2991,7 @@ class Dashboard(QtWidgets.QWidget):
         # set new active variables as selected variables from menu
         self.start_date = int(self.le_start_date.text())
         self.end_date = int(self.le_end_date.text())
-        self.network = [self.selected_network]
+        self.network = self.selected_network
         self.resolution = self.selected_resolution
         self.resampling_resolution = self.cb_resampling_resolution.currentText()
         # set active resolution, resampling_resolution when set, otherwise resolution
@@ -2145,31 +2999,85 @@ class Dashboard(QtWidgets.QWidget):
             self.active_resolution = self.resampling_resolution
         else:
             self.active_resolution = self.resolution
-        self.species = [self.selected_species]
+        self.species = self.selected_species
         self.qa = copy.deepcopy(self.qa_menu["checkboxes"]["remove_selected"])
-        self.qa_per_species[self.selected_species] = copy.deepcopy(self.qa)
+        for speci in self.species:
+            self.qa_per_species[speci] = copy.deepcopy(self.qa)
         self.flags = copy.deepcopy(self.flag_menu["checkboxes"]["remove_selected"])
         self.networkspecies = [
-            "{}|{}".format(network, speci)
-            for network, speci in zip(self.network, self.species)
+            f"{network}|{species}"
+            for network in set(self.network)
+            for species in set(self.species)
+            if network and species
         ]
+        self.obs_active = True if self.switch.currentOption() in ['OBS', 'BOTH'] else False
+
         self.networkspeci = self.networkspecies[0]
         self.filter_species = copy.deepcopy(self.selected_filter_species)
+        self.ghost_version = self.selected_ghost_version
+        self.ghost_features = self.selected_ghost_features
+
         # if are not loading from conf then get data labels, models and forecast indices
         if not self.from_conf:
-            models = {}
-            for mod in self.models_menu["models"]["keep_selected"]:
-                if mod in self.previous_models:
-                    models[mod] = self.previous_models[mod]
-                elif mod in self.init_models:
-                    models[mod] = self.init_models[mod]
-                else:
-                    models[mod] = mod
+            # only one gridded model can be plotted on the map at a time, keep first one
+            selected_gridded_models = self.models_menu["models"]["keep_selected"]["gridded"]
+            if len(selected_gridded_models) > 1:
+                msg = ("It is not possible to plot more than one gridded model. "
+                       f"Selecting the first one: {selected_gridded_models[0]}")
+                show_message(self, msg)
+                self.models_menu["models"]["keep_selected"]["gridded"] = selected_gridded_models[:1]
 
-            data_labels = [self.observations_data_label] + list(models.values())
-            data_labels_raw = [self.observations_data_label] + list(models.keys())
+            # get the models selected on the models menu, interpolated and gridded
+            models = {}
+            for mod in self.models_menu["models"]["map_vars"]:
+                for model_type in ['interpolated', 'gridded']:
+                    if mod not in self.models_menu["models"]["keep_selected"][model_type]:
+                        continue
+                    # the raw data label carries the interpolation mode, so the same
+                    # experiment can be read interpolated and gridded at the same time
+                    data_label_raw = "{}::{}".format(mod, model_type)
+
+                    # keep the alias the model was last read under
+                    if data_label_raw in self.previous_models:
+                        models[data_label_raw] = self.previous_models[data_label_raw]
+                    # keep the alias set in the .conf file
+                    elif data_label_raw in self.init_models:
+                        models[data_label_raw] = self.init_models[data_label_raw]
+                    # no alias, mark gridded models
+                    elif model_type == "gridded":
+                        models[data_label_raw] = "{} (gridded)".format(mod)
+                    # no alias, interpolated models keep the model name
+                    else:
+                        models[data_label_raw] = mod
+            
+            # if no obs are loaded (when MODEL is active), remove observations from labels
+            if not self.obs_active:
+                data_labels = list(models.values())
+                data_labels_raw = list(models.keys())
+            else:
+                data_labels = [self.observations_data_label] + list(models.values())
+                data_labels_raw = [self.observations_data_label] + list(models.keys())
             self.forecast = []
+
+            # models selected interpolated, as their gridded versions follow their forecast options
+            interpolated_model_ids = {
+                get_model_id(model_raw)
+                for model_raw in models
+                if not model_raw.endswith("::gridded")
+            }
+
             for model_raw, model in models.items():
+                # skip gridded models loaded interpolated, as they follow the forecast
+                # options of their interpolated versions
+                if model_raw.endswith("::gridded") and (
+                    get_model_id(model_raw) in interpolated_model_ids
+                ):
+                    continue
+
+                # skip models without forecast options in the menu (no data in the period)
+                if model not in self.models_menu["models"]["forecast"]:
+                    continue
+
                 # get available and selected forecast options
                 selected_forecast_options = self.models_menu["models"]["forecast"][
                     model
@@ -2222,7 +3130,8 @@ class Dashboard(QtWidgets.QWidget):
             ) = self.datareader.update_forecast_indices(
                 data_labels=data_labels,
                 data_labels_raw=data_labels_raw,
-                networkspecies=[self.networkspeci],
+                networkspecies=self.networkspecies,
+                show_warnings=True,
             )
 
         # remove bias plot options if have no models loaded
@@ -2241,7 +3150,7 @@ class Dashboard(QtWidgets.QWidget):
         if (self.filter_species) and (not self.spatial_colocation):
             self.filter_species = {}
             msg = '"spatial_colocation" must be set to True if wanting to use "filter_species" option.'
-            show_message(self.read_instance, msg)
+            show_message(self, msg)
 
         # set read operations to be empty list initially
         read_operations = []
@@ -2251,12 +3160,14 @@ class Dashboard(QtWidgets.QWidget):
             read_operations = ["reset"]
 
         # determine if any of the key variables have changed
-        # (network, resolution, species, qa, flags, filter_species)
+        # (network, resolution, species, qa, flags, filter_species, ghost_features)
         # if any have changed, observations and any selected models have to be re-read entirely
         elif (
-            (self.network[0] != self.previous_network[0])
+            (self.network != self.previous_network)
             or (self.resolution != self.previous_resolution)
-            or (self.species[0] != self.previous_species[0])
+            or (self.species != self.previous_species)
+            or (self.ghost_features != self.previous_ghost_features)
+            or (self.obs_active != self.previous_obs_active)
             or (not np.array_equal(self.qa, self.previous_qa))
             or (not np.array_equal(self.flags, self.previous_flags))
             or (
@@ -2374,14 +3285,18 @@ class Dashboard(QtWidgets.QWidget):
                 or ("read_left" in read_operations)
                 or ("read_right" in read_operations)
             ):
+                # the plots' settings menus are closed too, as they would
+                # otherwise be left open over plots no longer drawn
+                self.mpl_canvas.close_settings_menus()
                 self.mpl_canvas.canvas_cover.show()
             # otherwise, just cover plotting axes as are adding/removing models
             else:
-                self.mpl_canvas.top_right_canvas_cover.show()
-                self.mpl_canvas.lower_canvas_cover.show()
-            # update to show covers immediately
+                self.mpl_canvas.cover_plot_axes()
+            # update to show covers immediately - repaint() rather than
+            # flush_events(), which would also deliver queued user input
+            # mid-handler (see update_map_station_selection())
             self.mpl_canvas.figure.canvas.draw_idle()
-            self.mpl_canvas.figure.canvas.flush_events()
+            self.mpl_canvas.figure.canvas.repaint()
 
             # clear all axes elements
             for plot_type, ax in self.mpl_canvas.plot_axes.items():
@@ -2408,12 +3323,17 @@ class Dashboard(QtWidgets.QWidget):
                 unset_cursor(self.cursor_function, "handle_data_selection_update")
                 return
 
+            # the active map networkspeci may have just been dropped (0 stations for it)
+            if self.networkspeci not in self.networkspecies:
+               self.networkspeci = self.networkspecies[0]
+
             # if species has changed, or first read, update species specific lower/upper limits
-            if (self.first_read) or (self.species[0] != self.previous_species[0]):
+            if (self.first_read) or (self.species != self.previous_species):
                 # on first read set bounds on boxes, but do not update from parameter_dictionary again 
                 # they might have been updated in a configuration file
-                if self.species[0] != self.previous_species[0]:
+                if self.species != self.previous_species:
                     # get default GHOST limits
+                    # TODO: Set bounds per species
                     self.lower_bound[self.species[0]] = np.float32(
                         self.parameter_dictionary[self.species[0]]["extreme_lower_limit"]
                     )
@@ -2439,20 +3359,89 @@ class Dashboard(QtWidgets.QWidget):
                     update_metadata_fields(self)
 
             # generate list of sorted z1/z2 data arrays names in memory, putting observations
-            # before models, and empty string item as first element in z2 array list
+            # before models if they are loaded, and empty string item as first element in z2 array list
             # (for changing from 'difference' statistics to 'absolute')
-            if len(self.data_labels) == 1:
-                self.z1_arrays = np.array([self.observations_data_label])
-            else:
-                self.z1_arrays = np.array(self.data_labels)
-            self.z2_arrays = np.append([""], self.z1_arrays)
+            # do not include gridded data labels as options, as they have no station data
+            # (the lead days drawn on the grid are chosen in the grid lead days combobox)
+            raw_per_data_label = dict(zip(self.data_labels, self.data_labels_raw))
+            label_options = [
+                label
+                for label in self.data_labels
+                if not raw_per_data_label[label].endswith("::gridded")
+            ]
+            if self.observations_data_label in label_options:
+                label_options.remove(self.observations_data_label)
+                label_options.insert(0, self.observations_data_label)
+            self.z1_arrays = np.array(label_options)
+            self.z2_arrays = np.append([""], label_options)
 
+            # fill grid lead days with the lead days read for the gridded model,
+            # checking all of them only if models have changed
+            self.mpl_canvas.update_map_grid_lead_days(
+                check_all=(len(models_to_remove) > 0) or (len(models_to_read) > 0)
+            )
+
+            # get elements whose abilities depend on having or not only gridded model data
+            elements = {self.mpl_canvas.map_z1: "combobox", 
+                        self.mpl_canvas.map_z2: "combobox", 
+                        self.ch_select_all: "checkbox",
+                        self.ch_intersect: "checkbox",
+                        self.ch_extent: "checkbox"}
+            if hasattr(self, 'navi_toolbar'):
+                toolbar_actions = self.navi_toolbar.actions()
+
+            # only gridded model data is loaded?
+            if all(label_raw.endswith("::gridded") for label_raw in self.data_labels_raw):
+                # disable statistic comboboxes and station selection options on menu
+                for element, element_type in elements.items():
+                    self.disable_element(element, element_type)
+
+                # disable lasso
+                if hasattr(self, 'navi_toolbar'):
+                    for action in toolbar_actions:
+                        if action.text() == "Lasso":
+                            action.setEnabled(False)
+                            break
+            else:
+                # enable statistic comboboxes and station selection options on menu
+                for element, element_type in elements.items():
+                    self.enable_element(element, element_type)
+
+                # enable lasso
+                if hasattr(self, 'navi_toolbar'):
+                    for action in toolbar_actions:
+                        if action.text() == "Lasso":
+                            action.setEnabled(True)
+                            break
+                    
             # update temporal colocation
             self.mpl_canvas.handle_temporal_colocate_update()
 
             # unselect all/intersect/extent checkboxes
             self.mpl_canvas.unselect_map_checkboxes()
 
+            # add networkspecies as items to networkspecies combobox
+            all_plot_types = ["map", "timeseries", "periodic", "periodic_violin", "metadata",
+                             "distribution", "histogram", "scatter", "statsummary", "boxplot", "taylor",
+                             "fairmode_target", "fairmode_statsummary", "contingencytable",
+                             "heatmap", "table"]
+            multispecies_plot_types = ["statsummary", "boxplot", "heatmap", "table"]
+            sorted_networkspecies = sorted(self.networkspecies)
+            
+            for plot_type in all_plot_types:
+                element = getattr(self.mpl_canvas, f"{plot_type}_networkspecies")
+                previous_networkspeci = element.currentText()
+                element.blockSignals(True)
+                element.clear()
+                element.addItems(sorted_networkspecies)
+                if plot_type in multispecies_plot_types:
+                    for row in range(element.model().rowCount()):
+                        element.model().item(row).setCheckState(QtCore.Qt.Checked)
+                # keep previous if valid
+                elif previous_networkspeci in sorted_networkspecies:
+                    element.setCurrentText(previous_networkspeci)
+                element.blockSignals(False)
+                
             # unset variable to allow updating of MPL canvas
             self.block_MPL_canvas_updates = False
 
@@ -2461,7 +3450,7 @@ class Dashboard(QtWidgets.QWidget):
 
             # update MPL canvas
             self.mpl_canvas.update_MPL_canvas()
-
+            
             # if first read, then set this now to be False
             if self.first_read:
                 self.first_read = False
@@ -2474,6 +3463,12 @@ class Dashboard(QtWidgets.QWidget):
 
         # unset variable to allow updating of MPL canvas
         self.block_MPL_canvas_updates = False
+
+        # apply a pending dashboard_plots "-stat" now the read is done
+        if hasattr(self, "mpl_canvas") and not getattr(
+            self.mpl_canvas, "_dashboard_plots_pending_stat_applied", True
+        ):
+            self.mpl_canvas._apply_pending_dashboard_plot_stats()
 
     def reset_options(self):
         """Restore all filter fields, metadata, and coverage settings to their initial values."""
@@ -2539,58 +3534,54 @@ class Dashboard(QtWidgets.QWidget):
         qa_active = False
         flags_active = False
         period_active = False
+        ghost_features_active = False
+
+        # see if MODEL is selected
+        obs_active = self.switch.currentOption() in ['OBS', 'BOTH']
 
         # if have a GHOST network then QA and flags are active
         # also GHOST features are not set to min then period is also active
-        if check_for_ghost(self.selected_network):
-            qa_active = True
-            flags_active = True
-            if self.ghost_features != "min":
-                period_active = True
-        # if are reading ACTRIS network then QA and flags are active
-        elif self.selected_network == "actris/actris":
-            qa_active = True
-            flags_active = True
+        # everything depends on obs_active, if MODEL is selected, the fields must stay disabled
+        for network in self.selected_network:
+            if check_for_ghost(network):
+                qa_active = obs_active
+                flags_active = obs_active
+                if self.ghost_features != "min":
+                    period_active = obs_active
+                break
+            # if are reading ACTRIS network then QA and flags are active
+            elif network == "actris/actris":
+                qa_active = obs_active
+                flags_active = obs_active
+                break
+
+        # GHOST features are only active if all selected networks are from GHOST (the GHOST
+        # version is always active, as the GHOST networks offered depend on it)
+        all_ghost = bool(self.selected_network) and all(
+            check_for_ghost(network) for network in self.selected_network
+        )
+        ghost_features_active = all_ghost and obs_active
 
         # update buttons
         if event_source == "update_configuration_bar_fields":
             if qa_active:
-                self.bu_QA = set_formatting(
-                    self.bu_QA, self.formatting_dict["menu_button"]
-                )
-                self.bu_QA.setEnabled(True)
+                self.bu_QA = self.enable_element(self.bu_QA, "button")
             else:
-                self.bu_QA = set_formatting(
-                    self.bu_QA,
-                    self.formatting_dict["menu_button_disabled"],
-                    disabled=True,
-                )
-                self.bu_QA.setEnabled(False)
+                self.bu_QA = self.disable_element(self.bu_QA, "button")
             if flags_active:
-                self.bu_flags = set_formatting(
-                    self.bu_flags, self.formatting_dict["menu_button"]
-                )
-                self.bu_flags.setEnabled(True)
+                self.bu_flags = self.enable_element(self.bu_flags, "button")
             else:
-                self.bu_flags = set_formatting(
-                    self.bu_flags,
-                    self.formatting_dict["menu_button_disabled"],
-                    disabled=True,
-                )
-                self.bu_flags.setEnabled(False)
+                self.bu_flags = self.disable_element(self.bu_flags, "button")
+            self.cb_ghost_version = self.enable_element(self.cb_ghost_version, "combobox")
+            if ghost_features_active:
+                self.cb_ghost_features = self.enable_element(self.cb_ghost_features, "combobox")
+            else:
+                self.cb_ghost_features = self.disable_element(self.cb_ghost_features, "combobox")
         elif event_source == "handle_data_selection_update":
             if period_active:
-                self.bu_period = set_formatting(
-                    self.bu_period, self.formatting_dict["menu_button"]
-                )
-                self.bu_period.setEnabled(True)
+                self.bu_period = self.enable_element(self.bu_period, "button")
             else:
-                self.bu_period = set_formatting(
-                    self.bu_period,
-                    self.formatting_dict["menu_button_disabled"],
-                    disabled=True,
-                )
-                self.bu_period.setEnabled(False)
+                self.bu_period = self.disable_element(self.bu_period, "button")
 
 
 # generate Providentia dashboard
@@ -2640,12 +3631,23 @@ def main(**kwargs):
     p.setColor(QtGui.QPalette.Text, QtGui.QColor(*dcp["Text"]))
     q_app.setPalette(p)
 
+    # apply a settings field being edited when a click finishes anywhere
+    # else, whatever that click lands on - see MenuEditCommitFilter
+    q_app.installEventFilter(MenuEditCommitFilter(q_app))
+
     # set application name and icon
     q_app.setWindowIcon(QtGui.QIcon(join(PROVIDENTIA_ROOT, "assets/logo.icns")))
     q_app.setApplicationName("Providentia")
     q_app.setApplicationDisplayName("Providentia")
     q_app.setDesktopFileName("Providentia")
 
-    # open Providentia
-    Dashboard(**kwargs)
-    sys.exit(q_app.exec_())
+    # open Providentia - kept in a variable so the window cannot be collected
+    dashboard = Dashboard(**kwargs)
+    exit_code = q_app.exec_()
+
+    # exit without finalising the interpreter, as PyQt's atexit handler
+    # intermittently crashed on objects Qt had already destroyed
+    logging.shutdown()
+    sys.stdout.flush()
+    sys.stderr.flush()
+    os._exit(exit_code)

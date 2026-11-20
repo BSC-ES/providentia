@@ -1,13 +1,13 @@
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "providentia"
-version = "3.1.0"
+version = "4.0.0"
 description = "Providentia is designed to allow on-the-fly, offline and interactive analysis of model outputs, with respect to processed observational data."
 requires-python = ">=3.11"
-license = { text = "GNU GPL v3" }
+license = "GPL-3.0-only"
 dynamic = ["readme"]
 
 authors = [
@@ -43,7 +43,7 @@ dependencies = [
     "pandas==2.3.3",
     "PyQt5==5.15.11",
     "seaborn==0.13.2",
-    "scipy==1.16.3",
+    "scipy==1.17.1",
     "ConfigArgParse==1.7.1",
     "cftime==1.6.5",
     "xarray==2025.11.0",
@@ -62,7 +62,19 @@ dependencies = [
     "coverage-badge==1.1.2",
     "cdsapi==0.7.7",
     "pycountry==24.6.1",
-    "xskillscore==0.0.28"
+    "xskillscore==0.0.28",
+    # needed by xskillscore: 0.15.0 has no wheel and does not build without compilers (e.g. Nord4)
+    "statsmodels==0.14.6",
+    "plotly==7.1.0",
+    # website mode (ines-providentia, run from its checkout, see bin/providentia)
+    "dash==4.1.0",
+    "dash-bootstrap-components==2.0.4",
+    "dash-mantine-components==2.6.0",
+    "Flask==2.2.5",  # pinned: older version
+    "Flask-Caching==2.3.1",  # pinned: older version
+    "gevent==25.9.1",
+    "gunicorn==26.0.0",
+    "ipython==9.14.1"
 ]
 
 [project.urls]

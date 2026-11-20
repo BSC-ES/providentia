@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Plot types and options &mdash; Providentia 3.1.0 documentation</title>
+  <title>Plot types and options &mdash; Providentia 4.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=dd1205ac"></script>
+      <script src="_static/documentation_options.js?v=3304f9e4"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -51,6 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Colocation.html">Colocation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Filtering.html">Filtering</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Forecast.html">Forecast</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Gridded-data.html">Gridded data</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="Plotting.html">Plotting</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Plot types and options</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#plot-types">Plot types</a><ul>
@@ -61,6 +62,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#periodic-violin-periodic-violin">Periodic violin (<code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#boxplot-boxplot">Boxplot (<code class="docutils literal notranslate"><span class="pre">boxplot</span></code>)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#distribution-distribution">Distribution (<code class="docutils literal notranslate"><span class="pre">distribution</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#histogram-histogram">Histogram (<code class="docutils literal notranslate"><span class="pre">histogram</span></code>)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#scatter-plot-scatter">Scatter plot (<code class="docutils literal notranslate"><span class="pre">scatter</span></code>)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#heatmap-heatmap">Heatmap (<code class="docutils literal notranslate"><span class="pre">heatmap</span></code>)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#table-table">Table (<code class="docutils literal notranslate"><span class="pre">table</span></code>)</a></li>
@@ -87,6 +89,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#add-threshold-line-threshold">Add threshold line (<code class="docutils literal notranslate"><span class="pre">_threshold</span></code>)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#normalise-boxplot-normalise">Normalise boxplot (<code class="docutils literal notranslate"><span class="pre">_normalise</span></code>)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#transform-contingency-table-into-gerrity-scores-table-gerrity">Transform contingency table into gerrity scores table (<code class="docutils literal notranslate"><span class="pre">_gerrity</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#show-each-station-in-the-taylor-diagram-perstation">Show each station in the Taylor diagram (<code class="docutils literal notranslate"><span class="pre">_perstation</span></code>)</a></li>
 </ul>
 </li>
 </ul>
@@ -95,6 +98,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Statistics.html">Statistics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Skills.html">Skills</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
@@ -142,6 +146,7 @@
 <li><p>Periodic violin plot (<code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>)</p></li>
 <li><p>Box plot (<code class="docutils literal notranslate"><span class="pre">boxplot</span></code>)</p></li>
 <li><p>Distribution plot (<code class="docutils literal notranslate"><span class="pre">distribution</span></code>)</p></li>
+<li><p>Histogram (<code class="docutils literal notranslate"><span class="pre">histogram</span></code>)</p></li>
 <li><p>Scatter plot (<code class="docutils literal notranslate"><span class="pre">scatter</span></code>)</p></li>
 <li><p>Heat map (<code class="docutils literal notranslate"><span class="pre">heatmap</span></code>) - Not available in dashboard</p></li>
 <li><p>Table that gives one statistic per subsection per model (<code class="docutils literal notranslate"><span class="pre">table</span></code>) - Not available in dashboard</p></li>
@@ -181,6 +186,10 @@
 <h3>Distribution (<code class="docutils literal notranslate"><span class="pre">distribution</span></code>)<a class="headerlink" href="#distribution-distribution" title="Link to this heading"></a></h3>
 <p><img alt="Distribution" src="_images/distribution.png" /></p>
 </section>
+<section id="histogram-histogram">
+<h3>Histogram (<code class="docutils literal notranslate"><span class="pre">histogram</span></code>)<a class="headerlink" href="#histogram-histogram" title="Link to this heading"></a></h3>
+<p><img alt="Histogram" src="_images/histogram.png" /></p>
+</section>
 <section id="scatter-plot-scatter">
 <h3>Scatter plot (<code class="docutils literal notranslate"><span class="pre">scatter</span></code>)<a class="headerlink" href="#scatter-plot-scatter" title="Link to this heading"></a></h3>
 <p><img alt="Scatter" src="_images/scatter.png" /></p>
@@ -218,7 +227,8 @@
 </section>
 <section id="choosing-a-statistic-to-plot-stat">
 <h2>Choosing a statistic to plot (<code class="docutils literal notranslate"><span class="pre">-[stat]</span></code>)<a class="headerlink" href="#choosing-a-statistic-to-plot-stat" title="Link to this heading"></a></h2>
-<p>Some of these plots are created for specific statistics, namely: <code class="docutils literal notranslate"><span class="pre">map</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">heatmap</span></code>, <code class="docutils literal notranslate"><span class="pre">taylor</span></code> and <code class="docutils literal notranslate"><span class="pre">table</span></code>. In the report and library modes, this statistic is defined by aggregating the <code class="docutils literal notranslate"><span class="pre">-[stat]</span></code> field to the plot type. <code class="docutils literal notranslate"><span class="pre">[stat]</span></code> should be replaced with any of the base statistic names (e.g. p5, Mean) or model bias names (e.g. r2, RMSE). For example to show the median values spatially, <code class="docutils literal notranslate"><span class="pre">map-p50</span></code> would be set as the plot name or <code class="docutils literal notranslate"><span class="pre">map-r2</span></code> to show the coefficient of determination. The available statistic names are documented in <code class="docutils literal notranslate"><span class="pre">settings/basic_stats.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">settings/model_bias_stats.yaml</span></code>. For the Taylor diagram, only <code class="docutils literal notranslate"><span class="pre">r</span></code>and <code class="docutils literal notranslate"><span class="pre">r2</span></code>can be used.</p>
+<p>Some of these plots are created for specific statistics, namely: <code class="docutils literal notranslate"><span class="pre">map</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">heatmap</span></code>, <code class="docutils literal notranslate"><span class="pre">taylor</span></code> and <code class="docutils literal notranslate"><span class="pre">table</span></code>. In the report and library modes, this statistic is defined by aggregating the <code class="docutils literal notranslate"><span class="pre">-[stat]</span></code> field to the plot type. <code class="docutils literal notranslate"><span class="pre">[stat]</span></code> should be replaced with any of the base statistic names (e.g. p5, Mean) or model bias names (e.g. r2, RMSE). For example to show the median values spatially, <code class="docutils literal notranslate"><span class="pre">map-p50</span></code> would be set as the plot name or <code class="docutils literal notranslate"><span class="pre">map-r2</span></code> to show the coefficient of determination. The available statistic names are documented in <code class="docutils literal notranslate"><span class="pre">settings/basic_stats.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">settings/model_bias_stats.yaml</span></code>. For the Taylor diagram, only <code class="docutils literal notranslate"><span class="pre">r</span></code> and <code class="docutils literal notranslate"><span class="pre">r2</span></code> can be used.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">distribution</span></code> and <code class="docutils literal notranslate"><span class="pre">histogram</span></code> plots can optionally take a <code class="docutils literal notranslate"><span class="pre">-[stat]</span></code> too (e.g. <code class="docutils literal notranslate"><span class="pre">histogram-r</span></code>, <code class="docutils literal notranslate"><span class="pre">distribution-Mean</span></code>). Rather than the distribution of the raw concentration values, they then show the distribution of that statistic across the selected stations, from one value per station, needing at least 2 stations to be selected to be made.</p>
 <p>The timeseries can also be used to show how statistics vary in time. In order to do this, we need to add <code class="docutils literal notranslate"><span class="pre">-[stat]</span></code> and the temporal resolution after the plot type name (e.g. <code class="docutils literal notranslate"><span class="pre">timeseries-Mean-daily</span></code>, <code class="docutils literal notranslate"><span class="pre">timeseries-r2-monthly</span></code>, <code class="docutils literal notranslate"><span class="pre">timeseries-r-annual</span></code>).</p>
 </section>
 <section id="plot-options">
@@ -231,7 +241,7 @@
 <p>Plot types:</p>
 <ul class="simple">
 <li><p>Dashboard: Not applicable</p></li>
-<li><p>Report: <code class="docutils literal notranslate"><span class="pre">map</span></code>, <code class="docutils literal notranslate"><span class="pre">timeseries</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>, <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">boxplot</span></code></p></li>
+<li><p>Report: <code class="docutils literal notranslate"><span class="pre">map</span></code>, <code class="docutils literal notranslate"><span class="pre">timeseries</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>, <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">histogram</span></code>, <code class="docutils literal notranslate"><span class="pre">boxplot</span></code></p></li>
 <li><p>Library: Not applicable</p></li>
 </ul>
 </section>
@@ -242,7 +252,7 @@
 <p>Plot types:</p>
 <ul class="simple">
 <li><p>Dashboard: Not applicable</p></li>
-<li><p>Report: <code class="docutils literal notranslate"><span class="pre">timeseries</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>, <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code>, <code class="docutils literal notranslate"><span class="pre">boxplot</span></code>, <code class="docutils literal notranslate"><span class="pre">taylor</span></code>, <code class="docutils literal notranslate"><span class="pre">fairmode-target</span></code>, <code class="docutils literal notranslate"><span class="pre">fairmode-statsummary</span></code></p></li>
+<li><p>Report: <code class="docutils literal notranslate"><span class="pre">timeseries</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>, <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">histogram</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code>, <code class="docutils literal notranslate"><span class="pre">boxplot</span></code>, <code class="docutils literal notranslate"><span class="pre">taylor</span></code>, <code class="docutils literal notranslate"><span class="pre">fairmode-target</span></code>, <code class="docutils literal notranslate"><span class="pre">fairmode-statsummary</span></code></p></li>
 <li><p>Library: Not applicable</p></li>
 </ul>
 </section>
@@ -252,9 +262,9 @@
 <p><img alt="annotate" src="_images/annotate.jpg" /></p>
 <p>Plot types:</p>
 <ul class="simple">
-<li><p>Dashboard: <code class="docutils literal notranslate"><span class="pre">map</span></code>, <code class="docutils literal notranslate"><span class="pre">timeseries</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>, <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code>, <code class="docutils literal notranslate"><span class="pre">boxplot</span></code>, <code class="docutils literal notranslate"><span class="pre">taylor</span></code>, <code class="docutils literal notranslate"><span class="pre">fairmode-target</span></code></p></li>
-<li><p>Report: <code class="docutils literal notranslate"><span class="pre">map</span></code>, <code class="docutils literal notranslate"><span class="pre">timeseries</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>, <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code>, <code class="docutils literal notranslate"><span class="pre">boxplot</span></code>, <code class="docutils literal notranslate"><span class="pre">heatmap</span></code>, <code class="docutils literal notranslate"><span class="pre">taylor</span></code>, <code class="docutils literal notranslate"><span class="pre">fairmode-target</span></code></p></li>
-<li><p>Library: <code class="docutils literal notranslate"><span class="pre">map</span></code>, <code class="docutils literal notranslate"><span class="pre">timeseries</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>, <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code>, <code class="docutils literal notranslate"><span class="pre">boxplot</span></code>, <code class="docutils literal notranslate"><span class="pre">heatmap</span></code>, <code class="docutils literal notranslate"><span class="pre">taylor</span></code>, <code class="docutils literal notranslate"><span class="pre">fairmode-target</span></code></p></li>
+<li><p>Dashboard: <code class="docutils literal notranslate"><span class="pre">map</span></code>, <code class="docutils literal notranslate"><span class="pre">timeseries</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>, <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">histogram</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code>, <code class="docutils literal notranslate"><span class="pre">boxplot</span></code>, <code class="docutils literal notranslate"><span class="pre">taylor</span></code>, <code class="docutils literal notranslate"><span class="pre">fairmode-target</span></code></p></li>
+<li><p>Report: <code class="docutils literal notranslate"><span class="pre">map</span></code>, <code class="docutils literal notranslate"><span class="pre">timeseries</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>, <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">histogram</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code>, <code class="docutils literal notranslate"><span class="pre">boxplot</span></code>, <code class="docutils literal notranslate"><span class="pre">heatmap</span></code>, <code class="docutils literal notranslate"><span class="pre">taylor</span></code>, <code class="docutils literal notranslate"><span class="pre">fairmode-target</span></code></p></li>
+<li><p>Library: <code class="docutils literal notranslate"><span class="pre">map</span></code>, <code class="docutils literal notranslate"><span class="pre">timeseries</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>, <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">histogram</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code>, <code class="docutils literal notranslate"><span class="pre">boxplot</span></code>, <code class="docutils literal notranslate"><span class="pre">heatmap</span></code>, <code class="docutils literal notranslate"><span class="pre">taylor</span></code>, <code class="docutils literal notranslate"><span class="pre">fairmode-target</span></code></p></li>
 </ul>
 </section>
 <section id="get-the-bias-of-the-data-bias">
@@ -263,9 +273,9 @@
 <p><img alt="bias" src="_images/bias.jpg" /></p>
 <p>Plot types:</p>
 <ul class="simple">
-<li><p>Dashboard: <code class="docutils literal notranslate"><span class="pre">timeseries</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">statsummary</span></code></p></li>
-<li><p>Report: <code class="docutils literal notranslate"><span class="pre">map</span></code>, <code class="docutils literal notranslate"><span class="pre">timeseries</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">heatmap</span></code>, <code class="docutils literal notranslate"><span class="pre">table</span></code>, <code class="docutils literal notranslate"><span class="pre">statsummary</span></code></p></li>
-<li><p>Library: <code class="docutils literal notranslate"><span class="pre">timeseries</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">heatmap</span></code>, <code class="docutils literal notranslate"><span class="pre">table</span></code>, <code class="docutils literal notranslate"><span class="pre">statsummary</span></code></p></li>
+<li><p>Dashboard: <code class="docutils literal notranslate"><span class="pre">timeseries</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">histogram</span></code>, <code class="docutils literal notranslate"><span class="pre">statsummary</span></code></p></li>
+<li><p>Report: <code class="docutils literal notranslate"><span class="pre">map</span></code>, <code class="docutils literal notranslate"><span class="pre">timeseries</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">histogram</span></code>, <code class="docutils literal notranslate"><span class="pre">heatmap</span></code>, <code class="docutils literal notranslate"><span class="pre">table</span></code>, <code class="docutils literal notranslate"><span class="pre">statsummary</span></code></p></li>
+<li><p>Library: <code class="docutils literal notranslate"><span class="pre">timeseries</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">histogram</span></code>, <code class="docutils literal notranslate"><span class="pre">heatmap</span></code>, <code class="docutils literal notranslate"><span class="pre">table</span></code>, <code class="docutils literal notranslate"><span class="pre">statsummary</span></code></p></li>
 </ul>
 </section>
 <section id="add-a-smooth-line-to-the-timeseries-smooth">
@@ -307,9 +317,9 @@
 <p><img alt="logs" src="_images/logs.jpg" /></p>
 <p>Plot types:</p>
 <ul class="simple">
-<li><p>Dashboard: <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code></p></li>
-<li><p>Report: <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code></p></li>
-<li><p>Library:  <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code></p></li>
+<li><p>Dashboard: <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">histogram</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code></p></li>
+<li><p>Report: <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">histogram</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code></p></li>
+<li><p>Library: <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">histogram</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code></p></li>
 </ul>
 </section>
 <section id="make-the-scale-logarithmic-in-y-axis-logy">
@@ -317,9 +327,9 @@
 <p>Adding the options <code class="docutils literal notranslate"><span class="pre">_logy</span></code> will set the y axis to be logarithmically scaled.</p>
 <p>Plot types:</p>
 <ul class="simple">
-<li><p>Dashboard: <code class="docutils literal notranslate"><span class="pre">timeseries</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>, <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code>, <code class="docutils literal notranslate"><span class="pre">boxplot</span></code></p></li>
-<li><p>Report: <code class="docutils literal notranslate"><span class="pre">timeseries</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>, <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code>, <code class="docutils literal notranslate"><span class="pre">boxplot</span></code></p></li>
-<li><p>Library: <code class="docutils literal notranslate"><span class="pre">timeseries</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>, <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code>, <code class="docutils literal notranslate"><span class="pre">boxplot</span></code></p></li>
+<li><p>Dashboard: <code class="docutils literal notranslate"><span class="pre">timeseries</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>, <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">histogram</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code>, <code class="docutils literal notranslate"><span class="pre">boxplot</span></code></p></li>
+<li><p>Report: <code class="docutils literal notranslate"><span class="pre">timeseries</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>, <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">histogram</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code>, <code class="docutils literal notranslate"><span class="pre">boxplot</span></code></p></li>
+<li><p>Library: <code class="docutils literal notranslate"><span class="pre">timeseries</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>, <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">histogram</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code>, <code class="docutils literal notranslate"><span class="pre">boxplot</span></code></p></li>
 </ul>
 </section>
 <section id="get-plot-by-more-than-one-network-species-multispecies">
@@ -350,9 +360,9 @@
 <p><img alt="threshold" src="_images/threshold.png" /></p>
 <p>Plot types:</p>
 <ul class="simple">
-<li><p>Dashboard: <code class="docutils literal notranslate"><span class="pre">timeseries</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>, <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code>, <code class="docutils literal notranslate"><span class="pre">boxplot</span></code></p></li>
-<li><p>Report: <code class="docutils literal notranslate"><span class="pre">timeseries</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>, <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code>, <code class="docutils literal notranslate"><span class="pre">boxplot</span></code></p></li>
-<li><p>Library: <code class="docutils literal notranslate"><span class="pre">timeseries</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>, <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code>, <code class="docutils literal notranslate"><span class="pre">boxplot</span></code></p></li>
+<li><p>Dashboard: <code class="docutils literal notranslate"><span class="pre">timeseries</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>, <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">histogram</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code>, <code class="docutils literal notranslate"><span class="pre">boxplot</span></code></p></li>
+<li><p>Report: <code class="docutils literal notranslate"><span class="pre">timeseries</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>, <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">histogram</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code>, <code class="docutils literal notranslate"><span class="pre">boxplot</span></code></p></li>
+<li><p>Library: <code class="docutils literal notranslate"><span class="pre">timeseries</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>, <code class="docutils literal notranslate"><span class="pre">distribution</span></code>, <code class="docutils literal notranslate"><span class="pre">histogram</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code>, <code class="docutils literal notranslate"><span class="pre">boxplot</span></code></p></li>
 </ul>
 </section>
 <section id="normalise-boxplot-normalise">
@@ -375,6 +385,17 @@
 <li><p>Dashboard: <code class="docutils literal notranslate"><span class="pre">contingencytable</span></code></p></li>
 <li><p>Report: <code class="docutils literal notranslate"><span class="pre">contingencytable</span></code></p></li>
 <li><p>Library: <code class="docutils literal notranslate"><span class="pre">contingencytable</span></code></p></li>
+</ul>
+</section>
+<section id="show-each-station-in-the-taylor-diagram-perstation">
+<h3>Show each station in the Taylor diagram (<code class="docutils literal notranslate"><span class="pre">_perstation</span></code>)<a class="headerlink" href="#show-each-station-in-the-taylor-diagram-perstation" title="Link to this heading"></a></h3>
+<p>Adding <code class="docutils literal notranslate"><span class="pre">_perstation</span></code> draws one point per selected station for each model, instead of a single aggregated point per model, showing how model performance varies between stations.</p>
+<p><img alt="perstation" src="_images/perstation.png" /></p>
+<p>Plot types:</p>
+<ul class="simple">
+<li><p>Dashboard: <code class="docutils literal notranslate"><span class="pre">taylor</span></code></p></li>
+<li><p>Report: <code class="docutils literal notranslate"><span class="pre">taylor</span></code></p></li>
+<li><p>Library: <code class="docutils literal notranslate"><span class="pre">taylor</span></code></p></li>
 </ul>
 </section>
 </section>
