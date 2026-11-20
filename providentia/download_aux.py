@@ -111,12 +111,6 @@ def find_available_resolutions(
         try:
             download_instance.sftp.stat(join(remote_dir, resolution))
         except FileNotFoundError:
-            # show resolution not found
-            msg = (
-                f"There is no data available in {download_instance.remote_machine} for the {mod_id} model with the "
-                f"{domain} domain at {resolution} resolution."
-            )
-            show_message(download_instance, msg, deactivate=initial_check)
 
             if not resolution_not_found:
                 # obtain the possible resolutions
@@ -137,9 +131,9 @@ def find_available_resolutions(
                         user_resolution = input(
                         f"\nNo non-interpolated model data is available for {resolution} resolution. "
                         f"Available temporal resolutions for this model: {', '.join(sorted_resolutions)}. "
-                        f"Please specify the desired resolution. Press Enter to automatically select "
+                        f"Please specify the desired resolution or press Enter to automatically select "
                         f"the first available option ({sorted_resolutions[0]}). "
-                        f"Enter 'n' if you do not want to download this model at another resolution. "
+                        f"Otherwise enter 'n' if you do not want to download this model at another resolution. "
                     ).lower()
 
                         if (user_resolution in possible_resolutions or user_resolution in ["", "n"]):
@@ -153,13 +147,6 @@ def find_available_resolutions(
 
                             break
 
-                if not sorted_resolutions or user_resolution == "n":
-                    msg = (
-                        f"There is no data available in {download_instance.remote_machine} for the {mod_id} model "
-                        f"with the {domain} domain at {resolution} resolution."
-                    )
-                    show_message(download_instance, msg, deactivate=initial_check)
-                    continue
         else:
             # add resolution to the return list
             valid_resolutions.append(resolution)
