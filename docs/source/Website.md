@@ -20,4 +20,4 @@ To stop the website and the backend, press `Ctrl+C` in the command line. If the 
 
 - The website mode is only available on local machines, not on MN5, Nord4 or the operational machine.
 - Port 7782 must be free on your machine.
-- The website package (`ines-providentia`) is installed with the `providentia-env_v4.0.0` environment from BSC's GitLab (public, https://gitlab.earth.bsc.es).
+- The website's packages (dash, Flask…) are in `providentia-env_v4.0.0`, as they are listed in Providentia's `requirements.txt`; the website itself (`ines-providentia`, on BSC's GitLab, public, https://gitlab.earth.bsc.es) is the checkout at `WEBSITE_PATH`, not installed in the environment.
