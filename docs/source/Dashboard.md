@@ -52,7 +52,7 @@ The GHOST version menu, first in the Observations section, is always enabled: th
 
 The matrix and species menus do not depend on the data: they list the matrices and species of the species reference of Providentia (see [Available species](Available-species.md)), whatever the GHOST version, and the species menu only shows the species of the ticked matrices.
 
-When **READ** is clicked with GHOST networks, the GHOST standards of the version selected in the GHOST version menu are used (species, units and limits). If a selected species is not in that version, a message says so, it is unticked and the other species are read. If none of the selected species is in that version, nothing is read until a different GHOST version (or species) is selected.
+When the GHOST version changes in its menu, its GHOST standards are used from then on (species, units and limits, QA and flags). The **QA** and **FLAGS** windows list the items of that version, starting again from its default selection. When **READ** is clicked with GHOST networks, if a selected species is not in that version, a message says so, it is unticked and the other species are read. If none of the selected species is in that version, nothing is read until a different GHOST version (or species) is selected.
 
 Next, there are four pop-up menus:
 * **QA** contains the GHOST quality assurance flags to filter observations by, as explained in [QA](QA-filtering.md).

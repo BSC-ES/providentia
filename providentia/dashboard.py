@@ -39,6 +39,7 @@ from .fields_menus import (
     init_flags,
     init_qa,
     update_qa,
+    update_flags,
     init_metadata,
     init_multispecies,
     init_period,
@@ -2268,7 +2269,21 @@ class Dashboard(QtWidgets.QWidget):
 
             elif event_source == self.cb_ghost_version:
                 self.selected_ghost_version = changed_param
-                
+
+                # the GHOST standards of the new version (species, their fields, QA and flag
+                # codes, GHOST networks), so that everything follows the menu
+                self.ghost_version = self.selected_ghost_version
+                self.provconf.parse_parameter("ghost_version", self.ghost_version)
+                # its default QA (default_qa_standard, default_qa_non_negative), and the QA and
+                # flag menus with its codes, starting again from its defaults (set here, as the
+                # refresh of the menus below stops early when the version has no data)
+                self.provconf.parse_parameter("qa", None)
+                update_qa(self)
+                update_flags(self)
+                if self.selected_species:
+                    self.qa_menu["checkboxes"]["remove_default"] = get_default_qa(self, self.selected_species[0])
+                    self.qa_menu["checkboxes"]["remove_selected"] = self.qa_menu["checkboxes"]["remove_default"]
+
                 generate_file_trees(self, ghost_version=self.selected_ghost_version, only_ghost=True)
 
                 self.ghost_version_has_changed = True
@@ -2856,11 +2871,6 @@ class Dashboard(QtWidgets.QWidget):
         # if have no data to read, then do not read any data
         if self.no_data_to_read:
             return
-
-        # import the GHOST standards of the version selected in the menu (they are only imported
-        # at start, so the species, their fields, QA codes and GHOST networks follow the menu)
-        if self.selected_ghost_version != self.ghost_version:
-            self.provconf.parse_parameter("ghost_version", self.selected_ghost_version)
 
         # GHOST observations can only be read for the species of the selected GHOST version:
         # if none is in it, nothing is read, otherwise the others are not read
