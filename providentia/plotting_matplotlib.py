@@ -535,6 +535,88 @@ class PlottingMatplotlib(Plotting):
                     bias=bias,
                 )
 
+    def make_distribution(
+        self,
+        relevant_axis,
+        networkspeci,
+        data_labels,
+        plot_characteristics,
+        plot_options,
+        data_range_min=None,
+        data_range_max=None,
+        zstat=None,
+        station_statistic_range=None,
+    ):
+        """
+        Renders the probability density functions of get_distribution_data as lines.
+
+        Parameters
+        ----------
+        relevant_axis : object
+            Axis to plot on.
+        networkspeci : str
+            Current networkspeci (e.g. EBAS|sconco3).
+        data_labels : list
+            Data arrays to plot.
+        plot_characteristics : dict
+            Plot characteristics.
+        plot_options : list
+            Options to configure plot.
+        data_range_min : float, optional
+            Minimum data range of distribution plot grid.
+        data_range_max : float, optional
+            Maximum data range of distribution plot grid.
+        zstat : str, optional
+            Statistic parsed from a "distribution-<stat>" plot type (report/library modes),
+            see get_distribution_data.
+        station_statistic_range : tuple of float, optional
+            Minimum and maximum of the statistic's own per-station values, see get_distribution_data.
+        """
+
+        # get PDF per data label (None if the plot is not made)
+        distribution_data = self.get_distribution_data(
+            networkspeci,
+            data_labels,
+            plot_characteristics,
+            plot_options,
+            data_range_min=data_range_min,
+            data_range_max=data_range_max,
+            zstat=zstat,
+            station_statistic_range=station_statistic_range,
+        )
+        if distribution_data is None:
+            return
+        x_grid, PDFs_sampled, bias = distribution_data
+
+        # plot horizontal line across x axis at 0 if bias plot
+        if bias:
+            bias_line = [relevant_axis.axhline(**plot_characteristics["bias_line"])]
+            # track plot elements
+            if self.read_instance.mode not in ["report"]:
+                self.track_plot_elements(
+                    "ALL", "distribution", "bias_line", bias_line, bias=bias
+                )
+
+        # iterate through data labels
+        for data_label, PDF_sampled in PDFs_sampled.items():
+            # make plot
+            self.distribution_plot = relevant_axis.plot(
+                x_grid,
+                PDF_sampled,
+                color=self.read_instance.plotting_params[data_label]["colour"],
+                **plot_characteristics["plot"],
+            )
+
+            # track plot elements
+            if self.read_instance.mode not in ["report"]:
+                self.track_plot_elements(
+                    data_label,
+                    "distribution",
+                    "plot",
+                    self.distribution_plot,
+                    bias=bias,
+                )
+
     def make_fairmode_statsummary(
         self,
         relevant_axis,
