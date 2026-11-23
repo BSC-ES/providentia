@@ -119,3 +119,21 @@ Or increasing the number of cpus, for example:
 ```
 
 You can also combine both options for testing.
+
+## File length is exactly the declared header and records size, but misses the EOF byte. Last byte is 0x1a, but that value could also be from the last record's data. Note: In previous versions of PyShp, Writers did not output a .dbf EOF byte so no warning will be given.  Set strict=True to raise an Exception for this instead.
+
+This message can appear when a map is drawn, in the dashboard or in other modes. It is harmless: the map is drawn correctly.
+
+It comes from pyshp, the library cartopy uses to read the Natural Earth shapefiles of the map (land, ocean, coastlines and borders). Some of the files that Natural Earth publishes (e.g. `ne_50m_land.dbf`, `ne_50m_ocean.dbf`, `ne_50m_coastline.dbf`, `ne_110m_coastline.dbf`) end without the end-of-file byte (`0x1a`) that pyshp expects, and pyshp says so. Downloading them again or reinstalling cartopy does not help, as the published files are the same.
+
+Cartopy downloads these files once and keeps them in `~/.local/share/cartopy`, so you can fix your copies by adding the missing byte. Run this once; files that already end with the byte are left as they are:
+
+```
+cd ~/.local/share/cartopy/shapefiles/natural_earth
+for f in physical/ne_50m_land physical/ne_50m_ocean physical/ne_50m_coastline physical/ne_110m_coastline; do
+    [ -f $f.dbf ] || f=cultural/${f#*/}
+    tail -c 1 $f.dbf | od -An -tx1 | grep -q 1a || printf '\x1a' >> $f.dbf
+done
+```
+
+If the message appears for another file, add it to the list (its path without `.dbf`). On MN5 and Nord4, the files come from the shared cartopy installation, which you cannot change.

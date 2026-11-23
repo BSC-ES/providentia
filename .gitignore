@@ -9,6 +9,7 @@ bin/Mac/*
 plots/*
 reports/*
 saved_data/*
+docs/build/
 notebooks/.ipynb_checkpoints
 providentia/testing/.ipynb_checkpoints
 providentia/testing/files/.ipynb_checkpoints
