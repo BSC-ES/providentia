@@ -54,3 +54,27 @@ available_ghost_features:
   - min
   - med
   - max
+available_projections:
+  - Aitoff
+  - AzimuthalEquidistant
+  - EckertI
+  - EckertII
+  - EckertIII
+  - EckertIV
+  - EckertV
+  - EckertVI
+  - EqualEarth
+  - Hammer
+  - InterruptedGoodeHomolosine
+  - LambertAzimuthalEqualArea
+  - LambertCylindrical
+  - Mercator
+  - Miller
+  - Mollweide
+  - NorthPolarStereo
+  - Orthographic
+  - PlateCarree
+  - Robinson
+  - Sinusoidal
+  - SouthPolarStereo
+  - Stereographic

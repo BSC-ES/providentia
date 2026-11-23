@@ -3734,8 +3734,8 @@ class Canvas(FigureCanvas):
         Parameters
         ----------
         projection_name : str
-            A valid cartopy.crs projection name (see get_valid_projections()
-            in dashboard_elements.py).
+            A valid cartopy.crs projection name (see available_projections
+            in available_inputs.yaml).
         """
 
         self.plot_characteristics_templates["map"]["projection"] = projection_name
@@ -5892,6 +5892,7 @@ class Canvas(FigureCanvas):
         populate_projection_combobox(
             self.map_projection,
             current=self.plot_characteristics_templates["map"]["projection"],
+            valid_projections=self.read_instance.available_projections,
         )
 
         # get map detail controls (land/ocean colour, country borders,
