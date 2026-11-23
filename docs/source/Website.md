@@ -12,7 +12,7 @@ WEBSITE_PATH=<path to ines-providentia> ./bin/providentia --website
 
 It runs that checkout from its folder: its `src` is put on the path of Providentia (and on `PYTHONPATH`, for the backend it starts), and the ines-providentia installed in the environment, if any, is not used. Its dependencies must be in the environment, as they are when it was created with `requirements.txt`.
 
-It starts the backend, which loads Providentia and can take a few minutes, and then opens the dashboard of the website in your browser (`http://127.0.0.1:7782/...`). The configuration file and section are not used in this mode.
+It starts the backend, which loads Providentia and can take a few minutes, rebuilds the observation filetrees of the default GHOST version, as the dashboard mode does at start, and then opens the dashboard of the website in your browser (`http://127.0.0.1:7782/...`). If the filetrees cannot be rebuilt, the dashboard opens with a warning that the networks may be out of date. The configuration file and section are not used in this mode.
 
 To stop the website and the backend, press `Ctrl+C` in the command line. If the backend stops on its own, the page tells you to stop the command and start it again. The `LOGS` button of the page shows what the backend wrote, to see why it stopped.
 

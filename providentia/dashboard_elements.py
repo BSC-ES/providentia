@@ -514,51 +514,6 @@ def populate_colourmap_combobox(combobox, current=None):
     combobox.setCurrentIndex(valid_colourmaps.index(target_text))
 
 
-# cartopy projections that construct with no required arguments, render a
-# sensible whole-world view by default, and aren't a near-duplicate or a
-# regional CRS. Checked by rendering each candidate, not by name alone
-VALID_PROJECTIONS = [
-    "Aitoff",
-    "AzimuthalEquidistant",
-    "EckertI",
-    "EckertII",
-    "EckertIII",
-    "EckertIV",
-    "EckertV",
-    "EckertVI",
-    "EqualEarth",
-    "Hammer",
-    "InterruptedGoodeHomolosine",
-    "LambertAzimuthalEqualArea",
-    "LambertCylindrical",
-    "Mercator",
-    "Miller",
-    "Mollweide",
-    "NorthPolarStereo",
-    "Orthographic",
-    "PlateCarree",
-    "Robinson",
-    "Sinusoidal",
-    "SouthPolarStereo",
-    "Stereographic",
-]
-
-
-def get_valid_projections():
-    """
-    Get the names of the cartopy (cartopy.crs) map projections offered in the
-    map settings menu - see the VALID_PROJECTIONS comment for how this list
-    was curated.
-
-    Returns
-    -------
-    list of str
-        Sorted projection names, valid to pass to getattr(cartopy.crs, name).
-    """
-
-    return sorted(VALID_PROJECTIONS)
-
-
 def make_projection_icon(name, width=34, height=18):
     """
     Build a small icon showing a projection's actual world outline (land +
@@ -572,7 +527,8 @@ def make_projection_icon(name, width=34, height=18):
     Parameters
     ----------
     name : str
-        A valid projection name (see get_valid_projections()).
+        A valid projection name (see available_projections in
+        available_inputs.yaml).
     width : int, optional
         Icon width in pixels (default is 34).
     height : int, optional
@@ -610,7 +566,7 @@ def make_projection_icon(name, width=34, height=18):
     return QtGui.QIcon(pixmap)
 
 
-def populate_projection_combobox(combobox, current):
+def populate_projection_combobox(combobox, current, valid_projections):
     """
     Fill a QComboBox with every valid map projection, each shown with an icon
     of its actual world outline.
@@ -622,11 +578,12 @@ def populate_projection_combobox(combobox, current):
     current : str
         Projection name to select initially. Falls back to the first
         (alphabetically) projection if this isn't a valid projection name.
+    valid_projections : list of str
+        Projections of the menu, available_projections in available_inputs.yaml.
     """
 
     combobox.clear()
     combobox.setIconSize(QtCore.QSize(34, 18))
-    valid_projections = get_valid_projections()
     for name in valid_projections:
         combobox.addItem(make_projection_icon(name), name)
 

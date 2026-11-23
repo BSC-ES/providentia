@@ -36,7 +36,7 @@ from .fields_menus import (
     metadata_conf,
 )
 from .filter import DataFilter
-from .plotting_pyqt import PlottingPyQt
+from .plotting_matplotlib import PlottingMatplotlib
 from .plot_aux import (
     get_taylor_diagram_ghelper,
     histogram_bin_target,
@@ -223,7 +223,7 @@ class Report:
             self.plot_characteristics = {}
 
             # initialise Plotting class
-            self.plotting = PlottingPyQt(read_instance=self, canvas_instance=self)
+            self.plotting = PlottingMatplotlib(read_instance=self, canvas_instance=self)
 
             # add general plot characteristics to self (if not passed via command line)
             for k, val in self.plot_characteristics_templates["general"].items():
@@ -301,7 +301,7 @@ class Report:
             report_plots = resolve_plots_or_preset(
                 self.report_plots,
                 self.report_plots_presets,
-                set(self.plot_characteristics_templates.keys()),
+                set(self.available_matplotlib_plots),
             )
 
             # set plots that need to be made (summary and station specific)

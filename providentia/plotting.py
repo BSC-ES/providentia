@@ -73,10 +73,6 @@ from .warnings_prv import show_message
 # speed up transformations in cartopy
 pyproj.set_use_global_context()
 
-# sections of settings/plot_characteristics.yaml which are not plots that can
-# be asked for themselves (see available_plot_types())
-NON_PLOT_CHARACTERISTICS = ["general", "header", "doi"]
-
 PROVIDENTIA_ROOT = "/".join(CURRENT_PATH.split("/")[:-1])
 fairmode_settings = yaml.safe_load(
     open(join(PROVIDENTIA_ROOT, "settings/fairmode.yaml"))
@@ -122,9 +118,8 @@ class Plotting:
 
     def available_plot_types(self):
         """
-        Get the plot types that can be asked for, i.e. every plot in
-        settings/plot_characteristics.yaml, leaving out the sections there
-        which are not plots in their own right.
+        Get the plot types that can be asked for, i.e. the plots of
+        available_matplotlib_plots in settings/available_inputs.yaml.
 
         Returns
         -------
@@ -132,11 +127,7 @@ class Plotting:
             Plot type names, in alphabetical order
         """
 
-        return sorted(
-            plot_type
-            for plot_type in self.canvas_instance.plot_characteristics_templates
-            if plot_type not in NON_PLOT_CHARACTERISTICS
-        )
+        return sorted(self.read_instance.available_matplotlib_plots)
 
     def _exit_unavailable_plot_type(self, plot_type, base_plot_type):
         """
@@ -233,10 +224,9 @@ class Plotting:
                 base_plot_type = plot_type.split("-")[0]
             else:
                 base_plot_type = plot_type.split("_")[0]
-            if (
-                base_plot_type
-                not in self.canvas_instance.plot_characteristics_templates
-            ):
+            # sections that are not plots (legend, header, doi) also have their plot
+            # characteristics; which plots can be asked for is in available_plot_types()
+            if base_plot_type not in self.canvas_instance.plot_characteristics_templates:
                 self._exit_unavailable_plot_type(plot_type, base_plot_type)
 
             # check if plot type is correct for report and library modes
@@ -1335,7 +1325,7 @@ class Plotting:
     def get_map_data(self, networkspeci, zstat, labela="", labelb="", date_range=None):
         """
         Gets the station data of the map: the statistic per station and the stations it is for.
-        The drawing is done by make_map in each plotting class (PlottingPyQt, PlottingDash).
+        The drawing is done by make_map in each plotting class (PlottingMatplotlib, PlottingPlotly).
 
         Parameters
         ----------
@@ -1399,7 +1389,7 @@ class Plotting:
     ):
         """
         Gets the data of the timeseries plot, optionally applying statistical chunking or bias calculations.
-        The drawing is done by make_timeseries in each plotting class (PlottingPyQt, PlottingDash).
+        The drawing is done by make_timeseries in each plotting class (PlottingMatplotlib, PlottingPlotly).
 
         Parameters
         ----------
@@ -1525,7 +1515,7 @@ class Plotting:
         """
         Gets the data of the FAIRMODE statistical summary plot: the statistics of
         every row for each data label, and the stations they were calculated for.
-        The drawing is done by make_fairmode_statsummary in PlottingPyQt.
+        The drawing is done by make_fairmode_statsummary in PlottingMatplotlib.
 
         Parameters
         ----------
@@ -1715,7 +1705,7 @@ class Plotting:
         """
         Gets the data of the table and statsummary plots: the cell text, the column
         labels, the rows to merge and the colours of the cells or columns.
-        The drawing is done by make_table in PlottingPyQt.
+        The drawing is done by make_table in PlottingMatplotlib.
 
         Parameters
         ----------

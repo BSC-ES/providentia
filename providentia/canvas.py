@@ -55,7 +55,7 @@ from .dashboard_interactivity import (
 )
 from .fields_menus import update_metadata_fields
 from .filter import DataFilter
-from .plotting_pyqt import PlottingPyQt
+from .plotting_matplotlib import PlottingMatplotlib
 from .plot_aux import (
     get_map_extent,
     get_map_marker_size,
@@ -220,98 +220,35 @@ class Canvas(FigureCanvas):
         self.map_grid_title = ""
 
         # initialise Plotting class
-        self.plotting = PlottingPyQt(read_instance=self.read_instance, canvas_instance=self)
+        self.plotting = PlottingMatplotlib(read_instance=self.read_instance, canvas_instance=self)
 
         # setup gridding of canvas
         self.gridspec = gridspec.GridSpec(self.gridspec_nrows, self.gridspec_ncols)
         self.gridspec.update(**self.gridspec_format)
 
-        # define all possible plots
-        self.all_plots = [
-            "legend",
-            "map",
-            "timeseries",
-            "periodic-violin",
-            "periodic",
-            "metadata",
-            "distribution",
-            "histogram",
-            "scatter",
-            "statsummary",
-            "boxplot",
-            "taylor",
-            "fairmode-target",
-            "fairmode-statsummary",
-            "contingencytable",
-            "heatmap",
-            "table"
+        # define all possible plots (settings/available_inputs.yaml), and the legend, which is
+        # not a plot but has its plot characteristics
+        self.all_plots = ["legend"] + list(self.read_instance.available_matplotlib_plots)
+
+        # define all possible plots in layout options: the map always has position 1, so it
+        # cannot be chosen for the other positions
+        self.layout_options = ["None"] + [
+            plot for plot in self.read_instance.available_matplotlib_plots if plot != "map"
         ]
 
-        # define all possible plots in layout options
-        self.layout_options = [
-            "None",
-            "boxplot",
-            "distribution",
-            "histogram",
-            "metadata",
-            "periodic",
-            "periodic-violin",
-            "scatter",
-            "statsummary",
-            "timeseries",
-            "taylor",
-            "fairmode-target",
-            "fairmode-statsummary",
-            "contingencytable",
-            "heatmap",
-            "table"
-        ]
-
-        # a dashboard_plots entry can carry a "_option" and/or "-stat" suffix
-        # (e.g. "taylor_perstation", "distribution-r") - split off here; the
-        # "-stat" is applied later, from _apply_pending_dashboard_plot_stats(),
-        # once a real data read says what stats are actually available
-        self.dashboard_plots_initial_options = {}
-        self._dashboard_plots_pending_stat = {}
+        # options and stats of the dashboard_plots entries, split off by the
+        # configuration; the "-stat" is applied later, from
+        # _apply_pending_dashboard_plot_stats(), once a real data read says what
+        # stats are actually available
         self._dashboard_plots_pending_stat_applied = False
-        parsed_dashboard_plots = []
-        for plot_type_entry in self.read_instance.dashboard_plots:
-            if plot_type_entry == "None":
-                parsed_dashboard_plots.append(plot_type_entry)
-                continue
-
-            plot_options = plot_type_entry.split("_")[1:]
-            (
-                zstat,
-                base_zstat,
-                z_statistic_type,
-                z_statistic_sign,
-                z_statistic_period,
-            ) = get_z_statistic_info(plot_type_entry)
-            base_plot_type = (
-                plot_type_entry.split("-")[0] if zstat else plot_type_entry.split("_")[0]
-            )
-
-            # a plot type can only be shown in one position, as it can be
-            # when picked from a position's own menu (see
-            # handle_layout_update()) - the first of any repeats is kept and
-            # the rest are left empty, taking their options/stat with them
-            if base_plot_type in parsed_dashboard_plots:
-                parsed_dashboard_plots.append("None")
-                continue
-
-            parsed_dashboard_plots.append(base_plot_type)
-            if plot_options:
-                self.dashboard_plots_initial_options[base_plot_type] = plot_options
-            if zstat:
-                self._dashboard_plots_pending_stat[base_plot_type] = base_zstat
-        self.read_instance.dashboard_plots = parsed_dashboard_plots
+        self.dashboard_plots_initial_options = self.read_instance.dashboard_plots_options
+        self._dashboard_plots_pending_stat = self.read_instance.dashboard_plots_stats
 
         # stop running if plot type in dashboard_plots does not exist
         for plot_type in self.read_instance.dashboard_plots:
             if plot_type not in self.all_plots + ["None"]:
                 error = "Error: Plot type {0} is not an option. ".format(plot_type)
-                error += "The available plots are: {0}.".format(self.all_plots[2:])
+                error += "The available plots are: {0}.".format(self.layout_options[1:])
                 self.read_instance.logger.error(error)
                 sys.exit(1)
 
@@ -3734,8 +3671,8 @@ class Canvas(FigureCanvas):
         Parameters
         ----------
         projection_name : str
-            A valid cartopy.crs projection name (see get_valid_projections()
-            in dashboard_elements.py).
+            A valid cartopy.crs projection name (see available_projections
+            in available_inputs.yaml).
         """
 
         self.plot_characteristics_templates["map"]["projection"] = projection_name
@@ -5892,6 +5829,7 @@ class Canvas(FigureCanvas):
         populate_projection_combobox(
             self.map_projection,
             current=self.plot_characteristics_templates["map"]["projection"],
+            valid_projections=self.read_instance.available_projections,
         )
 
         # get map detail controls (land/ocean colour, country borders,

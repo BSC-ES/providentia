@@ -28,8 +28,8 @@ from .fields_menus import (
     coverage_conf,
 )
 from .filter import DataFilter
-from .plotting_dash import PlottingDash
-from .plotting_pyqt import PlottingPyQt
+from .plotting_plotly import PlottingPlotly
+from .plotting_matplotlib import PlottingMatplotlib
 from .plot_aux import download_plot_data_to_csv
 from .read import DataReader
 from .read_aux import (
@@ -142,13 +142,13 @@ class Providentia:
             plot_characteristics, mode
         )
 
-        # initialise Plotting class of the backend (PlottingPyQt draws with matplotlib,
-        # PlottingDash with plotly)
+        # initialise Plotting class of the backend (PlottingMatplotlib draws with matplotlib,
+        # PlottingPlotly with plotly)
         self.backend = backend
         if self.backend == "matplotlib":
-            self.plotting = PlottingPyQt(read_instance=self, canvas_instance=self)
+            self.plotting = PlottingMatplotlib(read_instance=self, canvas_instance=self)
         elif self.backend == "plotly":
-            self.plotting = PlottingDash(read_instance=self, canvas_instance=self)
+            self.plotting = PlottingPlotly(read_instance=self, canvas_instance=self)
         else:
             self.logger.error(f"Backend {self.backend} is not available")
             self.valid_config = False
@@ -1044,16 +1044,22 @@ class Providentia:
         elif base_plot_type != "legend":
             func_name = "make_{}".format(base_plot_type.split("-")[0])
         
-        # check if function exists for selected backend
+        # check the backend can draw it (settings/available_inputs.yaml): its plotting class
+        # also has the matplotlib functions it inherits, which do not draw with plotly
         if base_plot_type != "legend":
-            func = getattr(self.plotting, func_name, None)
-            if func is None:
+            backend_plots = (
+                self.available_plotly_plots
+                if self.backend == "plotly"
+                else self.available_matplotlib_plots
+            )
+            if base_plot_type not in backend_plots:
                 self.logger.error(
                     "Plot type {} is not available with the {} backend".format(
                         plot_type, self.backend
                     )
                 )
                 return
+            func = getattr(self.plotting, func_name)
 
         # create figure, and axes if the backend has them (main_gs is the matplotlib grid
         # that has the plot in its first row and room for the legend in the second)
@@ -1129,7 +1135,7 @@ class Providentia:
                 )
 
             func(
-                # PlottingDash draws on the plotly figure, PlottingPyQt on the matplotlib axis
+                # PlottingPlotly draws on the plotly figure, PlottingMatplotlib on the matplotlib axis
                 fig if self.backend == "plotly" else relevant_ax,
                 networkspeci,
                 self.plot_characteristics[plot_type],
@@ -1258,7 +1264,7 @@ class Providentia:
 
             # make plot
             func(
-                # PlottingDash draws on the plotly figure, PlottingPyQt on the matplotlib axis
+                # PlottingPlotly draws on the plotly figure, PlottingMatplotlib on the matplotlib axis
                 fig if self.backend == "plotly" else relevant_ax,
                 networkspeci,
                 relevant_data_labels,
@@ -1354,7 +1360,7 @@ class Providentia:
 
             # make plot
             func(
-                # PlottingDash draws on the plotly figure, PlottingPyQt on the matplotlib axis
+                # PlottingPlotly draws on the plotly figure, PlottingMatplotlib on the matplotlib axis
                 fig if self.backend == "plotly" else relevant_ax,
                 networkspeci,
                 relevant_data_labels,
@@ -1377,7 +1383,7 @@ class Providentia:
         # make timeseries plot
         elif base_plot_type == "timeseries":
             func(
-                # PlottingDash draws on the plotly figure, PlottingPyQt on the matplotlib axis
+                # PlottingPlotly draws on the plotly figure, PlottingMatplotlib on the matplotlib axis
                 fig if self.backend == "plotly" else relevant_ax,
                 networkspeci,
                 data_labels,

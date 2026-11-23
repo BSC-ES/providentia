@@ -54,3 +54,51 @@ available_ghost_features:
   - min
   - med
   - max
+# plots drawn with matplotlib (dashboard, library and reports), each with its function in PlottingMatplotlib
+available_matplotlib_plots:
+  - map
+  - boxplot
+  - distribution
+  - histogram
+  - metadata
+  - periodic
+  - periodic-violin
+  - scatter
+  - statsummary
+  - timeseries
+  - taylor
+  - fairmode-target
+  - fairmode-statsummary
+  - contingencytable
+  - heatmap
+  - table
+# plots drawn with plotly (the ines-providentia website), each with its function in PlottingPlotly
+available_plotly_plots:
+  - map
+  - timeseries
+  - statsummary
+  - table
+available_projections:
+  - Aitoff
+  - AzimuthalEquidistant
+  - EckertI
+  - EckertII
+  - EckertIII
+  - EckertIV
+  - EckertV
+  - EckertVI
+  - EqualEarth
+  - Hammer
+  - InterruptedGoodeHomolosine
+  - LambertAzimuthalEqualArea
+  - LambertCylindrical
+  - Mercator
+  - Miller
+  - Mollweide
+  - NorthPolarStereo
+  - Orthographic
+  - PlateCarree
+  - Robinson
+  - Sinusoidal
+  - SouthPolarStereo
+  - Stereographic
