@@ -513,7 +513,6 @@ class Dashboard(QtWidgets.QWidget):
             ):
                 menu_plot_type = menu_button.objectName().split("_menu")[0]
                 menu_plot_type = correct_plot_type_name(menu_plot_type)
-                plot_type = correct_plot_type_name(plot_type)
 
                 # proceed once have objects for plot type
                 # if plot type is None the axes and are initalising the qt element geometry

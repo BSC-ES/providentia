@@ -364,8 +364,9 @@ class Canvas(FigureCanvas):
             for menu_button, save_button, save_data_button in zip(
                 self.menu_buttons, self.save_buttons, self.save_data_buttons
             ):
-                menu_plot_type = menu_button.objectName().split("_menu")[0]
-                plot_type = correct_plot_type_name(plot_type)
+                menu_plot_type = correct_plot_type_name(
+                    menu_button.objectName().split("_menu")[0]
+                )
                 # proceed once have objects for plot type
                 if plot_type == menu_plot_type:
                     menu_button.show()

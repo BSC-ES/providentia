@@ -1409,7 +1409,8 @@ class Providentia:
         # make distribution/histogram plot
         elif base_plot_type in ["distribution", "histogram"]:
             func(
-                relevant_ax,
+                # PlottingPlotly draws on the plotly figure, PlottingMatplotlib on the matplotlib axis
+                fig if self.backend == "plotly" else relevant_ax,
                 networkspeci,
                 data_labels,
                 self.plot_characteristics[plot_type],

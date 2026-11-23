@@ -76,6 +76,7 @@ available_matplotlib_plots:
 available_plotly_plots:
   - map
   - timeseries
+  - distribution
   - statsummary
   - table
 available_projections:

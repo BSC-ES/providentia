@@ -99,9 +99,9 @@ class PlottingPlotly(Plotting):
         chunk_resolution=None,
     ):
         """
-        Sets the title of a library plot. The other arguments are those that the matplotlib
-        class needs to format its axes and add its legend and colourbar, which plotly figures
-        do not have or draw themselves.
+        Sets the title and the axis titles of a library plot. The other arguments are those
+        that the matplotlib class needs to format its axes and add its legend and colourbar,
+        which plotly figures do not have or draw themselves.
 
         Parameters
         ----------
@@ -149,17 +149,30 @@ class PlottingPlotly(Plotting):
             Chunk resolution.
         """
 
+        plot_characteristics = self.canvas_instance.plot_characteristics[plot_type]
+
         # plotly figures have no matplotlib axes, so the title is set on the figure layout:
         # small and close to the plot, and centred over the plot as in matplotlib, not at the
         # left of the figure
         if title:
-            plot_characteristics = self.canvas_instance.plot_characteristics[plot_type]
             fig.update_layout(
                 title_text=title.replace("\n", "<br>"),
                 title_font_size=plot_characteristics["axis_title"]["fontsize"],
                 title_x=0.5,
                 title_xanchor="center",
                 title_xref="paper",
+            )
+
+        # axis titles, with the font sizes of the website block
+        if xlabel:
+            fig.update_xaxes(
+                title_text=xlabel,
+                title_font_size=plot_characteristics["xlabel"]["fontsize"],
+            )
+        if ylabel:
+            fig.update_yaxes(
+                title_text=ylabel,
+                title_font_size=plot_characteristics["ylabel"]["fontsize"],
             )
 
     def make_map(
@@ -525,6 +538,29 @@ class PlottingPlotly(Plotting):
             }
         fig.update_layout(**layout)
 
+    def add_bias_line(self, fig, bias_line, y):
+        """
+        Draws the horizontal line of a bias plot across the x axis.
+
+        Parameters
+        ----------
+        fig : plotly.graph_objects.Figure
+            Figure to plot on.
+        bias_line : dict
+            Plot characteristics of the bias line, with matplotlib's line styles.
+        y : float
+            Position of the line in the y axis.
+        """
+
+        # the plot characteristics have matplotlib's line styles, which plotly names
+        line_dashes = {"-": "solid", "--": "dash", ":": "dot", "-.": "dashdot"}
+        fig.add_hline(
+            y=y,
+            line_dash=line_dashes[bias_line["linestyle"]],
+            line_color=bias_line["color"],
+            line_width=bias_line["linewidth"],
+        )
+
     def make_timeseries(
         self,
         fig,
@@ -556,7 +592,7 @@ class PlottingPlotly(Plotting):
             Chunk resolution.
         """
 
-        # get timeseries per data label (the bias line is not drawn yet in plotly)
+        # get timeseries per data label, and position of bias line (None if there is none)
         timeseries, bias_line_y, bias = self.get_timeseries_data(
             networkspeci,
             data_labels,
@@ -571,6 +607,10 @@ class PlottingPlotly(Plotting):
         # the figure
         fig.update_layout(margin=plot_characteristics["margin"])
 
+        # plot horizontal line across x axis if bias plot
+        if bias_line_y is not None:
+            self.add_bias_line(fig, plot_characteristics["bias_line"], bias_line_y)
+
         # iterate through data labels
         for data_label, ts in timeseries.items():
             # drop missing values, otherwise plotly fits the time axis to the whole period
@@ -584,6 +624,81 @@ class PlottingPlotly(Plotting):
                     name=data_label,
                     # model colours are RGB tuples (0-1), which plotly does not accept
                     marker_color=to_hex(self.read_instance.plotting_params[data_label]["colour"]),
+                )
+            )
+
+    def make_distribution(
+        self,
+        fig,
+        networkspeci,
+        data_labels,
+        plot_characteristics,
+        plot_options,
+        data_range_min=None,
+        data_range_max=None,
+        zstat=None,
+        station_statistic_range=None,
+    ):
+        """
+        Renders the probability density functions of get_distribution_data as plotly lines.
+
+        Parameters
+        ----------
+        fig : plotly.graph_objects.Figure
+            Figure to plot on.
+        networkspeci : str
+            Current networkspeci (e.g. EBAS|sconco3).
+        data_labels : list
+            Data arrays to plot.
+        plot_characteristics : dict
+            Plot characteristics.
+        plot_options : list
+            Options to configure plot.
+        data_range_min : float, optional
+            Minimum data range of distribution plot grid.
+        data_range_max : float, optional
+            Maximum data range of distribution plot grid.
+        zstat : str, optional
+            Statistic parsed from a "distribution-<stat>" plot type, see get_distribution_data.
+        station_statistic_range : tuple of float, optional
+            Minimum and maximum of the statistic's own per-station values, see get_distribution_data.
+        """
+
+        # get PDF per data label (None if the plot is not made)
+        distribution_data = self.get_distribution_data(
+            networkspeci,
+            data_labels,
+            plot_characteristics,
+            plot_options,
+            data_range_min=data_range_min,
+            data_range_max=data_range_max,
+            zstat=zstat,
+            station_statistic_range=station_statistic_range,
+        )
+        if distribution_data is None:
+            return
+        x_grid, PDFs_sampled, bias = distribution_data
+
+        # keep only the room that the tick labels and the titles need (see make_timeseries)
+        fig.update_layout(margin=plot_characteristics["margin"])
+
+        # plot horizontal line across x axis at 0 if bias plot
+        if bias:
+            self.add_bias_line(
+                fig, plot_characteristics["bias_line"], plot_characteristics["bias_line"]["y"]
+            )
+
+        # iterate through data labels, with every point of the PDF as in matplotlib
+        for data_label, PDF_sampled in PDFs_sampled.items():
+            fig.add_trace(
+                go.Scatter(
+                    x=x_grid,
+                    y=PDF_sampled,
+                    mode="lines",
+                    name=data_label,
+                    # model colours are RGB tuples (0-1), which plotly does not accept
+                    line_color=to_hex(self.read_instance.plotting_params[data_label]["colour"]),
+                    line_width=plot_characteristics["plot"]["linewidth"],
                 )
             )
 
