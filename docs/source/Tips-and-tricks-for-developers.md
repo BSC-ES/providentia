@@ -295,7 +295,7 @@ Prior to that you should update the paths to the volumes (/data, /home/avilanov/
 
 ## Create the docs for the first time and upload to readthedocs
 
-Install `myst-parser`, `Sphinx` and `Sphinx-rtd-theme` in your environment and add the modules to your `requirements.txt` file.
+Install `myst-parser`, `Sphinx` and `Sphinx-rtd-theme` in your environment and add the modules to your `requirements.txt` file, and to `docs/requirements.txt`, which is what Read the Docs installs (see below).
 
 ```bash
 conda activate providentia-env_v[version]
@@ -352,22 +352,27 @@ version: 2
 build:
   os: ubuntu-24.04
   tools:
-    python: "mambaforge-latest"
+    python: "3.11"
 
 # Build documentation in the "docs/" directory with Sphinx
 sphinx:
    configuration: docs/source/conf.py
 
-# Create environment
-conda:
-  environment: environment.yaml
+# Install only what Sphinx needs; Providentia's own packages are mocked in conf.py
+python:
+  install:
+    - requirements: docs/requirements.txt
 ```
+
+Read the Docs creates a plain Python virtual environment, installs `docs/requirements.txt` in it and runs Sphinx on `docs/source`. It does not create Providentia's whole conda environment: that took so long that builds were cancelled. `docs/requirements.txt` only has Sphinx, its extensions, and matplotlib and numpy, which are needed because `plot_formatting.py` sets the fonts of matplotlib when it is imported. Every other package that Providentia imports is mocked with `autodoc_mock_imports` in `docs/source/conf.py`, so that the [Reference](Reference.rst) page can still import `providentia.library` and show its docstrings.
 
 Trigger a build from your latest commit containing this file and you should be ready to go.
 
 ## Generate the docs
 
-Edit the files under `docs/source`, then navigate to docs and simply run:
+Edit the files under `docs/source`, commit them and push. Read the Docs builds the documentation from `docs/source` on every push, so there is nothing else to do: the pages at https://providentia.readthedocs.io/en/latest/ are updated once the build of the `latest` version has passed, which you can follow at https://readthedocs.org/projects/providentia/builds/. Only what reaches `master` is published there.
+
+To see the pages before pushing, build them locally:
 
 ```bash
 conda activate providentia-env_v4.0.0
@@ -376,7 +381,9 @@ make clean
 make html
 ```
 
-Do not edit anything under `docs/build` as it gets deleted everytime you run `make clean`.
+and open `docs/build/html/index.html` in your browser. `docs/build` is only for this: it is not committed (it is in `.gitignore`) and Read the Docs does not use it. Do not edit anything under `docs/build`, as it gets deleted every time you run `make clean`.
+
+If you add a new package to Providentia and import it at the top of a module used by `providentia.library`, add it to `autodoc_mock_imports` in `docs/source/conf.py`. Otherwise the [Reference](Reference.rst) page comes out empty on Read the Docs, and the build only shows a warning such as `autodoc: failed to import module 'library'`.
 
 ## Create conda environments
 
