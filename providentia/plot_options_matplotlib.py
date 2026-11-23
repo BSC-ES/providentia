@@ -1,4 +1,4 @@
-""" Functions for applying plot options (annotate, log, etc.) """
+""" Functions for applying plot options (annotate, log, etc.) to matplotlib axes """
 
 from matplotlib.offsetbox import AnchoredOffsetbox, TextArea, VPacker
 import numpy as np
@@ -24,19 +24,11 @@ def log_axes(relevant_axis, log_ax, plot_characteristics, undo=False):
         If True, sets the axis scale back to linear. Default is False.
     """
 
-    if not undo:
-        if log_ax == "logx":
-            relevant_axis.set_xscale("log")
-
-        if log_ax == "logy":
-            relevant_axis.set_yscale("log")
-
-    else:
-        if log_ax == "logx":
-            relevant_axis.set_xscale("linear")
-
-        if log_ax == "logy":
-            relevant_axis.set_yscale("linear")
+    axis_scale = "linear" if undo else "log"
+    if log_ax == "logx":
+        relevant_axis.set_xscale(axis_scale)
+    if log_ax == "logy":
+        relevant_axis.set_yscale(axis_scale)
 
 
 def linear_regression(

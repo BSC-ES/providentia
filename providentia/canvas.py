@@ -72,7 +72,7 @@ from .plot_formatting import (
     remove_map_features,
     draw_map_gridlines,
 )
-from .plot_options import annotation, linear_regression, log_axes, smooth, threshold
+from .plot_options_matplotlib import annotation, linear_regression, log_axes, smooth, threshold
 from .read_aux import (
     get_possible_resampling_resolutions, get_frequency_code, get_grid_title, get_map_lead_days,
     is_gridded_model_forecast
@@ -8438,9 +8438,22 @@ class Canvas(FigureCanvas):
             Temporal resolution
         """
 
+        # networks and species that the plot shows (one networkspeci, or those ticked in a
+        # multispecies plot), each written once, joined with "_"; "/" (e.g. eea/eionet)
+        # becomes "_", as it would otherwise be read as a folder
+        networkspecies = self.get_plot_networkspeci(plot_type)
+        if isinstance(networkspecies, str):
+            networkspecies = [networkspecies]
+        networks = "_".join(
+            dict.fromkeys(networkspeci.split("|")[0] for networkspeci in networkspecies)
+        ).replace("/", "_")
+        species = "_".join(
+            dict.fromkeys(networkspeci.split("|")[1] for networkspeci in networkspecies)
+        )
+
         default_filename = "{0}-{1}-{2}-{3}-{4}-{5}-{6}.png".format(
-            str(self.read_instance.network),
-            str(self.read_instance.species),
+            networks,
+            species,
             self.read_instance.resolution,
             self.read_instance.start_date,
             self.read_instance.end_date,
@@ -8564,12 +8577,15 @@ class Canvas(FigureCanvas):
                         figure_path, bbox_inches=extent.expanded(expand_x, expand_y)
                     )
         elif isinstance(self.plot_axes[plot_type], list):
-            # a plain list of axes (e.g. fairmode-statsummary) - union their extents
+            # a plain list of axes (e.g. fairmode-statsummary) - union their extents,
+            # with everything each axis draws (row titles, tick labels), as the row titles
+            # are to the left of the axes and a stretched plot area cut them
             from matplotlib.transforms import Bbox
 
+            renderer = self.figure.canvas.get_renderer()
             extent = Bbox.union(
                 [
-                    sub_ax.get_window_extent().transformed(
+                    sub_ax.get_tightbbox(renderer).transformed(
                         self.figure.dpi_scale_trans.inverted()
                     )
                     for sub_ax in self.plot_axes[plot_type]
@@ -8581,9 +8597,7 @@ class Canvas(FigureCanvas):
 
             # save figure
             if figure_path is not None:
-                self.figure.savefig(
-                    figure_path, bbox_inches=extent.expanded(expand_x, expand_y)
-                )
+                self.figure.savefig(figure_path, bbox_inches=extent.padded(0.1))
         else:
             extent = (
                 self.plot_axes[plot_type]

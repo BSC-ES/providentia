@@ -9,6 +9,7 @@ import yaml
 
 from providentia.auxiliar import PROVIDENTIA_ROOT, join, get_map_colours
 from .plot_aux import get_land_polygon_resolution
+from .plot_options_plotly import format_plot_options
 from .plotting import Plotting
 from .statistics import generate_colourbar_detail
 
@@ -99,9 +100,10 @@ class PlottingPlotly(Plotting):
         chunk_resolution=None,
     ):
         """
-        Sets the title and the axis titles of a library plot. The other arguments are those
-        that the matplotlib class needs to format its axes and add its legend and colourbar,
-        which plotly figures do not have or draw themselves.
+        Sets the title and the axis titles of a library plot, and applies its plot options
+        (see plot_options_plotly.py). The other arguments are those that the matplotlib class
+        needs to format its axes and add its legend and colourbar, which plotly figures do not
+        have or draw themselves.
 
         Parameters
         ----------
@@ -174,6 +176,9 @@ class PlottingPlotly(Plotting):
                 title_text=ylabel,
                 title_font_size=plot_characteristics["ylabel"]["fontsize"],
             )
+
+        # apply the plot options (log axes, ...)
+        format_plot_options(fig, plot_options)
 
     def make_map(
         self,
