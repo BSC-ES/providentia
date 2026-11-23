@@ -58,3 +58,14 @@ html_css_files = [
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
 sys.path.insert(0, os.path.abspath("../.."))
+
+# Providentia's packages are not installed on Read the Docs (see docs/requirements.txt),
+# so autodoc (Reference.rst) imports providentia.library with them mocked; matplotlib,
+# numpy, pillow and dateutil are installed instead, as plot_formatting.py sets the fonts
+# of matplotlib when it is imported
+autodoc_mock_imports = [
+    "bs4", "cartopy", "cdsapi", "cftime", "configargparse", "dotenv",
+    "ines_providentia", "netCDF4", "pandas", "paramiko", "plotly", "psutil",
+    "pycountry", "pypdf", "pyproj", "PyQt5", "scipy", "seaborn", "shapely", "tqdm",
+    "xarray", "xskillscore", "yaml",
+]

@@ -777,6 +777,8 @@
           "plot_options":
             ["annotate", "bias", "hidedata", "logy", "smooth", "threshold"],
           "axis_title": { "fontsize": 12 },
+          "xlabel": { "fontsize": 12 },
+          "ylabel": { "fontsize": 12 },
           "margin": { "l": 45, "r": 10, "b": 35, "t": 30 },
         },
       "tests":
@@ -1305,6 +1307,15 @@
             "height_ratios": [5, 1], 
             "hspace": 0.25
           }
+        },
+      "website":
+        {
+          "plot_options": ["annotate", "bias", "logx", "logy", "threshold"],
+          "axis_title": { "fontsize": 12 },
+          "xlabel": { "fontsize": 12 },
+          "ylabel": { "fontsize": 12 },
+          "plot": { "linewidth": 2 },
+          "margin": { "l": 45, "r": 10, "b": 35, "t": 30 },
         },
       "tests":
         {

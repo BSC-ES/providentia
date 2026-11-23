@@ -1,0 +1,9 @@
+# Packages to build the docs (Read the Docs, see .readthedocs.yaml): only Sphinx and its
+# extensions, at the versions of requirements.txt. Providentia's own packages are mocked in
+# docs/source/conf.py (autodoc_mock_imports)
+Sphinx==8.2.3
+sphinx-rtd-theme==3.0.2
+myst-parser==4.0.1
+# real, not mocked: plot_formatting.py sets matplotlib's fonts when it is imported
+matplotlib==3.10.7
+numpy==2.3.5

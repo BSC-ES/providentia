@@ -20,7 +20,7 @@ from PIL import Image
 from providentia.auxiliar import CURRENT_PATH, join, get_map_colours
 from .plot_aux import get_land_polygon_resolution, set_map_extent
 from .read_aux import get_periodic_relevant_temporal_resolutions
-from .plot_options import (
+from .plot_options_matplotlib import (
     annotation,
     model_domain,
     linear_regression,

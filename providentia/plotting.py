@@ -2096,8 +2096,7 @@ class Plotting:
                 )
 
                 # calculate PDF for data label
-                period_x_grid, PDFs_sampled = self.make_distribution(
-                    relevant_axis,
+                period_x_grid, PDFs_sampled = self.get_distribution_data(
                     networkspeci,
                     data_labels,
                     plot_characteristics,
@@ -2477,9 +2476,8 @@ class Plotting:
 
         return label_data
 
-    def _make_distribution_station_statistic(
+    def _get_distribution_station_statistic_data(
         self,
-        relevant_axis,
         networkspeci,
         cut_data_labels,
         plot_characteristics,
@@ -2489,15 +2487,13 @@ class Plotting:
         data_range_max=None,
     ):
         """
-        "Station statistic" mode for make_distribution() - plots the KDE of
+        "Station statistic" mode for get_distribution_data() - gets the KDE of
         a statistic's own per-station value across the current selection,
         one curve per data label, in place of the KDE of the raw values
         (see _station_statistic_label_data()).
 
         Parameters
         ----------
-        relevant_axis : object
-            Axis to plot on.
         networkspeci : str
             Current networkspeci (e.g. EBAS|sconco3).
         cut_data_labels : list
@@ -2514,6 +2510,12 @@ class Plotting:
             Range to calculate the distribution over, given by a report so
             that its subsections share one (see get_station_statistic_range()
             in report.py). Taken from the statistic's own values when not given.
+
+        Returns
+        -------
+        tuple or None
+            (x_grid, PDFs per data label, bias), as get_distribution_data(),
+            or None if the distribution cannot be calculated.
         """
 
         observations_label = self.read_instance.observations_data_label
@@ -2542,7 +2544,7 @@ class Plotting:
         if pooled_data.size == 0:
             msg = "The distribution kernel density cannot be calculated because there are no valid values."
             show_message(self.read_instance, msg)
-            return
+            return None
 
         if (data_range_min is None) or (data_range_max is None):
             data_range_min = float(np.nanmin(pooled_data))
@@ -2556,7 +2558,7 @@ class Plotting:
             else:
                 msg = "The distribution kernel density cannot be calculated because all values are equal."
             show_message(self.read_instance, msg)
-            return
+            return None
 
         # pad the grid so a model's kernel near the pooled min/max isn't clipped
         pad = 0.05 * (data_range_max - data_range_min)
@@ -2564,29 +2566,27 @@ class Plotting:
         data_range_max += pad
 
         # no natural reporting resolution to size the grid against for a
-        # statistic's own values (unlike the raw data - see make_distribution()),
+        # statistic's own values (unlike the raw data - see get_distribution_data()),
         # so the minimum sample count is used as it stands
         n_samples = plot_characteristics["pdf_min_samples"]
         n_samples = 2 ** np.ceil(np.log2(n_samples))
         x_grid = np.linspace(data_range_min, data_range_max, int(n_samples))
 
+        PDFs_sampled = {}
+
         if bias:
-            bias_line = [relevant_axis.axhline(**plot_characteristics["bias_line"])]
-            if self.read_instance.mode not in ["report"]:
-                self.track_plot_elements(
-                    "ALL", "distribution", "bias_line", bias_line, bias=bias
-                )
             obs_data = label_data.get(
                 observations_label, np.array([], dtype=np.float32)
             )
             if (obs_data.size == 0) or np.all(obs_data == obs_data[0]):
                 msg = "The distribution kernel density bias cannot be calculated because there are no valid observational values."
                 show_message(self.read_instance, msg)
-                return
+                # the bias line is still drawn
+                return x_grid, PDFs_sampled, bias
             PDF_obs_sampled = kde_fft(obs_data, xgrid=x_grid)
             if isinstance(PDF_obs_sampled, str):
                 show_message(self.read_instance, PDF_obs_sampled)
-                return
+                return x_grid, PDFs_sampled, bias
             if observations_label in cut_data_labels:
                 cut_data_labels = [
                     dl for dl in cut_data_labels if dl != observations_label
@@ -2622,25 +2622,12 @@ class Plotting:
             if bias:
                 PDF_sampled = PDF_sampled - PDF_obs_sampled
 
-            self.distribution_plot = relevant_axis.plot(
-                x_grid,
-                PDF_sampled,
-                color=self.read_instance.plotting_params[data_label]["colour"],
-                **plot_characteristics["plot"],
-            )
+            PDFs_sampled[data_label] = PDF_sampled
 
-            if self.read_instance.mode not in ["report"]:
-                self.track_plot_elements(
-                    data_label,
-                    "distribution",
-                    "plot",
-                    self.distribution_plot,
-                    bias=bias,
-                )
+        return x_grid, PDFs_sampled, bias
 
-    def make_distribution(
+    def get_distribution_data(
         self,
-        relevant_axis,
         networkspeci,
         data_labels,
         plot_characteristics,
@@ -2652,12 +2639,11 @@ class Plotting:
         station_statistic_range=None,
     ):
         """
-        Computes and renders probability density functions using Fast Fourier Transform-based Kernel Density Estimation.
+        Computes probability density functions using Fast Fourier Transform-based Kernel Density Estimation.
+        The drawing is done by make_distribution in each plotting class (PlottingMatplotlib, PlottingPlotly).
 
         Parameters
         ----------
-        relevant_axis : object
-            Axis to plot on.
         networkspeci : str
             Current networkspeci (e.g. EBAS|sconco3).
         data_labels : list
@@ -2685,10 +2671,19 @@ class Plotting:
 
         Returns
         -------
+        Without violin_resolution, None if the plot is not made, otherwise:
+        x_grid : np.ndarray
+            The grid of x-values the PDFs are calculated on.
+        PDFs_sampled : dict
+            The sampled PDF per data label (model minus observations if bias), empty if none could be calculated.
+        bias : bool
+            Indicates if the PDFs are biases, so a bias line is drawn.
+
+        With violin_resolution:
         period_x_grid : list
-            The grid of x-values used for periodic distribution calculations (only if violin_resolution is set).
+            The grid of x-values used for periodic distribution calculations.
         PDFs_sampled : np.ndarray
-            The sampled PDF values for each data label and period (only if violin_resolution is set).
+            The sampled PDF values for each data label and period.
         """
 
         # determine if 'bias' in plot_options
@@ -2721,10 +2716,9 @@ class Plotting:
                 "distribution", plot_characteristics, station_statistic, networkspeci
             )
             if station_statistic_action == "skip":
-                return
+                return None
             if station_statistic_action == "statistic":
-                self._make_distribution_station_statistic(
-                    relevant_axis,
+                return self._get_distribution_station_statistic_data(
                     networkspeci,
                     cut_data_labels,
                     plot_characteristics,
@@ -2739,7 +2733,6 @@ class Plotting:
                         station_statistic_range[1] if station_statistic_range else None
                     ),
                 )
-                return
             # too few stations selected for the dashboard, which has been
             # reset to "None" above - fall through to the raw-value
             # distribution below
@@ -2785,20 +2778,15 @@ class Plotting:
         # set x_grid
         x_grid = np.linspace(data_range_min, data_range_max, int(n_samples))
 
-        # plot horizontal line across x axis at 0 if bias plot
-        # also remove observations from cut_data_labels
+        # remove observations from cut_data_labels if bias plot
         if bias:
-            bias_line = [relevant_axis.axhline(**plot_characteristics["bias_line"])]
-            # track plot elements
-            if self.read_instance.mode not in ["report"]:
-                self.track_plot_elements(
-                    "ALL", "distribution", "bias_line", bias_line, bias=bias
-                )
             if self.read_instance.observations_data_label in cut_data_labels:
                 cut_data_labels.remove(self.read_instance.observations_data_label)
 
-        # if violin plot setup arrays for saving data
-        if violin_resolution is not None:
+        # setup PDFs to return, an array if violin plot
+        if violin_resolution is None:
+            PDFs_sampled = {}
+        else:
             PDFs_sampled = np.full(
                 (
                     len(cut_data_labels),
@@ -2833,14 +2821,15 @@ class Plotting:
                     # kde_data_obs = kde_data_obs[(kde_data_obs > data_range_min) & (kde_data_obs < data_range_max)]
 
                     # check if all values are equal in the dataframe
+                    # (the bias line is still drawn)
                     if kde_data_obs.size == 0:
                         msg = "The distribution kernel density cannot be calculated because there are no valid observational values."
                         show_message(self.read_instance, msg)
-                        return
+                        return x_grid, PDFs_sampled, bias
                     elif np.all(kde_data_obs == kde_data_obs[0]):
                         msg = "The distribution kernel density cannot be calculated because all observational values are equal."
                         show_message(self.read_instance, msg)
-                        return
+                        return x_grid, PDFs_sampled, bias
                     else:
                         PDF_obs_sampled = kde_fft(
                             kde_data_obs, xgrid=x_grid, min_bandwidth=min_bandwidth
@@ -2982,29 +2971,15 @@ class Plotting:
                         else:
                             PDF_sampled_calculated = True
 
-            # make plot (if not making PDF for violin plot)
+            # save PDF (if not making PDF for violin plot)
             if PDF_sampled_calculated:
-                # make plot
-                self.distribution_plot = relevant_axis.plot(
-                    x_grid,
-                    PDF_sampled,
-                    color=self.read_instance.plotting_params[data_label]["colour"],
-                    **plot_characteristics["plot"],
-                )
-
-                # track plot elements
-                if self.read_instance.mode not in ["report"]:
-                    self.track_plot_elements(
-                        data_label,
-                        "distribution",
-                        "plot",
-                        self.distribution_plot,
-                        bias=bias,
-                    )
+                PDFs_sampled[data_label] = PDF_sampled
 
         # if have made PDFs for violin plot then return it
         if violin_resolution is not None:
             return period_x_grid, PDFs_sampled
+
+        return x_grid, PDFs_sampled, bias
 
     def get_histogram_bin_edges(
         self,
@@ -3307,7 +3282,7 @@ class Plotting:
                 return None
 
         # the resolution the species is reported to, used to square the bins up
-        # with the values that can actually be reported - see make_distribution(),
+        # with the values that can actually be reported - see get_distribution_data(),
         # which floors its bandwidth against the same number. Not meaningful
         # for a statistic's own values, which are not reported at that
         # resolution themselves
@@ -3414,7 +3389,7 @@ class Plotting:
                 continue
 
             # one value has no spread across stations to show, as it does not
-            # on the distribution (see _make_distribution_station_statistic())
+            # on the distribution (see _get_distribution_station_statistic_data())
             if station_statistic_active and (data.size == 1):
                 msg = (
                     "The histogram cannot be made for {} because only one station "
