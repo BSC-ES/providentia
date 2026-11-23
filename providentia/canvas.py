@@ -55,7 +55,7 @@ from .dashboard_interactivity import (
 )
 from .fields_menus import update_metadata_fields
 from .filter import DataFilter
-from .plotting_pyqt import PlottingPyQt
+from .plotting_matplotlib import PlottingMatplotlib
 from .plot_aux import (
     get_map_extent,
     get_map_marker_size,
@@ -220,51 +220,20 @@ class Canvas(FigureCanvas):
         self.map_grid_title = ""
 
         # initialise Plotting class
-        self.plotting = PlottingPyQt(read_instance=self.read_instance, canvas_instance=self)
+        self.plotting = PlottingMatplotlib(read_instance=self.read_instance, canvas_instance=self)
 
         # setup gridding of canvas
         self.gridspec = gridspec.GridSpec(self.gridspec_nrows, self.gridspec_ncols)
         self.gridspec.update(**self.gridspec_format)
 
-        # define all possible plots
-        self.all_plots = [
-            "legend",
-            "map",
-            "timeseries",
-            "periodic-violin",
-            "periodic",
-            "metadata",
-            "distribution",
-            "histogram",
-            "scatter",
-            "statsummary",
-            "boxplot",
-            "taylor",
-            "fairmode-target",
-            "fairmode-statsummary",
-            "contingencytable",
-            "heatmap",
-            "table"
-        ]
+        # define all possible plots (settings/available_inputs.yaml), and the legend, which is
+        # not a plot but has its plot characteristics
+        self.all_plots = ["legend"] + list(self.read_instance.available_matplotlib_plots)
 
-        # define all possible plots in layout options
-        self.layout_options = [
-            "None",
-            "boxplot",
-            "distribution",
-            "histogram",
-            "metadata",
-            "periodic",
-            "periodic-violin",
-            "scatter",
-            "statsummary",
-            "timeseries",
-            "taylor",
-            "fairmode-target",
-            "fairmode-statsummary",
-            "contingencytable",
-            "heatmap",
-            "table"
+        # define all possible plots in layout options: the map always has position 1, so it
+        # cannot be chosen for the other positions
+        self.layout_options = ["None"] + [
+            plot for plot in self.read_instance.available_matplotlib_plots if plot != "map"
         ]
 
         # a dashboard_plots entry can carry a "_option" and/or "-stat" suffix
@@ -311,7 +280,7 @@ class Canvas(FigureCanvas):
         for plot_type in self.read_instance.dashboard_plots:
             if plot_type not in self.all_plots + ["None"]:
                 error = "Error: Plot type {0} is not an option. ".format(plot_type)
-                error += "The available plots are: {0}.".format(self.all_plots[2:])
+                error += "The available plots are: {0}.".format(self.layout_options[1:])
                 self.read_instance.logger.error(error)
                 sys.exit(1)
 

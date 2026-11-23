@@ -14,12 +14,12 @@ from .statistics import generate_colourbar_detail
 
 
 
-class PlottingDash(Plotting):
+class PlottingPlotly(Plotting):
     """Class for plotting with plotly: Plotly Dash (web-based) and library"""
 
     def __init__(self, read_instance=None, canvas_instance=None):
         """
-        Initialise the PlottingDash instance.
+        Initialise the PlottingPlotly instance.
 
         Parameters
         ----------
@@ -29,7 +29,7 @@ class PlottingDash(Plotting):
             The instance that holds the plot characteristics and the selected data.
         """
 
-        super(PlottingDash, self).__init__(
+        super(PlottingPlotly, self).__init__(
             read_instance=read_instance, canvas_instance=canvas_instance
         )
 

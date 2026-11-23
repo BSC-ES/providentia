@@ -54,11 +54,7 @@ report_plots_presets = yaml.safe_load(
 # valid base plot types, checked against a single "dashboard_plots" entry
 # before treating it as a preset name above - a real plot type wins as
 # itself even if a preset happens to share its name (see resolve_plots_or_preset())
-known_plot_types = set(
-    yaml.safe_load(
-        open(join(PROVIDENTIA_ROOT, "settings", "plot_characteristics.yaml"))
-    ).keys()
-)
+known_plot_types = set(available_inputs["available_matplotlib_plots"])
 actris_standard_metadata = yaml.safe_load(
     open(
         join(

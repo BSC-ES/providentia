@@ -18,7 +18,7 @@ from .plotting import Plotting, fairmode_settings
 from .warnings_prv import show_message
 
 
-class PlottingPyQt(Plotting):
+class PlottingMatplotlib(Plotting):
     """Class for plotting with matplotlib: PyQt dashboard (desktop app), report and library"""
 
     def create_figure(
