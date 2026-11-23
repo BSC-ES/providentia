@@ -224,8 +224,9 @@ class Plotting:
                 base_plot_type = plot_type.split("-")[0]
             else:
                 base_plot_type = plot_type.split("_")[0]
-            # the legend is not a plot, but has its plot characteristics
-            if base_plot_type not in self.available_plot_types() + ["legend"]:
+            # sections that are not plots (legend, header, doi) also have their plot
+            # characteristics; which plots can be asked for is in available_plot_types()
+            if base_plot_type not in self.canvas_instance.plot_characteristics_templates:
                 self._exit_unavailable_plot_type(plot_type, base_plot_type)
 
             # check if plot type is correct for report and library modes

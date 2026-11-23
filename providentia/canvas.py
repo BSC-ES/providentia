@@ -236,45 +236,13 @@ class Canvas(FigureCanvas):
             plot for plot in self.read_instance.available_matplotlib_plots if plot != "map"
         ]
 
-        # a dashboard_plots entry can carry a "_option" and/or "-stat" suffix
-        # (e.g. "taylor_perstation", "distribution-r") - split off here; the
-        # "-stat" is applied later, from _apply_pending_dashboard_plot_stats(),
-        # once a real data read says what stats are actually available
-        self.dashboard_plots_initial_options = {}
-        self._dashboard_plots_pending_stat = {}
+        # options and stats of the dashboard_plots entries, split off by the
+        # configuration; the "-stat" is applied later, from
+        # _apply_pending_dashboard_plot_stats(), once a real data read says what
+        # stats are actually available
         self._dashboard_plots_pending_stat_applied = False
-        parsed_dashboard_plots = []
-        for plot_type_entry in self.read_instance.dashboard_plots:
-            if plot_type_entry == "None":
-                parsed_dashboard_plots.append(plot_type_entry)
-                continue
-
-            plot_options = plot_type_entry.split("_")[1:]
-            (
-                zstat,
-                base_zstat,
-                z_statistic_type,
-                z_statistic_sign,
-                z_statistic_period,
-            ) = get_z_statistic_info(plot_type_entry)
-            base_plot_type = (
-                plot_type_entry.split("-")[0] if zstat else plot_type_entry.split("_")[0]
-            )
-
-            # a plot type can only be shown in one position, as it can be
-            # when picked from a position's own menu (see
-            # handle_layout_update()) - the first of any repeats is kept and
-            # the rest are left empty, taking their options/stat with them
-            if base_plot_type in parsed_dashboard_plots:
-                parsed_dashboard_plots.append("None")
-                continue
-
-            parsed_dashboard_plots.append(base_plot_type)
-            if plot_options:
-                self.dashboard_plots_initial_options[base_plot_type] = plot_options
-            if zstat:
-                self._dashboard_plots_pending_stat[base_plot_type] = base_zstat
-        self.read_instance.dashboard_plots = parsed_dashboard_plots
+        self.dashboard_plots_initial_options = self.read_instance.dashboard_plots_options
+        self._dashboard_plots_pending_stat = self.read_instance.dashboard_plots_stats
 
         # stop running if plot type in dashboard_plots does not exist
         for plot_type in self.read_instance.dashboard_plots:

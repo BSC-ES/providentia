@@ -22,6 +22,7 @@ from providentia.auxiliar import (
     resolve_plots_or_preset,
 )
 from providentia.read_aux import apply_ghost_version_fields, check_for_ghost, get_default_qa
+from providentia.statistics import get_z_statistic_info
 from providentia.warnings_prv import show_message
 
 # get current path and providentia root path
@@ -1750,7 +1751,30 @@ class ProvConfiguration:
                     plot for plot in dashboard_plots if plot.split("-")[0] != "map"
                 ][:4]
                 dashboard_plots += ["None"] * (4 - len(dashboard_plots))
-                setattr(self.read_instance, field, dashboard_plots)
+
+                # an entry can carry a "_option" and/or "-stat" suffix (e.g. "taylor_perstation",
+                # "distribution-r"), split off here; the dashboard applies the "-stat" once a real
+                # data read says what stats are available. A plot type can only be shown in one
+                # position, so the first of any repeats is kept and the rest are left empty
+                plots = []
+                self.read_instance.dashboard_plots_options = {}
+                self.read_instance.dashboard_plots_stats = {}
+                for entry in dashboard_plots:
+                    if entry == "None":
+                        plots.append(entry)
+                        continue
+                    plot_options = entry.split("_")[1:]
+                    zstat, base_zstat, _, _, _ = get_z_statistic_info(entry)
+                    base_plot_type = entry.split("-")[0] if zstat else entry.split("_")[0]
+                    if base_plot_type in plots:
+                        plots.append("None")
+                        continue
+                    plots.append(base_plot_type)
+                    if plot_options:
+                        self.read_instance.dashboard_plots_options[base_plot_type] = plot_options
+                    if zstat:
+                        self.read_instance.dashboard_plots_stats[base_plot_type] = base_zstat
+                setattr(self.read_instance, field, plots)
 
             # same as above, for report mode
             elif (field == "report_plots") and (current_value in [[], "", None]):
