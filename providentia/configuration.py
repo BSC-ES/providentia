@@ -1805,6 +1805,31 @@ class ProvConfiguration:
             ]:
                 setattr(self.read_instance, field, default)
 
+            # statistic each plot starts with: a basic or model bias statistic, otherwise
+            # the first basic statistic, with a warning
+            elif field == "dashboard_plots_default_stats":
+                valid_stats = list(self.read_instance.basic_stats) + list(
+                    self.read_instance.modbias_stats
+                )
+                first_basic_stat = list(self.read_instance.basic_stats)[0]
+                default_stats = {}
+                for plot_type, stat in default.items():
+                    if stat in valid_stats:
+                        default_stats[plot_type] = stat
+                    else:
+                        msg = (
+                            f"'{stat}' is not a basic or model bias statistic, so '{plot_type}' "
+                            f"starts on '{first_basic_stat}' (dashboard_plots_default_stats)."
+                        )
+                        show_message(
+                            self.read_instance,
+                            msg,
+                            from_conf=self.read_instance.from_conf,
+                            deactivate=deactivate_warning,
+                        )
+                        default_stats[plot_type] = first_basic_stat
+                setattr(self.read_instance, field, default_stats)
+
         # map to multiple species if have * wildcard
         # also duplicate out associated network
         # remove any species for which there exists no data
