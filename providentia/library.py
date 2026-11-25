@@ -489,6 +489,42 @@ class Providentia:
         else:
             self.initialised = False
 
+    def set_temporal_colocation(self, temporal_colocation):
+        """
+        Activate or deactivate temporal colocation, as the Temporal checkbox of the
+        dashboard: the metadata fields are updated with it, and the selected data when
+        colocation changes it, without filtering again.
+
+        Parameters
+        ----------
+        temporal_colocation : bool
+            Whether observations and models are temporally colocated
+        """
+
+        if (not self.have_valid_config()) or (not self.loaded_data()):
+            return
+
+        self.temporal_colocation = temporal_colocation
+
+        if temporal_colocation and any(
+            data_label_raw.endswith("::gridded") for data_label_raw in self.data_labels_raw
+        ):
+            show_message(self, "Temporal colocation is not applied to gridded data.")
+
+        # the valid stations of the metadata fields depend on temporal colocation
+        if self.station_cap:
+            update_metadata_fields(self, cap=True)
+        else:
+            update_metadata_fields(self)
+
+        # the filter computes the colocation of every station whatever this value, so only
+        # the selected data needs to be computed again, and only when there are
+        # observations and models to colocate
+        if len(self.data_labels) >= 2:
+            get_selected_station_data(
+                read_instance=self, canvas_instance=self, networkspecies=self.networkspecies
+            )
+
     def plot(
         self,
         plot,

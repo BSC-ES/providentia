@@ -200,6 +200,16 @@ provi.filter_station(station)
 
 where `station` corresponds to the `station_reference` of one station of interest or can be a list of multiple stations given their `station_reference` values. This will then subsequently mean the data in memory is filtered for the relevant station or stations.
 
+### Library: Temporal colocation
+
+Temporal colocation can be activated or deactivated after the data has been read, as with the Temporal checkbox of the dashboard, through the following method:
+
+```
+provi.set_temporal_colocation(True)
+```
+
+The metadata fields and the data selected for plotting are updated with it, without reading or filtering the data again. Colocation only changes the data when observations and at least one model are read; with gridded models it is not applied. Setting `provi.temporal_colocation` directly does not update the data selected for plotting, so use this method instead.
+
 ### Library: Print active configuration file
 
 If wanting to visually print the configuration file that is currently active this can be done by:
