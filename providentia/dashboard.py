@@ -275,7 +275,7 @@ class Dashboard(QtWidgets.QWidget):
             )
         plot_characteristics = yaml.safe_load(open(self.plot_characteristics_filename))
         self.plot_characteristics_templates = expand_plot_characteristics(
-            plot_characteristics, "dashboard"
+            plot_characteristics, "dashboard", engine="matplotlib"
         )
 
         # arguments are only local

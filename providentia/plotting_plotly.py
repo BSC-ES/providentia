@@ -153,9 +153,7 @@ class PlottingPlotly(Plotting):
 
         plot_characteristics = self.canvas_instance.plot_characteristics[plot_type]
 
-        # plotly figures have no matplotlib axes, so the title is set on the figure layout:
-        # small and close to the plot, and centred over the plot as in matplotlib, not at the
-        # left of the figure
+        # plotly figures have no matplotlib axes, so the title is set on the figure layout
         if title:
             fig.update_layout(
                 title_text=title.replace("\n", "<br>"),
@@ -165,7 +163,7 @@ class PlottingPlotly(Plotting):
                 title_xref="paper",
             )
 
-        # axis titles, with the font sizes of the website block
+        # axis titles
         if xlabel:
             fig.update_xaxes(
                 title_text=xlabel,
@@ -494,7 +492,7 @@ class PlottingPlotly(Plotting):
                 layout[axis]["range"] = [low - margin, high + margin]
 
         # horizontal colourbar under the map, with the limits, colourmap and label that the
-        # statistic has in the other backends
+        # statistic has in the other engines
         plotted_values = np.concatenate(plotted_values) if plotted_values else np.array([np.nan])
         if np.isfinite(plotted_values).any():
             z_vmin, z_vmax, z_label, z_colourmap, n_discrete, n_ticks = generate_colourbar_detail(

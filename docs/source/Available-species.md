@@ -25,7 +25,7 @@ Depending on the version specified in `ghost_version` in the [configuration file
 
 ## Check Available Species
 
-For each GHOST version, the species of its standards are listed below on this page. A link to the corresponding `GHOST_standards.py` file used by Providentia is also provided for additional context on the GHOST standards used. A species of the reference that is not in the standards of the selected version has no GHOST data, but can be read from other data.
+For each GHOST version, the species of its standards are listed below on this page. A link to the corresponding `GHOST_standards.py` file used by Providentia is also provided for additional context on the GHOST standards used. A species of the reference that is not in the standards of the selected version has no GHOST data, but can be read from other data. In library and report modes, such a species is removed from the selection of GHOST networks with a warning, and the run stops if no species is left; the dashboard says so on READ.
 
 (ghost-1-2)=
 ### GHOST 1.2

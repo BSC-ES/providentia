@@ -75,7 +75,7 @@ except NameError:
 class Providentia:
     """Class for Providentia Library mode"""
 
-    def __init__(self, config="", backend="matplotlib", **kwargs):
+    def __init__(self, config="", engine="matplotlib", **kwargs):
         """
         Initialize the library mode environment
 
@@ -84,7 +84,7 @@ class Providentia:
         config : str, optional
             Path to the configuration file. If not given, the configuration is
             taken from the passed arguments and the defaults.
-        backend : str, optional
+        engine : str, optional
             Library that draws the plots, 'matplotlib' (default) or 'plotly'.
         **kwargs : dict
             Optional command-line arguments that override default configuration values.
@@ -125,11 +125,12 @@ class Providentia:
         # initialise DataReader class
         self.datareader = DataReader(self)
 
+        # library that draws the plots, matplotlib or plotly
+        self.engine = engine
+
         # check for self defined plot characteristics file
-        # the plot characteristics of plotly figures are those of the website
-        if backend == "plotly":
-            mode = "website"
-        elif self.tests:
+        # plot characteristics of the tests, or of the library, with the block of the engine
+        if self.tests:
             mode = "tests"
         else:
             mode = "library"
@@ -139,18 +140,17 @@ class Providentia:
             )
         plot_characteristics = yaml.safe_load(open(self.plot_characteristics_filename))
         self.plot_characteristics_templates = expand_plot_characteristics(
-            plot_characteristics, mode
+            plot_characteristics, mode, engine=self.engine
         )
 
-        # initialise Plotting class of the backend (PlottingMatplotlib draws with matplotlib,
+        # initialise Plotting class of the engine (PlottingMatplotlib draws with matplotlib,
         # PlottingPlotly with plotly)
-        self.backend = backend
-        if self.backend == "matplotlib":
+        if self.engine == "matplotlib":
             self.plotting = PlottingMatplotlib(read_instance=self, canvas_instance=self)
-        elif self.backend == "plotly":
+        elif self.engine == "plotly":
             self.plotting = PlottingPlotly(read_instance=self, canvas_instance=self)
         else:
-            self.logger.error(f"Backend {self.backend} is not available")
+            self.logger.error(f"Engine {self.engine} is not available")
             self.valid_config = False
             return
 
@@ -488,6 +488,42 @@ class Providentia:
             self.initialised = True
         else:
             self.initialised = False
+
+    def set_temporal_colocation(self, temporal_colocation):
+        """
+        Activate or deactivate temporal colocation, as the Temporal checkbox of the
+        dashboard: the metadata fields are updated with it, and the selected data when
+        colocation changes it, without filtering again.
+
+        Parameters
+        ----------
+        temporal_colocation : bool
+            Whether observations and models are temporally colocated
+        """
+
+        if (not self.have_valid_config()) or (not self.loaded_data()):
+            return
+
+        self.temporal_colocation = temporal_colocation
+
+        if temporal_colocation and any(
+            data_label_raw.endswith("::gridded") for data_label_raw in self.data_labels_raw
+        ):
+            show_message(self, "Temporal colocation is not applied to gridded data.")
+
+        # the valid stations of the metadata fields depend on temporal colocation
+        if self.station_cap:
+            update_metadata_fields(self, cap=True)
+        else:
+            update_metadata_fields(self)
+
+        # the filter computes the colocation of every station whatever this value, so only
+        # the selected data needs to be computed again, and only when there are
+        # observations and models to colocate
+        if len(self.data_labels) >= 2:
+            get_selected_station_data(
+                read_instance=self, canvas_instance=self, networkspecies=self.networkspecies
+            )
 
     def plot(
         self,
@@ -1036,7 +1072,7 @@ class Providentia:
         if (not map_extent) and (self.map_extent):
             map_extent = copy.deepcopy(self.map_extent)
 
-        # get plotting function, stopping if the backend cannot draw this plot
+        # get plotting function, stopping if the engine cannot draw this plot
         if base_plot_type == "statsummary":
             func_name = "make_table"
         elif base_plot_type in ["fairmode-target", "fairmode-statsummary"]:
@@ -1044,24 +1080,24 @@ class Providentia:
         elif base_plot_type != "legend":
             func_name = "make_{}".format(base_plot_type.split("-")[0])
         
-        # check the backend can draw it (settings/available_inputs.yaml): its plotting class
+        # check the engine can draw it (settings/available_inputs.yaml): its plotting class
         # also has the matplotlib functions it inherits, which do not draw with plotly
         if base_plot_type != "legend":
-            backend_plots = (
+            engine_plots = (
                 self.available_plotly_plots
-                if self.backend == "plotly"
+                if self.engine == "plotly"
                 else self.available_matplotlib_plots
             )
-            if base_plot_type not in backend_plots:
+            if base_plot_type not in engine_plots:
                 self.logger.error(
-                    "Plot type {} is not available with the {} backend".format(
-                        plot_type, self.backend
+                    "Plot type {} is not available with the {} engine".format(
+                        plot_type, self.engine
                     )
                 )
                 return
             func = getattr(self.plotting, func_name)
 
-        # create figure, and axes if the backend has them (main_gs is the matplotlib grid
+        # create figure, and axes if the engine has them (main_gs is the matplotlib grid
         # that has the plot in its first row and room for the legend in the second)
         fig, relevant_ax, main_gs = self.plotting.create_figure(
             plot_type, base_plot_type, networkspeci, width, height, legend
@@ -1136,7 +1172,7 @@ class Providentia:
 
             func(
                 # PlottingPlotly draws on the plotly figure, PlottingMatplotlib on the matplotlib axis
-                fig if self.backend == "plotly" else relevant_ax,
+                fig if self.engine == "plotly" else relevant_ax,
                 networkspeci,
                 self.plot_characteristics[plot_type],
                 plot_options,
@@ -1265,7 +1301,7 @@ class Providentia:
             # make plot
             func(
                 # PlottingPlotly draws on the plotly figure, PlottingMatplotlib on the matplotlib axis
-                fig if self.backend == "plotly" else relevant_ax,
+                fig if self.engine == "plotly" else relevant_ax,
                 networkspeci,
                 relevant_data_labels,
                 self.plot_characteristics[plot_type],
@@ -1361,7 +1397,7 @@ class Providentia:
             # make plot
             func(
                 # PlottingPlotly draws on the plotly figure, PlottingMatplotlib on the matplotlib axis
-                fig if self.backend == "plotly" else relevant_ax,
+                fig if self.engine == "plotly" else relevant_ax,
                 networkspeci,
                 relevant_data_labels,
                 self.plot_characteristics[plot_type],
@@ -1384,7 +1420,7 @@ class Providentia:
         elif base_plot_type == "timeseries":
             func(
                 # PlottingPlotly draws on the plotly figure, PlottingMatplotlib on the matplotlib axis
-                fig if self.backend == "plotly" else relevant_ax,
+                fig if self.engine == "plotly" else relevant_ax,
                 networkspeci,
                 data_labels,
                 self.plot_characteristics[plot_type],
@@ -1410,7 +1446,7 @@ class Providentia:
         elif base_plot_type in ["distribution", "histogram"]:
             func(
                 # PlottingPlotly draws on the plotly figure, PlottingMatplotlib on the matplotlib axis
-                fig if self.backend == "plotly" else relevant_ax,
+                fig if self.engine == "plotly" else relevant_ax,
                 networkspeci,
                 data_labels,
                 self.plot_characteristics[plot_type],
@@ -1616,7 +1652,7 @@ class Providentia:
         if (base_plot_type == "map") and (grid_data is not None):
             legend_data_labels = data_labels
 
-        # set title and, where the backend has axes, format them and add legend and colourbar
+        # set title and, where the engine has axes, format them and add legend and colourbar
         self.plotting.format_figure(
             fig,
             relevant_ax,

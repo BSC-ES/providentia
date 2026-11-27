@@ -40,7 +40,12 @@ dashboard: &dashboard
     - statsummary
     - distribution
     - periodic
-  map_extent: 
+  dashboard_plots_default_stats:
+    map: Mean
+    table: Mean
+    heatmap: Mean
+    periodic: Mean
+  map_extent:
     - -180
     - 180
     - -90

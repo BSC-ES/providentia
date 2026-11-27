@@ -192,7 +192,7 @@ def deep_merge(dict1, dict2):
     return dict1
 
 
-def expand_plot_characteristics(plot_characteristics, mode):
+def expand_plot_characteristics(plot_characteristics, mode, engine=None):
     """
     Get values from active mode and expand generic plot characteristics
 
@@ -202,6 +202,9 @@ def expand_plot_characteristics(plot_characteristics, mode):
         Plot characteristics dictionary
     mode : str
         Active mode
+    engine : str, optional
+        Engine whose block, nested in the mode block ("matplotlib" or "plotly"),
+        is merged over it; the engine blocks are always removed
 
     Returns
     -------
@@ -209,12 +212,21 @@ def expand_plot_characteristics(plot_characteristics, mode):
         Plot characteristics dictionary
     """
 
-    keys_to_remove = ["dashboard", "report", "library", "website", "tests"]
+    keys_to_remove = ["dashboard", "report", "library", "tests"]
     for plot_type in plot_characteristics:
         # get all keys
         plot_type_characteristics = plot_characteristics[plot_type]
         if mode in plot_type_characteristics:
-            for key, value in plot_type_characteristics[mode].items():
+            # the engine block is merged over the mode block before expanding, so that
+            # its scalars and lists replace those of the mode (expanding twice would
+            # join lists without their order and keep the mode's scalars)
+            mode_characteristics = plot_type_characteristics[mode]
+            engine_characteristics = {
+                name: mode_characteristics.pop(name, {})
+                for name in ["matplotlib", "plotly"]
+            }
+            deep_merge(mode_characteristics, engine_characteristics.get(engine, {}))
+            for key, value in mode_characteristics.items():
                 # if it already exists (under general settings), update values
                 if key in plot_type_characteristics.keys():
                     # if it is a dict, merge general dictionary with and mode dictionary

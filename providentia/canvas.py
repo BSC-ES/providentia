@@ -274,10 +274,13 @@ class Canvas(FigureCanvas):
 
         # update plot characteristics for all plots, and initialise plot options per plot type
         for plot_type in self.all_plots:
-            # for plot types with zstat, initialise with default zstat (Mean)
+            # for plot types with zstat, initialise with their default zstat
+            # (dashboard_plots_default_stats in defaults.yaml)
             if plot_type in ["map", "periodic"]:
                 self.plotting.set_plot_characteristics(
-                    [plot_type], zstat="Mean", data_labels=["dummy"]
+                    [plot_type],
+                    zstat=self.read_instance.dashboard_plots_default_stats[plot_type],
+                    data_labels=["dummy"],
                 )
             else:
                 self.plotting.set_plot_characteristics(
@@ -2108,9 +2111,15 @@ class Canvas(FigureCanvas):
 
             # if selected_z_stat and selected_z1_array are empty strings it is
             # because they being initialised for the first time
-            # force them to be observations label and first basic z statistic respectively
+            # force them to be observations label and the default statistic of the map
+            # (dashboard_plots_default_stats in defaults.yaml), or the first basic z statistic
+            # if it is not one
             if selected_z_stat == "":
-                selected_z_stat = self.read_instance.basic_z_stats[0]
+                default_stat = self.read_instance.dashboard_plots_default_stats["map"]
+                if default_stat in self.read_instance.basic_z_stats:
+                    selected_z_stat = default_stat
+                else:
+                    selected_z_stat = self.read_instance.basic_z_stats[0]
             if hasattr(self.read_instance, "map_z"):
                 if self.read_instance.map_z in self.read_instance.basic_z_stats:
                     selected_z_stat = self.read_instance.map_z
@@ -4012,8 +4021,12 @@ class Canvas(FigureCanvas):
 
             # if stat is empty string, it is because fields are being initialised for the first time
             if stat == "":
-                # set periodic stat to be first available stat
-                stat = available_stats[0]
+                # set stat to the default statistic of the plot (dashboard_plots_default_stats
+                # in defaults.yaml), or the first available stat if it is not available
+                default_stat = self.read_instance.dashboard_plots_default_stats.get(
+                    plot_type
+                )
+                stat = default_stat if default_stat in available_stats else available_stats[0]
 
             # update periodic statistic combobox (clear, then add items)
             plot_stat.clear()
