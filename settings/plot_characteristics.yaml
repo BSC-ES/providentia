@@ -195,43 +195,29 @@
       "handles": { "marker": "o", "color": "white" },
       "dashboard":
         {
-          "plot":
-            {
-              "loc": "upper left",
-              "columnspacing": 1,
-              "ncol": 3,
-              "fontsize": 7.5,
-            },
+          "plot": { "ncol": 3, "fontsize": 7.5 },
           "handles": { "markersize": 7.5 },
+          "matplotlib": { "plot": { "loc": "upper left", "columnspacing": 1 } },
         },
       "library":
         {
           "figsize": [8, 1],
-          "subplots_adjust":
-            {
-              "left": 0.0,
-              "right": 1.0,
-              "top": 1.0,
-              "bottom": 0.0,
-              "hspace": 0.0,
-              "wspace": 0.0,
-            },
-          "plot":
-            {
-              "loc": "upper left",
-              "columnspacing": 0.5,
-              "ncol": 4,
-              "fontsize": 18,
-            },
+          "plot": { "ncol": 4, "fontsize": 18 },
           "handles": { "markersize": 18 },
-          "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.25
-          }
-        },
-      "website":
-        {
-          "handles": { "markersize": 18 },
+          "matplotlib":
+            {
+              "subplots_adjust":
+                {
+                  "left": 0.0,
+                  "right": 1.0,
+                  "top": 1.0,
+                  "bottom": 0.0,
+                  "hspace": 0.0,
+                  "wspace": 0.0,
+                },
+              "plot": { "loc": "upper left", "columnspacing": 0.5 },
+              "main_gs": { "height_ratios": [5, 1], "hspace": 0.25 },
+            },
         },
     },
   "metadata":
@@ -326,63 +312,56 @@
       "plot_options": [],
       "dashboard":
         {
-          "var_spacing": 5,
-          "axis_title": { "fontsize": 8.5, "loc": "left" },
+          "axis_title": { "fontsize": 8.5 },
           "xlabel": { "xlabel": "" },
           "ylabel": { "ylabel": "" },
           "plot": { "fontsize": 8.0 },
+          "matplotlib": { "var_spacing": 5, "axis_title": { "loc": "left" } },
         },
       "report":
         {
-          "orientation": "portrait",
-          "figure": { "ncols": 2, "nrows": 2 },
-          "page_title":
-            {
-              "t": "Metadata",
-              "fontsize": 10,
-              "ha": "left",
-              "x": 0.05,
-              "y": 0.98,
-            },
-          "subplots_adjust":
-            {
-              "left": 0.05,
-              "right": 0.98,
-              "top": 0.85,
-              "bottom": 0.02,
-              "hspace": 0.1,
-              "wspace": 0.03,
-            },
-          "var_spacing": 2,
           "axis_title": { "fontsize": 12 },
           "plot": { "fontsize": 11 },
+          "matplotlib":
+            {
+              "orientation": "portrait",
+              "figure": { "ncols": 2, "nrows": 2 },
+              "page_title": { "t": "Metadata", "fontsize": 10, "ha": "left", "x": 0.05, "y": 0.98 },
+              "subplots_adjust":
+                {
+                  "left": 0.05,
+                  "right": 0.98,
+                  "top": 0.85,
+                  "bottom": 0.02,
+                  "hspace": 0.1,
+                  "wspace": 0.03,
+                },
+              "var_spacing": 2,
+            },
         },
       "library":
         {
           "figsize": [5, 5],
-          "subplots_adjust":
-            {
-              "left": 0.0,
-              "right": 1.0,
-              "top": 1.0,
-              "bottom": 0.0,
-              "hspace": 0.0,
-              "wspace": 0.0,
-            },
-          "var_spacing": 5,
           "plot": { "fontsize": 15.0 },
-          "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.25
-          }
+          "matplotlib":
+            {
+              "subplots_adjust":
+                {
+                  "left": 0.0,
+                  "right": 1.0,
+                  "top": 1.0,
+                  "bottom": 0.0,
+                  "hspace": 0.0,
+                  "wspace": 0.0,
+                },
+              "var_spacing": 5,
+              "main_gs": { "height_ratios": [5, 1], "hspace": 0.25 },
+            },
         },
         "tests": {
-          "figsize": [5, 5],
-          "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.25
-          }
-        }
+                   "figsize": [5, 5],
+                   "matplotlib": { "main_gs": { "height_ratios": [5, 1], "hspace": 0.25 } },
+                 }
     },
   "map":
     {
@@ -418,9 +397,7 @@
       "dashboard":
         {
           "plot_options": ["annotate", "domain"],
-          "land_polygon": { "edgecolor": null },
-          "base_scale": 1.3,
-          "axis_title": { "fontsize": 8.5, "pad": 6, "loc": "center" },
+          "axis_title": { "fontsize": 8.5 },
           "cb":
             {
               "vmin_absolute": "",
@@ -435,38 +412,34 @@
           "cb_label": { "label": "", "fontsize": 8 },
           "cb_tick_params": { "labelsize": 8 },
           "annotate_text": { "fontsize": 8 },
-          "marker_zero_stations_selected": { "s": 4, "alpha": 1.0 },
-          "marker_selected": { "s": 8, "alpha": 1.0 },
-          "marker_unselected": { "s": 4, "alpha": 0.4 },
-          "marker_automatic": true,
           "plot":
             {
-              "stations": { "s": 20, "picker": 1, "zorder": 5, "linewidth": 0 },
               "stations_over_grid": { "edgecolor": "black", "linewidth": 0.4 },
-              "grid":     { "zorder": 2, "alpha": null },
+              "grid": { "alpha": null },
             },
           "marker_annotate_rounding": 2,
+          "matplotlib":
+            {
+              "land_polygon": { "edgecolor": null },
+              "base_scale": 1.3,
+              "axis_title": { "pad": 6, "loc": "center" },
+              "marker_zero_stations_selected": { "s": 4, "alpha": 1.0 },
+              "marker_selected": { "s": 8, "alpha": 1.0 },
+              "marker_unselected": { "s": 4, "alpha": 0.4 },
+              "marker_automatic": true,
+              "plot":
+                {
+                  "stations": { "s": 20, "picker": 1, "zorder": 5, "linewidth": 0 },
+                  "grid": { "zorder": 2 },
+                },
+            },
         },
       "report":
         {
           "plot_options": ["annotate", "bias", "domain", "obs"],
-          "orientation": "portrait",
-          "figure": { "ncols": 2, "nrows": 2 },
-          "page_title":
-            { "t": "Map", "fontsize": 10, "ha": "left", "x": 0.05, "y": 0.98 },
           "axis_title": { "fontsize": 8 },
-          "subplots_adjust":
-            {
-              "left": 0.02,
-              "right": 0.98,
-              "top": 0.85,
-              "bottom": 0.02,
-              "hspace": 0.14,
-              "wspace": 0.05,
-            },
           "cb":
             {
-              "position": [0.45, 0.95, 0.52, 0.04],
               "vmin_absolute": "",
               "vmax_absolute": "",
               "vmin_bias": "",
@@ -481,28 +454,37 @@
           "annotate_text": { "fontsize": 6 },
           "plot":
             {
-              "stations": { "s": "", "picker": 1, "zorder": 5, "linewidth": 0 },
               "stations_over_grid": { "edgecolor": "black", "linewidth": 0.4 },
-              "grid":     { "zorder": 2, "alpha": null },
+              "grid": { "alpha": null },
+            },
+          "matplotlib":
+            {
+              "orientation": "portrait",
+              "figure": { "ncols": 2, "nrows": 2 },
+              "page_title": { "t": "Map", "fontsize": 10, "ha": "left", "x": 0.05, "y": 0.98 },
+              "subplots_adjust":
+                {
+                  "left": 0.02,
+                  "right": 0.98,
+                  "top": 0.85,
+                  "bottom": 0.02,
+                  "hspace": 0.14,
+                  "wspace": 0.05,
+                },
+              "cb": { "position": [0.45, 0.95, 0.52, 0.04] },
+              "plot":
+                {
+                  "stations": { "s": "", "picker": 1, "zorder": 5, "linewidth": 0 },
+                  "grid": { "zorder": 2 },
+                },
             },
         },
       "library":
         {
           "plot_options": ["annotate", "domain"],
           "figsize": [14, 7],
-          "subplots_adjust":
-            {
-              "left": 0.00,
-              "right": 1.0,
-              "top": 1.0,
-              "bottom": 0.07,
-              "hspace": 0.0,
-              "wspace": 0.00,
-            },
-          "axis_title": { "fontsize": 16, "pad": 3, "loc": "center" },
           "cb":
             {
-              "position": [0.05, 0.1, 0.9, 0.05],
               "vmin_absolute": "",
               "vmax_absolute": "",
               "vmin_bias": "",
@@ -516,69 +498,70 @@
           "cb_tick_params": { "labelsize": 14 },
           "legend":
             {
-              "plot":
-                {
-                  "loc": "upper left",
-                  "columnspacing": 0.0,
-                  "frameon": false,
-                  "handletextpad": 0,
-                  "ncol": 4,
-                  "borderaxespad": 0,
-                  "fontsize": 14.0,
-                },
+              "plot": { "ncol": 4, "fontsize": 14.0 },
               "handles": { "markersize": 14, "marker": "o", "color": "white" },
             },
           "annotate_text": { "fontsize": 13 },
           "plot":
             {
-              "stations": { "s": "", "picker": 1, "zorder": 5, "linewidth": 0 },
               "stations_over_grid": { "edgecolor": "black", "linewidth": 0.4 },
-              "grid":     { "zorder": 2, "alpha": null },
+              "grid": { "alpha": null },
             },
-          "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.1
-          }
-        },
-      "website":
-        {
-          "plot_options": ["annotate", "domain"],
-          "cb":
+          "matplotlib":
             {
-              "vmin_absolute": "",
-              "vmax_absolute": "",
-              "vmin_bias": "",
-              "vmax_bias": "",
-              "n_ticks": 8,
-              "orientation": "horizontal",
-              "discrete": true,
-              "n_discrete": 15,
+              "subplots_adjust":
+                {
+                  "left": 0.0,
+                  "right": 1.0,
+                  "top": 1.0,
+                  "bottom": 0.07,
+                  "hspace": 0.0,
+                  "wspace": 0.0,
+                },
+              "axis_title": { "pad": 3, "loc": "center", "fontsize": 16 },
+              "cb": { "position": [0.05, 0.1, 0.9, 0.05] },
+              "legend":
+                {
+                  "plot":
+                    {
+                      "loc": "upper left",
+                      "columnspacing": 0.0,
+                      "frameon": false,
+                      "handletextpad": 0,
+                      "borderaxespad": 0,
+                    },
+                },
+              "plot":
+                {
+                  "stations": { "s": "", "picker": 1, "zorder": 5, "linewidth": 0 },
+                  "grid": { "zorder": 2 },
+                },
+              "main_gs": { "height_ratios": [5, 1], "hspace": 0.1 },
             },
-          "plot":
+          "plotly":
             {
-              "stations_over_grid": { "edgecolor": "black", "linewidth": 0.4 },
-              "grid": { "zorder": 2, "alpha": null },
+              "raster_shape": [500, 800],
+              "marker_size": 7,
+              "land_tolerance": 1000,
+              "colourbar_height": 52,
+              "axis_title": { "fontsize": 12 },
+              "margin": { "l": 5, "r": 5, "t": 30 },
             },
-          "raster_shape": [500, 800],
-          "marker_size": 7,
-          "land_tolerance": 1000,
-          "colourbar_height": 52,
-          "axis_title": { "fontsize": 12 },
-          "margin": { "l": 5, "r": 5, "t": 30 },
         },
       "tests":
         {
           "plot_options": ["annotate", "domain"],
           "figsize": [14, 7],
-          "plot":
+          "plot": { "grid": { "alpha": null } },
+          "matplotlib":
             {
-              "stations": { "s": "", "picker": 1, "zorder": 5 },
-              "grid":     { "zorder": 2, "alpha": null },
+              "plot":
+                {
+                  "stations": { "s": "", "picker": 1, "zorder": 5 },
+                  "grid": { "zorder": 2 },
+                },
+              "main_gs": { "height_ratios": [5, 1], "hspace": 0.1 },
             },
-          "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.1
-          }
         },
     },
   "timeseries":
@@ -659,154 +642,132 @@
       "margin_padding": {"x": 0.05, "y": 0.05},
       "dashboard":
         {
-          "plot_options":
-            ["annotate", "bias", "hidedata", "logy", "smooth", "threshold"],
+          "plot_options": ["annotate", "bias", "hidedata", "logy", "smooth", "threshold"],
           "remove_spines": ["top", "right"],
-          "axis_title": { "fontsize": 8.5, "loc": "left" },
+          "axis_title": { "fontsize": 8.5 },
           "xlabel": { "fontsize": 8 },
           "ylabel": { "fontsize": 8 },
           "xtick_params": { "labelsize": 8 },
           "ytick_params": { "labelsize": 8 },
-          "xtick_alteration": { "automatic_max_ticks": 12 },
           "annotate_text": { "fontsize": 8 },
           "smooth": { "format": { "linewidth": 1.0 } },
           "plot": { "markersize": 2 },
           "marker_annotate_rounding": 2,
+          "matplotlib":
+            {
+              "axis_title": { "loc": "left" },
+              "xtick_alteration": { "automatic_max_ticks": 12 },
+            },
         },
       "report":
         {
-          "plot_options":
-            [
-              "annotate",
-              "bias",
-              "hidedata",
-              "individual",
-              "logy",
-              "obs",
-              "smooth",
-              "threshold",
-            ],
-          "orientation": "portrait",
-          "figure": { "ncols": 1, "nrows": 2 },
-          "page_title":
-            {
-              "t": "Timeseries",
-              "fontsize": 10,
-              "ha": "left",
-              "x": 0.05,
-              "y": 0.98,
-            },
+          "plot_options": [
+            "annotate",
+            "bias",
+            "hidedata",
+            "individual",
+            "logy",
+            "obs",
+            "smooth",
+            "threshold"
+          ],
           "axis_title": { "fontsize": 8 },
           "xlabel": { "fontsize": 8 },
           "ylabel": { "fontsize": 8 },
           "xtick_params": { "labelsize": 7 },
-          "xtick_alteration": { "automatic_max_ticks": 10 },
           "ytick_params": { "labelsize": 7 },
-          "legend":
-            {
-              "plot":
-                {
-                  "loc": "upper right",
-                  "columnspacing": 1,
-                  "ncol": 4,
-                  "fontsize": 10.0,
-                  "frameon": false
-                },
-              "handles": { "markersize": 10 },
-            },
-          "subplots_adjust":
-            {
-              "left": 0.06,
-              "right": 0.97,
-              "top": 0.86,
-              "bottom": 0.06,
-              "hspace": 0.33,
-              "wspace": 0.14,
-            },
+          "legend": { "plot": { "ncol": 4, "fontsize": 10.0 }, "handles": { "markersize": 10 } },
           "annotate_text": { "fontsize": 6 },
           "smooth": { "format": { "linewidth": 0.5 } },
           "markersize_npoints_threshold": 200,
           "markersize": { "standard": 2.1, "few_points": 4.0 },
           "plot": { "markersize": "" },
+          "matplotlib":
+            {
+              "orientation": "portrait",
+              "figure": { "ncols": 1, "nrows": 2 },
+              "page_title":
+                {
+                  "t": "Timeseries",
+                  "fontsize": 10,
+                  "ha": "left",
+                  "x": 0.05,
+                  "y": 0.98,
+                },
+              "xtick_alteration": { "automatic_max_ticks": 10 },
+              "legend":
+                {
+                  "plot": { "loc": "upper right", "columnspacing": 1, "frameon": false },
+                },
+              "subplots_adjust":
+                {
+                  "left": 0.06,
+                  "right": 0.97,
+                  "top": 0.86,
+                  "bottom": 0.06,
+                  "hspace": 0.33,
+                  "wspace": 0.14,
+                },
+            },
         },
       "library":
         {
-          "plot_options":
-            ["annotate", "bias", "hidedata", "logy", "smooth", "threshold"],
+          "plot_options": ["annotate", "bias", "hidedata", "logy", "smooth", "threshold"],
           "figsize": [17, 6],
-          "subplots_adjust":
-            {
-              "left": 0.0,
-              "right": 1.0,
-              "top": 1.0,
-              "bottom": 0.06,
-              "hspace": 0.0,
-              "wspace": 0.0,
-            },
           "remove_spines": ["top", "right"],
-          "axis_title": { "fontsize": 16, "loc": "center" },
-          "xlabel": { "fontsize": 16 },
-          "ylabel": { "fontsize": 16 },
           "xtick_params": { "labelsize": 14 },
           "ytick_params": { "labelsize": 14 },
-          "legend":
-            {
-              "plot":
-                {
-                  "loc": "upper left",
-                  "columnspacing": 0.5,
-                  "ncol": 4,
-                  "fontsize": 14.0,
-                  "frameon": false
-                },
-              "handles": { "markersize": 14 },
-            },
-          "xtick_alteration": { "automatic_max_ticks": 14 },
+          "legend": { "plot": { "ncol": 4, "fontsize": 14.0 }, "handles": { "markersize": 14 } },
           "annotate_text": { "fontsize": 13 },
           "smooth": { "format": { "linewidth": 0.5 } },
           "markersize_npoints_threshold": 200,
           "markersize": { "standard": 2.1, "few_points": 4.0 },
           "plot": { "markersize": "" },
-          "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.25
-          }
-        },
-      "website":
-        {
-          "plot_options":
-            ["annotate", "bias", "hidedata", "logy", "smooth", "threshold"],
-          "axis_title": { "fontsize": 12 },
-          "xlabel": { "fontsize": 12 },
-          "ylabel": { "fontsize": 12 },
-          "margin": { "l": 45, "r": 10, "b": 35, "t": 30 },
+          "matplotlib":
+            {
+              "subplots_adjust":
+                {
+                  "left": 0.0,
+                  "right": 1.0,
+                  "top": 1.0,
+                  "bottom": 0.06,
+                  "hspace": 0.0,
+                  "wspace": 0.0,
+                },
+              "axis_title": { "loc": "center", "fontsize": 16 },
+              "legend":
+                {
+                  "plot": { "loc": "upper left", "columnspacing": 0.5, "frameon": false },
+                },
+              "xtick_alteration": { "automatic_max_ticks": 14 },
+              "main_gs": { "height_ratios": [5, 1], "hspace": 0.25 },
+              "xlabel": { "fontsize": 16 },
+              "ylabel": { "fontsize": 16 },
+            },
+          "plotly":
+            {
+              "axis_title": { "fontsize": 12 },
+              "xlabel": { "fontsize": 12 },
+              "ylabel": { "fontsize": 12 },
+              "margin": { "l": 45, "r": 10, "b": 35, "t": 30 },
+            },
         },
       "tests":
         {
-          "plot_options":
-            ["annotate", "bias", "hidedata", "logy", "smooth", "threshold"],
+          "plot_options": ["annotate", "bias", "hidedata", "logy", "smooth", "threshold"],
           "figsize": [17, 6],
           "markersize_npoints_threshold": 200,
           "markersize": { "standard": 2.1, "few_points": 4.0 },
-          "legend":
-            {
-              "plot":
-                {
-                  "loc": "upper right",
-                  "columnspacing": 0.5,
-                  "ncol": 4,
-                  "fontsize": 14.0,
-                },
-              "handles": { "markersize": 14 },
-            },
+          "legend": { "plot": { "ncol": 4, "fontsize": 14.0 }, "handles": { "markersize": 14 } },
           "plot": { "markersize": "" },
           "annotate_text": { "fontsize": 13 },
-          "xtick_alteration": { "automatic_max_ticks": 12 },
           "smooth": { "format": { "linewidth": 0.5 } },
-          "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.1
-          }
+          "matplotlib":
+            {
+              "legend": { "plot": { "loc": "upper right", "columnspacing": 0.5 } },
+              "xtick_alteration": { "automatic_max_ticks": 12 },
+              "main_gs": { "height_ratios": [5, 1], "hspace": 0.1 },
+            },
         },
     },
   "periodic":
@@ -853,7 +814,7 @@
       "dashboard":
         {
           "plot_options": ["annotate", "bias", "logy", "threshold"],
-          "axis_title": { "fontsize": 8.5, "loc": "left" },
+          "axis_title": { "fontsize": 8.5 },
           "label": { "fontsize": 8 },
           "ylabel": { "fontsize": 8 },
           "xtick_params": { "labelsize": 7 },
@@ -861,21 +822,11 @@
           "annotate_text": { "fontsize": 8 },
           "plot": { "markersize": 3, "linewidth": 0.5 },
           "marker_annotate_rounding": 2,
+          "matplotlib": { "axis_title": { "loc": "left" } },
         },
       "report":
         {
-          "plot_options":
-            ["annotate", "bias", "individual", "logy", "obs", "threshold"],
-          "orientation": "portrait",
-          "figure": { "ncols": 2, "nrows": 2 },
-          "page_title":
-            {
-              "t": "Periodic",
-              "fontsize": 10,
-              "ha": "left",
-              "x": 0.05,
-              "y": 0.98,
-            },
+          "plot_options": ["annotate", "bias", "individual", "logy", "obs", "threshold"],
           "axis_title": { "fontsize": 8 },
           "label": { "fontsize": 8 },
           "ylabel": { "fontsize": 8 },
@@ -883,81 +834,78 @@
           "ytick_params": { "labelsize": 7 },
           "legend":
             {
-              "plot":
-                {
-                  "loc": "upper right",
-                  "columnspacing": 1,
-                  "ncol": 4,
-                  "fontsize": 10.0,
-                  "frameon": false
-                },
+              "plot": { "ncol": 4, "fontsize": 10.0 },
               "handles": { "markersize": 10, "marker": "o", "color": "white" },
-            },
-          "subplots_adjust":
-            {
-              "left": 0.06,
-              "right": 0.98,
-              "top": 0.86,
-              "bottom": 0.04,
-              "hspace": 0.18,
-              "wspace": 0.14,
             },
           "annotate_text": { "fontsize": 6 },
           "plot": { "markersize": 3, "linewidth": 0.5 },
+          "matplotlib":
+            {
+              "orientation": "portrait",
+              "figure": { "ncols": 2, "nrows": 2 },
+              "page_title": { "t": "Periodic", "fontsize": 10, "ha": "left", "x": 0.05, "y": 0.98 },
+              "legend":
+                {
+                  "plot": { "loc": "upper right", "columnspacing": 1, "frameon": false },
+                },
+              "subplots_adjust":
+                {
+                  "left": 0.06,
+                  "right": 0.98,
+                  "top": 0.86,
+                  "bottom": 0.04,
+                  "hspace": 0.18,
+                  "wspace": 0.14,
+                },
+            },
         },
       "library":
         {
           "plot_options": ["annotate", "bias", "logy", "threshold"],
           "figsize": [13, 7],
-          "subplots_adjust":
-            {
-              "left": 0.0,
-              "right": 1.0,
-              "top": 1.0,
-              "bottom": 0.00,
-              "hspace": 0.0,
-              "wspace": 0.0,
-            },
-          "axis_title": { "fontsize": 16, "loc": "center" },
+          "axis_title": { "fontsize": 16 },
           "label": { "fontsize": 16 },
           "ylabel": { "fontsize": 16 },
           "xtick_params": { "labelsize": 14 },
           "ytick_params": { "labelsize": 14 },
           "legend":
             {
-              "plot":
-                {
-                  "loc": "upper left",
-                  "columnspacing": 0.5,
-                  "frameon": false,
-                  "handletextpad": 0,
-                  "ncol": 4,
-                  "borderaxespad": 0,
-                  "fontsize": 12.0,
-                },
-              "handles":
-                {
-                  "markersize": 14,
-                  "marker": "o",
-                  "color": "white",
-                  "ax": "hour",
-                },
+              "plot": { "ncol": 4, "fontsize": 12.0 },
+              "handles": { "markersize": 14, "marker": "o", "color": "white", "ax": "hour" },
             },
           "annotate_text": { "fontsize": 13 },
           "plot": { "markersize": 6, "linewidth": 1.0 },
-          "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.25
-          }
+          "matplotlib":
+            {
+              "subplots_adjust":
+                {
+                  "left": 0.0,
+                  "right": 1.0,
+                  "top": 1.0,
+                  "bottom": 0.0,
+                  "hspace": 0.0,
+                  "wspace": 0.0,
+                },
+              "axis_title": { "loc": "center" },
+              "legend":
+                {
+                  "plot":
+                    {
+                      "loc": "upper left",
+                      "columnspacing": 0.5,
+                      "frameon": false,
+                      "handletextpad": 0,
+                      "borderaxespad": 0,
+                    },
+                },
+              "main_gs": { "height_ratios": [5, 1], "hspace": 0.25 },
+            },
         },
       "tests": 
       {
         "plot_options": ["annotate", "bias", "logy", "threshold"],
         "figsize": [13, 7],
-        "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.1
-        } 
+        "matplotlib": { "main_gs": { "height_ratios": [5, 1], "hspace": 0.1 } },
       },
     },
   "periodic-violin":
@@ -1007,33 +955,26 @@
       "dashboard":
         {
           "plot_options": ["annotate", "logy", "threshold"],
-          "axis_title": { "fontsize": 8.5, "loc": "left" },
+          "axis_title": { "fontsize": 8.5 },
           "label": { "fontsize": 8 },
           "ylabel": { "fontsize": 8 },
           "xtick_params": { "labelsize": 7 },
           "ytick_params": { "labelsize": 7 },
           "annotate_text": { "fontsize": 8 },
-          "plot":
-            {
-              "violin": { "linewidth": 0.5 },
-              "median": { "marker": "o", "markersize": 3, "linewidth": 0.5 },
-            },
           "marker_annotate_rounding": 2,
+          "matplotlib":
+            {
+              "axis_title": { "loc": "left" },
+              "plot":
+                {
+                  "violin": { "linewidth": 0.5 },
+                  "median": { "marker": "o", "markersize": 3, "linewidth": 0.5 },
+                },
+            },
         },
       "report":
         {
-          "plot_options":
-            ["annotate", "individual", "logy", "obs", "threshold"],
-          "orientation": "portrait",
-          "figure": { "ncols": 2, "nrows": 2 },
-          "page_title":
-            {
-              "t": "Violin",
-              "fontsize": 10,
-              "ha": "left",
-              "x": 0.05,
-              "y": 0.98,
-            },
+          "plot_options": ["annotate", "individual", "logy", "obs", "threshold"],
           "axis_title": { "fontsize": 8 },
           "label": { "fontsize": 8 },
           "ylabel": { "fontsize": 8 },
@@ -1041,82 +982,87 @@
           "ytick_params": { "labelsize": 7 },
           "legend":
             {
-              "plot":
-                {
-                  "loc": "upper right",
-                  "columnspacing": 1,
-                  "frameon": false,
-                  "handletextpad": 0,
-                  "ncol": 4,
-                  "borderaxespad": 1,
-                  "fontsize": 10.0,
-                },
+              "plot": { "ncol": 4, "fontsize": 10.0 },
               "handles": { "markersize": 10, "marker": "o", "color": "white" },
             },
-          "subplots_adjust":
-            {
-              "left": 0.06,
-              "right": 0.98,
-              "top": 0.86,
-              "bottom": 0.04,
-              "hspace": 0.18,
-              "wspace": 0.14,
-            },
           "annotate_text": { "fontsize": 6 },
-          "plot":
+          "matplotlib":
             {
-              "violin": { "linewidth": 0.5 },
-              "median": { "marker": "o", "markersize": 3, "linewidth": 0.5 },
+              "orientation": "portrait",
+              "figure": { "ncols": 2, "nrows": 2 },
+              "page_title": { "t": "Violin", "fontsize": 10, "ha": "left", "x": 0.05, "y": 0.98 },
+              "legend":
+                {
+                  "plot":
+                    {
+                      "loc": "upper right",
+                      "columnspacing": 1,
+                      "frameon": false,
+                      "handletextpad": 0,
+                      "borderaxespad": 1,
+                    },
+                },
+              "subplots_adjust":
+                {
+                  "left": 0.06,
+                  "right": 0.98,
+                  "top": 0.86,
+                  "bottom": 0.04,
+                  "hspace": 0.18,
+                  "wspace": 0.14,
+                },
+              "plot":
+                {
+                  "violin": { "linewidth": 0.5 },
+                  "median": { "marker": "o", "markersize": 3, "linewidth": 0.5 },
+                },
             },
         },
       "library":
         {
           "plot_options": ["annotate", "logy", "threshold"],
           "figsize": [13, 7],
-          "subplots_adjust":
-            {
-              "left": 0.0,
-              "right": 1.0,
-              "top": 1.0,
-              "bottom": 0.0,
-              "hspace": 0.0,
-              "wspace": 0.0,
-            },
-          "axis_title": { "fontsize": 16, "loc": "center" },
+          "axis_title": { "fontsize": 16 },
           "label": { "fontsize": 16 },
           "ylabel": { "fontsize": 16 },
           "xtick_params": { "labelsize": 14 },
           "ytick_params": { "labelsize": 14 },
           "legend":
             {
-              "plot":
-                {
-                  "loc": "upper left",
-                  "columnspacing": 0.5,
-                  "frameon": false,
-                  "handletextpad": 0,
-                  "ncol": 4,
-                  "borderaxespad": 0,
-                  "fontsize": 12.0,
-                },
-              "handles":
-                {
-                  "markersize": 14,
-                  "marker": "o",
-                  "color": "white",
-                  "ax": "hour",
-                },
+              "plot": { "ncol": 4, "fontsize": 12.0 },
+              "handles": { "markersize": 14, "marker": "o", "color": "white", "ax": "hour" },
             },
           "annotate_text": { "fontsize": 13 },
-          "plot":
+          "matplotlib":
             {
-              "violin": { "linewidth": 1.0 },
-              "median": { "marker": "o", "markersize": 6, "linewidth": 1.0 },
+              "subplots_adjust":
+                {
+                  "left": 0.0,
+                  "right": 1.0,
+                  "top": 1.0,
+                  "bottom": 0.0,
+                  "hspace": 0.0,
+                  "wspace": 0.0,
+                },
+              "axis_title": { "loc": "center" },
+              "legend":
+                {
+                  "plot":
+                    {
+                      "loc": "upper left",
+                      "columnspacing": 0.5,
+                      "frameon": false,
+                      "handletextpad": 0,
+                      "borderaxespad": 0,
+                    },
+                },
+              "plot":
+                {
+                  "violin": { "linewidth": 1.0 },
+                  "median": { "marker": "o", "markersize": 6, "linewidth": 1.0 },
+                },
+              "main_gs": { "height_ratios": [5, 1], "hspace": 0.25 },
             },
-          "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.25
-          }
         },
       "tests":
         {
@@ -1124,34 +1070,30 @@
           "figsize": [13, 7],
           "legend":
             {
-              "plot":
-                {
-                  "loc": "upper right",
-                  "columnspacing": 0.5,
-                  "frameon": false,
-                  "handletextpad": 0,
-                  "ncol": 4,
-                  "borderaxespad": 0,
-                  "fontsize": 14.0,
-                },
-              "handles":
-                {
-                  "markersize": 14,
-                  "marker": "o",
-                  "color": "white",
-                  "ax": "hour",
-                },
+              "plot": { "ncol": 4, "fontsize": 14.0 },
+              "handles": { "markersize": 14, "marker": "o", "color": "white", "ax": "hour" },
             },
           "annotate_text": { "fontsize": 13 },
-          "plot":
+          "matplotlib":
             {
-              "violin": { "linewidth": 1.0 },
-              "median": { "marker": "o", "markersize": 6, "linewidth": 1.0 },
+              "legend":
+                {
+                  "plot":
+                    {
+                      "loc": "upper right",
+                      "columnspacing": 0.5,
+                      "frameon": false,
+                      "handletextpad": 0,
+                      "borderaxespad": 0,
+                    },
+                },
+              "plot":
+                {
+                  "violin": { "linewidth": 1.0 },
+                  "median": { "marker": "o", "markersize": 6, "linewidth": 1.0 },
+                },
+              "main_gs": { "height_ratios": [5, 1], "hspace": 0.1 },
             },
-          "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.1
-          }
         },
     },
   "distribution":
@@ -1207,7 +1149,7 @@
         {
           "plot_options": ["annotate", "bias", "logx", "logy", "threshold"],
           "remove_spines": ["top", "right"],
-          "axis_title": { "fontsize": 8.5, "loc": "left" },
+          "axis_title": { "fontsize": 8.5 },
           "xlabel": { "fontsize": 8 },
           "ylabel": { "fontsize": 8 },
           "xtick_params": { "labelsize": 7 },
@@ -1215,29 +1157,11 @@
           "annotate_text": { "fontsize": 8 },
           "plot": { "linewidth": 1 },
           "marker_annotate_rounding": 2,
+          "matplotlib": { "axis_title": { "loc": "left" } },
         },
       "report":
         {
-          "plot_options":
-            [
-              "annotate",
-              "bias",
-              "individual",
-              "logx",
-              "logy",
-              "obs",
-              "threshold",
-            ],
-          "orientation": "portrait",
-          "figure": { "ncols": 2, "nrows": 3 },
-          "page_title":
-            {
-              "t": "Distribution",
-              "fontsize": 10,
-              "ha": "left",
-              "x": 0.05,
-              "y": 0.98,
-            },
+          "plot_options": ["annotate", "bias", "individual", "logx", "logy", "obs", "threshold"],
           "axis_title": { "fontsize": 8 },
           "xlabel": { "fontsize": 8 },
           "ylabel": { "fontsize": 8 },
@@ -1245,77 +1169,92 @@
           "ytick_params": { "labelsize": 7 },
           "legend":
             {
-              "plot":
-                {
-                  "loc": "upper right",
-                  "columnspacing": 1,
-                  "frameon": false,
-                  "handletextpad": 0,
-                  "ncol": 4,
-                  "borderaxespad": 1,
-                  "fontsize": 10.0,
-                },
+              "plot": { "ncol": 4, "fontsize": 10.0 },
               "handles": { "markersize": 10, "marker": "o", "color": "white" },
-            },
-          "subplots_adjust":
-            {
-              "left": 0.08,
-              "right": 0.98,
-              "top": 0.86,
-              "bottom": 0.06,
-              "hspace": 0.33,
-              "wspace": 0.18,
             },
           "annotate_text": { "fontsize": 6 },
           "plot": { "linewidth": 1 },
+          "matplotlib":
+            {
+              "orientation": "portrait",
+              "figure": { "ncols": 2, "nrows": 3 },
+              "page_title":
+                {
+                  "t": "Distribution",
+                  "fontsize": 10,
+                  "ha": "left",
+                  "x": 0.05,
+                  "y": 0.98,
+                },
+              "legend":
+                {
+                  "plot":
+                    {
+                      "loc": "upper right",
+                      "columnspacing": 1,
+                      "frameon": false,
+                      "handletextpad": 0,
+                      "borderaxespad": 1,
+                    },
+                },
+              "subplots_adjust":
+                {
+                  "left": 0.08,
+                  "right": 0.98,
+                  "top": 0.86,
+                  "bottom": 0.06,
+                  "hspace": 0.33,
+                  "wspace": 0.18,
+                },
+            },
         },
       "library":
         {
           "plot_options": ["annotate", "bias", "logx", "logy", "threshold"],
           "figsize": [13, 7],
-          "subplots_adjust":
-            {
-              "left": 0.0,
-              "right": 1.0,
-              "top": 1.0,
-              "bottom": 0.0,
-              "hspace": 0.0,
-              "wspace": 0.0,
-            },
-          "axis_title": { "fontsize": 16, "loc": "center" },
-          "xlabel": { "fontsize": 16 },
-          "ylabel": { "fontsize": 16 },
           "xtick_params": { "labelsize": 14 },
           "ytick_params": { "labelsize": 14 },
           "legend":
             {
-              "plot":
-                {
-                  "loc": "upper left",
-                  "columnspacing": 0.5,
-                  "frameon": false,
-                  "handletextpad": 0,
-                  "ncol": 4,
-                  "borderaxespad": 0,
-                  "fontsize": 10.0,
-                },
+              "plot": { "ncol": 4, "fontsize": 10.0 },
               "handles": { "markersize": 14, "marker": "o", "color": "white" },
             },
           "annotate_text": { "fontsize": 13 },
           "plot": { "linewidth": 2 },
-          "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.25
-          }
-        },
-      "website":
-        {
-          "plot_options": ["annotate", "bias", "logx", "logy", "threshold"],
-          "axis_title": { "fontsize": 12 },
-          "xlabel": { "fontsize": 12 },
-          "ylabel": { "fontsize": 12 },
-          "plot": { "linewidth": 2 },
-          "margin": { "l": 45, "r": 10, "b": 35, "t": 30 },
+          "matplotlib":
+            {
+              "subplots_adjust":
+                {
+                  "left": 0.0,
+                  "right": 1.0,
+                  "top": 1.0,
+                  "bottom": 0.0,
+                  "hspace": 0.0,
+                  "wspace": 0.0,
+                },
+              "axis_title": { "loc": "center", "fontsize": 16 },
+              "legend":
+                {
+                  "plot":
+                    {
+                      "loc": "upper left",
+                      "columnspacing": 0.5,
+                      "frameon": false,
+                      "handletextpad": 0,
+                      "borderaxespad": 0,
+                    },
+                },
+              "main_gs": { "height_ratios": [5, 1], "hspace": 0.25 },
+              "xlabel": { "fontsize": 16 },
+              "ylabel": { "fontsize": 16 },
+            },
+          "plotly":
+            {
+              "axis_title": { "fontsize": 12 },
+              "xlabel": { "fontsize": 12 },
+              "ylabel": { "fontsize": 12 },
+              "margin": { "l": 45, "r": 10, "b": 35, "t": 30 },
+            },
         },
       "tests":
         {
@@ -1323,10 +1262,7 @@
           "figsize": [13, 7],
           "plot": { "linewidth": 1 },
           "annotate_text": { "fontsize": 13 },
-          "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.1
-          }
+          "matplotlib": { "main_gs": { "height_ratios": [5, 1], "hspace": 0.1 } },
         },
     },
   "histogram":
@@ -1385,7 +1321,7 @@
           "range": "tukey",
           "plot_options": ["annotate", "bias", "logx", "logy", "threshold"],
           "remove_spines": ["top", "right"],
-          "axis_title": { "fontsize": 8.5, "loc": "left" },
+          "axis_title": { "fontsize": 8.5 },
           "xlabel": { "fontsize": 8 },
           "ylabel": { "fontsize": 8 },
           "xtick_params": { "labelsize": 7 },
@@ -1393,6 +1329,7 @@
           "annotate_text": { "fontsize": 8 },
           "plot": { "linewidth": 1 },
           "marker_annotate_rounding": 2,
+          "matplotlib": { "axis_title": { "loc": "left" } },
         },
       "report":
         {
@@ -1400,26 +1337,7 @@
           "min_bins": 10,
           "max_bins": 60,
           "range": "tukey",
-          "plot_options":
-            [
-              "annotate",
-              "bias",
-              "individual",
-              "logx",
-              "logy",
-              "obs",
-              "threshold",
-            ],
-          "orientation": "portrait",
-          "figure": { "ncols": 2, "nrows": 3 },
-          "page_title":
-            {
-              "t": "Histogram",
-              "fontsize": 10,
-              "ha": "left",
-              "x": 0.05,
-              "y": 0.98,
-            },
+          "plot_options": ["annotate", "bias", "individual", "logx", "logy", "obs", "threshold"],
           "axis_title": { "fontsize": 8 },
           "xlabel": { "fontsize": 8 },
           "ylabel": { "fontsize": 8 },
@@ -1427,29 +1345,37 @@
           "ytick_params": { "labelsize": 7 },
           "legend":
             {
-              "plot":
-                {
-                  "loc": "upper right",
-                  "columnspacing": 1,
-                  "frameon": false,
-                  "handletextpad": 0,
-                  "ncol": 4,
-                  "borderaxespad": 1,
-                  "fontsize": 10.0,
-                },
+              "plot": { "ncol": 4, "fontsize": 10.0 },
               "handles": { "markersize": 10, "marker": "o", "color": "white" },
-            },
-          "subplots_adjust":
-            {
-              "left": 0.08,
-              "right": 0.98,
-              "top": 0.86,
-              "bottom": 0.06,
-              "hspace": 0.33,
-              "wspace": 0.18,
             },
           "annotate_text": { "fontsize": 6 },
           "plot": { "linewidth": 1 },
+          "matplotlib":
+            {
+              "orientation": "portrait",
+              "figure": { "ncols": 2, "nrows": 3 },
+              "page_title": { "t": "Histogram", "fontsize": 10, "ha": "left", "x": 0.05, "y": 0.98 },
+              "legend":
+                {
+                  "plot":
+                    {
+                      "loc": "upper right",
+                      "columnspacing": 1,
+                      "frameon": false,
+                      "handletextpad": 0,
+                      "borderaxespad": 1,
+                    },
+                },
+              "subplots_adjust":
+                {
+                  "left": 0.08,
+                  "right": 0.98,
+                  "top": 0.86,
+                  "bottom": 0.06,
+                  "hspace": 0.33,
+                  "wspace": 0.18,
+                },
+            },
         },
       "library":
         {
@@ -1459,40 +1385,43 @@
           "range": "tukey",
           "plot_options": ["annotate", "bias", "logx", "logy", "threshold"],
           "figsize": [13, 7],
-          "subplots_adjust":
-            {
-              "left": 0.0,
-              "right": 1.0,
-              "top": 1.0,
-              "bottom": 0.0,
-              "hspace": 0.0,
-              "wspace": 0.0,
-            },
-          "axis_title": { "fontsize": 16, "loc": "center" },
+          "axis_title": { "fontsize": 16 },
           "xlabel": { "fontsize": 16 },
           "ylabel": { "fontsize": 16 },
           "xtick_params": { "labelsize": 14 },
           "ytick_params": { "labelsize": 14 },
           "legend":
             {
-              "plot":
-                {
-                  "loc": "upper left",
-                  "columnspacing": 0.5,
-                  "frameon": false,
-                  "handletextpad": 0,
-                  "ncol": 4,
-                  "borderaxespad": 0,
-                  "fontsize": 10.0,
-                },
+              "plot": { "ncol": 4, "fontsize": 10.0 },
               "handles": { "markersize": 14, "marker": "o", "color": "white" },
             },
           "annotate_text": { "fontsize": 13 },
           "plot": { "linewidth": 2 },
-          "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.25
-          }
+          "matplotlib":
+            {
+              "subplots_adjust":
+                {
+                  "left": 0.0,
+                  "right": 1.0,
+                  "top": 1.0,
+                  "bottom": 0.0,
+                  "hspace": 0.0,
+                  "wspace": 0.0,
+                },
+              "axis_title": { "loc": "center" },
+              "legend":
+                {
+                  "plot":
+                    {
+                      "loc": "upper left",
+                      "columnspacing": 0.5,
+                      "frameon": false,
+                      "handletextpad": 0,
+                      "borderaxespad": 0,
+                    },
+                },
+              "main_gs": { "height_ratios": [5, 1], "hspace": 0.25 },
+            },
         },
       "tests":
         {
@@ -1504,10 +1433,7 @@
           "figsize": [13, 7],
           "plot": { "linewidth": 1 },
           "annotate_text": { "fontsize": 13 },
-          "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.1
-          }
+          "matplotlib": { "main_gs": { "height_ratios": [5, 1], "hspace": 0.1 } },
         },
     },
   "scatter":
@@ -1569,10 +1495,9 @@
       "plot": { "marker": "o", "linestyle": "None" },
       "dashboard":
         {
-          "plot_options":
-            ["annotate", "hidedata", "logx", "logy", "regression", "threshold"],
+          "plot_options": ["annotate", "hidedata", "logx", "logy", "regression", "threshold"],
           "remove_spines": ["top", "right"],
-          "axis_title": { "fontsize": 8.5, "loc": "left" },
+          "axis_title": { "fontsize": 8.5 },
           "xlabel": { "fontsize": 8 },
           "ylabel": { "fontsize": 8 },
           "xtick_params": { "labelsize": 7 },
@@ -1581,29 +1506,19 @@
           "plot": { "markersize": 2, "alpha": 0.5 },
           "marker_annotate_rounding": 2,
           "max_points": 100000,
+          "matplotlib": { "axis_title": { "loc": "left" } },
         },
       "report":
         {
-          "plot_options":
-            [
-              "annotate",
-              "hidedata",
-              "individual",
-              "logx",
-              "logy",
-              "regression",
-              "threshold",
-            ],
-          "orientation": "portrait",
-          "figure": { "ncols": 1, "nrows": 2 },
-          "page_title":
-            {
-              "t": "Scatter",
-              "fontsize": 10,
-              "ha": "left",
-              "x": 0.05,
-              "y": 0.98,
-            },
+          "plot_options": [
+            "annotate",
+            "hidedata",
+            "individual",
+            "logx",
+            "logy",
+            "regression",
+            "threshold"
+          ],
           "axis_title": { "fontsize": 8 },
           "xlabel": { "fontsize": 8 },
           "ylabel": { "fontsize": 8 },
@@ -1611,89 +1526,94 @@
           "ytick_params": { "labelsize": 7 },
           "legend":
             {
-              "plot":
-                {
-                  "loc": "upper right",
-                  "columnspacing": 1,
-                  "frameon": false,
-                  "handletextpad": 0,
-                  "ncol": 2,
-                  "borderaxespad": 1,
-                  "fontsize": 10.0,
-                },
+              "plot": { "ncol": 2, "fontsize": 10.0 },
               "handles": { "markersize": 10, "marker": "o", "color": "white" },
-            },
-          "subplots_adjust":
-            {
-              "left": 0.06,
-              "right": 0.98,
-              "top": 0.89,
-              "bottom": 0.06,
-              "hspace": 0.23,
-              "wspace": 0.05,
             },
           "annotate_text": { "fontsize": 6 },
           "markersize_npoints_threshold": 200,
           "markersize": { "standard": 1.1, "few_points": 4.0 },
           "plot": { "markersize": "" },
           "max_points": 100000,
+          "matplotlib":
+            {
+              "orientation": "portrait",
+              "figure": { "ncols": 1, "nrows": 2 },
+              "page_title": { "t": "Scatter", "fontsize": 10, "ha": "left", "x": 0.05, "y": 0.98 },
+              "legend":
+                {
+                  "plot":
+                    {
+                      "loc": "upper right",
+                      "columnspacing": 1,
+                      "frameon": false,
+                      "handletextpad": 0,
+                      "borderaxespad": 1,
+                    },
+                },
+              "subplots_adjust":
+                {
+                  "left": 0.06,
+                  "right": 0.98,
+                  "top": 0.89,
+                  "bottom": 0.06,
+                  "hspace": 0.23,
+                  "wspace": 0.05,
+                },
+            },
         },
       "library":
         {
-          "plot_options":
-            ["annotate", "hidedata", "logx", "logy", "regression", "threshold"],
+          "plot_options": ["annotate", "hidedata", "logx", "logy", "regression", "threshold"],
           "figsize": [5, 5],
-          "subplots_adjust":
-            {
-              "left": 0.0,
-              "right": 1.0,
-              "top": 1.0,
-              "bottom": 0.0,
-              "hspace": 0.0,
-              "wspace": 0.0,
-            },
-          "axis_title": { "fontsize": 11, "loc": "center", "pad": 10 },
+          "axis_title": { "fontsize": 11 },
           "xlabel": { "fontsize": 12 },
           "ylabel": { "fontsize": 12 },
           "xtick_params": { "labelsize": 10 },
           "ytick_params": { "labelsize": 10 },
           "legend":
             {
-              "plot":
-                {
-                  "loc": "upper left",
-                  "columnspacing": 0.5,
-                  "frameon": false,
-                  "handletextpad": 0,
-                  "ncol": 4,
-                  "borderaxespad": 0,
-                  "fontsize": 10.0,
-                },
-              "handles":
-                { "markersize": 10.5, "marker": "o", "color": "white" },
+              "plot": { "ncol": 4, "fontsize": 10.0 },
+              "handles": { "markersize": 10.5, "marker": "o", "color": "white" },
             },
           "annotate_text": { "fontsize": 10 },
           "markersize_npoints_threshold": 200,
           "markersize": { "standard": 1.1, "few_points": 4.0 },
           "plot": { "markersize": "" },
-          "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.25
-          },
           "max_points": 100000,
+          "matplotlib":
+            {
+              "subplots_adjust":
+                {
+                  "left": 0.0,
+                  "right": 1.0,
+                  "top": 1.0,
+                  "bottom": 0.0,
+                  "hspace": 0.0,
+                  "wspace": 0.0,
+                },
+              "axis_title": { "loc": "center", "pad": 10 },
+              "legend":
+                {
+                  "plot":
+                    {
+                      "loc": "upper left",
+                      "columnspacing": 0.5,
+                      "frameon": false,
+                      "handletextpad": 0,
+                      "borderaxespad": 0,
+                    },
+                },
+              "main_gs": { "height_ratios": [5, 1], "hspace": 0.25 },
+            },
         },
       "tests":
         {
-          "plot_options":
-            ["annotate", "hidedata", "logx", "logy", "regression", "threshold"],
+          "plot_options": ["annotate", "hidedata", "logx", "logy", "regression", "threshold"],
           "figsize": [5, 5],
           "markersize_npoints_threshold": 200,
           "markersize": { "standard": 1.1, "few_points": 4.0 },
           "plot": { "markersize": "" },
-          "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.1
-          }
+          "matplotlib": { "main_gs": { "height_ratios": [5, 1], "hspace": 0.1 } },
         },
     },
   "boxplot":
@@ -1729,97 +1649,110 @@
       "ylabel": { "ylabel": "[measurement_units]" },
       "xtick_params": { "rotation": 45 },
       "dashboard": {
-          "plot_options": ["annotate", "logy", "threshold"],
-          "remove_spines": ["top", "right"],
-          "axis_title": { "fontsize": 8.5, "loc": "left" },
-          "xlabel": { "fontsize": 8 },
-          "ylabel": { "fontsize": 8 },
-          "xtick_params": { "labelsize": 7 },
-          "ytick_params": { "labelsize": 7 },
-          "annotate_text": { "fontsize": 8 },
-        },
+                     "plot_options": ["annotate", "logy", "threshold"],
+                     "remove_spines": ["top", "right"],
+                     "axis_title": { "fontsize": 8.5 },
+                     "xlabel": { "fontsize": 8 },
+                     "ylabel": { "fontsize": 8 },
+                     "xtick_params": { "labelsize": 7 },
+                     "ytick_params": { "labelsize": 7 },
+                     "annotate_text": { "fontsize": 8 },
+                     "matplotlib": { "axis_title": { "loc": "left" } },
+                   },
       "report": {
-          "plot_options":
-            ["annotate", "individual", "logy", "multispecies", "obs", "threshold", "normalise"],
-          "orientation": "portrait",
-          "figure": { "ncols": 2, "nrows": 1 },
-          "page_title":
-            {
-              "t": "Boxplot",
-              "fontsize": 10,
-              "ha": "left",
-              "x": 0.05,
-              "y": 0.98,
-            },
-          "axis_title": { "fontsize": 8 },
-          "xlabel": { "fontsize": 8 },
-          "ylabel": { "fontsize": 8 },
-          "xtick_params": { "which": "both", "labelsize": 7 },
-          "ytick_params": { "which": "both", "labelsize": 7 },
-          "legend":
-            {
-              "plot":
-                {
-                  "loc": "upper right",
-                  "columnspacing": 1,
-                  "frameon": false,
-                  "handletextpad": 0,
-                  "ncol": 4,
-                  "borderaxespad": 1,
-                  "fontsize": 10.0,
+                  "plot_options": [
+                    "annotate",
+                    "individual",
+                    "logy",
+                    "multispecies",
+                    "obs",
+                    "threshold",
+                    "normalise"
+                  ],
+                  "axis_title": { "fontsize": 8 },
+                  "xlabel": { "fontsize": 8 },
+                  "ylabel": { "fontsize": 8 },
+                  "xtick_params": { "labelsize": 7 },
+                  "ytick_params": { "labelsize": 7 },
+                  "legend":
+                    {
+                      "plot": { "ncol": 4, "fontsize": 10.0 },
+                      "handles": { "markersize": 10, "marker": "o", "color": "white" },
+                    },
+                  "annotate_text": { "fontsize": 6 },
+                  "matplotlib":
+                    {
+                      "orientation": "portrait",
+                      "figure": { "ncols": 2, "nrows": 1 },
+                      "page_title":
+                        {
+                          "t": "Boxplot",
+                          "fontsize": 10,
+                          "ha": "left",
+                          "x": 0.05,
+                          "y": 0.98,
+                        },
+                      "xtick_params": { "which": "both" },
+                      "ytick_params": { "which": "both" },
+                      "legend":
+                        {
+                          "plot":
+                            {
+                              "loc": "upper right",
+                              "columnspacing": 1,
+                              "frameon": false,
+                              "handletextpad": 0,
+                              "borderaxespad": 1,
+                            },
+                        },
+                      "subplots_adjust":
+                        {
+                          "left": 0.1,
+                          "right": 0.9,
+                          "top": 0.86,
+                          "bottom": 0.25,
+                          "hspace": 0.34,
+                          "wspace": 0.14,
+                        },
+                    },
                 },
-              "handles": { "markersize": 10, "marker": "o", "color": "white" },
-            },
-          "subplots_adjust":
-            {
-              "left": 0.1,
-              "right": 0.9,
-              "top": 0.86,
-              "bottom": 0.25,
-              "hspace": 0.34,
-              "wspace": 0.14,
-            },
-          "annotate_text": { "fontsize": 6 },
-        },
       "library": {
-          "plot_options": ["annotate", "logy", "multispecies", "threshold", "normalise"],
-          "figsize": [13, 7],
-          "subplots_adjust":
-            {
-              "left": 0.0,
-              "right": 1.0,
-              "top": 1.0,
-              "bottom": 0.0,
-              "hspace": 0.0,
-              "wspace": 0.0,
-            },
-          "axis_title": { "fontsize": 16, "loc": "center" },
-          "xlabel": { "fontsize": 16 },
-          "ylabel": { "fontsize": 16 },
-          "xtick_params": { "labelsize": 14 },
-          "ytick_params": { "labelsize": 14 },
-          "annotate_text": { "fontsize": 13 },
-          "plot":
-            {
-              "boxprops": { "linewidth": 2 },
-              "medianprops": { "linewidth": 2 },
-              "whiskerprops": { "linewidth": 2 },
-              "capprops": { "linewidth": 2 },
-            },
-          "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.25
-          }
-        },
+                   "plot_options": ["annotate", "logy", "multispecies", "threshold", "normalise"],
+                   "figsize": [13, 7],
+                   "axis_title": { "fontsize": 16 },
+                   "xlabel": { "fontsize": 16 },
+                   "ylabel": { "fontsize": 16 },
+                   "xtick_params": { "labelsize": 14 },
+                   "ytick_params": { "labelsize": 14 },
+                   "annotate_text": { "fontsize": 13 },
+                   "matplotlib":
+                     {
+                       "subplots_adjust":
+                         {
+                           "left": 0.0,
+                           "right": 1.0,
+                           "top": 1.0,
+                           "bottom": 0.0,
+                           "hspace": 0.0,
+                           "wspace": 0.0,
+                         },
+                       "axis_title": { "loc": "center" },
+                       "plot":
+                         {
+                           "boxprops": { "linewidth": 2 },
+                           "medianprops": { "linewidth": 2 },
+                           "whiskerprops": { "linewidth": 2 },
+                           "capprops": { "linewidth": 2 },
+                         },
+                       "main_gs": { "height_ratios": [5, 1], "hspace": 0.25 },
+                     },
+                 },
       "tests": {
-        "plot_options": ["annotate", "logy", "multispecies", "threshold", "normalise"],
-        "figsize": [13, 7],
-        "annotate_text": { "fontsize": 13 },
-        "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.25
-          }
-      }
+                 "plot_options": ["annotate", "logy", "multispecies", "threshold", "normalise"],
+                 "figsize": [13, 7],
+                 "annotate_text": { "fontsize": 13 },
+                 "matplotlib": { "main_gs": { "height_ratios": [5, 1], "hspace": 0.25 } },
+               }
     },
   "heatmap":
     {
@@ -1885,109 +1818,106 @@
       "dashboard":
         {
           "plot_options": ["annotate", "bias"],
-          "cb": { "orientation": "vertical", "position": [0.012, 0.0, 0.012, 0.3] },
-          "axis_title": { "fontsize": 8.5, "loc": "left" },
+          "cb": { "orientation": "vertical" },
+          "axis_title": { "fontsize": 8.5 },
           "cb_tick_params": { "labelsize": 8 },
           "cb_label": { "fontsize": 8 },
           "xtick_params": { "labelsize": 7 },
-          "ytick_params": { "labelsize": 7, "labelrotation": 0 },
-          "xticklabels": { "ha": "right", "rotation_mode": "anchor", "fontsize": 9 },
-          "yticklabels": { "rotation": 0, "fontsize": 9 },
-          "plot":
+          "ytick_params": { "labelsize": 7 },
+          "matplotlib":
             {
-              "annot_kws":
-                { "fontsize": 10, "fontstyle": "italic", "color": "black" },
+              "cb": { "position": [0.012, 0.0, 0.012, 0.3] },
+              "axis_title": { "loc": "left" },
+              "ytick_params": { "labelrotation": 0 },
+              "xticklabels": { "ha": "right", "rotation_mode": "anchor", "fontsize": 9 },
+              "yticklabels": { "rotation": 0, "fontsize": 9 },
+              "plot":
+                {
+                  "annot_kws": { "fontsize": 10, "fontstyle": "italic", "color": "black" },
+                },
+              "multispecies": { "yticklabels": { "fontsize": 10, "fontweight": 600 } },
             },
-          "multispecies":
-            { "yticklabels": { "fontsize": 10, "fontweight": 600 } },
         },
       "report":
         {
           "plot_options": ["annotate", "bias", "multispecies"],
-          "orientation": "portrait",
-          "figure": { "ncols": 1, "nrows": 1},
-          "page_title":
-            {
-              "t": "Heatmap",
-              "fontsize": 10,
-              "ha": "left",
-              "x": 0.05,
-              "y": 0.98,
-            },
           "axis_title": { "fontsize": 10 },
           "xtick_params": { "labelsize": 7 },
-          "ytick_params": { "labelsize": 7, "labelrotation": 0 },
-          "subplots_adjust":
-            {
-              "left": 0.40,
-              "right": 0.9,
-              "top": 0.90,
-              "bottom": 0.1,
-              "hspace": 0.2,
-              "wspace": 0.1,
-            },
-          "cb": { "position": [0.45, 0.95, 0.52, 0.04] },
+          "ytick_params": { "labelsize": 7 },
           "cb_tick_params": { "labelsize": 8 },
           "cb_label": { "fontsize": 8 },
-          "xticklabels": { "ha": "right", "rotation_mode": "anchor", "fontsize": 9 },
-          "yticklabels": { "rotation": 0, "fontsize": 9 },
-          "plot":
+          "matplotlib":
             {
-              "annot_kws":
-                { "fontsize": 10, "fontstyle": "italic", "color": "black" },
+              "orientation": "portrait",
+              "figure": { "ncols": 1, "nrows": 1 },
+              "page_title": { "t": "Heatmap", "fontsize": 10, "ha": "left", "x": 0.05, "y": 0.98 },
+              "ytick_params": { "labelrotation": 0 },
+              "subplots_adjust":
+                {
+                  "left": 0.4,
+                  "right": 0.9,
+                  "top": 0.9,
+                  "bottom": 0.1,
+                  "hspace": 0.2,
+                  "wspace": 0.1,
+                },
+              "cb": { "position": [0.45, 0.95, 0.52, 0.04] },
+              "xticklabels": { "ha": "right", "rotation_mode": "anchor", "fontsize": 9 },
+              "yticklabels": { "rotation": 0, "fontsize": 9 },
+              "plot":
+                {
+                  "annot_kws": { "fontsize": 10, "fontstyle": "italic", "color": "black" },
+                },
+              "multispecies": { "yticklabels": { "fontsize": 10, "fontweight": 600 } },
             },
-          "multispecies":
-            { "yticklabels": { "fontsize": 10, "fontweight": 600 } },
         },
       "library":
         {
           "plot_options": ["annotate", "bias", "multispecies"],
           "figsize": [10, 7],
-          "subplots_adjust":
-            {
-              "left": 0.4,
-              "right": 1.0,
-              "top": 1.0,
-              "bottom": 0.04,
-              "hspace": 0.0,
-              "wspace": 0.0,
-            },
           "axis_title": { "fontsize": 16 },
           "xtick_params": { "labelsize": 14 },
-          "ytick_params": { "labelsize": 14, "labelrotation": 0 },
-          "cb": { "position": [0.05, 0.00, 0.9, 0.05] },
+          "ytick_params": { "labelsize": 14 },
           "cb_tick_params": { "labelsize": 14 },
           "cb_label": { "fontsize": 16 },
-          "xticklabels": { "rotation": 0, "fontsize": 16 },
-          "yticklabels": { "rotation": 0, "fontsize": 16 },
-          "multispecies":
-            { "yticklabels": { "fontsize": 16, "fontweight": 600 } },
-          "plot":
+          "matplotlib":
             {
-              "annot_kws":
-                { "fontsize": 16, "fontstyle": "italic", "color": "black" },
+              "subplots_adjust":
+                {
+                  "left": 0.4,
+                  "right": 1.0,
+                  "top": 1.0,
+                  "bottom": 0.04,
+                  "hspace": 0.0,
+                  "wspace": 0.0,
+                },
+              "ytick_params": { "labelrotation": 0 },
+              "cb": { "position": [0.05, 0.0, 0.9, 0.05] },
+              "xticklabels": { "rotation": 0, "fontsize": 16 },
+              "yticklabels": { "rotation": 0, "fontsize": 16 },
+              "multispecies": { "yticklabels": { "fontsize": 16, "fontweight": 600 } },
+              "plot":
+                {
+                  "annot_kws": { "fontsize": 16, "fontstyle": "italic", "color": "black" },
+                },
+              "main_gs": { "height_ratios": [5, 1], "hspace": 0.25 },
             },
-          "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.25
-          }
         },
       "tests":
         {
           "plot_options": ["annotate", "bias", "multispecies"],
           "figsize": [13, 7],
-          "cb": { "position": [0.4, 0.02, 0.5, 0.05] },
-          "xticklabels": { "rotation": 0, "fontsize": 16 },
-          "yticklabels": { "rotation": 0, "fontsize": 16 },
-          "plot":
+          "matplotlib":
             {
-              "annot_kws":
-                { "fontsize": 16, "fontstyle": "italic", "color": "black" },
+              "cb": { "position": [0.4, 0.02, 0.5, 0.05] },
+              "xticklabels": { "rotation": 0, "fontsize": 16 },
+              "yticklabels": { "rotation": 0, "fontsize": 16 },
+              "plot":
+                {
+                  "annot_kws": { "fontsize": 16, "fontstyle": "italic", "color": "black" },
+                },
+              "main_gs": { "height_ratios": [5, 1], "hspace": 0.1 },
             },
-          "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.1
-          }
         },
     },
   "table":
@@ -2026,114 +1956,115 @@
       "dashboard":
         {
           "plot_options": ["bias"],
-          "axis_title": { "fontsize": 8.5, "loc": "left" },
-          "cell_height": 1.3,
+          "axis_title": { "fontsize": 8.5 },
           "fontsize": 8.0,
-          "plot":
+          "matplotlib":
             {
-              "loc": "center left",
-              "rowLoc": "right",
-              "colLoc": "center",
-              "cellLoc": "center",
+              "axis_title": { "loc": "left" },
+              "cell_height": 1.3,
+              "plot":
+                {
+                  "loc": "center left",
+                  "rowLoc": "right",
+                  "colLoc": "center",
+                  "cellLoc": "center",
+                },
             },
         },
       "report":
         {
           "plot_options": ["bias", "multispecies"],
-          "orientation": "portrait",
-          "figure": { "ncols": 1, "nrows": 1 },
-          "page_title":
-            {
-              "t": "Table",
-              "fontsize": 10,
-              "ha": "left",
-              "x": 0.05,
-              "y": 0.98,
-            },
           "axis_title": { "fontsize": 12 },
-          "subplots_adjust":
-            {
-              "left": 0.05,
-              "right": 0.98,
-              "top": 0.90,
-              "bottom": 0.06,
-              "hspace": 0.2,
-              "wspace": 0.01,
-            },
           "legend":
             {
-              "plot":
-                {
-                  "loc": "upper right",
-                  "columnspacing": 1,
-                  "frameon": false,
-                  "handletextpad": 0,
-                  "ncol": 2,
-                  "borderaxespad": 1,
-                  "fontsize": 10.0,
-                },
+              "plot": { "ncol": 2, "fontsize": 10.0 },
               "handles": { "markersize": 10, "marker": "o", "color": "white" },
             },
-          "cell_height": 1.75,
           "fontsize": 10,
-          "plot":
+          "matplotlib":
             {
-              "loc": "upper left",
-              "rowLoc": "right",
-              "colLoc": "center",
-              "cellLoc": "center",
+              "orientation": "portrait",
+              "figure": { "ncols": 1, "nrows": 1 },
+              "page_title": { "t": "Table", "fontsize": 10, "ha": "left", "x": 0.05, "y": 0.98 },
+              "subplots_adjust":
+                {
+                  "left": 0.05,
+                  "right": 0.98,
+                  "top": 0.9,
+                  "bottom": 0.06,
+                  "hspace": 0.2,
+                  "wspace": 0.01,
+                },
+              "legend":
+                {
+                  "plot":
+                    {
+                      "loc": "upper right",
+                      "columnspacing": 1,
+                      "frameon": false,
+                      "handletextpad": 0,
+                      "borderaxespad": 1,
+                    },
+                },
+              "cell_height": 1.75,
+              "plot":
+                {
+                  "loc": "upper left",
+                  "rowLoc": "right",
+                  "colLoc": "center",
+                  "cellLoc": "center",
+                },
             },
         },
       "library":
         {
           "plot_options": ["bias", "multispecies"],
           "figsize": [13, 7],
-          "subplots_adjust":
+          "matplotlib":
             {
-              "left": 0.0,
-              "right": 1.0,
-              "top": 1.0,
-              "bottom": 0.0,
-              "hspace": 0.0,
-              "wspace": 0.0,
+              "subplots_adjust":
+                {
+                  "left": 0.0,
+                  "right": 1.0,
+                  "top": 1.0,
+                  "bottom": 0.0,
+                  "hspace": 0.0,
+                  "wspace": 0.0,
+                },
+              "cell_height": 2.2,
+              "plot":
+                {
+                  "loc": "center left",
+                  "rowLoc": "right",
+                  "colLoc": "center",
+                  "cellLoc": "center",
+                },
+              "main_gs": { "height_ratios": [5, 1], "hspace": 0.25 },
+              "axis_title": { "fontsize": 16 },
+              "fontsize": 18,
             },
-          "axis_title": { "fontsize": 16 },
-          "cell_height": 2.2,
-          "fontsize": 18,
-          "plot":
+          "plotly":
             {
-              "loc": "center left",
-              "rowLoc": "right",
-              "colLoc": "center",
-              "cellLoc": "center",
+              "axis_title": { "fontsize": 12 },
+              "fontsize": 12,
+              "margin": { "l": 10, "r": 10, "b": 10, "t": 30 },
             },
-          "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.25
-          }
-        },
-      "website":
-        {
-          "plot_options": ["bias", "multispecies"],
-          "axis_title": { "fontsize": 12 },
-          "fontsize": 12,
-          "margin": { "l": 10, "r": 10, "b": 10, "t": 30 },
         },
       "tests":
         {
           "plot_options": ["bias", "multispecies"],
           "figsize": [13, 7],
-          "plot":
+          "matplotlib":
             {
-              "loc": "center left",
-              "rowLoc": "right",
-              "colLoc": "center",
-              "cellLoc": "center",
+              "plot":
+                {
+                  "loc": "center left",
+                  "rowLoc": "right",
+                  "colLoc": "center",
+                  "cellLoc": "center",
+                },
+              "main_gs": { "height_ratios": [5, 1], "hspace": 0.1 },
             },
-          "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.1
-          }
         },
     },
   "statsummary":
@@ -2173,159 +2104,158 @@
         {
           "plot_options": ["bias"],
           "basic": ["Mean", "StdDev", "p5", "Median", "p95"],
-          "model_bias":
-            ["Mean_bias", "StdDev_bias", "NMB", "NME", "RMSE", "r"],
-          "axis_title": { "fontsize": 8.5, "loc": "left" },
-          "cell_height": 1.3,
+          "model_bias": ["Mean_bias", "StdDev_bias", "NMB", "NME", "RMSE", "r"],
+          "axis_title": { "fontsize": 8.5 },
           "fontsize": 7,
-          "plot":
+          "matplotlib":
             {
-              "loc": "center left",
-              "rowLoc": "right",
-              "colLoc": "center",
-              "cellLoc": "center",
+              "axis_title": { "loc": "left" },
+              "cell_height": 1.3,
+              "plot":
+                {
+                  "loc": "center left",
+                  "rowLoc": "right",
+                  "colLoc": "center",
+                  "cellLoc": "center",
+                },
             },
         },
       "report":
         {
           "plot_options": ["bias", "multispecies"],
           "basic": ["Mean", "StdDev", "p5", "Median", "p95"],
-          "model_bias":
-            ["Mean_bias", "StdDev_bias", "NMB", "NME", "RMSE", "r"],
-          "orientation": "portrait",
-          "figure": { "ncols": 1, "nrows": 1 },
-          "page_title":
-            {
-              "t": "StatSummary",
-              "fontsize": 10,
-              "ha": "left",
-              "x": 0.05,
-              "y": 0.98,
-            },
+          "model_bias": ["Mean_bias", "StdDev_bias", "NMB", "NME", "RMSE", "r"],
           "axis_title": { "fontsize": 12 },
-          "subplots_adjust":
-            {
-              "left": 0.05,
-              "right": 0.98,
-              "top": 0.90,
-              "bottom": 0.06,
-              "hspace": 0.2,
-              "wspace": 0.01,
-            },
           "legend":
             {
-              "plot":
-                {
-                  "loc": "upper right",
-                  "columnspacing": 1,
-                  "frameon": false,
-                  "handletextpad": 0,
-                  "ncol": 2,
-                  "borderaxespad": 1,
-                  "fontsize": 10.0,
-                },
+              "plot": { "ncol": 2, "fontsize": 10.0 },
               "handles": { "markersize": 10, "marker": "o", "color": "white" },
             },
-          "cell_height": 1.75,
           "fontsize": 10.0,
-          "plot":
-            { "loc": "upper left", "colLoc": "center", "cellLoc": "center" },
+          "matplotlib":
+            {
+              "orientation": "portrait",
+              "figure": { "ncols": 1, "nrows": 1 },
+              "page_title":
+                {
+                  "t": "StatSummary",
+                  "fontsize": 10,
+                  "ha": "left",
+                  "x": 0.05,
+                  "y": 0.98,
+                },
+              "subplots_adjust":
+                {
+                  "left": 0.05,
+                  "right": 0.98,
+                  "top": 0.9,
+                  "bottom": 0.06,
+                  "hspace": 0.2,
+                  "wspace": 0.01,
+                },
+              "legend":
+                {
+                  "plot":
+                    {
+                      "loc": "upper right",
+                      "columnspacing": 1,
+                      "frameon": false,
+                      "handletextpad": 0,
+                      "borderaxespad": 1,
+                    },
+                },
+              "cell_height": 1.75,
+              "plot": { "loc": "upper left", "colLoc": "center", "cellLoc": "center" },
+            },
         },
       "library":
         {
           "plot_options": ["bias", "multispecies"],
           "basic": ["Mean", "StdDev", "p5", "Median", "p95"],
-          "model_bias":
-            ["Mean_bias", "StdDev_bias", "NMB", "NME", "RMSE", "r"],
+          "model_bias": ["Mean_bias", "StdDev_bias", "NMB", "NME", "RMSE", "r"],
           "figsize": [13, 7],
-          "subplots_adjust":
+          "matplotlib":
             {
-              "left": 0.0,
-              "right": 1.0,
-              "top": 1.0,
-              "bottom": 0.0,
-              "hspace": 0.0,
-              "wspace": 0.0,
+              "subplots_adjust":
+                {
+                  "left": 0.0,
+                  "right": 1.0,
+                  "top": 1.0,
+                  "bottom": 0.0,
+                  "hspace": 0.0,
+                  "wspace": 0.0,
+                },
+              "cell_height": 2.2,
+              "plot":
+                {
+                  "loc": "center left",
+                  "rowLoc": "right",
+                  "colLoc": "center",
+                  "cellLoc": "center",
+                },
+              "main_gs": { "height_ratios": [5, 1], "hspace": 0.25 },
+              "axis_title": { "fontsize": 16 },
+              "fontsize": 18,
             },
-          "axis_title": { "fontsize": 16 },
-          "cell_height": 2.2,
-          "fontsize": 18,
-          "plot":
+          "plotly":
             {
-              "loc": "center left",
-              "rowLoc": "right",
-              "colLoc": "center",
-              "cellLoc": "center",
+              "axis_title": { "fontsize": 12 },
+              "fontsize": 12,
+              "margin": { "l": 10, "r": 10, "b": 10, "t": 30 },
             },
-          "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.25
-          }
-        },
-      "website":
-        {
-          "plot_options": ["bias", "multispecies"],
-          "basic": ["Mean", "StdDev", "p5", "Median", "p95"],
-          "model_bias":
-            ["Mean_bias", "StdDev_bias", "NMB", "NME", "RMSE", "r"],
-          "axis_title": { "fontsize": 12 },
-          "fontsize": 12,
-          "margin": { "l": 10, "r": 10, "b": 10, "t": 30 },
         },
       "tests":
         {
-          "basic":
-            [
-              "Mean",
-              "StdDev",
-              "Median",
-              "Var",
-              "Min",
-              "Max",
-              "NData",
-              "Data%",
-              "Exceedances",
-              "p1",
-              "p5",
-              "p10",
-              "p25",
-              "p75",
-              "p90",
-              "p95",
-              "p99",
-            ],
-          "model_bias":
-            [
-              "MB",
-              "NMB",
-              "ME",
-              "NME",
-              "MNB",
-              "MNE",
-              "MFB",
-              "MFE",
-              "RMSE",
-              "NRMSE",
-              "COE",
-              "FAC2",
-              "IOA",
-              "r",
-              "r2",
-              "UPA",
-            ],
+          "basic": [
+            "Mean",
+            "StdDev",
+            "Median",
+            "Var",
+            "Min",
+            "Max",
+            "NData",
+            "Data%",
+            "Exceedances",
+            "p1",
+            "p5",
+            "p10",
+            "p25",
+            "p75",
+            "p90",
+            "p95",
+            "p99"
+          ],
+          "model_bias": [
+            "MB",
+            "NMB",
+            "ME",
+            "NME",
+            "MNB",
+            "MNE",
+            "MFB",
+            "MFE",
+            "RMSE",
+            "NRMSE",
+            "COE",
+            "FAC2",
+            "IOA",
+            "r",
+            "r2",
+            "UPA"
+          ],
           "figsize": [13, 7],
-          "plot":
-            {
-              "loc": "center left",
-              "rowLoc": "right",
-              "colLoc": "center",
-              "cellLoc": "center",
-            },
           "plot_options": ["bias", "multispecies"],
-          "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.1
-          }
+          "matplotlib":
+            {
+              "plot":
+                {
+                  "loc": "center left",
+                  "rowLoc": "right",
+                  "colLoc": "center",
+                  "cellLoc": "center",
+                },
+              "main_gs": { "height_ratios": [5, 1], "hspace": 0.1 },
+            },
         },
     },
   "taylor":
@@ -2380,7 +2310,7 @@
       "dashboard":
         {
           "plot_options": ["annotate", "perstation"],
-          "axis_title": { "fontsize": 8.5, "loc": "left" },
+          "axis_title": { "fontsize": 8.5 },
           "xylabel": { "fontsize": 8 },
           "rlabel": { "fontsize": 8 },
           "xytick_params": { "fontsize": 7 },
@@ -2389,89 +2319,99 @@
           "marker_annotate_rounding": 2,
           "plot": { "markersize": 6 },
           "perstation_max_points": null,
+          "matplotlib": { "axis_title": { "loc": "left" } },
         },
       "report":
         {
           "plot_options": ["annotate", "individual", "perstation"],
-          "orientation": "portrait",
-          "figure": { "ncols": 2, "nrows": 3 },
-          "page_title":
-            {
-              "t": "Taylor diagram",
-              "fontsize": 10,
-              "ha": "left",
-              "x": 0.05,
-              "y": 0.98,
-            },
-          "axis_title": { "fontsize": 8, "pad": 10 },
+          "axis_title": { "fontsize": 8 },
           "xylabel": { "fontsize": 8 },
           "rlabel": { "fontsize": 8 },
           "xytick_params": { "fontsize": 7 },
           "rtick_params": { "fontsize": 7 },
           "legend":
             {
-              "plot":
-                {
-                  "loc": "upper right",
-                  "columnspacing": 1,
-                  "frameon": false,
-                  "handletextpad": 0,
-                  "ncol": 4,
-                  "borderaxespad": 1,
-                  "fontsize": 10.0,
-                },
+              "plot": { "ncol": 4, "fontsize": 10.0 },
               "handles": { "markersize": 10, "marker": "o", "color": "white" },
-            },
-          "subplots_adjust":
-            {
-              "left": 0.06,
-              "right": 0.98,
-              "top": 0.89,
-              "bottom": 0.06,
-              "hspace": 0.30,
-              "wspace": 0.10,
             },
           "annotate_text": { "fontsize": 6 },
           "plot": { "marker": "o", "linestyle": "None" },
+          "matplotlib":
+            {
+              "orientation": "portrait",
+              "figure": { "ncols": 2, "nrows": 3 },
+              "page_title":
+                {
+                  "t": "Taylor diagram",
+                  "fontsize": 10,
+                  "ha": "left",
+                  "x": 0.05,
+                  "y": 0.98,
+                },
+              "axis_title": { "pad": 10 },
+              "legend":
+                {
+                  "plot":
+                    {
+                      "loc": "upper right",
+                      "columnspacing": 1,
+                      "frameon": false,
+                      "handletextpad": 0,
+                      "borderaxespad": 1,
+                    },
+                },
+              "subplots_adjust":
+                {
+                  "left": 0.06,
+                  "right": 0.98,
+                  "top": 0.89,
+                  "bottom": 0.06,
+                  "hspace": 0.3,
+                  "wspace": 0.1,
+                },
+            },
         },
       "library":
         {
           "plot_options": ["annotate", "perstation"],
           "figsize": [5, 5],
-          "subplots_adjust":
-            {
-              "left": 0.0,
-              "right": 1.0,
-              "top": 1.0,
-              "bottom": 0.0,
-              "hspace": 0.0,
-              "wspace": 0.0,
-            },
-          "axis_title": { "fontsize": 11, "loc": "center", "pad": 10 },
+          "axis_title": { "fontsize": 11 },
           "xylabel": { "fontsize": 10 },
           "rlabel": { "fontsize": 10 },
           "xytick_params": { "fontsize": 10 },
           "rtick_params": { "fontsize": 10 },
           "legend":
             {
-              "plot":
-                {
-                  "loc": "upper left",
-                  "columnspacing": 0.5,
-                  "frameon": false,
-                  "handletextpad": 0,
-                  "ncol": 4,
-                  "borderaxespad": 0,
-                  "fontsize": 11.0
-                },
+              "plot": { "ncol": 4, "fontsize": 11.0 },
               "handles": { "markersize": 11, "marker": "o", "color": "white" },
             },
           "annotate_text": { "fontsize": 13 },
           "plot": { "marker": "o", "linestyle": "None" },
-          "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.25
-          }
+          "matplotlib":
+            {
+              "subplots_adjust":
+                {
+                  "left": 0.0,
+                  "right": 1.0,
+                  "top": 1.0,
+                  "bottom": 0.0,
+                  "hspace": 0.0,
+                  "wspace": 0.0,
+                },
+              "axis_title": { "loc": "center", "pad": 10 },
+              "legend":
+                {
+                  "plot":
+                    {
+                      "loc": "upper left",
+                      "columnspacing": 0.5,
+                      "frameon": false,
+                      "handletextpad": 0,
+                      "borderaxespad": 0,
+                    },
+                },
+              "main_gs": { "height_ratios": [5, 1], "hspace": 0.25 },
+            },
         },
       "tests":
         {
@@ -2482,10 +2422,7 @@
           "xytick_params": { "fontsize": 10 },
           "rtick_params": { "fontsize": 10 },
           "annotate_text": { "fontsize": 13 },
-          "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.1
-          }
+          "matplotlib": { "main_gs": { "height_ratios": [5, 1], "hspace": 0.1 } },
         },
     },
   "fairmode-target":
@@ -2644,7 +2581,7 @@
         {
           "plot_options": ["annotate"],
           "remove_spines": ["top", "right"],
-          "axis_title": { "fontsize": 8.5, "loc": "center" },
+          "axis_title": { "fontsize": 8.5 },
           "xlabel": { "fontsize": 8 },
           "ylabel": { "fontsize": 8 },
           "xtick_params": { "labelsize": 7 },
@@ -2652,20 +2589,11 @@
           "plot": { "markersize": 5 },
           "annotate_text": { "fontsize": 8 },
           "marker_annotate_rounding": 2,
+          "matplotlib": { "axis_title": { "loc": "center" } },
         },
       "report":
         {
           "plot_options": ["annotate", "individual"],
-          "orientation": "portrait",
-          "figure": { "ncols": 1, "nrows": 2 },
-          "page_title":
-            {
-              "t": "Fairmode target",
-              "fontsize": 10,
-              "ha": "left",
-              "x": 0.05,
-              "y": 0.98,
-            },
           "axis_title": { "fontsize": 8 },
           "xlabel": { "fontsize": 8 },
           "ylabel": { "fontsize": 8 },
@@ -2673,70 +2601,84 @@
           "ytick_params": { "labelsize": 7 },
           "legend":
             {
-              "plot":
-                {
-                  "loc": "upper right",
-                  "columnspacing": 0.5,
-                  "frameon": false,
-                  "handletextpad": 0,
-                  "ncol": 4,
-                  "borderaxespad": 0,
-                  "fontsize": 10,
-                },
+              "plot": { "ncol": 4, "fontsize": 10 },
               "handles": { "markersize": 10, "marker": "o", "color": "white" },
             },
           "plot": { "markersize": 5 },
           "annotate_text": { "fontsize": 8 },
+          "matplotlib":
+            {
+              "orientation": "portrait",
+              "figure": { "ncols": 1, "nrows": 2 },
+              "page_title":
+                {
+                  "t": "Fairmode target",
+                  "fontsize": 10,
+                  "ha": "left",
+                  "x": 0.05,
+                  "y": 0.98,
+                },
+              "legend":
+                {
+                  "plot":
+                    {
+                      "loc": "upper right",
+                      "columnspacing": 0.5,
+                      "frameon": false,
+                      "handletextpad": 0,
+                      "borderaxespad": 0,
+                    },
+                },
+            },
         },
       "library":
         {
           "plot_options": ["annotate"],
           "figsize": [5, 5],
-          "subplots_adjust":
-            {
-              "left": 0.0,
-              "right": 1.0,
-              "top": 1.0,
-              "bottom": 0.0,
-              "hspace": 0.0,
-              "wspace": 0.0,
-            },
-          "axis_title": { "fontsize": 11, "loc": "center", "pad": 10 },
+          "axis_title": { "fontsize": 11 },
           "xlabel": { "fontsize": 12 },
           "ylabel": { "fontsize": 12 },
           "xtick_params": { "labelsize": 12 },
           "ytick_params": { "labelsize": 12 },
           "legend":
             {
-              "plot":
-                {
-                  "loc": "upper left",
-                  "columnspacing": 0.5,
-                  "frameon": false,
-                  "handletextpad": 0,
-                  "ncol": 4,
-                  "borderaxespad": 0,
-                  "fontsize": 10.0,
-                },
-              "handles":
-                { "markersize": 10.5, "marker": "o", "color": "white" },
+              "plot": { "ncol": 4, "fontsize": 10.0 },
+              "handles": { "markersize": 10.5, "marker": "o", "color": "white" },
             },
           "plot": { "markersize": 5 },
-          "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.25
-          },
           "annotate_text": { "fontsize": 10 },
+          "matplotlib":
+            {
+              "subplots_adjust":
+                {
+                  "left": 0.0,
+                  "right": 1.0,
+                  "top": 1.0,
+                  "bottom": 0.0,
+                  "hspace": 0.0,
+                  "wspace": 0.0,
+                },
+              "axis_title": { "loc": "center", "pad": 10 },
+              "legend":
+                {
+                  "plot":
+                    {
+                      "loc": "upper left",
+                      "columnspacing": 0.5,
+                      "frameon": false,
+                      "handletextpad": 0,
+                      "borderaxespad": 0,
+                    },
+                },
+              "main_gs": { "height_ratios": [5, 1], "hspace": 0.25 },
+            },
         },
       "tests": 
-      { 
-        "plot_options": ["annotate"], 
-        "figsize": [5, 5], 
+      {
+        "plot_options": ["annotate"],
+        "figsize": [5, 5],
         "annotate_text": { "fontsize": 10 },
-        "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.1
-        } 
+        "matplotlib": { "main_gs": { "height_ratios": [5, 1], "hspace": 0.1 } },
       },
     },
   "fairmode-statsummary":
@@ -2899,112 +2841,114 @@
         {
           "plot_options": [],
           "marker_annotate_rounding": 2,
-          "auxiliar":
+          "matplotlib":
             {
-              "row_title": { "fontsize": 7.7 },
-              "units": { "position": [-0.19, -1], "fontsize": 7.5 },
-              "right_dot": { "s": 60 },
-              "station_dots":
+              "auxiliar":
                 {
-                  "tick_params": { "axis": "x", "labelsize": 6 },
-                  "markersize": 3.5,
+                  "row_title": { "fontsize": 7.7 },
+                  "units": { "position": [-0.19, -1], "fontsize": 7.5 },
+                  "right_dot": { "s": 60 },
+                  "station_dots":
+                    {
+                      "tick_params": { "axis": "x", "labelsize": 6 },
+                      "markersize": 3.5,
+                    },
                 },
             },
         },
       "report":
         {
           "plot_options": ["individual"],
-          "orientation": "portrait",
-          "subplots_adjust": { "left": 0.25, "top": 0.85 },
-          "figure": { "nrows": 1, "ncols": 1 },
-          "page_title":
-            {
-              "t": "Fairmode statistics summary",
-              "fontsize": 12,
-              "ha": "left",
-              "x": 0.05,
-              "y": 0.98,
-            },
-          "auxiliar":
-            {
-              "units": { "position": [-0.19, -0.45], "fontsize": 9 },
-              "right_dot": { "s": 170 },
-              "station_dots":
-                {
-                  "tick_params": { "axis": "x", "labelsize": 10 },
-                  "markersize": 7,
-                },
-              "row_title": { "position": [-3, 0.5], "fontsize": 11 },
-              "description": { "position": [-5.8, 0.95], "fontsize": 11 },
-              "separator": { "position": [-3, -1.8], "fontsize": 11 },
-            },
           "legend":
             {
-              "plot":
-                {
-                  "ncol": 4,
-                  "fontsize": 10,
-                  "loc": "upper right",
-                  "columnspacing": 0.5,
-                  "frameon": false,
-                  "handletextpad": 0,
-                  "borderaxespad": 0,
-                },
+              "plot": { "ncol": 4, "fontsize": 10 },
               "handles": { "markersize": 10, "marker": "o", "color": "white" },
+            },
+          "matplotlib":
+            {
+              "orientation": "portrait",
+              "subplots_adjust": { "left": 0.25, "top": 0.85 },
+              "figure": { "nrows": 1, "ncols": 1 },
+              "page_title":
+                {
+                  "t": "Fairmode statistics summary",
+                  "fontsize": 12,
+                  "ha": "left",
+                  "x": 0.05,
+                  "y": 0.98,
+                },
+              "auxiliar":
+                {
+                  "units": { "position": [-0.19, -0.45], "fontsize": 9 },
+                  "right_dot": { "s": 170 },
+                  "station_dots": { "tick_params": { "axis": "x", "labelsize": 10 }, "markersize": 7 },
+                  "row_title": { "position": [-3, 0.5], "fontsize": 11 },
+                  "description": { "position": [-5.8, 0.95], "fontsize": 11 },
+                  "separator": { "position": [-3, -1.8], "fontsize": 11 },
+                },
+              "legend":
+                {
+                  "plot":
+                    {
+                      "loc": "upper right",
+                      "columnspacing": 0.5,
+                      "frameon": false,
+                      "handletextpad": 0,
+                      "borderaxespad": 0,
+                    },
+                },
             },
         },
       "library":
         {
           "plot_options": [],
           "figsize": [10, 5],
-          "subplots_adjust": { "left": 0.3 },
           "legend":
             {
-              "plot":
-                {
-                  "ncol": 4,
-                  "fontsize": 10,
-                  "loc": "upper left",
-                  "columnspacing": 0.5,
-                  "frameon": false,
-                  "handletextpad": 0,
-                  "borderaxespad": 0,
-                },
+              "plot": { "ncol": 4, "fontsize": 10 },
               "handles": { "markersize": 10, "marker": "o", "color": "white" },
             },
-          "auxiliar":
+          "matplotlib":
             {
-              "row_title": { "fontsize": 9.5 },
-              "units": { "position": [-0.19, -0.8], "fontsize": 9 },
-              "right_dot": { "s": 100 },
-              "station_dots":
+              "subplots_adjust": { "left": 0.3 },
+              "legend":
                 {
-                  "tick_params": { "axis": "x", "labelsize": 10 },
-                  "markersize": 4,
+                  "plot":
+                    {
+                      "loc": "upper left",
+                      "columnspacing": 0.5,
+                      "frameon": false,
+                      "handletextpad": 0,
+                      "borderaxespad": 0,
+                    },
                 },
+              "auxiliar":
+                {
+                  "row_title": { "fontsize": 9.5 },
+                  "units": { "position": [-0.19, -0.8], "fontsize": 9 },
+                  "right_dot": { "s": 100 },
+                  "station_dots": { "tick_params": { "axis": "x", "labelsize": 10 }, "markersize": 4 },
+                },
+              "main_gs": { "height_ratios": [5, 1], "hspace": 0.25 },
             },
-          "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.25
-          }
         },
         "tests": {
-          "plot_options": [],
-          "figsize": [5, 5], 
-          "auxiliar":
-            {
-              "units": { "position": [-0.19, -0.8], "fontsize": 9 },
-              "station_dots":
-                {
-                  "tick_params": { "axis": "x", "labelsize": 10 },
-                  "markersize": 4,
-                },
-            },
-          "main_gs": {
-            "height_ratios": [5, 1], 
-            "hspace": 0.1
-          }
-        }
+                   "plot_options": [],
+                   "figsize": [5, 5],
+                   "matplotlib":
+                     {
+                       "auxiliar":
+                         {
+                           "units": { "position": [-0.19, -0.8], "fontsize": 9 },
+                           "station_dots":
+                             {
+                               "tick_params": { "axis": "x", "labelsize": 10 },
+                               "markersize": 4,
+                             },
+                         },
+                       "main_gs": { "height_ratios": [5, 1], "hspace": 0.1 },
+                     },
+                 }
     },
     "contingencytable":
       {
@@ -3042,75 +2986,86 @@
         "dashboard":
           {
             "plot_options": ["gerrity"],
-            "axis_title": { "fontsize": 8.5, "loc": "left" },
-            "cell_height": 1.3,
+            "axis_title": { "fontsize": 8.5 },
             "fontsize": 7.0,
             "gerrity_row_limit": 10,
-            "plot":
+            "matplotlib":
               {
-                "loc": "center left",
-                "rowLoc": "right",
-                "colLoc": "center",
-                "cellLoc": "center",
+                "axis_title": { "loc": "left" },
+                "cell_height": 1.3,
+                "plot":
+                  {
+                    "loc": "center left",
+                    "rowLoc": "right",
+                    "colLoc": "center",
+                    "cellLoc": "center",
+                  },
               },
           },
         "report":
           {
             "plot_options": ["gerrity"],
-            "orientation": "portrait",
-            "figure": { "ncols": 1, "nrows": 1 },
             "gerrity_row_limit": 30,
-            "page_title":
-              {
-                "t": "Contingency table",
-                "fontsize": 10,
-                "ha": "left",
-                "x": 0.05,
-                "y": 0.98,
-              },
-            "axis_title": { "fontsize": 12, "pad": 20 },
-            "subplots_adjust": {
-              "contingency":
-                {
-                  "left": 0.2,
-                  "right": 0.98,
-                  "top": 0.80,
-                  "bottom": 0.06,
-                  "hspace": 0.2,
-                  "wspace": 0.01,
-                },
-              "gerrity":
-                {
-                  "left": 0.04,
-                  "right": 0.98,
-                  "top": 0.90,
-                  "bottom": 0.06,
-                  "hspace": 0.2,
-                  "wspace": 0.01,
-                },
-            },
+            "axis_title": { "fontsize": 12 },
             "legend":
               {
-                "plot":
-                  {
-                    "loc": "upper right",
-                    "columnspacing": 1,
-                    "frameon": false,
-                    "handletextpad": 0,
-                    "ncol": 2,
-                    "borderaxespad": 1,
-                    "fontsize": 10.0,
-                  },
+                "plot": { "ncol": 2, "fontsize": 10.0 },
                 "handles": { "markersize": 10, "marker": "o", "color": "white" },
               },
-            "cell_height": 1.75,
             "fontsize": 10,
-            "plot":
+            "matplotlib":
               {
-                "loc": "upper left",
-                "rowLoc": "center",
-                "colLoc": "center",
-                "cellLoc": "center",
+                "orientation": "portrait",
+                "figure": { "ncols": 1, "nrows": 1 },
+                "page_title":
+                  {
+                    "t": "Contingency table",
+                    "fontsize": 10,
+                    "ha": "left",
+                    "x": 0.05,
+                    "y": 0.98,
+                  },
+                "axis_title": { "pad": 20 },
+                "subplots_adjust":
+                  {
+                    "contingency":
+                      {
+                        "left": 0.2,
+                        "right": 0.98,
+                        "top": 0.8,
+                        "bottom": 0.06,
+                        "hspace": 0.2,
+                        "wspace": 0.01,
+                      },
+                    "gerrity":
+                      {
+                        "left": 0.04,
+                        "right": 0.98,
+                        "top": 0.9,
+                        "bottom": 0.06,
+                        "hspace": 0.2,
+                        "wspace": 0.01,
+                      },
+                  },
+                "legend":
+                  {
+                    "plot":
+                      {
+                        "loc": "upper right",
+                        "columnspacing": 1,
+                        "frameon": false,
+                        "handletextpad": 0,
+                        "borderaxespad": 1,
+                      },
+                  },
+                "cell_height": 1.75,
+                "plot":
+                  {
+                    "loc": "upper left",
+                    "rowLoc": "center",
+                    "colLoc": "center",
+                    "cellLoc": "center",
+                  },
               },
           },
         "library":
@@ -3118,46 +3073,46 @@
             "plot_options": ["gerrity"],
             "figsize": [13, 7],
             "gerrity_row_limit": null,
-            "subplots_adjust":
-              {
-                "left": 0.0,
-                "right": 1.0,
-                "top": 1.0,
-                "bottom": 0.0,
-                "hspace": 0.0,
-                "wspace": 0.0,
-              },
             "axis_title": { "fontsize": 16 },
-            "cell_height": 2.2,
             "fontsize": 18,
-            "plot":
+            "matplotlib":
               {
-                "loc": "center left",
-                "rowLoc": "right",
-                "colLoc": "center",
-                "cellLoc": "center",
+                "subplots_adjust":
+                  {
+                    "left": 0.0,
+                    "right": 1.0,
+                    "top": 1.0,
+                    "bottom": 0.0,
+                    "hspace": 0.0,
+                    "wspace": 0.0,
+                  },
+                "cell_height": 2.2,
+                "plot":
+                  {
+                    "loc": "center left",
+                    "rowLoc": "right",
+                    "colLoc": "center",
+                    "cellLoc": "center",
+                  },
+                "main_gs": { "height_ratios": [5, 1], "hspace": 0.25 },
               },
-            "main_gs": {
-              "height_ratios": [5, 1], 
-              "hspace": 0.25
-            }
           },
         "tests":
           {
             "plot_options": ["gerrity"],
             "figsize": [13, 7],
             "gerrity_row_limit": null,
-            "plot":
+            "matplotlib":
               {
-                "loc": "center left",
-                "rowLoc": "right",
-                "colLoc": "center",
-                "cellLoc": "center",
+                "plot":
+                  {
+                    "loc": "center left",
+                    "rowLoc": "right",
+                    "colLoc": "center",
+                    "cellLoc": "center",
+                  },
+                "main_gs": { "height_ratios": [5, 1], "hspace": 0.1 },
               },
-            "main_gs": {
-              "height_ratios": [5, 1], 
-              "hspace": 0.1
-            }
           },
       },
 }

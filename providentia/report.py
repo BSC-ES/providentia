@@ -218,7 +218,7 @@ class Report:
                 open(self.plot_characteristics_filename)
             )
             self.plot_characteristics_templates = expand_plot_characteristics(
-                plot_characteristics, "report"
+                plot_characteristics, "report", engine="matplotlib"
             )
             self.plot_characteristics = {}
 

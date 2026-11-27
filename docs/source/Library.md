@@ -59,9 +59,9 @@ provi = prv.Providentia(network='EBAS', species='sconco3', start_date='20180101'
 
 Fields that are not passed take the same defaults as the dashboard when it is launched without a configuration file (network `GHOST`, species `sconco3`, resolution `hourly`, from `20180101` to `20190101`). Without a configuration file there are no sections or subsections.
 
-By default the plots are drawn with matplotlib. To get plotly figures instead, pass `backend='plotly'` when creating the object, which then applies to every plot it makes:
+By default the plots are drawn with matplotlib. To get plotly figures instead, pass `engine='plotly'` when creating the object, which then applies to every plot it makes:
 ```
-provi = prv.Providentia('interactive_template.conf', backend='plotly')
+provi = prv.Providentia('interactive_template.conf', engine='plotly')
 ```
 
 At the moment only the timeseries, the map, the table, the statsummary and the distribution can be drawn with plotly, and the plotly figures do not apply the plot options yet (e.g. `annotate`, `threshold`), apart from `bias`, `hidedata`, `logx` and `logy`. In the plotly table, a networkspecies or subsection repeated in the rows below is left blank instead of merged.

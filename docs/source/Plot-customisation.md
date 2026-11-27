@@ -4,7 +4,7 @@
 
 ### General edits
 
-If you want to edit the style of your plots, you will need to edit the file `settings/plot_characteristics.yaml`. There you will find parameters per plot type, and within those, parameters for each of the available modes, as well as general ones that are applied to all modes.
+If you want to edit the style of your plots, you will need to edit the file `settings/plot_characteristics.yaml`. There you will find parameters per plot type, and within those, parameters for each of the available modes, as well as general ones that are applied to all modes. Inside a mode, the parameters that only one plotting library can use are in a `matplotlib` or a `plotly` block, which applies when the plot is drawn with that library (in Library mode, `plotly` is used with `engine="plotly"`).
 
 ### Map resolution
 
