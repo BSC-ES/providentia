@@ -1907,7 +1907,7 @@ class ProvConfiguration:
                             invalid_species.remove(inv_speci)
 
         if invalid_species:
-            msg = f'Removing invalid species {", ".join(invalid_species)} for the current GHOST version ({self.read_instance.ghost_version})'
+            msg = f'Removing invalid species {", ".join(invalid_species)}, not in Providentia\'s species reference'
             show_message(
                 self.read_instance,
                 msg,
@@ -1919,7 +1919,7 @@ class ProvConfiguration:
 
             # exit if there are no valid species left
             if not self.read_instance.species:
-                error = f"Error: No valid species for the current GHOST version ({self.read_instance.ghost_version})"
+                error = "Error: No valid species in Providentia's species reference"
                 self.read_instance.logger.error(error)
                 sys.exit(1)
 
@@ -1993,6 +1993,31 @@ class ProvConfiguration:
                     self.read_instance.logger.error(error)
                     sys.exit(1)
                 self.read_instance.reading_ghost = is_ghost
+
+        # GHOST observations can only be read for the species of the GHOST version, so in library
+        # and report modes the others are removed with their network (the dashboard checks on READ)
+        if (self.read_instance.network and self.read_instance.reading_ghost
+                and self.read_instance.mode in ["library", "report"]):
+            missing_species = list(dict.fromkeys(
+                speci for speci in self.read_instance.species
+                if any(part not in self.read_instance.ghost_parameter_dictionary
+                       for part in speci.split("@"))
+            ))
+            if missing_species:
+                is_are = "is" if len(missing_species) == 1 else "are"
+                msg = (f"Species {', '.join(missing_species)} {is_are} not in GHOST version "
+                       f"{self.read_instance.ghost_version}, it will not be read.")
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf,
+                             deactivate=deactivate_warning)
+                kept = [(network, speci) for network, speci
+                        in zip(self.read_instance.network, self.read_instance.species)
+                        if speci not in missing_species]
+                if not kept:
+                    error = f"Error: No valid species for the current GHOST version ({self.read_instance.ghost_version})"
+                    self.read_instance.logger.error(error)
+                    sys.exit(1)
+                self.read_instance.network = [network for network, _ in kept]
+                self.read_instance.species = [speci for _, speci in kept]
 
         # fields of the GHOST version for GHOST observations, of the species reference otherwise
         if self.read_instance.network:
